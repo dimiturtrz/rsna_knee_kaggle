@@ -73,6 +73,57 @@ mechanism could plausibly deliver it. Every ensemble operation the project has r
 columns together and has flattened seven times; this axis moves three of them and has never been
 tried.
 
+## The free road is closed, on both estimators
+
+The first thing to try on a newly-priced axis is the thing that costs nothing. The metric leaves no
+within-column operation alive — `kneemri-monotone` shipped a monotone transform of the champion's table
+and read the champion's exact score — so post hoc has to be CROSS-column, and `column_mixing` is built
+for exactly that. Its ridge came back a clean null some time ago, and that result bounded DENSE mixing
+only: the L1 label-graph rule exists in `mixing_rules` precisely because it is the estimator that can
+keep one real pair and zero the other hundred-odd, and it was the open half.
+
+Run nested on the same seven-member pool, the sparse rule reads **mean −0.0085, worst −0.0653, best
++0.0041**. It also fails the specific question that made it worth running: it does not lift the weak
+columns. MCL +0.0001, Lateral OA +0.0041, and Fracture **−0.0653** — 68 positives, and the fit destroys
+the column.
+
+Post-hoc is now empty as a class. Every remaining mechanism for the per-label axis is training-side and
+costs card, which is what ranks it against whatever else holds the GPU.
+
+## Is the weak column a weak label? Mostly not, and the exception is the one being measured
+
+The obvious unification is that our three weak columns are the three our lexicon reads worst. The
+2026-09-04 four-reader measurement says `report_labels_v2` makes 108 false positives against 32 misses,
+so per-finding precision against the radiologist is available:
+
+| finding | radiologist agrees with a reader YES | model AUC |
+|---|---:|---:|
+| Contusion | 44.4% (36 calls) | 0.8851 |
+| MCL | **50.0%** (18 calls) | **0.8104** |
+| Lateral OA | **56.2%** (16 calls) | **0.8309** |
+| Medial OA | 63.6% (22) | 0.8875 |
+| Lateral Meniscus | 66.7% (30) | 0.8737 |
+| PF OA | 66.7% (24) | 0.8698 |
+| Effusion | 68.0% (50) | 0.8663 |
+| Fracture | 68.4% (19) | **0.8255** |
+| Baker's | 68.8% (16) | 0.9208 |
+| ACL | 71.9% (32) | 0.9055 |
+| Medial Meniscus | 78.1% (32) | 0.9108 |
+| Synovitis | 81.2% (16) | 0.8717 |
+
+Spearman between the two orderings is **+0.41 over twelve findings** — positive, and nowhere near
+significant at n=12. The four loudest cells contradict each other outright: Contusion is the
+worst-labelled column and the eighth-weakest model column, Synovitis is the best-labelled and sixth
+weakest, Fracture is eighth-labelled and second weakest, and Baker's is ninth-labelled and the best
+column we have. **The weak-column ordering is not the label ordering**, and an arm aimed at the weak
+columns cannot be justified as a labelling arm.
+
+Two honest caveats, and they cut in opposite directions. The per-finding precisions rest on 16 to 50
+calls each over 57 studies, so every one of those rows has an interval wide enough to swallow its
+neighbours — this separates the axes weakly at best, and it is not a refutation of the labelling lane.
+And **MCL is the one cell where both rulers agree**: worst-modelled column, second-worst-labelled, and
+the one column about to get a board-truth number.
+
 ## What this does not say
 
 The per-column map is scored against OUR supervision (`report_labels_v2.csv` binarised at its
