@@ -56,13 +56,13 @@ LEDGER = Path("comp/SUBMISSIONS.md")
 KERNELS = Path("comp/kernels")
 COMPETITION = "rsna-knee-abnormality-detection"
 PAGE = 100
-"""How many submissions one live page carries. A page SHORTER than this is the last one, which is the
-only end-of-history signal the API gives - so the value has to be the one actually requested, never a
-number that merely looks like the page size."""
-PAGES = 20
-"""A ceiling on the paging loop, not a budget. Five slots a day cannot reach 2000 submissions inside this
-competition, so hitting it means the short-page signal stopped arriving - and a live call that repeats
-forever is worse than one that stops early, because Kaggle answers the eleventh with a 429."""
+"""How many submissions the live listing reaches, and it is a CEILING on the API rather than a page size.
+
+Measured on 2026-09-05, after a paging loop written the day before produced no extra rows: pages 1, 2 and
+3 each return 100 submissions and the three sets are IDENTICAL. `page_number` is accepted and ignored, so
+there is no second page to walk - this competition's listing is the 100 most recent submissions and
+nothing older. Every reach beyond it costs an API call, returns the same rows, and moves the account
+toward a 429."""
 KERNEL_PREFIX = "kneemri-"
 VERSION_MARK = "_v"
 """How an entry id carries its revision (`chosen_v2`), and the prefix every kernel directory takes. An
@@ -385,8 +385,20 @@ class BoardCensus:
         return sorted(ref for ref, score in live.items() if ref not in recorded and score is None)
 
     def phantom(self, live: Mapping[str, float | None]) -> list[str]:
-        """Recorded refs Kaggle does not report — a typo in a ref, or a row for a submission never made."""
-        return sorted(row.ref for row in self.rows() if row.ref and row.ref not in live)
+        """Recorded refs Kaggle does not report — a typo in a ref, or a row for a submission never made.
+
+        ONLY WITHIN THE LISTING'S REACH. Kaggle serves the 100 most recent submissions and ignores
+        `page_number`, so once this competition passed 100 entries every older row became invisible to
+        the live call — permanently, and with no signal of its own. Reported as phantoms they were seven
+        standing alarms against seven submissions that really scored, and an alarm that can never be
+        cleared is one a reader learns to scroll past.
+
+        Refs are assigned in increasing order, which is what makes the horizon computable: a recorded ref
+        BELOW the oldest live one is out of reach, not missing. A ref above it and absent is still the
+        defect this method exists for.
+        """
+        reach = min((int(ref) for ref in live), default=0)
+        return sorted(row.ref for row in self.rows() if row.ref and row.ref not in live and int(row.ref) >= reach)
 
     def mismatched(self, live: Mapping[str, float | None]) -> list[str]:
         """Rows whose recorded board score disagrees with the score Kaggle holds for that submission."""
@@ -435,22 +447,19 @@ class LiveBoard:
     def _kaggle() -> list[tuple[str, str]]:
         """The real round trip, kept in one place so every other path is credential-free.
 
-        PAGED, because one page is not the history. This asked for `page_size=100` and stopped there,
-        and on 2026-09-05 the 107th submission pushed seven real rows off the end of that page - which
-        this check then reported as seven records the board does not hold. A phantom-record alarm that
-        fires because the LISTING was short is the one failure a record check must not have.
+        ONE CALL, because there is no second page to ask for. This was a paging loop for a day, written
+        when the 107th submission pushed seven real rows off the end of a 100-row listing and the check
+        reported them as seven records the board does not hold. The loop did not recover them: pages 1-3
+        return the same 100 refs, so it made twenty identical calls and produced one page of answers. The
+        listing's horizon is a property of the API, and the fix belongs in `phantom`, which now declines
+        to call a record missing when it sits BEHIND that horizon.
         """
         from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
 
         api = KaggleApi()
         api.authenticate()
-        listed: list[tuple[str, str]] = []
-        for page in range(1, PAGES + 1):
-            batch = api.competition_submissions(COMPETITION, page_size=PAGE, page_number=page) or []
-            listed += [(str(sub.ref), str(sub.public_score or "")) for sub in batch if sub is not None]
-            if len(batch) < PAGE:
-                break
-        return listed
+        batch = api.competition_submissions(COMPETITION, page_size=PAGE) or []
+        return [(str(sub.ref), str(sub.public_score or "")) for sub in batch if sub is not None]
 
 
 def main() -> None:

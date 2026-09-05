@@ -80,6 +80,9 @@ from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
+CHECKPOINT = ".pt"
+"""What a candidate given as a bare name is a name OF. Every arm in this repository writes one."""
+
 PRICEABLE = 2
 """The smallest roster a seat value can be priced against, and it is a claim about meaning not a guard.
 
@@ -136,8 +139,15 @@ class SeatValue:
         `no holdout record, skipped` line and the report still printed a complete-looking roster figure.
         That is the failure mode worth the method: a silently unpriced candidate reads exactly like a
         candidate priced at nothing, and `band_span_s2026` was read that way once before this existed.
+
+        The SUFFIX is applied here too, for a failure one step further along. A bare `rank966_hold_s2026`
+        resolved to a real directory and a real record — `HoldoutRecord` derives the npz from the stem, so
+        it is found either way — but to no `.pt`, and `RecordMix` reports a record without a checkpoint as
+        "the run never reached its end, dropped". That sentence is a claim about the CARD, and it was
+        printed on 2026-09-05 over a checkpoint that had been on disk for eighteen minutes.
         """
-        return self.processed / candidate.name if candidate.parent == Path() else candidate
+        given = self.processed / candidate.name if candidate.parent == Path() else candidate
+        return given.with_suffix(CHECKPOINT) if not given.suffix else given
 
     def unpriceable(self, roster: list[Path], unscoreable: list[Path]) -> list[str]:
         """Why no seat value exists for this entry, with the denominator that makes it a fact.

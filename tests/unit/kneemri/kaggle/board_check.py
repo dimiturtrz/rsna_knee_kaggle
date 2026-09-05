@@ -263,6 +263,7 @@ def test_phantom(tmp_path: Path):
     """A recorded ref the board does not hold — a typo in the join key reads as a whole record."""
     assert _census(tmp_path).phantom(LIVE) == []
     assert _census(tmp_path).phantom({"1": 0.93, "2": 0.937}) == ["3"]
+    assert _census(tmp_path).phantom({"3": 0.94}) == [], "older than the listing reaches is out of reach"
 
 
 def test_mismatched(tmp_path: Path):

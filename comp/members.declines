@@ -525,3 +525,46 @@ band224_s2026_run1    # The FIRST band224 fit, and it is declined because its re
                       # seat -0.0002, and the 3.2x throughput result that is the arm's actual output.
                       # RE-OPEN BY: nothing. Two fits of one seeded recipe are the same experiment, and a
                       # third would only re-measure the row the re-run already holds.
+
+rank966_hold_s2026    # The prune selector on the ruler built to see it, and it is inert. Trained from
+                      # band_dense_hold with one flag changed, --label-errors pointed at the rank-966
+                      # ranking (966 cells, a fifth of what errors_dense pruned). Converged 12 of 12,
+                      # flag verified landed before the score was read.
+                      # GOLD: 0.8862 against the control band_dense_hold_s2026 at 0.8956 over the 58
+                      # annotated studies. Paired, the control leads by +0.0094 [-0.0079, +0.0260] —
+                      # inside its own interval, so the arm reads FLAT and its DOWN branch is not taken.
+                      # SEAT: 0.8744 (-0.0007) [-0.0011, -0.0003] against honest12 at 0.8750. Negative
+                      # and outside zero; the board charges a negative at about 3x (knee-c0u9), so this
+                      # is roughly -0.002 of board for a seat. Solo 0.8517, well under the pool best.
+                      # The full reading is logs/rank966_hold_ledger.log.
+                      # RE-OPEN BY: nothing about pruning. Two selectors that disagree about WHICH cells
+                      # to drop now agree about the result of dropping them, at budgets 5.5x apart. What
+                      # this does NOT answer is OVERWRITING a flagged cell, which no arm has run — a
+                      # relabelling arm that clears the gold control at 0.8956 would be a different
+                      # treatment, not a re-open of this one.
+
+band224_hold_s2026    # A RULER, not a candidate. Built so that a 224 px arm could be read on the 58
+                      # annotated studies against a 224 px partner — band224_s2026 is not a held fit and
+                      # can never serve on that ruler. It did its job on 2026-09-05: gold 0.8940 against
+                      # band_dense_hold_s2026 at 0.8956, the 336 side leading by +0.0016 [-0.0146,
+                      # +0.0190], which is flat on the ruler that reads these weights 0.039 higher than
+                      # the report holdout does. Proxy 0.8516. The full reading is
+                      # logs/band224_hold_ledger.log.
+                      # NOT PRICED AS A SEAT, deliberately. A control that shipped would stop being a
+                      # control the next time the roster moved under it.
+                      # RE-OPEN BY: a reason to price it, which would have to be a roster that no longer
+                      # contains its 336 px twin. Nothing about the recipe: band224_s2026 already carries
+                      # that reading at seat -0.0002.
+
+relabel_hold_s2026    # The supervision arm read as a QUESTION, not as a member, and its answer is not
+                      # available at the size that matters. Gold +0.0104 with an interval crossing zero,
+                      # proxy -0.0058 under the 0.0062 floor: the pre-registered sign pattern, and
+                      # nothing more. The binding fact it produced is about the RULER — 58 gold cells
+                      # give a 95% half-width near 0.014, and the effects this project chases are 0.010,
+                      # so the gold ruler cannot arbitrate supervision by construction. The full reading
+                      # is logs/relabel_hold_ledger.log.
+                      # AND THE BOARD HAS ALREADY ANSWERED THE CHEAP VERSION: relabel7_v1 put corrected
+                      # supervision at one seat in seven and scored 0.943 against the champion 0.944.
+                      # RE-OPEN BY: a full-corpus relabel across EVERY seat of an entry, which is a
+                      # retraining bill and not a reseating — one seat has been measured and is worth
+                      # nothing. Or more annotated cells, which is owner-side.
