@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# relabel_hold.sh — corrected supervision, read by the radiologist instead of by the report.
+#
+# bead: knee-w84q
+#
+# WHY THIS ARM. `relabel7_v1` shipped the corrected-label member as a seventh seat and the board moved
+# -0.001. That refutes the STRONG form and nothing else, because the member sat at a seventh of the vote
+# and because every offline reading of it went through a ruler the mechanism says is broken for exactly
+# this question. Our holdout labels carry the same false-positive-heavy noise as our training labels —
+# 108 false positives against 32 misses over the 58 annotated studies — so a member fitted on CORRECTED
+# labels is scored by a ruler that still rewards the over-calling. `errors_relabel`'s -0.0056 solo is the
+# sign that mechanism PREDICTS. The claim has never been read on a ruler that could see it.
+#
+# WHAT THIS ARM CHANGES. `--hold-annotations` drops the annotated cells from the training table, which is
+# the only thing `kneemri.evaluation.annotated_readings` will accept — it REFUSES a checkpoint that
+# trained on those cells rather than scoring it, which is why `errors_relabel_s2026` cannot answer this
+# and a new fit is needed. With the hold in place the 58 radiologist-read studies become a second ruler,
+# independent of the report labels, and the corrected member can be compared against `band_dense_hold`
+# on BOTH: the report proxy it should lose on, and the annotations it should win on.
+#
+# ONE VARIABLE against `band_dense_hold_s2026`: `--unread-targets`. Same 336 px, same 20 slices, same
+# 0.10-0.90 band, same whole-stack max pooling, same 4e-5 backbone rate, same twelve epochs, same hold.
+#
+# THE SIGNED PREDICTION, written before the run. This is the whole point: a level is not the evidence,
+# the SIGN PATTERN across two rulers is.
+#   * proxy DOWN and annotated UP. The ruler-bias account is confirmed. Corrected supervision works, our
+#     report holdout cannot see it, and every seat search this project has run was ordered by a ruler
+#     that charges a member for being right. That reopens the supervision axis at full weight and puts
+#     the full-corpus relabel back on the table at a price the 224 throughput result can now pay.
+#   * proxy DOWN and annotated DOWN. The corrections are wrong, not the ruler. The confident-learning
+#     detector's 1,932 cells at the net-benefit-optimal budget are noise, and the supervision axis closes
+#     for real rather than by a flat that could not resolve it.
+#   * proxy FLAT and annotated FLAT. The relabel table does not change what the model learns at all;
+#     suspect the plumbing before the idea and check that `unread_targets` is non-empty in the recipe.
+#   * proxy UP. No mechanism here predicts it. Suspect the harness first.
+#
+# THE ONE ASSUMPTION, stated rather than hidden. `Supervision` carries `annotations` and `unread` as
+# SEPARATE switches, so the hold drops annotation-derived targets while the relabel overlay still applies
+# to every study including the 58. That is not a leak of the gold cells: the overlay's values come from a
+# confident-learning detector fitted on the REPORT labels, and the radiologist readings never enter it.
+# What it does mean is that the annotated studies are supervised by corrected report labels rather than
+# by original ones, which IS the treatment under test and not a contamination of the ruler.
+#
+# COST. Identical to `band_dense`: ~90 minutes for twelve epochs at 336 px and 20 slices.
+#
+# HARNESS CHECK. The printed recipe must name "hold_annotations": "True" and a non-empty
+# "unread_targets"; a run missing either answers a different question than this header does.
+#
+# control  band_dense_hold_s2026 (same recipe, original labels).
+#
+# reading: relabel_hold_annotated*.json
+#
+# deliberate: --unread-targets (the arm's thesis)
+# deliberate: --hold-annotations (matched to the control, and the only way the second ruler will score it)
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+TAUGHT="$PROCESSED/relabel_rank1932_a06.csv"
+require "$LABELS"
+require "$TAUGHT"
+
+run_train relabel_hold \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --hold-annotations \
+  --unread-targets "$TAUGHT" \
+  --labels "$LABELS" --out "$MODELS/relabel_hold_s2026.pt"

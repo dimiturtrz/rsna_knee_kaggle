@@ -8204,3 +8204,41 @@ plausibly recover 0.009.
 0.1-0.9). It says nothing about depth on a trunk whose pretraining is not natural-image, and the
 `ABOVE 0.8640` branch that would have licensed re-running the foreign-trunk family did not fire — so that
 family stays closed on its own ~25 arms, not on this one.
+
+## Diversity without a solo bar buys nothing — three distinct families priced to zero in one day — 2026-09-05
+
+knee-cj40f licensed exactly one card-free measurement against the CNN axis: how decorrelated
+`radnet_pinned` actually is from the ViT incumbents, on the argument that a branch which is weak but
+genuinely different can still earn a seat. It is now measured, and so are the two other non-incumbent
+families the project trained this week. All three read the same thing.
+
+| candidate | solo | nearest rank | JS nearest | seat vs honest12 | best available seat |
+|---|---|---|---|---|---|
+| `radnet_pinned_s2026` (RadImageNet DenseNet, BN pinned) | 0.7505 | **0.6415** | 0.0261 | −0.0009 [−0.0017, −0.0001] | −0.0001 |
+| `coatnet_hybrid_s2026` (CoAtNet-2 conv/attention hybrid) | 0.8259 | 0.8223 | 0.0253 | −0.0006 [−0.0012, −0.0000] | −0.0005 |
+| `mricore_corpus_s2026` (radiodinob16 trunk) | 0.8390 | 0.8607 | 0.0164 | −0.0007 [−0.0012, −0.0002] | −0.0006 |
+
+The roster of twelve has a rank boundary of 0.8956 and a JS boundary of 0.0150. `radnet_pinned` is the
+most decorrelated member this project has ever produced — 0.6415 is a quarter of the way to chance,
+against a pool whose own members sit at 0.87-0.90 — and its best available seat is **−0.0001**. Not
+positive-but-small. Zero, from the most different thing we own.
+
+**The pattern is a SOLO BAR, not a diversity deficit.** The three candidates span 0.09 of solo AUC and
+0.22 of rank divergence, and their seat values are indistinguishable from each other and from zero. What
+they share is that every one of them sits 0.02 to 0.11 below the pool's best solo of 0.8578. This
+reproduces on our own corpus what NVIDIA's IJCAI-ECAI 2022 result stated and what `radnet_pinned`'s own
+pre-registration gated on: a branch more than about five points off the incumbents measures as diverse
+and still ensembles worse. We now have it at three points on our own data rather than one citation.
+
+**What this closes.** The CNN axis stays closed, and it is now closed by MEASUREMENT rather than by the
+price of the arm — which is what knee-cj40f asked for and the only thing that could have re-opened it.
+It also retires the standing hope that architecture diversity is the missing 0.009 to the leader: the
+diversity is available, it has been bought three separate ways, and it is worth zero at this solo gap.
+
+**What it does NOT say.** It is not evidence that a DISTINCT member cannot pay. It is evidence that one
+below the bar cannot. The re-open condition is unchanged and now has a number attached: a non-incumbent
+family that lands within about 0.01 of 0.8578. None of the three came within 0.02, and `coatnet_hybrid`
+converged (12/12 epochs, peak not at the end) so its 0.8259 is not a budget artefact.
+
+**Cost: zero card, zero slots.** Three `seat_value` runs of about ten seconds each, against three
+checkpoints that already existed.
