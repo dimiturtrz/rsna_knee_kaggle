@@ -468,3 +468,28 @@ band_early_s2026.pt
   RE-OPEN BY: nothing on the position axis — this closed it, and the 2026-09-05 ledger row records the
   closure. A depth or decay result (band_deep_matched clearing 0.8640) would re-open the WIDTH of the
   window, which is a different flag and would need its own arm.
+
+band_deep_matched_s2026  # 0.8487 solo against a 0.8640 pre-registration, and the miss is the whole
+                      # point of the arm rather than a disappointment: 0.8640 was the branch that would
+                      # have licensed re-running the ENTIRE foreign-trunk family with layer-wise decay,
+                      # on the argument that every trunk negative this project has measured came through
+                      # a recipe that never let the trunk move. That branch did not fire. Seat value
+                      # against honest12: -0.0006, band [-0.0010, -0.0002]; its best available seat
+                      # (replacing mae_matched_s2026) is also negative at -0.0004, which the board
+                      # charges at about 3x. WHAT IT DOES NOT SAY: this is one depth-and-decay recipe on
+                      # one trunk, and it closes DEPTH as a lane rather than layer-wise decay as an idea.
+                      # Its 0.8924 nearest-neighbour rank divergence is the LEAST distinct of the three
+                      # members priced on 2026-09-05, so it is not a diversity seat either.
+                      # RE-OPEN BY: a trunk that is stronger SOLO under the same free-trunk recipe. A
+                      # second decay schedule on this trunk only re-measures this row.
+
+mricore_corpus_s2026  # 0.8390 solo, the weakest of the three members priced on 2026-09-05. One variable
+                      # off radiodino_corpus: --variant radiodinob16, so this row is about the TRUNK and
+                      # nothing else. Seat value against honest12: -0.0007, band [-0.0012, -0.0002]; best
+                      # available seat (replacing mae_matched_s2026) -0.0006. It is the most DIVERGENT of
+                      # the two by rank (nearest 0.8607 against band_deep_matched_s2026 at 0.8924) and
+                      # divergence still does not buy a seat here, which is the same reading coatnet
+                      # gave: this pool has no readable room for a member that is 0.02 under its best
+                      # solo, however differently it is wrong.
+                      # RE-OPEN BY: an MRI-pretrained trunk that lands within ~0.01 of the pool's best
+                      # solo. Another 2D-radiology-pretrained variant only re-measures this row.

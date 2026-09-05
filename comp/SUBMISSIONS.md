@@ -3591,3 +3591,37 @@ What the pair DOES establish is level, and it is enough to close the lane:
 So the per-column axis is CLOSED, and it is closed on measurement rather than on price. Per-label work
 still lands through `colnull`'s pricing rule (a column moving by d moves the board by d/12); what is
 retired is the idea of choosing WHICH column to work on from our own holdout.
+
+## `relabel7_v1` — 0.943 — corrected supervision is worth nothing at one seat in seven — 2026-09-05
+
+Ref 56033961. The champion's six seats, unchanged in order, weight, overlap, combiner, kit and raptor
+weight, with `errors_relabel_s2026` APPENDED as a seventh. `run_check` on the kernel log reads
+`loaded 7 of 7 members`, so this is a real seven-member entry.
+
+It is the only checkpoint the project owns fitted against a label table with 1,932 cells corrected at
+the net-benefit-optimal budget of a confident-learning detector (Northcutt, Jiang and Chuang, JAIR
+70:1373, 2021), and it was shipped after being declined offline. The decline used the 909-study holdout,
+whose bias `colmcl` had measured that same day: our labels are false-positive-heavy (108 false positives
+against 32 misses over the 58 radiologist-annotated studies), so a member fitted on CORRECTED labels is
+scored by a ruler that still rewards the over-calling. Its −0.0056 solo was the sign the mechanism
+PREDICTS. The claim was unfalsifiable offline by construction, which is exactly why it cost a slot.
+
+**It read 0.943 against the champion's 0.944.** That is inside the board's own 0.001 resolution, and it
+is the eighth consecutive flat in this pool — the first one that moved SUPERVISION rather than seating.
+
+**What it refutes and what it leaves alone.** One member appended at a seventh of the vote. A real
+per-member gain of up to about 0.007 would still land inside this flat, so what dies is the STRONG form
+— corrected supervision buys a visible board step at one seat — and not the weak one. A relabelled
+member at full weight, or a pool relabelled throughout, is a different question and this row cannot
+close it. What the row does add is a price for asking it: the weak form needs most of the pool retrained
+against the corrected table, which is card-days, and its own strong form has now read zero.
+
+## `colhalf_v1` — pending — the third point on the ruler question — 2026-09-05
+
+Ref 56037952, still scoring. Six members, the same set as `monotone_v1` (0.944), which is the control —
+`submit_check` refused it as a known repeat and it was shipped with `--anyway` on that ground. Half the
+twelve columns are served as a constant 0.5 after the blend, so under `colnull`'s rule the entry prices
+six columns at once instead of one, at six times the leverage of `colmcl` and `colbaker` for the same
+slot. Pre-registered before the slot was spent: **0.718-0.730** retires the per-label axis outright,
+**0.755-0.785** licenses the full-corpus relabel, **0.731-0.754** needs one confirming arm, and anything
+outside **0.718-0.785** is a harness defect to be found before the number is read.
