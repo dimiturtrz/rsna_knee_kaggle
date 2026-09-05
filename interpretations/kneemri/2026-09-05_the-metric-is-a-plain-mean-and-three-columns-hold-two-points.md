@@ -208,3 +208,33 @@ column at 0.9208; if its board drop is also ~0.040 then every column is near-cei
 no information, if it is small the ordering is inverted broadly, and if it is 0.035 the map transfers and
 MCL alone is anomalous. Those three answers aim three different next arms, which is what an instrument is
 for.
+
+### The relabel lane, priced against the board instead of against a corpus
+
+Kimi returned a literature price for a full-corpus relabel at 00:40Z: point estimate **+0.010 of
+board**, 80% interval 0.005-0.015, upside 0.020, built from Wollek's 0.858-vs-0.939 substitution plus
+Ghiassi's multi-label noise-response curve and the observation that MCL's 50% radiologist agreement puts
+it in the high-sensitivity regime. The mechanism half of that letter is sound and is kept. The price is
+not, and `colmcl` is what breaks it.
+
+The price converts "MCL recovers 0.08-0.12 AUC from clean labels" into board points by dividing by
+twelve. That step assumes the 0.08-0.12 is board AUC we do not currently have. **We have it.** MCL's
+board AUC is 0.980. The remaining headroom on that column is (1.000 − 0.980) / 12 = **0.0017 of board**,
+a quarter of this project's 0.0062 noise floor — not 0.007-0.010.
+
+The confusion is between two different injuries that noisy labels inflict, and only one of them is what
+Wollek measured:
+
+1. **Noise as TEST truth.** Our holdout AUC understates the model. `colmcl` proves this outright: the
+   same weights and the same preprocessing read 0.8104 against our labels and 0.980 against Kaggle's.
+2. **Noise as TRAIN supervision.** The model is genuinely worse. This is Wollek's effect, measured
+   against a clean test set.
+
+The 0.17 MCL gap is mostly (1), and a relabel is only paid for (2). Whatever (2) costs us on MCL, it is
+bounded above by the 0.020 AUC the column has left. On the one column where the axis can be priced
+against the board rather than against someone else's corpus, the relabel is worth less than the noise
+floor.
+
+What survives is Kimi's instrument, with its threshold moved: a relabel is licensed only if the columns
+are noise-limited ON THE BOARD, and our worst-labelled column is not. `colbaker` decides whether MCL is
+representative or anomalous, and until it reads, no card goes to the relabel.
