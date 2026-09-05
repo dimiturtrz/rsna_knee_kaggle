@@ -98,6 +98,7 @@
 #                             rather than hidden — the trainer now refuses the combination outright.)
 # deliberate: --recompute-activations  (matches swin_supervised; trades compute for memory, cannot move a
 #                                       score, so it is declared rather than dropped)
+# deliberate: --vram-gb
 # NO --vram-gb, deliberately. swin_supervised names 8 and a smoke at 8 died here with `Tried to allocate
 # 4.22 GiB ... 8.00 GiB allowed`: a hand-named cap is taken EXACTLY as typed, and this trunk runs 14
 # blocks of global attention over 576 tokens where Swin's are confined to a 12x12 window. Saying nothing
