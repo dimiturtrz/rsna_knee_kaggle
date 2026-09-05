@@ -110,8 +110,16 @@ def test_every_variant_states_its_own_width():
     # protecting against. The protection moved rather than vanished: the repository is unique per
     # variant, the member records its variant, and `MemberPackage.check` refuses a member whose
     # fingerprint moves — which it does by order one when the weights are a different network.
-    repositories = [encoder.repository for encoder in ENCODERS.values()]
+    # An EMPTY repository is not a repository — it is how a row says the weights come from a local
+    # builder rather than from the hub, and there are now two of those (`ortholarge` from a converted
+    # snapshot, `mricore` from a training checkpoint under the data root). Requiring "" to be unique
+    # would cap local trunks at one, which is a rule about nothing. What must stay unique for those is
+    # the builder, since that is what actually names the file the weights are read from.
+    repositories = [encoder.repository for encoder in ENCODERS.values() if encoder.repository]
     assert len(set(repositories)) == len(repositories), "two variants pointing at one repository is a typo"
+
+    builders = [encoder.builder for encoder in ENCODERS.values() if not encoder.repository]
+    assert len(set(builders)) == len(builders), "two local variants reading one checkpoint is a typo"
 
 
 def test_mount_is_refused_when_there_is_none():
