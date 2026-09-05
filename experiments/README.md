@@ -7777,3 +7777,29 @@ best swap, 0 of 2 clearing the +0.0040 line. Maximal distinctness, negative seat
 ImageNet VGG-16 / ResNet-50 arm stays unqueued, and the lane costs no further card on either of its two
 arguments. Full reading:
 `interpretations/kneemri/2026-09-05_the-cnn-axis-is-maximally-distinct-and-still-worthless.md`.
+
+## `ortho_slow_trunk` reads 0.8265 — and it peaked on its LAST epoch, which is the finding — 2026-09-05
+
+The arm asked one thing: is the ortho trunk's shortfall a RATE problem. It ran the full twelve epochs
+(`convergence_check`: `1 runs: 1 converged`) and reads **0.8265**, best epoch **11 of 12** — the last one.
+
+Against the pre-registered branches (`>= 0.8554` recovers the probe's lead, `>= 0.8526` recovers most,
+`>= 0.8402` closes the ortho trunk, `< 0.8402` is a null on the rate hypothesis only) this lands in the
+bottom cell at **0.8265**, 0.0137 below the closing branch. So by its own registration the ORTHO TRUNK
+DOES NOT CLOSE here; what is null is the rate hypothesis, and only that.
+
+**But the branch table cannot be read straight, because the curve never turned over.** The epoch series
+is monotone to the end — 0.7390, 0.7746, 0.7892, 0.8034, 0.8088, 0.8159, 0.8195, 0.8226, 0.8258, 0.8249,
+0.8265 (e10), 0.8265 (e11) — and the peak IS the last recorded epoch. That is the UNDERTRAINED shape:
+the budget bound the run, not the recipe. A lower rate needs more steps to reach the same place by
+construction, so a twelve-epoch budget inherited from a 4e-5 recipe is the harness suspect the branch
+table did not name, and it is a faulty-TRAINING reading, not a fact about the trunk. The honest statement
+is: **at twelve epochs the slow rate does not catch up.** Whether it catches up at twenty is unmeasured,
+and is NOT queued — `trajectory_check`'s corpus puts the median epoch-3-to-peak gain at +0.0210 and the
+p90 at +0.0380 over n=96, and this arm is 0.0289 short of `ortho_dense`-class numbers with its own curve
+already flattening (+0.0007 over the last three epochs). Eight more epochs at 924 s is 2.1 h of card for
+a gain the curve's own slope prices near zero.
+
+The ortho trunk stays open as a QUESTION and closed as a QUEUE ITEM: nothing about it is worth card
+while the position axis (`band_surgical`) and the initialisation axis (`band_lpft`) are unmeasured on a
+trunk that already reads 0.8578.
