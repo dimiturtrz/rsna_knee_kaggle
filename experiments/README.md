@@ -7879,3 +7879,45 @@ is now closed by measurement.
 **What this does NOT say.** It is not a claim about the leader, who has published nothing; it is a claim
 about what is publicly visible. And it does not re-open the public-notebook floor as a target — that
 floor was already left.
+
+### Resolution 336 to 392 does NOT lift the meniscus columns — card-free, 2026-09-05
+
+`supervision_gap` puts Lateral Meniscus at **−0.1925**, the largest model-bound gap this project has
+measured: our report label predicts the radiologist at 0.8422 while a published member fitted on those
+labels reaches 0.6497. The signal is in the supervision and the model does not pull it out of the pixels.
+The obvious mechanism is SIZE — a meniscal tear is a millimetre-scale signal at the horns, and 336 px
+over a 130 mm field is about 0.39 mm a pixel. So: does more resolution recover it?
+
+The pair already exists on disk and costs nothing to read. `res392_ws_s2026` against `lr4e-5_ws_s2026`,
+one variable (392 px against 336 px), same whole-stack recipe, same 4e-5 backbone rate, both scored on
+the same 909 studies by `column_headroom`:
+
+| column | 336 px | 392 px | delta |
+|---|---:|---:|---:|
+| ACL | 0.8706 | 0.8815 | **+0.0109** |
+| Fracture | 0.8066 | 0.8170 | **+0.0104** |
+| Contusion | 0.8685 | 0.8777 | +0.0092 |
+| Baker's | 0.9076 | 0.9120 | +0.0044 |
+| Effusion | 0.8542 | 0.8563 | +0.0021 |
+| PF OA | 0.8392 | 0.8397 | +0.0005 |
+| **Lateral Meniscus** | 0.8460 | 0.8459 | **−0.0001** |
+| **Medial Meniscus** | 0.8983 | 0.8963 | **−0.0020** |
+| Medial OA | 0.8763 | 0.8705 | −0.0058 |
+| MCL | 0.7908 | 0.7821 | −0.0087 |
+| Synovitis | 0.8546 | 0.8446 | −0.0100 |
+| Lateral OA | 0.8178 | 0.8044 | −0.0134 |
+| **mean** | **0.8525** | **0.8523** | **−0.0002** |
+
+**The two meniscus columns are the two flattest columns in the table.** Lateral Meniscus moves by one
+ten-thousandth and Medial Meniscus moves backwards. Whatever the model is missing about the meniscus, a
+17% linear resolution increase does not supply it — so the size hypothesis is refuted at this step size,
+and a 448 px or 420 px arm aimed at meniscus has no reading behind it. That is a card hour not spent.
+
+**What it does NOT say.** It does not close resolution as an axis: 336→392 is a small step, and a
+mechanism that needs 2x might still exist. It does not price the columns that DID move — ACL +0.0109 and
+Fracture +0.0104 up against Lateral OA −0.0134 and Synovitis −0.0100 down is a rotation of about the size
+this project keeps seeing when the mean does not move, and single-seed per-column deltas at n=909 with
+68 to 558 positives are not results. The one thing the table settles is the column it was built to ask
+about, and it settles it negative.
+
+Beads: knee-zsyp4. Reading: `interpretations/kneemri/2026-09-05_the-offline-column-map-ranks-our-labels-not-our-model.md`.

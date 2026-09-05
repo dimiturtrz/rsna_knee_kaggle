@@ -110,15 +110,26 @@ class ColumnHeadroom:
 
 
 REFUTED = """
-THIS MAP FAILED ITS ONLY EXTERNAL CHECK - DO NOT AIM WORK WITH IT (knee-zsyp4).
+THIS MAP FAILED ITS EXTERNAL CHECKS - DO NOT AIM WORK WITH IT (knee-zsyp4).
 `colmcl` replaced the MCL column with a constant and read 0.904 against the champion's 0.944, which
-under the settled metric puts MCL's BOARD auc at 0.980 (interval 0.968-0.992). MCL is the WORST column
-in this map and very nearly the BEST on the board, so the ordering printed above does not merely shift
-in level - on the one column anyone has an external read for, it INVERTS. What the map measures is our
-own supervision: MCL carries 50% radiologist agreement, the second-worst-labelled column we own, so a
-low area here says the LABELS are noisy and not that the model is weak. Reading it the other way prices
-a lane that is not there. The board's own per-column area arrives one column per slot, and until a
-column has that pair, nothing below is a target.
+under the settled metric puts MCL's BOARD auc at 0.980 (+/- 0.012 from the board's three decimals).
+`colbaker` did the same for Baker's and puts it at 0.992. MCL is the WORST column in this map and very
+nearly the BEST on the board, so the ordering printed above does not merely shift in level.
+
+WHY, CORRECTED 2026-09-05: it is NOT that our MCL labels are noisy. `supervision_gap` scores the report
+label itself against the radiologist on the 58 annotated studies and MCL reads 0.9762 there, SECOND BEST
+of twelve. Our MCL labels are among the cleanest we own. The "50% agreement" this text used to cite is a
+THRESHOLD statistic - on the 58, gold calls MCL positive 9 times and our reader 18 - and AUC reads the
+RANKING, which the graded reader gets almost right. What the split does say is that MCL is MODEL-bound
+(-0.0964: the label beats the model at predicting the radiologist), so the signal is in our supervision
+and the model fails to pull it out of the pixels - while the board still scores that column 0.980. The
+only account left is that the board's column is a different and easier task: case mix, or a definitional
+mismatch between our lexicon's MCL and the competition's. Q-RULER5 could not separate those two, and it
+no longer has to separate them from label noise.
+
+Either way a low area here is not a board target, and reading it as one prices a lane that is not there.
+The board's own per-column area arrives one column per slot, and until a column has that pair, nothing
+below is a target.
 """
 
 
