@@ -7975,3 +7975,53 @@ opposite directions: 336->392 px moved both meniscus columns by ~0 (section abov
 moved Lateral Meniscus DOWN by 0.0432. Any arm aimed at the largest model-bound column should move the
 POOLING, not the coverage, and should expect to trade MCL and Contusion for it. That is also the answer
 to Q-MENISCUS-2, taken from our own disk rather than the literature.
+
+### Slice pooling and slice count INTERACT: max wins short stacks and loses long ones — card-free, 2026-09-05
+
+The section above read one max-versus-labelwise pair at 36 slices and called the operator a per-column
+redistribution. **That was one pair, and the tree holds two more.** `base224` / `labelwise224` /
+`attend224` are the same three operators at 12 slices and 224 px, and `band_dense` / `labelwise_dense` /
+`attend_dense` are the same three at 20 slices and 336 px — each triple one flag apart. Reading the
+column that motivated the question:
+
+**Lateral Meniscus, three operators, three slice counts**
+
+| slices | max | labelwise | attend |
+|---|---:|---:|---:|
+| 12 (224 px, band 0.2-0.8) | **0.8460** | 0.8342 (−0.0118) | 0.8280 (−0.0180) |
+| 20 (336 px, band 0.1-0.9) | 0.8464 | **0.8566 (+0.0102)** | 0.8551 (+0.0087) |
+| 36 (224 px, band 0.05-0.95) | 0.8028 | **0.8141 (+0.0113)** | not on disk |
+
+**The sign flips with the slice count, and it flips for both learned operators independently.** At 12
+slices max is the best of the three by 0.0118 and 0.0180; at 20 and 36 it is the worst by 0.0102, 0.0087
+and 0.0113. Five of the six deltas clear the 0.0062 paired floor and all six agree in direction within
+their count.
+
+**This is the dilution argument with its sign made explicit.** A max over a short stack is close to
+optimal for a focal finding — few slices, so few chances for a non-carrying slice to win the argmax — and
+it degrades as the count rises, which is exactly where a learned aggregator earns its parameters. The
+mechanism predicted the 36-slice loss; it also predicts that the loss is recoverable by the operator, and
+it is, by about a quarter of it.
+
+**The means, for scale.** 12 slices: 0.8509 max, 0.8517 labelwise, 0.8503 attend. 20 slices: 0.8578 max,
+**0.8613 labelwise**, 0.8569 attend. 36 slices: 0.8476 max, 0.8495 labelwise. So the operator moves the
+mean by at most +0.0035 anywhere, inside the floor — the earlier "redistribution, not improvement"
+reading survives on the MEAN and is wrong as a statement about the column, which is what it was written
+to be about. `labelwise_dense` at 0.8613 is already the project's third-best solo and already rostered.
+
+**Where it does NOT generalise, checked rather than assumed.** The interaction is clean on Lateral
+Meniscus and does not repeat on the other columns that ought to be focal. Fracture reads 0.8184 /
+0.8124 / 0.8194 at 12, 0.8088 / 0.8124 / 0.8173 at 20, 0.7929 / 0.7911 at 36 — no consistent sign. MCL
+reads 0.7803 / 0.7997 / 0.8059, then 0.7931 / 0.7800 / 0.7899, then 0.7859 / 0.8118 — the sign inverts
+between the two recipes. So this is a statement about ONE column, and "focal findings prefer learned
+pooling" is a mechanism that fits it, not a result that has been shown for focal findings as a class.
+With 68 positives Fracture cannot settle its own row either way.
+
+**What it changes.** Three things were true of the meniscus lane this morning and all three are now
+measured: resolution 336->392 moves it by zero, slice count 12->36 moves it DOWN 0.0432, and the pooling
+operator moves it UP 0.0102 to 0.0113 but only once the stack is long. The best Lateral Meniscus reading
+the project owns is `labelwise_dense` at 0.8566, and it is on the roster. The arm the interaction points
+at is labelwise pooling at a HIGHER count inside the tight 0.1-0.9 band — 36 slices at 336 px is on the
+reservation curve at roughly 12.3 GB with `--recompute-activations`, so it fits — but the honest
+prediction is that its MEAN stays flat and only the one column moves, which is a per-column instrument
+and not a >=0.010 lever. It is not queued ahead of the depth arm for that reason.
