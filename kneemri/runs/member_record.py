@@ -267,6 +267,9 @@ class RunOptions(Protocol):
     def unfreeze_last(self) -> int: ...
 
     @property
+    def unfreeze_offset(self) -> int: ...
+
+    @property
     def head_lr(self) -> float: ...
 
     @property
@@ -468,6 +471,9 @@ class MemberRecord:
                 # field a lie the moment the depth became a flag, and the loader reads it back to
                 # decide how a member was fitted.
                 "unfreeze_last": options.unfreeze_last,
+                # WHERE that many blocks sat. The count alone cannot tell an early-block fit from the
+                # suffix every run before 2026-09-05 opened, and the loader has to rebuild the recipe.
+                "unfreeze_offset": options.unfreeze_offset,
                 "head_lr": options.head_lr,
                 "backbone_lr": options.backbone_lr,
                 "layer_decay": options.layer_decay,
