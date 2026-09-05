@@ -297,3 +297,32 @@ the card right now is in that class by construction. `errors_rank` and `errors_r
 `band_dense` control in NOTHING BUT supervision. So their offline delta against 0.8578 is exactly the
 comparison Q-RULER4 flags as reversible, and whatever they read has to be written down with that
 caveat attached rather than as a clean keep/kill.
+
+### The column map is unaffordable, and that is a closure rather than a caveat
+
+Kimi accepted the correction above and withdrew the 0.096. What they returned instead is the more useful
+half: **case mix and definitional mismatch cannot be separated offline, at any price.** Both hypotheses
+make the identical prediction on every piece of data we hold — the model ranks the board's MCL event
+better than it ranks ours — and telling them apart needs either the board's cases or the board's label
+definition. Any offline design that claims to separate them is smuggling in a bridge assumption
+("if the board used the radiologist definition the AUC would be X") that is itself untestable without
+board data. That is a guess wearing a measurement's clothes, and it is exactly the shape of the
+0.9070 mistake this same exchange just produced.
+
+**So a reliable per-column board map costs ONE SLOT PER COLUMN.** Twelve columns is twelve slots — 2.4
+days in which we spend every slot we get on instruments and ship nothing. That price is not payable, and
+naming it is what closes the axis: there is no cheap version, and the expensive version is not worth its
+cost against a 0.009 gap.
+
+What survives is the sparsity bet. `colhalf` ablates six columns at once and asks whether the deviation
+vector is CONCENTRATED. If it is, adaptive group ablation finds the deviants in a handful of slots
+(Fornasier & Rauhut) and a partial map becomes affordable. If the six-column half lands near the six-column
+prediction of a flat map, the columns are spread and the map is unbuyable at any slot count we have. Either
+way `colhalf` is the last slot this axis gets until it earns another.
+
+The residual reading on MCL stands and is now unexplained rather than explained: MCL is 0.980 on the board
+and 0.8112 over our 103-member rostered pool, sampling is ruled out at ~7 SE, label noise is demoted to
+possible-but-unmeasured on this column, and the two leading candidates are both unfalsifiable here. An
+unexplained 0.17 on the column that carries 0.014 of board is not a comfortable place to leave a finding,
+but it is an honest one, and the alternative is to keep buying explanations with slots at a price the gap
+does not justify.
