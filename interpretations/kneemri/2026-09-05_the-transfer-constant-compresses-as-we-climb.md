@@ -37,6 +37,14 @@ not one. Nothing currently on the card or in the pool is priced that large:
 - decode and architecture axes are closed at about **+0.005 total** (`README:4627`)
 - the member/seating axis is closed on seven board flats
 - the crop route, priced today, is **+0.0007**
+- **the EPOCH BUDGET is not binding, closed card-free at 12:54Z.** "Twelve epochs is capping us" is the
+  cheapest ≥0.010 story available — if runs were peaking on their last epoch, more schedule would be a
+  mechanism rather than a knob. `convergence_check` over the whole corpus says no: **212 runs, 165
+  converged, 14 truncated, 3 stopped, 8 undertrained.** Seven of the eight undertrained asked for only
+  four epochs and are short probes (`adapt_null`, `mae_matched`, `raptor_feat_pre`, `small_feat_pre`,
+  `swin_distill_pre`, `lora_r8_small_336`, `wholestack_fold2`). Exactly ONE twelve-epoch run peaked on
+  its last epoch — `encoder_adapt_lower_s2026`, e11 of 12. One run in 165 is not an axis. Extending the
+  schedule buys nothing, and the reason to write that down is that it costs card to re-ask.
 - **the corpus SITE-COUNT corner is negative, priced today off an arm nothing had read.**
   `merged3_corpus_s2026` ran on 2026-09-01, converged (e9 0.8511, e10 0.8510, e11 0.8510), and sits on the
   roster at **0.8521** with not one row in `experiments/README.md`. Its control is `merged_corpus_s2026`
