@@ -29,7 +29,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 TABLE=.agent-runtime/scratch/report_labels_v3.csv
-EXPECTED=4406
+# The corpus is 4407 studies, read from the reader's OWN census sidecar (every one of the twelve
+# findings reports total=4407) and from its finish-reason table (4407 rows, all `stop`, no truncation).
+# This line said 4406 until 2026-09-06 — a number carried over from prose, not from the corpus — and it
+# refused the completed walk with `REFUSED: 4407 distinct studies, expected 4406`.
+EXPECTED=4407
 
 .venv/Scripts/python.exe - "$TABLE" "$EXPECTED" <<'PY'
 import sys
