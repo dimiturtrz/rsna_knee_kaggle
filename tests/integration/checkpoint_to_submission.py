@@ -29,7 +29,7 @@ from core.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
-from kneemri.inference.members import MemberPackage
+from kneemri.inference.member_package import MemberPackage
 from kneemri.inference.vote import RankAverage
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign, StudyModel

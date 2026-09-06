@@ -25,7 +25,8 @@ from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble
-from kneemri.inference.members import MemberConfig, MemberPackage
+from kneemri.inference.member_package import MemberPackage
+from kneemri.inference.members import MemberConfig
 from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyDesign, StudyModel

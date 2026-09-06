@@ -1,0 +1,18 @@
+# comp/members2.roster — the SECOND weights dataset, `kneemri-members-2`, mounted BESIDE the shipped one.
+#
+# WHY A SECOND PACKAGE EXISTS. The shipped package holds 127 members and about 10 GB. Adding one member
+# to it means re-pushing all ten gigabytes, which nobody does per member — so every member trained after
+# the last big push was an offline gain that could never become a board gain. This file holds only the
+# members added since that push. `MemberPackage.spanning` merges every mounted root into one package and
+# REFUSES an identifier two roots both hold, so a member listed here must NOT also be in
+# `comp/members.roster`: a duplicate is not a merge conflict, it is a vote loading weights nobody chose.
+#
+# A member here is still governed by `roster_check` and by `comp/members.declines` — this is a second
+# SHELF, never a second standard.
+
+# The highest solo this project owns: band_dense's recipe distilled from our own out-of-fold posterior
+# at weight 0.7. Reads 0.8681 against band_dense's 0.8578, and the gain sits on the model-bottlenecked
+# findings (MCL +0.0310, Lateral Meniscus +0.0250, ACL +0.0175, Contusion +0.0175). Its one
+# pre-registered prediction — synovitis — FAILED at -0.0040, which is what says this is an ordering
+# transfer rather than a calibration effect.
+oof_teacher_s2026.pt                 # 0.8681

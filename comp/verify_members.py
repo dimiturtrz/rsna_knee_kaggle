@@ -20,7 +20,7 @@ from kneemri.device import VisibleCards
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from kneemri.inference.members import MemberPackage, WeightsError
+from kneemri.inference.member_package import MemberPackage, WeightsError
 from kneemri.kaggle.kernel_sources import KernelSources
 from kneemri.models.backbone import ENCODERS
 

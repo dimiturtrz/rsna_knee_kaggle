@@ -38,7 +38,8 @@ from pathlib import Path
 import torch
 
 from core import cli
-from kneemri.inference.members import Member, MemberPackage
+from kneemri.inference.member_package import MemberPackage
+from kneemri.inference.members import Member
 
 logger = logging.getLogger(__name__)
 

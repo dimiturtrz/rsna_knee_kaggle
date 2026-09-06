@@ -50,7 +50,7 @@ def _drift(tmp_path: Path, roster_text: str, declines_text: str) -> RosterDrift:
     declines = tmp_path / "members.declines"
     roster.write_text(roster_text, encoding="utf-8")
     declines.write_text(declines_text, encoding="utf-8")
-    return RosterDrift(tmp_path, roster, declines)
+    return RosterDrift(tmp_path, [roster], declines)
 
 
 def _clean(tmp_path: Path) -> RosterDrift:
@@ -97,6 +97,30 @@ def test_patterns(tmp_path: Path):
     drift = _drift(tmp_path, f"# what ships\n{SHIPPED}.pt   # the member\n", "")
 
     assert drift.patterns() == [f"{SHIPPED}.pt"], "the comment and the blank are not patterns"
+
+
+def test_patterns_spans_every_shelf_and_skips_one_that_is_not_there(tmp_path: Path):
+    """Members split across two packages are documented by the same rule, and a missing shelf is silent.
+
+    There are two shelves because the shipped package is ~10 GB and a member added to it can only reach
+    the board by re-pushing all of it. If this check read only the first, every member on the second
+    would report as undocumented — a permanently red gate, which is how a real refusal stops being read.
+    A shelf that does not exist is not a complaint: the second package is optional.
+    """
+    for name in (SHIPPED, SMOKE, BARE, FORGOTTEN):
+        _member(tmp_path, name, scoreable=True)
+    first = tmp_path / "members.roster"
+    second = tmp_path / "members2.roster"
+    first.write_text(f"{SHIPPED}.pt\n", encoding="utf-8")
+    second.write_text(f"{BARE}.pt\n", encoding="utf-8")
+    declines = tmp_path / "members.declines"
+    declines.write_text("", encoding="utf-8")
+
+    spanning = RosterDrift(tmp_path, [first, second], declines)
+    assert spanning.packaged() == {SHIPPED, BARE}, "both shelves ship"
+
+    alone = RosterDrift(tmp_path, [first, tmp_path / "absent.roster"], declines)
+    assert alone.packaged() == {SHIPPED}, "a shelf that does not exist is skipped, not read as empty prose"
 
 
 def test_reasons(tmp_path: Path):

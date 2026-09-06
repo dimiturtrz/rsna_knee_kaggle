@@ -145,7 +145,7 @@ def main() -> None:
 
     from core.findings import TARGETS  # noqa: PLC0415 - the kit is on sys.path only after boot
     from core.mounts import Mounts  # noqa: PLC0415 - the kit is on sys.path only after boot
-    from kneemri.inference.members import (  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.inference.member_package import (  # noqa: PLC0415 - the kit is on sys.path only after boot
         MemberPackage,
         WeightsError,
     )

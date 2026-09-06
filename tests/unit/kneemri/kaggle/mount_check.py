@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from kneemri.inference.members import MemberPackage
+from kneemri.inference.member_package import MemberPackage
 from kneemri.kaggle.mount_check import MEMBERS_DATASET, EncoderMounts, LiveReading, MountCheck, MountSweep
 
 DINOV2 = "metaresearch/dinov2/PyTorch/small/1"
@@ -316,3 +316,69 @@ def test_the_sweep_holds_the_package_it_was_given_not_the_one_that_ships(tmp_pat
 def test_a_package_that_does_not_say_falls_back_to_the_shipped_dataset(tmp_path: Path):
     """Every package built before the metadata existed, and every package a unit test builds."""
     assert MountCheck(_package(tmp_path)).dataset == MEMBERS_DATASET
+
+
+SECOND_DATASET = "dimiturnt/kneemri-members-2"
+"""The second shelf's id — a member on it needs a SECOND mount declared by every kernel naming it."""
+
+
+def _second_shelf(tmp_path: Path, package: MemberPackage) -> MemberPackage:
+    """A one-member shelf, stamped with its own dataset id, absorbed onto the package beside it."""
+    root = tmp_path / "members_2"
+    root.mkdir()
+    (root / "fresh.pt").write_bytes(b"")
+    (root / "manifest.json").write_text(
+        json.dumps(
+            {
+                "format": 2,
+                "members": [
+                    {
+                        "id": "fresh",
+                        "file": "fresh.pt",
+                        "fold": 0,
+                        "config": {"variant": "small"},
+                        "fingerprint": [0.0],
+                        "holdout": 0.87,
+                        "annot": 0.88,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "dataset-metadata.json").write_text(json.dumps({"id": SECOND_DATASET}), encoding="utf-8")
+    package.absorb(MemberPackage(root).members, root)
+    return package
+
+
+def test_identify(tmp_path: Path):
+    """A shelf's own metadata answers, and a shelf that never recorded one reads as the shipped package."""
+    package = _second_shelf(tmp_path, _package(tmp_path))
+
+    assert MountCheck.identify(package.roots[1]) == SECOND_DATASET, "the shelf says"
+    assert MountCheck.identify(package.roots[0]) == MEMBERS_DATASET, "and a shelf that does not is the shipped one"
+
+
+def test_shelf(tmp_path: Path):
+    """Which dataset serves a member is read from the root its own file resolves against."""
+    check = MountCheck(_second_shelf(tmp_path, _package(tmp_path)))
+    served = {member.identifier: check.shelf(member) for member in check.package.members}
+
+    assert served == {"v2member": MEMBERS_DATASET, "v3member": MEMBERS_DATASET, "fresh": SECOND_DATASET}
+
+
+def test_verdict_refuses_a_named_member_on_an_undeclared_shelf(tmp_path: Path):
+    """A member on the second shelf that the kernel never mounts is DROPPED at run time, silently.
+
+    That is the `farseat_v1` failure: a complete kernel, a real submission, and a board row under the
+    name of an entry that was never assembled. A kernel naming no members is not refused — it ranks
+    whatever mounted, so an absent shelf is a smaller pool rather than a broken identity.
+    """
+    check = MountCheck(_second_shelf(tmp_path, _package(tmp_path)))
+    body = 'KernelRun(names=("v2member", "fresh")).run()'
+    silent = _kernel(tmp_path, "quiet", body, [])
+    declared = _kernel(tmp_path, "loud", body, [SECOND_DATASET])
+
+    assert "REFUSED" in check.verdict(silent), "it names a member no mount would serve"
+    assert SECOND_DATASET in check.verdict(silent), "and the refusal names the shelf to declare"
+    assert check.verdict(declared).startswith("ok"), "declaring the second shelf is all it takes"

@@ -29,7 +29,8 @@ from core.data.corpus.slot_reader import Reading
 from core.data.corpus.slots import SCHEMES, SlotScheme
 from core.findings import TARGETS
 from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
-from kneemri.inference.members import Member, MemberPackage, Window
+from kneemri.inference.member_package import MemberPackage
+from kneemri.inference.members import Member, Window
 from kneemri.inference.read_groups import ReadGroups, SharedRead
 from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import RankAverage, Vote

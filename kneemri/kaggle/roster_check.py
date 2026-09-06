@@ -39,6 +39,7 @@ gate people learn to skip.
 
 import fnmatch
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -50,6 +51,15 @@ from kneemri.runs.holdout_record import HoldoutRecord
 logger = logging.getLogger(__name__)
 
 ROSTER = Path("comp/members.roster")
+ROSTERS = (ROSTER, Path("comp/members2.roster"))
+"""Every shelf a member may be named on, in mount order.
+
+There are two because the shipped package is ~10 GB: adding one member to it means re-pushing all of
+it, so members trained after the last big push live in a SECOND dataset mounted beside the first
+(`MemberPackage.spanning`). That is a second shelf, never a second standard — this check reads both and
+holds every member on either to the same rule, so moving a line between them changes what gets pushed
+and nothing about what is documented. A name on BOTH shelves is a duplicate the mount refuses, which is
+why `packaged` is a set and the duplicate is caught there rather than being silently merged."""
 DECLINES = Path("comp/members.declines")
 CHECKPOINT_SUFFIX = ".pt"
 CHECKPOINT_GLOB = f"*{CHECKPOINT_SUFFIX}"
@@ -105,10 +115,14 @@ class RosterDrift:
     """Every way the roster has stopped describing the members on disk."""
 
     def __init__(
-        self, processed: Path, roster: Path = ROSTER, declines: Path = DECLINES, pixels: Path | None = None
+        self,
+        processed: Path,
+        rosters: Sequence[Path] = ROSTERS,
+        declines: Path = DECLINES,
+        pixels: Path | None = None,
     ) -> None:
         self.processed = processed
-        self.roster = roster
+        self.rosters = [roster for roster in rosters if roster.is_file()]
         self.declines = declines
         self.pixels = processed if pixels is None else pixels
         """Where the decoded arrays live. Defaults to the checkpoint directory so every existing caller
@@ -123,7 +137,7 @@ class RosterDrift:
         return [name for name in self.checkpoints() if HoldoutRecord(self.processed / f"{name}.pt").exists()]
 
     def patterns(self) -> list[str]:
-        return MemberRoster.read(self.roster).patterns()
+        return [pattern for roster in self.rosters for pattern in MemberRoster.read(roster).patterns()]
 
     def packaged(self) -> set[str]:
         """The scoreable members the roster's globs actually reach."""
@@ -210,12 +224,18 @@ class RosterDrift:
 def main() -> None:
     """Assert the roster is the scoreable pool minus a documented decline."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--roster", type=Path, default=ROSTER, help="what ships")
+    command.parser.add_argument(
+        "--roster",
+        type=Path,
+        action="append",
+        help="a shelf of what ships; repeatable, and every shelf given replaces the default pair "
+        "(comp/members.roster plus the second package's comp/members2.roster)",
+    )
     command.parser.add_argument("--declines", type=Path, default=DECLINES, help="what deliberately does not")
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    drift = RosterDrift(root.models(), arguments.roster, arguments.declines, root.processed())
+    drift = RosterDrift(root.models(), arguments.roster or ROSTERS, arguments.declines, root.processed())
     command.report(drift.report())
     if drift.complaints():
         message = f"{len(drift.complaints())} member(s) the roster no longer describes"

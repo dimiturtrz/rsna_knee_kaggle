@@ -22,7 +22,8 @@ from core.mounts import Mounts
 from kneemri.device import VisibleCards
 from kneemri.inference.budget import Budget
 from kneemri.inference.ensemble import Ensemble, Serving
-from kneemri.inference.members import Member, MemberPackage
+from kneemri.inference.member_package import MemberPackage
+from kneemri.inference.members import Member
 from kneemri.kaggle.submission import Submission
 from kneemri.models.backbone import ENCODERS, Encoder
 
@@ -128,8 +129,13 @@ class KernelRun:
         entry merges OUR members with the published ones, which are two packages under two mounts and
         one decode, because both were fitted on the same pixels (336 px, 12 slices, group 3, canonical
         slots) and `pixel_group` says so.
+
+        It SPANS every mounted root rather than taking the first. The shipped package is ~10 GB, so a
+        member trained today can only reach the board beside it, in a dataset of its own; taking the
+        first manifest made that impossible and made re-pushing ten gigabytes the price of one member.
+        A name held by two roots refuses.
         """
-        found = MemberPackage.find(self.mounts)
+        found = MemberPackage.spanning(self.mounts)
         if found is None:
             message = "no weights package mounted"
             raise FileNotFoundError(message)

@@ -23,7 +23,7 @@ from typing import cast
 import torch
 
 from core import cli
-from kneemri.inference.members import MemberPackage
+from kneemri.inference.member_package import MemberPackage
 from kneemri.models.backbone import ENCODERS, SMALL
 
 logger = logging.getLogger(__name__)

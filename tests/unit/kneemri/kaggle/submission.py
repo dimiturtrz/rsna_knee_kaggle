@@ -17,7 +17,7 @@ from core.data.corpus.study import SlotPipeline
 from core.findings import TARGETS
 from kneemri.inference.budget import Budget
 from kneemri.inference.ensemble import Ensemble, Read, Serving
-from kneemri.inference.members import MemberPackage
+from kneemri.inference.member_package import MemberPackage
 from kneemri.kaggle import submission as submission_module
 from kneemri.kaggle.submission import Split, Submission
 from kneemri.models.model import StudyModel

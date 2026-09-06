@@ -110,7 +110,8 @@ if TYPE_CHECKING:
     import torch as torch_types
 
     from kneemri.inference.ensemble import Ensemble
-    from kneemri.inference.members import Member, MemberPackage
+    from kneemri.inference.member_package import MemberPackage
+    from kneemri.inference.members import Member
     from kneemri.kaggle.kernel_run import KernelRun
     from kneemri.models.model import StudyModel
 

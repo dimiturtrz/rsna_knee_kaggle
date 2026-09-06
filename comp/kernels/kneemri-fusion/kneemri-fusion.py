@@ -124,7 +124,7 @@ def _published(root: Path) -> bool:
 def main() -> None:
     boot()
 
-    from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.inference.member_package import MemberPackage  # noqa: PLC0415 - the kit is on sys.path only after boot
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     logger = logging.getLogger("fusion")

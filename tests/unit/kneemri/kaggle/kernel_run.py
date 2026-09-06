@@ -173,7 +173,7 @@ def test_find_encoder_refuses_when_two_mounts_match(tmp_path: Path):
 
 def test_run(monkeypatch: MonkeyPatch):
     """With no weights mounted the run must die, not write a submission from an untrained model."""
-    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls, mounts=None: None))
+    monkeypatch.setattr(kernel_run.MemberPackage, "spanning", classmethod(lambda cls, mounts=None: None))
     with pytest.raises(FileNotFoundError):
         KernelRun().run()
 
@@ -186,10 +186,10 @@ def test_package(monkeypatch: MonkeyPatch):
     continues writes a submission from an untrained model and nothing downstream can tell.
     """
     sentinel = object()
-    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls, mounts=None: sentinel))
+    monkeypatch.setattr(kernel_run.MemberPackage, "spanning", classmethod(lambda cls, mounts=None: sentinel))
     assert KernelRun().package() is sentinel
 
-    monkeypatch.setattr(kernel_run.MemberPackage, "find", classmethod(lambda cls, mounts=None: None))
+    monkeypatch.setattr(kernel_run.MemberPackage, "spanning", classmethod(lambda cls, mounts=None: None))
     with pytest.raises(FileNotFoundError):
         KernelRun().package()
 

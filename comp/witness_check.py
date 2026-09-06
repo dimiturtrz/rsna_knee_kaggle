@@ -35,7 +35,8 @@ from kneemri.device import VisibleCards
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from kneemri.inference.ensemble import Ensemble
-from kneemri.inference.members import Member, MemberPackage
+from kneemri.inference.member_package import MemberPackage
+from kneemri.inference.members import Member
 from kneemri.models.backbone import ENCODERS
 
 logger = logging.getLogger(__name__)

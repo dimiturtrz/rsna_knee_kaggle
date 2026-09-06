@@ -22,7 +22,8 @@ from pathlib import Path
 
 from core import cli
 from core.denominator import Denominator
-from kneemri.inference.members import MemberPackage, WeightsError
+from kneemri.inference.member_package import MemberPackage, WeightsError
+from kneemri.inference.members import Member
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources
 from kneemri.kaggle.live_dataset import LiveDataset, LiveModel, TruncatedListingError
@@ -62,13 +63,35 @@ class MountCheck:
     def __init__(self, package: MemberPackage, live: set[str] | None = None) -> None:
         self.package = package
         self.live = live
+        self.datasets = [self.identify(root) for root in package.roots]
+        self.dataset = self.datasets[0]
+        """The FIRST shelf — the one a kernel must mount to have a package at all. A kernel mounting a
+        different one is another package's business; a kernel mounting this one and not the second is
+        answered by `verdict`, per member, because only some members live on the second."""
+
+    @staticmethod
+    def identify(root: Path) -> str:
+        """The dataset id a shelf ships under, or the shipped id when the shelf never recorded one.
+
+        A package built before `package_members` wrote the metadata beside it, and every package a unit
+        test builds. The shipped id is the only honest guess, and guessing it wrong can only SKIP a
+        kernel — never pass one whose members were not looked at.
+        """
         try:
-            self.dataset = LiveDataset.identified(package.root)
+            return LiveDataset.identified(root)
         except (FileNotFoundError, KeyError):
-            # A package built before `package_members` wrote the metadata beside it, and every package
-            # a unit test builds. The shipped id is the only honest guess, and guessing it wrong can
-            # only SKIP a kernel — never pass one whose members were not looked at.
-            self.dataset = MEMBERS_DATASET
+            return MEMBERS_DATASET
+
+    def shelf(self, member: "Member") -> str:
+        """Which dataset serves one member — its file is resolved against its OWN root, so the path says.
+
+        A member on the second shelf needs a SECOND mount declared, and a kernel that declares only the
+        first drops it silently at run time and scores as a smaller ensemble under the larger name.
+        """
+        for root, dataset in zip(self.package.roots, self.datasets, strict=True):
+            if root in member.file.parents:
+                return dataset
+        return self.dataset
 
     def entries(self, kernels: Path) -> list[Path]:
         """Every directory under a root that is TRYING to be a kernel, in a stable order.
@@ -104,12 +127,20 @@ class MountCheck:
             return f"skipped - mounts a weights package other than {self.dataset}, which this sweep is not holding"
         names = script.member_names()
         try:
-            mounts = self.package.mounts(self.package.named(names) if names else None)
+            wanted = self.package.named(names) if names else self.package.members
+            mounts = self.package.mounts(wanted)
         except WeightsError as unusable:
             # The message is passed through rather than framed, because there are now two ways to be
             # unusable — a member the package does not hold, and a member on a variant no dataset
             # mirrors — and only the raiser knows which one this is.
             return f"REFUSED - {unusable}"
+        # ONLY when the kernel NAMES its members. An entry that ranks whatever mounted has no identity
+        # to break: a shelf it does not declare is a smaller pool, not a dropped seat, and refusing it
+        # would make seven correct kernels permanently red — which is how a real refusal stops being read.
+        shelves: list[str] = sorted({self.shelf(member) for member in wanted}) if names else []
+        unmounted = [shelf for shelf in shelves if not sources.covers(shelf)]
+        if unmounted:
+            return f"REFUSED - serves members from {', '.join(shelves)} and does not declare {', '.join(unmounted)}"
         undeclared = sources.undeclared(mounts)
         if undeclared:
             return f"REFUSED - needs {', '.join(mounts)} and does not declare {', '.join(undeclared)}"
@@ -219,14 +250,19 @@ class LiveReading:
         """
         if not (live or settle):
             return cls(None, [])
-        identifier = LiveDataset.identified(package.root)
-        dataset = LiveDataset(identifier, listing)
+        # EVERY shelf, unioned: a member the kernel will mount from the second dataset is present as
+        # far as the kernel is concerned, and reading only the first calls it unpushed.
+        shelves = [LiveDataset(MountCheck.identify(root), listing) for root in package.roots]
+
+        def held_now() -> set[str]:
+            return set().union(*(shelf.members() for shelf in shelves))
+
         try:
-            held = dataset.members()
-            unsettled = MountCheck(package, held).settled(dataset.members, pause=pause) if settle else []
+            held = held_now()
+            unsettled = MountCheck(package, held).settled(held_now, pause=pause) if settle else []
         except TruncatedListingError as truncated:
             return cls(None, [], str(truncated))
-        logger.info("live %s holds %d members", identifier, len(held))
+        logger.info("live %s hold %d members", ", ".join(shelf.identifier for shelf in shelves), len(held))
         return cls(held, unsettled)
 
 
@@ -345,7 +381,7 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    package = MemberPackage.at(arguments.root, arguments.paths)
+    package = MemberPackage.shipped(arguments.root, arguments.paths)
     # OPT-IN, because it needs credentials and a round trip, and REQUIRED before a submission: the
     # local answer cannot see a package that leads the pushed one, which is exactly the failure that
     # killed a kernel run on 2026-08-19. A pre-flight without --live checks the kernels; --live checks

@@ -129,7 +129,7 @@ def main() -> None:
 
     from core.mounts import Mounts  # noqa: PLC0415 - the kit is on sys.path only after boot
     from kneemri.inference.ensemble import Ensemble  # noqa: PLC0415 - the kit is on sys.path only after boot
-    from kneemri.inference.members import MemberPackage  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.inference.member_package import MemberPackage  # noqa: PLC0415 - the kit is on sys.path only after boot
     from kneemri.kaggle.submission import Submission  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     # ONE finder for the whole run: it caches, and each of these lookups used to walk the whole

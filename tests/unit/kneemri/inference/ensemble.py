@@ -12,7 +12,8 @@ from torch import Tensor
 from core.findings import TARGETS
 from kneemri.inference.budget import KERNEL_SECONDS, SECONDS_PER_HOUR, Budget
 from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving
-from kneemri.inference.members import Member, MemberConfig, MemberPackage, Window
+from kneemri.inference.member_package import MemberPackage
+from kneemri.inference.members import Member, MemberConfig, Window
 from kneemri.inference.read_groups import SharedRead
 from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import LogitAverage
