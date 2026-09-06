@@ -38,7 +38,7 @@
 #   4. 24 sl 0.1-0.9              + 6.1 files (+5.8%)  deeper than anything served
 #   5. 20 sl 0.15-0.85            + 6.6 files (+6.3%)  shift and depth together
 #
-# reading: */holdout_records/*_{r392,n16b0.1-0.9,n12b0.15-0.85,n24b0.1-0.9,n20b0.15-0.85}*
+# reading: *_r392.holdout.npz
 #
 # THE BAR, pre-registered. Ten seats (five native + five regrouped) must read >= 0.8751 — 0.8706 plus
 # the 0.0045 board resolution — for a candidate to be worth a slot. Below that it is DIRECTIONAL and
@@ -53,7 +53,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MODELS=D:/models/rsna_knee_abnormality/all_ours
+MODELS=D:/models/rsna_knee_abnormality
 TWINS=(calib_span_s2026 grade_ladder_s2026 merged_blend_cf lr4e-5_ws_s2026 through_dense_s2026)
 LOGS=experiments/logs
 mkdir -p "$LOGS"
@@ -72,9 +72,15 @@ serve() {
     # shellcheck disable=SC2046 - the checkpoint list is a word list on purpose
     .venv/Scripts/python.exe -m kneemri.inference.holdout_backfill \
         --checkpoints $(checkpoints) "$@" >>"$log" 2>&1
-    # FULL PATHS, never bare names. `DataRoot.checkpoints` resolves a bare name through `Path.stem`,
-    # and a regrouped record is spelled `..._n16b0.1-0.9.pt` — whose stem is `..._n16b0.1-0`, because
-    # `.9` reads as the suffix. A path with a parent is taken as written and never goes through stem.
+    # FULL PATHS INTO THE MODELS ROOT, never bare names and never `all_ours/`. Two traps, one line.
+    # (a) `DataRoot.checkpoints` resolves a bare name through `Path.stem`, and a regrouped record is
+    #     spelled `..._n16b0.1-0.9.pt` — whose stem is `..._n16b0.1-0`, because `.9` reads as the
+    #     suffix. A path with a parent is taken as written and never goes through stem.
+    # (b) A `.holdout.npz` lives BESIDE its checkpoint in the models ROOT (`core/paths.py:50`), and
+    #     `all_ours/` is a packaging COPY of the `.pt` with no records in it. Pointing at `all_ours/`
+    #     makes every seat read `no holdout record, skipped` and the run dies with "none of the 5
+    #     named records carries a holdout array" — which reads exactly like the `--fold -1` refusal
+    #     and would have been blamed on the fold line.
     local seats=()
     for twin in "${TWINS[@]}"; do seats+=("$MODELS/$twin.pt" "$MODELS/${twin}${suffix}.pt"); done
     .venv/Scripts/python.exe -m kneemri.evaluation.vote_ceiling \
@@ -82,10 +88,30 @@ serve() {
     echo "--- $tag done $(date -u +%Y-%m-%dT%H:%M:%SZ)" | tee -a "$log"
 }
 
+# WHAT THREE FREE READINGS ALREADY SAID (2026-09-06 11:35Z, zero card — the records were on disk
+# from earlier work and nobody had scored the ten-seat blend). Native five reproduce 0.8706 EXACTLY,
+# so the harness is not the suspect:
+#
+#   + _r224          0.8693   -0.0013
+#   + _r280          0.8707   +0.0001
+#   + _n12b0.1-0.9   0.8698   -0.0008
+#
+# Three points, all at or below baseline, none within 0.0044 of the 0.8751 bar. The mechanism that
+# explains it: a twin of yourself under an UNWEIGHTED LogitAverage is the most CORRELATED seat the
+# pool can hold, so the diversity it adds is smaller than the dilution it costs. Reweighting would be
+# the obvious answer and is a seating operation — closed five times, not reopened here.
+#
+# So the queue is CUT to its one candidate with a live mechanism. `_r224` and `_r280` are DOWNSCALES
+# from the 336 the twins were fitted at; 392 is the other direction, and `res392_ws_s2026` — a member
+# TRAINED at 392 — is the best solo this project owns. That is a different sign of the same knob, not
+# a third point on the one already measured. `_n12b0.1-0.9` is the depth/band axis's first point and
+# it is null, so #2-#5 below stay parked unless r392 moves.
 serve r392            _r392            --read-size 392
-serve n16b0.1-0.9     _n16b0.1-0.9     --served-slices 16 --served-band 0.1 0.9
-serve n12b0.15-0.85   _n12b0.15-0.85   --served-slices 12 --served-band 0.15 0.85
-serve n24b0.1-0.9     _n24b0.1-0.9     --served-slices 24 --served-band 0.1 0.9
-serve n20b0.15-0.85   _n20b0.15-0.85   --served-slices 20 --served-band 0.15 0.85
+
+# PARKED on the r392 reading — each is a depth/band regroup, and that axis already has a null point.
+# serve n16b0.1-0.9     _n16b0.1-0.9     --served-slices 16 --served-band 0.1 0.9
+# serve n12b0.15-0.85   _n12b0.15-0.85   --served-slices 12 --served-band 0.15 0.85
+# serve n24b0.1-0.9     _n24b0.1-0.9     --served-slices 24 --served-band 0.1 0.9
+# serve n20b0.15-0.85   _n20b0.15-0.85   --served-slices 20 --served-band 0.15 0.85
 
 echo "QUEUE DONE $(date -u +%Y-%m-%dT%H:%M:%SZ)"
