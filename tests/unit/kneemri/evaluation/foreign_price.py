@@ -1,5 +1,7 @@
 import numpy as np
+import pandas as pd
 
+from core.findings import STUDY, TARGETS
 from kneemri.evaluation.foreign_price import ForeignPrice
 from kneemri.evaluation.foreign_split import ForeignSplit
 
@@ -50,3 +52,18 @@ def test_lines() -> None:
     assert "out-of-sample studies" in lines[0]
     assert "over all 4 studies, none contaminated" in lines[5]
     assert "rank-mean" in lines[6]
+
+
+def test_truth_of() -> None:
+    """No holdout npz means the training table IS the truth, taken in the served order and deduplicated."""
+    table = pd.DataFrame(
+        [
+            {STUDY: study, "Report": "r", **{target: float(index) for target in TARGETS}}
+            for index, study in enumerate("ab")
+        ]
+    )
+    doubled = pd.concat([table, table.iloc[[0]]], ignore_index=True)
+    truth = ForeignPrice.truth_of(None, ["b", "a"], doubled)
+    assert truth.shape == (2, len(TARGETS))
+    assert truth[0, 0] == 1.0, "the served order decides the rows, not the table's"
+    assert truth[1, 0] == 0.0

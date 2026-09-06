@@ -27,7 +27,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 from kneemri.evaluation.foreign_split import FOLDS, ForeignSplit
 from kneemri.evaluation.protocol_prior import Ordering
 from kneemri.runs.holdout_record import FOREIGN
@@ -68,6 +68,28 @@ class ForeignPrice:
         """
         return self.predictions[self.split.fold, np.arange(len(self.split.studies))]
 
+    @staticmethod
+    def truth_of(
+        holdout: Path | None, studies: list[str], table: pd.DataFrame
+    ) -> Float[NDArray[np.float32], "studies labels"]:
+        """The truth for the served studies: our holdout record's, or the training table's.
+
+        A holdout npz is the reading when the subject is the 909 — it carries the exact truth our members
+        were scored against, and its study ORDER is the contract this module holds the serving to. The
+        CORPUS reading has no such file by construction: their five folds hold out all 4407 between them
+        by THEIR split, and nothing on our side ever wrote that list. There the training table is the
+        truth, which is the point rather than a fallback — the census this feeds asks which of the
+        table's own cells two independent instruments both contradict.
+        """
+        if holdout is None:
+            rows = table.drop_duplicates(subset=STUDY).set_index(STUDY)
+            return rows.loc[studies, list(TARGETS)].to_numpy(np.float32)
+        ours = np.load(holdout, allow_pickle=True)
+        if studies != [str(one) for one in ours["studies"]]:
+            message = "the served studies are not our holdout's studies, in order"
+            raise ValueError(message)
+        return ours["truth"].astype(np.float32)
+
     def lines(self) -> list[str]:
         """The reading, with the denominator on every row because that is what makes it quotable."""
         sizes = self.split.sizes()
@@ -86,7 +108,10 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--predictions", type=Path, required=True, help="the npz foreign_folds wrote")
     command.parser.add_argument(
-        "--holdout", type=Path, required=True, help="our holdout npz, for truth and study order"
+        "--holdout",
+        type=Path,
+        default=None,
+        help="our holdout npz, for truth and study order; omit for a corpus scan, whose truth is --labels",
     )
     command.parser.add_argument("--labels", type=Path, required=True)
     command.parser.add_argument(
@@ -95,21 +120,19 @@ def main() -> None:
     arguments = command.parsed()
 
     served = np.load(arguments.predictions, allow_pickle=True)
-    ours = np.load(arguments.holdout, allow_pickle=True)
     studies = [str(one) for one in served["studies"]]
-    if studies != [str(one) for one in ours["studies"]]:
-        message = "the served studies are not our holdout's studies, in order"
-        raise ValueError(message)
     if [str(one) for one in served["labels"]] != list(TARGETS):
         message = f"their label order is not ours: {list(served['labels'])}"
         raise ValueError(message)
-    price = ForeignPrice(served["predictions"], ours["truth"], ForeignSplit.of(studies, pd.read_csv(arguments.labels)))
+    table = pd.read_csv(arguments.labels)
+    truth = ForeignPrice.truth_of(arguments.holdout, studies, table)
+    price = ForeignPrice(served["predictions"], truth, ForeignSplit.of(studies, table))
     if arguments.emit:
         np.savez(
             arguments.emit,
             studies=np.array(studies),
             predictions=price.matched(),
-            truth=ours["truth"],
+            truth=truth,
             epoch=np.array(-1),
             source=np.array(FOREIGN),
         )

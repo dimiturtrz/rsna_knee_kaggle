@@ -8329,3 +8329,26 @@ minutes, and then every subsequent point on the curve is a single 28-minute arm 
 
 Not being spent tonight: `relabel_hold` and `rank966_hold` are both matched to `band_dense_hold` at 336
 and must stay there. This buys the arms AFTER them.
+
+## Their recipe transcribed lands 0.07 below their released weights — 2026-09-06
+
+`foreign_recipe_v3small_336_20sl_s2026` is mattiaangeli's published recipe as we read it — DINOv3-small at
+336 px, 20 slices, their pool and their conditioning — trained here on fold 0. It finished its full twelve
+epochs (peak at epoch 11, `convergence_check` reads UNDERTRAINED at worst, never TRUNCATED) and scored:
+
+| | holdout mean AUC |
+|---|---|
+| `foreign_recipe_v3small_336_20sl_s2026`, our train of their recipe | **0.8087** |
+| their five released folds, fold-matched on the same 909 | **0.8812** |
+| the weakest member holding a champion seat (`calib_span`) | 0.8545 |
+
+The arm's own header branches are VOID: they were written to ask whether their recipe transfers as a
+member, and the answer arrived in a form the branches did not anticipate. A 0.0725 gap between their
+recipe and their weights, on the same architecture at the same resolution, is not a member-quality
+reading — it says the transcription is missing something the released checkpoints have. Candidates, none
+of them measured: their training corpus (they fit on the host's labels over a split we do not reproduce),
+their schedule, or a preprocessing step that lives outside the symbols the lift takes. What it forecloses
+is the cheap route: retraining their recipe here does not reproduce their family, so the foreign seat is
+worth having as THEIR WEIGHTS, mounted, and not as a recipe we own.
+
+The seat itself is unaffected and still reads +0.0091 [+0.0080, +0.0103] as seat eight on `greedyseat_v1`.
