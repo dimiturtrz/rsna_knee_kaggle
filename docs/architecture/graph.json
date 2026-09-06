@@ -25953,6 +25953,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.seat_requirement.SeatRequirement.report",
+      "target": "kneemri.kaggle.seat_requirement.SeatRequirement.frontier",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.report",
       "target": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
       "weight": 1
     },
@@ -52288,6 +52294,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.seat_requirement.SeatRequirement.fitted",
       "label": "fitted",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatRequirement.frontier",
+      "label": "frontier",
       "level": "method",
       "parent": "kneemri.kaggle.seat_requirement.SeatRequirement",
       "role": null
