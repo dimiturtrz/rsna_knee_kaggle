@@ -4976,6 +4976,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.seat_requirement",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_requirement",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_requirement",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_requirement",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_requirement",
+      "target": "kneemri.kaggle.priceable_blend",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.seat_value",
       "target": "core.cli",
       "weight": 1
@@ -25826,6 +25856,120 @@
     },
     {
       "kind": "holds",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "target": "kneemri.kaggle.seat_requirement.SeatFit",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "target": "kneemri.kaggle.seat_requirement.SeatReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.__init__",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.fitted",
+      "target": "kneemri.kaggle.seat_requirement.SeatFit",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.inference.vote.RankAverage.agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.candidates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "target": "kneemri.kaggle.seat_requirement.SeatReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.report",
+      "target": "kneemri.kaggle.seat_requirement.SeatRequirement.fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.SeatRequirement.report",
+      "target": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_requirement.main",
+      "target": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_requirement.main",
+      "target": "kneemri.kaggle.seat_requirement.SeatRequirement.report",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
       "source": "kneemri.kaggle.seat_value.SeatValue",
       "target": "kneemri.kaggle.champion_check.Champion",
       "weight": 1
@@ -30541,7 +30685,7 @@
       "role": null
     },
     {
-      "descendants": 240,
+      "descendants": 241,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -31597,7 +31741,7 @@
       "role": null
     },
     {
-      "descendants": 32,
+      "descendants": 33,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -31824,6 +31968,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.run_check",
       "label": "run_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement",
+      "label": "seat_requirement",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -35923,6 +36075,30 @@
       "level": "class",
       "parent": "kneemri.kaggle.run_check",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatFit",
+      "label": "SeatFit",
+      "level": "class",
+      "parent": "kneemri.kaggle.seat_requirement",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatReading",
+      "label": "SeatReading",
+      "level": "class",
+      "parent": "kneemri.kaggle.seat_requirement",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "label": "SeatRequirement",
+      "level": "class",
+      "parent": "kneemri.kaggle.seat_requirement",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -52066,6 +52242,78 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.run_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatFit.agreement_needed",
+      "label": "agreement_needed",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatFit.extrapolation",
+      "label": "extrapolation",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatFit.gain",
+      "label": "gain",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatFit.solo_needed",
+      "label": "solo_needed",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatRequirement.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatRequirement.fitted",
+      "label": "fitted",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatRequirement.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.SeatRequirement.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement.SeatRequirement",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_requirement.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_requirement",
       "role": null
     },
     {
