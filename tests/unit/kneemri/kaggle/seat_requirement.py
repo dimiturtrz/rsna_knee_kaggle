@@ -65,6 +65,13 @@ def test_fitted() -> None:
     assert SeatRequirement.fitted(readings[:2]) is None
 
 
+def test_frontier() -> None:
+    lines = SeatRequirement.frontier([on_the_plane(0.86, 0.92), on_the_plane(0.80, 0.92), on_the_plane(0.70, 0.60)])
+    assert "2 members, best solo 0.8600" in lines[0]
+    assert "none owned" in lines[1]
+    assert "1 members, best solo 0.7000" in lines[4]
+
+
 def test_report(tmp_path: Path) -> None:
     corners = ((0.80, 0.90), (0.86, 0.92), (0.84, 0.85), (0.88, 0.95))
     readings = [on_the_plane(solo, agreement) for solo, agreement in corners]

@@ -69,6 +69,13 @@ a member adds to the best ensemble this pool can form. Measured against a worse 
 looks more valuable than it is, and the requirement this module prints would come out too small.
 """
 
+AGREEMENT_BANDS = ((0.90, 1.01), (0.85, 0.90), (0.80, 0.85), (0.70, 0.80), (0.00, 0.70))
+"""Where the pool's members sit relative to the seated blend, coarse enough that a band holds members.
+
+The bands are legislated rather than quantiles on purpose: the question is whether a member exists at a
+given DISTANCE, and quantile bands would always report five populated bands however tight the cloud is.
+"""
+
 MIN_READINGS = 3
 """Below this a two-coefficient fit is under-determined and would report a line through noise."""
 
@@ -180,6 +187,27 @@ class SeatRequirement:
             best_observed=float(observed.max()),
         )
 
+    @staticmethod
+    def frontier(readings: list[SeatReading]) -> list[str]:
+        """The best member owned inside each agreement band — the shape of the distance/quality tradeoff.
+
+        This is the line that says whether "buy distance" is a plan or a wish. If every member below a
+        given agreement scores near chance, then the pool has no distance it can USE, and the seat that
+        closes the gap has to be built rather than selected.
+        """
+        lines: list[str] = []
+        for low, high in AGREEMENT_BANDS:
+            inside = [reading for reading in readings if low <= reading.agreement < high]
+            if not inside:
+                lines.append(f"  [{low:.2f}, {high:.2f})  none owned")
+                continue
+            best = max(inside, key=lambda reading: reading.solo)
+            lines.append(
+                f"  [{low:.2f}, {high:.2f})  {len(inside):3d} members, best solo {best.solo:.4f} "
+                f"({best.name}, gain {best.gain:+.4f})"
+            )
+        return lines
+
     def report(self, target: float = TARGET_GAIN, readings: list[SeatReading] | None = None) -> list[str]:
         """The fit, the best members it was taken on, and what closing `target` would require.
 
@@ -202,6 +230,13 @@ class SeatRequirement:
         )
         typical = float(np.median([reading.agreement for reading in readings]))
         strongest = max(reading.solo for reading in readings)
+        furthest = min(readings, key=lambda reading: reading.agreement)
+        lines.append(
+            f"the furthest member owned: {furthest.name} at agreement {furthest.agreement:.4f}, "
+            f"solo {furthest.solo:.4f}, gain {furthest.gain:+.4f}"
+        )
+        lines.append("the distance/quality frontier — best solo owned inside each agreement band:")
+        lines += self.frontier(readings)
         lines.append(f"TO ADD {target:+.4f} — {fit.extrapolation(target):.1f}x the largest gain ever observed here")
         lines.append(
             f"  at the pool's median agreement {typical:.4f}: solo must reach {fit.solo_needed(typical, target):.4f}"
