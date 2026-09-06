@@ -98,7 +98,29 @@ class Vote(ABC):
         ranked = np.empty_like(member)
         studies = member.shape[0]
         for label in range(member.shape[1]):
-            ranked[:, label] = member[:, label].argsort().argsort() / max(studies - 1, 1)
+            ranked[:, label] = Vote.midranks(member[:, label])
+        return ranked / max(studies - 1, 1)
+
+    @staticmethod
+    def midranks(column: NDArray[np.float64]) -> NDArray[np.float64]:
+        """Tied studies share the AVERAGE of the positions they span, rather than being ordered by index.
+
+        `LabelScores.area_under_curve` was fixed to midranks for this exact defect, and this is the same
+        fix on the serving side: under ordinal ranks a member emitting ONE value everywhere — which knows
+        nothing — votes a full sweep from 0 to 1 ordered by corpus position, as loudly as a member that
+        can actually separate the studies.
+
+        Reachable at submission time rather than hypothetical: serving is fp16, whose eleven mantissa bits
+        collapse a saturated sigmoid onto a handful of distinct values. Measured on the greedy-optimal
+        seven the training-side tie mass is 7.9e-05 and the blend mean does not move, because float64
+        training arrays essentially never tie — so no recorded number changes and only serving does.
+        """
+        order = np.argsort(column, kind="mergesort")
+        _, inverse, counts = np.unique(column[order], return_inverse=True, return_counts=True)
+        opens = np.cumsum(counts) - counts
+        centres = opens + (counts - 1) / 2.0
+        ranked = np.empty_like(column)
+        ranked[order] = centres[inverse]
         return ranked
 
 
