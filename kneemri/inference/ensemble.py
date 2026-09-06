@@ -145,12 +145,23 @@ class Serving:
     compare three, but the inner autocast that `arithmetic` decides carries an explicit dtype and
     overrides it — so all three arms ran the same arithmetic and reported max|diff| of exactly 0.0,
     twelve times, which read as "fp16 is free". A knob that is not connected reports agreement."""
+    read_size: int | None = None
+    """None means each member is read at the size it was FITTED at, which is what a submission wants.
+    A size forces one across every member, for an entry whose variable IS the resolution. What it buys
+    is FORWARD time and never decode time: `Member.resized` overrides `train_size`, never `img`, so the
+    corpus is still decoded once at the cache size the members share (`reads` groups without resolution
+    precisely because one read serves every size). Priced offline first — six champion twins go 0.8706
+    native, 0.8687 at 280 px, 0.8637 at 224."""
     vote: Vote | None = None
     """None means `RankAverage`, the rule every number this project has published came out of. It sits
     here because it is the same KIND of knob as the other three — something no member can answer,
     decided once for the whole run — and because `member_curve` has been able to vary the vote offline
     since the family existed while the SUBMISSION path could not vary it at all. An axis measurable
     only offline is an axis whose board transfer cannot be asked about."""
+
+    def read(self, member: Member) -> Member:
+        """The member as this entry serves it: its own reading, unless the entry forces a size."""
+        return member if self.read_size is None else member.resized(self.read_size)
 
 
 class Ensemble:
@@ -361,6 +372,7 @@ class Ensemble:
         """
         model = self.models[member.identifier]
         model.eval()
+        member = self.serving.read(member)
         window = member.window(images.shape[2], overlap=overlap)
         views = self.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
         total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)

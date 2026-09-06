@@ -740,3 +740,19 @@ def test_decoded_scheme_refuses_mixed_tie_rules(tmp_path: Path):
     assert ensemble.decoded_scheme([theirs]).tie == "last"
     with pytest.raises(ValueError, match="tie rule"):
         ensemble.decoded_scheme([ours, theirs])
+
+
+def test_read(tmp_path: Path):
+    """A forced serving size moves the size the ENCODER runs at, and only that.
+
+    `img` names the decode cache every member of a group shares, so forcing it would feed resampled
+    pixels to an encoder still at the old resolution and price nothing (knee-d2fc). The default is the
+    member untouched, because a submission serves each member the way it was fitted.
+    """
+    member = _ensemble(tmp_path).package.members[0]
+
+    served = Serving(read_size=280).read(member)
+
+    assert served.read_size == 280, "the encoder runs at the size the entry forces"
+    assert served.image_size == member.image_size, "and the group still shares one decode"
+    assert Serving().read(member) is member, "an entry that forces nothing serves the member as fitted"
