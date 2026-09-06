@@ -110,3 +110,11 @@ comp/fout*/
 /.agent-runtime/scratch/
 .runlogs/
 commit.log
+
+# .claude/mastermind_inbox/ is the coordinator's box (see its README): letters, archive and listener
+# state are runtime; only the README is source.
+/.claude/mastermind_inbox/*.txt
+/.claude/mastermind_inbox/*.md
+!/.claude/mastermind_inbox/README.md
+/.claude/mastermind_inbox/read/
+.claude/mastermind_inbox/.listener_*

@@ -18,7 +18,7 @@ LABELS = 3
 
 
 NEARLY_IDENTICAL = 0.99
-"""How closely a nearly-flat squash must track the flat rule, given ties broken by array position."""
+"""How closely a nearly-flat squash must track the flat rule, given the bend a finite k still applies."""
 
 
 def _members(count: int, seed: int = 2026) -> list[NDArray[np.float64]]:
@@ -69,6 +69,31 @@ def test_ranks():
 
     assert ranked[:, 0].tolist() == [1.0, 0.0, 0.5]
     assert ranked[:, 1].tolist() == [0.0, 1.0, 0.5], "the second label orders on its own values"
+
+
+def test_midranks():
+    """Ties share the average of the positions they span, which is what makes a rank a READING.
+
+    The constant column is the case that decides it: a member emitting one value everywhere knows
+    nothing, and under ordinal ranks it votes a full sweep from 0 to 1 ordered by corpus position.
+    """
+    assert Vote.midranks(np.array([3.0, 1.0, 2.0])).tolist() == [2.0, 0.0, 1.0]
+    assert Vote.midranks(np.array([1.0, 1.0, 1.0])).tolist() == [1.0, 1.0, 1.0], (
+        "a member that knows nothing votes flat"
+    )
+    assert Vote.midranks(np.array([5.0, 1.0, 1.0, 9.0])).tolist() == [2.0, 0.5, 0.5, 3.0]
+
+
+def test_ranks_ties_vote_flat():
+    """A tied member contributes NOTHING to an ensemble, instead of contributing the corpus ordering."""
+    saturated = np.full((STUDIES, LABELS), 0.999)
+    strong = _members(1)[0]
+    combined = RankAverage().combine([strong, saturated])
+
+    assert np.allclose(Vote.ranks(saturated), 0.5), "every study ties, so every study takes the midrank"
+    assert np.array_equal(np.argsort(combined[:, 0]), np.argsort(Vote.ranks(strong)[:, 0])), (
+        "a flat vote cannot reorder the member that does know something"
+    )
 
 
 def test_vote_named():
@@ -193,9 +218,9 @@ def test_sharpened_rank_combine():
     Not its values — a logistic is affine only in the limit — so the check is on the ordering the metric
     reads, through the rank correlation rather than through `argsort`: a flat rank-average of three
     members ties by construction and `argsort` settles a tie by position, which would make this test read
-    array order rather than agreement. It is a floor and not an equality for the same reason: those ties
-    are re-broken by array position inside `Vote.ranks`, which uses ordinal ranks (knee ranks-tie bead),
-    so two orderings that agree everywhere the values differ still correlate at 0.998 and not at 1.
+    array order rather than agreement. It is a floor and not an equality because a logistic is affine
+    only in the limit: the bend is still present at k = 1e-3 and moves the ordering wherever two studies
+    sit within one squash-step of each other, so the correlation lands near 1 without reaching it.
     """
     members = _members(3)
 
