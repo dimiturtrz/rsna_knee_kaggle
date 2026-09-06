@@ -4460,6 +4460,54 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "kneemri.kaggle.pool_ceiling",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.column_lift",
+      "target": "kneemri.kaggle.seat_requirement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.decode_entry",
       "target": "core.cli",
       "weight": 1
@@ -24013,6 +24061,132 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.column_lift.ColumnLift",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.column_lift.ColumnLift",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.column_lift.ColumnLift",
+      "target": "kneemri.kaggle.column_lift.LiftReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.lifted",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.lifted",
+      "target": "kneemri.kaggle.column_lift.ColumnLift.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "target": "kneemri.kaggle.column_lift.ColumnLift.lifted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "target": "kneemri.kaggle.column_lift.LiftReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.report",
+      "target": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.report",
+      "target": "kneemri.kaggle.column_lift.ColumnLift.required",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.report",
+      "target": "kneemri.kaggle.column_lift.ColumnLift.seated",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.seated",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.seated",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.seated",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.column_lift.ColumnLift.seated",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.column_lift.main",
+      "target": "kneemri.kaggle.column_lift.ColumnLift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.column_lift.main",
+      "target": "kneemri.kaggle.column_lift.ColumnLift.report",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.decode_entry.DecodeEntry",
       "target": "kneemri.evaluation.pool.Pool",
@@ -30937,7 +31111,7 @@
       "role": null
     },
     {
-      "descendants": 242,
+      "descendants": 243,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -31993,7 +32167,7 @@
       "role": null
     },
     {
-      "descendants": 34,
+      "descendants": 35,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -32028,6 +32202,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.champion_uncertainty",
       "label": "champion_uncertainty",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift",
+      "label": "column_lift",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -36055,6 +36237,22 @@
       "level": "class",
       "parent": "kneemri.kaggle.champion_uncertainty",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift",
+      "label": "ColumnLift",
+      "level": "class",
+      "parent": "kneemri.kaggle.column_lift",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.LiftReading",
+      "label": "LiftReading",
+      "level": "class",
+      "parent": "kneemri.kaggle.column_lift",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -51118,6 +51316,78 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.champion_uncertainty",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.ColumnLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift.lifted",
+      "label": "lifted",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.ColumnLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.ColumnLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.ColumnLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.ColumnLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift.required",
+      "label": "required",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.ColumnLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.ColumnLift.seated",
+      "label": "seated",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.ColumnLift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.LiftReading.weakest",
+      "label": "weakest",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift.LiftReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.column_lift.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.column_lift",
       "role": null
     },
     {
