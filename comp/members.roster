@@ -691,3 +691,14 @@ blendemalabel224_s2026.pt   # 0.8591 solo, the best 224-corner member the projec
                             # blendema224 could not make. Against the best single term (blendhold 0.8575) it
                             # is +0.0016, inside the floor and NOT a ranking. Its reading is
                             # logs/blendemalabel224_ledger.log.
+chaindense_s2026.pt         # 0.8628 solo at the dense corner - the three 224-corner terms (blended labels,
+                            # --ema, --slice-pooling labelwise) on the BARE dense base band_dense_hold
+                            # (0.8573), +0.0055, 0.89 paired floors, INSIDE the floor and its arm's MIDDLE
+                            # branch. Seated for DIVERSITY, not for rank: at 0.0014 BELOW the pool best it
+                            # is not a ranking member, but it is the only member trained on blend_three_v1
+                            # at 336 px with an EMA trajectory, so its errors are not the calibrated
+                            # members' errors. The sentence that matters is in its ledger: it reads 0.0006
+                            # under calib_dense_hold (0.8634), the same base plus --calibrated-targets
+                            # ALONE, so three cheap terms and one expensive one are indistinguishable here
+                            # and the chain SUBSTITUTES for calibration. Its reading is
+                            # logs/chaindense_ledger.log.
