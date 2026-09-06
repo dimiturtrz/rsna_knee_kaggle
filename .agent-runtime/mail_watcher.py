@@ -156,6 +156,14 @@ def main():
     )
     args = parser.parse_args()
 
+    if args.name in ("both", "all"):
+        print(
+            "ERROR: --name both|all refuses to run: this watcher may only watch its own side's box. "
+            "Watching the other side's box archives letters before that side's listener sees them.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
     log_path = os.path.join(SCRIPT_DIR, "mail_alerts.kimi.log")
     claude_log_path = os.path.join(REPO_ROOT, ".claude", "mail_alerts.claude.log")
     global_claude_log_path = os.path.join(os.path.expanduser("~/.claude"), "mail_alerts.global-claude.log")
