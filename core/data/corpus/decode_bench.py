@@ -129,7 +129,22 @@ class DecodeBench:
         return [acquisition.ordered_files() for acquisition in study.acquisitions]
 
     @staticmethod
-    def _union_one(directory: str) -> object:
+    def _union_all(studies: Sequence[str], groups: Sequence[tuple[int, tuple[float, float]]]) -> tuple[int, int]:
+        """Distinct and summed opens over a corpus slice for ANY set of read groups.
+
+        Taking the groups rather than reading the constant is what prices a CANDIDATE group: the memo
+        makes an entry's decode bill the size of the UNION, so what a new reading costs is
+        `union(champion + candidate) - union(champion)`, and that marginal is nothing like the group's
+        own size — a band nested inside one already served costs almost nothing, a shifted band costs
+        nearly all of itself.
+        """
+        counted = [DecodeBench._union_one(study, groups) for study in studies]
+        return sum(pair[0] for pair in counted), sum(pair[1] for pair in counted)
+
+    @staticmethod
+    def _union_one(
+        directory: str, groups: Sequence[tuple[int, tuple[float, float]]] = CHAMPION_GROUPS
+    ) -> tuple[int, int]:
         """How many DISTINCT files the champion's three read groups open in this study, against their sum.
 
         A group is a decode of every study, but two groups at the same band and different depths open
@@ -155,7 +170,7 @@ class DecodeBench:
         # counting every series would price a decode nothing performs and inflate the memo's win.
         for acquisition in study.pipeline.route(study.acquisitions, PLANES).values():
             available = len(acquisition.ordered_files())
-            for slices, band in CHAMPION_GROUPS:
+            for slices, band in groups:
                 opened = SlotReader(band=Band(*band)).band_indices(available, slices)
                 distinct.update((acquisition.series, index) for index in opened)
                 total += len(opened)
@@ -181,6 +196,13 @@ def main() -> None:
     command.parser.add_argument(
         "--union", action="store_true", help="count distinct vs opened files across the champion's read groups"
     )
+    command.parser.add_argument(
+        "--extra",
+        action="append",
+        default=[],
+        metavar="SLICES:LOW:HIGH",
+        help="price a CANDIDATE read group's marginal decode over the champion's union, one flag each",
+    )
     arguments = command.parsed()
 
     from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
@@ -190,16 +212,24 @@ def main() -> None:
     chosen = studies[: arguments.studies]
 
     if arguments.union:
-        counted = [DecodeBench._union_one(study) for study in chosen]  # noqa: SLF001 - its own CLI
-        distinct = sum(pair[0] for pair in counted)  # type: ignore[index]
-        total = sum(pair[1] for pair in counted)  # type: ignore[index]
-        command.report(
-            [
-                f"{len(chosen)} studies: {total / len(chosen):.1f} files opened per study across "
-                f"{len(CHAMPION_GROUPS)} groups, {distinct / len(chosen):.1f} distinct "
-                f"({1 - distinct / total:.1%} of the decode is the same file read twice)"
-            ]
-        )
+        distinct, total = DecodeBench._union_all(chosen, CHAMPION_GROUPS)  # noqa: SLF001 - its own CLI
+        lines = [
+            f"{len(chosen)} studies: {total / len(chosen):.1f} files opened per study across "
+            f"{len(CHAMPION_GROUPS)} groups, {distinct / len(chosen):.1f} distinct "
+            f"({1 - distinct / total:.1%} of the decode is the same file read twice)"
+        ]
+        priced = []
+        for spec in arguments.extra:
+            slices, low, high = spec.split(":")
+            candidate = (int(slices), (float(low), float(high)))
+            joined, _ = DecodeBench._union_all(chosen, (*CHAMPION_GROUPS, candidate))  # noqa: SLF001 - its own CLI
+            priced.append((joined - distinct, spec))
+        for marginal, spec in sorted(priced):
+            lines.append(
+                f"candidate {spec:<16s} + {marginal / len(chosen):5.1f} files/study "
+                f"({marginal / max(distinct, 1):+.1%} over the union)"
+            )
+        command.report(lines)
         return
 
     os.environ[SLICES] = str(arguments.slices)
