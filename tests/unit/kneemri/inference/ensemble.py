@@ -331,10 +331,11 @@ def test_read_of(tmp_path: Path):
 
 
 def test_budget(tmp_path: Path):
-    """The run budget reaches `afford` for ONE read group and is switched off for more than one.
+    """The run budget reaches `afford` whatever the entry's read grouping.
 
-    Not a knob: under the chunk-outer traversal a multi-group entry has no group boundary to project
-    from, so the net would be firing on arithmetic that no longer describes the run (knee-fma1r).
+    It was off for more than one group for exactly one commit, between the traversal moving and the
+    projection being repriced (knee-fma1r). A chunk of studies is now the unit of progress, and that is
+    the same fraction of the run for one read group and for five.
     """
     ensemble = _ensemble(tmp_path / "budget")
     ensemble.serving = replace(ensemble.serving, budget=Budget(seconds=1.0, margin=1.0))
@@ -343,7 +344,7 @@ def test_budget(tmp_path: Path):
 
     deeper = replace(member, identifier="deep")
     ensemble.reads = lambda: [[member], [deeper]]
-    assert ensemble.budget() is None, "and more than one switches it off until the reprice lands"
+    assert ensemble.budget() is not None, "and so does more than one"
 
 
 def test_attempt(tmp_path: Path):
@@ -706,11 +707,10 @@ def test_predict_member_redoes_a_non_finite_pass(tmp_path: Path):
 
 
 def _timed(ensemble: Ensemble, seconds: float, ceiling: float) -> None:
-    """Put the ensemble on a budget that has already burned `seconds` of `ceiling`, one whole group done."""
+    """Put the ensemble on a budget that has already burned `seconds` of `ceiling`, one whole chunk done."""
     budget = Budget(seconds=ceiling, margin=1.0)
     ensemble.serving = Serving(budget=budget)
     budget.started -= seconds
-    budget.begin(1)
     budget.chunk(1, 1)
 
 

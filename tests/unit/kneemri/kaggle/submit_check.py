@@ -50,22 +50,6 @@ def test_seats(tmp_path: Path):
     assert SubmitCheck.seats(ranked) is None, "unknown seats must not read as a new entry"
 
 
-def test_netted(tmp_path: Path):
-    """A declared budget with member-chosen grouping is refused; forcing one group keeps the net.
-
-    The refusal is the whole point of the (b)-state: under the chunk-outer traversal `Ensemble.budget`
-    returns None for more than one read group, so such an entry ships believing in a timeout net that is
-    switched off — and three entries have already died at the cap writing nothing.
-    """
-    loose = _kernel(tmp_path, "kneemri-loose", "KernelRun(serving=Serving(vote=v, budget=left)).run()\n")
-    forced = _kernel(tmp_path, "kneemri-forced", "KernelRun(serving=Serving(vote=v, budget=left, group=g)).run()\n")
-    netless = _kernel(tmp_path, "kneemri-netless", "KernelRun(serving=Serving(vote=v)).run()\n")
-
-    assert "knee-fma1r" in SubmitCheck.netted(loose)
-    assert SubmitCheck.netted(forced) == "", "one forced read group keeps the budget the kernel declared"
-    assert SubmitCheck.netted(netless) == "", "asking for no net is not believing in one that is off"
-
-
 def test_resolved(tmp_path: Path):
     """A bare name resolves under the kernels root; an existing directory is taken as given."""
     kernel = _kernel(tmp_path, "kneemri-named", "KernelRun().run()\n")

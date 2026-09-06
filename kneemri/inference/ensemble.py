@@ -509,16 +509,14 @@ class Ensemble:
         )
 
     def budget(self) -> Budget | None:
-        """The run budget, and NONE for a multi-group entry until the projection is repriced.
+        """The run budget, whatever the entry's read grouping — the decode reports the progress.
 
-        The traversal is chunk-outer: every group advances together over one pass, so "group k of three" is
-        no longer a fraction of the run and `afford` would project against a model of progress that no
-        longer exists. Repricing the net inside the change that moved the traversal makes a bug in either
-        show up as the other, so it is off for the multi-group case and repriced separately (knee-fma1r).
-        A SINGLE-group entry is unaffected. This is a development state, not a shipping one —
-        `submit_check` refuses a multi-group entry while this returns None.
+        It was disabled for a multi-group entry for one commit, while the traversal moved and before the
+        projection was repriced (knee-fma1r): "group k of three" was the progress model, and chunk-outer
+        has no group boundary to count. `Budget` now measures chunks of studies against the split's total,
+        which is the same number for one group and for five.
         """
-        return self.serving.budget if len(self.reads()) == 1 else None
+        return self.serving.budget
 
     def predict_groups(
         self,
@@ -542,9 +540,6 @@ class Ensemble:
         group results would weight a group of one as heavily as a group of five.
         """
         groups = self.reads()
-        budget = self.budget()
-        if budget:
-            budget.begin(len(groups))
         per_member: dict[str, list[NDArray[np.float64]]] = {
             member.identifier: [] for members in groups for member in members
         }

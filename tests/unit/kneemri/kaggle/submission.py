@@ -249,24 +249,27 @@ def test_predict_gives_up_a_member_when_the_wall_clock_runs_out(
     assert set(submission.ensemble.spent) == {"m0", "m1", "m2"}, "and every member was timed while it ran"
 
 
-def test_predict_disables_the_budget_for_a_multi_group_entry(tmp_path: Path, caplog: pytest.LogCaptureFixture):
-    """Two read groups means NO budget — deliberately, and it must stay visible that it is deliberate.
+def test_predict_keeps_the_net_for_a_multi_group_entry(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
+):
+    """An entry serving TWO read groups still gives a member up when it is projected past the ceiling.
 
-    Under the chunk-outer traversal every group advances together over one pass, so "group k of three" is
-    no longer a fraction of the run and `afford` would project against a model of progress that does not
-    exist. Switching the net off is the honest state until it is repriced; shipping in that state is not,
-    which is why `kit_check` refuses a multi-group entry while this holds.
+    The net was off for exactly one commit, while the traversal moved to chunk-outer and before the
+    projection was repriced (knee-fma1r): "group k of three" had been the progress model and there is no
+    group boundary left to count. A chunk of studies is the unit now, which is a fraction of the run
+    whatever the grouping — so the case that runs longest, an entry decoding twice, is netted again.
     """
+    monkeypatch.setattr(submission_module, "STUDY_CHUNK", 1)
     budget = Budget(seconds=1e-6, margin=1.0)
     submission = _submission(tmp_path, depths=(4, 3, 3), budget=budget)
 
     with caplog.at_level(logging.WARNING):
         combined = submission.predict(["study_a", "study_b"], {"sag": "Sagittal"})
 
-    assert combined.shape == (2, len(TARGETS)), "every member still votes"
-    assert submission.ensemble.budget() is None, "the budget is off for more than one read group"
-    assert not budget.measured(), "and nothing reported progress into it"
-    assert "giving up" not in caplog.text, "so no member was given up on a projection nobody made"
+    assert combined.shape == (2, len(TARGETS)), "the entry still writes a full table"
+    assert submission.ensemble.budget() is budget, "the net is the one the kernel declared, not None"
+    assert budget.measured(), "the decode reported chunks against the split, not groups against the entry"
+    assert "giving up" in caplog.text, "and the projection was acted on"
 
 
 def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):

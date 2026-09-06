@@ -24,46 +24,32 @@ class Budget:
     killed with no submission at all — so twenty-five members that do not finish score nothing, while
     twenty that do score most of what twenty-five would have.
 
-    The projection needs one number the ensemble cannot compute and one the decode cannot: how far
-    through the studies this group is (the decode knows) and how many groups there are (the ensemble
-    knows). So the two of them report progress here and this object owns the arithmetic.
+    ONE PROGRESS MODEL: chunks of studies done, out of chunks the split holds. It used to be two — read
+    groups, reported by the ensemble, times chunks inside the current group, reported by the decode —
+    because the traversal was group-outer and a group WAS a fraction of the run. Chunk-outer advances
+    every group together over one pass, so "group k of three" no longer names any part of the work, and
+    the party that knows how far along the run is is the only one that ever knew how long the corpus is:
+    the decode. That also drops the estimate this class used to carry — every group counted as equal
+    work whatever its member count — because there is nothing left to weight.
     """
 
     def __init__(self, seconds: float = KERNEL_SECONDS, margin: float = DEADLINE_MARGIN) -> None:
         self.seconds = seconds * margin
         self.started = time.time()
-        self.groups = 1
-        self.index = 0
-        self.fraction = 0.0
-
-    def begin(self, groups: int) -> None:
-        """How many decodes of the whole split this entry will make, which is its unit of total work."""
-        self.groups = max(groups, 1)
-
-    def group(self, index: int) -> None:
-        """Entering the index-th read group; everything before it counts as finished work."""
-        self.index = index
         self.fraction = 0.0
 
     def chunk(self, done: int, total: int) -> None:
-        """A chunk of the current group has landed: `done` of `total` for this decode."""
+        """`done` of the split's `total` chunks have been decoded AND forwarded."""
         self.fraction = done / max(total, 1)
 
     def projected(self) -> float:
-        """Seconds the whole run is on course to take, or infinity before anything has finished.
-
-        Every group is counted as equal work, which is what makes this an estimate rather than a
-        measurement: a group of one member costs less than a group of twenty. It errs toward
-        over-projecting on the cheap groups, and over-projecting is the safe direction — a member
-        dropped that need not have been costs a little accuracy, and a ceiling hit costs the entry.
-        """
+        """Seconds the whole run is on course to take, or infinity before anything has finished."""
         elapsed = time.time() - self.started
-        share = (self.index + self.fraction) / self.groups
-        return elapsed / share if share > 0 else float("inf")
+        return elapsed / self.fraction if self.fraction > 0 else float("inf")
 
     def measured(self) -> bool:
         """Whether any work has finished yet — before that there is nothing to project from."""
-        return self.index + self.fraction > 0
+        return self.fraction > 0
 
     def overrunning(self) -> bool:
         """Whether the run is on course to be killed before it writes anything."""

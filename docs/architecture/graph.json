@@ -22543,12 +22543,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.budget",
-      "target": "kneemri.inference.ensemble.Ensemble.reads",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.inference.ensemble.Ensemble.decoded_scheme",
       "target": "core.data.corpus.slots.SlotScheme",
@@ -22576,12 +22570,6 @@
       "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
       "target": "kneemri.inference.ensemble.Ensemble.afford",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_groups",
-      "target": "kneemri.inference.ensemble.Ensemble.budget",
       "weight": 1
     },
     {
@@ -27464,18 +27452,6 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.kaggle.submit_check.SubmitCheck.netted",
-      "target": "kneemri.kaggle.kernel_script.KernelScript",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.submit_check.SubmitCheck.netted",
-      "target": "kneemri.kaggle.kernel_script.KernelScript.serving",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
       "source": "kneemri.kaggle.submit_check.SubmitCheck.seats",
       "target": "kneemri.kaggle.kernel_script.KernelScript",
       "weight": 1
@@ -27526,12 +27502,6 @@
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
       "target": "kneemri.kaggle.submit_check.SubmitCheck.described",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.SubmitCheck.netted",
       "weight": 1
     },
     {
@@ -50682,24 +50652,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.inference.budget.Budget.begin",
-      "label": "begin",
-      "level": "method",
-      "parent": "kneemri.inference.budget.Budget",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.inference.budget.Budget.chunk",
       "label": "chunk",
-      "level": "method",
-      "parent": "kneemri.inference.budget.Budget",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.budget.Budget.group",
-      "label": "group",
       "level": "method",
       "parent": "kneemri.inference.budget.Budget",
       "role": null
@@ -53106,14 +53060,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.kernel_script.KernelScript.serving",
-      "label": "serving",
-      "level": "method",
-      "parent": "kneemri.kaggle.kernel_script.KernelScript",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.kaggle.kernel_sources.KernelSources.__init__",
       "label": "__init__",
       "level": "method",
@@ -54524,14 +54470,6 @@
       "descendants": 0,
       "id": "kneemri.kaggle.submit_check.SubmitCheck.described",
       "label": "described",
-      "level": "method",
-      "parent": "kneemri.kaggle.submit_check.SubmitCheck",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.SubmitCheck.netted",
-      "label": "netted",
       "level": "method",
       "parent": "kneemri.kaggle.submit_check.SubmitCheck",
       "role": null

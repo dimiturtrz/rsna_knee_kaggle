@@ -12,9 +12,6 @@ from pathlib import Path
 KERNEL_RUN = "KernelRun"
 """The call every entry that runs OUR package makes, and the only place its member selection appears."""
 
-SERVING = "Serving"
-"""The call carrying an entry's serving knobs — the vote, the timeout net, the read grouping."""
-
 SELECTION = "names"
 """Its one keyword whose value resolves statically. `members=N` is `strongest(N)`, a ranking over
 recorded holdouts that a parse cannot evaluate, so it reads as the whole package instead."""
@@ -58,19 +55,6 @@ class KernelScript:
             return None
         selected = next((keyword.value for keyword in call.keywords if keyword.arg == SELECTION), None)
         return None if selected is None else self._strings(selected)
-
-    def serving(self) -> set[str] | None:
-        """Which knobs the script's `Serving(...)` names, or None when it builds none.
-
-        The NAMES and not their values, because that is what a parse can answer honestly: `budget=left`
-        resolves to a wall-clock computed on Kaggle and `group=SharedRead(...)` to an object, but whether
-        each APPEARS is exactly the question a pre-flight asks — a budget declared alongside a read
-        grouping the members choose is a timeout net that the chunk-outer traversal switches off.
-        """
-        for node in ast.walk(self.tree):
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == SERVING:
-                return {keyword.arg for keyword in node.keywords if keyword.arg}
-        return None
 
     def _strings(self, value: ast.expr) -> list[str] | None:
         """A literal sequence of names, following one level of variable, or None if it is not literal."""
