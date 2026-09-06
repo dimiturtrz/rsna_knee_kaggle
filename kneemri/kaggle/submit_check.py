@@ -77,6 +77,25 @@ class SubmitCheck:
         return set(names) if names else None
 
     @staticmethod
+    def netted(kernel: Path) -> str:
+        """Why this kernel would ship without a timeout net, or an empty string when it would not.
+
+        THE NET IS OFF FOR A MULTI-GROUP ENTRY. The decode traversal is chunk-outer, so every read group
+        advances together over one pass and "group k of three" is no longer a fraction of the run;
+        `Ensemble.budget` returns None rather than project against arithmetic that no longer describes
+        the run (knee-fma1r). A kernel that declares `budget=` and lets its MEMBERS choose the grouping
+        is therefore an entry whose declared net does nothing — and three entries have already died at
+        the nine-hour cap with no submission written. `group=SharedRead(...)` forces one group and keeps
+        the net; so does a kernel that declares no budget, which is asking for no net rather than
+        believing in one that is off.
+        """
+        scripts = sorted(kernel.glob("*.py"))
+        served = KernelScript(scripts[0]).serving() if scripts else None
+        if served is None or "budget" not in served or "group" in served:
+            return ""
+        return "declares budget= with the read grouping left to its members, so the net is off (knee-fma1r)"
+
+    @staticmethod
     def resolved(given: str, kernels: Path) -> Path:
         """A kernel named either by its directory or by its bare name, as a directory."""
         direct = Path(given)
@@ -93,6 +112,10 @@ def main() -> None:
     arguments = command.parsed()
 
     kernel = SubmitCheck.resolved(arguments.kernel, arguments.kernels)
+    unnetted = SubmitCheck.netted(kernel)
+    if unnetted and not arguments.anyway:
+        logger.error("REFUSED %s: %s", kernel.name, unnetted)
+        sys.exit(1)
     named = SubmitCheck.seats(kernel)
     if named is None:
         logger.error("UNKNOWN %s: names no members in its source, so this check did not look", kernel.name)

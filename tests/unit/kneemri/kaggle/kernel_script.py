@@ -17,6 +17,19 @@ def test_call(tmp_path: Path):
     assert _script(tmp_path, "MemberPackage.find(mounts)\n").call() is None, "graft picks members another way"
 
 
+def test_serving(tmp_path: Path):
+    """The knob NAMES a `Serving(...)` carries, and None when the script builds none.
+
+    Names and not values, because `budget=left` is a wall-clock computed on Kaggle: whether a knob
+    appears is the whole question a pre-flight can answer honestly from source.
+    """
+    assert _script(tmp_path, "KernelRun(serving=Serving(vote=v, budget=left)).run()\n").serving() == {
+        "vote",
+        "budget",
+    }
+    assert _script(tmp_path, "KernelRun(names=('a',)).run()\n").serving() is None, "no Serving is not an empty one"
+
+
 def test_member_names(tmp_path: Path):
     """A literal selection resolves — through one variable — and a ranked one reads as the whole package.
 

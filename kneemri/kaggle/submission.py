@@ -27,12 +27,16 @@ import torch
 from numpy.typing import NDArray
 from torch import Tensor
 
+from core.data.corpus.slot_reader import FileMemo
 from core.data.corpus.study import SlotPipeline, Study
 from core.findings import TARGETS
 from kneemri.inference.ensemble import Ensemble, Read
 from kneemri.kaggle.slot_fill import SlotFill
 
 logger = logging.getLogger(__name__)
+
+Bags = list[dict[int, tuple[Tensor, Tensor]]]
+"""One study decoded for EVERY read group, in the order the groups were asked for."""
 
 STUDY_CHUNK = 48
 """Studies decoded before a prediction pass. Bounds peak memory: a chunk of 48 at twelve slices and
@@ -138,7 +142,8 @@ class Submission:
         root = self.split.series(self.competition)
         return self.batched([self.decoded_at(root / name, planes, pipeline, read) for name in identifiers], read)
 
-    def pipeline(self, read: Read) -> SlotPipeline:
+    @staticmethod
+    def pipeline(read: Read, memo: FileMemo | None = None) -> SlotPipeline:
         """The reader ONE decode needs, built from what the members recorded rather than a constant.
 
         The scheme carries the TIE RULE, so this needs no extra field: `Ensemble.decoded_scheme` refuses
@@ -155,8 +160,27 @@ class Submission:
         read's crop and band, which is the axis list spelled a second time: a third reading rule would
         have been applied when a cache was built and dropped when a submission was served, and the
         member's own fingerprint — checked against its own reading — would still have passed.
+
+        A MEMO IS PER STUDY AND SO IS THE PIPELINE THAT CARRIES ONE. Static so a process pool worker can
+        build both for the study it was handed; passing a memo built in the parent would either pickle a
+        copy per study (useless) or hold the whole corpus's planes (impossible).
         """
-        return SlotPipeline(scheme=read.scheme, reader=read.reading.reader(max(read.sizes)))
+        return SlotPipeline(scheme=read.scheme, reader=read.reading.reader(max(read.sizes), memo))
+
+    @staticmethod
+    def decoded_reads(
+        directory: Path, planes: dict[str, str], reads: list[Read]
+    ) -> list[dict[int, tuple[Tensor, Tensor]]]:
+        """One study's bag for EVERY read, decoded together against one shared memo.
+
+        This is the whole reason the traversal is chunk-outer. The champion's three read groups overlap
+        by 48.5% of their file opens — 204.9 opens a study against 105.6 distinct — and the overlap is
+        BETWEEN groups, so no cache inside one decode can see it. Decoding every read of a study in one
+        call makes the overlap intra-call, where a `FileMemo` collects it: header parses (band-invariant
+        by construction) and slice decodes alike.
+        """
+        memo = FileMemo()
+        return [Submission.decoded_at(directory, planes, Submission.pipeline(read, memo), read) for read in reads]
 
     @staticmethod
     def decoded_at(
@@ -208,8 +232,8 @@ class Submission:
         }
 
     def chunks(
-        self, identifiers: list[str], planes: dict[str, str], read: Read
-    ) -> Iterator[dict[int, tuple[Tensor, Tensor]]]:
+        self, identifiers: list[str], planes: dict[str, str], reads: list[Read]
+    ) -> Iterator[list[dict[int, tuple[Tensor, Tensor]]]]:
         """Decoded chunks, with the NEXT chunk already decoding while this one is on the GPU.
 
         THE OVERLAP THIS DOCSTRING USED TO CLAIM DID NOT EXIST. The body was `sized = self.decode(...)`
@@ -229,23 +253,24 @@ class Submission:
         the mount" — predicts the opposite of what happens.
         """
         started = time.time()
-        pipeline = self.pipeline(read)
         root = self.split.series(self.competition)
         groups = [identifiers[begin : begin + STUDY_CHUNK] for begin in range(0, len(identifiers), STUDY_CHUNK)]
 
-        def submit(pool: Executor, names: list[str]) -> list[Future[dict[int, tuple[Tensor, Tensor]]]]:
-            return [pool.submit(self.decoded_at, root / name, planes, pipeline, read) for name in names]
+        def submit(pool: Executor, names: list[str]) -> list[Future[Bags]]:
+            return [pool.submit(self.decoded_reads, root / name, planes, reads) for name in names]
 
         with self.pool(len(identifiers)) as pool:
-            pending: list[Future[dict[int, tuple[Tensor, Tensor]]]] = submit(pool, groups[0]) if groups else []
+            pending: list[Future[Bags]] = submit(pool, groups[0]) if groups else []
             for index, group in enumerate(groups):
                 # QUEUED BEFORE THE WAIT, which is the whole point: by the time the main thread returns
                 # from the GPU, these have been decoding rather than waiting to be asked.
-                following: list[Future[dict[int, tuple[Tensor, Tensor]]]] = (
-                    submit(pool, groups[index + 1]) if index + 1 < len(groups) else []
-                )
+                following: list[Future[Bags]] = submit(pool, groups[index + 1]) if index + 1 < len(groups) else []
                 decode_started = time.time()
-                sized = self.witnessed(self.batched([future.result() for future in pending], read), read)
+                decoded = [future.result() for future in pending]
+                per_read = [
+                    self.witnessed(self.batched([bags[position] for bags in decoded], read), read)
+                    for position, read in enumerate(reads)
+                ]
                 pending = following
                 begin = index * STUDY_CHUNK
                 # THE PROJECTION IS THE ENSEMBLE'S TO MAKE, not this loop's. It used to be computed here
@@ -257,16 +282,20 @@ class Submission:
                 # chunks BEFORE this one have been forwarded and this one has only been decoded. Counting
                 # it as finished would credit the run with a forward pass it has not made yet, which
                 # under-projects exactly when the forward is the expensive half.
-                budget = self.ensemble.serving.budget
+                budget = self.ensemble.budget()
                 if budget:
                     budget.chunk(index, len(groups))
                 projection = budget.report() if budget else ""
                 logger.info(
                     f"  studies {begin + 1}-{begin + len(group)}: decode {time.time() - decode_started:.0f}s "
-                    f"at {list(read.sizes)}, elapsed {time.time() - started:.0f}s, "
+                    f"for {len(reads)} read(s) at {[list(read.sizes) for read in reads]}, "
+                    f"elapsed {time.time() - started:.0f}s, "
                     f"{projection}peak {self.peak_vram():.1f} GB vram, {self.peak_rss():.1f} GB host"
                 )
-                yield {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
+                yield [
+                    {size: (images.to(self.device), mask.to(self.device)) for size, (images, mask) in sized.items()}
+                    for sized in per_read
+                ]
 
     def peak_vram(self) -> float:
         """The highest allocation the card has held so far, in GB, or zero off the GPU.
@@ -323,7 +352,7 @@ class Submission:
         The grouping and combining live on `Ensemble`, which knows which members can share pixels; this
         supplies the only thing it cannot know, which is how to turn a set of studies into chunks.
         """
-        return self.ensemble.predict_groups(lambda read: self.chunks(identifiers, planes, read), overlap=self.overlap)
+        return self.ensemble.predict_groups(lambda reads: self.chunks(identifiers, planes, reads), overlap=self.overlap)
 
     def run(self) -> pd.DataFrame:
         """The whole submission: decode, predict, write — and NOTHING if any of it fails.

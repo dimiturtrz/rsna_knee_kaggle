@@ -281,6 +281,71 @@ def test_predict_members(tmp_path: Path):
     assert arrays[0].shape == (2, len(TARGETS))
 
 
+def test_absorb(tmp_path: Path):
+    """One chunk through a group: a survivor accumulates, a member already failed is not retried."""
+    ensemble = _ensemble(tmp_path / "absorb")
+    member = ensemble.package.members[0]
+    other = replace(member, identifier="dead")
+    ensemble.models["dead"] = ensemble.models[member.identifier]
+    sized = {
+        member.image_size: (
+            torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8),
+            torch.ones(2, len(SLOTS)),
+        )
+    }
+    per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [], "dead": []}
+
+    ensemble.absorb([member, other], sized, per_member, {"dead"}, overlap=False)
+
+    assert len(per_member[member.identifier]) == 1
+    assert per_member["dead"] == [], "a member already given up is skipped, not attempted again"
+
+
+def test_survived(tmp_path: Path):
+    """A member counts only if it BOTH survived and predicted something — the two are not the same."""
+    ensemble = _ensemble(tmp_path / "survived")
+    member = ensemble.package.members[0]
+    empty = replace(member, identifier="empty")
+    gone = replace(member, identifier="gone")
+    predicted = np.zeros((2, len(TARGETS)))
+    per_member = {member.identifier: [predicted], "empty": [], "gone": [predicted]}
+
+    arrays = ensemble.survived([member, empty, gone], per_member, {"gone"})
+
+    assert len(arrays) == 1, "the failed one and the one that never predicted are both out"
+    assert arrays[0].shape == (2, len(TARGETS))
+
+
+def test_read_of(tmp_path: Path):
+    """The group's read is ASKED of the group, and a group that disagrees is refused, not served."""
+    ensemble = _ensemble(tmp_path / "read-of")
+    member = ensemble.package.members[0]
+    cropped: MemberConfig = {**member.config, "crop_mm": member.crop.mm - 10.0}
+
+    read = ensemble.read_of([member])
+    assert read.reading == member.reading
+    assert read.sizes == (member.image_size,)
+
+    with pytest.raises(ValueError, match="reading"):
+        ensemble.read_of([member, replace(member, identifier="tight", config=cropped)])
+
+
+def test_budget(tmp_path: Path):
+    """The run budget reaches `afford` for ONE read group and is switched off for more than one.
+
+    Not a knob: under the chunk-outer traversal a multi-group entry has no group boundary to project
+    from, so the net would be firing on arithmetic that no longer describes the run (knee-fma1r).
+    """
+    ensemble = _ensemble(tmp_path / "budget")
+    ensemble.serving = replace(ensemble.serving, budget=Budget(seconds=1.0, margin=1.0))
+    member = ensemble.package.members[0]
+    assert ensemble.budget() is not None, "one read group keeps the net it shipped with"
+
+    deeper = replace(member, identifier="deep")
+    ensemble.reads = lambda: [[member], [deeper]]
+    assert ensemble.budget() is None, "and more than one switches it off until the reprice lands"
+
+
 def test_attempt(tmp_path: Path):
     """A pass that lands is banked as seconds; one that raises returns None and is charged nothing."""
     ensemble = _ensemble(tmp_path / "attempt")
@@ -297,6 +362,17 @@ def test_attempt(tmp_path: Path):
     del ensemble.models[member.identifier]
     assert ensemble.attempt(member, sized, overlap=False) is None, "a failed member drops, it does not raise"
     assert ensemble.spent[member.identifier] == banked, "and pays for no prediction it did not make"
+
+
+def _chunk(read: Read) -> dict[int, tuple[torch.Tensor, torch.Tensor]]:
+    """One decoded chunk for one read, every size the read asks for."""
+    return {
+        size: (
+            torch.randint(0, 256, (2, len(SLOTS), read.slices, 14, 14), dtype=torch.uint8),
+            torch.ones(2, len(SLOTS)),
+        )
+        for size in read.sizes
+    }
 
 
 def test_predict_groups(tmp_path: Path):
@@ -317,17 +393,9 @@ def test_predict_groups(tmp_path: Path):
 
     asked: list[tuple[int, tuple[int, ...]]] = []
 
-    def chunks_for(read: Read):
-        asked.append((read.slices, read.sizes))
-        return [
-            {
-                size: (
-                    torch.randint(0, 256, (2, len(SLOTS), read.slices, 14, 14), dtype=torch.uint8),
-                    torch.ones(2, len(SLOTS)),
-                )
-                for size in read.sizes
-            }
-        ]
+    def chunks_for(reads: list[Read]):
+        asked.extend((read.slices, read.sizes) for read in reads)
+        return [[_chunk(read) for read in reads]]
 
     combined = ensemble.predict_groups(chunks_for, overlap=False)
 
@@ -352,7 +420,7 @@ def test_predict_groups_refuses_a_group_that_does_not_share_its_pixels(tmp_path:
     ensemble.reads = lambda: [mixed]
 
     with pytest.raises(ValueError, match="reading"):
-        ensemble.predict_groups(lambda read: [], overlap=False)
+        ensemble.predict_groups(lambda reads: [], overlap=False)
 
 
 def test_predict_groups_combines_by_the_rule_the_serving_names(tmp_path: Path):
@@ -368,17 +436,9 @@ def test_predict_groups_combines_by_the_rule_the_serving_names(tmp_path: Path):
     ensemble.package.members = [member, replace(member, identifier="second")]
     ensemble.models["second"] = ensemble.models[member.identifier]
 
-    def chunks_for(read: Read):
+    def chunks_for(reads: list[Read]):
         torch.manual_seed(SEED)
-        return [
-            {
-                size: (
-                    torch.randint(0, 256, (2, len(SLOTS), read.slices, 14, 14), dtype=torch.uint8),
-                    torch.ones(2, len(SLOTS)),
-                )
-                for size in read.sizes
-            }
-        ]
+        return [[_chunk(read) for read in reads]]
 
     ranked = ensemble.predict_groups(chunks_for, overlap=False)
     ensemble.serving = replace(ensemble.serving, vote=LogitAverage())

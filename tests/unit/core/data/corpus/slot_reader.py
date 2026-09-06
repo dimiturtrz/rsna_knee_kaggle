@@ -6,8 +6,62 @@ import torch
 
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.crop_centre import Crop, ImageCentre, TissueCentre
-from core.data.corpus.slot_reader import ADJACENT, SPREAD, Adjacent, Band, Reading, SlotReader, Spacing, Spread
+from core.data.corpus.slot_reader import (
+    ADJACENT,
+    SPREAD,
+    Adjacent,
+    Band,
+    FileMemo,
+    Reading,
+    SlotReader,
+    Spacing,
+    Spread,
+)
 from tests.unit.conftest import write_series
+
+
+def test_sharing(tmp_path: Path):
+    """A shared memo collects the reader's file opens, and the pixels are the same either way."""
+    acquisition = Acquisition.probe("study", "series", write_series(tmp_path / "series", slices=4, size=32))
+    memo = FileMemo()
+
+    alone = SlotReader(image_size=32).read(acquisition, 2)
+    shared = SlotReader(image_size=32).sharing(memo).read(acquisition, 2)
+
+    assert alone is not None and shared is not None
+    assert torch.equal(alone, shared), "a memo changes what is opened twice, never what comes back"
+    assert memo.planes, "and the shared reader left its opens in the memo"
+
+
+def test_ordered(tmp_path: Path):
+    """The header parse happens once however many read groups ask for it, and the answer is the same."""
+    acquisition = Acquisition.probe("study", "series", write_series(tmp_path / "series", slices=6, size=32))
+    memo = FileMemo()
+
+    first = memo.ordered(acquisition)
+    assert first == acquisition.ordered_files(), "the memo answers what the acquisition answers"
+    assert memo.ordered(acquisition) is first, "and the second ask is the same object, not a second parse"
+
+
+def test_plane(tmp_path: Path):
+    """A FAILED decode is kept too — a file that will not open must not be opened again per group."""
+    acquisition = Acquisition.probe("study", "series", write_series(tmp_path / "series", slices=2, size=32))
+    memo = FileMemo()
+
+    memo.plane(acquisition, "broken.dcm", None)
+
+    assert memo.planes[(acquisition.series, "broken.dcm")] is None
+    assert memo.opened(acquisition, "broken.dcm"), "a failure is a recorded answer, not a missing one"
+
+
+def test_opened(tmp_path: Path):
+    """Whether some other read group has already decoded this file of this series."""
+    acquisition = Acquisition.probe("study", "series", write_series(tmp_path / "series", slices=2, size=32))
+    memo = FileMemo()
+
+    assert not memo.opened(acquisition, "one.dcm")
+    memo.plane(acquisition, "one.dcm", np.zeros((4, 4), dtype=np.float32))
+    assert memo.opened(acquisition, "one.dcm")
 
 
 def test_read(tmp_path: Path):

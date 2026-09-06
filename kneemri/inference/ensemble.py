@@ -38,6 +38,10 @@ from kneemri.models.model import StudyModel
 
 logger = logging.getLogger(__name__)
 
+SizedBag = dict[int, tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]]
+"""One decoded chunk at every size ONE read group serves — the resize is the only size-dependent step, so
+one decode answers 448 and 336 together. Named because the traversal passes a LIST of these, one per group."""
+
 Decision = TypeVar("Decision", bound=Hashable)
 """A field the whole decode has to share — the slot list, the tie rule — not one member's own setting."""
 
@@ -490,85 +494,136 @@ class Ensemble:
                     passes += 1
         return (total / passes).cpu().numpy().astype(np.float64)
 
+    def read_of(self, members: list[Member]) -> Read:
+        """The one reading a group shares, asked of the group rather than taken from its first member.
+
+        ASKED, not taken from member[0]. `reads` groups by the reading, so agreement holds by construction
+        today — which is exactly the guarantee a later edit to the grouping key drops silently, serving the
+        rest of the group under member[0]'s pixels. Every other field here is refused on disagreement.
+        """
+        return Read(
+            slices=self.slices(members),
+            scheme=self.decoded_scheme(members),
+            sizes=tuple(sorted({member.image_size for member in members})),
+            reading=self.agreed(members, "reading", lambda member: member.reading),
+        )
+
+    def budget(self) -> Budget | None:
+        """The run budget, and NONE for a multi-group entry until the projection is repriced.
+
+        The traversal is chunk-outer: every group advances together over one pass, so "group k of three" is
+        no longer a fraction of the run and `afford` would project against a model of progress that no
+        longer exists. Repricing the net inside the change that moved the traversal makes a bug in either
+        show up as the other, so it is off for the multi-group case and repriced separately (knee-fma1r).
+        A SINGLE-group entry is unaffected. This is a development state, not a shipping one —
+        `submit_check` refuses a multi-group entry while this returns None.
+        """
+        return self.serving.budget if len(self.reads()) == 1 else None
+
     def predict_groups(
         self,
-        chunks_for: "Callable[[Read], Iterable[dict[int, tuple[UInt8[Tensor, 'b n s h w'], Float[Tensor, 'b n']]]]]",
+        chunks_for: Callable[[list[Read]], Iterable[list[SizedBag]]],
         *,
         overlap: bool = True,
     ) -> NDArray[np.float64]:
-        """Predict every member, decoding once PER PIXEL GROUP, and rank-combine across all of them.
+        """Predict every member over ONE pass of the corpus, and rank-combine across all groups.
 
-        The decode is injected rather than performed here: this class knows which members can share
-        pixels and how their outputs combine, and nothing about DICOM directories. It lives here rather
-        than in `Submission` because the loop is six calls into this object and two into the caller's —
-        the feature-envy gate said so, and it was right.
+        CHUNK-OUTER, GROUPS-INNER, and that is the whole point. Group-outer streamed the corpus once per
+        read group, so the champion's three groups opened the same DICOM files in three traversals
+        minutes apart — 204.9 opens a study against 105.6 distinct, 48.5% of them a second decode of a
+        file already read. A memo cannot span traversals (the corpus's planes do not fit in memory) but
+        spans a STUDY trivially: one chunk decoded for every read at once, one `FileMemo` per study.
 
-        Combining across ALL groups at once matters: rank-averaging within a group and then averaging
-        the group results would weight a group of one as heavily as a group of five.
+        The decode is injected rather than performed here: this class knows which members can share pixels
+        and how their outputs combine, and nothing about DICOM directories — the loop is six calls into
+        this object and two into the caller's, which is what the feature-envy gate said, correctly.
+
+        Combining across ALL groups at once matters: rank-averaging within a group and then averaging the
+        group results would weight a group of one as heavily as a group of five.
         """
-        per_member: list[NDArray[np.float64]] = []
         groups = self.reads()
-        budget = self.serving.budget
+        budget = self.budget()
         if budget:
             budget.begin(len(groups))
-        for index, members in enumerate(groups):
-            if budget:
-                budget.group(index)
-            read = Read(
-                slices=self.slices(members),
-                scheme=self.decoded_scheme(members),
-                sizes=tuple(sorted({member.image_size for member in members})),
-                # ASKED, not taken from the first member. `reads` groups by the reading, so agreement
-                # holds by construction today — and that is exactly the guarantee a later edit to the
-                # grouping key would drop silently, serving every other member of the group under
-                # member[0]'s pixels. Every other field of this Read is already refused on disagreement.
-                reading=self.agreed(members, "reading", lambda member: member.reading),
-            )
-            per_member.extend(self.predict_members(members, chunks_for(read), overlap=overlap))
-        return (self.serving.vote or RankAverage()).combine(per_member)
+        per_member: dict[str, list[NDArray[np.float64]]] = {
+            member.identifier: [] for members in groups for member in members
+        }
+        failed: set[str] = set()
+        for chunk in chunks_for([self.read_of(members) for members in groups]):
+            for members, sized in zip(groups, chunk, strict=True):
+                self.absorb(members, sized, per_member, failed, overlap=overlap)
+            self.afford([member for members in groups for member in members], failed)
+        combined = [array for members in groups for array in self.survived(members, per_member, failed)]
+        if not combined:
+            message = f"every member of this group failed: {sorted(failed)}"
+            raise RuntimeError(message)
+        return (self.serving.vote or RankAverage()).combine(combined)
 
     def predict_members(
         self,
         members: list[Member],
-        chunks: Iterable[dict[int, tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]]],
+        chunks: Iterable[SizedBag],
         *,
         overlap: bool = True,
     ) -> list[NDArray[np.float64]]:
         """One array per member, over every chunk — UNCOMBINED, so groups can be combined together.
 
         A chunk arrives as {decoded size: (images, mask)} from ONE read, and each member is handed the
-        size it was fitted from. That is what lets members of different resolutions share a decode
-        without any of them being fed pixels it never saw.
-
-        Returned uncombined because rank-averaging must happen ACROSS every member of every group at
-        once: combining per group and then averaging the results would weight a group of one as heavily
-        as a group of five.
+        size it was fitted from — which lets members of different resolutions share a decode without any
+        of them being fed pixels it never saw. Uncombined, for the reason `predict_groups` gives.
         """
         per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [] for member in members}
         failed: set[str] = set()
         for sized in chunks:
-            for member in members:
-                if member.identifier in failed:
-                    continue
-                predicted = self.attempt(member, sized, overlap=overlap)
-                if predicted is None:
-                    failed.add(member.identifier)
-                else:
-                    per_member[member.identifier].append(predicted)
+            self.absorb(members, sized, per_member, failed, overlap=overlap)
             self.afford(members, failed)
-        survived = [member for member in members if member.identifier not in failed and per_member[member.identifier]]
-        if not survived:
+        arrays = self.survived(members, per_member, failed)
+        if not arrays:
             message = f"every member of this group failed: {sorted(failed)}"
             raise RuntimeError(message)
-        return [np.concatenate(per_member[member.identifier]) for member in survived]
+        return arrays
 
-    def attempt(
+    def absorb(
         self,
-        member: Member,
-        sized: dict[int, tuple[UInt8[Tensor, "b n s h w"], Float[Tensor, "b n"]]],
+        members: list[Member],
+        sized: SizedBag,
+        per_member: dict[str, list[NDArray[np.float64]]],
+        failed: set[str],
         *,
-        overlap: bool,
-    ) -> NDArray[np.float64] | None:
+        overlap: bool = True,
+    ) -> None:
+        """ONE chunk through one group's members, appending each survivor's predictions.
+
+        The unit of work both traversals are built from: `predict_members` loops it over the chunks of a
+        single read, and `predict_groups` loops the groups inside one chunk. A member already in `failed`
+        is skipped rather than retried — a member that raised once raises again, and the retries were
+        measured costing more than the member was worth.
+        """
+        for member in members:
+            if member.identifier in failed:
+                continue
+            predicted = self.attempt(member, sized, overlap=overlap)
+            if predicted is None:
+                failed.add(member.identifier)
+            else:
+                per_member[member.identifier].append(predicted)
+
+    @staticmethod
+    def survived(
+        members: list[Member], per_member: dict[str, list[NDArray[np.float64]]], failed: set[str]
+    ) -> list[NDArray[np.float64]]:
+        """One concatenated array per member that both survived AND predicted something.
+
+        Both conditions, because they are not the same: a member can be absent from `failed` and still
+        hold nothing, when the run gave it up on the first chunk it was ever offered.
+        """
+        return [
+            np.concatenate(per_member[member.identifier])
+            for member in members
+            if member.identifier not in failed and per_member[member.identifier]
+        ]
+
+    def attempt(self, member: Member, sized: SizedBag, *, overlap: bool) -> NDArray[np.float64] | None:
         """One member's pass over one chunk, timed — or None, because ONE MEMBER MUST NOT COST THE ENTRY.
 
         Three submissions died because any single failure anywhere took the whole run down, and a run
@@ -618,7 +673,7 @@ class Ensemble:
         member and re-measuring converges on the smallest set that finishes, instead of over-cutting
         from a single early estimate made when the pool spawn and the first decode are still in it.
         """
-        budget = self.serving.budget
+        budget = self.budget()
         if not budget or not budget.overrunning():
             return
         # VIEWS GO FIRST, AND THEY GO WHOLE. `kneemri-views` came back COMPLETE with a blank public

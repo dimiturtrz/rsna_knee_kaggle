@@ -16,7 +16,7 @@ rather than extremes so one bright vessel does not compress everything else.
 
 from collections import Counter
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import override
 
 import numpy as np
@@ -243,7 +243,7 @@ class Reading:
         """
         return "" if self.spacing == SPREAD else f"_{self.spacing}"
 
-    def reader(self, image_size: int) -> "SlotReader":
+    def reader(self, image_size: int, memo: "FileMemo | None" = None) -> "SlotReader":
         """The reader that decodes under this geometry, at the size asked for.
 
         Here rather than at each call site because a caller assembling one reached through this object
@@ -256,7 +256,44 @@ class Reading:
             band=self.band,
             centre=self.crop.located(),
             spacing=self.spacing,
-        )
+        ).sharing(memo)
+
+
+@dataclass
+class FileMemo:
+    """ONE STUDY's decoded planes and file orders, so read groups that overlap open each file once.
+
+    THE DUPLICATE IS ACROSS GROUPS, NOT INSIDE ONE. An entry's decode bill is the number of READ
+    GROUPS (`Ensemble.reads`), and the champion's three groups — 20 slices at band 0.1-0.9, 12 at
+    0.1-0.9, 12 at 0.2-0.8 — sample overlapping indices of the same series. Measured over the champion's
+    groups on 96 studies, routed acquisitions only: 204.9 files opened per study against 105.6 distinct,
+    so 48.5% of the opens are the same file decoded again. The header parse duplicates outright —
+    `ordered_files` reads every file in a series to sort it, and its answer cannot depend on the band.
+
+    IT IS PER STUDY AND MUST STAY PER STUDY. Series names are unique inside a study and nowhere else,
+    and the whole corpus's planes do not fit in memory (about 8 MB a study). One memo is built per
+    `decoded_at` call, lives inside the worker process for that study, and dies with it.
+
+    Nothing here changes a pixel: a memoised plane IS the array the second decode would have produced,
+    so every member is handed byte-identical bags. That equality is the change's admission ticket.
+    """
+
+    planes: dict[tuple[str, str], NDArray[np.float32] | None] = field(default_factory=dict)
+    orders: dict[str, tuple[str, ...]] = field(default_factory=dict)
+
+    def ordered(self, acquisition: Acquisition) -> tuple[str, ...]:
+        """This series' file order, header-parsed once however many groups ask for it."""
+        if acquisition.series not in self.orders:
+            self.orders[acquisition.series] = acquisition.ordered_files()
+        return self.orders[acquisition.series]
+
+    def plane(self, acquisition: Acquisition, name: str, decoded: NDArray[np.float32] | None) -> None:
+        """Keep a decode, including a FAILED one — a file that will not open must not be retried."""
+        self.planes[(acquisition.series, name)] = decoded
+
+    def opened(self, acquisition: Acquisition, name: str) -> bool:
+        """Whether this file has already been decoded under some other group."""
+        return (acquisition.series, name) in self.planes
 
 
 class SlotReader:
@@ -270,6 +307,7 @@ class SlotReader:
         centre: CropCentre | None = None,
         spacing: str = SPREAD,
     ) -> None:
+        self.memo: FileMemo | None = None
         self.crop_mm = crop_mm
         self.spacing = SPACINGS[spacing]
         # Defaulting to the image centre keeps every cache on disk and every member fitted on one
@@ -277,6 +315,16 @@ class SlotReader:
         self.centre = centre or ImageCentre()
         self.image_size = image_size
         self.band = band or Band()
+
+    def sharing(self, memo: "FileMemo | None") -> "SlotReader":
+        """Route this reader's file opens through a memo, and hand it back.
+
+        Not a constructor argument because it is not part of the READING: two readers differing only in
+        their memo decode byte-identical pixels, and the geometry constructor is already at the argument
+        ceiling with the five knobs that DO change what comes back.
+        """
+        self.memo = memo
+        return self
 
     def read(self, acquisition: Acquisition, slices: int) -> UInt8[Tensor, "s h w"] | None:
         """Sample `slices` physically-spread slices at this reader's size, or None if nothing decodes."""
@@ -299,10 +347,10 @@ class SlotReader:
         Or None when the series has no files, or when nothing in the sampled band decodes — see
         `_stacked` for what "nothing decodes" is allowed to mean and why it is not a black stack.
         """
-        ordered = acquisition.ordered_files()
+        ordered = acquisition.ordered_files() if self.memo is None else self.memo.ordered(acquisition)
         if not ordered:
             return None
-        planes = [self._decode(acquisition, ordered[index]) for index in self.band_indices(len(ordered), slices)]
+        planes = [self._decoded(acquisition, ordered[index]) for index in self.band_indices(len(ordered), slices)]
         stack = self._stacked(planes)
         return None if stack is None else self._crop(stack, acquisition.pixel_spacing)
 
@@ -360,6 +408,14 @@ class SlotReader:
         while len(indices) < slices:
             indices.append(indices[-1])
         return indices[:slices]
+
+    def _decoded(self, acquisition: Acquisition, name: str) -> NDArray[np.float32] | None:
+        """One slice, through this reader's memo when it has one — the same array either way."""
+        if self.memo is None:
+            return self._decode(acquisition, name)
+        if not self.memo.opened(acquisition, name):
+            self.memo.plane(acquisition, name, self._decode(acquisition, name))
+        return self.memo.planes[(acquisition.series, name)]
 
     @staticmethod
     def _decode(acquisition: Acquisition, name: str) -> NDArray[np.float32] | None:

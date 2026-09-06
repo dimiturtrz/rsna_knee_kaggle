@@ -18,6 +18,7 @@ from core.findings import TARGETS
 from kneemri.inference.budget import Budget
 from kneemri.inference.ensemble import Ensemble, Read, Serving
 from kneemri.inference.members import MemberPackage
+from kneemri.kaggle import submission as submission_module
 from kneemri.kaggle.submission import Split, Submission
 from kneemri.models.model import StudyModel
 from tests.unit.conftest import write_series
@@ -199,10 +200,10 @@ def test_chunks(tmp_path: Path):
     submission = _submission(tmp_path)
     scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
     read = Read(3, scheme, (IMAGE,))
-    produced = list(submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, read))
+    produced = list(submission.chunks(["study_a", "study_b"], {"sag": "Sagittal"}, [read]))
 
     assert len(produced) == 1, "two studies fit in one chunk"
-    images, mask = produced[0][IMAGE]
+    images, mask = produced[0][0][IMAGE]
     assert images.device.type == submission.device.type
     assert images.shape[0] == 2
 
@@ -211,7 +212,9 @@ def test_chunks(tmp_path: Path):
     assert torch.equal(mask.cpu(), serial[IMAGE][1]), "and mask-identical"
 
 
-def test_predict_gives_up_a_member_when_the_wall_clock_runs_out(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+def test_predict_gives_up_a_member_when_the_wall_clock_runs_out(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
+):
     """The deadline mitigation, end to end — the WIRING, not the arithmetic.
 
     Every part of this was unit-tested and none of it was tested joined up, which is this project's
@@ -220,12 +223,18 @@ def test_predict_gives_up_a_member_when_the_wall_clock_runs_out(tmp_path: Path, 
     decode loop reports its chunks into it, and `afford` reads the same object back. Any one of those
     four missing leaves every unit test green and the run dies at nine hours with no submission.
 
-    Three members at two depths: the shallow pair share a read, so by the time that group is entered a
-    whole group has finished and the projection is measurable — which is exactly when a real run first
-    learns it is overrunning.
+    Three members at ONE depth, so the entry has one read group. That is not a simplification of the
+    fixture, it is the shipping case: the traversal is chunk-outer, so a multi-group entry has no group
+    boundary to project from and `Ensemble.budget` returns None for one until the projection is repriced
+    (knee-fma1r) — asserted in its own test beside this one.
+
+    ONE STUDY PER CHUNK, because progress is now measured in chunks and a run of a single chunk has by
+    construction finished nothing when it is asked. That is the shipping case too: the hidden set is
+    thousands of studies, so the projection first exists at the second chunk.
     """
+    monkeypatch.setattr(submission_module, "STUDY_CHUNK", 1)
     budget = Budget(seconds=1e-6, margin=1.0)
-    submission = _submission(tmp_path, depths=(4, 3, 3), budget=budget)
+    submission = _submission(tmp_path, depths=(3, 3, 3), budget=budget)
 
     with caplog.at_level(logging.WARNING):
         combined = submission.predict(["study_a", "study_b"], {"sag": "Sagittal"})
@@ -236,8 +245,28 @@ def test_predict_gives_up_a_member_when_the_wall_clock_runs_out(tmp_path: Path, 
     # WHICH of the pair goes is not asserted: `worth` divides by seconds MEASURED in this run, and two
     # members a hundredth of holdout apart are separated by timing jitter on a fixture this small. What
     # must hold is that a member of the shared group leaves and the group still predicts.
-    assert "giving up m" in caplog.text and ", 1 members left" in caplog.text
+    assert "giving up m" in caplog.text and ", 2 members left" in caplog.text
     assert set(submission.ensemble.spent) == {"m0", "m1", "m2"}, "and every member was timed while it ran"
+
+
+def test_predict_disables_the_budget_for_a_multi_group_entry(tmp_path: Path, caplog: pytest.LogCaptureFixture):
+    """Two read groups means NO budget — deliberately, and it must stay visible that it is deliberate.
+
+    Under the chunk-outer traversal every group advances together over one pass, so "group k of three" is
+    no longer a fraction of the run and `afford` would project against a model of progress that does not
+    exist. Switching the net off is the honest state until it is repriced; shipping in that state is not,
+    which is why `kit_check` refuses a multi-group entry while this holds.
+    """
+    budget = Budget(seconds=1e-6, margin=1.0)
+    submission = _submission(tmp_path, depths=(4, 3, 3), budget=budget)
+
+    with caplog.at_level(logging.WARNING):
+        combined = submission.predict(["study_a", "study_b"], {"sag": "Sagittal"})
+
+    assert combined.shape == (2, len(TARGETS)), "every member still votes"
+    assert submission.ensemble.budget() is None, "the budget is off for more than one read group"
+    assert not budget.measured(), "and nothing reported progress into it"
+    assert "giving up" not in caplog.text, "so no member was given up on a projection nobody made"
 
 
 def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture):
@@ -360,6 +389,35 @@ def test_pool(tmp_path: Path):
     with submission.pool(studies=3) as small:
         assert isinstance(small, ThreadPoolExecutor), "a three-study run must not spawn interpreters"
         assert small.submit(len, "abc").result() == 3
+
+
+def test_decoded_reads(tmp_path: Path):
+    """THE TICKET FOR THE WHOLE TRAVERSAL: a shared memo changes what is opened, never what is read.
+
+    Three reads over one study — two bands and two depths, so they overlap without being equal — decoded
+    together against one `FileMemo` and separately against none. Every plane of every bag must be
+    byte-identical, because the memo caches the DECODE of a file and nothing downstream of it: the crop,
+    the band sampling and the resize all still run per read. If this ever diverges, the entry silently
+    serves some member pixels it was never fitted on, and every fingerprint still passes.
+    """
+    submission = _submission(tmp_path)
+    scheme = submission.ensemble.decoded_scheme(submission.ensemble.package.members)
+    reads = [
+        Read(3, scheme, (IMAGE,)),
+        Read(3, scheme, (IMAGE,), Reading(band=Band(0.1, 0.9))),
+        Read(2, scheme, (IMAGE,), Reading(band=Band(0.1, 0.9))),
+    ]
+    directory = submission.split.series(submission.competition) / "study_a"
+
+    shared = submission.decoded_reads(directory, {"sag": "Sagittal"}, reads)
+    separate = [
+        submission.decoded_at(directory, {"sag": "Sagittal"}, submission.pipeline(read), read) for read in reads
+    ]
+
+    assert len(shared) == len(reads), "one bag per read, in the order the reads were given"
+    for memoed, alone, read in zip(shared, separate, reads, strict=True):
+        assert torch.equal(memoed[IMAGE][0], alone[IMAGE][0]), f"pixels differ under the memo for {read.reading}"
+        assert torch.equal(memoed[IMAGE][1], alone[IMAGE][1]), f"mask differs under the memo for {read.reading}"
 
 
 def test_pipeline(tmp_path: Path):
