@@ -31,6 +31,7 @@ from core.findings import STUDY, TARGETS
 from kneemri.evaluation.foreign_split import FOLDS, ForeignSplit
 from kneemri.evaluation.protocol_prior import Ordering
 from kneemri.runs.holdout_record import FOREIGN
+from kneemri.teacher_file import TeacherFile
 
 logger = logging.getLogger(__name__)
 
@@ -148,6 +149,12 @@ def main() -> None:
     command.parser.add_argument(
         "--emit", type=Path, default=None, help="write the fold-matched column as a holdout record, priceable as a seat"
     )
+    command.parser.add_argument(
+        "--teacher",
+        type=Path,
+        default=None,
+        help="write the fold-matched column as a teacher file, out-of-sample on every study it names",
+    )
     arguments = command.parsed()
 
     served = np.load(arguments.predictions, allow_pickle=True)
@@ -157,6 +164,21 @@ def main() -> None:
         raise ValueError(message)
     table = pd.read_csv(arguments.labels)
     predictions = served["predictions"]
+    if arguments.teacher:
+        # A TEACHER FILE THAT IS OUT-OF-SAMPLE EVERYWHERE, which the pool cannot produce. `teacher_fold0.npz`
+        # is our own fold-0 twins reading studies they fitted, so its ordering is partly memorised AND it is
+        # an ordering the pool already holds — which is exactly what `distill_pairs` diagnosed its null as.
+        # The fold-matched column takes every study from the ONE foreign fold that never trained on it.
+        #
+        # WRITTEN BEFORE THE TRUTH JOIN, and that is the whole point. A teacher needs no truth — it IS the
+        # target — so filtering it to the rows a LABEL table happens to carry only narrows its coverage. The
+        # first attempt emitted it after that join and the trainer refused on `1 of the 3498 training studies
+        # have no teacher reading`: one study of ours is absent from `report_labels_v2.csv`, which is a fact
+        # about the reader's table and has nothing to do with what the foreign folds served.
+        served_split = ForeignSplit.of(studies, table)
+        matched = predictions[served_split.fold, np.arange(len(studies))]
+        TeacherFile.write(arguments.teacher, studies, matched.astype(np.float32))
+        logger.info("wrote %s teacher readings to %s", len(studies), arguments.teacher)
     if arguments.holdout is None:
         if arguments.truth is None:
             message = "a corpus scan needs --truth: --labels is their split's Report source, not a label table"

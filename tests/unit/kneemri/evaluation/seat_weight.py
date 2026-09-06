@@ -1,0 +1,77 @@
+"""A seat's price at each weight, on a pool small enough to check the arithmetic by hand."""
+
+import numpy as np
+
+from kneemri.evaluation.pool import Pool
+from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.seat_weight import SeatWeight
+from kneemri.inference.vote import RankAverage
+
+
+def pool_of() -> Pool:
+    """Two base members that rank the studies backwards and a candidate that ranks them right."""
+    truth = np.array([[0.0], [0.0], [1.0], [1.0]], dtype=np.float32)
+    wrong = np.array([[0.9], [0.8], [0.2], [0.1]], dtype=np.float32)
+    right = np.array([[0.1], [0.2], [0.8], [0.9]], dtype=np.float32)
+    return Pool(
+        names=["wrong_a", "wrong_b", "candidate"],
+        predictions=[wrong, wrong.copy(), right],
+        truth=truth,
+        vote=RankAverage(),
+    )
+
+
+def seat_of() -> SeatWeight:
+    """The candidate seated last, priced against the two members that disagree with it."""
+    return SeatWeight(pool_of(), seat=2, scores=LabelScores())
+
+
+def test_base() -> None:
+    """The base is every member but the candidate, in the pool's own order."""
+    assert seat_of().base() == [0, 1]
+
+
+def test_blended() -> None:
+    """Weight is repetition: at 2x the candidate outvotes two members that agree with each other."""
+    seat = seat_of()
+    assert seat.blended(0).shape == (4, 1)
+    assert not np.allclose(seat.blended(1), seat.blended(2))
+
+
+def test_scored() -> None:
+    """A candidate that is right against a base that is wrong lifts the score as its weight rises."""
+    seat = seat_of()
+    assert seat.scored(0) < seat.scored(2)
+
+
+def test_interval() -> None:
+    """The paired interval brackets the delta it is taken around."""
+    seat = seat_of()
+    low, high = seat.interval(2, draws=32, seed=1)
+    assert low <= seat.scored(2) - seat.scored(0) <= high
+
+
+def test_on() -> None:
+    """Reading the seat on a subset keeps the members and narrows the studies."""
+    subset = seat_of().on(np.array([0, 2], dtype=np.int64))
+    assert subset.pool.names == ["wrong_a", "wrong_b", "candidate"]
+    assert len(subset.pool.truth) == 2
+
+
+def test_split_half() -> None:
+    """Two rows, one per half, each naming the weight the other half chose."""
+    rows = seat_of().split_half([1, 2])
+    assert len(rows) == 3
+    assert "out-of-sample" in rows[1]
+
+
+def test_lines() -> None:
+    """One line for the base and one per weight asked for."""
+    lines = seat_of().lines([1, 2])
+    assert len(lines) == 3
+    assert "candidate at 2x" in lines[2]
+
+
+def test_rules() -> None:
+    """Both shipped vote rules are offered, each under the name its own class answers to."""
+    assert set(SeatWeight.rules()) == {"logit_average", "rank_average"}

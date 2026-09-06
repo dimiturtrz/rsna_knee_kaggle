@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# foreign_distill.sh — the same distillation term, taught by an ordering OUR POOL DOES NOT HOLD.
+#
+# WHAT MOVES AND WHAT IS HELD. This is `distill_pairs`' invocation with ONE argument changed: the teacher
+# file. Same variant, rate, batch, slices, band, pooling, whole-stack, epochs, schedule and distill weight.
+# So its control is already in the ledger and costs zero extra card — `band_dense` = 0.8578 with no teacher,
+# and `distill_pairs` = 0.8594 with our own.
+#
+# WHY A SECOND TEACHER IS NOT A REPEAT. `distill_pairs` did not read as "distillation does not work". It
+# read as "a rank average cannot pay for an ordering it already holds": the student landed at 0.9159 nearest
+# to a seated member, closer than any seated member sits to its own neighbour, because the teacher WAS the
+# pool. That diagnosis names the variable, and this arm is the only way to move it.
+#
+# THE TEACHER, and why it is better on both axes at once:
+#
+#   teacher_fold0.npz          our fold-0 twins   ~0.869   in-sample on every training row it reads
+#   teacher_foreign_corpus.npz mattiaangeli x5     0.8929   out-of-sample on EVERY row, by their split
+#
+# Their five released folds partition the corpus by an md5 of the report text (`foreign_split`), so the
+# fold-matched column takes each study from the ONE fold that never trained on it. That is an honest
+# out-of-sample opinion on all 4406 studies — a thing our pool cannot produce for its own training rows,
+# because every member fitted them. It is also a DIFFERENT FAMILY's ordering: their decode, their crop, their
+# xcodex pooling, their DINOv3 trunk. Both halves of the distill_pairs diagnosis are addressed by one file.
+#
+# THE READING IS THE SEAT, NOT THE SOLO. Distillation from a distant teacher is a diversity mechanism; the
+# owner's standing rule is that a member which does not beat the pool can still be worth its seat. So the
+# deliverable is `seat_value` against a scoreable base, and the distance column beside it.
+#
+# THE FALSIFIABLE PART, pre-registered before the run, against distill_pairs' 0.8594 / 0.9159 nearest:
+#   * nearest distance drops BELOW the roster's own worst nearest (0.8893) — the far teacher transferred a
+#     structure the pool lacks, and the seat is priceable on its own merit. This is the branch the mechanism
+#     predicts and the one worth a slot.
+#   * nearest stays ~0.9159 while the solo moves — what a teacher hands over is the CORPUS's ordering and
+#     nothing family-specific; distillation is then a solo-quality knob and never a diversity lever, which
+#     closes the axis for good rather than for this teacher.
+#   * solo <= 0.8578 (the no-teacher control) with nearest unmoved — the term did not fire. Suspect the
+#     landing witness before the teacher: `landed` reports whether the array ARRIVED, and a weight can be
+#     carried by a run whose teacher never loaded.
+#
+# COST. ~2 h of card (12 epochs on the shared recipe). ZERO submission slots. The teacher file is written
+# and costs nothing: `foreign_price --teacher`, off a corpus scan that is already on disk.
+#
+# deliberate: --teacher-targets (the whole thesis; the file is the single changed argument)
+# deliberate: --distill-weight (0.3, HELD from distill_pairs so the teacher is the only moving variable)
+# bead: knee-bq62a
+# reading: foreign_distill_s2026.holdout.npz
+# control  band_dense = 0.8578 (no teacher) and distill_pairs = 0.8594 (our teacher), both in the ledger.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+# 0.3 is distill_pairs' weight, HELD rather than re-derived: a weight swept at the same time as the teacher
+# confounds the teacher question with the operating-point question, and the teacher is the question.
+run_train foreign_distill \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --distill-weight 0.3 --teacher-targets "$PROCESSED/teacher_foreign_corpus.npz" \
+  --labels "$LABELS" --out "$MODELS/foreign_distill_s2026.pt"

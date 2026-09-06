@@ -136,17 +136,44 @@ def boot() -> Path:
 
 # <<< KERNEL-BOOTSTRAP
 
-OUR_WEIGHT = 6.0 / 8.0 * (2.0 / 3.0)
-"""The champion's own share, scaled by 7/8 because a seat entered a roster of seven. Nothing reweighted."""
+FOREIGN_WEIGHT = 6.0 / 13.0
+"""The DINOv3 family at SIX seats of the thirteen, which is where its offline curve stops climbing.
 
-RAPTOR_WEIGHT = 7.0 / 8.0 * (1.0 / 3.0)
-"""What raptorweight_v1 shipped, scaled by the same 7/8. This entry does not touch the raptor dial."""
+Named after a number for once, and the number is `seat_weight` over the seven `greedyseat_v1` members
+with `foreign_dinov3_matched` as the eighth: +0.0091 at one seat, +0.0218 at six, and flat-to-falling
+above. A weight is a fraction of a final table and a seat is a repetition inside a vote, and the two
+are the same quantity: `w` copies beside `n` members is a fraction `w / (n + w)`. At n = 7 - our six
+plus the raptor, which is what this kernel serves beside the family - six copies are 6/13 = 0.46.
 
-FOREIGN_WEIGHT = 1.0 / 8.0
-"""One seat of the widened roster, RaptorSeat.fleet's rule at n_foreign = 2. Named before the number."""
+WHY NOT ONE SEAT, WHICH IS WHAT EVERY OTHER FOREIGN ENTRY SHIPPED. Because one seat was never chosen;
+it was the arithmetic of appending. The curve above is the first time the dial has been priced at all
+offline, and it says the appending convention was giving away 0.013 of the seat's value. Split-half
+answers the obvious objection - the weight chosen on 454 studies earns +0.0232 on the other 455, and
++0.0191 the other way round, against +0.0091 for one seat on the same studies - so the weight survives
+being chosen out of sample, and the halves' disagreement (6x against 9x) is why the LOWER of the two
+ships rather than the maximum.
+
+WHAT THE OFFLINE NUMBER IS NOT. It is a FLOOR: fold-matched scores each of our 909 studies by the one
+of their five folds that never saw it, while the entry serves the rank-mean of all five on a test split
+none of them trained on. And it is priced on the `greedyseat_v1` seven, not on the champion's six, five
+of which are `--fold -1` fits with no holdout record at all. The board is the only ruler for the served
+form, which is what this slot buys.
+"""
+
+RAPTOR_WEIGHT = (1.0 - FOREIGN_WEIGHT) * (1.0 / 3.0)
+"""What raptorweight_v1 shipped, of what the DINOv3 seat leaves. The raptor DIAL is untouched at 1/3."""
+
+OUR_WEIGHT = (1.0 - FOREIGN_WEIGHT) * (2.0 / 3.0)
+"""The champion's own share of the remainder. Reported, never passed - `combined` gives ours the rest."""
 
 SERVED_SLICES = 12
-"""Our own seats' depth, unchanged from onegroup. The foreign family reads at ITS OWN geometry."""
+"""Our own seats' depth, unchanged from onegroup. The foreign family reads at ITS OWN geometry.
+
+THE BASELINE FOR THIS ENTRY IS 0.942, NOT THE CHAMPION'S 0.944. `onegroup_v1` served these same six at
+this same collapsed read geometry and paid a measured -0.002 for it, and this kernel inherits that read
+because three producers do not fit in nine hours at the champion's three groups. Any branch read against
+0.944 would charge this entry for a cost another slot already priced.
+"""
 
 SERVED_BAND = (0.1, 0.9)
 """Our own seats' band, unchanged. Their 0.12-0.88 is theirs, applied inside their lifted program."""
@@ -168,7 +195,7 @@ def main() -> None:
     from kneemri.evaluation.raptor_model import RaptorMember  # noqa: PLC0415 - same
     from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415 - same
     from kneemri.inference.ensemble import Serving, SharedRead  # noqa: PLC0415 - same
-    from kneemri.inference.vote import LogitAverage  # noqa: PLC0415 - same
+    from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - same
     from kneemri.kaggle.foreign_entry import CHECKPOINTS, SOURCE, ForeignEntry  # noqa: PLC0415 - same
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
     from kneemri.kaggle.raptor_run import WORKING, RaptorEntry  # noqa: PLC0415 - same
@@ -218,11 +245,15 @@ def main() -> None:
     # killed at the real one with no submission written at all.
     spent = time.time() - started
     logger.info("the two foreign passes cost %.0fs; the six get what is left", spent)
+    # RankAverage rather than the champion's LogitAverage, because the seat curve was measured under both
+    # and rank wins at every weight (+0.0091 against +0.0053 at one seat, +0.0218 against +0.0184 at six).
+    # It is the entry's SECOND change and the reason a LogitAverage twin at the same weight is the
+    # pre-registered follow-up: a flat here has to be attributable to one dial or the other.
     KernelRun(
         names=chosen,
         overlap=False,
         serving=Serving(
-            vote=LogitAverage(),
+            vote=RankAverage(),
             budget=Budget(seconds=max(KERNEL_SECONDS - spent, 0.0)),
             group=SharedRead(SERVED_SLICES, SERVED_BAND),
         ),

@@ -44,6 +44,16 @@ FOREIGN_KERNEL="$REPO/external/dinov3folds/bend_the_knee_to_dinov3_ensembled.py"
 FOREIGN_WEIGHTS="D:/data/external/kaggle_foreign/mattiaangeli_dinov3"
 RAW="$(dirname "$PROCESSED")/../raw/rsna_knee_abnormality"
 
+# A SCAN NEEDS THE OVERWRITE GUARD `run_train` ALREADY HAS. This arm does not train, so nothing on the
+# path that refuses a second write to a checkpoint sees it — and a scan relaunched onto a job that had NOT
+# failed is exactly the defect `card_check` was written for. It has now happened twice with this arm: two
+# pairs of identical processes, same argv, same `--out`, both writing this npz while the other read it.
+# Cheapest place to stop it is here, in the arm, before the card is touched.
+if [ -e "$MODELS/foreign_oof_corpus.npz" ] && [ -z "$ALLOW_OVERWRITE" ]; then
+  echo "REFUSED foreign_oof - '$MODELS/foreign_oof_corpus.npz' already holds a scan. ALLOW_OVERWRITE=1 to replace it." >&2
+  exit 1
+fi
+
 "$REPO/.venv/Scripts/python.exe" -m kneemri.inference.foreign_folds \
   --kernel "$FOREIGN_KERNEL" \
   --checkpoints "$FOREIGN_WEIGHTS" \
