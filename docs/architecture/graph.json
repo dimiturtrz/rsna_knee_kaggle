@@ -1622,6 +1622,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.board_floor",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.board_floor",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.board_floor",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.board_floor",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.board_floor",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.board_floor",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.board_transfer",
       "target": "core.cli",
       "weight": 1
@@ -12670,6 +12706,84 @@
       "kind": "calls",
       "source": "kneemri.evaluation.band_tta.main",
       "target": "kneemri.evaluation.band_tta.BandTTA.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.board_floor.BoardFloor",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.board_floor.BoardFloor",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.BoardFloor.delta",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.BoardFloor.delta",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.BoardFloor.interval",
+      "target": "kneemri.evaluation.board_floor.BoardFloor.delta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.BoardFloor.lines",
+      "target": "kneemri.evaluation.board_floor.BoardFloor.delta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.BoardFloor.lines",
+      "target": "kneemri.evaluation.board_floor.BoardFloor.interval",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.board_floor.main",
+      "target": "kneemri.evaluation.board_floor.BoardFloor",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.main",
+      "target": "kneemri.evaluation.board_floor.BoardFloor.lines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.main",
+      "target": "kneemri.evaluation.board_floor.BoardFloor.seats",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.board_floor.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_floor.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.board_floor.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -32851,7 +32965,7 @@
       "role": null
     },
     {
-      "descendants": 257,
+      "descendants": 258,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -32915,7 +33029,7 @@
       "role": null
     },
     {
-      "descendants": 87,
+      "descendants": 88,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -32974,6 +33088,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.band_tta",
       "label": "band_tta",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_floor",
+      "label": "board_floor",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -36160,6 +36282,14 @@
       "label": "BandTTA",
       "level": "class",
       "parent": "kneemri.evaluation.band_tta",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_floor.BoardFloor",
+      "label": "BoardFloor",
+      "level": "class",
+      "parent": "kneemri.evaluation.board_floor",
       "role": "satellite"
     },
     {
@@ -44896,6 +45026,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.band_tta",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_floor.BoardFloor.delta",
+      "label": "delta",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_floor.BoardFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_floor.BoardFloor.interval",
+      "label": "interval",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_floor.BoardFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_floor.BoardFloor.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_floor.BoardFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_floor.BoardFloor.seats",
+      "label": "seats",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_floor.BoardFloor",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_floor.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_floor",
       "role": null
     },
     {
