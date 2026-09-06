@@ -145,7 +145,8 @@ def main() -> None:
 
     # EVERY roster member at the cheap decode corner - 224 px, 12 slices, band 0.2-0.8 - and nothing
     # else, minus blendemalabel224_s2026, which finished after the members package was last built and
-    # is therefore not mountable today. Chosen by RULE, not by rank: no score enters this tuple, so the entry is not a selection.
+    # is therefore not mountable today. Chosen by RULE, not by rank: no score enters this tuple, so
+    # the entry is not a selection.
     # The question is runtime. Members at one decode corner share the decode, which is what a kernel
     # here actually spends (the cheapdecode log reads decode 5s of 5s elapsed for three studies), so
     # four times the members should cost far less than four times the wall clock.

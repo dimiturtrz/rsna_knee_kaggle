@@ -7857,7 +7857,7 @@ with no affordable instrument, not a branch anyone should re-derive from the ID 
 
 ## The public top of this leaderboard is running mechanisms we have already priced — 2026-09-05
 
-Board read 20:55Z: **rank 41 of 3154 at 0.944, tied with 14; leader 0.954; gap 0.010.** Our slope is
+Board read 20:55Z: **rank 43 of 3188 at 0.944; leader 0.954; gap 0.010.** Our slope is
 +0.00037/day against the frontier's +0.00024/day, so the gap closes in 62 days. Grinding does not get
 there and only a step change does, which makes "what is the top doing" a measurement worth taking
 before another arm is queued. It costs no slot: `kaggle kernels list --competition ... --sort-by
