@@ -85,6 +85,30 @@ def test_per_label_table(tmp_path: Path):
     assert lines[2].split()[:2] == [TARGETS[1], "1"], "the count is printed even where the AUC is withheld"
 
 
+def test_cross(tmp_path: Path):
+    """An off-diagonal cell reads ANOTHER finding's gold column, and a rare gold column is not a column.
+
+    The equivalence classes are the two readings the grid exists to separate: a posterior that finds only
+    its own gold column, and one that finds a neighbour's better than the neighbour's own head does.
+    """
+    from core.findings import TARGETS  # noqa: PLC0415 - test-local, so the module under test owns its imports
+    from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - test-local
+
+    annotations = np.zeros((20, len(TARGETS)), dtype=np.float32)
+    annotations[10:, 0] = 1.0
+    annotations[10:, 1] = 1.0
+    annotations[0, 2] = 1.0
+    values = np.zeros((20, len(TARGETS)), dtype=np.float64)
+    values[10:, 0] = 1.0
+
+    lines = _reader(tmp_path).cross(LabelScores(), values, annotations)
+
+    assert TARGETS[2][:7] not in lines[0], "one positive of twenty is a column no reading may use"
+    assert lines[0].split()[-2:] == [TARGETS[0][:7], TARGETS[1][:7]], "the two readable gold columns, in order"
+    assert lines[1].split()[-2:] == ["1.000", "1.000"], "the first posterior finds its own column AND its neighbour's"
+    assert lines[3].split()[-2:] == ["0.500", "0.500"], "a flat posterior separates neither"
+
+
 def test_paired(tmp_path: Path):
     """Every member is priced against the NAMED baseline, which never prices itself.
 

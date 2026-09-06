@@ -3113,7 +3113,7 @@ submission adds an efficiency candidate rather than displacing the 0.944.
 ### Not licensed
 
 Reading 0.939 as an accuracy result. It is three seats where the champion has seven, and it was built
-to be cheap. The accuracy row stays 0.944, rank 43 of 3188, 0.010 behind a 0.954 leader.
+to be cheap. The accuracy row stays 0.944, rank 44 of 3234, 0.010 behind a 0.954 leader.
 
 ## corpusdose_v1 (0.943) + corpusfull_v1 (0.940) — the external-corpus dose curve
 

@@ -246,6 +246,45 @@ class AnnotatedReadings:
             lines.append(f"{target:20s} {positives:4d}  {cells}")
         return lines
 
+    def cross(
+        self,
+        scores: "LabelScores",
+        values: NDArray[np.float64],
+        annotations: NDArray[np.float32],
+        *,
+        readable_min: int = READABLE_MIN,
+    ) -> list[str]:
+        """One member's every posterior column read against every GOLD column — the off-diagonal matrix.
+
+        WHY THE OFF-DIAGONALS ARE THE READING. A per-finding table answers "does our synovitis column
+        find the radiologist's synovitis". It cannot answer "does our EFFUSION column find it", and that
+        is a different question with a different consequence: radiological convention writes synovial
+        thickening into the effusion sentence, so a report-trained effusion head may have learned the
+        compartment rather than the fluid. If it reads gold synovitis better than our synovitis head
+        does, the serving fix is a column mix and it needs no retrain at all.
+
+        THE DIAGONAL IS THE PER-LABEL TABLE, and printing it inside the same grid is deliberate — an
+        off-diagonal cell means nothing except against the diagonal cell in its own COLUMN, which is the
+        score the finding's own head achieves. A cell above its column's diagonal is the claim.
+
+        A gold column too rare to read is withheld entirely rather than printed at n=2, on the same floor
+        `per_label_table` uses and for the same reason.
+        """
+        from core.findings import TARGETS  # noqa: PLC0415 - CLI-only
+        from kneemri.evaluation.scores import MIDPOINT  # noqa: PLC0415 - CLI-only
+
+        present = [(annotations[:, column] > MIDPOINT).astype(np.int64) for column in range(len(TARGETS))]
+        readable = [
+            column
+            for column in range(len(TARGETS))
+            if min(int(present[column].sum()), len(present[column]) - int(present[column].sum())) >= readable_min
+        ]
+        lines = [f"{'posterior \\ gold':20s}" + "".join(f"{TARGETS[column][:7]:>8s}" for column in readable)]
+        for row in range(len(TARGETS)):
+            cells = "".join(f"{scores.area_under_curve(values[:, row], present[column]):8.3f}" for column in readable)
+            lines.append(f"{TARGETS[row]:20s}{cells}")
+        return lines
+
     def paired(
         self,
         scores: "LabelScores",
@@ -293,6 +332,7 @@ def main() -> None:
     command.parser.add_argument("--against", type=Path, default=None, help="baseline for paired deltas; default first")
     command.parser.add_argument("--add", type=Path, nargs="*", default=[], help="npz readings from a foreign gate")
     command.parser.add_argument("--per-label", action="store_true", help="one row per finding, with its count")
+    command.parser.add_argument("--cross", action="store_true", help="each posterior column against every gold column")
     arguments = command.parsed()
 
     from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - CLI-only
@@ -319,12 +359,17 @@ def main() -> None:
     ]
     origin = caveat if flagged else []
     breakdown = ["", *reader.per_label_table(scores, per_member, annotations)] if arguments.per_label else []
+    matrices: list[str] = []
+    for member, values in per_member if arguments.cross else []:
+        matrices += ["", f"cross-column AUC, {member.stem} (rows: our posterior; columns: gold truth)"]
+        matrices += reader.cross(scores, values, annotations)
     command.report(
         [f"{len(names)} annotated studies, {len(per_member)} member(s), none of them TRAINED on these cells"]
         + [f"{member.stem:28s} {scores.mean(values, annotations):.4f}" for member, values in per_member]
         + [f"{'combined':28s} {scores.mean(combined, annotations):.4f}"]
         + ([""] + reader.paired(scores, per_member, arguments.against or arguments.checkpoints[0], annotations))
         + breakdown
+        + matrices
         + origin
     )
 

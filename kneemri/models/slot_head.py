@@ -60,13 +60,23 @@ class SlotHead(nn.Module):
         self.drop = nn.Dropout(p)
         self.out = nn.Linear(hidden, n_out)
         self.hidden = hidden
-        # A parameter, not a buffer: the anatomy is where the query should START looking, and the data
-        # is allowed to overrule it. Zeros when absent, so the prior costs nothing when it is not used.
-        self.prior = nn.Parameter(torch.zeros(n_out, n_slot) if prior is None else prior.clone())
+        self.hold_prior(torch.zeros(n_out, n_slot) if prior is None else prior.clone())
         # Predicts the study's REPORT embedding from the same slot features the diagnoses read. It is
         # always built and costs one small Linear, so no call site has to ask whether report
         # supervision is switched on; an unused head simply receives no gradient.
         self.report = nn.Linear(hidden, report_dims)
+
+    def hold_prior(self, prior: Float[Tensor, "o s"]) -> None:
+        """Keep the anatomical prior as something the data may OVERRULE — a parameter, not a buffer.
+
+        The anatomy is where each query should START looking, and gradient descent is allowed to decide
+        it was wrong. That is a claim about learning, not a storage detail, which is why it is a method
+        a subclass can answer differently rather than a line inside `__init__`: `FixedPriorSlotHead`
+        holds the same numbers as a buffer and gets a permanent constraint instead of a warm start.
+
+        Zeros when no prior is supplied, so the term costs nothing when it is not used.
+        """
+        self.prior = nn.Parameter(prior)
 
     def per_diagnosis(self, x: Float[Tensor, "b s *o d"]) -> Float[Tensor, "b s o d"]:
         """The slot features AS EACH DIAGNOSIS SEES THEM — one reading shared by all twelve, or twelve.
@@ -185,13 +195,50 @@ class MeanSlotHead(SlotHead):
         return weights.unsqueeze(1).expand(-1, self.query.shape[0], -1)
 
 
+class FixedPriorSlotHead(SlotHead):
+    """The attention head with the anatomical prior held as a BUFFER — a constraint, not a warm start.
+
+    `aprior_dense_s2026` refuted the prior at −0.0021 against `band_dense`, and the ledger's reading of
+    that failure is what this class exists to test: "the warm start washed out rather than failed to
+    land. Train loss tracks the control to the fourth decimal at every epoch, so 72 numbers of
+    initialisation on an `nn.Parameter` the data may overrule are gone by the time the fit matters."
+
+    That is a refutation of ONE FORM of the idea. A buffer cannot be washed out: the same numbers are
+    added to the attention logits on every forward pass at every epoch, and gradient descent can only
+    learn around them rather than erase them. It is the form the published foreign program actually
+    ships (`bend_the_knee_to_dinov3_ensembled.py`, `SLOT_PRIOR_STRENGTH = 0.55` on a `register_buffer`),
+    which is why our port lost to their number on an axis we thought we had already copied.
+
+    So the two heads ask different questions. `SlotHead` asks whether a good starting point helps, and
+    the answer measured here is no. This one asks whether a permanent constraint on where each finding
+    may attend helps, and that has never been run. Nothing else differs — same projection, same slot
+    embeddings, same dropout, same readout — so a difference in score is attributable to the holding.
+    """
+
+    @override
+    def hold_prior(self, prior: Float[Tensor, "o s"]) -> None:
+        """Register the prior as a buffer, so it survives every step instead of being a starting point."""
+        self.register_buffer("prior", prior)
+
+
 ATTENDED = "attend"
 """Per-diagnosis attention over the slots — what every member on disk was fitted with."""
 
 AVERAGED = "mean"
 """The ablation: a uniform mean, so the attention has a denominator."""
 
-SLOT_POOLINGS: dict[str, type[SlotHead]] = {ATTENDED: SlotHead, AVERAGED: MeanSlotHead}
+CONSTRAINED = "attend_fixed"
+"""Per-diagnosis attention with the anatomical prior held fixed — the published form of the prior.
+
+Named on this axis rather than on a new flag because this table IS the head-construction dispatch: what
+it selects is which `SlotHead` a recipe builds, and the prior's holding is a property of the head and of
+nothing else. A second flag would let a recipe name a pooling and a holding that no class implements."""
+
+SLOT_POOLINGS: dict[str, type[SlotHead]] = {
+    ATTENDED: SlotHead,
+    AVERAGED: MeanSlotHead,
+    CONSTRAINED: FixedPriorSlotHead,
+}
 """The vocabulary AND the dispatch, in one object beside the heads it names.
 
 A name a member records is a head this builds, and there is no third place for the two to disagree. The

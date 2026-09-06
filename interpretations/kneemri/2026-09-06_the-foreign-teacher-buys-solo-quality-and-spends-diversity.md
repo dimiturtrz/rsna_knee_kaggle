@@ -1,7 +1,7 @@
 # The foreign teacher buys solo quality and spends diversity — and the trade is monotone in the weight
 
-2026-09-06. Subject: distilling the out-of-sample foreign teacher (0.8929) into our own band_dense student,
-read at two teacher weights. Instruments: `price_served_base8.sh` (seat on the served base of 8) and
+2026-09-06. Subject: distilling the out-of-sample foreign teacher, which reads 0.8929 fold-matched, into
+our own band_dense student (0.8578), read at two teacher weights. Instruments: `price_served_base8.sh` (seat on the served base of 8) and
 `kneemri.kaggle.seat_value` / `member_axes` (the three-column cell). Logs: `logs/seat_mix07.log`,
 `logs/axes_mix07.log`. Card: 73 min each arm; zero slots.
 

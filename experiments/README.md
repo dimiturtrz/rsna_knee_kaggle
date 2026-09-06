@@ -7857,7 +7857,7 @@ with no affordable instrument, not a branch anyone should re-derive from the ID 
 
 ## The public top of this leaderboard is running mechanisms we have already priced — 2026-09-05
 
-Board read 20:55Z: **rank 43 of 3188 at 0.944; leader 0.954; gap 0.010.** Our slope is
+Board read 21:07Z: **rank 44 of 3234 at 0.944; leader 0.954; gap 0.010.** Our slope is
 +0.00037/day against the frontier's +0.00024/day, so the gap closes in 62 days. Grinding does not get
 there and only a step change does, which makes "what is the top doing" a measurement worth taking
 before another arm is queued. It costs no slot: `kaggle kernels list --competition ... --sort-by
@@ -8440,3 +8440,83 @@ that arm was killed at epoch 8 of 12 (a floor, not a landing) and its teacher wa
 complement to itself is noise. The pre-registered column is js divergence against `band_dense`'s 0.0273:
 dissent must move it UP where distillation moved it DOWN, or every non-seating use of a foreign teacher
 is closed.
+
+## The foreign decode band is already at its optimum — the fine sweep closes the geometry axis — 2026-09-06
+
+The coarse sweep put the band peak inside a 0.04 step, so `foreign_decode_fine` re-served their five
+released folds at four bands one hundredth apart, each one fold-matched over the same 909 studies with
+no contaminated cell. Everything but `--band` is their lifted program untouched.
+
+| serving band | fold-matched pooled AUC |
+|---|---|
+| 0.10 - 0.90 | 0.8704 |
+| 0.11 - 0.89 | 0.8777 |
+| **0.12 - 0.88, the band they ship** | **0.8812** |
+| 0.13 - 0.87 | 0.8724 |
+| 0.14 - 0.86 | 0.8685 |
+
+The shipped band is a strict local maximum on a 0.01 grid, by +0.0035 over its better neighbour, and the
+0.8862 bar the sweep was given is not reached by any point. So the axis closes: there is no free accuracy
+in re-serving their folds at a different depth, and the fact that their own inference program serves
+WIDER than it trains (0.12/0.88 at `bend_the_knee_to_dinov3_ensembled.py:1622` against 0.2/0.8 at :411)
+is a choice that pays on our ruler too, not an oversight to correct.
+
+What this costs the open questions: `foreignseat_v1`'s inversion (-0.013 board against +0.0178 offline,
+the largest this project records) can no longer be explained by our port serving their folds at the wrong
+geometry. Our port declares `SERVING = (1600, 2320)` in `foreign_folds.py:43`, which contains :1622, so
+the band arrives byte-identical AND is now shown to be the best of five. Two candidates survive for that
+inversion, and `kneemri-foreignsolo` is the instrument that separates them: the family itself does not
+transfer, or the vote change (LogitAverage -> RankAverage, moved in the same entry) carries the drop.
+
+Card: 17 minutes for four re-serves, no training, zero slots.
+
+## The UNK cell is a constant, so a prior cannot fix it and a mask is the only treatment — 2026-09-06
+
+Census of `blend_hybrid_fx_v4b.csv`, denominator **4407 studies per column**, all twelve printed
+(`__verdict == UNK`):
+
+| finding | UNK | frac | mean value on UNK | mean value on stated | conf on UNK | sd(value \| UNK) |
+|---|---:|---:|---:|---:|---:|---:|
+| ACL | 355 | 0.081 | 0.2644 | 0.2682 | 0.0500 | 0.011 |
+| MCL | 430 | 0.098 | 0.2613 | 0.1905 | 0.0500 | 0.029 |
+| Medial Meniscus | 250 | 0.057 | 0.2661 | 0.4847 | 0.0500 | 0.020 |
+| Lateral Meniscus | 442 | 0.100 | 0.2635 | 0.2519 | 0.0500 | 0.023 |
+| Medial OA | 1125 | 0.255 | 0.2598 | 0.4530 | 0.0500 | 0.074 |
+| Lateral OA | 1457 | 0.331 | 0.2718 | 0.3500 | 0.0500 | 0.091 |
+| PF OA | 815 | 0.185 | 0.2720 | 0.5142 | 0.0500 | 0.064 |
+| Effusion | 942 | 0.214 | 0.2654 | 0.5424 | 0.0500 | 0.008 |
+| **Synovitis** | **3713** | **0.843** | 0.2685 | 0.7211 | 0.0500 | 0.050 |
+| Baker's | 2024 | 0.459 | 0.2625 | 0.4268 | 0.0500 | 0.018 |
+| Contusion | 916 | 0.208 | 0.2464 | 0.3068 | 0.0500 | 0.055 |
+| Fracture | 2486 | 0.564 | 0.2865 | 0.2210 | 0.0500 | 0.054 |
+
+Confidence on an UNK cell is **0.0500 exactly, on every cell of every column**, and the value is a
+sentinel near 0.26 taking between 6 and 158 distinct values across thousands of rows. The UNK cell is a
+constant with jitter. Stated cells, by contrast, run 0.19 to 0.72 in mean and carry conf 0.87-0.93.
+
+**The consequence for the three candidate treatments.** The board scores AUC, a *ranking* metric. A
+constant target on a subset produces gradient that pulls those studies' logits toward one value: it
+teaches no ordering and actively **compresses** the ordering on the rows it covers. For synovitis that
+is 84.3% of the corpus compressed at weight 1.
+
+- **PRIOR (set the UNK target from the gold positive rate among UNK cells)** replaces 0.265 with another
+  constant. It moves where the compression sits, not whether there is one. Its only real effect is on
+  calibration, which the vote does not read. **AUC-neutral by construction** — this is the argument that
+  retires it, not a measurement.
+- **MASK** removes a gradient measured to carry zero information, and lets the image decide — the reading
+  this ledger already owns twice (effusion and contusion both beat their own labels).
+- **WEIGHT** at mattiaangeli's `W = 0.25 + 0.75*conf` gives an UNK cell **0.2875**, i.e. 29%, not zero.
+  It is a genuine third option, not a soft mask.
+
+**A porting trap, recorded because it inverts the treatment.** stevenleehans' `2|p − 0.5|` masks silence
+*only because their sentinel is exactly 0.5*. Ours is 0.265. Ported literally, an UNK cell gets weight
+`2 × |0.265 − 0.5| = 0.47` — our silence comes out at nearly half weight — while a *stated* cell near 0.5
+(a "maybe" the reader committed to) is weighted toward zero. The formula does the opposite of what it
+does in their kernel. **Mask on the `__verdict` column**, the field that states silence, never on a value
+that silence has to be re-inferred from.
+
+Cost of masking, stated: the synovitis head trains on **694 studies** instead of 4407 (fracture 1921,
+Baker's 2383). Taken anyway, because the head sits on a trunk trained by eleven other columns at full
+data, so what shrinks is the head's fit and not the representation.
+
+Card: zero. Two cpu reads of one csv.

@@ -1,12 +1,53 @@
 import torch
 
 from core.findings import TARGETS
-from kneemri.models.slot_head import REPORT_DIMS, MeanSlotHead, SlotHead
+from kneemri.models.slot_head import REPORT_DIMS, FixedPriorSlotHead, MeanSlotHead, SlotHead
 
 SEED = 2026
 DIM = 8
 SLOTS = 4
 OUT = len(TARGETS)
+
+
+def test_slot_head_hold_prior():
+    """The default holding is a WARM START — the anatomy is where to begin, and the data may overrule it.
+
+    Zeros when nothing is supplied, so the term costs nothing on a recipe that does not use it; the
+    supplied table is held unmodified and trainable, which is the form `aprior_dense` measured washing
+    out.
+    """
+    torch.manual_seed(SEED)
+    prior = torch.randn(OUT, SLOTS)
+
+    warm = SlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT)
+    warm.hold_prior(prior)
+
+    assert warm.prior.requires_grad, "a warm start is a starting point the data may overrule"
+    assert torch.equal(warm.prior.detach(), prior), "and it starts at the anatomy itself, unmodified"
+    assert "prior" in dict(warm.named_parameters()), "so an optimiser must see it"
+    assert torch.equal(SlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT).prior.detach(), torch.zeros(OUT, SLOTS)), (
+        "and with no prior supplied the term contributes nothing"
+    )
+
+
+def test_fixed_prior_slot_head_hold_prior():
+    """The subclass's one difference: a CONSTRAINT, which no gradient step can erase.
+
+    Both heads hold the SAME numbers and add them to the same logits, so the assertion is about
+    trainability and about the value, never about the arithmetic — that is what makes the two arms a
+    single-variable comparison.
+    """
+    torch.manual_seed(SEED)
+    prior = torch.randn(OUT, SLOTS)
+
+    warm = SlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT, prior=prior)
+    fixed = FixedPriorSlotHead(dim=DIM, n_slot=SLOTS, n_out=OUT)
+    fixed.hold_prior(prior)
+
+    assert not fixed.prior.requires_grad, "a constraint survives every step, so no gradient reaches it"
+    assert torch.equal(warm.prior.detach(), fixed.prior), "both hold the anatomy itself, unmodified"
+    assert "prior" not in dict(fixed.named_parameters()), "held as a buffer, so an optimiser never sees it"
+    assert "prior" in dict(fixed.named_buffers()), "and it still travels with the checkpoint"
 
 
 def test_forward():

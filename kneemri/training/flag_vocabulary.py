@@ -290,7 +290,9 @@ class FlagVocabulary:
             help="how the twelve diagnoses read the six slots. 'attend' gives each diagnosis its own "
             "query over the present slots; 'mean' pools them uniformly and is the ABLATION - it exists "
             "to give the attention a denominator, since every number in the ledger was measured on a "
-            "recipe that already contained it.",
+            "recipe that already contained it. 'attend_fixed' is the attention again with the "
+            "anatomical prior held as a BUFFER rather than as a warm start, so a gradient step cannot "
+            "erase it - the form aprior_dense's washout says was never actually tested.",
         )
         parser.add_argument(
             "--pool",

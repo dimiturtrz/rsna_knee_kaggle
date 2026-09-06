@@ -294,6 +294,17 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   it. **Grep the arm for `--out` before arming a watcher.** `queue_check`'s own MISARMED hint states the
   rule as `<arm>_s<seed>.full.log`, which is wrong and cost two wakes on 2026-09-05 — it disarmed a
   correct watcher and then flagged the corrected one (knee-ket1c).
+  **And the FILE carries the checkpoint spelling while the MARKER TEXT does not** — they are two
+  different variables and only one of them is the checkpoint's. `_arm_log` (`lib.sh:685`) reads
+  `ARM_LOG_NAME`, set at :580 from `basename "$out" .pt`; `_mark` (:642) writes `ARM DONE $name`, the
+  `run_train` name. So an arm with `--out …/foreign_distill_mix30_s2026.pt` writes
+  `foreign_distill_mix30_s2026.full.log` whose marker line reads `ARM DONE foreign_distill_mix30`: the
+  seed is in the filename and never in the string. A watcher grepping the checkpoint spelling in the
+  MARKER waits forever with the card idle behind it, and `queue_check` reports **OK** the whole time —
+  a live process gating an owed arm is all it can see, and it cannot read the string that process is
+  blocked on. Proof already on disk: `logs/after_dissent2.log:139` reads `ARM DONE foreign_decode_fine`.
+  Caught 2026-09-06 on `after_mix30.sh` before the card went idle; grep an EXISTING `ARM DONE` line for
+  the format, don't derive it from the checkpoint.
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,
   weights, or run outputs in git.
 - **No notebooks** (`.ipynb`) — a one-off run becomes a committed CLI / `python -m` entrypoint
