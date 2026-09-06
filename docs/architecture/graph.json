@@ -5090,6 +5090,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.run_check",
       "target": "core.cli",
       "weight": 1
@@ -26420,6 +26456,144 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "target": "kneemri.kaggle.ruler_swap.Seat",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.forward",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.forward",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.forward",
+      "target": "kneemri.kaggle.ruler_swap.Seat",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.mixed",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.mixed",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.mixed",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.mixed",
+      "target": "kneemri.evaluation.record_mix.RecordMix.shared",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.churn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.diff",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.forward",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.mixed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.swapped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.truth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.mean_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.swapped",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.truth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.truth",
+      "target": "core.data.labels.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.ruler_swap.main",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.main",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.kaggle.run_check.KernelLog",
       "target": "kneemri.kaggle.run_check.KernelLog",
       "weight": 1
@@ -31291,7 +31465,7 @@
       "role": null
     },
     {
-      "descendants": 244,
+      "descendants": 245,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -32347,7 +32521,7 @@
       "role": null
     },
     {
-      "descendants": 36,
+      "descendants": 37,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -32590,6 +32764,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.roster_reads",
       "label": "roster_reads",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap",
+      "label": "ruler_swap",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -36760,6 +36942,22 @@
       "label": "RosterReads",
       "level": "class",
       "parent": "kneemri.kaggle.roster_reads",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "label": "RulerSwap",
+      "level": "class",
+      "parent": "kneemri.kaggle.ruler_swap",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.Seat",
+      "label": "Seat",
+      "level": "class",
+      "parent": "kneemri.kaggle.ruler_swap",
       "role": "satellite"
     },
     {
@@ -53160,6 +53358,94 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.roster_reads",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.churn",
+      "label": "churn",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.diff",
+      "label": "diff",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.mixed",
+      "label": "mixed",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.swapped",
+      "label": "swapped",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.truth",
+      "label": "truth",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.roster_members",
+      "label": "roster_members",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap",
       "role": null
     },
     {
