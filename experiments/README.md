@@ -8352,3 +8352,46 @@ is the cheap route: retraining their recipe here does not reproduce their family
 worth having as THEIR WEIGHTS, mounted, and not as a recipe we own.
 
 The seat itself is unaffected and still reads +0.0091 [+0.0080, +0.0103] as seat eight on `greedyseat_v1`.
+
+## The label-correction lever was founded on the wrong table, and closes at 0.1% — 2026-09-06
+
+`train.csv` is not a label table for these studies. It carries a value for **58 of our 4407**: 52188 of
+its 52884 target cells are nan, and every one of the twelve targets is nan on 4349 rows. What our members
+are scored against is the reader's `labels/report_labels_v2.csv` — 4406 studies, zero nan cells, the soft
+0.08/0.28/0.68/0.82/0.94 convention every holdout record on disk already carries.
+
+Two numbers were produced against the wrong file, and both moved when it was corrected.
+
+| reading | on `train.csv` | on `report_labels_v2.csv` |
+| --- | --- | --- |
+| foreign family, fold-matched over the corpus | 0.8211 (4407) | **0.8929** (4406) |
+| `label_contradiction`, fold-0 holdout, five members | 6.2% of cells (675/10908) | **0.1%** (13/10908) |
+
+The control holds: the same family on the 909 still reads **0.8812**, unchanged, because that path takes
+its truth from a holdout npz and never touched the csv. That is what makes this a table defect rather
+than a serving one.
+
+**The corpus census, three independent ways, on the correct table:**
+
+| instruments | candidate cells | denominator |
+| --- | --- | --- |
+| their corpus OOF + our four OOF folds + one fold-0 member | 66 (0.1%) | 52872 cells, 4406 studies |
+| our four OOF folds alone (`oof_fold1..4_s2026`) | 51 (0.1%) | 41964 cells, 3497 studies |
+| five fold-0 members, the original census re-run | 13 (0.1%) | 10908 cells, 909 studies |
+
+`oof_folds.sh` pre-registered "far BELOW the fold-0 census ⇒ the label route closes here for the second
+time". It lands at 0.1% on every denominator, against a ~2% threshold pre-registered as the level worth
+acting on. **The route is closed, and the 6.2% that opened it was an artefact of reading truth out of a
+98.7%-nan file.** The 336/12 full-strength OOF re-derivation that was contingent on this is cancelled
+(~4.7 h of card), as is the correction arm.
+
+One caveat kept in writing: their family alone contradicts the reader **nowhere** (0 cells), and its
+predictions are flatter than ours (1st/99th percentile 0.060/0.895 against our 0.018/0.966). A
+conjunction census is not a fair instrument for a compressed calibration, so their 0 is not evidence
+about labels. Our own four-fold reading, whose spread matches the original census's members, is the one
+that carries the closure.
+
+**What this leaves standing, and it is the better half:** `foreign_oof_corpus.holdout.npz` is now an
+honest out-of-sample opinion on all 4406 studies from a family that reads **0.8929** fold-matched — above
+our best solo (`stackfit_s2026`, 0.8631) and above their own 909 reading. As a label corrector it says
+nothing. As a distillation teacher it is the strongest per-study signal this project has.

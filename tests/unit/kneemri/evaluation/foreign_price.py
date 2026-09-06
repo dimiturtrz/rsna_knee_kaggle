@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from core.findings import STUDY, TARGETS
 from kneemri.evaluation.foreign_price import ForeignPrice
@@ -67,3 +68,12 @@ def test_truth_of() -> None:
     assert truth.shape == (2, len(TARGETS))
     assert truth[0, 0] == 1.0, "the served order decides the rows, not the table's"
     assert truth[1, 0] == 0.0
+    empty = doubled.assign(**dict.fromkeys(TARGETS, np.nan))
+    with pytest.raises(ValueError, match="does not label these studies"):
+        ForeignPrice.truth_of(None, ["b", "a"], empty)
+
+
+def test_corpus_rows() -> None:
+    """Only the served studies the truth table carries are read, and their served ORDER is kept."""
+    table = pd.DataFrame([{STUDY: study, **dict.fromkeys(TARGETS, 0.0)} for study in "ac"])
+    assert ForeignPrice.corpus_rows(table, ["a", "b", "c"]) == [0, 2]
