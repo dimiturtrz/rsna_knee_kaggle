@@ -695,3 +695,16 @@ chaindense_s2026.pt         # 0.8628 solo at the dense corner - the three 224-co
                             # ALONE, so three cheap terms and one expensive one are indistinguishable here
                             # and the chain SUBSTITUTES for calibration. Its reading is
                             # logs/chaindense_ledger.log.
+
+chainfour_s2026.pt          # 0.8648 solo, the BEST single member this project owns, +0.0014 over
+                            # calib_dense_hold (0.8634). Four terms on the dense base band_dense_hold
+                            # (0.8573): --calibrated-targets, --labels blend_three_v1, --ema,
+                            # --slice-pooling labelwise. Peak at e7 of a full 12, four declining epochs
+                            # after it, so the number is a value and not a floor. Its arm's MIDDLE branch:
+                            # the four terms sum to +0.0191 alone and delivered +0.0075 together, 39% -
+                            # they substitute rather than add at the top. Seated for RANK, and its rank
+                            # is the only thing it brings: on the five-seat held-twin proxy it adds
+                            # +0.0020 alone but +0.0000 on top of chaindense/blendemalabel224/blendema224,
+                            # which is why kneemri-proxyseat ships nine seats and not ten. Best solo,
+                            # redundant in ensemble - the third time this project has measured that.
+                            # Its reading is logs/chainfour_ledger.log.
