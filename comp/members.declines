@@ -611,3 +611,34 @@ radnet_pinned_s2026.pt  # 0.7505 solo. DECLINED 2026-09-06: no dataset mounts `r
                       # whole package rebuild. The CNN/trunk-family lane is closed independently.
                       # RE-OPEN BY: a convolutional member trained to within about 0.01 of the pool, on a
                       # mounted encoder. Not by the diversity argument alone.
+
+# --- Read PRICES, not members, 2026-09-06 ----------------------------------------------------------
+# Seventeen records written by `holdout_backfill` to price a READING, never by a training run. Each is
+# an already-fitted member scored on its own holdout under a reading it was NOT fitted at — `_r224` and
+# `_r280` are `Member.resized` (a resolution priced before the arm that would fit it exists, knee-d2fc),
+# and `_n12b0.1-0.9` is `SharedRead.regrouped` (one read group across an entry, which is what
+# `kneemri-onegroup` ships: native 0.8706 against 0.8684 grouped, a cost of 0.0022).
+#
+# They are not seats. Each one's WEIGHTS are already on the roster under the member's own name, so
+# shipping one would seat the same model twice and call the pair diverse. What they carry is a price,
+# and the price is read from the record rather than from a board slot.
+#
+# RE-OPEN BY: nothing. A price that turns out to be worth training AT re-opens as an ARM, which leaves a
+# checkpoint of its own with its own name — never by promoting one of these records to a seat.
+calib_span_s2026_n12b0.1-0.9      # regroup price for calib_span_s2026
+calib_span_s2026_r224             # resize price for calib_span_s2026
+calib_span_s2026_r280             # resize price for calib_span_s2026
+calibrated_targets_s2026_r224     # resize price for calibrated_targets_s2026
+calibrated_targets_s2026_r280     # resize price for calibrated_targets_s2026
+grade_ladder_s2026_n12b0.1-0.9    # regroup price for grade_ladder_s2026
+grade_ladder_s2026_r224           # resize price for grade_ladder_s2026
+grade_ladder_s2026_r280           # resize price for grade_ladder_s2026
+lr4e-5_ws_s2026_n12b0.1-0.9       # regroup price for lr4e-5_ws_s2026
+lr4e-5_ws_s2026_r224              # resize price for lr4e-5_ws_s2026
+lr4e-5_ws_s2026_r280              # resize price for lr4e-5_ws_s2026
+merged_blend_cf_n12b0.1-0.9       # regroup price for merged_blend_cf
+merged_blend_cf_r224              # resize price for merged_blend_cf
+merged_blend_cf_r280              # resize price for merged_blend_cf
+through_dense_s2026_n12b0.1-0.9   # regroup price for through_dense_s2026
+through_dense_s2026_r224          # resize price for through_dense_s2026
+through_dense_s2026_r280          # resize price for through_dense_s2026

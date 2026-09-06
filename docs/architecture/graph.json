@@ -1952,6 +1952,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.label_contradiction",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_contradiction",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_contradiction",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.label_errors",
       "target": "core.cli",
       "weight": 1
@@ -13924,6 +13942,60 @@
       "kind": "construct",
       "source": "kneemri.evaluation.label_combine.main",
       "target": "kneemri.inference.prediction_cache.PredictionCache",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "target": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_contradiction.LabelContradiction.align",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_contradiction.LabelContradiction.align",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_contradiction.LabelContradiction.candidates",
+      "target": "kneemri.evaluation.label_contradiction.LabelContradiction.labelled_positive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_contradiction.LabelContradiction.lines",
+      "target": "kneemri.evaluation.label_contradiction.LabelContradiction.per_finding",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_contradiction.LabelContradiction.per_finding",
+      "target": "kneemri.evaluation.label_contradiction.LabelContradiction.candidates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_contradiction.LabelContradiction.per_finding",
+      "target": "kneemri.evaluation.label_contradiction.LabelContradiction.labelled_positive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_contradiction.main",
+      "target": "kneemri.evaluation.label_contradiction.LabelContradiction.align",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_contradiction.main",
+      "target": "kneemri.evaluation.label_contradiction.LabelContradiction.read_table",
       "weight": 1
     },
     {
@@ -32113,7 +32185,7 @@
       "role": null
     },
     {
-      "descendants": 248,
+      "descendants": 249,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -32177,7 +32249,7 @@
       "role": null
     },
     {
-      "descendants": 82,
+      "descendants": 83,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -32340,6 +32412,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.label_combine",
       "label": "label_combine",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction",
+      "label": "label_contradiction",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -35567,6 +35647,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.label_combine",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "label": "LabelContradiction",
+      "level": "class",
+      "parent": "kneemri.evaluation.label_contradiction",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -44958,6 +45046,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.label_combine",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.LabelContradiction.align",
+      "label": "align",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.LabelContradiction.candidates",
+      "label": "candidates",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.LabelContradiction.labelled_positive",
+      "label": "labelled_positive",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.LabelContradiction.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.LabelContradiction.per_finding",
+      "label": "per_finding",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.LabelContradiction.read_table",
+      "label": "read_table",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_contradiction.LabelContradiction",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_contradiction.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_contradiction",
       "role": null
     },
     {

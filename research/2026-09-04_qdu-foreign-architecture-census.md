@@ -161,3 +161,20 @@ No published inference cost exists for the knee checkpoint itself or for T4 hard
 ### Kernel fit estimate
 
 Inference rule is *mean sigmoid over all series of the study* with no stated series cap. For ~1,300 test studies, forward-only wall-clock is on the order of tens of minutes on fast local hardware, but the actual T4 cost will be higher and the DICOM → `[192,384,384]` preprocessing must also fit inside the 9-hour budget.
+
+## Amendment 2026-09-06 — the DINOv3 licence chain overrides the CC0 labels
+
+The CC0-1.0 readings above come from Kaggle dataset metadata. For DINOv3-derived weights that
+metadata cannot be the operative licence: the **DINOv3 License** (Meta Platforms, 2025-08-19,
+`facebookresearch/dinov3` `LICENSE.md`) grants derivative-works rights (§1a) but requires that any
+redistribution of the DINO Materials OR derivative works be under that same Agreement with a copy
+provided (§1b(i)), plus publication attribution (§1b(ii)); derivative works are owned by their maker
+as between maker and Meta (§5a). **No non-commercial clause, no share-alike** — materially more
+permissive than DINOv2's CC-BY-NC-4.0. Verified full text pulled 2026-09-06.
+
+Consequences:
+- `mattiaangeli/knee-mri-fold-weights` (DINOv3 ViT-S/16): shippable under rule 2.6, but the citable
+  licence is the DINOv3 License, not CC0 — ship `LICENSE.md` with the mount and carry the attribution.
+- `tim9510019/...best_dinov3_finetuned_384.pth` (DINOv3 ViT-S/14): same chain.
+- `starkhushi/rsna-knee-v6f2-weights` is **DINOv2** (CC-BY-NC-4.0): different chain — non-commercial
+  plus mandatory attribution; CC0 metadata would be flat wrong there.

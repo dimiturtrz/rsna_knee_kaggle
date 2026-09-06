@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# oof_folds.sh — the four complementary folds, so the corpus has an OUT-OF-SAMPLE opinion everywhere.
+#
+# THIS ARM IS AN INSTRUMENT. It is not a member, it will not be seated, and its four checkpoints are not
+# roster candidates. What it produces is the missing half of the label-correction lever, and nothing
+# else on the card can produce it.
+#
+# WHY IT IS NEEDED, measured today. `label_contradiction` over the fold-0 holdout finds 675 cells of
+# 10908 (6.2%) where the report reader AND an out-of-sample model both contradict the training label,
+# concentrated exactly where the labels are weakest: MCL 52.1% of its positives, Effusion 29.9%,
+# Lateral OA 28.3%. That is five to twenty-five times the ~2% that was pre-registered as the level worth
+# acting on. But the census can only speak for 909 studies, because EVERY ONE of the 263 holdout records
+# on disk holds out the SAME fold-0 909 — the union of all of them is 909 of 4407. A correction applied
+# only there changes the holdout and not one row the model trains on, which is the definition of a
+# correction that cannot move a score.
+#
+# WHY THIS IS NOT THE BANNED FOLD SWEEP. The ban is on re-running an experiment whose ANSWER is known —
+# a second fold of a settled recipe to see whether the score repeats. Nothing here reads these arms'
+# scores. Their deliverable is the `.holdout.npz` arrays: fold k's record is the only out-of-sample
+# opinion that will ever exist for fold k's studies, and four of them plus the fold-0 records already on
+# disk cover all 4407. If these were seeded twins of each other the ban would apply; they hold out
+# disjoint fifths of the corpus by construction.
+#
+# THE RECIPE IS DELIBERATELY NOT THE BEST ONE. 224 px and 8 epochs, not 336 and 12: the instrument needs
+# an opinion good enough to be a second vote against a label, not a member worth seating. At the settled
+# 336/12 this arm is ~4.7 h of card for predictions that get thresholded at 0.5; at 224/8 it is under
+# two, and the same four fifths of the corpus come back covered. If the correction it enables reads
+# positive, re-deriving the OOF at full strength is a cheap follow-on — and it is a follow-on that only
+# happens if the cheap version says the axis is alive.
+#
+# THE FALSIFIABLE PART, pre-registered before the run:
+#   * The corpus-wide candidate rate lands within a factor of two of the fold-0 census (6.2% of cells,
+#     ~20-50% of positives in the weak columns) — the conjunction is a property of the labels, and a
+#     correction arm is queued on the corrected table.
+#   * It lands far BELOW that — the fold-0 census was a property of that split or of those five members,
+#     not of the labels, and the label route closes here for the second time.
+#   * It lands far ABOVE — suspect the instrument before the labels: a 224/8 model contradicts more
+#     because it is worse, and the conjunction stops being two independent instruments the moment one of
+#     them is mostly noise. The check is the per-fold agreement rate between the reader and the model,
+#     which this arm's records make computable.
+#
+# COST: four runs, ~25 min each at 224/8 on the settled small encoder, ~1.7 h total.
+#
+# deliberate: --fold 1..4 (the arm's whole thesis; $RECIPE's --fold 0 is overridden per run)
+# deliberate: --image-size 224 (an instrument, not a member — see THE RECIPE above)
+# reading: oof_fold*_s2026.holdout.npz
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+for fold in 1 2 3 4; do
+  run_train "oof_fold${fold}" \
+    $RECIPE --fold "$fold" --epochs 8 --slice-pooling max --whole-stack $THROUGHPUT \
+    --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 --image-size 224 \
+    --labels "$LABELS" --out "$MODELS/oof_fold${fold}_s2026.pt"
+done
