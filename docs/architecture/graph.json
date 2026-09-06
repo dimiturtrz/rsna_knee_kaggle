@@ -5259,6 +5259,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.submission",
+      "target": "core.data.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.submission",
       "target": "core.data.corpus.study",
       "weight": 1
     },
@@ -5302,6 +5308,48 @@
       "kind": "import",
       "source": "kneemri.kaggle.submit_check",
       "target": "kneemri.kaggle.kernel_script",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.traversal_census",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.traversal_census",
+      "target": "core.data.corpus.decode_bench",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.traversal_census",
+      "target": "core.data.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.traversal_census",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.traversal_census",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.traversal_census",
+      "target": "kneemri.inference.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.traversal_census",
+      "target": "kneemri.kaggle.submission",
       "weight": 1
     },
     {
@@ -27529,6 +27577,108 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus",
+      "target": "kneemri.inference.ensemble.Read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus",
+      "target": "kneemri.kaggle.traversal_census.CensusRow",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "target": "core.data.corpus.slot_reader.FileMemo",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "target": "kneemri.kaggle.submission.Submission.decoded_at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "target": "kneemri.kaggle.submission.Submission.decoded_reads",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "target": "kneemri.kaggle.submission.Submission.pipeline",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "target": "kneemri.kaggle.traversal_census.CensusRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "target": "kneemri.kaggle.traversal_census.TraversalCensus.equal",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "target": "kneemri.kaggle.traversal_census.TraversalCensus.reads",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.reads",
+      "target": "core.data.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.reads",
+      "target": "core.data.corpus.slot_reader.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.reads",
+      "target": "core.data.corpus.slots.SlotScheme",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.traversal_census.TraversalCensus.reads",
+      "target": "kneemri.inference.ensemble.Read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.traversal_census.main",
+      "target": "core.data.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.main",
+      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.main",
+      "target": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.traversal_census.main",
+      "target": "kneemri.kaggle.traversal_census.TraversalCensus.report",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.models.depth_attention.DepthAttention",
       "target": "kneemri.models.slice_attention.SliceAttention",
@@ -31867,7 +32017,7 @@
       "role": null
     },
     {
-      "descendants": 246,
+      "descendants": 247,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -32931,7 +33081,7 @@
       "role": null
     },
     {
-      "descendants": 37,
+      "descendants": 38,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -33230,6 +33380,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.submit_check",
       "label": "submit_check",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census",
+      "label": "traversal_census",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -37496,6 +37654,22 @@
       "label": "SubmitCheck",
       "level": "class",
       "parent": "kneemri.kaggle.submit_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census.CensusRow",
+      "label": "CensusRow",
+      "level": "class",
+      "parent": "kneemri.kaggle.traversal_census",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census.TraversalCensus",
+      "label": "TraversalCensus",
+      "level": "class",
+      "parent": "kneemri.kaggle.traversal_census",
       "role": "primary"
     },
     {
@@ -54512,6 +54686,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.submit_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census.TraversalCensus.census",
+      "label": "census",
+      "level": "method",
+      "parent": "kneemri.kaggle.traversal_census.TraversalCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census.TraversalCensus.equal",
+      "label": "equal",
+      "level": "method",
+      "parent": "kneemri.kaggle.traversal_census.TraversalCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census.TraversalCensus.reads",
+      "label": "reads",
+      "level": "method",
+      "parent": "kneemri.kaggle.traversal_census.TraversalCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census.TraversalCensus.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.traversal_census.TraversalCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.traversal_census.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.traversal_census",
       "role": null
     },
     {

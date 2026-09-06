@@ -41,6 +41,7 @@ def test_ordered(tmp_path: Path):
     first = memo.ordered(acquisition)
     assert first == acquisition.ordered_files(), "the memo answers what the acquisition answers"
     assert memo.ordered(acquisition) is first, "and the second ask is the same object, not a second parse"
+    assert memo.header_opens == 1, "the counter records parses, not asks — that is what a census reads"
 
 
 def test_plane(tmp_path: Path):
@@ -51,6 +52,7 @@ def test_plane(tmp_path: Path):
     memo.plane(acquisition, "broken.dcm", None)
 
     assert memo.planes[(acquisition.series, "broken.dcm")] is None
+    assert memo.slice_opens == 1, "a failed open is still an open — the census must not read it as free"
     assert memo.opened(acquisition, "broken.dcm"), "a failure is a recorded answer, not a missing one"
 
 

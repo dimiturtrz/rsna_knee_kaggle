@@ -281,15 +281,27 @@ class FileMemo:
     planes: dict[tuple[str, str], NDArray[np.float32] | None] = field(default_factory=dict)
     orders: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
+    slice_opens: int = 0
+    """Files this memo actually decoded. Counted rather than derived from `len(planes)` so the number
+    survives being read after a memo is reused, and so a census can ask the SHIPPED path what it opened
+    instead of recomputing what it should have — a traversal that passes equality while still opening
+    the un-deduplicated count is the memo not firing, and only a counter on the memo can say so."""
+
+    header_opens: int = 0
+    """Series this memo header-parsed. The term no slice depth cuts: `ordered_files` reads every file in
+    a series to sort it, so under one memo per group it duplicates outright."""
+
     def ordered(self, acquisition: Acquisition) -> tuple[str, ...]:
         """This series' file order, header-parsed once however many groups ask for it."""
         if acquisition.series not in self.orders:
             self.orders[acquisition.series] = acquisition.ordered_files()
+            self.header_opens += 1
         return self.orders[acquisition.series]
 
     def plane(self, acquisition: Acquisition, name: str, decoded: NDArray[np.float32] | None) -> None:
         """Keep a decode, including a FAILED one — a file that will not open must not be retried."""
         self.planes[(acquisition.series, name)] = decoded
+        self.slice_opens += 1
 
     def opened(self, acquisition: Acquisition, name: str) -> bool:
         """Whether this file has already been decoded under some other group."""

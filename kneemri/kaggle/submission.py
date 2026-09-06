@@ -169,7 +169,7 @@ class Submission:
 
     @staticmethod
     def decoded_reads(
-        directory: Path, planes: dict[str, str], reads: list[Read]
+        directory: Path, planes: dict[str, str], reads: list[Read], memo: FileMemo | None = None
     ) -> list[dict[int, tuple[Tensor, Tensor]]]:
         """One study's bag for EVERY read, decoded together against one shared memo.
 
@@ -178,9 +178,13 @@ class Submission:
         BETWEEN groups, so no cache inside one decode can see it. Decoding every read of a study in one
         call makes the overlap intra-call, where a `FileMemo` collects it: header parses (band-invariant
         by construction) and slice decodes alike.
+
+        The memo is an ARGUMENT with a default rather than a local, so a caller can read back what the
+        shipped traversal opened. `traversal_census` is the only such caller: the win is a property of
+        this call, and a number recomputed beside it would be a claim about a second implementation.
         """
-        memo = FileMemo()
-        return [Submission.decoded_at(directory, planes, Submission.pipeline(read, memo), read) for read in reads]
+        shared = FileMemo() if memo is None else memo
+        return [Submission.decoded_at(directory, planes, Submission.pipeline(read, shared), read) for read in reads]
 
     @staticmethod
     def decoded_at(
