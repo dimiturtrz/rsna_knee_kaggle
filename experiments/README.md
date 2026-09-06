@@ -8520,3 +8520,48 @@ Baker's 2383). Taken anyway, because the head sits on a trunk trained by eleven 
 data, so what shrinks is the head's fit and not the representation.
 
 Card: zero. Two cpu reads of one csv.
+
+### `oof_teacher` reads 0.8681 — the best solo on disk — and the teacher's SOURCE is not the mechanism — 2026-09-06
+
+`--teacher-targets` set to OUR OWN out-of-fold predictions (`teacher_oof_corpus.npz`), `--distill-weight
+0.7` HELD from `foreign_distill_mix07`, everything else `band_dense`'s line. Twelve epochs, peak e10-e11,
+`convergence_check` clean. **0.8681 against `band_dense` 0.8578, +0.0107** — above the 0.0062 holdout
+floor and above `stackfit_s2026` 0.8631, so it is the highest solo this project owns.
+
+| per-label vs `band_dense` | | | |
+|---|---|---|---|
+| MCL **+0.0310\*** | Lateral Meniscus **+0.0250\*** | ACL **+0.0175\*** | Contusion **+0.0175\*** |
+| Baker's **+0.0094\*** | Lateral OA +0.0103 | Fracture +0.0069 | PF OA +0.0054 |
+| Effusion +0.0043 | Medial OA +0.0037 | Medial Meniscus +0.0014 | **Synovitis −0.0040** |
+
+`*` = clears the pair's own paired floor (half-widths up to ±0.0239). By structure scale: focal +0.0135,
+regional +0.0068.
+
+**THE PRE-REGISTERED PREDICTION FAILED, and that is the load-bearing part of the row.** Synovitis was
+named FIRST: it is the most miscalibrated column we own (AUC 0.819 at 51.9% FN, 84.2% of studies carrying
+`Synovitis__verdict == UNK`), so a teacher working by target-softening had to pay there. It came back
+**−0.0040**. What moved instead is MCL / Lateral Meniscus / ACL / Contusion — and `supervision_gap` reads
+the human READER at 0.84–0.99 on exactly those, i.e. the findings where the label was never the weak half
+and the MODEL was. So the mechanism this arm is evidence for is **ordering transfer on model-bottlenecked
+findings**, not calibration. The focal/regional split says the same thing from the other side.
+
+**THE SECOND CONTROL RETIRES THE ARM'S OWN PREMISE.** The arm was queued to ask whether OUR out-of-fold
+teacher beats a FOREIGN one. Read on the same holdout: `foreign_distill_s2026` 0.8595 → `foreign_distill_
+mix07_s2026` 0.8656, **+0.0061 from a foreign teacher at the same weight**; ours is +0.0107 from
+`band_dense`'s 0.8578. The two distilled members sit **0.0025 apart**, well inside the 0.0062 floor. So:
+
+- **DISTILLATION IS THE LEVER (+0.006 to +0.011), THE TEACHER'S SOURCE IS NOT.** "Our own OOF predictions
+  carry something a foreign teacher cannot" is not supported by these two arms.
+- The per-label SHAPES do differ — mix07 paid on Fracture +0.0134 and Synovitis +0.0082, ours on MCL and
+  Lateral Meniscus — which is a diversity argument for holding both, and is priced by seat value, never
+  assumed from the shapes.
+- It lowers the expected value of `foreign_distill_mix30` (queued third), whose own pre-registration
+  already predicted a null and whose teacher-seat curve reads −0.0005 at 1×. Its remaining value is as an
+  instrument on the MIXTURE ratio, not on the teacher.
+
+**What it does NOT close.** Weight and FORM are untouched: 0.7 was inherited, never fitted here, and both
+arms distil TARGETS. Whether the transferred signal is per-label confidence or inter-label correlation
+decides between a weight sweep and `--feature-weight`, and that question is out with the researcher rather
+than on the card, because it is answerable from the literature before it is answerable from the GPU.
+
+Roster: packaged with the reading beside it. Card: 84 min. knee-bq62a

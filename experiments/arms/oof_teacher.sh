@@ -38,7 +38,10 @@
 # deliberate: --distill-weight (0.7, HELD from foreign_distill_mix07)
 # bead: knee-bq62a
 # reading: oof_teacher_s2026.holdout.npz
-# control  foreign_distill_mix07 (same weight, foreign teacher), band_dense = 0.8578 solo (no teacher).
+# control  band_dense = 0.8578
+# The second control is `foreign_distill_mix07` — same distill weight, foreign teacher — which is what
+# separates "a teacher helps" from "OUR out-of-fold teacher helps". `arm_read` parses one control line
+# only, so the no-teacher solo is the one named in machine form; the teacher control is read by hand.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"

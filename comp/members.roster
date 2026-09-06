@@ -533,6 +533,16 @@ stack_increments_s2026.pt            # 0.8642
 # instrument. Seat it in `merged_blend_cf`'s position — the lone fold-0 seat, the one paying the penalty.
 stack_increments_ff.pt               # blind (--fold -1 --ema), no holdout number exists — see above
 stackfit_s2026.pt                    # 0.8631
+# `oof_teacher` is the highest solo this project owns, and the first one whose gain has a per-label
+# shape that says WHERE it came from. Distilled from our own out-of-fold predictions at weight 0.7 (the
+# weight HELD from foreign_distill_mix07), it reads +0.0107 on the mean over `band_dense` — and the gain
+# is concentrated on MCL +0.0310, Lateral Meniscus +0.0250, ACL +0.0175, Contusion +0.0175, all four
+# marked against the pair's own +/-0.0239 floor. Those are the MODEL-bottlenecked findings, the ones
+# `supervision_gap` reads the reader at 0.84-0.99 on: a teacher moves ordering where the labels were
+# never the weak half. Its ONE pre-registered prediction FAILED — Synovitis was named first and came
+# back -0.0040 — which is the reading that matters, because it says this is not a calibration effect.
+oof_teacher_s2026.pt                 # 0.8681
+
 # `recal_dense` is packaged on its solo alone and carries a warning about the seat, because pool_census
 # reads it as `calib_dense_hold`'s TWIN: identical nearest agreement (0.9496) and identical nearest
 # divergence (0.0065 bits) to four decimals, the two of them being each other's nearest neighbour out of
