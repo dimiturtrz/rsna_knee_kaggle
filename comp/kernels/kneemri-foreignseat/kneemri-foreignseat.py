@@ -226,7 +226,11 @@ def main() -> None:
         competition=competition,
         kernel=mounts.one(SOURCE, "their serving program, carried in our kit") / SOURCE,
         checkpoints=mounts.one("m_f0.pt", f"the {CHECKPOINTS} fold checkpoints"),
-        series_root=competition,
+        # Their program builds a study's path as SERIES_ROOT / study / series, so the root is the
+        # test_series DIRECTORY and not the competition mount. Version 1 passed the mount, every path
+        # under it missed, build_study returned its zero-filled default for all three visible studies,
+        # and Submission.check refused the constant table - which is the refusal doing its job.
+        series_root=competition / "test_series",
         working=foreign_scratch,
     ).run()
     if torch.cuda.is_available():
