@@ -23103,6 +23103,12 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.foreign_folds.main",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.read_studies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.main",
       "target": "kneemri.inference.foreign_folds.ForeignFolds.records",
       "weight": 1
     },
@@ -51900,6 +51906,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.ForeignFolds.read_studies",
+      "label": "read_studies",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_folds.ForeignFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.foreign_folds.ForeignFolds.records",
       "label": "records",
       "level": "method",
@@ -51918,14 +51932,6 @@
       "descendants": 0,
       "id": "kneemri.inference.foreign_folds.main",
       "label": "main",
-      "level": "method",
-      "parent": "kneemri.inference.foreign_folds",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.foreign_folds.read_studies",
-      "label": "read_studies",
       "level": "method",
       "parent": "kneemri.inference.foreign_folds",
       "role": null
