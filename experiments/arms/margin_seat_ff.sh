@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# margin_seat_ff.sh — margin_seat refit on the whole corpus, so it can sit beside the champion's six
+# without the dose confound.
+#
+# bead: knee-oizh2
+# unmeasurable: --fold -1 holds nothing back, so this member has no holdout score and no ledger row can
+#   price it. Its ruler is the board, through the entry that seats it, and nowhere else.
+#
+# WHY THIS ARM. `margin_seat` is one of the greedy-optimal seven (the best offline set this project owns,
+# 0.8764), and it has no full-fit twin. Every one of the champion's six seats is full-fit, so an entry
+# mixing this member in would be comparing a fold-held member against full-fit ones — a dose confound,
+# not a member comparison. Full-fit dose is worth about +0.007 board on this record. This arm removes the
+# confound for one seat; `finding_calib_dense_ff` removes it for the other.
+#
+# EVERY FLAG IS margin_seat's, TWO CHANGED, AND THE CHANGES ARE STATED:
+#   --fold -1        replaces the implicit fold 0. This is the whole arm.
+#   --out            a distinct file, so the fold-0 member every offline reading is about is untouched.
+#
+# deliberate: --fold -1 (the arm)
+# deliberate: --rank-weight 0 --auc-margin 1.0 (margin_seat's objective, unchanged)
+# deliberate: --slice-pooling max --slices 20 --band-low 0.1 --band-high 0.9 --backbone-lr 4e-5 (the corner, held)
+# deliberate: --epochs 12. Under --fold -1 no holdout ranks the epochs, so the epoch INDEX stands in and
+#   the budget must match the one whose peak is known.
+#
+# COST. ~75 min of card, zero slots.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train margin_seat_ff \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --rank-weight 0 --auc-margin 1.0 --fold -1 \
+  --labels "$LABELS" --out "$MODELS/margin_seat_ff.pt"

@@ -4748,6 +4748,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.pool_ceiling",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pool_ceiling",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pool_ceiling",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pool_ceiling",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pool_ceiling",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pool_ceiling",
+      "target": "kneemri.kaggle.priceable_blend",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.priceable_blend",
       "target": "core.cli",
       "weight": 1
@@ -25069,6 +25105,144 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "target": "kneemri.kaggle.pool_ceiling.CeilingReading",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.__init__",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.features",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.out_of_fold",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.features",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.candidates",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "target": "kneemri.kaggle.priceable_blend.PriceableBlend.on_the_corpus_ruler",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.readings",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.readings",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.readings",
+      "target": "kneemri.kaggle.pool_ceiling.CeilingReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.readings",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.out_of_fold",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.readings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.main",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.main",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kaggle.priceable_blend.PriceableBlend.chosen",
       "target": "kneemri.kaggle.priceable_blend.PriceableBlend.candidates",
@@ -30691,7 +30865,7 @@
       "role": null
     },
     {
-      "descendants": 241,
+      "descendants": 242,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -31747,7 +31921,7 @@
       "role": null
     },
     {
-      "descendants": 33,
+      "descendants": 34,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -31902,6 +32076,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members",
       "label": "package_members",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling",
+      "label": "pool_ceiling",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -35993,6 +36175,22 @@
       "level": "class",
       "parent": "kneemri.kaggle.package_members",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.CeilingReading",
+      "label": "CeilingReading",
+      "level": "class",
+      "parent": "kneemri.kaggle.pool_ceiling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "label": "PoolCeiling",
+      "level": "class",
+      "parent": "kneemri.kaggle.pool_ceiling",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -51704,6 +51902,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.package_members",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.features",
+      "label": "features",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.out_of_fold",
+      "label": "out_of_fold",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
+      "label": "pool",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling",
       "role": null
     },
     {
