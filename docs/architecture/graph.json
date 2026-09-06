@@ -6033,12 +6033,6 @@
     {
       "kind": "import",
       "source": "kneemri.training.flag_vocabulary",
-      "target": "core.findings",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.flag_vocabulary",
       "target": "kneemri.models.backbone",
       "weight": 1
     },
@@ -29396,8 +29390,20 @@
     },
     {
       "kind": "inherits",
+      "source": "kneemri.models.slot_head.FixedPriorSlotHead",
+      "target": "kneemri.models.slot_head.SlotHead",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
       "source": "kneemri.models.slot_head.MeanSlotHead",
       "target": "kneemri.models.slot_head.SlotHead",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.slot_head.SlotHead.__init__",
+      "target": "kneemri.models.slot_head.SlotHead.hold_prior",
       "weight": 1
     },
     {
@@ -39308,6 +39314,14 @@
       "label": "SliceRead",
       "level": "class",
       "parent": "kneemri.models.slice_read",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slot_head.FixedPriorSlotHead",
+      "label": "FixedPriorSlotHead",
+      "level": "class",
+      "parent": "kneemri.models.slot_head",
       "role": "satellite"
     },
     {
@@ -57760,6 +57774,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.slot_head.FixedPriorSlotHead.hold_prior",
+      "label": "hold_prior",
+      "level": "method",
+      "parent": "kneemri.models.slot_head.FixedPriorSlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.slot_head.MeanSlotHead.attention",
       "label": "attention",
       "level": "method",
@@ -57794,6 +57816,14 @@
       "descendants": 0,
       "id": "kneemri.models.slot_head.SlotHead.forward",
       "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.slot_head.SlotHead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.slot_head.SlotHead.hold_prior",
+      "label": "hold_prior",
       "level": "method",
       "parent": "kneemri.models.slot_head.SlotHead",
       "role": null
