@@ -4772,6 +4772,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.foreign_entry",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.foreign_entry",
+      "target": "kneemri.inference.foreign_folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.foreign_entry",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.foreign_entry",
+      "target": "kneemri.kaggle.submission",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.fp16_ties",
       "target": "core.cli",
       "weight": 1
@@ -23089,6 +23113,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.main",
+      "target": "kneemri.inference.foreign_source.ForeignModule.inject",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.inference.foreign_holdout.ForeignHoldout",
       "target": "kneemri.inference.foreign_member.ForeignMember",
@@ -25594,6 +25624,66 @@
       "kind": "calls",
       "source": "kneemri.kaggle.entry_offline.main",
       "target": "kneemri.kaggle.entry_offline.EntryOffline.written",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry",
+      "target": "kneemri.kaggle.submission.Split",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.ranked",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.module",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.nets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.records",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.serve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "target": "kneemri.kaggle.foreign_entry.ForeignEntry.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "target": "kneemri.kaggle.foreign_entry.ForeignEntry.table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.foreign_entry.ForeignEntry.table",
+      "target": "kneemri.kaggle.submission.Submission.check",
       "weight": 1
     },
     {
@@ -32473,7 +32563,7 @@
       "role": null
     },
     {
-      "descendants": 253,
+      "descendants": 254,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -33577,7 +33667,7 @@
       "role": null
     },
     {
-      "descendants": 39,
+      "descendants": 40,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -33660,6 +33750,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.entry_offline",
       "label": "entry_offline",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.foreign_entry",
+      "label": "foreign_entry",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -37863,6 +37961,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.entry_offline",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.foreign_entry.ForeignEntry",
+      "label": "ForeignEntry",
+      "level": "class",
+      "parent": "kneemri.kaggle.foreign_entry",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -51818,6 +51924,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.read_studies",
+      "label": "read_studies",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_folds",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.foreign_head.ForeignHead.__init__",
       "label": "__init__",
       "level": "method",
@@ -53854,6 +53968,30 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.entry_offline",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.foreign_entry.ForeignEntry.ranked",
+      "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.kaggle.foreign_entry.ForeignEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.foreign_entry.ForeignEntry.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.kaggle.foreign_entry.ForeignEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.foreign_entry.ForeignEntry.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.kaggle.foreign_entry.ForeignEntry",
       "role": null
     },
     {

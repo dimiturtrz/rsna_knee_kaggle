@@ -85,3 +85,31 @@ def test_align(tmp_path: Path) -> None:
     """Records that carry no holdout array are a harness fault, and must not read as a null census."""
     with pytest.raises(ValueError, match="carries a holdout array"):
         LabelContradiction.align(pd.DataFrame(index=pd.Index([], name=STUDY)), [tmp_path / "absent.holdout.npz"])
+
+
+def _record(path: Path, studies: list[str], value: float) -> Path:
+    width = len(TARGETS)
+    np.savez(
+        path,
+        studies=np.array(studies),
+        predictions=np.full((len(studies), width), value, np.float64),
+        truth=np.zeros((len(studies), width), np.float32),
+        epoch=np.array(1),
+        source=np.array("test"),
+    )
+    return path
+
+
+def test_align_unions_complementary_records(tmp_path: Path) -> None:
+    """Records holding out DISJOINT folds cover the corpus together; an intersection would cover nothing."""
+    verdicts = {f"{target}{VERDICT_SUFFIX}": [POSITIVE, POSITIVE] for target in TARGETS}
+    table = pd.DataFrame({STUDY: ["a", "b"], **verdicts}).set_index(STUDY)
+    census = LabelContradiction.align(
+        table,
+        [
+            _record(tmp_path / "one.holdout.npz", ["a"], 0.9),
+            _record(tmp_path / "two.holdout.npz", ["b"], 0.9),
+        ],
+    )
+    assert census.predicted.shape == (2, len(TARGETS)), "both folds' studies are present, not their overlap"
+    assert census.candidates().all(), "reader and model both call positive where the label says negative"

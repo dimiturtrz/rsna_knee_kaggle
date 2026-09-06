@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from core.findings import STUDY
@@ -53,3 +54,13 @@ def test_records(tmp_path: Path) -> None:
     by = ForeignFolds.records(series, ["a"])
     assert set(by) == {"a"}, "a study we did not ask for is not decoded"
     assert [row["SeriesInstanceUID"] for row in by["a"]] == ["s1", "s2"]
+
+
+def test_read_studies(tmp_path: Path) -> None:
+    """A holdout npz names the 909; a CSV names the corpus, deduplicated and in file order."""
+    npz = tmp_path / "holdout.npz"
+    np.savez(npz, studies=np.array(["b", "a"]))
+    assert ForeignFolds.read_studies(npz) == ["b", "a"]
+    csv = tmp_path / "train.csv"
+    pd.DataFrame({STUDY: ["a", "a", "c"]}).to_csv(csv, index=False)
+    assert ForeignFolds.read_studies(csv) == ["a", "c"], "a study listed twice is served once"

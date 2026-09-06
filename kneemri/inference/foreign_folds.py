@@ -164,6 +164,20 @@ class ForeignFolds:
         return built
 
     @staticmethod
+    def read_studies(path: Path) -> list[str]:
+        """The study list to serve: a holdout npz for the 909, or a CSV when the subject is the whole corpus.
+
+        Both are needed and neither substitutes for the other. A holdout npz names the studies ONE run held
+        out, which is what pricing this family against ours is read on. But the corpus-wide reading — a
+        strong out-of-sample opinion on every study, which is what a label correction needs before it can
+        touch a training row — has no npz to come from: their five folds hold out all 4407 between them by
+        THEIR split, and nothing on our side ever wrote that list.
+        """
+        if path.suffix == ".npz":
+            return [str(one) for one in np.load(path, allow_pickle=True)["studies"]]
+        return [str(one) for one in pd.read_csv(path)[STUDY].drop_duplicates().tolist()]
+
+    @staticmethod
     def records(series: pd.DataFrame, studies: list[str]) -> dict[str, list[dict[str, object]]]:
         """Their `by`: each study's series rows as dicts, which is what their `build_study` reads."""
         wanted = series[series[STUDY].isin(set(studies))]
@@ -210,7 +224,7 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    studies = [str(one) for one in np.load(arguments.studies, allow_pickle=True)["studies"]]
+    studies = ForeignFolds.read_studies(arguments.studies)
     folds = ForeignFolds(arguments.kernel, arguments.checkpoints, arguments.series_root)
     module = folds.module()
     if arguments.band:

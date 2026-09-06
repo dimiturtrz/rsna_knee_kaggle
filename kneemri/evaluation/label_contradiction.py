@@ -56,30 +56,40 @@ class LabelContradiction:
 
     @classmethod
     def align(cls, table: pd.DataFrame, records: list[Path]) -> "LabelContradiction":
-        """Pair the reader's verdicts with the mean out-of-sample prediction over the shared studies.
+        """Pair the reader's verdicts with the mean out-of-sample prediction, over the UNION of the records.
 
-        The predictions are averaged across records BEFORE the comparison, which is the same LogitAverage
-        the pool is scored under — one member's opinion is noisier than the pool's, and the point of the
-        conjunction is that the second instrument be a strong one.
+        Each study is averaged across the records that HOLD IT OUT, and studies covered by one record are
+        kept beside studies covered by five. Averaging first is the same LogitAverage the pool is scored
+        under: one member's opinion is noisier than the pool's, and the conjunction is only worth drawing
+        if the second instrument is a strong one.
+
+        UNION RATHER THAN INTERSECTION, because the records that cover the CORPUS are complementary by
+        construction. Every one of the 263 fold-0 records on disk holds out the same 909 studies, so an
+        intersection was the whole answer while fold 0 was the only fold — and it silently became the
+        empty set the moment `oof_folds` produced four disjoint fifths, which is the exact set of records
+        the corpus-wide census needs. A census that cannot read complementary folds cannot leave the
+        holdout, and a correction that never leaves the holdout cannot move a training label.
         """
         readings = [reading for record in records if (reading := HoldoutRecord(record).read()) is not None]
         if not readings:
             message = f"none of the {len(records)} named records carries a holdout array"
             raise ValueError(message)
-        shared = sorted(set.intersection(*[set(reading.studies) for reading in readings]) & set(table.index))
-        stacked = []
+        covered = sorted(set().union(*[set(reading.studies) for reading in readings]) & set(table.index))
+        opinions: dict[str, list[NDArray[np.float64]]] = {study: [] for study in covered}
+        truths: dict[str, NDArray[np.float32]] = {}
         for reading in readings:
-            order = {study: position for position, study in enumerate(reading.studies)}
-            stacked.append(reading.predictions[[order[study] for study in shared]])
-        first = readings[0]
-        order = {study: position for position, study in enumerate(first.studies)}
-        truth = first.truth[[order[study] for study in shared]]
-        rows = table.loc[shared]
+            for position, study in enumerate(reading.studies):
+                if study in opinions:
+                    opinions[study].append(reading.predictions[position].astype(np.float64))
+                    truths[study] = reading.truth[position]
+        stacked = [np.mean(opinions[study], axis=0) for study in covered]
+        truth = np.stack([truths[study] for study in covered])
+        rows = table.loc[covered]
         verdicts = np.column_stack([rows[f"{target}{VERDICT_SUFFIX}"].to_numpy(str) for target in TARGETS])
         return cls(
             spoke=verdicts != SILENT,
             read_positive=verdicts == POSITIVE,
-            predicted=np.mean(stacked, axis=0),
+            predicted=np.stack(stacked),
             truth=truth,
         )
 

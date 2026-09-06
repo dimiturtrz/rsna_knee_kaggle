@@ -28,6 +28,19 @@ _PACKAGES = ("kneemri", "core")
 _SOURCE_DIR = "kneemri_src"
 
 
+def _copy_extras(extras: list[Path], out: Path) -> None:
+    """Copy each named file into the kit root, refusing a name that is not a file.
+
+    Refused rather than skipped because the caller names these by hand on a command line, and a
+    mistyped path that copies nothing builds a kit that passes every other check and drops a member
+    inside the kernel — the failure `--wheels` already cost a slot to learn.
+    """
+    for extra in extras:
+        if not extra.is_file():
+            raise SystemExit(f"--extra {extra} is not a file")
+        shutil.copy2(extra, out / extra.name)
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     ap = argparse.ArgumentParser(description=__doc__)
@@ -59,6 +72,17 @@ def main() -> None:
         help="dir holding the offline dependency wheels the Kaggle image lacks",
     )
     ap.add_argument("--processed", type=Path, default=None, help="processed data dir holding the weight files")
+    # A FILE THAT IS NEITHER OURS NOR A WEIGHT, and the kernel cannot reach any other way. `kernel_sources`
+    # mounts a kernel's OUTPUT, not its source, so a lifted foreign program has no route into a no-internet
+    # kernel except this one. It also carries the licence texts that route with the materials they cover:
+    # the DINOv3 Agreement travels beside the weights it grants, which is the condition, not a courtesy.
+    ap.add_argument(
+        "--extra",
+        nargs="*",
+        type=Path,
+        default=[],
+        help="files copied verbatim into the kit root (foreign source, licences)",
+    )
     arguments = ap.parse_args()
     if arguments.weights and arguments.processed is None:
         ap.error("--weights needs --processed to say where the files live")
@@ -84,6 +108,7 @@ def main() -> None:
             shutil.copy2(wheel, out / wheel.name)
     for weight in arguments.weights:
         shutil.copy2(arguments.processed / weight, out / weight)
+    _copy_extras(arguments.extra, out)
     (out / "dataset-metadata.json").write_text(
         json.dumps({"title": "kneemri-kit", "id": _DATASET_ID, "licenses": [{"name": "CC0-1.0"}]}, indent=2)
     )
@@ -125,7 +150,10 @@ def main() -> None:
     wheels = [w.name for w in out.glob("*.whl")]
     weights = list(arguments.weights)
     stamp = f"{revision} (DIRTY)" if dirty else revision
-    logger.info(f"kit at {out} from {stamp}: src={','.join(_PACKAGES)} wheels={wheels} weights={weights}")
+    extras = [extra.name for extra in arguments.extra]
+    logger.info(
+        f"kit at {out} from {stamp}: src={','.join(_PACKAGES)} wheels={wheels} weights={weights} extra={extras}"
+    )
     logger.info(f"push a new version:\n  kaggle datasets version -p {out} -m '<message>' --dir-mode zip")
 
 
