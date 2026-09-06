@@ -26593,6 +26593,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.main",
+      "target": "kneemri.kaggle.ruler_swap.RulerSwap.roster_members",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.run_check.KernelLog",
       "target": "kneemri.kaggle.run_check.KernelLog",
@@ -53410,6 +53416,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.ruler_swap.RulerSwap.roster_members",
+      "label": "roster_members",
+      "level": "method",
+      "parent": "kneemri.kaggle.ruler_swap.RulerSwap",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.ruler_swap.RulerSwap.scored",
       "label": "scored",
       "level": "method",
@@ -53436,14 +53450,6 @@
       "descendants": 0,
       "id": "kneemri.kaggle.ruler_swap.main",
       "label": "main",
-      "level": "method",
-      "parent": "kneemri.kaggle.ruler_swap",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.ruler_swap.roster_members",
-      "label": "roster_members",
       "level": "method",
       "parent": "kneemri.kaggle.ruler_swap",
       "role": null
