@@ -43,11 +43,13 @@ from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.vote import (
     CHANCE,
+    SHARPNESS,
     LabelQualityRank,
     LogitAverage,
     MedianLogit,
     QualityWeightedRank,
     RankAverage,
+    SharpenedRank,
     Vote,
 )
 
@@ -130,6 +132,7 @@ class VoteCeiling:
             LabelQualityRank(fitted),
             LogitAverage(),
             MedianLogit(),
+            *[SharpenedRank(sharpness) for sharpness in SHARPNESS],
         ]
 
     def scored(self, scores: LabelScores, rule: Vote, on: NDArray[np.bool_]) -> float:

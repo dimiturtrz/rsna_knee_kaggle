@@ -80,3 +80,36 @@ denominator.
   the same column quality is worth MORE than the sweep says — the ceiling bounds the column CONTRIBUTION,
   not the member.
 - It says nothing about whether the columns are liftable. That is still `lean_weak_columns`'s question.
+
+## Addendum, 05:19Z — the tie-structure lever it exposed is CLOSED, and it cost no card
+
+The sweep above found that AUC does not determine a seat: identical 1.0000 columns were worth +0.0041
+and +0.0074 depending only on whether the column was tied inside each class. That is a lever over members
+ALREADY OWNED if it generalises, so it was priced immediately.
+
+`SharpenedRank(k)` bends each member's ranks through a logistic centred on the median before averaging —
+the flat rule is its own `k → 0` limit (an affine map of every member's ranks averages to an affine map of
+the mean, and AUC is invariant under it), and large `k` drives every member toward the two-level vote that
+was worth double. It fits nothing, so its honest and fit-on-self readings are identical by construction.
+`vote_ceiling` reads it on the split half:
+
+```
+over 109 members                    over the greedy-optimal seven
+  RankAverage        0.8713           RankAverage        0.8764
+  LogitAverage       0.8721 (+0.0008) LogitAverage       0.8766 (+0.0002)
+  SharpenedRank(2)   0.8712 (-0.0001) SharpenedRank(2)   0.8764 (-0.0001)
+  SharpenedRank(4)   0.8710 (-0.0002) SharpenedRank(4)   0.8762 (-0.0003)
+  SharpenedRank(8)   0.8704 (-0.0009) SharpenedRank(8)   0.8755 (-0.0010)
+  SharpenedRank(16)  0.8675 (-0.0038) SharpenedRank(16)  0.8740 (-0.0024)
+```
+
+**Monotonically negative at both pool sizes.** The lever is closed, and the mechanism says why it had to
+be: a tied column is worth more only when the column is RIGHT. Binarising a perfect ordering loses
+nothing and buys vote mass; binarising a 0.83 ordering throws away the within-class information that is
+the only thing separating it from a coin. The synthetic oracle had the first case and no member here has
+it. So the +0.0074 row is confirmed as an artefact of perfection rather than a shape worth copying — which
+is the more useful reading of it, because it means the ceiling this document reports is the +0.0041 one.
+
+Incidentally the flat rule reads **0.8764** on the greedy-optimal seven here, the same number
+`seat_requirement.DEFAULT_BASE` records from a different tool and a different path. The ruler agrees with
+itself.

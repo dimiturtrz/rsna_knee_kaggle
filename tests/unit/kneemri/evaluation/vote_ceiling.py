@@ -69,6 +69,10 @@ def test_rules():
         "LabelQualityRank",
         "LogitAverage",
         "MedianLogit",
+        "SharpenedRank(2)",
+        "SharpenedRank(4)",
+        "SharpenedRank(8)",
+        "SharpenedRank(16)",
     ]
 
 

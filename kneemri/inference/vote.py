@@ -58,6 +58,15 @@ PROBABILITY_FLOOR = 1e-6
 carries the ensemble alone. bf16 training and fp16 serving both make a saturated sigmoid reachable."""
 
 
+SHARPNESS = (2.0, 4.0, 8.0, 16.0)
+"""The sharpnesses `vote_ceiling` reads. Legislated, spanning nearly-flat to nearly-binary: the flat rule
+is k=0 by construction, and 16 already squashes 90% of the rank range into the two tails, so a grid past
+it measures the same two-level vote twice."""
+
+RANK_MIDPOINT = 0.5
+"""Where `Vote.ranks` puts the median study, so a squash centred here bends both tails alike."""
+
+
 class Vote(ABC):
     """One rule for turning several members' per-study, per-label scores into one table.
 
@@ -135,6 +144,56 @@ class RankAverage(Vote):
                 ]
             )
         )
+
+
+class SharpenedRank(Vote):
+    """Rank-average after a MONOTONE squash of each member's ranks — the same order, a different vote.
+
+    Every rank rule in this module is LINEAR in the ranks: the flat one averages them, the weighted ones
+    average them with coefficients. So a member's say is uniform across its own ordering, and moving a
+    study from the 10th percentile to the 11th counts exactly as much as moving it from the 49th to the
+    50th. That is an assumption nobody here has ever tested, and `column_lift` (2026-09-06) tripped over
+    the evidence against it: a synthetic column at AUC 1.0000 was worth +0.0041 when it carried an
+    ordinary within-class ordering and +0.0074 when it was BINARY and tied every study inside a class.
+    Identical AUC, twice the seat. The rank-average was reading the shape of the ordering, not only the
+    ordering.
+
+    This is that shape as a knob. `sharpness` k passes the ranks through a logistic centred on the
+    median, so a large k pushes every member toward a two-level vote (the tied binary column that was
+    worth double) and a small k leaves the flat rule untouched. Untouched exactly: as k goes to zero the
+    logistic becomes affine in the rank, an affine map of every member's ranks averages to an affine map
+    of the mean, and AUC is invariant under it. So k is a deviation FROM the shipped rule with the
+    shipped rule as its own limit — there is no separate null to fit or trust.
+
+    IT FITS NOTHING, which is what separates it from the weighting family. `QualityWeightedRank` and
+    `LabelQualityRank` buy their gain with parameters read off a holdout and have to be split-half tested
+    for that reason. k is one legislated number applied identically to every member and every label; its
+    honest and fit-on-self readings are the same number by construction.
+    """
+
+    def __init__(self, sharpness: float) -> None:
+        self.sharpness = sharpness
+
+    @override
+    def named(self) -> str:
+        """The rule AND its strength, because two sharpnesses are two rules and a bare name hides which ran."""
+        return f"SharpenedRank({self.sharpness:g})"
+
+    def squashed(self, ranks: NDArray[np.float64]) -> NDArray[np.float64]:
+        """Ranks in [0, 1] bent toward a two-level vote, centred so the median is the pivot."""
+        return 1 / (1 + np.exp(-self.sharpness * (ranks - RANK_MIDPOINT)))
+
+    @override
+    def combine(self, per_member: list[NDArray[np.float64]]) -> NDArray[np.float64]:
+        """Squashed ranks averaged equally — and a lone member returned untouched, as the flat rule does.
+
+        Untouched for the flat rule's reason and one of its own: with a single member the squash is a
+        monotone map of that member's own scores, so it changes every value a submission carries and no
+        order at all.
+        """
+        if len(per_member) == 1:
+            return per_member[0]
+        return np.stack([self.squashed(self.ranks(member)) for member in per_member]).mean(0)
 
 
 class QualityWeightedRank(Vote):

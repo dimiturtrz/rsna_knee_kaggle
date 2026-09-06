@@ -19867,6 +19867,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.rules",
+      "target": "kneemri.inference.vote.SharpenedRank",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.vote_ceiling.VoteCeiling.scored",
       "target": "kneemri.evaluation.scores.LabelScores.per_label",
@@ -23535,6 +23541,24 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.vote.RankAverage.combine",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.inference.vote.SharpenedRank",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.vote.SharpenedRank.combine",
+      "target": "kneemri.inference.vote.SharpenedRank.squashed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.vote.SharpenedRank.combine",
       "target": "kneemri.inference.vote.Vote.ranks",
       "weight": 1
     },
@@ -36146,6 +36170,14 @@
       "descendants": 0,
       "id": "kneemri.inference.vote.RankAverage",
       "label": "RankAverage",
+      "level": "class",
+      "parent": "kneemri.inference.vote",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.SharpenedRank",
+      "label": "SharpenedRank",
       "level": "class",
       "parent": "kneemri.inference.vote",
       "role": "satellite"
@@ -50836,6 +50868,38 @@
       "label": "combine",
       "level": "method",
       "parent": "kneemri.inference.vote.RankAverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.SharpenedRank.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.vote.SharpenedRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.SharpenedRank.combine",
+      "label": "combine",
+      "level": "method",
+      "parent": "kneemri.inference.vote.SharpenedRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.SharpenedRank.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.inference.vote.SharpenedRank",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.vote.SharpenedRank.squashed",
+      "label": "squashed",
+      "level": "method",
+      "parent": "kneemri.inference.vote.SharpenedRank",
       "role": null
     },
     {

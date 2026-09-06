@@ -9,11 +9,16 @@ from kneemri.inference.vote import (
     MedianLogit,
     QualityWeightedRank,
     RankAverage,
+    SharpenedRank,
     Vote,
 )
 
 STUDIES = 40
 LABELS = 3
+
+
+NEARLY_IDENTICAL = 0.99
+"""How closely a nearly-flat squash must track the flat rule, given ties broken by array position."""
 
 
 def _members(count: int, seed: int = 2026) -> list[NDArray[np.float64]]:
@@ -66,7 +71,7 @@ def test_ranks():
     assert ranked[:, 1].tolist() == [0.0, 1.0, 0.5], "the second label orders on its own values"
 
 
-def test_named():
+def test_vote_named():
     """A rule names itself, so a reported number can carry the rule that produced it."""
     assert RankAverage().named() == "RankAverage"
     assert LogitAverage().named() == "LogitAverage"
@@ -166,3 +171,36 @@ def test_label_quality_rank_votes_flat_on_a_label_nobody_beats_chance_on():
 
     assert rule.weights[:, 2] == pytest.approx([1 / 3, 1 / 3, 1 / 3])
     assert rule.weights[:, 0] == pytest.approx([1 / 3, 1 / 3, 1 / 3]), "equal knowledge is equal say"
+
+
+def test_sharpened_rank_named():
+    """The strength is IN the name, because two sharpnesses are two rules in one comparison."""
+    assert SharpenedRank(8.0).named() == "SharpenedRank(8)"
+
+
+def test_sharpened_rank_squashed():
+    """A monotone bend around the median: the tails move toward 0 and 1, the median does not move."""
+    squashed = SharpenedRank(8.0).squashed(np.array([[0.0], [0.5], [1.0]]))
+
+    assert squashed[1, 0] == pytest.approx(0.5), "the median is the pivot"
+    assert squashed[0, 0] < 0.5 < squashed[2, 0]
+    assert squashed[2, 0] - squashed[1, 0] < 0.5 - 0.0, "the bend compresses the range it is applied to"
+
+
+def test_sharpened_rank_combine():
+    """Nearly flat sharpening reproduces the flat rule's ORDER, which is what makes k a deviation from it.
+
+    Not its values — a logistic is affine only in the limit — so the check is on the ordering the metric
+    reads, through the rank correlation rather than through `argsort`: a flat rank-average of three
+    members ties by construction and `argsort` settles a tie by position, which would make this test read
+    array order rather than agreement. It is a floor and not an equality for the same reason: those ties
+    are re-broken by array position inside `Vote.ranks`, which uses ordinal ranks (knee ranks-tie bead),
+    so two orderings that agree everywhere the values differ still correlate at 0.998 and not at 1.
+    """
+    members = _members(3)
+
+    gentle = SharpenedRank(1e-3).combine(members)
+    flat = RankAverage().combine(members)
+
+    assert RankAverage.agreement(gentle, flat) > NEARLY_IDENTICAL
+    assert np.array_equal(SharpenedRank(8.0).combine(members[:1]), members[0]), "a lone member is untouched"
