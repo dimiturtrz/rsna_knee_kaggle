@@ -117,8 +117,14 @@ class ReadingDrift:
         return any(self.models.glob(f"{arm.name}{CHECKPOINT_GLOB_SUFFIX}"))
 
     def found(self, glob: str) -> bool:
-        """Whether a declared glob matches anything, under the processed root or under the repo."""
-        return any(self.processed.glob(glob)) or any(Path().glob(glob))
+        """Whether a declared glob matches anything, under the models or processed root, or under the repo.
+
+        THE MODELS ROOT IS WHERE A HOLDOUT ARRAY LIVES, and it was missing here until 2026-09-06: a run
+        writes `<checkpoint>.holdout.npz` beside its `.pt`, so every arm whose ruler is its own holdout
+        record read as DECLARED-AND-MISSING the moment it finished. `foreign_recipe` was refused with its
+        `.holdout.npz` on disk, which is the failure mode that teaches a check to be ignored.
+        """
+        return any(self.models.glob(glob)) or any(self.processed.glob(glob)) or any(Path().glob(glob))
 
     def missing(self) -> list[str]:
         """Arms that ran and whose own declared artefact is not there — the recal_dense shape."""

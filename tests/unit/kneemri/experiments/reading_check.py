@@ -70,6 +70,14 @@ def test_found(tmp_path: Path) -> None:
     assert drift.found("gold/one*")
 
 
+def test_found_in_models(tmp_path: Path) -> None:
+    """A holdout array lives beside its checkpoint in the MODELS root, which is the commonest ruler there is."""
+    drift = _drift(tmp_path)
+    assert not drift.found("one_*sl_s2026.holdout.npz")
+    (drift.models / "one_20sl_s2026.holdout.npz").write_bytes(b"")
+    assert drift.found("one_*sl_s2026.holdout.npz")
+
+
 def test_missing(tmp_path: Path) -> None:
     drift = _drift(tmp_path)
     _arm(drift.arms, "one", "# reading: gold/one*\n")

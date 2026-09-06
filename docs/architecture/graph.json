@@ -1832,6 +1832,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_price",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_price",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_price",
+      "target": "kneemri.evaluation.foreign_split",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_price",
+      "target": "kneemri.evaluation.protocol_prior",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_price",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_ruler",
       "target": "core.cli",
       "weight": 1
@@ -4042,6 +4072,24 @@
       "kind": "import",
       "source": "kneemri.inference.ensemble",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.foreign_folds",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.foreign_folds",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.foreign_folds",
+      "target": "kneemri.inference.foreign_source",
       "weight": 1
     },
     {
@@ -13591,6 +13639,84 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "target": "kneemri.evaluation.foreign_split.ForeignSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.lines",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.lines",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.solo",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.lines",
+      "target": "kneemri.evaluation.foreign_split.ForeignSplit.sizes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.macro",
+      "target": "kneemri.evaluation.protocol_prior.Ordering.auc",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.pooled",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.macro",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.pooled",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.matched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.solo",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.macro",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.ForeignPrice.solo",
+      "target": "kneemri.evaluation.foreign_split.ForeignSplit.out_of_sample",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_price.main",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.main",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.lines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.main",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.matched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_price.main",
+      "target": "kneemri.evaluation.foreign_split.ForeignSplit.of",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.foreign_ruler.ForeignReading",
       "target": "kneemri.evaluation.foreign_ruler.ForeignReading",
@@ -22909,6 +23035,60 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.ForeignFolds.module",
+      "target": "kneemri.inference.foreign_source.ForeignModule.inject",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.foreign_folds.ForeignFolds.module",
+      "target": "kneemri.inference.foreign_source.ForeignSource",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.ForeignFolds.module",
+      "target": "kneemri.inference.foreign_source.ForeignSource.lift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.ForeignFolds.nets",
+      "target": "kneemri.inference.foreign_source.ForeignModule.inject",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.foreign_folds.main",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.main",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.module",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.main",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.nets",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.main",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.records",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_folds.main",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.serve",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.inference.foreign_holdout.ForeignHoldout",
       "target": "kneemri.inference.foreign_member.ForeignMember",
@@ -23110,6 +23290,12 @@
       "kind": "calls",
       "source": "kneemri.inference.foreign_source.ForeignSource.lift",
       "target": "kneemri.inference.foreign_source.ForeignSource._first_definitions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.foreign_source.ForeignSource.lift",
+      "target": "kneemri.inference.foreign_source.ForeignSource._start",
       "weight": 1
     },
     {
@@ -32287,7 +32473,7 @@
       "role": null
     },
     {
-      "descendants": 251,
+      "descendants": 253,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -32351,7 +32537,7 @@
       "role": null
     },
     {
-      "descendants": 84,
+      "descendants": 85,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -32482,6 +32668,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.foreign_overlap",
       "label": "foreign_overlap",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price",
+      "label": "foreign_price",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -33199,7 +33393,7 @@
       "role": null
     },
     {
-      "descendants": 21,
+      "descendants": 22,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
@@ -33226,6 +33420,14 @@
       "descendants": 0,
       "id": "kneemri.inference.ensemble",
       "label": "ensemble",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_folds",
+      "label": "foreign_folds",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -35704,6 +35906,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "label": "ForeignPrice",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_price",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_ruler.ForeignReading",
       "label": "ForeignReading",
       "level": "class",
@@ -37164,6 +37374,14 @@
       "label": "SharedRead",
       "level": "class",
       "parent": "kneemri.inference.ensemble",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.ForeignFolds",
+      "label": "ForeignFolds",
+      "level": "class",
+      "parent": "kneemri.inference.foreign_folds",
       "role": "satellite"
     },
     {
@@ -45000,6 +45218,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price.ForeignPrice.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price.ForeignPrice.macro",
+      "label": "macro",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price.ForeignPrice.matched",
+      "label": "matched",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price.ForeignPrice.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price.ForeignPrice.solo",
+      "label": "solo",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_price.ForeignPrice",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_price.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_price",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_ruler.ForeignReading.load",
       "label": "load",
       "level": "method",
@@ -51512,6 +51778,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.ForeignFolds.module",
+      "label": "module",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_folds.ForeignFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.ForeignFolds.nets",
+      "label": "nets",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_folds.ForeignFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.ForeignFolds.records",
+      "label": "records",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_folds.ForeignFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.ForeignFolds.serve",
+      "label": "serve",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_folds.ForeignFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_folds.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_folds",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.foreign_head.ForeignHead.__init__",
       "label": "__init__",
       "level": "method",
@@ -51682,6 +51988,14 @@
       "descendants": 0,
       "id": "kneemri.inference.foreign_source.ForeignSource._in_scope",
       "label": "_in_scope",
+      "level": "method",
+      "parent": "kneemri.inference.foreign_source.ForeignSource",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.foreign_source.ForeignSource._start",
+      "label": "_start",
       "level": "method",
       "parent": "kneemri.inference.foreign_source.ForeignSource",
       "role": null

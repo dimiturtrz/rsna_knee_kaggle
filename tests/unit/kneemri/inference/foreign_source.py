@@ -73,6 +73,20 @@ def test_lift(tmp_path: Path) -> None:
     assert "preds = render" not in lifted.source, "a top-level statement that RUNS is not a lifted symbol"
 
 
+def test_start(tmp_path: Path) -> None:
+    """A decorated definition is cut from its `@`, not from its `def` — `ast` puts `lineno` on the `def`.
+
+    Their `_micro` is `@torch.no_grad()`. Lifted without it, their serving loop builds a graph and dies
+    on `Can't call numpy() on Tensor that requires grad`; a decorator that changed values instead of
+    raising would not have announced itself at all.
+    """
+    kernel = tmp_path / "decorated.py"
+    kernel.write_text("import functools\n\n\n@functools.cache\ndef once(value):\n    return value\n", encoding="utf-8")
+    lifted = ForeignSource(kernel, header="import functools\n").lift(["once"])
+    assert "@functools.cache" in lifted.source
+    assert lifted.build().once.__wrapped__ is not None, "the decorator is applied, not merely present"
+
+
 def test_lift_missing(tmp_path: Path) -> None:
     """A name the ported program does not define means the kernel moved under the port; that is a fault."""
     with pytest.raises(KeyError, match="defines none of"):

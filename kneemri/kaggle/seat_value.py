@@ -100,10 +100,17 @@ whether a member ships went dark as a side effect of the board improving (knee-1
 class SeatValue:
     """The pinned champion's members, and what each candidate would add to them."""
 
-    def __init__(self, champion: Champion, processed: Path, board: Path = BOARD) -> None:
+    def __init__(self, champion: Champion, processed: Path, board: Path = BOARD, *, foreign: bool = False) -> None:
         self.champion = champion
         self.processed = processed
         self.board = board
+        self.foreign = foreign
+        """Whether a candidate whose weights and decode are someone else's may take a seat here.
+
+        Off by default because a foreign record is priced on OUR holdout while its author chose the
+        studies it trained on, so it must be argued for once (see `foreign_price`, which reads each
+        released fold only on the studies that fold held out) before it is read like one of ours.
+        """
 
     def roster(self) -> list[Path]:
         """The champion's members as checkpoints on disk.
@@ -178,7 +185,7 @@ class SeatValue:
         if len(roster) < PRICEABLE:
             return self.unpriceable(roster, unscoreable)
         named = [self.named(candidate) for candidate in candidates]
-        mixed = RecordMix(list(dict.fromkeys([*roster, *named]))).per_member()
+        mixed = RecordMix(list(dict.fromkeys([*roster, *named])), foreign=self.foreign).per_member()
         curve = MemberCurve(LabelScores(), combine_seed)
         held, rest = mixed.split(roster)
         denominator = (
@@ -206,11 +213,16 @@ def main() -> None:
         default=None,
         help="board entry id to price against instead of the pinned champion (see comp/board.jsonl)",
     )
+    command.parser.add_argument(
+        "--foreign",
+        action="store_true",
+        help="also price candidates whose weights and decode are someone else's",
+    )
     arguments = command.parsed()
 
     champion = Champion.from_board(arguments.against) if arguments.against else Champion.recorded()
     logger.info("%s scored %.3f on the board with %d members", champion.entry, champion.board, len(champion.members))
-    seats = SeatValue(champion, command.rooted(arguments).models())
+    seats = SeatValue(champion, command.rooted(arguments).models(), foreign=arguments.foreign)
     command.report(seats.report(arguments.candidates, arguments.combine_seed))
 
 

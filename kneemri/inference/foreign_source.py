@@ -120,6 +120,19 @@ class ForeignSource:
         """Where each symbol the kernel offers is cut from."""
         return self._first_definitions(self.tree())
 
+    @staticmethod
+    def _start(node: ast.stmt) -> int:
+        """The first line of a definition INCLUDING its decorators.
+
+        `ast` puts a decorated function's `lineno` on the `def`, not on the `@`, so cutting at `lineno`
+        silently drops every decorator. That is not a formatting loss: their `_micro` is
+        `@torch.no_grad()`, and lifted without it their serving loop builds a graph and dies on
+        `Can't call numpy() on Tensor that requires grad` — the visible half of the failure. The
+        invisible half is a decorator that changes VALUES rather than raising.
+        """
+        decorators = getattr(node, "decorator_list", [])
+        return min([node.lineno, *[one.lineno for one in decorators]])
+
     def lift(self, names: list[str]) -> ForeignModule:
         """Cut the named symbols out in FILE order, so a definition still precedes its first use.
 
@@ -133,7 +146,7 @@ class ForeignSource:
             raise KeyError(message)
         wanted = {id(definitions[name]) for name in names}
         lines = self.path.read_text(encoding="utf-8").splitlines()
-        blocks = ["\n".join(lines[node.lineno - 1 : node.end_lineno]) for node in tree.body if id(node) in wanted]
+        blocks = ["\n".join(lines[self._start(node) - 1 : node.end_lineno]) for node in tree.body if id(node) in wanted]
         return ForeignModule(name=self.path.stem, source="\n\n".join([self.header, *blocks]))
 
 
