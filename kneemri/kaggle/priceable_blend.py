@@ -22,13 +22,23 @@ a greedy answer is comparable to the entries already on the board rather than be
 object. The stopping rule is a gain under `MIN_GAIN`, not a fixed width, because a blend that stops
 improving has found its own size.
 
-THE NUMBER THIS PRINTS IS NOT A SEAT ARGUMENT, and `--optimism` now says by how much. Selecting on 455
-of the 909 holdout studies and pricing on the 454 it never saw reads 0.8841 against 0.8641: **+0.0201**,
-larger than the entire +0.0121 the seven seats buy over the best single member. Run on half the studies
-the search accepts a six-seat blend sharing only two members with the five it accepts on all of them, so
-the search does not reproduce on its own ruler. SUBTRACT the optimism before comparing a searched offline
-with an unsearched one, and read the raw number as a CEILING rather than an estimate: an arm that cannot
-beat this pool's best member is not going to move an entry built from it.
+THE NUMBER THIS PRINTS IS NOT A SEAT ARGUMENT, and `--optimism` says by how much. AT THE DEFAULT TEN
+FOLDS — the regime every offline number in `comp/board.jsonl` was taken in, because the search reads 90%
+of the shared studies — the optimism is **+0.0019**, measured 2026-09-06 over the 206-member pool, with
+a per-fold spread of -0.0199 to +0.0254. Each fold prices on 91 studies, so the SPREAD is what one small
+pricing set does and the MEAN is the bias; ten folds put that bias near a fifth of a resolvable board
+point.
+
+This corrects a number this file quoted for three weeks. The **+0.0201** in `DEFAULT_FOLDS`' note below
+is a TWO-fold reading — search on 455 studies, price on the 454 it never saw — and it answers a
+different question: what a search overfits when it reads HALF the corpus. It is an upper bracket, it was
+taken once, and it was being cited as the optimism of a normal run. It is not. A searched blend is very
+nearly an unbiased estimate of itself, and the honest correction is +0.0019 rather than a tenth of the
+distance to first place.
+
+Still subtract it before comparing a searched offline with an unsearched one, and still read the raw
+number as a CEILING rather than an estimate: an arm that cannot beat this pool's best member is not
+going to move an entry built from it.
 """
 
 import logging
