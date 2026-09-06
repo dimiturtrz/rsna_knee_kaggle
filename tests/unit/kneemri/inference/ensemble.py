@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from core.findings import TARGETS
-from kneemri.inference.budget import KERNEL_SECONDS, Budget
+from kneemri.inference.budget import KERNEL_SECONDS, SECONDS_PER_HOUR, Budget
 from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving, SharedRead
 from kneemri.inference.members import RESIZED_FROM, Member, MemberConfig, MemberPackage, Window
 from kneemri.inference.test_time import SpatialViews
@@ -861,3 +861,98 @@ def test_served(tmp_path: Path):
 
     assert len(ensemble.reads()) == 1, "two depths served as one group are ONE decode"
     assert {served.slices for served in ensemble.served()} == {member.slices}
+
+
+def _paced(ensemble: Ensemble, elapsed: list[float], chunks: list[list[dict[int, tuple[Tensor, Tensor]]]]):
+    """A decode that takes a NAMED number of seconds to reach each chunk, driving the budget as it goes.
+
+    The existing drop tests set `spent` by hand and call `afford` directly, which proves the ordering
+    rule and nothing about when the rule fires. What ships is a loop: the decode reports progress, the
+    budget projects from it, and `afford` runs once per chunk. A simulated pace is the only way to ask
+    whether the give-up lands on the chunk the projection actually turns on — and whether a run that
+    keeps pace gives up nothing at all, which is the failure mode that costs votes for free.
+    """
+    budget = Budget(seconds=KERNEL_SECONDS, margin=1.0)
+    ensemble.serving = replace(ensemble.serving, budget=budget)
+    started = budget.started
+
+    def chunks_for(_reads: list[Read]):
+        for index, (seconds, chunk) in enumerate(zip(elapsed, chunks, strict=True), start=1):
+            budget.started = started - seconds
+            budget.chunk(index, len(chunks))
+            yield chunk
+
+    return chunks_for
+
+
+def _forwarded(ensemble: Ensemble, monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    """Every member the loop actually forwards, in order — the record `failed` cannot give afterwards."""
+    seen: list[str] = []
+    attempt = ensemble.attempt
+
+    def spy(member: Member, sized: dict[int, tuple[Tensor, Tensor]], *, overlap: bool = True):
+        seen.append(member.identifier)
+        return attempt(member, sized, overlap=overlap)
+
+    monkeypatch.setattr(ensemble, "attempt", spy)
+    return seen
+
+
+def _two_members(ensemble: Ensemble) -> None:
+    """A cheap strong member and a cheap weak one, so worth-per-second is decided by the holdout."""
+    member = ensemble.package.members[0]
+    ensemble.package.members = [
+        replace(member, identifier="strong", holdout=0.87),
+        replace(member, identifier="weak", holdout=0.76),
+    ]
+    ensemble.models["strong"] = ensemble.models[member.identifier]
+    ensemble.models["weak"] = ensemble.models[member.identifier]
+
+
+def test_predict_groups_gives_up_the_weakest_at_the_chunk_the_projection_turns(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """A decode that falls behind mid-run costs the weakest member — from the chunk it falls behind, not before.
+
+    Four chunks of a nine-hour ceiling. One hour spent at chunk 1 projects four hours and is affordable;
+    six hours at chunk 2 projects twelve and is not. So `weak` must be forwarded on chunks 1 and 2 and
+    on neither of the rest, and `strong` on all four. A give-up that fired at chunk 1 would throw away a
+    vote a run that was on course did not need to lose; one that never fired would be killed at nine
+    hours with nothing written, which is what three unscored entries actually did.
+    """
+    ensemble = _ensemble(tmp_path / "slow")
+    _two_members(ensemble)
+    reads = [ensemble.read_of(members) for members in ensemble.reads()]
+    chunks = [[_chunk(read) for read in reads] for _ in range(4)]
+    hour = float(SECONDS_PER_HOUR)
+    chunks_for = _paced(ensemble, [hour, 6 * hour, 6.1 * hour, 6.2 * hour], chunks)
+    seen = _forwarded(ensemble, monkeypatch)
+
+    combined = ensemble.predict_groups(chunks_for, overlap=False)
+
+    assert seen.count("strong") == 4, "the survivor votes on every chunk"
+    assert seen.count("weak") == 2, "given up when the projection turned, not at the first chunk"
+    assert combined.shape == (8, len(TARGETS)), "and the entry is still written, from what survived"
+
+
+def test_predict_groups_gives_up_nothing_when_the_decode_keeps_pace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """A run inside its ceiling keeps every member — the drop is a mitigation, not a tax.
+
+    The same four chunks and the same two members, paced so the projection never leaves four hours.
+    Worth the assertion because `afford` runs once per chunk whatever the pace: a projection that read
+    an unmeasured budget as overrunning, or a margin applied twice, would shed votes on a run that had
+    hours to spare and no log anybody reads would look wrong.
+    """
+    ensemble = _ensemble(tmp_path / "quick")
+    _two_members(ensemble)
+    reads = [ensemble.read_of(members) for members in ensemble.reads()]
+    chunks = [[_chunk(read) for read in reads] for _ in range(4)]
+    hour = float(SECONDS_PER_HOUR)
+    chunks_for = _paced(ensemble, [hour, 2 * hour, 3 * hour, 4 * hour], chunks)
+    seen = _forwarded(ensemble, monkeypatch)
+
+    combined = ensemble.predict_groups(chunks_for, overlap=False)
+
+    assert seen.count("strong") == 4, "no member is given up on a run that keeps pace"
+    assert seen.count("weak") == 4, "least of all the weakest one"
+    assert combined.shape == (8, len(TARGETS))
