@@ -674,13 +674,6 @@ errors_relabel_s2026.pt     # 0.8522 solo, and the only member trained on a CORR
 errors_rank_s2026.pt        # 0.8462 solo, trained with the same detector's ranking used to PRUNE rather
                             # than to correct. Same axis as above and the opposite treatment, so the two
                             # disagree with each other as well as with the pool.
-radiodino_s16_s2026.pt      # 0.8108 solo, RadioDINO ViT-S/16 — a radiology-pretrained family the pool
-                            # otherwise carries only at base scale.
-radiodino_s8_s2026.pt       # 0.7971 solo, the same family at patch 8: a different patch grid over the
-                            # same corpus, which is the cheapest real decorrelation there is.
-radnet_pinned_s2026.pt      # 0.7505 solo, RadImageNet DenseNet-121 with the trunk pinned — the only
-                            # CONVOLUTIONAL member here and by far the weakest, seated for that reason
-                            # alone. If a seat search never takes it, it costs a kernel nothing.
 blendema224_s2026.pt        # 0.8567 solo at the cheap 224 corner, blendhold plus --ema. Scores 0.0008
                             # BELOW its own control, which is inside the paired floor and therefore not
                             # a ranking; seated for the different weight trajectory an EMA leaves, not

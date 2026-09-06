@@ -589,3 +589,25 @@ coatnet_hybrid_s2026  # The hybrid-architecture question, asked once and answere
                       # RE-OPEN BY: a hybrid whose PRETRAINING distribution is what differs (medical
                       # volumes rather than ImageNet). Not by another trunk from the same family — that
                       # is the question this arm already answered.
+radiodino_s16_s2026.pt  # 0.8108 solo. DECLINED 2026-09-06: UNSHIPPABLE BY CONSTRUCTION, and not worth
+                      # fixing. Its encoder variant `radiodinos16` has no Kaggle dataset mirror, so
+                      # package_members refuses it - a kernel cannot attach the weights, and packaging it
+                      # would ship an entry that cannot run. That refusal is what blocked the rebuild that
+                      # would have made tonight's three new members shippable, which is the real cost.
+                      # On merit it would not survive either: 0.8108 is 5.4 paired floors under the pool
+                      # best (0.8642), far outside the roughly 0.01 window where ensemble diversity has
+                      # ever bought back a weak member on this project.
+                      # RE-OPEN BY: publishing the RadioDINO weights as a Kaggle dataset AND giving the
+                      # variant a mount - and then only if a seat search actually takes it. Not by
+                      # re-quoting the radiology-pretraining argument; the mount is the blocker.
+radiodino_s8_s2026.pt   # 0.7971 solo. DECLINED 2026-09-06, same reason as radiodino_s16 above: the
+                      # `radiodinos8` variant has no dataset mount, and 0.7971 is 10.8 floors under the
+                      # pool best. The patch-8 decorrelation argument is real and it is not enough.
+                      # RE-OPEN BY: the same mount, and a seat search that takes it.
+radnet_pinned_s2026.pt  # 0.7505 solo. DECLINED 2026-09-06: no dataset mounts `radnet121`, and at 0.7505 it
+                      # is 18 floors under the pool best - the weakest checkpoint the roster ever held. It
+                      # was seated as the pool's only CONVOLUTIONAL member, on the argument that a seat
+                      # search costs nothing if it never takes it. That argument is now false: it cost the
+                      # whole package rebuild. The CNN/trunk-family lane is closed independently.
+                      # RE-OPEN BY: a convolutional member trained to within about 0.01 of the pool, on a
+                      # mounted encoder. Not by the diversity argument alone.
