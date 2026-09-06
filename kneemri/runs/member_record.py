@@ -81,11 +81,14 @@ NOT_IN_CONFIG = {
     "emits the one per-label logit a rebuild serves",
     "side_weight": "objective policy — the term compares two of the twelve logits against each "
     "other INSIDE the loss and adds no parameter, so the head a rebuild serves is byte-identical",
-    "focus_label": "objective policy — it zeroes eleven columns of the loss WEIGHT and touches no "
-    "parameter, so the twelve-logit head a rebuild serves is byte-identical. The hazard it carries is "
-    "not a rebuild hazard: a focused member's other eleven columns are untrained, so it is an "
-    "INSTRUMENT and never a roster seat, which its arm states and `members.roster` enforces by simply "
-    "not naming it",
+    "focus_label": "objective policy — it SCALES the unnamed columns of the loss WEIGHT and touches no "
+    "parameter, so the twelve-logit head a rebuild serves is byte-identical. The hazard depends on the "
+    "strength: at unfocused_weight 0 it is the MASK, whose unnamed columns are untrained, so such a "
+    "member is an INSTRUMENT and never a roster seat; at a weight inside (0, 1) every column is still "
+    "supervised and the member is shippable like any other",
+    "unfocused_weight": "objective policy — the strength focus_label leans at, read INSIDE the loss and "
+    "adding no parameter. Recorded beside the findings because a mechanism that lands at the wrong "
+    "strength passes every gate: an unfocused weight applied twice descends its square",
     "sample_spread": "a draw policy — it decides WHICH studies the epoch descended on and touches no "
     "module, no parameter and no loss term, so the function a rebuild serves is byte-identical. The "
     "file it names is a fact about how these weights were REACHED, like `teacher_targets`, and the "

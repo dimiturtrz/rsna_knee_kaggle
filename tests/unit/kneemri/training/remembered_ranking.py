@@ -3,7 +3,7 @@
 import torch
 
 from kneemri.training.grades import GRADE_LADDER, Predicted
-from kneemri.training.label_focus import FOCUS
+from kneemri.training.label_focus import FOCUS, UNFOCUSED
 from kneemri.training.objective import (
     CONTRAST_TERM,
     COUNT_NORMALISED,
@@ -42,6 +42,7 @@ def test_settings():
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
         FOCUS: "",
+        UNFOCUSED: 0.0,
     }
 
 

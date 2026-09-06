@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# lean_weak_columns.sh — margin_seat's recipe with the loss leaning on MCL + Lateral OA at quarter
+# weight on the other ten, so a member finally exists that is SHAPED toward the two columns the gap
+# lives in.
+#
+# bead: knee-vbj77
+# reading: logs/lean_weak_columns_ledger.log
+#
+# WHY THIS ARM. `pool_ceiling --columns` (2026-09-06) decomposed the 0.0097 gap to first place by
+# finding. Two columns carry three quarters of it and survive their own sampling band:
+#   MCL         stack 0.8283  171+  band 0.0702   against a 0.8765 pool mean
+#   Lateral OA  stack 0.8369  233+  band 0.0583
+# (Fracture is lower still at 0.8232 but has 68 positives and a 0.1068 band — that column is about the
+# ruler, not about the model, so it is deliberately NOT named here.)
+# Lifting those two to the pool's own mean is worth (0.8765-0.8283 + 0.8765-0.8369)/12 = +0.0073.
+# `pool_ceiling --specialists` then asked whether anything owned already leans that way: over 188
+# members above a 0.80 quality floor, the best-shaped is margin_seat at -0.0281. Every competent member
+# this project owns is WORSE on those two findings than on its own mean. There is no member to promote
+# because none exists, which is what makes this an arm and not a reseating.
+#
+# THE DESIGN IS CONSTRAINED BY A PRIOR FAILURE, AND THE CONSTRAINT IS THE WHOLE POINT. `focus_mcl`
+# already ran the MASK (--focus-label MCL, every other column zeroed). It did not merely underperform:
+# it regressed its own target label by -0.0576 paired and collapsed to a 0.5332 twelve-column mean.
+# One supervisory signal per study is not enough to fit an encoder on, and `label_focus.py`'s own
+# docstring named this follow-up before that arm ran — "an upweight rather than a mask, which starves
+# nothing". So every one of the twelve columns keeps gradient here; only the balance moves.
+#
+# WHY 0.25 AND NOT ANOTHER NUMBER. The two named columns' share of the loss weight is 2/(2 + 10w):
+# 0.167 at w=1 (the plain recipe), 0.286 at w=0.5, 0.444 at w=0.25, 0.667 at w=0.1. A 1.7x tilt is a
+# knob and would pre-register a null; a 4x tilt starts approaching the starvation that killed the mask.
+# 0.25 is a 2.7x tilt with all ten remaining columns still supervised at a quarter of full weight —
+# the largest move the mechanism allows without re-running the failure it was built to avoid.
+#
+# EVERY FLAG IS margin_seat's, TWO ADDED, AND NOTHING ELSE MOVES:
+#   --focus-label "MCL+Lateral OA"   the arm
+#   --unfocused-weight 0.25          its strength
+#   --out                            a distinct file
+# The control is therefore margin_seat itself at 0.8578-class, already on disk, already in the ledger,
+# fitted on the same fold — no matched control run is needed and none should be queued.
+#
+# deliberate: --focus-label "MCL+Lateral OA" --unfocused-weight 0.25 (the arm)
+# deliberate: --rank-weight 0 --auc-margin 1.0 (margin_seat's objective, held)
+# deliberate: --slice-pooling max --slices 20 --band-low 0.1 --band-high 0.9 --backbone-lr 4e-5 (the corner, held)
+# deliberate: --epochs 12 (margin_seat's budget, so the epoch curves are comparable)
+#
+# WHAT WOULD REFUTE IT. The reading is PER COLUMN and not on the mean. A solo mean that lands at or
+# below margin_seat is expected and is not the verdict: a member that trades ten columns for two is
+# exactly what was asked for, and its value is a SEAT next to members strong on the other ten. The
+# refutation is MCL and Lateral OA failing to rise in the ledger's per-label read — that would say the
+# columns are not liftable by supervision balance, which the interpretation explicitly does not claim.
+#
+# COST. ~75 min of card, zero slots. Expected: +0.02-0.05 on two columns if the balance is the binding
+# constraint, which is +0.004-0.008 of solo mean and worth a seat trial; a null here costs one arm and
+# closes the loss-reweighting half of the two routes the interpretation left open, leaving the INPUT
+# half (field of view, laterality) as the one to spend the next arm on.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train lean_weak_columns \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --rank-weight 0 --auc-margin 1.0 \
+  --focus-label "MCL+Lateral OA" --unfocused-weight 0.25 \
+  --labels "$LABELS" --out "$MODELS/lean_weak_columns_s2026.pt"

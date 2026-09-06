@@ -3,7 +3,7 @@ import torch
 
 from core.findings import COMPARTMENT_PAIRS, TARGETS
 from kneemri.training.grades import GRADE_LADDER, OrdinalGrades, Predicted
-from kneemri.training.label_focus import FOCUS, LabelFocus
+from kneemri.training.label_focus import FOCUS, UNFOCUSED, LabelFocus
 from kneemri.training.objective import (
     CONTRAST_TERM,
     COUNT_NORMALISED,
@@ -57,6 +57,7 @@ def test_objective_settings():
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
         FOCUS: "",
+        UNFOCUSED: 0.0,
     }
 
 
@@ -75,6 +76,7 @@ def test_ranked_objective_settings():
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
         FOCUS: "",
+        UNFOCUSED: 0.0,
     }
 
 
@@ -240,10 +242,10 @@ def _twelve() -> Predicted:
 
 def test_label_structure_settings():
     """All three held policies are reported, so a run can check any one of them landed."""
-    assert LabelStructure().settings() == {GRADE_LADDER: False, SIDE_TERM: 0.0, FOCUS: ""}
+    assert LabelStructure().settings() == {GRADE_LADDER: False, SIDE_TERM: 0.0, FOCUS: "", UNFOCUSED: 0.0}
     assert LabelStructure(grades=OrdinalGrades()).settings()[GRADE_LADDER] is True
     assert LabelStructure(sides=PairedSides(0.5)).settings()[SIDE_TERM] == 0.5
-    assert LabelStructure(focus=LabelFocus(TARGETS[3])).settings()[FOCUS] == TARGETS[3]
+    assert LabelStructure(focus=LabelFocus((TARGETS[3],))).settings()[FOCUS] == TARGETS[3]
 
 
 def test_focused():
@@ -255,7 +257,7 @@ def test_focused():
     batch = _twelve()
 
     assert LabelStructure().focused(batch) is batch
-    assert float(LabelStructure(focus=LabelFocus(TARGETS[3])).focused(batch).weights.sum()) == float(
+    assert float(LabelStructure(focus=LabelFocus((TARGETS[3],))).focused(batch).weights.sum()) == float(
         batch.weights[:, 3].sum()
     )
 

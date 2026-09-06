@@ -17,7 +17,7 @@ from kneemri.training.augmentation import INTENSITY_AUGMENT, SLOT_DROPOUT
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.gradient_clip import UNCLIPPED
-from kneemri.training.label_focus import FOCUS
+from kneemri.training.label_focus import FOCUS, UNFOCUSED
 from kneemri.training.mixup import OFF
 from kneemri.training.objective import (
     CONTRAST_TERM,
@@ -423,6 +423,7 @@ def test_policies():
         GRADE_LADDER: False,
         SIDE_TERM: 0.0,
         FOCUS: "",
+        UNFOCUSED: 0.0,
         INTENSITY_AUGMENT: False,
         SLOT_DROPOUT: 0.0,
         # The three optimiser-path knobs, in `constructed` because they are the same on both sides of

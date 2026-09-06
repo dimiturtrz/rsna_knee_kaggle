@@ -13,7 +13,6 @@ import argparse
 from pathlib import Path
 
 from core.data.corpus.cache_flags import CacheFlags
-from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
@@ -282,17 +281,7 @@ class FlagVocabulary:
             "by emitting the pair's marginal twice; side_blindness measures the Lateral OA column doing "
             "exactly that, at chance on every member.",
         )
-        parser.add_argument(
-            "--focus-label",
-            default=None,
-            choices=TARGETS,
-            help="fit ONE of the twelve findings: every other column's loss weight is zeroed, so the "
-            "whole encoder goes behind it. The published per-finding numbers this project is measured "
-            "against come from SPECIALIST models, while the one published twelve-finding panel averages "
-            "0.812 — below our own mean. This is the instrument that says whether our per-finding gaps "
-            "are the price of jointness. The head still emits twelve logits, so the checkpoint stays a "
-            "member; only the loss narrows.",
-        )
+        cls._focus_arguments(parser)
         cls._sampling_arguments(parser)
         parser.add_argument(
             "--slot-pooling",
@@ -422,6 +411,34 @@ class FlagVocabulary:
             "(0 = off). Early epochs therefore treat every cell as equally uncertain, and later epochs "
             "recover the full certainty-weighted table. The total weight mass is held constant so the "
             "loss scale matches the un-ramped control.",
+        )
+
+    @staticmethod
+    def _focus_arguments(parser: argparse.ArgumentParser) -> None:
+        """WHICH of the twelve findings the loss leans on, and how hard — one policy in two halves.
+
+        Grouped away from the recipe flags for the same reason the sampling pair is: a strength with no
+        findings named leans on nothing, and named findings at strength 1.0 are the plain recipe rather
+        than a second one. Neither half is readable without the other.
+        """
+        parser.add_argument(
+            "--focus-label",
+            default=None,
+            help="lean the loss on one or more of the twelve findings, joined by '+' in ONE quoted "
+            'token (a finding\'s name holds a space): --focus-label "MCL+Lateral OA". Every unnamed '
+            "column's loss weight is multiplied by --unfocused-weight, which at its default of 0 is the "
+            "hard mask. The head still emits twelve logits, so the checkpoint stays a member; only the "
+            "loss leans. An unknown name RAISES rather than falling through to the plain recipe.",
+        )
+        parser.add_argument(
+            "--unfocused-weight",
+            type=float,
+            default=0.0,
+            help="what an unnamed finding's loss weight is multiplied by, 0 masking it outright. The "
+            "mask has been run and it failed in a named way: focus_mcl regressed its own target label "
+            "by -0.0576 paired and collapsed to a 0.5332 twelve-column mean, because one supervisory "
+            "signal per study is not enough to fit an encoder on. A weight strictly inside (0, 1) keeps "
+            "all twelve signals and only moves the gradient's balance.",
         )
 
     @staticmethod

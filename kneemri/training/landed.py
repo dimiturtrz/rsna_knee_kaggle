@@ -48,7 +48,7 @@ from kneemri.models.model import (
 )
 from kneemri.training.augmentation import INTENSITY_AUGMENT, SLOT_DROPOUT
 from kneemri.training.grades import GRADE_LADDER
-from kneemri.training.label_focus import FOCUS
+from kneemri.training.label_focus import FOCUS, UNFOCUSED
 from kneemri.training.objective import (
     CONTRAST_TERM,
     COUNT_NORMALISED,
@@ -268,6 +268,7 @@ class Request:
     unread_targets: str
     side_weight: float
     focus_label: str
+    unfocused_weight: float
     unfreeze_last: int
     accumulate: int
     layer_decay: float
@@ -347,6 +348,9 @@ class Request:
             GRADE_LADDER: self.grade_ladder,
             SIDE_TERM: self.side_weight,
             FOCUS: self.focus_label,
+            # RE-DERIVED FROM THE FLAG PAIR, as SAMPLING is: an unfocused weight with no findings named
+            # scales nothing, so the honest request is the 0.0 the null policy accounts for.
+            UNFOCUSED: self.unfocused_weight if self.focus_label else 0.0,
             # RE-DERIVED FROM THE FLAG PAIR, the way WINDOW is: an alpha without a spread file weights
             # nothing, so the honest request there is the uniform draw the run will actually get.
             SAMPLING: self.sample_alpha if self.sample_spread is not None else 0.0,

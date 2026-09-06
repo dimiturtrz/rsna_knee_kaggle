@@ -128,6 +128,7 @@ class TrainingOptions:
     teacher_features: Path | None = None
     side_weight: float = 0.0
     focus_label: str | None = None
+    unfocused_weight: float = 0.0
     sample_spread: Path | None = None
     sample_alpha: float = 0.5
     sample_ramp: int = 0

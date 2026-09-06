@@ -34,6 +34,16 @@ class Predicted:
     logits: Float[Tensor, "b o"]
     scores: Float[Tensor, "b o"]
     weights: Float[Tensor, "b o"]
+    shaped: bool = False
+    """Whether a label policy has already re-weighted these columns, so a second pass leaves them alone.
+
+    `LabelFocus` is applied at two entries by design (`RankedObjective.__call__` delegates to a base
+    `__call__` that focuses again), which a zero/one mask survives because zero and one square to
+    themselves. An UNFOCUSED WEIGHT strictly between them does not: applying 0.25 twice descends 0.0625,
+    a mechanism landing at the wrong strength with every gate green. The marker makes the contract
+    explicit rather than accidental.
+    """
+
     teacher: Float[Tensor, "b o"] | None = None
     """What an ensemble said about these same studies, when a run is distilling — `None` otherwise.
 

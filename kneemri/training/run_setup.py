@@ -174,6 +174,7 @@ class RunSetup:
             # The EMPTY STRING and not None, because that is what `LabelFocus.settings()` reports for
             # the null policy, and this comparison is a strict equality against exactly that report.
             focus_label=options.focus_label or "",
+            unfocused_weight=options.unfocused_weight,
             unfreeze_last=options.unfreeze_last,
             unfreeze_offset=options.unfreeze_offset,
             layer_decay=options.layer_decay,
@@ -241,7 +242,7 @@ class RunSetup:
         structure = LabelStructure(
             grades=OrdinalGrades() if options.grade_ladder else Grades(),
             sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
-            focus=LabelFocus(options.focus_label),
+            focus=LabelFocus.parse(options.focus_label, options.unfocused_weight),
         )
         shaping = Shaping(
             normalise_by_count=options.normalise_by_count,

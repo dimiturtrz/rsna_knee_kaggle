@@ -25117,6 +25117,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "target": "kneemri.kaggle.pool_ceiling.ColumnReading",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.pool_ceiling.PoolCeiling",
       "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
@@ -25126,6 +25132,42 @@
       "kind": "construct",
       "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.__init__",
       "target": "kneemri.kaggle.priceable_blend.PriceableBlend",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "target": "core.bootstrap.StudyBootstrap.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "target": "kneemri.kaggle.pool_ceiling.ColumnReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.out_of_fold",
       "weight": 1
     },
     {
@@ -25221,6 +25263,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
       "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.pool",
       "weight": 1
     },
@@ -25228,6 +25276,24 @@
       "kind": "calls",
       "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
       "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
+      "target": "kneemri.kaggle.pool_ceiling.PoolCeiling.specialists",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.specialists",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pool_ceiling.PoolCeiling.specialists",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
       "weight": 1
     },
     {
@@ -28327,6 +28393,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.training.label_focus.LabelFocus",
+      "target": "kneemri.training.label_focus.LabelFocus",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.label_focus.LabelFocus.focused",
       "target": "kneemri.training.grades.Predicted",
@@ -29365,9 +29437,9 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.label_focus.LabelFocus",
+      "target": "kneemri.training.label_focus.LabelFocus.parse",
       "weight": 1
     },
     {
@@ -36180,6 +36252,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.pool_ceiling.CeilingReading",
       "label": "CeilingReading",
+      "level": "class",
+      "parent": "kneemri.kaggle.pool_ceiling",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.ColumnReading",
+      "label": "ColumnReading",
       "level": "class",
       "parent": "kneemri.kaggle.pool_ceiling",
       "role": "satellite"
@@ -51906,8 +51986,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.ColumnReading.gain",
+      "label": "gain",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.ColumnReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.ColumnReading.width",
+      "label": "width",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.ColumnReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.columns",
+      "label": "columns",
       "level": "method",
       "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
       "role": null
@@ -51948,6 +52052,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.report",
       "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pool_ceiling.PoolCeiling.specialists",
+      "label": "specialists",
       "level": "method",
       "parent": "kneemri.kaggle.pool_ceiling.PoolCeiling",
       "role": null
@@ -55074,6 +55186,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.flag_vocabulary.FlagVocabulary._focus_arguments",
+      "label": "_focus_arguments",
+      "level": "method",
+      "parent": "kneemri.training.flag_vocabulary.FlagVocabulary",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.flag_vocabulary.FlagVocabulary._label_quality_arguments",
       "label": "_label_quality_arguments",
       "level": "method",
@@ -55356,6 +55476,14 @@
       "descendants": 0,
       "id": "kneemri.training.label_focus.LabelFocus.focused",
       "label": "focused",
+      "level": "method",
+      "parent": "kneemri.training.label_focus.LabelFocus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.label_focus.LabelFocus.parse",
+      "label": "parse",
       "level": "method",
       "parent": "kneemri.training.label_focus.LabelFocus",
       "role": null
