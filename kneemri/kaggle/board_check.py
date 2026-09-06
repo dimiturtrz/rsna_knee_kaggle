@@ -37,6 +37,7 @@ reported 0 of 269 resolved pairs inverted. No gate stood between the rule and th
 and `uncorrected` below are that gate.
 """
 
+import datetime as dt
 import json
 import logging
 import sys
@@ -436,15 +437,27 @@ class LiveBoard:
     """
 
     scores: dict[str, float | None]
+    dates: tuple[dt.datetime, ...] = ()
+    """When each submission was FIRED, which is the only honest count of a day's spent slots — a
+    pending entry has no score and no record row, and `slot_pace` reads this rather than the record."""
 
     @classmethod
-    def taken(cls, lister: Callable[[], list[tuple[str, str]]] | None = None) -> "LiveBoard":
+    def taken(cls, lister: Callable[[], list[tuple[str, str, str]]] | None = None) -> "LiveBoard":
         """Ask Kaggle, or ask whatever was injected in its place."""
         listed = lister() if lister is not None else cls._kaggle()
-        return cls({ref: float(score) if score else None for ref, score in listed})
+        return cls(
+            {ref: float(score) if score else None for ref, score, _ in listed},
+            tuple(cls._stamped(when) for _, _, when in listed if when),
+        )
 
     @staticmethod
-    def _kaggle() -> list[tuple[str, str]]:
+    def _stamped(when: str) -> dt.datetime:
+        """Kaggle's submission date as an aware UTC instant. It reports naive UTC, so it is labelled."""
+        parsed = dt.datetime.fromisoformat(when)
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.UTC)
+
+    @staticmethod
+    def _kaggle() -> list[tuple[str, str, str]]:
         """The real round trip, kept in one place so every other path is credential-free.
 
         ONE CALL, because there is no second page to ask for. This was a paging loop for a day, written
@@ -459,7 +472,7 @@ class LiveBoard:
         api = KaggleApi()
         api.authenticate()
         batch = api.competition_submissions(COMPETITION, page_size=PAGE) or []
-        return [(str(sub.ref), str(sub.public_score or "")) for sub in batch if sub is not None]
+        return [(str(sub.ref), str(sub.public_score or ""), str(sub.date or "")) for sub in batch if sub is not None]
 
 
 def main() -> None:

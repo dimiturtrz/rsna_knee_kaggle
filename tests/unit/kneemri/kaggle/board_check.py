@@ -288,5 +288,5 @@ def test_refusals(tmp_path: Path):
 
 def test_taken():
     """The live listing through an injected lister — the real round trip is the only untested line."""
-    board = LiveBoard.taken(lambda: [("1", "0.93"), ("4", "")])
+    board = LiveBoard.taken(lambda: [("1", "0.93", "2026-09-06 10:21:29"), ("4", "", "")])
     assert board.scores == {"1": 0.93, "4": None}, "a blank score is None, not 0.0"

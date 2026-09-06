@@ -5258,6 +5258,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.slot_pace",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.slot_pace",
+      "target": "kneemri.kaggle.board_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.submission",
       "target": "core.data.corpus.slot_reader",
       "weight": 1
@@ -27331,6 +27343,84 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.interval",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.deadline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.interval",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.left",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.left",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.spent",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.lines",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.lines",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.left",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.lines",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.marks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.lines",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.spent",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.marks",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.SlotPace.marks",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.left",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.main",
+      "target": "kneemri.kaggle.board_check.LiveBoard.taken",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.slot_pace.main",
+      "target": "kneemri.kaggle.slot_pace.SlotPace",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.main",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.left",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.slot_pace.main",
+      "target": "kneemri.kaggle.slot_pace.SlotPace.lines",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.submission.Submission",
       "target": "core.data.corpus.slot_reader.FileMemo",
@@ -32023,7 +32113,7 @@
       "role": null
     },
     {
-      "descendants": 247,
+      "descendants": 248,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -33087,7 +33177,7 @@
       "role": null
     },
     {
-      "descendants": 38,
+      "descendants": 39,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -33370,6 +33460,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.slot_fill",
       "label": "slot_fill",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace",
+      "label": "slot_pace",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -37637,6 +37735,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.slot_fill",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.SlotPace",
+      "label": "SlotPace",
+      "level": "class",
+      "parent": "kneemri.kaggle.slot_pace",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -52336,6 +52442,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.board_check.LiveBoard._stamped",
+      "label": "_stamped",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.LiveBoard",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.board_check.LiveBoard.taken",
       "label": "taken",
       "level": "method",
@@ -54516,6 +54630,62 @@
       "label": "shares",
       "level": "method",
       "parent": "kneemri.kaggle.slot_fill.SlotFill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.SlotPace.deadline",
+      "label": "deadline",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_pace.SlotPace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.SlotPace.interval",
+      "label": "interval",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_pace.SlotPace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.SlotPace.left",
+      "label": "left",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_pace.SlotPace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.SlotPace.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_pace.SlotPace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.SlotPace.marks",
+      "label": "marks",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_pace.SlotPace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.SlotPace.spent",
+      "label": "spent",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_pace.SlotPace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.slot_pace.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.slot_pace",
       "role": null
     },
     {
