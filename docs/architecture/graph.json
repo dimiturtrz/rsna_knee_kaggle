@@ -3470,6 +3470,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.vendor_folds",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vendor_folds",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.vendor_folds",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.vendor_ruler",
       "target": "core.cli",
       "weight": 1
@@ -19639,6 +19657,90 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.VendorFolds.predicted",
+      "target": "kneemri.evaluation.vendor_folds.VendorFolds.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.VendorFolds.record",
+      "target": "kneemri.evaluation.vendor_folds.VendorFolds.predicted",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_folds.VendorFolds.record",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.VendorFolds.record",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.vendor_folds.VendorSpace",
+      "target": "kneemri.evaluation.vendor_folds.VendorScript",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.VendorSpace.built",
+      "target": "kneemri.evaluation.vendor_folds.VendorScript.segment",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.VendorFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.VendorFolds.kept",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.VendorFolds.record",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.VendorScript",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.VendorSpace",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.VendorSpace.built",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.vendor_ruler.VendorRuler",
       "target": "kneemri.evaluation.pool.Pool",
@@ -31471,7 +31573,7 @@
       "role": null
     },
     {
-      "descendants": 245,
+      "descendants": 246,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -31535,7 +31637,7 @@
       "role": null
     },
     {
-      "descendants": 81,
+      "descendants": 82,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -32154,6 +32256,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.unsure_cost",
       "label": "unsure_cost",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds",
+      "label": "vendor_folds",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -35900,6 +36010,30 @@
       "label": "UnsureSplit",
       "level": "class",
       "parent": "kneemri.evaluation.unsure_cost",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorFolds",
+      "label": "VendorFolds",
+      "level": "class",
+      "parent": "kneemri.evaluation.vendor_folds",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorScript",
+      "label": "VendorScript",
+      "level": "class",
+      "parent": "kneemri.evaluation.vendor_folds",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorSpace",
+      "label": "VendorSpace",
+      "level": "class",
+      "parent": "kneemri.evaluation.vendor_folds",
       "role": "satellite"
     },
     {
@@ -48204,6 +48338,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.unsure_cost",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorFolds.combined",
+      "label": "combined",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds.VendorFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorFolds.kept",
+      "label": "kept",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds.VendorFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorFolds.predicted",
+      "label": "predicted",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds.VendorFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorFolds.record",
+      "label": "record",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds.VendorFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorScript.segment",
+      "label": "segment",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds.VendorScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.VendorSpace.built",
+      "label": "built",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds.VendorSpace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.read_series",
+      "label": "read_series",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds",
       "role": null
     },
     {
