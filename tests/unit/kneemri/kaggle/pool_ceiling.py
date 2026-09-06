@@ -55,6 +55,26 @@ def test_readings(tmp_path: Path) -> None:
     assert max(reading.score for reading in readings) < CHANCE + TOLERANCE
 
 
+def test_columns(tmp_path: Path) -> None:
+    readings = a_ceiling(tmp_path).columns(a_pool(informative=True), penalty=1.0)
+    assert len(readings) == LABELS
+    assert [reading.stacked for reading in readings] == sorted(reading.stacked for reading in readings)
+    assert min(reading.best_alone for reading in readings) > CHANCE + TOLERANCE
+    assert all(0 < reading.positives < STUDIES for reading in readings)
+    assert all(reading.interval[0] <= reading.stacked <= reading.interval[1] for reading in readings)
+
+
+def test_gain(tmp_path: Path) -> None:
+    readings = a_ceiling(tmp_path).columns(a_pool(informative=True), penalty=1.0)
+    assert all(reading.gain == reading.stacked - reading.best_alone for reading in readings)
+
+
+def test_width(tmp_path: Path) -> None:
+    readings = a_ceiling(tmp_path).columns(a_pool(informative=True), penalty=1.0)
+    assert all(reading.width == reading.interval[1] - reading.interval[0] for reading in readings)
+    assert all(reading.width > 0.0 for reading in readings)
+
+
 def test_report(tmp_path: Path) -> None:
     lines = a_ceiling(tmp_path).report(target=0.9, pool=a_pool(informative=True))
     assert lines[0].startswith(f"{MEMBERS} members, {STUDIES} shared studies")

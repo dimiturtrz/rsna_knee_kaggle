@@ -36,6 +36,7 @@ from numpy.typing import NDArray
 from sklearn.linear_model import LogisticRegression
 
 from core import cli
+from core.bootstrap import StudyBootstrap
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
@@ -70,6 +71,27 @@ class CeilingReading:
     penalty: float
     score: float
     members: int
+
+
+@dataclass(frozen=True)
+class ColumnReading:
+    """One finding: what the best stack reaches on it, and what the single best member reaches alone."""
+
+    label: str
+    stacked: float
+    best_alone: float
+    positives: int
+    interval: tuple[float, float]
+
+    @property
+    def gain(self) -> float:
+        """What weighting all 188 members buys over the best one of them, on this finding alone."""
+        return self.stacked - self.best_alone
+
+    @property
+    def width(self) -> float:
+        """How wide the finding's own sampling band is — a deficit narrower than this is not read."""
+        return self.interval[1] - self.interval[0]
 
 
 class PoolCeiling:
@@ -129,6 +151,33 @@ class PoolCeiling:
             for penalty in PENALTIES
         ]
 
+    def columns(self, pool: Pool, penalty: float) -> list[ColumnReading]:
+        """Per finding: the stack against the best single member, weakest finding first.
+
+        The mean hides where the missing points are. A finding whose stack sits far below the others is
+        a place a NEW member could still pay; a finding where the stack cannot beat its own best member
+        is one where more of the same evidence does nothing, however it is weighted.
+        """
+        scores = LabelScores()
+        out_of_fold = self.out_of_fold(pool, penalty)
+        stacked = scores.per_label(out_of_fold, pool.truth)
+        alone = [scores.per_label(prediction, pool.truth) for prediction in pool.predictions]
+        bands = StudyBootstrap().per_label(
+            pool.truth.shape[0], lambda drawn: scores.per_label(out_of_fold[drawn], pool.truth[drawn])
+        )
+        positive = pool.truth > MIDPOINT
+        readings = [
+            ColumnReading(
+                label=label,
+                stacked=value,
+                best_alone=max(one[label] for one in alone),
+                positives=int(positive[:, column].sum()),
+                interval=bands[label],
+            )
+            for column, (label, value) in enumerate(stacked.items())
+        ]
+        return sorted(readings, key=lambda reading: reading.stacked)
+
     def report(self, target: float = TARGET_SCORE, pool: Pool | None = None) -> list[str]:
         """The flat blend, the best stack, and the distance both of them still sit from first place."""
         pool = self.pool() if pool is None else pool
@@ -143,6 +192,12 @@ class PoolCeiling:
         lines += [f"  stack at C={reading.penalty:<6g} out-of-fold {reading.score:.4f}" for reading in readings]
         lines.append(f"best stack: {best.score:.4f} at C={best.penalty:g} — chosen on the number it reports")
         lines.append(f"first place needs {target:.4f}: the best weighting of this pool is {best.score - target:+.4f}")
+        lines.append("per finding, weakest first — stack vs the best single member:")
+        lines += [
+            f"  {reading.label:<20} stack {reading.stacked:.4f}  alone {reading.best_alone:.4f}"
+            f"  {reading.positives:>4d}+  band {reading.width:.4f}"
+            for reading in self.columns(pool, best.penalty)
+        ]
         return lines
 
 
