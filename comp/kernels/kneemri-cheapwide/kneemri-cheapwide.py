@@ -1,4 +1,4 @@
-"""EVERY cheap-corner member at once — 224 px, 12 slices, fp16, logit vote, ELEVEN seats.
+"""EVERY cheap-corner member at once — 224 px, 12 slices, fp16, logit vote, TEN seats.
 
 **THIS IS AN EFFICIENCY-TRACK INSTRUMENT AND IT MOVES ONE THING: THE SEAT COUNT AT A FIXED DECODE.**
 `cheapdecode_v1` served three members of this exact group on 2026-09-05 and read **0.925**, which was
@@ -9,7 +9,7 @@ shortfall was the corner or the seat count.
 
 **THE MECHANISM, AND IT IS A RUNTIME CLAIM.** Members that share a decode corner share the decode.
 `comp/logs/cheapdecode/kneemri-cheapdecode.log` reads `studies 1-3: decode 5s at [224], elapsed 5s` —
-the decode IS the elapsed time at three seats; the eleven forward passes this entry adds are the only
+the decode IS the elapsed time at three seats; the ten forward passes this entry adds are the only
 new work, and they run on a card the fleet pass measured at 0% while pydicom worked. So 3.7x the seats
 should cost far less than 3.7x the wall clock. Nothing in this project has ever measured that, and it
 decides the whole efficiency lane: if seats are near-free at a fixed decode, the lane is "hold ~0.940
@@ -18,17 +18,20 @@ accuracy with many cheap members" rather than "give up accuracy for speed".
 **THE SEATS ARE CHOSEN BY RULE, NOT BY RANK.** Every roster member whose recipe reads 224 px / 12 slices
 / band 0.2-0.8, and nothing else. No score enters the tuple, so this is not a selection or a reseating —
 the same rule run tomorrow returns the same set plus whatever has since been trained at that corner.
-One member is missing for a stated reason: `blendemalabel224_s2026` (0.8591, the group's strongest)
-finished tonight, after the members package was last built, and is not mountable today.
+Two members are missing for a stated reason, and Kaggle told us which: `blendemalabel224_s2026`
+(0.8591, the group's strongest) and `blendema224_s2026` (0.8567) both finished tonight, after the
+members package was last built, so `MemberPackage.named` refuses them. Version 1 of this kernel died on
+exactly that refusal, which is the behaviour we want -- `KernelRun` drops a member it cannot MOUNT, but
+a member the package does not HOLD raises.
 
-    blendhold_s2026 0.8575 · blendema224_s2026 0.8567 · ema224_s2026 0.8544 · blendlabels_s2026 0.8537
+    blendhold_s2026 0.8575 · ema224_s2026 0.8544 · blendlabels_s2026 0.8537
     labelwise224_s2026 0.8517 · sided224_s2026 0.8512 · warm224_long_s2026 0.8512
     base224_s2026 0.8509 · through224_s2026 0.8505 · mixup224_strong_s2026 0.8516 · native224_s2026 0.8502
 
 **PRE-REGISTERED, BEFORE THE NUMBER.** Control is `cheapdecode_v1` = 0.925, three seats, same corner,
 same vote, same precision:
 
-- **0.933-0.940** — the expectation. Eleven seats at one decode recover the cheap corner onto the top-20
+- **0.933-0.940** — the expectation. Ten seats at one decode recover the cheap corner onto the top-20
   efficiency floor. The lane opens: hold accuracy, cut runtime, and the entry is a live efficiency row.
 - **0.926-0.933** — seats help but not enough. The cheap corner is short of the 0.927 floor on merit and
   the efficiency lane needs a better corner, not more seats.
@@ -36,7 +39,7 @@ same vote, same precision:
   board flat on the member axis and would close it at the cheap corner too, which is worth knowing: it
   would mean the 0.019 `cheapdecode_v1` gave up is the corner's price and not the group's.
 - **below 0.920** — read `run_check` on the log BEFORE reading the score. `KernelRun` drops a member it
-  cannot mount and keeps going; eleven seats is the most this project has shipped at once and it is the
+  cannot mount and keeps going; ten seats is the most this project has shipped at once and it is the
   most exposed to a silent drop.
 
 **THE RUNTIME NUMBER IS THE POINT AND IT IS READ FROM THE LOG, NOT THE BOARD.** Whatever the score, the
@@ -148,7 +151,6 @@ def main() -> None:
     # four times the members should cost far less than four times the wall clock.
     chosen = (
         "blendhold_s2026",
-        "blendema224_s2026",
         "ema224_s2026",
         "blendlabels_s2026",
         "labelwise224_s2026",
