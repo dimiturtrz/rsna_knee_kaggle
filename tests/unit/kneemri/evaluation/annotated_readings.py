@@ -65,6 +65,26 @@ def test_rows(tmp_path: Path):
         reader.rows(["s3", "s1"], ["s0", "s2"])
 
 
+def test_per_label_table(tmp_path: Path):
+    """A finding too rare to read prints its COUNT and no number; a readable one prints both."""
+    from core.findings import TARGETS  # noqa: PLC0415 - test-local, so the module under test owns its imports
+    from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - test-local
+
+    reader = _reader(tmp_path)
+    annotations = np.zeros((20, len(TARGETS)), dtype=np.float32)
+    annotations[1::2, 0] = 1.0
+    annotations[0, 1] = 1.0
+    perfect = annotations.astype(np.float64)
+
+    lines = reader.per_label_table(LabelScores(), [(tmp_path / "best.pt", perfect)], annotations)
+
+    assert lines[0].startswith("finding"), "the header names the members whose columns follow"
+    assert lines[1].split()[:2] == [TARGETS[0], "10"]
+    assert "1.0000" in lines[1], "ten positives is readable, and a perfect ordering reads 1.0"
+    assert "unreadable at n=20" in lines[2], "one positive is a count, never an AUC"
+    assert lines[2].split()[:2] == [TARGETS[1], "1"], "the count is printed even where the AUC is withheld"
+
+
 def test_paired(tmp_path: Path):
     """Every member is priced against the NAMED baseline, which never prices itself.
 

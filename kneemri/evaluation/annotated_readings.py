@@ -81,6 +81,13 @@ CORPUS_LABELS = "report_labels_v2.csv"
 """The report-derived corpus table. Any OTHER table a run was handed is derived, and every derived table
 this project has built was derived using the gold cells — so the unknown one is flagged, not cleared."""
 
+READABLE_MIN = 5
+"""Cases a finding needs on BOTH sides of 58 studies before a per-label AUC is printed at all.
+
+`label_power` puts the per-label standard error here at 0.04-0.09 with tens of positives; below five the
+number is a permutation of a handful of studies and its interval spans most of the unit line. Printing it
+would put a figure on the page that no reading can use, next to figures that some can."""
+
 
 class TrainedOnAnnotationsError(Exception):
     """A checkpoint whose loss read the radiologist cells, so its score against them is not held out."""
@@ -205,6 +212,40 @@ class AnnotatedReadings:
             joined.append((path, saved_file["values"][rows].astype(np.float64)))
         return joined
 
+    def per_label_table(
+        self,
+        scores: "LabelScores",
+        per_member: list[tuple[Path, NDArray[np.float64]]],
+        annotations: NDArray[np.float32],
+        *,
+        readable_min: int = READABLE_MIN,
+    ) -> list[str]:
+        """One row per finding: how many of the 58 the radiologist marked present, and each member's AUC.
+
+        THE COUNT IS PART OF THE READING, not decoration. A twelve-label mean over 58 studies hides that
+        the columns behind it have between one and forty positives, so a column carried by two positives
+        moves the mean as much as one carried by thirty. A finding with fewer than `readable_min` on
+        either side is printed with its count and NO number at all — an AUC over two positives is defined
+        arithmetically and says nothing, and printing it invites exactly the pairwise claim the paired
+        intervals exist to refuse.
+        """
+        from core.findings import TARGETS  # noqa: PLC0415 - CLI-only
+        from kneemri.evaluation.scores import MIDPOINT  # noqa: PLC0415 - CLI-only
+
+        header = f"{'finding':20s} {'n+':>4s}  " + "  ".join(f"{member.stem[:18]:>18s}" for member, _ in per_member)
+        lines = [header]
+        for column, target in enumerate(TARGETS):
+            present = (annotations[:, column] > MIDPOINT).astype(np.int64)
+            positives, negatives = int(present.sum()), int(len(present) - present.sum())
+            if min(positives, negatives) < readable_min:
+                lines.append(f"{target:20s} {positives:4d}  unreadable at n={len(present)}")
+                continue
+            cells = "  ".join(
+                f"{scores.area_under_curve(values[:, column], present):18.4f}" for _, values in per_member
+            )
+            lines.append(f"{target:20s} {positives:4d}  {cells}")
+        return lines
+
     def paired(
         self,
         scores: "LabelScores",
@@ -251,6 +292,7 @@ def main() -> None:
     command.parser.add_argument("--tta", action="store_true", help="average over rotations as the curve can")
     command.parser.add_argument("--against", type=Path, default=None, help="baseline for paired deltas; default first")
     command.parser.add_argument("--add", type=Path, nargs="*", default=[], help="npz readings from a foreign gate")
+    command.parser.add_argument("--per-label", action="store_true", help="one row per finding, with its count")
     arguments = command.parsed()
 
     from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - CLI-only
@@ -276,11 +318,13 @@ def main() -> None:
         *flagged,
     ]
     origin = caveat if flagged else []
+    breakdown = ["", *reader.per_label_table(scores, per_member, annotations)] if arguments.per_label else []
     command.report(
         [f"{len(names)} annotated studies, {len(per_member)} member(s), none of them TRAINED on these cells"]
         + [f"{member.stem:28s} {scores.mean(values, annotations):.4f}" for member, values in per_member]
         + [f"{'combined':28s} {scores.mean(combined, annotations):.4f}"]
         + ([""] + reader.paired(scores, per_member, arguments.against or arguments.checkpoints[0], annotations))
+        + breakdown
         + origin
     )
 
