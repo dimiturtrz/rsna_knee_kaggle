@@ -7795,6 +7795,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_all",
+      "target": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
       "target": "core.data.corpus.slot_reader.Band",
@@ -7851,7 +7857,7 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.decode_bench.main",
-      "target": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.decode_bench.DecodeBench._union_all",
       "weight": 1
     },
     {
@@ -39380,6 +39386,14 @@
       "descendants": 0,
       "id": "core.data.corpus.decode_bench.DecodeBench._headers_one",
       "label": "_headers_one",
+      "level": "method",
+      "parent": "core.data.corpus.decode_bench.DecodeBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.decode_bench.DecodeBench._union_all",
+      "label": "_union_all",
       "level": "method",
       "parent": "core.data.corpus.decode_bench.DecodeBench",
       "role": null
