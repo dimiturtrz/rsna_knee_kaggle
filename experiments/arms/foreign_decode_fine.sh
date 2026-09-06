@@ -45,6 +45,12 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 FOREIGN_KERNEL="$REPO/external/dinov3folds/bend_the_knee_to_dinov3_ensembled.py"
 FOREIGN_WEIGHTS="D:/data/external/kaggle_foreign/mattiaangeli_dinov3"
 RAW="$(dirname "$PROCESSED")/../raw/rsna_knee_abnormality"
+# HOLDOUT is the arm's to set, not lib.sh's — `foreign_decode_sweep.sh:41` sets the same file, and this
+# arm inherited its `require` line without it. Under `set -u` that is an unbound variable, and the arm dies
+# at the require BEFORE the first band, on a line that reads like a missing file. It cost the whole fine
+# sweep on 2026-09-06T19:23Z: the chain reported one line and went straight on to `foreign_dissent`.
+HOLDOUT="$MODELS/band_dense_s2026.holdout.npz"
+
 require "$LABELS"
 require "$HOLDOUT"
 
