@@ -200,11 +200,22 @@ def main() -> None:
     command.parser.add_argument("--series", type=Path, required=True)
     command.parser.add_argument("--studies", type=Path, required=True)
     command.parser.add_argument("--out", type=Path, required=True)
+    command.parser.add_argument(
+        "--band",
+        type=float,
+        nargs=2,
+        default=None,
+        metavar=("LOW", "HIGH"),
+        help="override their SLICE_BAND; their kernel serves 0.12 0.88 and trains 0.2 0.8, on one set of weights",
+    )
     arguments = command.parsed()
 
     studies = [str(one) for one in np.load(arguments.studies, allow_pickle=True)["studies"]]
     folds = ForeignFolds(arguments.kernel, arguments.checkpoints, arguments.series_root)
     module = folds.module()
+    if arguments.band:
+        logger.warning("serving at SLICE_BAND %s, not their %s", tuple(arguments.band), module.SLICE_BAND)
+        ForeignModule.inject(module, SLICE_BAND=tuple(arguments.band))
     folds.nets(module)
     predictions = folds.serve(module, studies, folds.records(pd.read_csv(arguments.series), studies))
     np.savez(arguments.out, predictions=predictions, studies=np.array(studies), labels=np.array(module.LABELS))
