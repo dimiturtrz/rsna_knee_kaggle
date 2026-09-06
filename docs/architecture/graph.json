@@ -1598,6 +1598,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.band_tta",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.band_tta",
+      "target": "kneemri.evaluation.foreign_price",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.band_tta",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.band_tta",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.board_transfer",
       "target": "core.cli",
       "weight": 1
@@ -12616,6 +12640,36 @@
       "kind": "calls",
       "source": "kneemri.evaluation.attribution_faithfulness.main",
       "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.band_tta.BandTTA",
+      "target": "kneemri.evaluation.band_tta.BandTTA",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.band_tta.BandTTA.combined",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.band_tta.BandTTA.lines",
+      "target": "kneemri.evaluation.band_tta.BandTTA.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.band_tta.BandTTA.lines",
+      "target": "kneemri.evaluation.foreign_price.ForeignPrice.macro",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.band_tta.main",
+      "target": "kneemri.evaluation.band_tta.BandTTA.aligned",
       "weight": 1
     },
     {
@@ -32797,7 +32851,7 @@
       "role": null
     },
     {
-      "descendants": 256,
+      "descendants": 257,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -32861,7 +32915,7 @@
       "role": null
     },
     {
-      "descendants": 86,
+      "descendants": 87,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -32912,6 +32966,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.attribution_faithfulness",
       "label": "attribution_faithfulness",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.band_tta",
+      "label": "band_tta",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -36091,6 +36153,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.attribution_faithfulness",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.band_tta.BandTTA",
+      "label": "BandTTA",
+      "level": "class",
+      "parent": "kneemri.evaluation.band_tta",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -44794,6 +44864,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.attribution_faithfulness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.band_tta.BandTTA.aligned",
+      "label": "aligned",
+      "level": "method",
+      "parent": "kneemri.evaluation.band_tta.BandTTA",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.band_tta.BandTTA.combined",
+      "label": "combined",
+      "level": "method",
+      "parent": "kneemri.evaluation.band_tta.BandTTA",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.band_tta.BandTTA.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.band_tta.BandTTA",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.band_tta.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.band_tta",
       "role": null
     },
     {
