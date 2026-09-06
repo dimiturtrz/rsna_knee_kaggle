@@ -19695,6 +19695,18 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.SeriesTable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.vendor_folds.main",
+      "target": "kneemri.evaluation.vendor_folds.SeriesTable.records",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.vendor_folds.main",
       "target": "kneemri.evaluation.vendor_folds.VendorFolds",
       "weight": 1
     },
@@ -36014,6 +36026,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.SeriesTable",
+      "label": "SeriesTable",
+      "level": "class",
+      "parent": "kneemri.evaluation.vendor_folds",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.vendor_folds.VendorFolds",
       "label": "VendorFolds",
       "level": "class",
@@ -48342,6 +48362,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.vendor_folds.SeriesTable.records",
+      "label": "records",
+      "level": "method",
+      "parent": "kneemri.evaluation.vendor_folds.SeriesTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.vendor_folds.VendorFolds.combined",
       "label": "combined",
       "level": "method",
@@ -48392,14 +48420,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.vendor_folds.main",
       "label": "main",
-      "level": "method",
-      "parent": "kneemri.evaluation.vendor_folds",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.vendor_folds.read_series",
-      "label": "read_series",
       "level": "method",
       "parent": "kneemri.evaluation.vendor_folds",
       "role": null
