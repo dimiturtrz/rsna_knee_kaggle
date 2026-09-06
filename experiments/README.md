@@ -8395,3 +8395,48 @@ that carries the closure.
 honest out-of-sample opinion on all 4406 studies from a family that reads **0.8929** fold-matched — above
 our best solo (`stackfit_s2026`, 0.8631) and above their own 909 reading. As a label corrector it says
 nothing. As a distillation teacher it is the strongest per-study signal this project has.
+
+## Distillation from a foreign teacher DESTROYS distance instead of importing it — 2026-09-06
+
+`foreign_distill_s2026` finished twelve epochs (peak e9, `convergence_check` clean) and answers the
+question `foreign_distill.sh` pre-registered, on the column that question needed.
+
+| member | teacher | solo | seat on greedyseat base of 7 (Rank) | nearest, rank | js divergence |
+|---|---|---|---|---|---|
+| `band_dense` | none | 0.8578 | seated | 0.8959 | **0.0273** |
+| `distill_pairs` | ours (fold-0 twins) | 0.8594 | — | 0.9079 | 0.0249 |
+| `foreign_distill` | **theirs** (5 DINOv3 folds, 0.8929 fold-matched) | 0.8595 | **−0.0004 at 1x → −0.0027 at 4x** | 0.9003 | **0.0190** |
+
+Roster boundary: rank 0.8936, js 0.0147. All three students land SCALED, none DISTINCT.
+
+**The seat is negative at every weight on both rulers** — Rank −0.0004 / −0.0012 / −0.0020 / −0.0027 at
+1-4x on a 0.8763 base; Logit −0.0001 → −0.0018 on a 0.8768 base — and the distance column says why. The
+foreign teacher did not move the student away from our pool, it moved it **toward** it: js divergence
+0.0273 → **0.0190**, a 30% collapse against the no-teacher control, with rank agreement rising 0.8959 →
+0.9003. Our own teacher does the same thing slightly less hard. **A student trained toward an ordering
+ends up agreeing with the pool that already holds most of that ordering, because the label term holds 0.7
+of its loss and the labels are what our pool is already fitted to.** What survives the transfer is the
+corpus's ordering, which we own; what does not survive is the family-specific structure, which is the
+entire reason the seat is worth anything.
+
+**The number this sits beside is the whole finding.** Same family, same released weights, same
+predictions:
+
+| use of `teacher_foreign_corpus.npz` | delta |
+|---|---|
+| SEATED directly (their weights mounted) | **+0.0178** at 6x on the served base of 8, **+0.0218** on the greedyseat base of 7 |
+| ABSORBED into a student | **−0.0004** at 1x, worse at every larger weight |
+
+Distillation is lossy in exactly the dimension seating is not. Together with `foreign_recipe_v3small`
+(their recipe transcribed and retrained here: 0.8087 against their weights' 0.8812), this closes both
+cheap routes to a foreign family. **A foreign family is worth having as MOUNTED WEIGHTS or not at all** —
+neither its recipe nor its ordering carries the thing that makes it distant. The one case where
+distillation would still be the only route is a licence that forbids shipping the weights.
+
+**What is NOT closed, and is on the card next.** The third use of the same teacher file: `foreign_dissent`
+(knee-1vdcz) re-weights the pair mass toward the pairs THEIR ordering gets wrong, rather than reproducing
+it. `dissent_seat` ran that flag at the same strength on OUR teacher and read 0.8509 with no seat — but
+that arm was killed at epoch 8 of 12 (a floor, not a landing) and its teacher was our own pool, whose
+complement to itself is noise. The pre-registered column is js divergence against `band_dense`'s 0.0273:
+dissent must move it UP where distillation moved it DOWN, or every non-seating use of a foreign teacher
+is closed.
