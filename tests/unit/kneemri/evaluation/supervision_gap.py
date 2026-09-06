@@ -16,6 +16,23 @@ RESAMPLES = 200
 """Enough resamples for a band to be stable at these separations, few enough to keep the unit fast."""
 
 
+def test_confusion():
+    """Each rate is over ITS OWN denominator: a reader that over-labels posts FP and no FN."""
+    truth = np.zeros((10, len(TARGETS)), dtype=np.float32)
+    truth[:4, 0] = 1.0
+    values = np.zeros_like(truth)
+    values[:7, 0] = 1.0
+
+    lines = SupervisionGap().confusion(values, truth)
+
+    assert lines[0].split()[:2] == ["finding", "gold+"]
+    over = lines[1].split()
+    assert over[:3] == [TARGETS[0], "4", "7"], "four gold positives, seven the reader called"
+    assert over[3] == "50.0%", "three false positives over six gold negatives, not over ten cells"
+    assert over[4] == "0.0%", "it missed none of the four, so the FN column stays empty"
+    assert "(6 neg, 4 pos)" in lines[1], "each rate prints the denominator it was taken over"
+
+
 def _train_table(path: Path, *, annotate: int) -> Path:
     """A train.csv where the first `annotate` studies carry every finding and the rest carry none."""
     rows = []

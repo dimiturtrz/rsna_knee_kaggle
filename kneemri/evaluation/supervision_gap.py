@@ -255,6 +255,39 @@ class SupervisionGap:
             f"not twelve findings: {', '.join(resolved) or 'none'}",
         ]
 
+    def confusion(
+        self,
+        values: Float[np.ndarray, "kept targets"],
+        truth: Float[np.ndarray, "kept targets"],
+        cut: float = PRESENT,
+    ) -> list[str]:
+        """Which DIRECTION the reader is wrong in, per finding — the half an AUC cannot show.
+
+        `report`'s labels column ranks the reader; it cannot say whether a weak column is the reader
+        inventing findings or missing them, and those two want opposite treatments. `thresholds` prices
+        the same question over all 696 cells at once, which averages a column that over-labels against a
+        column that under-labels into a middling aggregate.
+
+        FALSE POSITIVE is over the gold NEGATIVES and FALSE NEGATIVE over the gold POSITIVES, so each
+        rate has its own denominator printed beside it: a finding with four positives can post a 25% FN
+        on one cell, and a rate whose denominator is not stated is the defect this project keeps paying
+        for. No band is drawn — 58 studies binarised per column is far too little for one, and a rate
+        that arrived with an interval would be read as a claim about a finding rather than a shape.
+        """
+        said, positive = values > cut, truth > PRESENT
+        lines = [f"{'finding':20s} {'gold+':>6s} {'reader+':>8s} {'FP':>8s} {'FN':>8s}"]
+        for column, target in enumerate(TARGETS[: values.shape[1]]):
+            hit, gold = said[:, column], positive[:, column]
+            positives, negatives = int(gold.sum()), int((~gold).sum())
+            false_positive = float((hit & ~gold).sum()) / max(negatives, 1)
+            false_negative = float((~hit & gold).sum()) / max(positives, 1)
+            lines.append(
+                f"{target:20s} {positives:6d} {int(hit.sum()):8d} "
+                f"{false_positive:7.1%}{'':1s} {false_negative:7.1%}"
+                f"   ({negatives} neg, {positives} pos)"
+            )
+        return lines
+
     def report(self, reference: dict[str, float], achieved: dict[str, float]) -> list[str]:
         """Every finding ordered by what holds it back, with the dividing line drawn explicitly.
 
@@ -322,6 +355,8 @@ def main() -> None:
     command.report(gap.separation(values, predictions, annotations))
     # WHERE the graded label becomes a positive, which decides the base rate our ruler scores against.
     command.report(gap.thresholds(values, annotations))
+    # And WHICH DIRECTION each column is wrong in, which decides whether a reader fix adds or removes.
+    command.report(gap.confusion(values, annotations))
 
 
 if __name__ == "__main__":
