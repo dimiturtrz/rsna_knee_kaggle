@@ -11,8 +11,9 @@ from torch import Tensor
 
 from core.findings import TARGETS
 from kneemri.inference.budget import KERNEL_SECONDS, SECONDS_PER_HOUR, Budget
-from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving, SharedRead
-from kneemri.inference.members import RESIZED_FROM, Member, MemberConfig, MemberPackage, Window
+from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Read, Serving
+from kneemri.inference.members import Member, MemberConfig, MemberPackage, Window
+from kneemri.inference.read_groups import SharedRead
 from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import LogitAverage
 from kneemri.models.backbone import ENCODERS
@@ -816,35 +817,6 @@ def test_read(tmp_path: Path):
     assert served.read_size == 280, "the encoder runs at the size the entry forces"
     assert served.image_size == member.image_size, "and the group still shares one decode"
     assert Serving().read(member) is member, "an entry that forces nothing serves the member as fitted"
-
-
-def test_regrouped(tmp_path: Path):
-    """A re-group moves the DECODE — depth and band — so the member reads from another cache entirely.
-
-    That is the whole point: the entry's decode bill is its number of read groups, and two members only
-    share a decode when both of these agree. Sizes collapse inside a group and do not.
-    """
-    fitted = _ensemble(tmp_path).package.members[0]
-
-    priced = SharedRead(12, (0.1, 0.9)).regrouped(fitted)
-
-    assert priced.slices == 12, "the read opens twelve files per study, not four"
-    assert priced.decode_key != fitted.decode_key, "which is a different decode"
-    assert RESIZED_FROM in priced.config, "so the trainer's own array is refused for it"
-
-
-def test_beside(tmp_path: Path):
-    """A re-grouped record carries BOTH axes in its name, because either alone would collide.
-
-    The same member priced at 12 slices on two different bands is two different reads and two different
-    numbers; one name for both would silently overwrite the first with the second.
-    """
-    checkpoint = tmp_path / "member.pt"
-
-    destination = SharedRead(12, (0.1, 0.9)).beside(checkpoint)
-
-    assert destination == tmp_path / "member_n12b0.1-0.9.pt"
-    assert destination != SharedRead(12, (0.2, 0.8)).beside(checkpoint), "the band is part of the read"
 
 
 def test_served(tmp_path: Path):

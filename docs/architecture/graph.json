@@ -4394,6 +4394,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.inference.read_groups",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.inference.serve_bench",
       "target": "core.cli",
       "weight": 1
@@ -23227,15 +23233,21 @@
       "weight": 1
     },
     {
-      "kind": "holds",
-      "source": "kneemri.inference.ensemble.Serving",
-      "target": "kneemri.inference.ensemble.SharedRead",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "kneemri.inference.ensemble.Serving",
       "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.ensemble.Serving",
+      "target": "kneemri.inference.read_groups.ReadGroups",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.ensemble.Serving",
+      "target": "kneemri.inference.read_groups.SharedRead",
       "weight": 1
     },
     {
@@ -23253,13 +23265,13 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.ensemble.Serving.read",
-      "target": "kneemri.inference.ensemble.SharedRead.regrouped",
+      "target": "kneemri.inference.read_groups.ReadGroups.regrouped",
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.inference.ensemble.SharedRead",
-      "target": "kneemri.inference.members.Member",
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Serving.read",
+      "target": "kneemri.inference.read_groups.SharedRead.regrouped",
       "weight": 1
     },
     {
@@ -23740,12 +23752,6 @@
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "kneemri.device.VisibleCards.device",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.inference.holdout_backfill.main",
-      "target": "kneemri.inference.ensemble.SharedRead",
       "weight": 1
     },
     {
@@ -24274,6 +24280,24 @@
       "kind": "calls",
       "source": "kneemri.inference.prediction_cache.PredictionCache.write",
       "target": "kneemri.inference.prediction_cache.PredictionCache._path",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.read_groups.ReadGroups",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.read_groups.ReadGroups",
+      "target": "kneemri.inference.read_groups.SharedRead",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.read_groups.SharedRead",
+      "target": "kneemri.inference.members.Member",
       "weight": 1
     },
     {
@@ -32773,7 +32797,7 @@
       "role": null
     },
     {
-      "descendants": 255,
+      "descendants": 256,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -33701,7 +33725,7 @@
       "role": null
     },
     {
-      "descendants": 22,
+      "descendants": 23,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
@@ -33824,6 +33848,14 @@
       "descendants": 0,
       "id": "kneemri.inference.prediction_cache",
       "label": "prediction_cache",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.read_groups",
+      "label": "read_groups",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -37694,14 +37726,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.inference.ensemble.SharedRead",
-      "label": "SharedRead",
-      "level": "class",
-      "parent": "kneemri.inference.ensemble",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.inference.foreign_folds.ForeignFolds",
       "label": "ForeignFolds",
       "level": "class",
@@ -37923,6 +37947,22 @@
       "level": "class",
       "parent": "kneemri.inference.prediction_cache",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.read_groups.ReadGroups",
+      "label": "ReadGroups",
+      "level": "class",
+      "parent": "kneemri.inference.read_groups",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.read_groups.SharedRead",
+      "label": "SharedRead",
+      "level": "class",
+      "parent": "kneemri.inference.read_groups",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -52190,22 +52230,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.inference.ensemble.SharedRead.beside",
-      "label": "beside",
-      "level": "method",
-      "parent": "kneemri.inference.ensemble.SharedRead",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.ensemble.SharedRead.regrouped",
-      "label": "regrouped",
-      "level": "method",
-      "parent": "kneemri.inference.ensemble.SharedRead",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.inference.foreign_folds.ForeignFolds.module",
       "label": "module",
       "level": "method",
@@ -53090,6 +53114,38 @@
       "label": "write",
       "level": "method",
       "parent": "kneemri.inference.prediction_cache.PredictionCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.read_groups.ReadGroups.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.inference.read_groups.ReadGroups",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.read_groups.ReadGroups.regrouped",
+      "label": "regrouped",
+      "level": "method",
+      "parent": "kneemri.inference.read_groups.ReadGroups",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.read_groups.SharedRead.beside",
+      "label": "beside",
+      "level": "method",
+      "parent": "kneemri.inference.read_groups.SharedRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.read_groups.SharedRead.regrouped",
+      "label": "regrouped",
+      "level": "method",
+      "parent": "kneemri.inference.read_groups.SharedRead",
       "role": null
     },
     {

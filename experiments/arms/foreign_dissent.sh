@@ -41,9 +41,13 @@
 #   * seat NEGATIVE and solo well below `dissent_seat`'s 0.8509 floor — the dissent term is fighting the
 #     labels rather than re-weighting them, and 1.0 is too large for a teacher this distant.
 #
-# THE RULER, AND ITS KNOWN GAP. `seat_weight` DROPS foreign records passed to --base (knee: filed today),
-# so the served shape has to be built the way `logs/seat_weight_served.log` was built, not by passing the
-# foreign records as a plain base. A run that prints "base of 7" has silently priced the wrong ensemble.
+# THE RULER. `experiments/price_served_base8.sh` IS the served shape — greedyseat's seven plus
+# `raptor_v4_swa`, the eight `logs/seat_weight_served.log` was built from, which until 2026-09-06T18:00Z
+# lived in no file. Pass this arm's record as its `$1`. The gap this comment used to claim — that
+# `seat_weight` drops foreign records from `--base` — is NOT a gap: it drops them without `--foreign`, and
+# with the flag the same eight print "base of 8". Repetition in `--base` is expressible too (seven plus
+# six copies of the DINOv3 record prints "base of 13"), so a WEIGHTED base needs no new tool. Still check
+# the printed count against the base you passed: a run that prints "base of 7" priced the wrong ensemble.
 #
 # COST. ~70 min of card, 12 epochs on the shared recipe. ZERO submission slots. Teacher file on disk.
 #
