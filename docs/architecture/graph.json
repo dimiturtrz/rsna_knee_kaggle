@@ -4652,6 +4652,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.fp16_ties",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.fp16_ties",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.fp16_ties",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.fp16_ties",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.fp16_ties",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.fp16_ties",
+      "target": "kneemri.kaggle.seat_requirement",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.kernel_run",
       "target": "core.mounts",
       "weight": 1
@@ -23563,6 +23599,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.vote.Vote.ranks",
+      "target": "kneemri.inference.vote.Vote.midranks",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.board_check.BoardCensus",
       "target": "kneemri.evaluation.selection_bias.SelectionBias",
@@ -24718,6 +24760,120 @@
       "kind": "calls",
       "source": "kneemri.kaggle.entry_offline.main",
       "target": "kneemri.kaggle.entry_offline.EntryOffline.written",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "target": "kneemri.kaggle.fp16_ties.TieReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.reading",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.reading",
+      "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.reading",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties.ordinal",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.reading",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties.tie_mass",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.reading",
+      "target": "kneemri.kaggle.fp16_ties.TieReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.readings",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties.reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.readings",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties.served",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.report",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.report",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties.seated",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.seated",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.seated",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.seated",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.fp16_ties.Fp16Ties.seated",
+      "target": "kneemri.inference.vote.RankAverage",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.fp16_ties.main",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.fp16_ties.main",
+      "target": "kneemri.kaggle.fp16_ties.Fp16Ties.report",
       "weight": 1
     },
     {
@@ -31135,7 +31291,7 @@
       "role": null
     },
     {
-      "descendants": 243,
+      "descendants": 244,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -32191,7 +32347,7 @@
       "role": null
     },
     {
-      "descendants": 35,
+      "descendants": 36,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -32274,6 +32430,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.entry_offline",
       "label": "entry_offline",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties",
+      "label": "fp16_ties",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -36341,6 +36505,22 @@
       "level": "class",
       "parent": "kneemri.kaggle.entry_offline",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "label": "Fp16Ties",
+      "level": "class",
+      "parent": "kneemri.kaggle.fp16_ties",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.TieReading",
+      "label": "TieReading",
+      "level": "class",
+      "parent": "kneemri.kaggle.fp16_ties",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -50912,6 +51092,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.vote.Vote.midranks",
+      "label": "midranks",
+      "level": "method",
+      "parent": "kneemri.inference.vote.Vote",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.vote.Vote.named",
       "label": "named",
       "level": "method",
@@ -51796,6 +51984,86 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.entry_offline",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.ordinal",
+      "label": "ordinal",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.reading",
+      "label": "reading",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.seated",
+      "label": "seated",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.served",
+      "label": "served",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.Fp16Ties.tie_mass",
+      "label": "tie_mass",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.Fp16Ties",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.TieReading.cost",
+      "label": "cost",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties.TieReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.fp16_ties.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.fp16_ties",
       "role": null
     },
     {

@@ -316,10 +316,13 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   first person. Letters TO Claude go to `.claude/inbox/`; letters TO Kimi go to `.agent-runtime/inbox/`.
   Each side watches only its OWN box, with the listener that sits beside it: Claude runs
   `python .claude/listen_for_mail.py`, Kimi runs `python .agent-runtime/listen_for_mail.py`. A THIRD box
-  exists: `.claude/mastermind_inbox/` holds letters from the coordinator, watched by the SAME listener
-  under `--box mastermind_inbox` and armed as its own background task (one listener per box, never a
-  flag on one arm). Replies to the coordinator go into that box; replies to Kimi still go to
-  `.agent-runtime/inbox/`. Both boxes
+  exists: `.claude/mastermind_inbox/` holds letters TO the coordinator — it is the coordinator's box,
+  the way `.agent-runtime/inbox/` is Kimi's, and letters FROM the coordinator arrive in `.claude/inbox/`
+  like everyone else's. The rule that a box is armed by its OWNER holds there too: the listener
+  (`--box mastermind_inbox`, its own background task, one listener per box) is the coordinator's to run,
+  and arming it from this side archives their unread mail into `read/` where they will never see it.
+  That has happened. Replies to the coordinator are WRITTEN into that box and never watched from here;
+  replies to Kimi still go to `.agent-runtime/inbox/`. Both boxes
   hold a `.txt` runtime side plus committed `.md` letter history per their README. Writing into your own
   box, or watching the other side's, delivers nothing and looks perfectly healthy while doing it — that
   already armed a watcher on the wrong directory once. Each listener resolves its box from its OWN
