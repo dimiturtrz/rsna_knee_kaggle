@@ -10,8 +10,8 @@ import torch
 from core.data.corpus.study_cache import CachedCorpus
 from core.findings import TARGETS
 from core.paths import DataRoot
-from kneemri.inference.holdout_backfill import Backfill, HoldoutBackfill, UnbackfillableError
-from kneemri.inference.members import Member
+from kneemri.inference.holdout_backfill import Backfill, HoldoutBackfill, ReadSize, UnbackfillableError
+from kneemri.inference.members import RESIZED_FROM, Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
 from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutRecord
@@ -176,3 +176,32 @@ def test_of_prefers_the_metrics_file_when_a_run_kept_both(tmp_path: Path):
     torch.save({"model": {}, "options": RECIPE, "epochs_done": 3}, checkpoint)
 
     assert Backfill.of(checkpoint).epoch == 1, "under patience the last epoch's weights were thrown away"
+
+
+def test_read(tmp_path: Path):
+    """Pricing a size overrides `train_size`, the knob the encoder actually runs at.
+
+    Moving `img` instead names a different decode cache and leaves the encoder where it was, which
+    times and scores as though nothing changed (knee-d2fc). The member also comes back marked, so its
+    own trainer record can no longer stand in for the pass.
+    """
+    priced = ReadSize(224).read(_member(tmp_path / "fitted.pt"))
+
+    assert priced.read_size == 224, "the encoder runs at the priced size"
+    assert priced.image_size == 336, "and decodes from the cache it was fitted on"
+    assert RESIZED_FROM in priced.config, "so the trainer's own array is refused for it"
+
+
+def test_destination(tmp_path: Path):
+    """A priced record is named for its size, because the unsized name is the one everything reads.
+
+    `HoldoutRecord` derives its path from whatever it is handed, so writing a 224-px pass against the
+    checkpoint would overwrite the member's native holdout — the array every ensemble, seat search and
+    curve in this project scores from.
+    """
+    checkpoint = tmp_path / "member.pt"
+
+    destination = ReadSize(224).destination(checkpoint)
+
+    assert destination == tmp_path / "member_r224.pt"
+    assert HoldoutRecord(destination).path != HoldoutRecord(checkpoint).path, "the native record survives a price"

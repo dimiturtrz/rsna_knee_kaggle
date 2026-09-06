@@ -23,7 +23,7 @@ back-filled.
 """
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -117,6 +117,30 @@ class Backfill:
         return Targets.load(scoring, train_table, identifiers)
 
 
+@dataclass(frozen=True)
+class ReadSize:
+    """Serving an already-fitted member at a size it was not fitted at, priced on its own holdout.
+
+    The efficiency question is what a smaller read COSTS in accuracy, and the only honest way to ask it
+    of a member that exists is to re-derive its holdout through the submission path at that size. The
+    override is `train_size`, never `img`: `img` names the cache the member shares, so moving it feeds
+    resampled pixels to an encoder still running at the old resolution and prices nothing (knee-d2fc).
+
+    The record is written beside the checkpoint under a SIZED name, so a price never overwrites the
+    member's native record — which is the number every ensemble and every seat search reads.
+    """
+
+    pixels: int
+
+    def read(self, fitted: Member) -> Member:
+        """The same weights, read at this size."""
+        return fitted.resized(self.pixels)
+
+    def destination(self, checkpoint: Path) -> Path:
+        """Where the priced record goes: beside the checkpoint, named for the size that produced it."""
+        return checkpoint.with_name(f"{checkpoint.stem}_r{self.pixels}{checkpoint.suffix}")
+
+
 class HoldoutBackfill:
     """The inference pass that gives an already-run arm the per-study record it never kept."""
 
@@ -169,8 +193,12 @@ def main() -> None:
     command.parser.add_argument(
         "--restamp", action="store_true", help="correct an existing record's epoch only, with no inference"
     )
+    command.parser.add_argument(
+        "--read-size", type=int, default=0, help="price the member at this many pixels, into a sized record"
+    )
     arguments = command.parsed()
 
+    sizing = ReadSize(arguments.read_size) if arguments.read_size else None
     backfill = HoldoutBackfill(command.rooted(arguments), torch.device(arguments.device), overlap=arguments.overlap)
     # The walk, not each member: a suspend between two members costs the same wall-clock as one inside
     # a member, and the walk over 55 of them is what runs for hours unattended (knee-wyzj).
@@ -178,7 +206,8 @@ def main() -> None:
         for checkpoint in arguments.checkpoints:
             # A restamp is only ever asked of a record that EXISTS, so it passes this gate for the same
             # reason a refresh does — the gate keeps a plain walk from re-deriving what is done.
-            if HoldoutRecord(checkpoint).exists() and not (arguments.refresh or arguments.restamp):
+            destination = sizing.destination(checkpoint) if sizing else checkpoint
+            if HoldoutRecord(destination).exists() and not (arguments.refresh or arguments.restamp):
                 logger.info("%s: already keeps its predictions", checkpoint.stem)
                 continue
             try:
@@ -192,6 +221,9 @@ def main() -> None:
                 continue
             member = Member.from_checkpoint(checkpoint)
             corpus, identifiers = member.cache(backfill.root.processed()).load()
+            if sizing:
+                member = sizing.read(member)
+                plan = replace(plan, checkpoint=destination)
             written = backfill.derive(member, plan, corpus, identifiers)
             logger.info("%s: %d studies re-derived at epoch %d", checkpoint.stem, written, plan.epoch)
 

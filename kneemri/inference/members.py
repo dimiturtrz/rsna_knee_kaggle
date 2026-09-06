@@ -40,6 +40,9 @@ FINGERPRINT_TOLERANCE = 2e-3
 LEGACY_SLICES = 12
 """What a manifest written before members could differ in depth was fitted on."""
 
+RESIZED_FROM = "resized_from"
+"""The size a member was FITTED at, stamped by `resized` so `TrainerRecord` refuses its native array."""
+
 
 class MemberConfig(TypedDict):
     """The manifest's per-member config: the reading a member was fitted under, plus its architecture."""
@@ -249,17 +252,15 @@ class Member:
     def resized(self, size: int) -> "Member":
         """The same member READ at a different size — for pricing a resolution, never for predicting.
 
-        A ViT interpolates its position embeddings, so this member will forward the bigger tensor and
-        return a number that means nothing. What it spends getting there IS what a member fitted at
-        that size spends, which is how a resolution arm is priced before it exists (knee-d2fc).
+        A ViT interpolates its position embeddings, so what it SPENDS reading at this size is what a
+        member fitted at it spends — which is how a resolution is priced before that arm exists (knee-d2fc).
 
         THE SIZE HAS TO BE THE MEMBER'S, not the caller's tensor. `StudyModel.forward` resamples its
         input to the `img_size` it is handed and that comes from `window(...).size` — feeding it 448 px
         pixels while the member still says 392 measures a bilinear resize and an encoder running at the
-        old resolution, which times the same as not overriding anything at all. Measured 2026-08-17:
-        392, 420 and 448 all came back at 380 ms, and the flat line was the bug.
+        old resolution. Measured 2026-08-17: 392, 420 and 448 all came back at 380 ms, flat line the bug.
         """
-        return replace(self, config={**self.config, "train_size": size})
+        return replace(self, config={**self.config, "train_size": size, RESIZED_FROM: self.read_size})
 
     @property
     def whole_stack(self) -> bool:
