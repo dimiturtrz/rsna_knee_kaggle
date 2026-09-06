@@ -60,7 +60,30 @@ LOCALISED findings, and every one of our 188 members reads a centre-weighted cro
 budget chosen on the mean. That is an INPUT axis (field of view, slice selection, laterality), not
 another recipe over the same corpus, which is the kind of thing the frontier reading said was needed.
 
-## What it does not say
+## Nothing in the pool leans that way — including the arm built to
+
+`pool_ceiling --specialists` ranks every member by how much better it is on MCL + Lateral OA than on its
+own twelve-column mean. Shape, not quality. Over the 188 members, above a 0.80 quality floor:
+
+```
+members most shaped toward MCL + Lateral OA, over their own mean:
+  margin_seat_s2026.pt               -0.0281
+  ortho_slow_trunk.pt                -0.0290
+  blendema224_s2026.pt               -0.0320
+  deep24_s2026.pt                    -0.0343
+  merged_blend_s2026.pt              -0.0347
+  ...
+```
+
+**Every competent member this project owns is WORSE on those two findings than on its own mean, and the
+best of them is still −0.0281.** Not one leans toward the deficit. That is what makes the columns a real
+target rather than a rebalancing: there is no member to promote, because none exists.
+
+The floor matters and it is not cosmetic. Without it the ranking is won outright by `focus_mcl_s2026` at
+**+0.0466**, the arm built with `--focus-label MCL` — and its twelve-column mean is **0.5332**, near
+chance, having regressed its own target label by −0.0576 paired (ledger, 2026-09-01). Its "advantage" is
+one near-chance column standing above eleven worse ones. **The single attempt to build an MCL specialist
+produced a broken member, and read without a quality floor it would have read as the answer.**
 
 - **`alone` is selection-biased upward and `stack` is not.** The best-single-member column is a maximum
   over 188 members chosen on the very studies it is scored on; the stack column is out of fold. So a
@@ -80,7 +103,23 @@ another recipe over the same corpus, which is the kind of thing the frontier rea
 
 ## What to do next
 
-The gating question is answered, so the next one is whether the deficit is about FIELD OF VIEW. Both
-surviving columns are localised and off-centre; if a crop or slice-selection variant already in the
-ledger scores better on MCL and Lateral OA than on the mean, the axis is confirmed before any card is
-spent. That is a ledger read, not a run.
+Both gating questions are answered — the columns are real, and nothing owned leans toward them. What is
+left is the arm, and its design is constrained by the one attempt that already failed.
+
+`focus_mcl` used `--focus-label MCL`, and it did not merely underperform: it **regressed its own target
+label**, and its twelve-column mean collapsed to 0.5332. Narrowing the objective to one finding threw
+away the shared structure the other eleven provide — which is the failure mode the project's own rules
+warn about, and it is a fact about THAT lever, not about the target.
+
+So the next arm keeps all twelve columns and changes something else:
+
+- **Reweight, do not narrow.** Twelve-label supervision with extra weight on MCL and Lateral OA. The
+  shared trunk stays; only the gradient's balance moves. `focus_mcl` is not evidence against this — it is
+  evidence against dropping eleven labels.
+- **Or change the INPUT rather than the loss.** Both columns are peripheral: MCL sits at the medial edge
+  and Lateral OA is compartment-specific, while every member reads a centre-weighted crop and a fixed
+  slice budget chosen on the mean. A wider field of view or a laterality-aware crop is a member that
+  differs in what it SEES, which is the only axis the frontier reading left open.
+
+The second is the better bet on mechanism (a loss reweighting is a knob; a field-of-view change is an
+input axis), but the first is far cheaper to smoke. Price both before either goes on the card.

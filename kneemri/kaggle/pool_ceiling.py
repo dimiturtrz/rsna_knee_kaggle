@@ -27,6 +27,7 @@ pool, read under the same rank ruler as every other offline number in the ledger
 """
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -59,6 +60,20 @@ MAX_ITERATIONS = 2000
 
 SEED = 2026
 """The fold split, fixed, because a ceiling that moves with the shuffle is not a ceiling."""
+
+SPECIALISTS = 12
+"""How many shaped members to name. Enough to see whether one RECIPE recurs, not a full listing."""
+
+QUALITY_FLOOR = 0.80
+"""A member below this is near enough to noise that its column SHAPE is noise too.
+
+Without it the ranking is won by `focus_mcl_s2026`, whose twelve-column mean is 0.5332 — its apparent
++0.0466 advantage on MCL is one near-chance column standing above eleven others, not a specialist. Shape
+is only readable on a member that can see anything at all.
+"""
+
+WEAK_COLUMNS = ("MCL", "Lateral OA")
+"""The two findings whose deficit survives its own sampling band; see the 2026-09-06 interpretation."""
 
 BOTH_CLASSES = 2
 """A training fold needs a positive and a negative; one class alone carries no information to fit."""
@@ -178,6 +193,25 @@ class PoolCeiling:
         ]
         return sorted(readings, key=lambda reading: reading.stacked)
 
+    def specialists(
+        self, pool: Pool, labels: Sequence[str], count: int = SPECIALISTS, floor: float = QUALITY_FLOOR
+    ) -> list[tuple[str, float]]:
+        """Members ranked by how much BETTER they are on the named findings than on their own mean.
+
+        The question a weak column raises is whether anything already owned is shaped toward it. A member
+        that is merely good overall will score high on every column, so the ranking is on the DIFFERENCE
+        against the member's own twelve-column mean — which asks about shape and not about quality.
+        """
+        scores = LabelScores()
+        advantages = []
+        for name, prediction in zip(pool.names, pool.predictions, strict=True):
+            columns = scores.per_label(prediction, pool.truth)
+            own = float(np.nanmean(list(columns.values())))
+            if own < floor:
+                continue
+            advantages.append((name, float(np.mean([columns[label] for label in labels]) - own)))
+        return sorted(advantages, key=lambda pair: pair[1], reverse=True)[:count]
+
     def report(self, target: float = TARGET_SCORE, pool: Pool | None = None) -> list[str]:
         """The flat blend, the best stack, and the distance both of them still sit from first place."""
         pool = self.pool() if pool is None else pool
@@ -198,6 +232,8 @@ class PoolCeiling:
             f"  {reading.positives:>4d}+  band {reading.width:.4f}"
             for reading in self.columns(pool, best.penalty)
         ]
+        lines.append(f"members most shaped toward {' + '.join(WEAK_COLUMNS)}, over their own mean:")
+        lines += [f"  {name:<34} {advantage:+.4f}" for name, advantage in self.specialists(pool, WEAK_COLUMNS)]
         return lines
 
 

@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 from kneemri.evaluation.pool import Pool
-from kneemri.kaggle.pool_ceiling import PENALTIES, PoolCeiling
+from kneemri.kaggle.pool_ceiling import PENALTIES, WEAK_COLUMNS, PoolCeiling
 
 STUDIES = 200
 LABELS = 12
@@ -81,3 +81,15 @@ def test_report(tmp_path: Path) -> None:
     best = next(line for line in lines if line.startswith("best stack:"))
     assert float(best.split()[2]) > CHANCE + TOLERANCE
     assert any("first place needs" in line for line in lines)
+
+
+def test_specialists(tmp_path: Path) -> None:
+    ranked = a_ceiling(tmp_path).specialists(a_pool(informative=True), WEAK_COLUMNS, count=MEMBERS, floor=0.0)
+    assert len(ranked) == MEMBERS
+    assert {name for name, _ in ranked} == {f"m{index}" for index in range(MEMBERS)}
+    assert [advantage for _, advantage in ranked] == sorted((a for _, a in ranked), reverse=True)
+
+
+def test_specialists_floor(tmp_path: Path) -> None:
+    pool = a_pool(informative=True)
+    assert a_ceiling(tmp_path).specialists(pool, WEAK_COLUMNS, count=MEMBERS, floor=1.0) == []
