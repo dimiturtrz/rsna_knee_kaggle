@@ -161,17 +161,22 @@ class RecordMix:
             if reading is None:
                 logger.info("%s: no holdout record, skipped", path.name)
                 continue
-            if not path.exists():
-                self._dead.append(path.name)
-                logger.warning(
-                    "%s: a holdout record with no checkpoint — the run never reached its end, dropped",
-                    path.name,
-                )
-                continue
             if reading.source == FOREIGN and not self.foreign:
                 self._foreign.append(path.name)
                 logger.warning(
                     "%s: someone else's weights through someone else's decode — dropped, pass --foreign to seat it",
+                    path.name,
+                )
+                continue
+            # AFTER the foreign question, because the two refusals answer different things and the
+            # order decided one of them wrongly. A missing checkpoint means a killed run for a member
+            # WE fitted; a foreign member never has one of our checkpoints at all, by construction —
+            # its record is the whole artefact. Asked first, this rule dropped `dinov3f0_solo` as a
+            # dead run and made the foreign seat unreadable offline even with --foreign passed.
+            if reading.source != FOREIGN and not path.exists():
+                self._dead.append(path.name)
+                logger.warning(
+                    "%s: a holdout record with no checkpoint — the run never reached its end, dropped",
                     path.name,
                 )
                 continue

@@ -282,3 +282,25 @@ def test_narrowed(tmp_path: Path):
     dropped = mix.narrow()
 
     assert mix.narrowed() == dropped == ["smoke.pt"]
+
+
+def test_readings_seats_a_foreign_record_that_has_no_checkpoint_of_ours(tmp_path: Path):
+    """A vendor member IS its record: there was never a checkpoint of ours to be missing.
+
+    The dead-run rule asked first, so `dinov3f0_solo` — someone else's fold served through their own
+    kernel code onto our holdout — was dropped as a crashed run of ours, and `--foreign` could not
+    seat it however loudly it was passed. The two refusals answer different questions and only the
+    dead-run one is about a checkpoint we would have written.
+    """
+    studies = [f"s{index}" for index in range(8)]
+    _record(tmp_path / "ours.pt", studies)
+    theirs = _record(tmp_path / "theirs.pt", studies)
+    reading = HoldoutRecord(theirs).read()
+    assert reading is not None
+    HoldoutRecord(theirs).write(reading.studies, reading.predictions, reading.truth, reading.epoch, source=FOREIGN)
+    theirs.unlink()
+
+    seated = RecordMix([tmp_path / "ours.pt", theirs], foreign=True)
+
+    assert [name for name, _ in seated.readings()] == ["ours.pt", "theirs.pt"]
+    assert seated.dropped() == [], "a vendor record is not a dead run"
