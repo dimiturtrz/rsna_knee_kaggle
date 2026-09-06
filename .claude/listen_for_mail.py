@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Inbox listener — arm as a harness background task, exits on mail.
 
-Watches .agent-runtime/inbox/ for .txt/.md letters. On arrival: prints each
+Watches THIS side's box for .txt/.md letters, resolved from this script's own
+directory (.claude/ here, .agent-runtime/ for the peer) so a copy can never end
+up watching the other side's mail. `--box <name>` selects which box under that
+directory: `inbox` (default) is the peer's letters to us, `mastermind_inbox` is
+the coordinator's. On arrival: prints each
 letter's body, archives it to inbox/read/, and exits so the harness delivers
 the output as a background-task completion notification. Re-arm FIRST on every
 notification, then read, then work.
@@ -10,8 +14,9 @@ Stdlib-only polling: filesystem-event listeners (watchdog) are a dependency
 this repo does not otherwise need, and events were unreliable enough in the
 fpga project that its listener drained on a 5s poll regardless.
 
-Usage: python .agent-runtime/listen_for_mail.py [timeout_seconds]
-Arm with a harness timeout slightly above the internal one.
+Usage: python <this script> [--box inbox|mastermind_inbox] [timeout_seconds]
+Arm with a harness timeout slightly above the internal one. One listener per
+box: arming a second box is a second background task, not a flag.
 """
 
 import os
@@ -30,12 +35,49 @@ HEARTBEAT_STALE_SECONDS = 30
 DEFAULT_TIMEOUT_SECONDS = 82800  # arm the background task with 86400
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-INBOX = os.path.join(SCRIPT_DIR, "inbox")
+DEFAULT_BOX = "inbox"
+BOXES = ("inbox", "mastermind_inbox")
+
+EXTENSIONS = (".txt", ".md")
+NOT_LETTERS = ("README.md",)
+"""A box documents itself in the box; that file is not mail and archiving it empties the documentation."""
+
+INBOX = os.path.join(SCRIPT_DIR, DEFAULT_BOX)
 READ_DIR = os.path.join(INBOX, "read")
 PID_FILE = os.path.join(INBOX, ".listener_pid")
 HEARTBEAT_FILE = os.path.join(INBOX, ".listener_heartbeat")
 
-EXTENSIONS = (".txt", ".md")
+
+def _select_box(box):
+    """Point the module's paths at one box. Per-box state files, so two boxes can be armed at once."""
+    global INBOX, READ_DIR, PID_FILE, HEARTBEAT_FILE
+    INBOX = os.path.join(SCRIPT_DIR, box)
+    READ_DIR = os.path.join(INBOX, "read")
+    PID_FILE = os.path.join(INBOX, ".listener_pid")
+    HEARTBEAT_FILE = os.path.join(INBOX, ".listener_heartbeat")
+
+
+def _parsed(argv):
+    """`--box <name>` anywhere, one optional positional timeout — argparse is not worth a dependency here."""
+    box, timeout, rest = DEFAULT_BOX, DEFAULT_TIMEOUT_SECONDS, []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--box":
+            if index + 1 >= len(argv) or argv[index + 1] not in BOXES:
+                print(f"--box takes one of {', '.join(BOXES)}", file=sys.stderr)
+                sys.exit(2)
+            box = argv[index + 1]
+            index += 2
+            continue
+        rest.append(argv[index])
+        index += 1
+    if rest:
+        try:
+            timeout = int(rest[0])
+        except ValueError:
+            print(f"invalid timeout: {rest[0]}", file=sys.stderr)
+            sys.exit(2)
+    return box, timeout
 
 
 def _touch_heartbeat():
@@ -94,7 +136,11 @@ def _kill_existing_listener():
 def _letters():
     if not os.path.isdir(INBOX):
         return []
-    return sorted(f for f in os.listdir(INBOX) if f.endswith(EXTENSIONS) and os.path.isfile(os.path.join(INBOX, f)))
+    return sorted(
+        f
+        for f in os.listdir(INBOX)
+        if f.endswith(EXTENSIONS) and f not in NOT_LETTERS and os.path.isfile(os.path.join(INBOX, f))
+    )
 
 
 def _archive(basename):
@@ -120,22 +166,17 @@ def _deliver(names):
         except OSError:
             body = ""
         _archive(basename)
-        print(f"=== inbox/{basename} ===")
+        print(f"=== {os.path.basename(INBOX)}/{basename} ===")
         print(body)
     print(f"MAIL:{len(names)}:{','.join(names)}")
     print("---")
     print("Listener exited on mail. Re-arm now:")
-    print("  python .agent-runtime/listen_for_mail.py")
+    print(f"  python {sys.argv[0]} --box {os.path.basename(INBOX)}")
 
 
 def main():
-    timeout = DEFAULT_TIMEOUT_SECONDS
-    if len(sys.argv) >= 2:
-        try:
-            timeout = int(sys.argv[1])
-        except ValueError:
-            print(f"invalid timeout: {sys.argv[1]}", file=sys.stderr)
-            sys.exit(2)
+    box, timeout = _parsed(sys.argv[1:])
+    _select_box(box)
 
     os.makedirs(READ_DIR, exist_ok=True)
     _kill_existing_listener()
@@ -165,7 +206,7 @@ def main():
                 return
             if time.time() - start > timeout:
                 print(f"TIMEOUT: no mail after {timeout}s. Re-arm now:")
-                print(f"  python .agent-runtime/listen_for_mail.py {timeout}")
+                print(f"  python {sys.argv[0]} --box {box} {timeout}")
                 return
     finally:
         _clear_state_files()

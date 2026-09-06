@@ -315,7 +315,11 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 - **Mailboxes, one per side, and this file is read from BOTH** — so the rule is written without a
   first person. Letters TO Claude go to `.claude/inbox/`; letters TO Kimi go to `.agent-runtime/inbox/`.
   Each side watches only its OWN box, with the listener that sits beside it: Claude runs
-  `python .claude/listen_for_mail.py`, Kimi runs `python .agent-runtime/listen_for_mail.py`. Both boxes
+  `python .claude/listen_for_mail.py`, Kimi runs `python .agent-runtime/listen_for_mail.py`. A THIRD box
+  exists: `.claude/mastermind_inbox/` holds letters from the coordinator, watched by the SAME listener
+  under `--box mastermind_inbox` and armed as its own background task (one listener per box, never a
+  flag on one arm). Replies to the coordinator go into that box; replies to Kimi still go to
+  `.agent-runtime/inbox/`. Both boxes
   hold a `.txt` runtime side plus committed `.md` letter history per their README. Writing into your own
   box, or watching the other side's, delivers nothing and looks perfectly healthy while doing it — that
   already armed a watcher on the wrong directory once. Each listener resolves its box from its OWN
