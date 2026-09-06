@@ -459,20 +459,26 @@
     {
       "kind": "import",
       "source": "core.data.corpus.decode_bench",
-      "target": "core.data.corpus.study",
+      "target": "core.data.corpus.slot_reader",
       "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.decode_bench",
+      "target": "core.data.corpus.study",
+      "weight": 3
     },
     {
       "kind": "import",
       "source": "core.data.corpus.decode_bench",
       "target": "core.data.corpus.study_cache",
-      "weight": 2
+      "weight": 4
     },
     {
       "kind": "import",
       "source": "core.data.corpus.decode_bench",
       "target": "core.paths",
-      "weight": 1
+      "weight": 3
     },
     {
       "kind": "import",
@@ -4053,6 +4059,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
+      "target": "core.data.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
       "target": "core.data.corpus.study_cache",
       "weight": 1
     },
@@ -4078,6 +4090,12 @@
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
       "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
+      "target": "kneemri.inference.ensemble",
       "weight": 1
     },
     {
@@ -7700,8 +7718,92 @@
     },
     {
       "kind": "construct",
+      "source": "core.data.corpus.decode_bench.DecodeBench._headers_one",
+      "target": "core.data.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._headers_one",
+      "target": "core.data.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.decode_bench.DecodeBench._headers_one",
+      "target": "core.data.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._headers_one",
+      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._headers_one",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.slot_reader.SlotReader.band_indices",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "core.data.corpus.decode_bench.main",
       "target": "core.data.corpus.decode_bench.DecodeBench",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.decode_bench.main",
+      "target": "core.data.corpus.decode_bench.DecodeBench._union_one",
       "weight": 1
     },
     {
@@ -22346,6 +22448,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble._asked",
+      "target": "kneemri.inference.ensemble.Ensemble.served",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.afford",
       "target": "kneemri.inference.ensemble.Ensemble.worth",
       "weight": 1
@@ -22429,12 +22537,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_member",
-      "target": "kneemri.inference.members.Member.window",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.inference.ensemble.Ensemble.predict_member",
       "target": "kneemri.inference.test_time.SpatialViews",
@@ -22450,6 +22552,12 @@
       "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.predict_members",
       "target": "kneemri.inference.ensemble.Ensemble.attempt",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Ensemble.reads",
+      "target": "kneemri.inference.ensemble.Ensemble.served",
       "weight": 1
     },
     {
@@ -22485,6 +22593,18 @@
     {
       "kind": "holds",
       "source": "kneemri.inference.ensemble.Serving",
+      "target": "kneemri.inference.ensemble.SharedRead",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.ensemble.Serving",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.ensemble.Serving",
       "target": "kneemri.inference.test_time.SpatialViews",
       "weight": 1
     },
@@ -22492,6 +22612,18 @@
       "kind": "holds",
       "source": "kneemri.inference.ensemble.Serving",
       "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.ensemble.Serving.read",
+      "target": "kneemri.inference.ensemble.SharedRead.regrouped",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.ensemble.SharedRead",
+      "target": "kneemri.inference.members.Member",
       "weight": 1
     },
     {
@@ -22813,6 +22945,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.inference.holdout_backfill.ReadSize",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.ReadSize.read",
+      "target": "kneemri.inference.members.Member.resized",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "core.wakelock.Wakelock",
@@ -22831,6 +22975,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.inference.ensemble.SharedRead",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "kneemri.inference.holdout_backfill.Backfill.of",
@@ -22846,6 +22996,12 @@
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.inference.holdout_backfill.ReadSize",
       "weight": 1
     },
     {
@@ -36394,6 +36550,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.ensemble.SharedRead",
+      "label": "SharedRead",
+      "level": "class",
+      "parent": "kneemri.inference.ensemble",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.foreign_head.ForeignHead",
       "label": "ForeignHead",
       "level": "class",
@@ -36455,6 +36619,14 @@
       "level": "class",
       "parent": "kneemri.inference.holdout_backfill",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_backfill.ReadSize",
+      "label": "ReadSize",
+      "level": "class",
+      "parent": "kneemri.inference.holdout_backfill",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -38892,6 +39064,22 @@
       "descendants": 0,
       "id": "core.data.corpus.decode_bench.DecodeBench._decode_one",
       "label": "_decode_one",
+      "level": "method",
+      "parent": "core.data.corpus.decode_bench.DecodeBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.decode_bench.DecodeBench._headers_one",
+      "label": "_headers_one",
+      "level": "method",
+      "parent": "core.data.corpus.decode_bench.DecodeBench",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.decode_bench.DecodeBench._union_one",
+      "label": "_union_one",
       "level": "method",
       "parent": "core.data.corpus.decode_bench.DecodeBench",
       "role": null
@@ -50450,6 +50638,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.ensemble.Ensemble.served",
+      "label": "served",
+      "level": "method",
+      "parent": "kneemri.inference.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.ensemble.Ensemble.slices",
       "label": "slices",
       "level": "method",
@@ -50470,6 +50666,30 @@
       "label": "worth",
       "level": "method",
       "parent": "kneemri.inference.ensemble.Ensemble",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.ensemble.Serving.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.inference.ensemble.Serving",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.ensemble.SharedRead.beside",
+      "label": "beside",
+      "level": "method",
+      "parent": "kneemri.inference.ensemble.SharedRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.ensemble.SharedRead.regrouped",
+      "label": "regrouped",
+      "level": "method",
+      "parent": "kneemri.inference.ensemble.SharedRead",
       "role": null
     },
     {
@@ -50646,6 +50866,22 @@
       "label": "derive",
       "level": "method",
       "parent": "kneemri.inference.holdout_backfill.HoldoutBackfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_backfill.ReadSize.destination",
+      "label": "destination",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_backfill.ReadSize",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_backfill.ReadSize.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_backfill.ReadSize",
       "role": null
     },
     {

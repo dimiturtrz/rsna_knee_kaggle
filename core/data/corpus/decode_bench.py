@@ -25,6 +25,7 @@ the code rather than the disk.
 """
 
 import logging
+import os
 import time
 from collections.abc import Callable, Sequence
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -37,6 +38,20 @@ logger = logging.getLogger(__name__)
 STUDIES = 96
 """Enough that a pool's startup is not the measurement. At 24 the Windows spawn cost alone flattered
 threads and hid the process pool's win entirely."""
+
+SLICES = "DECODE_BENCH_SLICES"
+"""How the depth reaches a worker. A process pool SPAWNS here, so a module global set in the parent is
+not inherited — but the environment is, and `os.environ` is the one channel that survives a spawn
+without being sent per item (which would time pickling, the same trap `PLANES` avoids)."""
+
+DEFAULT_SLICES = 12
+"""The depth every shipped member reads at except the 20-slice group. The bench's own default, so a
+run with no flag prices what the champion actually serves."""
+
+CHAMPION_GROUPS = ((20, (0.1, 0.9)), (12, (0.1, 0.9)), (12, (0.2, 0.8)))
+"""The three read groups `raptorweight_v1` serves — three seats, one seat, two seats. Read off the
+members' own recipes on 2026-09-06, and the reason its Kaggle log decodes the same three visible
+studies three times over (`decode 4s`, `2s`, `2s`) and projects 7.6 h of a 9 h cap."""
 
 PLANES: dict[str, str] = {}
 """Filled per worker on first use. A process pool re-imports this module rather than inheriting state,
@@ -88,7 +103,63 @@ class DecodeBench:
 
         if not PLANES:
             PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
-        return Study.from_directory(Path(directory), PLANES, SlotPipeline()).bag(12)
+        return Study.from_directory(Path(directory), PLANES, SlotPipeline()).bag(
+            int(os.environ.get(SLICES, DEFAULT_SLICES))
+        )
+
+    @staticmethod
+    def _headers_one(directory: str) -> object:
+        """The same study with the PIXELS left unread — every header parsed, nothing decoded.
+
+        This is the term no depth can cut. `Acquisition.ordered_files` header-parses EVERY file in
+        every series to sort them, and only then does `SlotReader.cropped` decode the `slices` files
+        the band selects. So decode time is `headers(all files) + pixels(slices)`, and halving the
+        depth halves the second term only. Timed separately because a lever that moves the smaller of
+        the two is a lever priced wrong — and if headers dominate, ordering by filename or parsing one
+        header per series is worth more than any slice count.
+        """
+        global PLANES
+        from core.data.corpus.study import SlotPipeline, Study  # noqa: PLC0415 - CLI-only
+        from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
+        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+
+        if not PLANES:
+            PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
+        study = Study.from_directory(Path(directory), PLANES, SlotPipeline())
+        return [acquisition.ordered_files() for acquisition in study.acquisitions]
+
+    @staticmethod
+    def _union_one(directory: str) -> object:
+        """How many DISTINCT files the champion's three read groups open in this study, against their sum.
+
+        A group is a decode of every study, but two groups at the same band and different depths open
+        overlapping files, and the historic band 0.2-0.8 sits INSIDE 0.1-0.9. So the floor a file-level
+        memo reaches is the size of the union, not the size of one group — and unlike unifying the
+        groups, a memo changes no pixels any member sees, so it costs 0 AUC and can ride in final A.
+
+        Returns `(distinct, total)` per study; the caller sums both. Reads headers only — the count is a
+        property of `band_indices` and the file list, so no pixel is decoded to answer it.
+        """
+        global PLANES
+        from core.data.corpus.slot_reader import Band, SlotReader  # noqa: PLC0415 - CLI-only
+        from core.data.corpus.study import SlotPipeline, Study  # noqa: PLC0415 - CLI-only
+        from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
+        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+
+        if not PLANES:
+            PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
+        study = Study.from_directory(Path(directory), PLANES, SlotPipeline())
+        distinct: set[tuple[str, int]] = set()
+        total = 0
+        # ROUTED acquisitions only. A study holds many series and the pipeline decodes one per slot;
+        # counting every series would price a decode nothing performs and inflate the memo's win.
+        for acquisition in study.pipeline.route(study.acquisitions, PLANES).values():
+            available = len(acquisition.ordered_files())
+            for slices, band in CHAMPION_GROUPS:
+                opened = SlotReader(band=Band(*band)).band_indices(available, slices)
+                distinct.update((acquisition.series, index) for index in opened)
+                total += len(opened)
+        return len(distinct), total
 
     def report(self, measured: dict[str, float], studies: int) -> list[str]:
         """Each strategy against SERIAL, because the question is whether a pool earns its complexity."""
@@ -103,6 +174,13 @@ def main() -> None:
     """Time the real decode under each strategy and print what each buys over running serially."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--studies", type=int, default=STUDIES)
+    command.parser.add_argument("--slices", type=int, default=DEFAULT_SLICES, help="depth to decode at")
+    command.parser.add_argument(
+        "--headers-only", action="store_true", help="time the header parse alone, the term no depth cuts"
+    )
+    command.parser.add_argument(
+        "--union", action="store_true", help="count distinct vs opened files across the champion's read groups"
+    )
     arguments = command.parsed()
 
     from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
@@ -111,8 +189,24 @@ def main() -> None:
     studies = [str(path) for path in sorted(source.iterdir()) if path.is_dir()]
     chosen = studies[: arguments.studies]
 
+    if arguments.union:
+        counted = [DecodeBench._union_one(study) for study in chosen]  # noqa: SLF001 - its own CLI
+        distinct = sum(pair[0] for pair in counted)  # type: ignore[index]
+        total = sum(pair[1] for pair in counted)  # type: ignore[index]
+        command.report(
+            [
+                f"{len(chosen)} studies: {total / len(chosen):.1f} files opened per study across "
+                f"{len(CHAMPION_GROUPS)} groups, {distinct / len(chosen):.1f} distinct "
+                f"({1 - distinct / total:.1%} of the decode is the same file read twice)"
+            ]
+        )
+        return
+
+    os.environ[SLICES] = str(arguments.slices)
     bench = DecodeBench()
-    measured = bench.timings(DecodeBench._decode_one, chosen)  # noqa: SLF001 - its own CLI
+    work = DecodeBench._headers_one if arguments.headers_only else DecodeBench._decode_one  # noqa: SLF001 - its own CLI
+    measured = bench.timings(work, chosen)
+    command.report(["headers only, no pixels" if arguments.headers_only else f"{arguments.slices} slices"])
     command.report(bench.report(measured, len(chosen)))
 
 

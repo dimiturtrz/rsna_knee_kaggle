@@ -16,7 +16,8 @@ disjoint windows, probability pooling, 0.025 max deviation against ours).
 import logging
 import time
 from collections.abc import Callable, Hashable, Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import TypeVar
 
 import numpy as np
@@ -29,7 +30,7 @@ from core.data.corpus.slot_reader import Reading
 from core.data.corpus.slots import SCHEMES, SlotScheme
 from core.findings import TARGETS
 from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
-from kneemri.inference.members import Member, MemberPackage, Window
+from kneemri.inference.members import RESIZED_FROM, Member, MemberPackage, Window
 from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import RankAverage, Vote
 from kneemri.models.backbone import ENCODERS
@@ -122,6 +123,48 @@ class Read:
 
 
 @dataclass(frozen=True)
+class SharedRead:
+    """Serving an already-fitted member under ANOTHER read group's depth and band.
+
+    THE ENTRY'S DECODE BILL IS THE NUMBER OF READ GROUPS, NOT THE NUMBER OF SEATS. `Ensemble.reads`
+    groups members by their reading, and a group is one decode of every study; sizes collapse inside a
+    group because `SlotReader.cropped` stops before the resize, but the slice count and the band do not
+    — they decide WHICH files are opened. `raptorweight_v1`'s six seats span three groups (20 slices at
+    the 0.1-0.9 band, 12 at that band, 12 at the historic one), and its Kaggle log decodes the same
+    three visible studies three times over: `decode 4s`, then `2s`, then `2s`, projecting 7.6 h of a
+    9 h limit. One group would decode 12 slices per study instead of 44.
+
+    So the question this asks is not "how much accuracy does a shallower read cost" but "how much does
+    it cost to serve every seat out of ONE decode". It lives beside `Serving` because the same object
+    has to answer it in BOTH halves: the kernel serves through it, and `holdout_backfill` prices it on
+    each member's own holdout. Two copies of a regroup would be two definitions of what shipped.
+
+    The band is the reader's own `[low, high]` recorded form, so the value handed here is the value a
+    manifest carries and nothing has to translate it.
+
+    A re-grouped member carries the `RESIZED_FROM` mark, which is what `TrainerRecord.instead_of`
+    refuses on. The mark's name says "size" and its RULE is "this is not the reading the trainer
+    fitted", which is what a re-grouped member is; without it the trainer's own array would be handed
+    back and an offline price would read zero.
+    """
+
+    slices: int
+    band: tuple[float, float]
+
+    def regrouped(self, fitted: Member) -> Member:
+        """The same weights, read at this group's depth and band."""
+        return replace(
+            fitted,
+            config={**fitted.config, "slices": self.slices, "band": list(self.band), RESIZED_FROM: fitted.read_size},
+        )
+
+    def beside(self, checkpoint: Path) -> Path:
+        """Where a priced record goes: beside the checkpoint, named for the group that produced it."""
+        low, high = self.band
+        return checkpoint.with_name(f"{checkpoint.stem}_n{self.slices}b{low:g}-{high:g}{checkpoint.suffix}")
+
+
+@dataclass(frozen=True)
 class Serving:
     """How the members are RUN, as opposed to what any of them recorded about itself.
 
@@ -159,9 +202,22 @@ class Serving:
     since the family existed while the SUBMISSION path could not vary it at all. An axis measurable
     only offline is an axis whose board transfer cannot be asked about."""
 
+    group: SharedRead | None = None
+    """None means each member is read at the depth and band it was FITTED at, and the entry pays one
+    decode per distinct reading. A group forces ONE reading across every member, which is the only knob
+    here that moves DECODE time rather than forward time — `reads` collapses to a single group and the
+    corpus is opened once. Priced offline on the champion's five fold-0 twins: 0.8706 native against
+    0.8684 at 12 slices / band 0.1-0.9, a cost of 0.0022 under the 0.0045 board resolution."""
+
     def read(self, member: Member) -> Member:
-        """The member as this entry serves it: its own reading, unless the entry forces a size."""
-        return member if self.read_size is None else member.resized(self.read_size)
+        """The member as this entry serves it: its own reading, unless the entry forces one.
+
+        The re-group runs FIRST and the size second, because they act on different halves of the read:
+        depth and band decide WHICH files are decoded, and a size is applied to pixels already decoded
+        (knee-d2fc). Reversed, the size override would be overwritten by the regroup's config copy.
+        """
+        served = member if self.group is None else self.group.regrouped(member)
+        return served if self.read_size is None else served.resized(self.read_size)
 
 
 class Ensemble:
@@ -219,9 +275,20 @@ class Ensemble:
         cannot answer a decode count the serve path would contradict.
         """
         gathered: dict[tuple[str, int, str, Reading], list[Member]] = {}
-        for member in self.package.members:
+        for member in self.served():
             gathered.setdefault(member.decode_key, []).append(member)
         return list(gathered.values())
+
+    def served(self) -> list[Member]:
+        """Every member as this entry RUNS it, with the reading `Serving` forces applied up front.
+
+        The forced reading has to land HERE rather than only in `predict_member`, because a re-group
+        moves the DECODE: `reads` keys on the members' own depth and band, so a group applied after the
+        grouping would decode three times and then predict from one reading — paying the bill the group
+        exists to remove. A size alone was safe either way (`reads` ignores resolution), which is why
+        the late application was correct until the group joined it.
+        """
+        return [self.serving.read(member) for member in self.package.members]
 
     def _asked(self, members: list[Member] | None) -> list[Member]:
         """The subset a caller named, or the whole package when it named none — and NOT when it named zero.
@@ -234,7 +301,7 @@ class Ensemble:
         sequence and `agreed` refuses a set of zero distinct values, so the loud failure already exists
         and only the fallback was hiding it.
         """
-        return self.package.members if members is None else members
+        return self.served() if members is None else members
 
     def slices(self, members: list[Member] | None = None) -> int:
         """How deep a stack to decode: the deepest any member was fitted on.

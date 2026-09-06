@@ -32,11 +32,13 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.corpus.folds import ReportFolds
+from core.data.corpus.slot_reader import SLICE_BAND
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.paths import DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
+from kneemri.inference.ensemble import SharedRead
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
@@ -196,9 +198,22 @@ def main() -> None:
     command.parser.add_argument(
         "--read-size", type=int, default=0, help="price the member at this many pixels, into a sized record"
     )
+    command.parser.add_argument(
+        "--served-slices", type=int, default=0, help="price the member at this depth, into a re-grouped record"
+    )
+    command.parser.add_argument(
+        "--served-band",
+        type=float,
+        nargs=2,
+        default=None,
+        metavar=("LOW", "HIGH"),
+        help="price the member at this band, into a re-grouped record; needs --served-slices",
+    )
     arguments = command.parsed()
 
     sizing = ReadSize(arguments.read_size) if arguments.read_size else None
+    band = (arguments.served_band[0], arguments.served_band[1]) if arguments.served_band else SLICE_BAND
+    regroup = SharedRead(arguments.served_slices, band) if arguments.served_slices else None
     backfill = HoldoutBackfill(command.rooted(arguments), torch.device(arguments.device), overlap=arguments.overlap)
     # The walk, not each member: a suspend between two members costs the same wall-clock as one inside
     # a member, and the walk over 55 of them is what runs for hours unattended (knee-wyzj).
@@ -207,6 +222,7 @@ def main() -> None:
             # A restamp is only ever asked of a record that EXISTS, so it passes this gate for the same
             # reason a refresh does — the gate keeps a plain walk from re-deriving what is done.
             destination = sizing.destination(checkpoint) if sizing else checkpoint
+            destination = regroup.beside(destination) if regroup else destination
             if HoldoutRecord(destination).exists() and not (arguments.refresh or arguments.restamp):
                 logger.info("%s: already keeps its predictions", checkpoint.stem)
                 continue
@@ -220,9 +236,15 @@ def main() -> None:
                 logger.info("%s: epoch %s", checkpoint.stem, f"restamped to {plan.epoch}" if moved else "already right")
                 continue
             member = Member.from_checkpoint(checkpoint)
+            # The re-group runs BEFORE the cache is resolved and the resize after it, because the two
+            # overrides act on different halves of the read: slices and band decide WHICH files are
+            # decoded, so they name a different cache; a size is applied to pixels already decoded, so
+            # it must not move the cache the member shares (knee-d2fc).
+            member = regroup.regrouped(member) if regroup else member
             corpus, identifiers = member.cache(backfill.root.processed()).load()
             if sizing:
                 member = sizing.read(member)
+            if sizing or regroup:
                 plan = replace(plan, checkpoint=destination)
             written = backfill.derive(member, plan, corpus, identifiers)
             logger.info("%s: %d studies re-derived at epoch %d", checkpoint.stem, written, plan.epoch)

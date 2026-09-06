@@ -63,6 +63,8 @@ class MemberConfig(TypedDict):
     train_size: NotRequired[int]
     """Absent on every member fitted before the read size could differ from the cache's."""
 
+    resized_from: NotRequired[int]  # see RESIZED_FROM; absent on a member served exactly as fitted
+
     cache_studies: NotRequired[int]
     """How many studies the cache it was fitted on held; absent means the full corpus, as every member
     fitted before a truncated cache could exist."""
@@ -254,11 +256,9 @@ class Member:
 
         A ViT interpolates its position embeddings, so what it SPENDS reading at this size is what a
         member fitted at it spends — which is how a resolution is priced before that arm exists (knee-d2fc).
-
-        THE SIZE HAS TO BE THE MEMBER'S, not the caller's tensor. `StudyModel.forward` resamples its
-        input to the `img_size` it is handed and that comes from `window(...).size` — feeding it 448 px
-        pixels while the member still says 392 measures a bilinear resize and an encoder running at the
-        old resolution. Measured 2026-08-17: 392, 420 and 448 all came back at 380 ms, flat line the bug.
+        THE SIZE HAS TO BE THE MEMBER'S, not the caller's tensor: `StudyModel.forward` resamples its input
+        to the `img_size` from `window(...).size`, so 448 px pixels under a member still saying 392 measure
+        a resize plus an encoder at the OLD resolution — 392, 420 and 448 all read 380 ms (2026-08-17).
         """
         return replace(self, config={**self.config, "train_size": size, RESIZED_FROM: self.read_size})
 
