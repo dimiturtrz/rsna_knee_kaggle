@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# chaindense.sh — the same three-term chain, at the dense corner, on a BARE base.
+#
+# bead: knee-jbum4
+# reading: logs/chaindense_ledger.log
+#
+# THE CONFOUND THIS ARM EXISTS TO BREAK. Two experiments on composition disagree, and they differ in
+# two things at once:
+#   blendemalabel224  three terms on the BARE 224 base (native224 0.8502)     -> 0.8591, +0.0089, SUMS
+#   knee-orjq         second terms on the CALIBRATED DENSE base (calib_dense_hold 0.8634) -> 7 of 7
+#                     negative, --ema -0.0003 and labelwise -0.0021, the same two terms
+# The variables are the CORNER (224/12 vs 336/20) and the base's SATURATION (bare vs calibrated).
+# Nothing on disk separates them. This arm holds the corner at dense and moves the base to bare.
+#
+# CONTROL, already on disk and matched on every flag except the three under test:
+#   band_dense_hold_s2026  0.8573  — 336 px, 20 slices, band 0.1-0.9, max pooling, no EMA,
+#                                     calibrated_targets False, hold_annotations True, lr 4e-5, 12 epochs
+#
+# THE THREE TERMS, each measured alone at the 224 corner against native224 0.8502:
+#   blended labels (--labels blend_three_v1)   +0.0073
+#   --ema                                      +0.0042
+#   --slice-pooling labelwise                  +0.0015
+#   arithmetic sum                             +0.0130 -> 0.8703 at this control
+#   chain as MEASURED at 224 (0.8089 of the sum) +0.0089 -> 0.8662
+# The tested quantity is the whole chain, 1.4 to 2.1 paired floors (floor 0.0062), so the comparison
+# is readable. This is the same fix blendema224 paid for learning: price the SUM against a bare base,
+# never one link against a two-link control.
+#
+# PRE-REGISTERED, BEFORE THE NUMBER. Control 0.8573, floor 0.0062:
+#   >= 0.8635   THE CHAIN SUMS ON A BARE BASE AT EITHER CORNER. Saturation is the variable, not the
+#               corner. knee-orjq's 7/7 becomes a statement about an already-optimised recipe, and
+#               composition stays a live route on any unsaturated base — which is what the +0.015 plan
+#               needs. It is also within 0.0007 of the calibrated base's own 0.8634, i.e. three cheap
+#               terms would have bought what --calibrated-targets buys.
+#   0.8511-0.8635  THE 224 GAIN DOES NOT TRANSFER. The chain is worth less than a floor at the dense
+#               corner even on a bare base, so the corner is the variable and the 224 result does not
+#               generalise. Composition closes as a route: it works only where the members are weakest.
+#   <= 0.8511   THE TERMS SUBSTITUTE AT THIS CORNER. Same shape as knee-orjq's ordering. Two corners
+#               agreeing against the 224 result would make blendemalabel224 the outlier and demand its
+#               own re-read before anything is built on it.
+#   <= 0.8380   Harness first, not a result. Verify the blend table loaded, --ema fired, and the recipe
+#               printed image_size 336 / slices 20 / band 0.1-0.9; three non-negative terms cannot
+#               subtract to two floors below a bare base.
+#
+# THE MEMBER QUESTION IS SECONDARY AND STATED ANYWAY. Predicted 0.8662 against a pool best of 0.8642 is
+# +0.0020, inside the floor. If it lands there it is NOT "the best member we own" — it is a member with
+# a different weight trajectory and a different target table, and it is seated for that or not at all.
+#
+# COST. ~70 min of card, 3.7x the 224 corner. Zero submission slots.
+#
+# deliberate: --labels blend_three_v1 (term one; the control trains on report_labels_v2)
+# deliberate: --ema (term two)
+# deliberate: --slice-pooling labelwise (term three; substitutes the control's max)
+# deliberate: --hold-annotations (matched to band_dense_hold; buys the gold ruler in the same run)
+# deliberate: --eval-labels report_labels_v2.csv (the proxy must not move with the arm)
+# deliberate: --slices 20 --band-low 0.1 --band-high 0.9 --image-size 336 (the control's corner, held)
+# deliberate: every other flag — they are band_dense_hold's and may not be touched in this arm.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+BLEND="$PROCESSED/labels/blend_three_v1.csv"
+require "$BLEND"
+require "$LABELS"
+
+run_train chaindense \
+  $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --image-size 336 --hold-annotations --ema \
+  --labels "$BLEND" --eval-labels "$LABELS" --out "$MODELS/chaindense_s2026.pt"

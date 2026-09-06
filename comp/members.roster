@@ -685,3 +685,9 @@ blendema224_s2026.pt        # 0.8567 solo at the cheap 224 corner, blendhold plu
                             # BELOW its own control, which is inside the paired floor and therefore not
                             # a ranking; seated for the different weight trajectory an EMA leaves, not
                             # for the score. Its reading is logs/blendema224_ledger.log.
+blendemalabel224_s2026.pt   # 0.8591 solo, the best 224-corner member the project owns. Three terms on the
+                            # bare native224 base - blended labels, --ema, --slice-pooling labelwise - read
+                            # +0.0089 over it, 1.4 paired floors, which is the readable comparison
+                            # blendema224 could not make. Against the best single term (blendhold 0.8575) it
+                            # is +0.0016, inside the floor and NOT a ranking. Its reading is
+                            # logs/blendemalabel224_ledger.log.
