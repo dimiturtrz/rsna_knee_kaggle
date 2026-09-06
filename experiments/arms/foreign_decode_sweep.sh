@@ -43,29 +43,7 @@ HOLDOUT="$MODELS/band_dense_s2026.holdout.npz"
 require "$LABELS"
 require "$HOLDOUT"
 
-sweep_band() {
-  low="$1"
-  high="$2"
-  tag="$3"
-  served="$MODELS/foreign_dinov3_$tag.npz"
-  if [ -e "$served" ] && [ -z "$ALLOW_OVERWRITE" ]; then
-    echo "REFUSED foreign_decode_sweep - '$served' already holds a scan. ALLOW_OVERWRITE=1 to replace it." >&2
-    return 1
-  fi
-  "$REPO/.venv/Scripts/python.exe" -m kneemri.inference.foreign_folds \
-    --kernel "$FOREIGN_KERNEL" \
-    --checkpoints "$FOREIGN_WEIGHTS" \
-    --series-root "$RAW/train_series" \
-    --series "$RAW/train_series.csv" \
-    --studies "$HOLDOUT" \
-    --band "$low" "$high" \
-    --out "$served"
-  "$REPO/.venv/Scripts/python.exe" -m kneemri.evaluation.foreign_price \
-    --predictions "$served" \
-    --holdout "$HOLDOUT" \
-    --labels "$RAW/train.csv" \
-    --emit "$MODELS/foreign_dinov3_$tag.holdout.npz"
-}
+source "$(dirname "${ARM_LIB:-$(dirname "$0")/../lib.sh}")/foreign_sweep_lib.sh"
 
 sweep_band 0.08 0.92 band0892
 sweep_band 0.16 0.84 band1684
