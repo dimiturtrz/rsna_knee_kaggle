@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from core.findings import TARGETS
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.seat_weight import SeatWeight
@@ -10,9 +11,10 @@ from kneemri.inference.vote import RankAverage
 
 def pool_of() -> Pool:
     """Two base members that rank the studies backwards and a candidate that ranks them right."""
-    truth = np.array([[0.0], [0.0], [1.0], [1.0]], dtype=np.float32)
-    wrong = np.array([[0.9], [0.8], [0.2], [0.1]], dtype=np.float32)
-    right = np.array([[0.1], [0.2], [0.8], [0.9]], dtype=np.float32)
+    columns = len(TARGETS)
+    truth = np.tile(np.array([[0.0], [0.0], [1.0], [1.0]], dtype=np.float32), (1, columns))
+    wrong = np.tile(np.array([[0.9], [0.8], [0.2], [0.1]], dtype=np.float32), (1, columns))
+    right = np.tile(np.array([[0.1], [0.2], [0.8], [0.9]], dtype=np.float32), (1, columns))
     return Pool(
         names=["wrong_a", "wrong_b", "candidate"],
         predictions=[wrong, wrong.copy(), right],
@@ -34,7 +36,7 @@ def test_base() -> None:
 def test_blended() -> None:
     """Weight is repetition: at 2x the candidate outvotes two members that agree with each other."""
     seat = seat_of()
-    assert seat.blended(0).shape == (4, 1)
+    assert seat.blended(0).shape == (4, len(TARGETS))
     assert not np.allclose(seat.blended(1), seat.blended(2))
 
 
@@ -74,4 +76,4 @@ def test_lines() -> None:
 
 def test_rules() -> None:
     """Both shipped vote rules are offered, each under the name its own class answers to."""
-    assert set(SeatWeight.rules()) == {"logit_average", "rank_average"}
+    assert set(SeatWeight.rules()) == {"LogitAverage", "RankAverage"}
