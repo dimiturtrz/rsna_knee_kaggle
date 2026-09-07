@@ -49,12 +49,17 @@ set -u
 REPO="D:/personal_projects/rsna_knee_kaggle"
 PY="$REPO/.venv/Scripts/python.exe"
 SCRIPT="$REPO/external/raptor/knee-mri-training-the-twelve-finding-model.py"
-CLOG="$REPO/logs/repl2x2_c.full.log"
 LOG="$REPO/logs/raptor_ft_effv2l_f0.full.log"
+HOLDER=62660
 
-echo "waiting for 'ARM DONE repl2x2_c' in $CLOG" >> "$LOG"
-until grep -q "ARM DONE repl2x2_c" "$CLOG" 2>/dev/null; do sleep 30; done
-echo "cell C released the card at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+# GATED ON THE DEVICE, not on an `ARM DONE` marker. Cell C released the card hours ago; the arm this
+# now queues behind is `hisfluid_hold`, which was launched straight from the repo tree rather than
+# through a watcher, so `lib.sh` wrote its markers into a snapshot log this tree cannot name. The card
+# itself can be asked, and a pid that no longer appears in `nvidia-smi` has released it whatever log it
+# wrote. `card_check` reads the same source.
+echo "waiting for pid $HOLDER (hisfluid_hold) to release the card" >> "$LOG"
+until ! nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null | grep -qx "$HOLDER"; do sleep 30; done
+echo "card released by $HOLDER at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 
 cd /d/personal_projects/rsna_knee_kaggle || exit 1
 export PYTHONPATH="$REPO"

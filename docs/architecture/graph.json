@@ -4196,6 +4196,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.default_drift",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.default_drift",
+      "target": "kneemri.training.options",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.foreign_run",
       "target": "core.cli",
       "weight": 1
@@ -23263,6 +23275,24 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.experiments.default_drift.DefaultDrift",
+      "target": "kneemri.experiments.default_drift.DefaultDrift",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.default_drift.DefaultDrift.__init__",
+      "target": "kneemri.training.options.TrainingOptions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.default_drift.main",
+      "target": "kneemri.experiments.default_drift.DefaultDrift.of_metrics",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.experiments.foreign_run.main",
       "target": "kneemri.experiments.foreign_run.ForeignRun",
@@ -34119,7 +34149,7 @@
       "role": null
     },
     {
-      "descendants": 269,
+      "descendants": 270,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -34943,7 +34973,7 @@
       "role": null
     },
     {
-      "descendants": 21,
+      "descendants": 22,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -35042,6 +35072,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.convergence_check",
       "label": "convergence_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.default_drift",
+      "label": "default_drift",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -39141,6 +39179,14 @@
       "level": "class",
       "parent": "kneemri.experiments.convergence_check",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.default_drift.DefaultDrift",
+      "label": "DefaultDrift",
+      "level": "class",
+      "parent": "kneemri.experiments.default_drift",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -53548,6 +53594,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.convergence_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.default_drift.DefaultDrift.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.default_drift.DefaultDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.default_drift.DefaultDrift.drifted",
+      "label": "drifted",
+      "level": "method",
+      "parent": "kneemri.experiments.default_drift.DefaultDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.default_drift.DefaultDrift.of_metrics",
+      "label": "of_metrics",
+      "level": "method",
+      "parent": "kneemri.experiments.default_drift.DefaultDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.default_drift.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.default_drift",
       "role": null
     },
     {
