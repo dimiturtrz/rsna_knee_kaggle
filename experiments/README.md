@@ -9142,3 +9142,44 @@ Consequence for the entry staged today: `kneemri-cleancalib` seats `final_ws_df`
 i.e. at (b)-like weight. The fit prices that at ≈ +0.001, not the +0.002-0.003 its pre-registration assumed —
 and `final_ws_df` cannot be measured offline at all (`--fold -1`). Its stand-in `clean_calib`'s solo gate is
 still the right gate; what changed is the size of the prize it can license.
+
+## D36 — the trunk axis inside his recipe is CLOSED, and the D35 fit predicted it out of sample
+
+`effv2l_f0` is his released training script, unchanged, with the trunk swapped from coatnet2-384 to
+efficientnetv2-l at 480 px (16 epochs, `after_effv2l.sh:66-69`). It is the second cell of the pair whose
+first cell is `repl2x2_a` (A'), so the only variable between them is the trunk.
+
+| member | R1 | L75mid | his gold-58 | corr core5 | pool rank |
+|---|---|---|---|---|---|
+| `raptor_ft_effv2l_f0` | 0.7992 | 0.8480 | 0.8669 (best ep10 of 16) | 0.750 | #208 / 259 |
+| `raptor_ft_effv2l_f0_swa` | 0.8025 | 0.8505 | 0.8657 | — | — |
+| `raptor_ft_repl2x2_a` | 0.8307 | 0.8770 | 0.9082 | — | #133 |
+| `raptor_ft_repl2x2_a_swa` | 0.8328 | 0.8787 | — | 0.830 | — |
+
+**The bigger trunk costs -0.029 L75mid AND 0.080 of correlation with our block.** Both halves of what a
+cross-family seat is bought for move the wrong way at once, so no weight can recover it: the researcher's
+seat read prices (b) sixth-ours-seat at **-0.0002** [-0.0012, +0.0008] and the honest 1/3 seat at
+**-0.0019**. The foreign family's lead is not its trunk size. Both checkpoints are declined in
+`comp/members.declines` with those numbers.
+
+**The D35 fit held on a point outside its fitting range.** (c) = -0.0290 + 0.313*lift + 0.0557*(1-corr)
+predicted **-0.0272**; observed **-0.0263**. (b) predicted -0.0004, observed -0.0002. That is a member
+0.05 below the pool centre with corr 0.750, under a fit built on corr 0.78-0.96 — so the seat-pricing rule
+is now an out-of-sample-validated instrument, and a candidate seat can be priced from (solo, corr) without
+spending a card on it. That is the D36 result worth more than the effv2l number.
+
+**Per-column, effv2l minus core5 (L75mid):** ACL -0.064 · MCL -0.069 · MedMen -0.058 · LatMen -0.104 ·
+MedOA -0.025 · LatOA -0.011 · PFOA -0.047 · Effusion **+0.004** · Synovitis -0.095 · Baker's -0.037 ·
+Contusion -0.054 · Fracture -0.056. One column reaches core, and it is not one of the four D32 named as
+carrying the board gap.
+
+**A ruler disagreement is open, not resolved.** The SWA averages the top-3 epochs [10, 13, 11] (his
+script :576-597, `swa_over = topk`, NOT a tail). His gold-58 ruler reads it 0.8657 against a best epoch of
+0.8669 — a loss; our 896-row L75mid reads 0.8505 against 0.8480 — a gain. Same predictions, two truth
+tables, opposite signs on a 0.002 effect. It is the first time the D30/D31 ruler residual has flipped a
+sign WITHIN one arm rather than between members. Filed to the researcher as a no-card per-column pass;
+neither number is quotable as an SWA fact until it comes back.
+
+**And the gold-to-holdout offset is not a constant** (researcher, self-corrected): effv2l's gold-58 sits
+0.019 above its 896-study L75mid where A''s sat 0.031 above. A pre-registration that translates a gold
+number into a solo with another member's offset will miss, and this one did, on the low side, twice.

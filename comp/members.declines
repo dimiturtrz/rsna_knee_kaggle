@@ -700,3 +700,18 @@ hisfluid_hold_s2026               # gold-58 trunk, best-in-class on ONE column a
                                   # so a member that wins one column by less than the sampling noise
                                   # has nothing to add to the vote. Declined on the swap, not on the
                                   # solo - its gold-58 table is posted for the record either way.
+
+raptor_ft_effv2l_f0.pt      # his recipe, effv2l trunk, fold 0, 16 epochs. Best gold epoch 10 (0.8669 on
+                            # HIS ruler); our rulers read R1 0.8025 / L75mid 0.8480 against A' (coatnet2,
+                            # same recipe, same corpus) at 0.8307 / 0.8770. A trunk swap inside his recipe
+                            # costs -0.029 L75mid, so this is the WORSE half of a cross-family pair we
+                            # already own. D35 puts an honest sixth seat at solo 0.934 to pay +0.005; a
+                            # 0.8480 member is 0.086 under that even before corr. Declined on solo, not on
+                            # family - the family question is answered by A', which stays shippable.
+raptor_ft_effv2l_f0_swa.pt  # weight average over the top-3 epochs [10, 13, 11] (recipe :576-597, `swa_over`
+                            # = topk, NOT a tail window). The two rulers DISAGREE IN SIGN: his gold reads
+                            # 0.8657 vs best-epoch 0.8669 ("no gain"), ours reads L75mid 0.8505 vs 0.8480
+                            # (+0.0025). Recorded rather than resolved - both are 896-study reads of the
+                            # same predictions under different truth tables, which is the ruler residual
+                            # D30/D31 already priced. Declined for the same solo reason as its parent, and
+                            # NOT rostered above it on SWA habit (raptor_v4_swa's lift is his recipe's fact).
