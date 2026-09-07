@@ -90,6 +90,15 @@ class MemberRoster:
 
     COMMENT = "#"
 
+    LICENCE = "licence:"
+    """The trailing-comment tag naming the external table a member trained on, when that table's terms
+    are not settled against competition rule 2.5's obligation to license the winning submission.
+
+    It lives in the COMMENT because packaging a tagged member is not the thing being refused — SEATING
+    one in a submitted entry is. `patterns` splits on `#` and never sees this, so the shelf still holds
+    the member and every offline reading of it stays valid; only a `chosen` tuple is refused.
+    """
+
     @classmethod
     def read(cls, path: Path) -> "MemberRoster":
         return cls(path.read_text(encoding="utf-8"))
@@ -98,6 +107,21 @@ class MemberRoster:
         """The named members, without the prose that says why each is in the package."""
         lines = [line.split(self.COMMENT)[0].strip() for line in self.text.splitlines()]
         return [line for line in lines if line]
+
+    def licence_refusals(self, names: set[str]) -> list[str]:
+        """Every seat in `names` whose roster line carries a `# licence:` tag, as the line a check prints.
+
+        Keyed on the name a kernel spells — a `chosen` tuple never carries the `.pt` the roster does.
+        """
+        tagged = {}
+        for line in self.text.splitlines():
+            member, _, comment = line.partition(self.COMMENT)
+            if member.strip() and self.LICENCE in comment:
+                tagged[member.strip().removesuffix(".pt")] = comment.split(self.LICENCE)[1].split()[0]
+        return [
+            f"{name} trains on the {tagged[name]} table, whose terms are unresolved against rule 2.5"
+            for name in sorted(names & set(tagged))
+        ]
 
     def shelf(self) -> "RosterShelf":
         """Which shelf this roster's members belong to, declared in the roster's own header."""

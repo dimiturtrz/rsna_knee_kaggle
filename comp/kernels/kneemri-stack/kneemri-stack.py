@@ -1,11 +1,17 @@
-"""stack — the champion seven with three EXTRA seats in the ours-block, the foreign token untouched.
+"""stack — the champion's CLEAN five with three EXTRA seats in the ours-block, the foreign token untouched.
 
 **WHAT MOVES AND WHAT DOES NOT.** The foreign seat keeps its 1/3 and its checkpoint; the vote stays
-`LogitAverage`; `overlap=False` stays; the champion's six stay in their order. The single change is that
-the ours-block is a mean over NINE members instead of six: `labelwise_dense_s2026`,
-`warm_calib_dense_s2026` and `warm_calib_lowlr_s2026` are ADDED, and nothing is displaced. So this is
-not a reseating -- no member leaves, no weight is refitted, no selection is run. It is the first entry
-that asks whether the ours-block gains from WIDTH at fixed quality.
+`LogitAverage`; `overlap=False` stays; the champion's members stay in their order. The ours-block is a
+mean over EIGHT members instead of six: `labelwise_dense_s2026`, `warm_calib_dense_s2026` and
+`warm_calib_lowlr_s2026` are ADDED, and `merged_blend_cf` LEAVES. No weight is refitted and no selection
+is run. It is the first entry that asks whether the ours-block gains from WIDTH at fixed quality.
+
+**WHY ONE MEMBER LEAVES, AND WHY THAT IS NOT A RESEATING.** `merged_blend_cf` trains on the Rijeka merged
+table, whose mirror is published CC BY-NC-ND; the ND term is the open question against competition rule
+2.6a and the clause read is owed. D74 prices its seat beside the rest at -0.0001 [-0.0007, +0.0004] over
+300 draws on the 896-study L75mid frame -- the seat is free to remove, so the exposure is closed at no
+measurable cost rather than carried while the rules are read. A removal priced at zero is not a selection
+step: nothing was ranked, and the entry would read the same with it in.
 
 **THE MECHANISM.** D45 prices the three as extra seats against the champion block: +0.0009 for
 `warm_calib_lowlr` alone at corr 0.898 to the rest, and +0.0026 for all three together. Each is a member
@@ -175,7 +181,6 @@ def main() -> None:
         "final_ws_cf",
         "calib_span_ff",
         "grade_ladder_cf",
-        "merged_blend_cf",
         "lr4e-5_ws_cf",
         "through_dense_cf",
         "labelwise_dense_ff",

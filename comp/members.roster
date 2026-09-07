@@ -387,7 +387,7 @@ final_ws_cf.pt              # DARK. final_ws_e12's flags plus --calibrated-targe
 grade_ladder_cf.pt          # DARK. grade_ladder_ff's flags plus --calibrated-targets
 through_dense_cf.pt         # DARK. through_dense_ff's flags plus --calibrated-targets
 lr4e-5_ws_cf.pt             # DARK. lr4e-5_ws_ff's flags plus --calibrated-targets
-merged_blend_cf.pt          # merged_blend_s2026's flags plus --calibrated-targets; fold 0, the arm's only offline read
+merged_blend_cf.pt          # merged_blend_s2026's flags plus --calibrated-targets; fold 0, the arm's only offline read  # licence: rijeka
 # Added 2026-08-24, from final_fit_six.sh members 1-5. Every caveat on final_ws_e12 above applies to all
 # five WITHOUT EXCEPTION: they have seen every holdout study, no offline score exists or can exist for
 # them, they must never enter a pool that reports an offline mean, and no board-per-holdout compression
@@ -417,7 +417,7 @@ v3base_dense_s2026.pt       # 0.8455 — the STRONG end of the DINOv3-BASE famil
 #
 # It costs no slot and no card — the trunk's weights are already mounted at dimiturnt/dinov3-hf/vitb16,
 # and it is converged rather than truncated (12 epochs asked, 12 run, peak before the last).
-merged_blend_s2026.pt       # 0.8587 — the RIJEKA+finer-labels member; seat +0.0017, in every best subset
+merged_blend_s2026.pt       # 0.8587 — the RIJEKA+finer-labels member; seat +0.0017, in every best subset  # licence: rijeka
 
 # Added 2026-08-26 05:24Z, the blendsix harvest (knee-4i3m, knee-5z9r). Five all-data twins of five
 # champion seats, identical in every respect EXCEPT the label table they are supervised by:
@@ -435,9 +435,9 @@ merged_blend_s2026.pt       # 0.8587 — the RIJEKA+finer-labels member; seat +0
 # the 58 radiologist annotations and report_labels_v2 reads 0.8658, separated at +0.0254
 # [+0.0098, +0.0428]. So these five are supervised by a resolvably better reader. What that is worth as
 # SUPERVISION is exactly what dose 3 and dose 6 are being spent to find out.
-blend_ws.pt                 # twin of lr4e-5_ws_ff — dose-3 seat
-blend_calib.pt              # twin of calib_span_ff — dose-3 seat
-blend_ladder.pt             # twin of grade_ladder_ff — dose-3 seat
+blend_ws.pt                 # twin of lr4e-5_ws_ff — dose-3 seat  # licence: rijeka
+blend_calib.pt              # twin of calib_span_ff — dose-3 seat  # licence: rijeka
+blend_ladder.pt             # twin of grade_ladder_ff — dose-3 seat  # licence: rijeka
 
 # Added 2026-08-27 11:32Z, the honest-12 seating (knee-7d53's sibling lane). These seven are the seats
 # the greedy picked that this package did not already hold. The other five of the twelve
@@ -466,7 +466,7 @@ calib_span_hold_s2026.pt    # 0.8565 — eleventh seat. CORRECTED 2026-09-01 (kn
                             # different arm, not the ff's fold-0 twin. The ff's twin is calib_span_s2026 (0.8545,
                             # line 80). Nothing downstream moves — the seat was never chosen for the twinning —
                             # but a blind-seat proxy that ordered on it would have been reading the wrong pair.
-merged_dense_cf.pt          # twelfth seat
+merged_dense_cf.pt          # twelfth seat  # licence: rijeka
 
 # Added 2026-08-29 20:37Z. AN ORPHAN, FOUND BY AUDIT RATHER THAN BY BUILDING ANYTHING. The checkpoint
 # finished at 13:35Z the same day and experiments/README.md gives it its own section, but it was never
@@ -487,7 +487,7 @@ calib_dense_hold_ff.pt      # DARK. calib_dense_hold_s2026's flags plus --fold -
 # run fifteen minutes later put it at greedy seat TWO, the largest single jump in the whole 111-member curve
 # (+0.0075), and its own metrics.jsonl carries the complete recipe — the ledger entry was recoverable in one
 # read, not unrecoverable. Documented now (experiments/README.md), so it is a member now.
-merged_span_cf.pt           # 0.8618 solo, converged at epoch 8 of 12. Second-best solo member in the project.
+merged_span_cf.pt           # 0.8618 solo, converged at epoch 8 of 12. Second-best solo member in the project.  # licence: rijeka
 # merged scheme, 336 px, 20 slices, band 0.2-0.8, crop 130 mm, centre image, spacing spread, tie first,
 # --calibrated-targets --whole-stack --one-cycle --weight-floor, batch 12, fold 0, seed 2026, no EMA.
 # FOLD 0 DESPITE THE _cf SUFFIX, so unlike every other _cf here it IS scoreable and its holdout number is
@@ -556,7 +556,7 @@ band_dense_hold_s2026.pt             # 0.8573
 attend_dense_s2026.pt                # 0.8569
 mixup_dense_s2026.pt                 # 0.8552
 depth_regions_s2026.pt               # 0.8549
-merged_corpus_s2026.pt               # 0.8545
+merged_corpus_s2026.pt               # 0.8545  # licence: rijeka
 band_density_s2026.pt                # 0.8540
 blendlabels_s2026.pt                 # 0.8537
 fuse_regions_s2026.pt                # 0.8518
@@ -585,7 +585,7 @@ ema_ws_s2026.pt                      # 0.8460
 # excludes it and neither seat_value nor decode_entry can price it. The 0.8618 belongs to the fold-0
 # parent, which is a different model fitted on 3,497 studies, and may not be quoted for this file.
 # Twelve epochs recorded of twelve asked, loss 1.1580 -> 0.4745 monotone.
-merged_span_ff.pt           # DARK. merged_span_cf's flags plus --fold -1 --ema. External corpus
+merged_span_ff.pt           # DARK. merged_span_cf's flags plus --fold -1 --ema. External corpus  # licence: rijeka
                             # (merged_blend_v1) at 20 slices, band 0.2-0.8 - a decode cell no champion
                             # seat occupies. Parent is greedy seat two with the largest single jump in
                             # the 111-member curve (+0.0075).
@@ -610,7 +610,7 @@ decay224_high_s2026.pt               # 0.8487
 regions224_s2026.pt                  # 0.8476
 headlr224_slow_s2026.pt              # 0.8475
 small_feat_fit_s2026.pt              # 0.8571
-merged3_corpus_s2026.pt              # 0.8521
+merged3_corpus_s2026.pt              # 0.8521  # licence: mrnet
 disagreed_uniform_s2026.pt           # 0.8507
 disagreed_full_s2026.pt              # 0.8471
 slot_dropout_s2026.pt                # 0.8592 - best single member the project owns

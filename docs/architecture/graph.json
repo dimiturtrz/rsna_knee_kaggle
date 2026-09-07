@@ -5846,6 +5846,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.submit_check",
+      "target": "kneemri.kaggle.package_members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.traversal_census",
       "target": "core.cli",
       "weight": 1
@@ -26827,6 +26833,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.main",
+      "target": "kneemri.kaggle.package_members.MemberRoster.read",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.champion_uncertainty.ChampionUncertainty",
       "target": "kneemri.kaggle.champion_check.Champion",
@@ -30118,6 +30130,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
       "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.package_members.MemberRoster.read",
       "weight": 1
     },
     {
@@ -58370,6 +58388,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members.MemberRoster.checkpoints",
       "label": "checkpoints",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster.licence_refusals",
+      "label": "licence_refusals",
       "level": "method",
       "parent": "kneemri.kaggle.package_members.MemberRoster",
       "role": null

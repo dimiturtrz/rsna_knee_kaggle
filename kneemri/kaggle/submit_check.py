@@ -26,8 +26,13 @@ from core import cli
 from core.denominator import Denominator
 from kneemri.kaggle.board_check import KERNELS, RECORD, BoardCensus, BoardRow
 from kneemri.kaggle.kernel_script import KernelScript
+from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)
+
+ROSTER = Path("comp/members.roster")
+"""Where the licence tags live. The roster is the only file that states, per member, which external
+table it trained on, so it is the only file that can answer whether a seat is shippable at all."""
 
 UNKNOWN_EXIT = 2
 OVERLAP_FLOOR = 0.5
@@ -90,6 +95,7 @@ def main() -> None:
     command.parser.add_argument("--record", type=Path, default=RECORD, help="the board record to read")
     command.parser.add_argument("--kernels", type=Path, default=KERNELS, help="where bare kernel names live")
     command.parser.add_argument("--anyway", default="", help="ship a known repeat, stating WHY in one line")
+    command.parser.add_argument("--roster", type=Path, default=ROSTER, help="what may ship, and its licence tags")
     arguments = command.parsed()
 
     kernel = SubmitCheck.resolved(arguments.kernel, arguments.kernels)
@@ -97,6 +103,15 @@ def main() -> None:
     if named is None:
         logger.error("UNKNOWN %s: names no members in its source, so this check did not look", kernel.name)
         sys.exit(UNKNOWN_EXIT)
+
+    # Before the repeat question, because a repeat is a wasted slot and this is a wasted WIN: rule 2.5
+    # obliges the winner to license the submission and its source, and a member trained on a
+    # no-derivatives table cannot be relicensed by us. `--anyway` does not open this one.
+    refusals = MemberRoster.read(arguments.roster).licence_refusals(named)
+    for refusal in refusals:
+        logger.error("LICENCE %s: %s", kernel.name, refusal)
+    if refusals:
+        sys.exit(1)
 
     shipped = SubmitCheck(BoardCensus(record=arguments.record).rows())
     Denominator(len(shipped.rows), "no recorded entry names its members, so nothing could be compared").refuse_empty()

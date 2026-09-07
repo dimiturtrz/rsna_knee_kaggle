@@ -220,6 +220,13 @@ def main() -> None:
     # still be planned against a competition position read days ago. The gap sat in this record's prose
     # at 0.008 while the board said 0.015. The live read needs credentials, so it is a separate command
     # and this only refuses its AGE — the same split board_check draws with `--live`.
+    # REPORTED, never fatal. Rule 2.5 binds the WINNING submission, so a licence tag is a refusal at
+    # `submit_check` — where an entry is about to be sent — and only an exposure here, where the subject
+    # is an entry that has already scored. A pin that carries one is still a real result and still the
+    # thing to price against; what it cannot be is the entry left standing at the end.
+    exposed = MemberRoster.read(arguments.roster).licence_refusals(set(champion.members))
+    for complaint in exposed:
+        logger.warning("LICENCE EXPOSURE: the pin seats %s — a clean entry that ties it replaces it", complaint)
     aged = LeaderboardRead.recorded(arguments.leaderboard).stale(LeaderboardRead.now())
     for complaint in aged:
         logger.error("%s", complaint)

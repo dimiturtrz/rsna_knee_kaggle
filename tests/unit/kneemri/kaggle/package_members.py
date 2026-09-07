@@ -127,6 +127,18 @@ def test_patterns(tmp_path: Path):
     assert _rostered(tmp_path).patterns() == ["res392_ws_s2026.pt", "sliceattn_s2026.pt", "lora_r8_*.pt"]
 
 
+def test_licence_refusals(tmp_path: Path):
+    """A tagged member is refused a SEAT while still packaging — and the tag is invisible to `patterns`."""
+    text = "clean_s2026.pt   # nothing external\ntainted_s2026.pt # 0.85  # licence: rijeka\n"
+    (tmp_path / "roster").write_text(text, encoding="utf-8")
+    roster = MemberRoster.read(tmp_path / "roster")
+    assert roster.patterns() == ["clean_s2026.pt", "tainted_s2026.pt"]
+    assert roster.licence_refusals({"clean_s2026"}) == []
+    refused = roster.licence_refusals({"clean_s2026", "tainted_s2026"})
+    assert len(refused) == 1
+    assert refused[0].startswith("tainted_s2026 trains on the rijeka table")
+
+
 def test_checkpoints(tmp_path: Path):
     """Resolved under the processed root, in roster order — a glob line may name more than one."""
     source = tmp_path / "processed"
