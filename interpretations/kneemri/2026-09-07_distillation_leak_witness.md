@@ -96,6 +96,29 @@ The leak can be removed two ways, and they fail differently, which is why both r
 A miss on the starved arm cannot refute the full-strength one. That is the whole reason the four-row
 table above was worth taking before either number arrived.
 
+## The first one landed: the leak transferred ~zero AUC
+
+03:20Z, twelve epochs, `convergence_check` clean, peak e9.
+
+    seat_distill_lr4e5   leaky teachers, saw fold 0         0.8633
+    seat_clean_distill   clean teachers, --exclude-fold 0   0.8634
+    band_dense           no teacher, same fold              0.8578
+
+**−0.0001 to remove the leak**, paid out of teachers that are −0.0067 weaker by construction. The
+witness and the score are both right and they are not in conflict: the student demonstrably preferred
+the teachers that had seen its holdout (+0.0127 diff-in-diff of residual mimicry), and that preference
+bought it nothing. The mimicry rode along; the +0.0107 is the treatment.
+
+The general shape, and it is the second time this document records one: **a leak visible in the
+residuals is not automatically a leak in the score.** The witness answers "is it there", never "is it
+the number" — only a re-run without it answers that, which is why the arm was worth 1.2 h of card
+against a witness that had already come back positive.
+
+What stays open: `oof_teacher`'s 0.8681 and the `oofsolo` board inversion (0.926 from an offline read
+above `holdsolo`'s 0.928) are a different corner and are NOT explained by this. `seat_oof5_distill`
+still runs — full teacher strength, `--fold -1`, board as ruler — and it is the only reading that can
+price the term where it will actually be spent.
+
 ## The FOREIGN teacher is the same leak, by the same mechanism
 
 Added 02:55Z, from mastermind, and it is a correction to a comparison rather than to a member. The

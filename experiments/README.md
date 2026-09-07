@@ -8533,7 +8533,11 @@ Card: zero. Two cpu reads of one csv.
 > low anchor and negative from the high one. `foreign_distill_mix07`'s +0.0061 is from a FOREIGN
 > teacher and may be clean — unchecked. `--exclude-fold` now exists; `teacher_clean.sh` +
 > `seat_clean_distill.sh` re-read the term with the leak removed, pre-registered ≥0.864 / 0.860-0.864
-> / <0.860 against `band_dense` 0.8578.
+> / <0.860 against `band_dense` 0.8578. **IT READ 0.8634 — the leaky twin's 0.8633 to within 0.0001,
+> out of teachers −0.0067 weaker by construction. See the `seat_clean_distill` row at the end of this
+> file: the leak is real in the residuals and worth ~zero AUC, so `seat_distill_lr4e5`'s +0.0107 is a
+> treatment effect. This warning still stands for THIS row (0.8681) and the board inversion under it,
+> which that arm does not explain.**
 
 `--teacher-targets` set to OUR OWN out-of-fold predictions (`teacher_oof_corpus.npz`), `--distill-weight
 0.7` HELD from `foreign_distill_mix07`, everything else `band_dense`'s line. Twelve epochs, peak e10-e11,
@@ -8646,3 +8650,51 @@ What it does NOT rule out: the prior as a *loss-side* term composed with distill
 different operation from constraining the band. Nothing here was measured against a teacher.
 
 Declined for the roster with that reason. knee-uco3 unaffected.
+
+## `seat_clean_distill` — the leak was witnessed and it transferred ~ZERO AUC; the distillation term is REAL
+
+Read 2026-09-07 03:20Z. Twelve epochs, 363 s each, `convergence_check` clean (peak e9, not truncated,
+not undertrained). Holdout mean AUC by epoch:
+
+```
+e0 .7549  e1 .8116  e2 .8387  e3 .8446  e4 .8550  e5 .8580
+e6 .8601  e7 .8607  e8 .8622  e9 .8634  e10 .8626  e11 .8631
+```
+
+**Peak 0.8634**, against `band_dense` 0.8578 and a pre-registered bar of ≥0.864 real / 0.860-0.864 knob
+/ <0.860 the lever closes. It lands 0.0006 under the top bar, in the knob band on its face — and the
+face is not the reading.
+
+**THE COMPARISON THAT MATTERS IS NOT THE BAR, IT IS THE LEAKY TWIN.**
+
+    seat_distill_lr4e5   leaky teachers, saw fold 0     0.8633
+    seat_clean_distill   clean teachers, --exclude-fold 0   0.8634
+    band_dense           no teacher, same fold           0.8578
+
+Removing the leak cost **−0.0001**. And it was not free to remove: `--exclude-fold 0` takes ~900 of
+~3,500 studies out of every teacher, and those teachers were priced on their own holdouts at **−0.0067
+mean** (fold 1 −0.0006, fold 2 −0.0043, fold 3 −0.0133, fold 4 −0.0084). So the clean student matched
+the leaky one while distilling from a demonstrably WEAKER teacher set.
+
+**What that does to knee-zwcyk.** The leak is still real — `teacher_witness` measured the student
+preferring the teachers that saw its holdout at diff-in-diff **+0.0127** of residual mimicry, and the
+undistilled control on the same fold preferred the other set. Both statements now stand together: the
+student did mimic memorised labels, and that mimicry bought it **no AUC**. A leak that is visible in the
+residuals and invisible in the score is a leak that rode along, not one that carried the number. The
++0.0107 term is a treatment effect.
+
+**What it does NOT say.** It does not clear `oof_teacher`'s 0.8681 or the `oofsolo` board inversion.
+That row is a different arm at a different corner and its board refusal (0.926 offline-above-0.928) is
+unexplained by this reading. It also cannot speak for `--fold -1` at full teacher strength; that is
+`seat_oof5_distill`'s job and its ruler is the board.
+
+**What it licenses immediately.** `retrain_six_distill` (knee-ygi2k, priced: 8.5 h of card, zero slots
+to produce, P(clears 0.948) ~0.45). Its per-seat term is the +0.0107 this arm just defended. The kill
+switch written for it — "disarm if the clean student reads <0.860 with the witness null" — did not fire.
+
+The five distilled members declined under the leak argument in `comp/members.declines` are answered by
+this row, not re-quoted into it: the decline says in writing that it is lifted by this arm and
+`seat_oof5_distill`. Half of that is now in. The member axis is still closed for seating (seven board
+flats) — this reopens the TERM, not the seats.
+
+Card: 1.2 h. knee-zwcyk
