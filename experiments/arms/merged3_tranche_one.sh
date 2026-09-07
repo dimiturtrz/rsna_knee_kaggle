@@ -30,6 +30,12 @@
 # and their three canonical partners, unchanged, from retrain_six_distill:
 #   final_ws_df, grade_ladder_df, through_dense_df (all 336/20 at 0.1-0.9)
 #
+# WHAT THE THREE SEATS ARE WORTH, STATED BEFORE THE ENTRY IS ASSEMBLED. `calib_span_dm` and
+# `lr4e-5_ws_dm` differ on merged3 by BAND ALONE — 0.1-0.9 against 0.2-0.8 over the same twelve cached
+# slices. On the canonical path they also differed in what the cache held. It is a real difference and it
+# is kept, but it is thinner than the seat names suggest: this tranche is closer to two and a half
+# distinct reads than three, and an entry built from it should not be read as though it had three.
+#
 # ONE RANK POPULATION. The full-strength teacher is ONE `--teach-all` pass over all 6,393 studies with
 # the five `oof_fold[0-4]` twins — not `teacher_oof5.npz` joined to an external-only pass. A rank is a
 # position WITHIN a population: two shards ranked over two populations put a meaningless separation on
