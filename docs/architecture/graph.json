@@ -25112,6 +25112,18 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.inference.teacher_readings.TeacherReadings.over_corpus",
+      "target": "kneemri.inference.read_groups.SharedRead",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.teacher_readings.TeacherReadings.over_corpus",
+      "target": "kneemri.inference.read_groups.SharedRead.regrouped",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.inference.teacher_readings.TeacherReadings.teach",
       "target": "core.wakelock.Wakelock",
       "weight": 1
@@ -25167,6 +25179,12 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.teacher_readings.main",
+      "target": "kneemri.inference.teacher_readings.TeacherReadings.over_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.teacher_readings.main",
       "target": "kneemri.inference.teacher_readings.TeacherReadings.teach",
       "weight": 1
     },
@@ -25174,18 +25192,6 @@
       "kind": "calls",
       "source": "kneemri.inference.teacher_readings.main",
       "target": "kneemri.teacher_file.TeacherFile.write",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.inference.teacher_readings.over_corpus",
-      "target": "kneemri.inference.read_groups.SharedRead",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.teacher_readings.over_corpus",
-      "target": "kneemri.inference.read_groups.SharedRead.regrouped",
       "weight": 1
     },
     {
@@ -54472,6 +54478,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.teacher_readings.TeacherReadings.over_corpus",
+      "label": "over_corpus",
+      "level": "method",
+      "parent": "kneemri.inference.teacher_readings.TeacherReadings",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.teacher_readings.TeacherReadings.teach",
       "label": "teach",
       "level": "method",
@@ -54482,14 +54496,6 @@
       "descendants": 0,
       "id": "kneemri.inference.teacher_readings.main",
       "label": "main",
-      "level": "method",
-      "parent": "kneemri.inference.teacher_readings",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.teacher_readings.over_corpus",
-      "label": "over_corpus",
       "level": "method",
       "parent": "kneemri.inference.teacher_readings",
       "role": null
