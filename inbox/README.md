@@ -34,3 +34,31 @@ Arm it as a background task with a harness timeout slightly above the internal o
 letter's body, files it into `read/`, and exits, so mail arrives as a task notification. **On every
 notification: re-arm FIRST, then read, then work.** One listener per box; a second box is a second
 background task, not a flag.
+
+## The switch — `inbox/agents.csv` and `python inbox/agents.py`
+
+A lane can be turned OFF and back ON, and the two halves of "is it alive" are kept in two files
+because config and runtime truth must not share a home:
+
+- **`inbox/agents.csv`** — human-owned config, git-tracked, one row per box, `active` 1 or 0. The
+  toggle CLI is its only programmatic writer.
+- **`inbox/<box>/.status`** — runtime, gitignored, written by that box's OWN listener alone: pid,
+  when it armed, when it last delivered, how much. One writer per file, so nothing needs a lock.
+
+The listener reads the registry on arm AND on every poll. An inactive box prints
+`box <x> is INACTIVE in inbox/agents.csv (<note>) — not arming` and exits 2, so switching a lane off
+also stops one that is already running. **Unread letters are never archived while inactive** — they
+stay in the box and are delivered when the lane is armed again. Off means silenced, never lost.
+
+    python inbox/agents.py --list                          # config JOINED with runtime evidence
+    python inbox/agents.py --box researcher --off "reason"  # silence a lane, with the reason recorded
+    python inbox/agents.py --box researcher --on
+    python inbox/agents.py --check researcher               # exit 0 active, 1 not — gate a letter on it
+
+`--list` flags the two lies a flag alone cannot catch: `active=1` with no `.status`, or one older
+than a day, reads **STALE — flagged active, no live listener** (the dead-watcher failure wearing a
+green flag); `active=0` with letters in the box reads **OFF, N letters waiting**.
+
+**What the switch does NOT do.** Switching a box off silences its MAIL. It does not stop that side's
+wakeup loop — that is the owner's `/loop` control — and it does not let one side arm or disarm
+another's listener. A box is still armed by its owner, one listener per box.

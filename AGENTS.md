@@ -328,6 +328,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   blocked on. Proof already on disk: `logs/after_dissent2.log:139` reads `ARM DONE foreign_decode_fine`.
   Caught 2026-09-06 on `after_mix30.sh` before the card went idle; grep an EXISTING `ARM DONE` line for
   the format, don't derive it from the checkpoint.
+- **A `foreign_run` arm writes NO `ARM DONE` line, ever — gate on the ARTEFACT, or on the pid, with OR.**
+  `_mark` lives in `run_train`, and a `foreign_run` arm (`hisrecipe_distill.sh`) never calls it, so no
+  marker exists in any file under either `logs/` or `$MODELS/experiments/`. A watcher grepping for one
+  waits forever with the card idle behind it while `queue_check` reads **OK** — a live process gating an
+  owed arm is all it can see. Gate instead on the trainer's OWN success artefact
+  (`raptor_ft_<tag>_swa.holdout.npz`) **OR** Windows-pid liveness, `ps -W | grep -q "[^0-9]$PID[^0-9]"` —
+  never `kill -0`, the MSYS pid is a different number. The OR is the point: the artefact alone hangs
+  forever on a silent exit-0 death, and the pid alone fires the next arm the instant a crash frees the
+  card. `experiments/after_weakdraw.sh` is the worked example.
 - **And that log is NOT under `logs/` — a `run_train` arm's full log lives under `$MODELS/experiments/`.**
   `lib.sh` re-runs an arm launched from the repo tree "from a snapshot", and the snapshot's `tee` writes
   `$MODELS/experiments/<checkpoint>.full.log` (measured 2026-09-07 off the live process table:
@@ -377,6 +386,16 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   `AGENTS.md` (Kimi auto-loads that name) and rebuilds the CLAUDE.md tier stack; the SessionStart
   hook (`.agent-runtime/kimi-session-start.sh`, wired in `~/.kimi-code/config.toml`) runs it and prints
   the upward tiers + mailbox digest.
+- **A lane can be switched OFF, and `active=1` is never on its own evidence it is alive.**
+  `inbox/agents.csv` is the human-owned, git-tracked config (one row per box, `active` 1/0);
+  `inbox/<box>/.status` is runtime truth written by that box's OWN listener alone (gitignored, one
+  writer per file, so no lock). The listener reads the registry on arm AND on every poll, so switching
+  a lane off stops one already running — it exits 2 and **leaves the mail in the box**: off means
+  silenced, never lost. `python inbox/agents.py --list` JOINS the two and names both lies —
+  `active=1` with no or a stale `.status` reads **STALE** (the dead-watcher failure wearing a green
+  flag), `active=0` with letters reads **OFF, N waiting**. Toggle with
+  `python inbox/agents.py --box <x> --off "<reason>"` / `--on`; gate a letter with `--check <x>`
+  (exit 0/1). The switch silences MAIL only — not a side's `/loop`, and no side may arm another's box.
 
 
 

@@ -90,4 +90,15 @@ uv run --no-sync --project "$REPO" python -m kneemri.experiments.foreign_run \
   --workers 4
 trainer_status=$?
 release_card
+
+# A ZERO STATUS IS NOT EVIDENCE THE TRAINER TRAINED. His script answers a labels file it cannot find
+# by printing `_NO_LABELS` and calling `SystemExit(0)` (T:379-384), and `foreign_run.py:71` does not
+# translate a death into a non-zero status either — so this arm died twice tonight reading `returned 0`
+# with `queue_check` OK over an idle card. The OOF artefact is the one signal only a run that actually
+# ran can produce, so it is what the status is taken from.
+OOF="$MODELS/raptor_ft_hisrecipe_distill.holdout.npz"
+if [ ! -f "$OOF" ]; then
+  echo "hisrecipe_distill wrote no $OOF - the trainer exited $trainer_status without training" >&2
+  exit 1
+fi
 exit "$trainer_status"

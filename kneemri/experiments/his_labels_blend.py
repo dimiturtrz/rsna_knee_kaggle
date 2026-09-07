@@ -21,6 +21,9 @@ from jaxtyping import Float
 
 logger = logging.getLogger(__name__)
 
+PARQUET_TWIN = ".parquet"
+"""The suffix his trainer's existence check looks for beside the blend it is actually served."""
+
 UID = "StudyInstanceUID"
 HIS_POSITIVE = 0.5
 OUR_POSITIVE = 0.75
@@ -115,6 +118,12 @@ def main() -> None:
     out: Path = parsed.out
     out.parent.mkdir(parents=True, exist_ok=True)
     table.to_csv(out, index=False)
+    # His trainer tests os.path.exists on the parquet BEFORE it reads it, and that test runs ahead of
+    # foreign_run's csv-beside shim - the shim redirects the READ, never the existence check. So a
+    # blend written as csv alone made the trainer print its no-labels line and SystemExit(0), which
+    # reads as a clean run everywhere: exit 0, no traceback, ledger row still queued, card idle. The
+    # twin is an existence marker only; the shim serves the csv standing beside it.
+    out.with_suffix(PARQUET_TWIN).touch()
     n_held = sum(uid in held for uid in table[UID])
     logger.info(
         "wrote %s: %d rows, %d held-out rows left at his raw values, weight %.2f",

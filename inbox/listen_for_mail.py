@@ -31,6 +31,9 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from agents import Registry, Status, utc_now  # noqa: E402  (the path above is what makes it importable)
+
 if sys.platform == "win32":
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -88,6 +91,21 @@ def _parsed(argv: list[str]) -> tuple[str, int]:
     return box, timeout
 
 
+def _refuse_if_inactive(box: str) -> None:
+    """A lane switched off in `inbox/agents.csv` is not armed, and its mail is left where it is.
+
+    Checked on arm AND on every poll, because switching a lane off has to work on one that is already
+    running. Exit 2 rather than a silent return: the harness records a status, and 'not arming' must
+    never look like 'armed and quiet'. Unread letters are never archived while inactive — off means
+    silenced, never lost, and that is the whole safety property of the switch.
+    """
+    if Registry.read().active(box):
+        return
+    note = Registry.read().agent(box).note
+    print(f"box {box} is INACTIVE in inbox/agents.csv ({note}) — not arming", file=sys.stderr)
+    sys.exit(2)
+
+
 def _touch_heartbeat() -> None:
     try:
         with open(HEARTBEAT_FILE, "w", encoding="utf-8") as f:
@@ -140,6 +158,21 @@ def _kill_existing_listener() -> None:
     _clear_state_files()
 
 
+def _record(box: str, delivered: int) -> None:
+    """This listener's own runtime line — the half of `agents.py --list` a human cannot type.
+
+    One writer per file (this box's listener), so no lock is needed. `delivered` accumulates across
+    arms: a lane that has delivered nothing all day is a different picture from one that has.
+    """
+    was = Status.read(box)
+    Status(
+        pid=os.getpid(),
+        armed_utc=was.armed_utc if was is not None and delivered else utc_now(),
+        last_delivered_utc=utc_now() if delivered else (was.last_delivered_utc if was is not None else ""),
+        delivered=(was.delivered if was is not None else 0) + delivered,
+    ).written(box)
+
+
 def _letters() -> list[str]:
     if not os.path.isdir(INBOX):
         return []
@@ -176,6 +209,7 @@ def _deliver(names: list[str]) -> None:
         _archive(basename)
         print(f"=== inbox/{box}/{basename} ===")
         print(body)
+    _record(box, delivered=len(names))
     print(f"MAIL:{len(names)}:{','.join(names)}")
     print("---")
     print("Listener exited on mail. Re-arm now:")
@@ -185,6 +219,7 @@ def _deliver(names: list[str]) -> None:
 def main() -> None:
     box, timeout = _parsed(sys.argv[1:])
     _select_box(box)
+    _refuse_if_inactive(box)
 
     os.makedirs(READ_DIR, exist_ok=True)
     _kill_existing_listener()
@@ -195,6 +230,7 @@ def main() -> None:
     except OSError as e:
         print(f"WARNING: pid write failed: {e}", file=sys.stderr)
     _touch_heartbeat()
+    _record(box, delivered=0)
     start = time.time()
 
     try:
@@ -204,6 +240,7 @@ def main() -> None:
             return
         while True:
             time.sleep(POLL_SECONDS)
+            _refuse_if_inactive(box)
             _touch_heartbeat()
             if not os.path.isdir(INBOX):
                 print("ERROR: box directory was deleted", file=sys.stderr)

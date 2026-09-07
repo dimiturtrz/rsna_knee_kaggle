@@ -1,0 +1,92 @@
+ours D:\data\volumetric\mri\processed\rsna_knee_abnormality\labels\report_labels_v2.csv rows 4406 sha 6f704a7bdb2f
+cols ['ACL', 'ACL__conf', 'ACL__verdict', 'MCL', 'MCL__conf', 'MCL__verdict', 'Medial Meniscus', 'Medial Meniscus__conf'] ...
+
+== UNK census (ours), n=4406
+ACL                UNK   355   8.1%   YES  1226  NO  2825
+MCL                UNK   430   9.8%   YES   767  NO  3209
+Medial Meniscus    UNK   250   5.7%   YES  2347  NO  1809
+Lateral Meniscus   UNK   442  10.0%   YES  1121  NO  2843
+Medial OA          UNK  1125  25.5%   YES  1619  NO  1662
+Lateral OA         UNK  1457  33.1%   YES  1087  NO  1862
+PF OA              UNK   815  18.5%   YES  1991  NO  1600
+Effusion           UNK   434   9.9%   YES  2666  NO  1306
+Synovitis          UNK  3712  84.2%   YES   580  NO   114
+Baker's            UNK  2023  45.9%   YES  1114  NO  1269
+Contusion          UNK   916  20.8%   YES  1297  NO  2193
+Fracture           UNK  2486  56.4%   YES   314  NO  1606
+
+== pilkwang D:\data\external\kaggle_foreign\pilkwang_rsna-knee-llm-labels\report_labels_v2.csv rows 4406 sha 6f704a7bdb2f cols ['StudyInstanceUID', 'ACL', 'ACL__conf', 'ACL__verdict', 'MCL', 'MCL__conf']...
+   byte-identical to ours: True
+   studies in common 4406 of ours 4406
+   ACL                ourUNK   355  called     0 (  0.0%)  read-subset n= 4051 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   MCL                ourUNK   430  called     0 (  0.0%)  read-subset n= 3976 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Medial Meniscus    ourUNK   250  called     0 (  0.0%)  read-subset n= 4156 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Lateral Meniscus   ourUNK   442  called     0 (  0.0%)  read-subset n= 3964 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Medial OA          ourUNK  1125  called     0 (  0.0%)  read-subset n= 3281 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Lateral OA         ourUNK  1457  called     0 (  0.0%)  read-subset n= 2949 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   PF OA              ourUNK   815  called     0 (  0.0%)  read-subset n= 3591 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Effusion           ourUNK   434  called     0 (  0.0%)  read-subset n= 3972 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Synovitis          ourUNK  3712  called     0 (  0.0%)  read-subset n=  694 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Baker's            ourUNK  2023  called     0 (  0.0%)  read-subset n= 2383 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Contusion          ourUNK   916  called     0 (  0.0%)  read-subset n= 3490 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Fracture           ourUNK  2486  called     0 (  0.0%)  read-subset n= 1920 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+
+== raptor_llm_soft D:\data\external\raptor\labels\labels_llm_soft.csv rows 4349 sha 8cec477fb555 cols ['StudyInstanceUID', 'ACL', 'MCL', 'Medial Meniscus', 'Lateral Meniscus', 'Medial OA']...
+   studies in common 4349 of ours 4406
+   ACL                ourUNK   351  called   351 (100.0%)  read-subset n= 3998 AUC 0.971 acc@0.5 0.840  mean val on filled UNK 0.194
+   MCL                ourUNK   424  called   424 (100.0%)  read-subset n= 3925 AUC 0.978 acc@0.5 0.863  mean val on filled UNK 0.146
+   Medial Meniscus    ourUNK   248  called   248 (100.0%)  read-subset n= 4101 AUC 0.957 acc@0.5 0.835  mean val on filled UNK 0.213
+   Lateral Meniscus   ourUNK   435  called   435 (100.0%)  read-subset n= 3914 AUC 0.942 acc@0.5 0.866  mean val on filled UNK 0.192
+   Medial OA          ourUNK  1111  called  1111 (100.0%)  read-subset n= 3238 AUC 0.986 acc@0.5 0.828  mean val on filled UNK 0.084
+   Lateral OA         ourUNK  1435  called  1435 (100.0%)  read-subset n= 2914 AUC 0.981 acc@0.5 0.836  mean val on filled UNK 0.102
+   PF OA              ourUNK   801  called   801 (100.0%)  read-subset n= 3548 AUC 0.991 acc@0.5 0.846  mean val on filled UNK 0.117
+   Effusion           ourUNK   432  called   432 (100.0%)  read-subset n= 3917 AUC 0.986 acc@0.5 0.613  mean val on filled UNK 0.200
+   Synovitis          ourUNK  3671  called  3671 (100.0%)  read-subset n=  678 AUC 0.785 acc@0.5 0.665  mean val on filled UNK 0.430
+   Baker's            ourUNK  1994  called  1994 (100.0%)  read-subset n= 2355 AUC 0.980 acc@0.5 0.759  mean val on filled UNK 0.051
+   Contusion          ourUNK   906  called   906 (100.0%)  read-subset n= 3443 AUC 0.915 acc@0.5 0.793  mean val on filled UNK 0.164
+   Fracture           ourUNK  2460  called  2460 (100.0%)  read-subset n= 1889 AUC 0.984 acc@0.5 0.926  mean val on filled UNK 0.088
+
+== v4hybrid_blend D:\data\volumetric\mri\processed\rsna_knee_abnormality\labels\blend_hybrid_fx_v4b.csv rows 4407 sha 3041b78f4dcd cols ['StudyInstanceUID', 'ACL', 'ACL__conf', 'ACL__verdict', 'MCL', 'MCL__conf']...
+   studies in common 4406 of ours 4406
+   ACL                ourUNK   355  called     0 (  0.0%)  read-subset n= 4051 AUC 1.000 acc@0.5 0.947  mean val on filled UNK nan
+   MCL                ourUNK   430  called     0 (  0.0%)  read-subset n= 3976 AUC 1.000 acc@0.5 0.986  mean val on filled UNK nan
+   Medial Meniscus    ourUNK   250  called     0 (  0.0%)  read-subset n= 4156 AUC 1.000 acc@0.5 0.985  mean val on filled UNK nan
+   Lateral Meniscus   ourUNK   442  called     0 (  0.0%)  read-subset n= 3964 AUC 1.000 acc@0.5 0.992  mean val on filled UNK nan
+   Medial OA          ourUNK  1125  called     0 (  0.0%)  read-subset n= 3281 AUC 1.000 acc@0.5 0.994  mean val on filled UNK nan
+   Lateral OA         ourUNK  1457  called     0 (  0.0%)  read-subset n= 2949 AUC 1.000 acc@0.5 0.994  mean val on filled UNK nan
+   PF OA              ourUNK   815  called     0 (  0.0%)  read-subset n= 3591 AUC 1.000 acc@0.5 0.998  mean val on filled UNK nan
+   Effusion           ourUNK   434  called     0 (  0.0%)  read-subset n= 3464 AUC 1.000 acc@0.5 0.997  mean val on filled UNK nan
+   Synovitis          ourUNK  3712  called     0 (  0.0%)  read-subset n=  694 AUC 1.000 acc@0.5 0.990  mean val on filled UNK nan
+   Baker's            ourUNK  2023  called     0 (  0.0%)  read-subset n= 2383 AUC 1.000 acc@0.5 0.995  mean val on filled UNK nan
+   Contusion          ourUNK   916  called     0 (  0.0%)  read-subset n= 3490 AUC 1.000 acc@0.5 0.951  mean val on filled UNK nan
+   Fracture           ourUNK  2486  called     0 (  0.0%)  read-subset n= 1920 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+
+== report_v4 D:\data\volumetric\mri\processed\rsna_knee_abnormality\labels\report_labels_v4.csv rows 4407 sha dc6f3fed4fa9 cols ['StudyInstanceUID', 'ACL', 'ACL__conf', 'ACL__verdict', 'MCL', 'MCL__conf']...
+   studies in common 4406 of ours 4406
+   ACL                ourUNK   355  called     0 (  0.0%)  read-subset n= 4051 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   MCL                ourUNK   430  called     0 (  0.0%)  read-subset n= 3976 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Medial Meniscus    ourUNK   250  called     0 (  0.0%)  read-subset n= 4156 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Lateral Meniscus   ourUNK   442  called     0 (  0.0%)  read-subset n= 3964 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Medial OA          ourUNK  1125  called     0 (  0.0%)  read-subset n= 3281 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Lateral OA         ourUNK  1457  called     0 (  0.0%)  read-subset n= 2949 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   PF OA              ourUNK   815  called     0 (  0.0%)  read-subset n= 3591 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Effusion           ourUNK   434  called     0 (  0.0%)  read-subset n= 3464 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Synovitis          ourUNK  3712  called     6 (  0.2%)  read-subset n=  694 AUC 1.000 acc@0.5 1.000  mean val on filled UNK 0.820
+   Baker's            ourUNK  2023  called     0 (  0.0%)  read-subset n= 2383 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Contusion          ourUNK   916  called     0 (  0.0%)  read-subset n= 3490 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+   Fracture           ourUNK  2486  called     0 (  0.0%)  read-subset n= 1920 AUC 1.000 acc@0.5 1.000  mean val on filled UNK nan
+
+== report_v3 D:\data\volumetric\mri\processed\rsna_knee_abnormality\labels\report_labels_v3.csv rows 4406 sha bd9560ce36d3 cols ['StudyInstanceUID', 'ACL', 'ACL__conf', 'ACL__verdict', 'MCL', 'MCL__conf']...
+   studies in common 4406 of ours 4406
+   ACL                ourUNK   355  called     0 (  0.0%)  read-subset n= 4051 AUC 1.000 acc@0.5 0.883  mean val on filled UNK nan
+   MCL                ourUNK   430  called     0 (  0.0%)  read-subset n= 3976 AUC 1.000 acc@0.5 0.876  mean val on filled UNK nan
+   Medial Meniscus    ourUNK   250  called     0 (  0.0%)  read-subset n= 4156 AUC 1.000 acc@0.5 0.863  mean val on filled UNK nan
+   Lateral Meniscus   ourUNK   442  called     0 (  0.0%)  read-subset n= 3964 AUC 1.000 acc@0.5 0.895  mean val on filled UNK nan
+   Medial OA          ourUNK  1125  called     0 (  0.0%)  read-subset n= 3281 AUC 1.000 acc@0.5 0.842  mean val on filled UNK nan
+   Lateral OA         ourUNK  1457  called     0 (  0.0%)  read-subset n= 2949 AUC 1.000 acc@0.5 0.850  mean val on filled UNK nan
+   PF OA              ourUNK   815  called     0 (  0.0%)  read-subset n= 3591 AUC 1.000 acc@0.5 0.849  mean val on filled UNK nan
+   Effusion           ourUNK   434  called     0 (  0.0%)  read-subset n= 3972 AUC 1.000 acc@0.5 0.597  mean val on filled UNK nan
+   Synovitis          ourUNK  3712  called     0 (  0.0%)  read-subset n=  694 AUC 1.000 acc@0.5 0.686  mean val on filled UNK nan
+   Baker's            ourUNK  2023  called     0 (  0.0%)  read-subset n= 2383 AUC 1.000 acc@0.5 0.770  mean val on filled UNK nan
+   Contusion          ourUNK   916  called     0 (  0.0%)  read-subset n= 3490 AUC 1.000 acc@0.5 0.851  mean val on filled UNK nan
+   Fracture           ourUNK  2486  called     0 (  0.0%)  read-subset n= 1920 AUC 1.000 acc@0.5 0.936  mean val on filled UNK nan
