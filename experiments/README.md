@@ -8565,3 +8565,50 @@ decides between a weight sweep and `--feature-weight`, and that question is out 
 than on the card, because it is answerable from the literature before it is answerable from the GPU.
 
 Roster: packaged with the reading beside it. Card: 84 min. knee-bq62a
+
+## `labels_v4hybrid_s2026` — MIDDLE on the gold 58, and one cell that is not noise
+
+2026-09-06. Recipe: `band_dense` with `--labels blend_hybrid_fx_v4b.csv --eval-labels report_labels_v2.csv
+--hold-annotations`. One flag pair moved. Log: `logs/gold_v4hybrid.log`.
+
+| ruler | control | arm | delta |
+|---|---|---|---|
+| v2 holdout (881) | `band_dense_hold` 0.8573 | 0.8524 @e8 of 12, flat e7–e11 | −0.0049 |
+| gold 58, twelve-mean | `holdannot_s2026` 0.8932 | **0.9063** | **+0.0131** [−0.0045, +0.0332] |
+
+The v2 drop is the PRE-REGISTERED SIGN, not a kill: a student of v4b scored against v2 measures
+disagreement with v2. That −0.0049 is now the measured construction offset for any later v4b student.
+
+**Pre-registration:** twelve-mean ≥ +0.008 CLEARS (+0.0131). Effusion/Contusion/Fracture mean ≥ +0.02
+FAILS (+0.0082: −0.0111 / +0.0108 / +0.0250). Branch written: **MIDDLE**.
+
+**The instrument's own floor, and why most of the table is unreadable.** Synovitis is a CONTROL — its
+column is byte-identical between the two tables — and it moved **−0.0298**. That is 3.6× the largest
+E/C/F term and 2.3× their mean, so the per-label noise floor at these n is ~0.03 and every cell under it,
+including the E/C/F verdict, is being read below its own resolution. The twelve-mean clears because
+averaging twelve columns is the only statistic here with enough support.
+
+**The one cell above the floor.** Lateral Meniscus **0.8273 → 0.9093, +0.0820** — 2.7× the control's own
+excursion, and the column `supervision_gap` reads the REPORT reader at 0.84 on, the lowest of the four
+"the mechanism cannot reach" findings. v4b disagrees with v2 on lateral meniscus in a direction gold
+sides with. That is a lead about the TABLE, not about the recipe, and it is the one per-label claim this
+run supports. Next after it: Lateral OA +0.0349, Fracture +0.0250, MCL +0.0227 — all inside the floor.
+
+**Shared-origin flag, carried from the tool's own output.** `blend_hybrid_fx_v4b` is DERIVED, so its
++0.0131 is partly agreement between two rulers sharing an origin, never an independent confirmation
+(knee-vrioa). The honest statement is that the twelve-mean cleared its bar on a ruler that cannot fully
+separate the student from its own teacher table.
+
+**What this licensed, and what it did not.** The labelwise-20sl successor was NOT queued. Per the MIDDLE
+rule — the label axis composes with distillation or it is not worth a seat — `compose_v4b_oof` goes ahead
+of it, right behind `seat_distill_lr4e5`.
+
+**And the v3 level map is NOT in that composition, for a measured reason.** `LevelCalibration` fits one
+rate per UNIQUE VALUE and its docstring names the precondition: the reader's vocabulary is five levels.
+v2 satisfies it (0.08/0.28/0.68/0.82/0.94 → 0.041/0.136/0.378/0.688/0.958, five parameters over 684
+cells). v4b is a continuous blend — **130 distinct values**, most appearing in one or two gold cells — so
+the fit emits sixty-odd `n=1 raw 1.000` buckets and writes the gold panel's answers back into the
+training table (`logs/level_calib_v4b.log`; the written table was deleted). Applying the v3 map to v4b is
+the shared-origin defect at full strength on the exact ruler the arm is then read with. It is buildable
+only by first quantising v4b onto five levels, which is a THIRD treatment and not a composition of two
+measured ones. knee-wko44
