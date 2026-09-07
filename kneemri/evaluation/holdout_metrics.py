@@ -45,8 +45,31 @@ class ScoredEpoch:
 class HoldoutMetrics:
     """A run's scored epoch, from its metrics file when it wrote one and from its predictions when not."""
 
-    def __init__(self, scores: LabelScores | None = None) -> None:
+    def __init__(self, scores: LabelScores | None = None, excluded: frozenset[str] | None = None) -> None:
         self.scores = scores or LabelScores()
+        self.excluded = excluded or frozenset()
+
+    def kept(self, reading: HoldoutReading) -> HoldoutReading:
+        """The same reading without the studies this instrument was told to drop.
+
+        WHY ANY STUDY IS EVER DROPPED. A foreign arm is not always scored on the set it was selected
+        on. The dread trainer validates on the gold-58 and keeps its best epoch by that number, so a
+        gold study inside OUR held-out fold is in-sample for it in the one way that matters — it chose
+        the weights. Comparing on those rows credits the arm with a selection it made, and the effect
+        is directional, never noise. Excluding them by NAME rather than by count, because which
+        studies overlap is a property of the fold file and moves when the fold does.
+        """
+        if not self.excluded:
+            return reading
+        kept = [position for position, study in enumerate(reading.studies) if study not in self.excluded]
+        rows = np.array(kept, dtype=np.int64)
+        return HoldoutReading(
+            studies=[reading.studies[position] for position in kept],
+            predictions=reading.predictions[rows],
+            truth=reading.truth[rows],
+            epoch=reading.epoch,
+            source=reading.source,
+        )
 
     def epoch(self, reading: HoldoutReading) -> EpochRow:
         """The per-label AUCs a kept holdout implies, scored exactly as the training loop scored them.
@@ -55,6 +78,7 @@ class HoldoutMetrics:
         binarisation at the midpoint is the ruler's own decision, and a reconstruction that spelled it
         out again would be free to drift from the runs it is compared against.
         """
+        reading = self.kept(reading)
         per_label = self.scores.per_label(reading.predictions, reading.truth)
         return EpochRow(
             epoch=reading.epoch,
@@ -82,13 +106,19 @@ class HoldoutMetrics:
         replace a measurement with a recomputation of the same measurement, and any disagreement
         between them would then be invisible rather than a bug worth seeing.
 
+        UNLESS STUDIES ARE EXCLUDED, and then it cannot win: the recorded row is an AGGREGATE over the
+        whole holdout, so there is no arithmetic that removes a study from it. Reconstruction is the
+        only way to answer the question that was asked, and the answer says so — `reconstructed` is
+        True and `named()` prints it — because a filtered number that claimed to be the recorded one
+        would be the more dangerous of the two mistakes.
+
         A run that held NOTHING back is refused outright, whatever files sit beside it. `RunMetrics.best`
         already refuses one on its recipe, and reconstruction must obey the same rule or it becomes the
         way around it: a final fit's `--fold -1` means there is no held-out study to score, so any
         number computed here would be a score on training data wearing a holdout's name.
         """
         recorded = metrics.best()
-        if recorded is not None:
+        if recorded is not None and not self.excluded:
             return ScoredEpoch(row=recorded, reconstructed=False)
         recipe = metrics.recipe()
         if recipe is not None and int(recipe.get("fold", 0)) < 0:

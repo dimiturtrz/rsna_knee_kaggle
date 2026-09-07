@@ -10,6 +10,7 @@ import numpy as np
 from core import cli
 from core.data.corpus.anatomy import ScaleProfile
 from core.data.labels.label_power import FOLDS, LabelPower
+from kneemri.evaluation.gold_rows import GoldRows
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.supervision_gap import Bottleneck, SupervisionGap
@@ -125,7 +126,12 @@ class RunComparison:
     """
 
     def __init__(
-        self, control: Path, arms: list[Path], labels: Path | None = None, bottleneck: Bottleneck | None = None
+        self,
+        control: Path,
+        arms: list[Path],
+        labels: Path | None = None,
+        bottleneck: Bottleneck | None = None,
+        excluded: frozenset[str] | None = None,
     ) -> None:
         self.control = RunMetrics(control)
         self.arms = [RunMetrics(arm) for arm in arms]
@@ -135,7 +141,11 @@ class RunComparison:
         # reports which half it moved — it just does not get the deltas restricted to that half.
         self.bottleneck = bottleneck
         self.scores = LabelScores()
-        self.holdout = HoldoutMetrics(self.scores)
+        # The studies every number in this report is taken WITHOUT. Empty for every comparison between
+        # two of our own runs; non-empty when one side chose its weights on studies the other held out,
+        # which is a property of the foreign arm and not of the fold.
+        self.excluded = excluded or frozenset()
+        self.holdout = HoldoutMetrics(self.scores, self.excluded)
         # CACHED because reading a run's account can cost a `torch.load` of the whole checkpoint, and
         # the report asks each arm for its recipe twice — once to say whether the pair is matched and
         # once to say which half of the pipeline it moved.
@@ -237,6 +247,7 @@ class RunComparison:
         lines = [
             f"control {self.control.path.stem}: mean {reference['auc']:.4f} at epoch {reference['epoch']}",
             f"  {control.named()}",
+            *([f"  taken WITHOUT {len(self.excluded)} excluded studies"] if self.excluded else []),
             *self._stalled(self.control),
         ]
         for arm in self.arms:
@@ -370,7 +381,9 @@ class RunComparison:
         control, theirs = HoldoutRecord(self.control.path).read(), HoldoutRecord(arm.path).read()
         if control is None or theirs is None:
             return None
-        first, second, truth = control.aligned(theirs)
+        # THE SAME STUDIES the deltas were taken on. A floor measured over rows the delta above does not
+        # include is a floor for a different comparison, and it would be quoted beside this one.
+        first, second, truth = self.holdout.kept(control).aligned(self.holdout.kept(theirs))
         interval = self.scores.paired_interval(first, second, truth)
         return PairedWidths(
             widths={label: (high - low) / 2 for label, (low, high) in interval.items()},
@@ -551,6 +564,11 @@ def main() -> None:
         action="store_true",
         help="also print each arm's deltas over the half of the findings its kind of change can move",
     )
+    command.parser.add_argument(
+        "--exclude-gold",
+        action="store_true",
+        help="score without the radiologist-annotated studies, for an arm that selected its epoch on them",
+    )
     arguments = command.parsed()
     # OPT-IN, because the split costs the twenty published checkpoints and their alignment to the
     # annotations — seconds, and a `--labels` table this comparison does not otherwise need. Asking for
@@ -566,7 +584,13 @@ def main() -> None:
             message = "--split measures the report labels against the annotations, so it needs --labels"
             raise SystemExit(message)
         split = SupervisionGap().measured(arguments.labels, root.raw() / "train.csv", root.processed() / "published")
-    logger.info("%s", RunComparison(control, arms, arguments.labels, split).report())
+    # WHY A FLAG AND NOT A DEFAULT. Between two of our own runs the gold studies are held out by both
+    # and dropping them would throw away 58 of the fold's rows for nothing. It earns its keep against a
+    # FOREIGN arm whose trainer validated on gold-58 and kept its best epoch by that number: every gold
+    # study inside our holdout then chose that arm's weights, and the delta credits it with a selection
+    # it made. Which studies overlap is read from train.csv, never assumed to be a count.
+    excluded = frozenset(GoldRows().annotated(root.raw() / "train.csv")[0]) if arguments.exclude_gold else None
+    logger.info("%s", RunComparison(control, arms, arguments.labels, split, excluded).report())
 
 
 if __name__ == "__main__":

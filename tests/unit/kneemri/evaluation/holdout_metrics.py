@@ -41,6 +41,35 @@ def test_epoch(tmp_path: Path):
     assert row["seconds"] == 0, "and so is the wall-clock"
 
 
+def test_kept(tmp_path: Path):
+    """Named studies leave the reading, the arrays stay aligned to what is left, and nothing else moves."""
+    checkpoint = tmp_path / "wsfold0_e6.pt"
+    _kept(checkpoint)
+    reading = HoldoutRecord(checkpoint).read()
+    assert reading is not None
+
+    whole = HoldoutMetrics().kept(reading)
+    assert whole.studies == reading.studies, "an empty exclusion returns the reading it was given"
+
+    dropped = frozenset({"s0", "s3", "s39"})
+    left = HoldoutMetrics(excluded=dropped).kept(reading)
+
+    assert len(left.studies) == STUDIES - len(dropped)
+    assert not dropped & set(left.studies)
+    assert left.predictions.shape == (STUDIES - len(dropped), len(TARGETS))
+    assert left.truth.shape == left.predictions.shape
+    kept_at = reading.studies.index("s7")
+    assert np.allclose(left.predictions[left.studies.index("s7")], reading.predictions[kept_at]), (
+        "a surviving study must keep its OWN row — a filter that shifted them would score every study "
+        "against another study's truth and still return a plausible AUC"
+    )
+    assert left.epoch == reading.epoch, "the epoch is a property of the weights, not of the rows scored"
+
+    # A name the record does not carry is not an error: the gold table spans the whole corpus and only
+    # part of it falls in any one fold, so most of the exclusion is expected to match nothing here.
+    assert len(HoldoutMetrics(excluded=frozenset({"absent"})).kept(reading).studies) == STUDIES
+
+
 def test_named():
     """A reconstructed control must never read as a recorded one — the report says which it holds."""
     row: EpochRow = {"epoch": 1, "loss": 1.0, "auc": 0.8, "seconds": 9, "per_label": {}}
@@ -68,6 +97,13 @@ def test_of(tmp_path: Path):
     kept = resolver.of(recorded)
     assert kept is not None and not kept.reconstructed, "a run that scored itself is not recomputed over"
     assert kept.row["seconds"] == 300, "and it keeps the wall-clock a reconstruction cannot recover"
+
+    # ...unless studies are excluded, and then it CANNOT win: the recorded row is an aggregate over the
+    # whole holdout and no arithmetic removes a study from it. Answering with it would silently ignore
+    # the exclusion, which is the one failure this flag exists to prevent.
+    restricted = HoldoutMetrics(excluded=frozenset({"s0", "s1"})).of(recorded)
+    assert restricted is not None and restricted.reconstructed, "an exclusion forces the arrays to be reread"
+    assert restricted.row["auc"] != kept.row["auc"]
 
     # A final fit holds nothing back, so a number computed from any file beside it would be a score on
     # training data wearing a holdout's name. `RunMetrics.best` refuses one on its recipe and this must
