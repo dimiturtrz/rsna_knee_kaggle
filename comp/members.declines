@@ -674,3 +674,13 @@ grade_ladder_s2026_r392           # resize price for grade_ladder_s2026
 lr4e-5_ws_s2026_r392              # resize price for lr4e-5_ws_s2026
 merged_blend_cf_r392              # resize price for merged_blend_cf
 through_dense_s2026_r392          # resize price for through_dense_s2026
+
+# oof_fold0_s2026 — DECLINED, and not on quality: it is a TEACHER BLOCK, not a candidate seat. It is the
+# fifth out-of-fold reader, fitted at --fold 0 at the four twins' own 224/12 geometry so that
+# `teacher_oof5.npz` is five real out-of-fold blocks with no fill (the band_dense fill it replaces read
+# outside the fold-to-fold scatter on 8/12 labels and higher-spread on 9/12, which is reader shape, not
+# fold contents). Seating it would put a member in the vote whose whole purpose is to be mimicked by
+# other members — the ensemble would be voting with its own teacher, which is the redundancy this
+# project has now measured three times. Re-opened only by an argument that the block adds RANK the
+# students do not already carry, never by re-quoting its solo number. knee-zwcyk
+oof_fold0_s2026

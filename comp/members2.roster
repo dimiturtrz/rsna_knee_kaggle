@@ -28,3 +28,10 @@ oof_teacher_s2026.pt                 # 0.8681
 # is the third ruler and the only independent one — this member exists to be read there, as a solo,
 # against holdsolo (0.8634 offline, 0.928 board).
 labels_v4hybrid_s2026.pt             # 0.8524 on the v2 ruler — a disagreement rate, see above
+
+# The leak-free re-read of the distillation term: band_dense's recipe distilled from teachers built
+# with --exclude-fold 0, so no teacher ever saw the fold it is scored on. 0.8634 against band_dense's
+# 0.8578 and against its own leaky twin seat_distill_lr4e5's 0.8633 — it matched the twin out of
+# teachers that are -0.0067 weaker by construction, which is what says the +0.0107 is a treatment
+# effect and not memorised fold-0 labels (knee-zwcyk). Seated as the honest member of that family.
+seat_clean_distill_s2026.pt          # 0.8634
