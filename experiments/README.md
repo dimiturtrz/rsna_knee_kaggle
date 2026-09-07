@@ -9295,3 +9295,46 @@ be worth nothing to a block that already holds its columns.
 
 **Branch fired:** < +0.004 vs the calib parent → **not a block lever**. `kneemri-cleancalib` stays staged and
 never ships on this reading. It goes to the roster on the solo (#9 of 262), not to a seat.
+
+### D47 — his DINOv3 five-fold OOF table is a third error source offline and a 0.06-weaker member on the board — 2026-09-07
+
+Zero card. Researcher job 8, `d47_hisoof.py` (scratchpad), on
+`teacher_foreign_corpus.npz` (`identifiers` 4407, `scores` 4407x12), OOF by THEIR split
+(`experiments/arms/foreign_distill.sh:17`). Frame: the 896 gold-removed fold-0 studies, L75mid,
+rank-transformed; proxy = five parents rank-mean @ 2/3 + `raptor_v4_swa` @ 1/3 = 0.9237, five alone 0.8993.
+
+| reading | value |
+|---|---|
+| OOF solo on the 896 | 0.8984 (level with our five-alone 0.8993) |
+| corr OOF <-> `raptor_v4_swa` | **0.731** (columns 0.57-0.83); OOF <-> block 0.748; raptor <-> block 0.847 |
+| inside the 1/3 share (raptor 1/6 + OOF 1/6) | -0.0013 |
+| beside the block, raptor 1/3 untouched, OOF as sixth ours-member | **+0.0063** boot95 [+0.0052, +0.0073] |
+| same as a plain seventh EQUAL seat | -0.0041 (5+raptor at 1/6 each is already -0.0110 — equal weights cost, not the OOF) |
+
+The corr gate does not fire: 0.731 against our members' 0.85 makes this a genuine third error source.
+The inside-the-share number is **unreadable in sign** — raptor is in-sample on the 896 and reads +0.0244 at 1/3
+where its honest stand-in reads +0.0027, so every rank point taken off it reads as an offline loss the board
+would not see. Two of twelve columns carry the whole +0.0063 (Synovitis +0.0124 at solo 0.938 vs raptor 0.868,
+MedMen +0.0065); eight lose, PFOA worst at -0.0069. A column-restricted seat is the shape, and D16 already
+pre-registered a DINOv3 column seat, read it flat on the honest mask, and declined it in writing (README:8862-8868).
+
+**Two board anchors already price this family, and they are why the offline number is not a plan.**
+`bend_v1` (ref 56076290, today) joined the champion six @ 0.5 with his WHOLE 24-member hashed-fold program @ 0.5
+in rank space and read **0.941** against the champion's 0.944 — his program solo is board 0.939, ours-alone ~0.941,
+so a 50/50 join at 0.941 is ~+0.001 of complementarity over the midpoint, where the same join offline reads ~+0.010.
+Board/offline on the complementarity is ~0.1x, not the 0.55x we price members with. `foreignsolo_v1` (ref 56063670)
+says the same in solo: his five folds board 0.882 against offline 0.8812, i.e. his family transfers at +0.001 where
+ours transfers at +0.054 (README:8867). Priced through D35 (b) with lift -0.06 and corr 0.75: **~-0.002 board**.
+
+The weight grid in the log (share 0.50 / OOF fraction 0.2 at +0.0092; split-half choosing share 0.55 at +0.0113)
+is WITHDRAWN by its author and must not be quoted: every fit wants raptor's share raised, which is the exact
+signature of the inflation README:9138 names.
+
+Unexplained, and worth naming: level-with-ours offline vs 0.06-below on the board. Candidates are his LLM-soft
+labels sitting closer to our report-derived ruler than to the hidden labels, or residual leakage through the
+reconstructed md5 split (`oof_teacher.py` rebuilds his folds; a wrong assignment on even 10% of rows scores those
+rows in-sample). Both would inflate the offline reading and leave the board alone. **Branch:** no slot tonight; the
+only entry this licenses is an INSTRUMENT — OOF-beside-raptor vs program-instead-of-raptor — pre-registered at
+<= +0.001 board, spare-slot class. His weights mount from `mattiaangeli/knee-mri-fold-weights` and `bend_entry.py`
+already does it. What Kaggle would run is his five-fold MEAN, not this per-row OOF object; the number above prices
+the object measured, not the one that would ship.
