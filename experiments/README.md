@@ -8698,3 +8698,95 @@ this row, not re-quoted into it: the decline says in writing that it is lifted b
 flats) — this reopens the TERM, not the seats.
 
 Card: 1.2 h. knee-zwcyk
+
+## The window sampler was never missing — it is `trainer.py:532`, and whole-stack is its LIMIT — 2026-09-07
+
+Written after an order to "port his window sampler into our loader" turned out to be an order to build a
+thing that has been running since before this project had a board row. Card-free, one morning of reading.
+
+**The claim under audit.** dread's training script draws k=12 windows per step over a 64-slice stack and
+averages k_eval=24 at inference, and his kernel comment (`knee-mri-twelve-findings-from-a-single-model.py:315-317`)
+attributes the collateral ligaments and the lateral meniscus to the peripheral slices that a narrow span
+throws away. Read as a mechanism, that is: *sample windows across epochs so depth costs no per-step VRAM,
+then average windows at serve.*
+
+**We already do both, and the second one is measured.**
+
+- `kneemri/training/trainer.py:523-532` — `plan()` returns `[(batch, int(generator.integers(0, corpus.slices - self.window + 1))) for batch in batches]`. A random window start per BATCH, redrawn every epoch, over a cache deeper than the window. `core/data/corpus/prefetch.py:47-48` reads it as `corpus.window(batch, start=start, width=self.width)`; `study_cache.py:72-84` serves `width` slices of every slot from `start`, with `slices` documented as "how many slices per slot the cache holds, which bounds the windows a member can read". The cache is a stack and the window slides inside it — it is not a fixed pick.
+- The serve side takes the CENTRE window only (`trainer.py:681`, `middle = (corpus.slices - self.window) // 2`). The k_eval analogue exists separately as **overlap TTA**, and this file already prices it: windowed members gain +0.0152 / +0.0141 / +0.0146, whole-stack members gain **~0**, under the heading "Whole-stack and overlap TTA are the same mechanism". Averaging overlapping windows in PREDICTION space is how a model that cannot afford the whole stack approximates seeing it; reading the whole stack in FEATURE space measured better.
+
+**So his sampler is the budgeted version of what our members do at full budget.** His 64 slices at 480 px
+do not fit a step; our 20 at 336 do, and `--whole-stack` reads them all. The degenerate case is worth
+naming: on a 12-slice cache with a 12-slice window, `integers(0, 1)` is always 0, so members fitted on the
+12sl caches carry the sampler and never sample. Members fitted on the 20sl caches have been running his
+mechanism the whole time.
+
+**WHAT IS ACTUALLY UNTESTED, and it is a VRAM question rather than an anatomy one:** does window sampling
+beat a whole-stack read once the stack is DEEPER than whole-stack can hold? At 1.335 GB/slice, whole-stack
+dies past about 20 slices at 336 px, and sampling is what buys depth beyond that. That cell is blocked on
+disk, not on card (see below).
+
+## The published raptor corpus is 0.15-0.85, read off its own pixels — 2026-09-07
+
+The corpus dread published records no geometry, so it was recovered by matching its slices to the maxspan
+build: 50 studies, each 44-slot plane downsampled 4x and normalised-cross-correlated against all 64 maxspan
+slots of the same study. Mean best-match NCC 0.950, 41.9 of 44 slots valid per study, 99.6% of adjacent
+matched positions monotone within a run. Slot layout confirmed independently of the NCC by per-slot
+occupancy over all 3200 studies (the missing-plane runs break at the same fractions in both corpora: Sag0
+at 0.97, Cor0 at 0.74). Crop confirmed by tissue bounding box on matched pairs, ratio median 1.000, IQR
+[1.000, 1.000] over 2096 pairs.
+
+| | published 44 | maxspan 64 |
+|---|---|---|
+| slots | Sag1 12 / Sag0 10 / Cor1 8 / Cor0 6 / Ax 8 | Sag1 18 / Sag0 14 / Cor1 12 / Cor0 8 / Ax 12 |
+| span | **[0.15, 0.85]** | [0.02, 0.98] |
+| crop | 140.0 mm | 140.0 mm |
+
+**THREE CONSEQUENCES.** (1) Cell C moves TWO variables against A', not three — slot count and span; the
+crop is constant. (2) His kernel's serve span `[0.06, 0.94]` is NEITHER corpus: a first slot at 0.06 never
+lands inside any run's interquartile range on the published one. His released weights were fitted at
+0.15-0.85 and are served at 0.06-0.94, so the geometry mismatch is his. (3) Our own span ladder now gives C
+a DIRECTION rather than a neutral band: 0.20-0.80 = 0.8525, 0.10-0.90 = 0.8565, 0.00-1.00 = 0.8427, an
+interior optimum. A' at 0.15-0.85 sits beside our second-best point; C at 0.02-0.98 sits essentially at the
+point that lost 0.0138. If span behaves on his stack as on ours, **C reads below A'**. The one thing that
+could overturn that is the sampler above — depth accruing across epochs instead of thinning a fixed budget
+— which our fixed-slice-count ladder cannot see. That makes C the cell separating "wider span is bad" from
+"wider span is bad only when you pay for it in density".
+
+## The next geometry cell is blocked by DISK, not by card — 2026-09-07 (knee-8d6m1)
+
+`df /d` reads 3.7 T used, **39 G free**. The cache directory alone is 656 GB, and dread's two corpora added
+~54 GB today. A 336 px cache at 40-64 slices is 120-191 GB; at 224 px, 64 slices is 85 GB. Neither fits. So
+the deeper-than-whole-stack cell cannot be built until an array dies.
+
+**The array census (researcher, D16, 11:20Z).** Every cache array was resolved to the members fitted on it
+by rebuilding the cache key from `study_cache.py:220` + the three suffix rules and reading each member's
+recipe from the first line of its `.metrics.jsonl` (234 members) or its `.pt` payload (41). Population = 314
+names with a holdout record or a roster line; 275 resolve, 39 claim no array (no `.pt` on disk).
+
+- **True orphans — nothing with a holdout record or a roster line resolves to them — total 33 GiB**:
+  `224px_12sl_merged` 17.3, seven small foreign arrays 14.1, five `_first60` smoke caches 2.1. That is the
+  whole answer to "what does nothing need", and it is *less* than the 39 GB already free.
+- **Declined-only arrays, 102.6 GiB**: `336px_16sl` 44.5, `336px_12sl_tissue` 33.4,
+  `224px_20sl_0.1-0.9band` 24.7 — every member on them is in `comp/members.declines` with a written reason.
+- **One-roster-member arrays, ~295 GiB**: the two 64.9 GiB merged 20sl arrays, `336px_20sl` 55.6,
+  `420px_12sl_160mm` 52.1, `merged3` 48.4, `224px_12sl_tissue` 14.8.
+
+**An array is needed for exactly three things** — a NEW arm on that recipe, a re-serve/TTA reading of the
+member on our stack, and an `init=` warm-start that re-reads the same corpus. Nothing else: nine roster
+members are shippable today with their array already deleted (`res392_ws_s2026` and `intensity392_ws_s2026`
+among them, the roster's own line-1 solo at 0.8523), because the `.pt` payload carries `holdout` and
+`targets` itself. **Deleting a one-member array costs the OPTION of re-reading that member, not the
+member.**
+
+**And every array is a VIEW, so deletion is reversible.** The merged arrays are provably base + rijeka rows
+(5143 = 4407 + 736 for all three; `merged3` 6393 = 5143 + 1250 mrnet), built by `build_merged.py:74` /
+`merged_cache.py:94-95` by memmap copy — so 217 GiB of merged arrays rebuild from a base array plus a 1.5
+GiB foreign one, which is exactly why the seven "orphan" small foreign arrays are the LAST thing to delete
+rather than the first. The rest come from raw DICOM, and all four raw trees are present
+(`rsna_knee_abnormality/train_series` 4411 entries, `mrnet`, `kneemri_rijeka`, `fastmri`). `decode_bench`
+measures processes(4) at 0.12 s/study at 12 slices over 4407 studies = 9 min, scaling with planes, so a 20sl
+rebuild is ~15 min and the worst array is well under an hour. `atime` cannot rank the arrays — every file
+reads the same timestamp, so access-time updates are off on this volume, and the member mapping above is
+the only honest test. No process of ours holds any of them open: A', cell C and effv2l all read dread's
+corpora under `D:/kaggle/input/`, not a processed cache.
