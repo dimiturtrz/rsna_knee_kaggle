@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Depth past the batch-12 VRAM ceiling: 32 slices over the SAME 0.10-0.90 band, paid for with batch 6.
+#
+# reading: D:/models/rsna_knee_abnormality/deep32_batch6_s2026.holdout.npz
+# bead: knee-12ckm
+#
+# THE QUESTION. Depth density on the anatomy that carries the finding is the only mechanism class in
+# this ledger that has ever cleared the bar, and it cleared it twice (whole-stack reading +0.0185 at
+# train time, overlap TTA +0.0146 at inference). The band family swept it as far as batch 12 allows:
+# band_wide 16 slices +0.0028 over rate_wholestack, band_dense 20 slices +0.0053, i.e. the second
+# 4-slice step bought +0.0025 against the first step's +0.0028. That is 89% per step, not a halving,
+# and it is the ONLY clean depth step in the family — band_wide moved the band and the count together,
+# so band_wide -> band_dense at fixed band is the single point the decay rests on. Extrapolated at the
+# measured decay, 20 -> 32 is three more 4-slice steps at roughly 0.0025 / 0.0022 / 0.0020, about
+# +0.0067, with an honest band running to +0.008. The fleet-wide bar is d >= +0.008 per member, so this
+# probe is pre-registered AT the floor of the bar and not comfortably over it.
+#
+# WHY THE CEILING IS REAL AND WHY BATCH IS WHAT PAYS. Reserved peak is a function of the slice count
+# alone at 1.335 GB a slice (knee-ylp0), so 20 slices derive 28.26 GB against 31.8 usable and 24 do not
+# fit. Gradient checkpointing cannot buy the room: recipe.sh:31 has had --recompute-activations in
+# $THROUGHPUT on every arm since 08-19, so the 1.335 constant is already the post-checkpointing number.
+# Resolution could buy it and is REFUSED here: the resolution null was measured 392 -> 448, and carrying
+# it down to 224 -> 176 is an extrapolation across a regime boundary onto exactly the fine-structure
+# columns we are weakest in. That leaves the batch, which halves activation for the same slice count.
+#
+# WHY THE BATCH CONFOUND IS MATCHED RATHER THAN ARGUED AWAY. band_dense's own header says the batch is
+# deliberately NOT the knob that pays for depth, because $RECIPE carries --rank-weight 1.0 and the
+# pairwise term forms its pairs INSIDE the batch — shrinking it changes the loss at the same time as the
+# coverage. That is why the control here is not band_dense. It is small_batch6_s2026 (batch_teardown),
+# which is band_dense's recipe at batch 6 and 20 slices and reads 0.8598. Arm and control share the
+# batch, share the band, share the rate, share the pooling; the single moving variable is --slices.
+#
+# control  small_batch6_s2026 = 0.8598 (336 px, 20 slices, 0.10-0.90, whole-stack, 4e-5, batch 6).
+#          Behind it band_dense = 0.8578 at batch 12, which is the same member with the confound the
+#          control removes: batch 6 vs 12 measured +0.0020, inside the 0.0062 floor.
+# cost     1.6x the control's images a study (192 against 120); 12 epochs, one cache build at 32 slices.
+#
+# WHY THIS ARM NAMES NO CAP, AND WHAT IT NEARLY NAMED. It was written with --vram-gb 30, on the reading
+# that DeviceBudget's 1.335 GB a slice is a batch-12 constant and would derive ~44 GB at 32 slices and
+# block await_headroom forever on memory the card does not have. arm_check refused that: the derivation
+# already accounts for the batch and asks 22.25 GB for this invocation, so 30 was 7.75 GB of overstatement
+# and knee-ylp0's exact failure mode — an arm polling for headroom it never needs. The derivation is
+# correct here and is left to do its job. 22.25 GB against 31.8 usable is also the answer to whether the
+# batch buys the depth: it does, with room.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+run_train deep32_batch6 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 32 --band-low 0.1 --band-high 0.9 --batch 6 \
+  --labels "$LABELS" --out "$MODELS/deep32_batch6_s2026.pt"

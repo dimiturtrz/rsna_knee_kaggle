@@ -97,6 +97,10 @@ class SeatFrame:
     truth: Float[NDArray[np.float32], "studies targets"]
     ranks: dict[str, Float[NDArray[np.float64], "studies targets"]]
     holdouts: Path
+    anchor: str = ANCHOR
+    """The member seated at 1/3. A field rather than the module constant because `--anchor` was accepted
+    and then ignored by `proxy`, which read ANCHOR directly -- so every reading with a substituted anchor
+    died on a KeyError, and one that happened to name a seated member would have scored the default."""
     rank_kept: bool = False
     allow_ruler_move: bool = False
     """Whether a child scored by a DIFFERENT label table may still be seated. Off, because that is how a
@@ -158,6 +162,7 @@ class SeatFrame:
             truth=truth[keep],
             ranks={name: matrix if rank_kept else matrix[keep] for name, matrix in ranks.items()},
             holdouts=holdouts,
+            anchor=anchor,
             rank_kept=rank_kept,
             allow_ruler_move=allow_ruler_move,
         )
@@ -205,7 +210,7 @@ class SeatFrame:
         moved = float(np.mean(~np.isclose(truth, self.truth)))
         if moved > 0.0:
             message = (
-                f"{name} was scored against a different label table than {ANCHOR}: {moved:.1%} of cells differ. "
+                f"{name} was scored against a different label table than {self.anchor}: {moved:.1%} of cells differ. "
                 "Its swap gain would be a ruler move wearing a seat's clothes (the recal_holdannot incident). "
                 "Pass --allow-ruler-move to score it against the frame's truth anyway, as D43 did."
             )
@@ -219,7 +224,7 @@ class SeatFrame:
     ) -> Float[NDArray[np.float64], "studies targets"]:
         """The champion proxy over this ours-side block: rank-mean at 2/3, the anchor at 1/3."""
         mean = np.mean(block, axis=0)
-        return (1 - ANCHOR_WEIGHT) * mean + ANCHOR_WEIGHT * self.ranks[ANCHOR] if with_anchor else mean
+        return (1 - ANCHOR_WEIGHT) * mean + ANCHOR_WEIGHT * self.ranks[self.anchor] if with_anchor else mean
 
     def macro(self, predictions: Float[NDArray[np.float64], "studies targets"]) -> float:
         """LEDGER75 over this frame -- ten findings at 0.75, Medial Meniscus and Baker's at the midpoint."""
