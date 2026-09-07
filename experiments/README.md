@@ -8867,3 +8867,55 @@ foreign weights, so in-sample by the rule above; the researcher's independent md
 inflation. The honest mask `foreign_dinov3_matched` reads +0.0074 LEDGER / +0.0030 HIS, and the family
 transfers at +0.001 (foreignsolo 0.882 board against 0.8812 offline) against our +0.054 — so a DINOv3
 column seat is pre-registered flat and was not built. Declined in writing.
+
+## His training table is our corpus minus the 57 gold rows — exactly and only, so gold-58 UN-VOIDS the released foreign readings — 2026-09-07
+
+The rule filed earlier today — *any reading of a released foreign checkpoint on our 909/896 is in-sample
+by construction* — needs a qualifier, and the qualifier restores a comparator the same entry had just
+written off. Set arithmetic on `StudyInstanceUID`:
+
+| set | n |
+|---|---|
+| ours, `report_labels_v2.csv` | 4,406 |
+| his, `D:/data/external/raptor/labels/labels_llm_soft.csv` | 4,349 |
+| ours − his | **57** |
+| of those 57, gold-annotated in `train.csv` (all twelve columns non-null) | **57 of 57** |
+| non-gold rows absent from his table | **0** |
+| gold rows total | 58 |
+| gold ∩ his table | **0** |
+
+The 58th gold study is the one already recorded as missing from `report_labels_v2.csv` altogether, so it
+sits in neither table. **His corpus is our corpus minus the radiologist-annotated set.** He held those
+rows out deliberately; nothing else was dropped.
+
+So `--folds 0` means his released weights saw every row of HIS corpus — the 909/896 readings
+(`raptor_coat384` 0.8508, `cnv2b336` 0.8550, `effv2l480` 0.8703, `distill_s2026` 0.8613, `raptor_v4_swa`)
+stay void — while on the **gold-58 those same checkpoints are out of sample and their readings are
+honest**. The gold-58 is therefore the only ruler on which our members and his released members are both
+scoreable with no in-sample advantage on his side.
+
+It is not symmetric, and the asymmetry runs against us: **13 of the 58 sit inside our fold-0 909 holdout
+and 45 are inside our training corpus**, so ours are 45/58 in-sample there and his are 0/58. A gold-58
+win for his family would be real; a gold-58 win for ours is confounded by 45 rows. Fifty-eight rows is
+also a thin ruler and no decision may rest on a 58-row delta until its sampling interval is priced (D20).
+
+Consequence for the 2×2: **zero gold rows leaked into A'/C's training set**, so A' and C are out of
+sample on all 58 and A''s gold-58 SWA 0.9107 stands as an honest number. The LEDGER truth on those rows
+is the ANNOTATION, pulled by `GoldRows.annotated` (`kneemri/evaluation/gold_rows.py`) straight from
+`train.csv`, all-or-nothing per study because train.csv annotates a study on all twelve columns or none.
+
+## `kneemri-bend` serves his program verbatim, so its transfer number carries no feed term — 2026-09-07
+
+`comp/kernels/kneemri-bend/kneemri-bend.py:196` runs `BendEntry(source=…).run()`, and
+`kneemri/kaggle/bend_entry.py:3-10` states the design: `foreignseat_v1` lifted 45% of one of his three
+stages and read −0.013, so the whole program runs as a subprocess from his own source file with one
+constant changed (`TIME_BUDGET`, twice), against his own weights package
+(`/kaggle/input/datasets/mattiaangeli/knee-mri-fold-weights`, named rather than searched after his
+`find_weights` walk twice took the wrong package). `ForeignMember` is not on that path; `RaptorSeat`
+only rank-blends the two finished tables.
+
+So bend's board-minus-offline is a clean ruler-transfer reading for the raptor family, with no feed
+term in it — and an A'-solo entry built through the same lift is priced against **A' SWA 0.8328**, not
+against a feed-corrected number. The `A'_ourfeed` pass stays worth running as an INSTRUMENT (it prices
+what our cache costs a his-pixels model, and so re-prices the six released foreign readings that WERE
+served through `ForeignMember` on our cache), but it is not on the critical path for any entry.
