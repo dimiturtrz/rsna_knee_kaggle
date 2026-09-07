@@ -10,12 +10,35 @@ instructions it has not read yet. So C's header lives here instead, committed be
 |---|---|---|
 | `all_vols.npy` | `(3200, 44, 336, 336)` uint8 | `(3200, 64, 336, 336)` uint8 |
 | `extra_vols.npy` | `(1207, 44, 336, 336)` | `(1207, 64, 336, 336)` |
-| slot layout | 44, undocumented split | `Sag1 18 · Sag0 14 · Cor1 12 · Cor0 8 · Ax 12` = 64 |
-| span | not recorded with the corpus | `[0.02, 0.98]` |
-| crop | not recorded with the corpus | 140.0 mm |
+| slot layout | `Sag1 12 · Sag0 10 · Cor1 8 · Cor0 6 · Ax 8` = 44 | `Sag1 18 · Sag0 14 · Cor1 12 · Cor0 8 · Ax 12` = 64 |
+| span | `[0.15, 0.85]` | `[0.02, 0.98]` |
+| crop | 140.0 mm | 140.0 mm |
 
-Slot count 44 → 64 AND span AND crop all move together, so **C does not price span alone**. Its ledger row
-says UNPRICED-span. His loader reads the depth dynamically (`self._D = self.vols.shape[1]`, T:217), so 64
+**RECOVERED FROM THE PIXELS, 11:08Z (researcher), and it revises this table's first column.** The 44
+corpus records none of its own geometry, so it was read back by matching its slices to maxspan's: 50
+studies, each 44-slot plane downsampled 4x and cross-correlated against all 64 maxspan slots of the same
+study (mean best-match NCC 0.950, 41.9 of 44 slots valid, 99.6% of adjacent matches monotone). Slot layout
+confirmed independently of the NCC by per-slot occupancy over all 3200 studies — the missing-plane runs
+break at the same fractions in both corpora (Sag0 at 0.97, Cor0 at 0.74). Crop confirmed by tissue
+bounding box on matched pairs: ratio median 1.000, IQR [1.000, 1.000] over 2096 pairs, so the two share
+the crop code path.
+
+So **C moves TWO variables, not three**: slot count 44 → 64 and span 0.15–0.85 → 0.02–0.98. The crop is
+constant. Its ledger row still says UNPRICED-span, because slot count moves with it.
+
+**AND HIS KERNEL'S SPAN MATCHES NEITHER.** `[0.06, 0.94]` is not the corpus he published (0.15–0.85) and
+not maxspan (0.02–0.98); a first slot at 0.06 never lands inside any run's IQR. So his serve geometry is
+a third setting, and the comment at `:315-317` describing 0.15–0.85 as the span that "threw away" the
+collaterals is a claim about the corpus he published — which is the one A' is fitted on.
+
+**WHAT OUR OWN LADDER PREDICTS, now that the numbers are known.** Our three trained span points are
+0.20–0.80 = 0.8525, 0.10–0.90 = 0.8565, 0.00–1.00 = 0.8427 — an interior optimum with the outer tenths
+measured as active distraction. A' at 0.15–0.85 sits beside our best-but-one point; C at 0.02–0.98 sits
+essentially at the point that lost 0.0138. If span behaved on his stack as it does on ours, **C reads
+BELOW A'**, and the pre-registered direction is therefore negative rather than neutral. What could
+overturn that and is the reason to run it anyway: his k=12 window sampler redraws its window every step,
+so the extra depth accrues across epochs instead of thinning a fixed budget — our ladder moved span at a
+FIXED slice count and cannot see that case. C is the only cell that separates the two. His loader reads the depth dynamically (`self._D = self.vols.shape[1]`, T:217), so 64
 runs without an edit; nothing in his training script hard-codes 44 outside its docstring.
 
 ## The reason that reframes the whole 2x2
