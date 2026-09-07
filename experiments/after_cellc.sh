@@ -12,6 +12,12 @@
 # `raptor-corpus` — so cell C would silently train on the corpus it is supposed to be compared
 # against. `C:\kaggle\input` holds one junction, pointing at maxspan and nothing else. Every other
 # path below is absolute for the same reason: the cwd is no longer the repo.
+# WHY `--norm imagenet` WHEN HIS DEFAULT IS `none`. His default is correct for HIS checkpoint: `none`
+# is [0,1] with no ImageNet statistics, matching the SSL input pipeline the published weights were
+# trained under (T:165-174). Those weights are unpublished, so both cells substitute `--ckpt timm` —
+# an ImageNet-pretrained CoAtNet — and feeding that backbone [0,1] is the input distribution his own
+# comment at T:255 says each backbone must be given. The flag is not a recipe change, it is the
+# substitution made coherent; leaving it at `none` prices a plumbing defect of ours as his recipe.
 set -u
 
 REPO="D:/personal_projects/rsna_knee_kaggle"
@@ -29,7 +35,7 @@ export PYTHONPATH="$REPO"
 nohup "$PY" -m kneemri.experiments.foreign_run \
   --script "$SCRIPT" \
   --arch coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k \
-  --res 384 --epochs 16 --bs 8 --k 12 --k_eval 24 --grad_ckpt --ckpt timm \
+  --res 384 --epochs 16 --bs 8 --k 12 --k_eval 24 --grad_ckpt --ckpt timm --norm imagenet \
   --tag repl2x2_c \
   --labels "D:/data/external/raptor/labels/labels_llm_soft.parquet" \
   --folds 1 --fold 0 --fold_file "$REPO/external/raptor/fold0_909.json" \
