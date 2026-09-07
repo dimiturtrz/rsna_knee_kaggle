@@ -642,3 +642,4 @@ merged_blend_cf_r280              # resize price for merged_blend_cf
 through_dense_s2026_n12b0.1-0.9   # regroup price for through_dense_s2026
 through_dense_s2026_r224          # resize price for through_dense_s2026
 through_dense_s2026_r280          # resize price for through_dense_s2026
+aprior_fixed_s2026                # peak 0.8557 = the no-mechanism control exactly, -0.0021 under band_dense; anatomical prior added nothing over the band recipe, family closed for seats

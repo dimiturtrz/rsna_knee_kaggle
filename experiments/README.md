@@ -8612,3 +8612,25 @@ training table (`logs/level_calib_v4b.log`; the written table was deleted). Appl
 the shared-origin defect at full strength on the exact ruler the arm is then read with. It is buildable
 only by first quantising v4b onto five levels, which is a THIRD treatment and not a composition of two
 measured ones. knee-wko44
+
+## `aprior_fixed` — the anatomical prior added nothing, and the family closes
+
+Read 2026-09-07 00:39Z. Twelve epochs, 364 s each. Holdout mean AUC by epoch:
+
+```
+e0 .7426  e1 .7891  e2 .8200  e3 .8397  e4 .8482  e5 .8486
+e6 .8557  e7 .8500  e8 .8524  e9 .8518  e10 .8520  e11 .8513
+```
+
+**Peak 0.8557 at e6**, and the last five epochs sit below it — the `one_cycle` anneal did not recover it.
+`convergence_check` does not call this TRUNCATED: it ran the epochs its recipe asked for.
+
+**The reading is not "missed a bar".** 0.8557 is the *"holding was never the mechanism"* control exactly,
+and it is **−0.0021 under `band_dense`'s 0.8578**. The anatomical prior constraint added nothing over the
+plain band recipe: it reproduced the control to four decimals rather than beating or breaking it. That is
+a cleaner negative than a scatter would be, and it closes the family for seats.
+
+What it does NOT rule out: the prior as a *loss-side* term composed with distillation, which is a
+different operation from constraining the band. Nothing here was measured against a teacher.
+
+Declined for the roster with that reason. knee-uco3 unaffected.
