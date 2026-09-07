@@ -679,3 +679,25 @@ def test_the_defaults_a_keyless_config_is_read_at_are_pinned_to_the_values_that_
     assert keyless.band.recorded() == [0.20, 0.80]
     assert keyless.crop.centre == DEFAULT_CENTRE
     assert StudyDesign.from_config(dict(keyless.config)).slice_pooling == "channels"
+
+
+def test_on_scheme() -> None:
+    """A stated scheme is the only thing that can name a merged cache, so it must beat the lookup.
+
+    `canonical`, `merged` and `merged3` hold the same six slots and differ only in which studies they
+    hold, and no checkpoint on disk records a scheme — so the lookup answers `canonical` for all three.
+    A teacher pointed at a student's merged corpus would then read the wrong arrays and raise on the
+    foreign rows, or worse, order studies it never saw.
+    """
+    member = Member(
+        identifier="keyless",
+        file=Path("m_keyless.pt"),
+        fold=0,
+        config=cast(MemberConfig, {"img": 336, "group": 3, "slots": list(SLOTS)}),
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    assert member.scheme == "canonical", "the lookup cannot tell the three apart"
+    assert member.on_scheme("merged3").scheme == "merged3"
+    assert member.scheme == "canonical", "the transform returns a new member and leaves the fitted one alone"

@@ -36,6 +36,19 @@ LEGACY_SLICES = 12
 RESIZED_FROM = "resized_from"
 """The size a member was FITTED at, stamped by `resized` so `TrainerRecord` refuses its native array."""
 
+CACHE_SCHEME = "cache_scheme"
+"""The scheme naming the cache to READ, when the recorded slot list cannot name it on its own.
+
+`canonical`, `merged` and `merged3` hold the SAME six slots and differ only in which studies they hold,
+so `scheme`'s lookup — first scheme whose slot names match — answers `canonical` for all three, and no
+checkpoint on disk records a scheme key to break the tie. Every member fitted on a merged cache
+therefore resolves to the canonical arrays at serve time: the ninth instance of a value travelling in a
+run's options while its consumer reads something else, and the first where the consumer is a LOOKUP
+rather than a constant. Harmless for holdout scoring, because our studies lead every merged cache in
+the same order — and silently wrong the moment anything wants a study only a merged cache holds.
+
+Set by `on_scheme`, never by the trainer, so a member on disk keeps resolving exactly as it did."""
+
 
 class MemberConfig(TypedDict):
     """The manifest's per-member config: the reading a member was fitted under, plus its architecture."""
@@ -246,6 +259,22 @@ class Member:
         a resize plus an encoder at the OLD resolution — 392, 420 and 448 all read 380 ms (2026-08-17).
         """
         return replace(self, config={**self.config, "train_size": size, RESIZED_FROM: self.read_size})
+
+    def on_scheme(self, scheme: str) -> "Member":
+        """The same member READ over a DIFFERENT corpus's cache — for TEACHING studies its own cache
+        does not hold, never for a number compared against its own.
+
+        A teacher must read every study the student will be fitted on, and a student fitted on a merged
+        corpus is fitted on studies no canonical cache holds. Without this the join in
+        `TeacherFile.aligned` raises on the foreign rows — correctly, since the alternative is a student
+        taught another study's reading — so the teacher has to be pointed at the STUDENT's cache.
+
+        SCHEME ONLY, and the depth is not its business: a merged cache also differs from the member's
+        own in slices and band, and `SharedRead.regrouped` already re-points those for the kernel and
+        for `holdout_backfill`. A second spelling of the regroup here would be two definitions of what a
+        member reads. Compose them — regroup for the geometry, this for which studies exist.
+        """
+        return replace(self, config={**self.config, CACHE_SCHEME: scheme})
 
     @property
     def whole_stack(self) -> bool:
@@ -465,7 +494,14 @@ class Member:
         On the member because it is a fact ABOUT the member, and because two tools had already grown
         their own copy of this lookup — the curve and the witness check — which is how a description
         drifts from the thing it describes.
+
+        A STATED scheme wins over the lookup, because the lookup cannot always answer: three schemes
+        share the canonical slot list and differ only in which studies they hold, so the tie goes to
+        whichever `SCHEMES` names first. See `CACHE_SCHEME` for what that costs and who sets it.
         """
+        stated = self.config.get(CACHE_SCHEME)
+        if stated is not None:
+            return str(stated)
         known = ((name, [slot.name for slot in slots]) for name, slots in SCHEMES.items())
         return next((name for name, names in known if names == list(self.config["slots"])), CANONICAL_SCHEME)
 

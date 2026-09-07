@@ -22,6 +22,7 @@ student through this file and the arm reads as a win with nothing behind it. Pas
 """
 
 import logging
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -31,6 +32,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.corpus.folds import ReportFolds
+from core.data.corpus.slot_reader import SLICE_BAND
 from core.paths import DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
@@ -38,6 +40,7 @@ from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
+from kneemri.inference.read_groups import SharedRead
 from kneemri.inference.vote import RankAverage
 from kneemri.teacher_file import TeacherFile
 
@@ -106,6 +109,18 @@ class TeacherReadings:
         order = combined.argsort(axis=0).argsort(axis=0).astype(np.float32)
         return order / max(len(combined) - 1, 1)
 
+    @staticmethod
+    def over_corpus(members: list[Member], scheme: str, slices: int, band: Sequence[float] | None) -> list[Member]:
+        """The members re-pointed at the STUDENT's cache — geometry through the regroup, studies through the scheme.
+
+        Two transforms rather than one because they are two different facts and each already has an owner:
+        `SharedRead.regrouped` is what the kernel and `holdout_backfill` serve a member at another depth
+        through, and `Member.on_scheme` is the only thing that can say WHICH corpus, since the three merged
+        schemes share the canonical slot list and no checkpoint records a scheme at all.
+        """
+        regroup = SharedRead(slices or members[0].slices, (band[0], band[1]) if band else SLICE_BAND)
+        return [regroup.regrouped(member).on_scheme(scheme) for member in members]
+
 
 def main() -> None:
     """Write the teacher file: `--checkpoints <fold-0 twins> --out teacher.npz`."""
@@ -117,6 +132,9 @@ def main() -> None:
     command.parser.add_argument("--split-seed", type=int, default=2026)
     command.parser.add_argument("--fold", type=int, default=0, help="the fold these members held out, never -1")
     command.parser.add_argument("--overlap", action="store_true", help="read overlapping windows, as the kit does")
+    command.parser.add_argument("--scheme", default="", help="teach over ANOTHER corpus's cache, e.g. merged3")
+    command.parser.add_argument("--slices", type=int, default=0, help="the depth that cache holds, with --scheme")
+    command.parser.add_argument("--band", type=float, nargs=2, default=None, help="the band that cache holds")
     arguments = command.parsed()
 
     if arguments.fold < 0:
@@ -126,8 +144,10 @@ def main() -> None:
         )
         raise ValueError(message)
 
-    readings = TeacherReadings(command.rooted(arguments), torch.device(arguments.device))
+    readings = TeacherReadings(command.rooted(arguments), torch.device(arguments.device), overlap=arguments.overlap)
     members = [Member.from_checkpoint(checkpoint) for checkpoint in arguments.checkpoints]
+    if arguments.scheme:
+        members = TeacherReadings.over_corpus(members, arguments.scheme, arguments.slices, arguments.band)
     _, identifiers = members[0].cache(readings.root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
 

@@ -4635,6 +4635,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.teacher_readings",
+      "target": "core.data.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.teacher_readings",
       "target": "core.paths",
       "weight": 1
     },
@@ -4672,6 +4678,12 @@
       "kind": "import",
       "source": "kneemri.inference.teacher_readings",
       "target": "kneemri.inference.prediction_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.teacher_readings",
+      "target": "kneemri.inference.read_groups",
       "weight": 1
     },
     {
@@ -25162,6 +25174,18 @@
       "kind": "calls",
       "source": "kneemri.inference.teacher_readings.main",
       "target": "kneemri.teacher_file.TeacherFile.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.teacher_readings.over_corpus",
+      "target": "kneemri.inference.read_groups.SharedRead",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.teacher_readings.over_corpus",
+      "target": "kneemri.inference.read_groups.SharedRead.regrouped",
       "weight": 1
     },
     {
@@ -54000,6 +54024,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.members.Member.on_scheme",
+      "label": "on_scheme",
+      "level": "method",
+      "parent": "kneemri.inference.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.members.Member.pixel_group",
       "label": "pixel_group",
       "level": "method",
@@ -54450,6 +54482,14 @@
       "descendants": 0,
       "id": "kneemri.inference.teacher_readings.main",
       "label": "main",
+      "level": "method",
+      "parent": "kneemri.inference.teacher_readings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.teacher_readings.over_corpus",
+      "label": "over_corpus",
       "level": "method",
       "parent": "kneemri.inference.teacher_readings",
       "role": null

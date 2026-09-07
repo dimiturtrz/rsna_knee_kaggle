@@ -1,6 +1,7 @@
 """The producer's testable half is the ORDERING — everything else is a card, a corpus and an encoder."""
 
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import pytest
@@ -8,7 +9,10 @@ import torch
 
 from core.data.corpus.folds import ReportFolds
 from core.paths import DataRoot
+from kneemri.inference.members import Member, MemberConfig
 from kneemri.inference.teacher_readings import TeacherReadings
+
+SLOTS = ["SAG_FLUID_FS", "COR_FLUID_FS", "AX_FLUID_FS", "SAG_FLUID_NOFS", "COR_T1", "SAG_T1"]
 
 
 def test_teach(tmp_path: Path) -> None:
@@ -48,3 +52,26 @@ def test_ordered_spans_the_unit_interval_for_every_label() -> None:
     ordered = TeacherReadings.ordered([scores])
     assert ordered.min(axis=0).tolist() == [0.0] * 4
     assert ordered.max(axis=0).tolist() == [1.0] * 4
+
+
+def test_over_corpus() -> None:
+    """Both halves of the re-point land: the geometry through the regroup, the corpus through the scheme.
+
+    They are separate transforms because each already has an owner, and a member re-pointed at only one
+    of them is the failure with no symptom — the right shape read out of the wrong cache.
+    """
+    member = Member(
+        identifier="keyless",
+        file=Path("m_keyless.pt"),
+        fold=0,
+        config=cast(MemberConfig, {"img": 336, "group": 3, "slots": list(SLOTS), "slices": 20}),
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    (repointed,) = TeacherReadings.over_corpus([member], "merged3", 12, [0.2, 0.8])
+
+    assert repointed.scheme == "merged3"
+    assert repointed.slices == 12
+    assert repointed.band.recorded() == [0.2, 0.8]
+    assert member.slices == 20, "the fitted member is untouched"
