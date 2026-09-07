@@ -27,7 +27,7 @@ cd "$(dirname "$0")/.."
 
 MARKER="ARM DONE foreign_distill_mix30"
 LOG="logs/after_dissent2.log"
-ARM_LOG="logs/foreign_distill_mix30_s2026.full.log"
+ARM_LOG="D:/models/rsna_knee_abnormality/experiments/foreign_distill_mix30_s2026.full.log"
 
 until grep -q "$MARKER" "$LOG" "$ARM_LOG" 2>/dev/null; do sleep 60; done
 echo "$MARKER seen — starting labels_v4hybrid $(date -u +%FT%TZ)"

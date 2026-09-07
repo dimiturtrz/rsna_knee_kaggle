@@ -316,6 +316,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   blocked on. Proof already on disk: `logs/after_dissent2.log:139` reads `ARM DONE foreign_decode_fine`.
   Caught 2026-09-06 on `after_mix30.sh` before the card went idle; grep an EXISTING `ARM DONE` line for
   the format, don't derive it from the checkpoint.
+- **And that log is NOT under `logs/` — a `run_train` arm's full log lives under `$MODELS/experiments/`.**
+  `lib.sh` re-runs an arm launched from the repo tree "from a snapshot", and the snapshot's `tee` writes
+  `$MODELS/experiments/<checkpoint>.full.log` (measured 2026-09-07 off the live process table:
+  `tee D:/models/rsna_knee_abnormality/experiments/clean_calib_s2026.full.log`). `logs/` holds the
+  `foreign_run` arms — his script, a different launcher — and misc, which is why the spelling looks right
+  until the one time it is not. Two watchers were gated on `logs/<checkpoint>.full.log`, a path that does
+  not exist and never will; one of them would have held the card idle from the moment its arm finished.
+  **`queue_check` cannot see this**: a live process gating an owed arm is all it can read, and it never
+  checks that the file that process greps has a producer. `ls` the gate path before arming a watcher.
 - **Data lives out of the repo** (under a root pointed at by `paths.yaml`, gitignored). No datasets,
   weights, or run outputs in git.
 - **No notebooks** (`.ipynb`) — a one-off run becomes a committed CLI / `python -m` entrypoint

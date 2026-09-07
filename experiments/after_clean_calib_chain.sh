@@ -35,7 +35,15 @@ set -u
 
 cd /d/personal_projects/rsna_knee_kaggle || exit 1
 
-GATE="logs/clean_calib_s2026.full.log"
+# THE ARM LOG IS NOT UNDER `logs/`. `lib.sh` re-runs an arm launched from the repo tree "from a
+# snapshot", and the snapshot's `tee` writes to `$MODELS/experiments/<checkpoint>.full.log` — confirmed
+# 2026-09-07 16:01Z off the live process table (`tee D:/models/rsna_knee_abnormality/experiments/
+# clean_calib_s2026.full.log`, pid 1779299), while `logs/clean_calib_s2026.full.log` does not exist and
+# never will. The predecessor watcher gated on the repo path and would have held the card idle from
+# ~17:05Z with `queue_check` reporting OK the whole time — a live process gating an owed arm is all it
+# can see. Both paths are watched here so neither spelling can strand the card again.
+GATE="D:/models/rsna_knee_abnormality/experiments/clean_calib_s2026.full.log"
+GATE_ALT="logs/clean_calib_s2026.full.log"
 LOG="logs/after_clean_calib_chain.log"
 PY=".venv/Scripts/python.exe"
 HOLDOUTS="D:/models/rsna_knee_abnormality"
@@ -44,8 +52,8 @@ PARENT="seat_clean_distill_s2026"
 HISRECIPE="experiments/arms/hisrecipe_distill.sh"
 ATTACH="inbox/main/attach/hisrecipe_distill.sh"
 
-echo "waiting for 'ARM DONE clean_calib' in $GATE" >> "$LOG"
-until grep -q "ARM DONE clean_calib" "$GATE" 2>/dev/null; do sleep 30; done
+echo "waiting for 'ARM DONE clean_calib' in $GATE or $GATE_ALT" >> "$LOG"
+until grep -q "ARM DONE clean_calib" "$GATE" 2>/dev/null || grep -q "ARM DONE clean_calib" "$GATE_ALT" 2>/dev/null; do sleep 30; done
 echo "gate cleared at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 
 READING="logs/clean_calib_ledger75.log"

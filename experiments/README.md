@@ -9183,3 +9183,15 @@ neither number is quotable as an SWA fact until it comes back.
 **And the gold-to-holdout offset is not a constant** (researcher, self-corrected): effv2l's gold-58 sits
 0.019 above its 896-study L75mid where A''s sat 0.031 above. A pre-registration that translates a gold
 number into a solo with another member's offset will miss, and this one did, on the low side, twice.
+
+**The SWA sign is a DENOMINATOR fact, and it retires a suspicion rather than opening one** (researcher,
+16:00Z, no card). Per-column both ways: the 896-row gain is +0.0025, paired-bootstrap 95%
+[+0.0005, +0.0042], and it lives in **Fracture (+0.011) and Contusion (+0.010)** — the two rarest
+findings, which is exactly where a top-3 weight average should pay, since variance reduction buys most
+where positives are fewest. Both rulers AGREE on those two columns (gold-58: +0.017 / +0.011). The macro
+sign flips only because of **LatMen at n=23 positives against 35 negatives**: one swapped pair there is
+0.0012 of AUC, and the whole -0.021 is 17 pairs. **No 58-study macro can resolve a within-arm effect of
+0.001**, so the gold-58 ruler is not a second opinion at that size — it is the same opinion with a
+denominator too small to hold it. The two tables are not weighting columns differently. Nothing about
+D30/D31's ruler residual is implicated, and the general rule this fixes is: quote gold-58 for BETWEEN-member
+gaps of 0.01+, never for a within-arm knob.
