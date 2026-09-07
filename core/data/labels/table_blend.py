@@ -50,6 +50,16 @@ the ruler, so `LEAKED` blocks them here rather than leaving the trap for the nex
 TRAINING ON THE RESULT NEEDS `--eval-labels`. Our fold-0 holdout is scored against `report_labels_v2`
 itself, so an arm that trains on a blend and is scored unpinned measures DISAGREEMENT WITH V2, not
 supervision quality. Pin the ruler to v2 and let the 58 gold and the board be the honest tests.
+
+`OVERRIDE` AND `--only` EXIST FOR A COLUMN-SCOPED RETARGET, NOT A BLEND. D23 read our v2 extraction and
+a second LLM reader of the SAME reports against the 58 gold cells per column: on Effusion the foreign
+reader correlates +.78 with gold where v2 correlates -.17, and on Synovitis +.46 against -.49. That is a
+defect in TWO of our twelve extractions, not a global reader-quality gap, and averaging it across all
+twelve would dilute the ten columns where v2 is the better reader. `--only Effusion Synovitis --mode
+override` takes the foreign value where the foreign reader covers the study and leaves v2 standing
+everywhere else, which is the arm `hisfluid_hold` trains on. `coverage()` states the row count that
+keeps its base value, because the studies the foreign reader misses are the denominator of any claim
+about what the retarget did.
 """
 
 import logging
@@ -80,6 +90,7 @@ LEAKED: tuple[str, ...] = ("report_labels_v5", "train_labels_final", "train_targ
 
 MEAN = "mean"
 TIEBREAK = "tiebreak"
+OVERRIDE = "override"
 
 
 class LabelBlend:
@@ -91,18 +102,24 @@ class LabelBlend:
     repeated error.
     """
 
-    def __init__(self, base: pd.DataFrame, foreign: Sequence[pd.DataFrame]) -> None:
+    def __init__(self, base: pd.DataFrame, foreign: Sequence[pd.DataFrame], only: Sequence[str] = ()) -> None:
         self.base = base.set_index(STUDY) if STUDY in base.columns else base
         self.foreign = [table.set_index(table.columns[0]).reindex(self.base.index) for table in foreign]
+        self.only = tuple(only)
 
     def findings(self) -> list[str]:
-        """The twelve findings, as the base table carries them.
+        """The findings this blend may touch, as the base table carries them.
 
         Taken from `TARGETS` rather than from "every column that is not a confidence" — a real label
         table also carries `Report` and `report_language`, and asking pandas to average a string column
-        is how the first run of this module died.
+        is how the first run of this module died. `only` narrows it further; empty means all twelve, and
+        a name that is not a target is refused rather than silently ignored.
         """
-        return [column for column in TARGETS if column in self.base.columns]
+        unknown = [column for column in self.only if column not in TARGETS]
+        if unknown:
+            raise ValueError(f"not findings: {unknown}")
+        scope = self.only or TARGETS
+        return [column for column in TARGETS if column in self.base.columns and column in scope]
 
     def readings(self, finding: str) -> list[pd.Series]:
         """Every reader's column for one finding — the base first, then whichever foreigns carry it."""
@@ -129,7 +146,24 @@ class LabelBlend:
         nudge = pd.concat(readings[1:], axis=1).mean(axis=1).fillna(MIDPOINT) - MIDPOINT
         return base + TIEBREAK_WEIGHT * nudge
 
-    STRATEGIES: ClassVar[dict[str, Callable[[list[pd.Series]], pd.Series]]] = {MEAN: _mean, TIEBREAK: _tiebreak}
+    @staticmethod
+    def _override(readings: list[pd.Series]) -> pd.Series:
+        """The foreign consensus wherever it covers the study; the base's own value everywhere else.
+
+        Not a blend: the base contributes nothing to a covered cell. That is deliberate — this mode is
+        for a column whose base extraction is measurably wrong, where averaging in the defect is the
+        thing to avoid.
+        """
+        base = readings[0]
+        if len(readings) == 1:
+            return base
+        return pd.concat(readings[1:], axis=1).mean(axis=1).fillna(base)
+
+    STRATEGIES: ClassVar[dict[str, Callable[[list[pd.Series]], pd.Series]]] = {
+        MEAN: _mean,
+        TIEBREAK: _tiebreak,
+        OVERRIDE: _override,
+    }
     """Declaration-only dispatch, so a new way to combine readers is a function and never a branch."""
 
     def blended(self, mode: str) -> pd.DataFrame:
@@ -153,6 +187,10 @@ class LabelBlend:
             shared = [finding for finding in self.findings() if finding in table.columns]
             present = int(table[shared].notna().any(axis=1).sum()) if shared else 0
             lines.append(f"  reader {position}: {len(shared):3d} shared findings, {present}/{rows} studies aligned")
+        for finding in self.findings():
+            readings = self.readings(finding)
+            uncovered = rows if len(readings) == 1 else int(pd.concat(readings[1:], axis=1).isna().all(axis=1).sum())
+            lines.append(f"  {finding}: {rows - uncovered}/{rows} cells foreign, {uncovered} keep the base")
         return lines
 
 
@@ -162,10 +200,13 @@ def main() -> None:
     command.parser.add_argument("--base", type=Path, required=True, help="the table whose rows and scale lead")
     command.parser.add_argument("--foreign", type=Path, nargs="+", required=True, help="other readers, same reports")
     command.parser.add_argument("--mode", choices=sorted(LabelBlend.STRATEGIES), default=MEAN)
+    command.parser.add_argument("--only", nargs="+", default=[], help="findings to touch; default all twelve")
     command.parser.add_argument("--out", type=Path, required=True, help="where the blended table is written")
     arguments = command.parsed()
 
-    blend = LabelBlend(LabelBlend.read(arguments.base), [LabelBlend.read(path) for path in arguments.foreign])
+    blend = LabelBlend(
+        LabelBlend.read(arguments.base), [LabelBlend.read(path) for path in arguments.foreign], arguments.only
+    )
     command.report(blend.coverage())
     table = blend.blended(arguments.mode)
 

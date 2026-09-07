@@ -7,6 +7,7 @@ from core.data.labels.reader_agreement import MIDPOINT
 from core.data.labels.table_blend import (
     LEAKED,
     MEAN,
+    OVERRIDE,
     TIEBREAK,
     TIEBREAK_WEIGHT,
     LabelBlend,
@@ -74,6 +75,25 @@ def test_blended_tiebreak_is_a_no_op_without_a_foreign_reader():
 
     assert table.loc["a", FINDING] == pytest.approx(0.68)
     assert table.loc["b", FINDING] == pytest.approx(0.68)
+
+
+def test_findings_narrowed_by_only():
+    """`--only` scopes the retarget; a name that is not a target is a typo and must not pass silently."""
+    assert LabelBlend(_base(), [_foreign()], [FINDING]).findings() == [FINDING]
+
+    with pytest.raises(ValueError, match="not findings"):
+        LabelBlend(_base(), [_foreign()], ["Effusiom"]).findings()
+
+
+def test_blended_override_replaces_covered_cells_and_keeps_the_base_elsewhere():
+    """The mode the two-column retarget rides on: no averaging where covered, base where not."""
+    partial = pd.DataFrame({STUDY: ["a", "c"], FINDING: [0.90, 0.02]})
+
+    table = LabelBlend(_base(), [partial], [FINDING]).blended(OVERRIDE).set_index(STUDY)
+
+    assert table.loc["a", FINDING] == pytest.approx(0.90), "the foreign value stands alone, unaveraged"
+    assert table.loc["b", FINDING] == pytest.approx(0.68), "uncovered study keeps the base"
+    assert table.loc["b", OTHER] == pytest.approx(0.08), "a finding outside --only is never touched"
 
 
 def test_coverage():
