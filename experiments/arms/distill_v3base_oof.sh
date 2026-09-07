@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# distill_v3base_oof.sh — capacity under distillation, on the FAR family, taught by the teacher that works.
+#
+# THIS IS `distill_v3base.sh` WITH ONE THING CHANGED: the teacher. That arm was written on 2026-09-03 and
+# never ran, because its own header gates it on `distill_pairs`, and `distill_pairs` read 0.8594 against
+# band_dense's 0.8578 — +0.0016, flat, and the ledger's verdict on it was "a rank average cannot pay for
+# an ordering it already holds". The gate refuses a flat profile, correctly.
+#
+# WHY THAT GATE NO LONGER BINDS. It was written against a teacher worth +0.0016. `oof_teacher` is worth
+# +0.0107 on the v2 holdout (0.8681 vs band_dense 0.8578) — 6.7x more, and the best solo this project
+# owns. The premise that closed this arm ("the distillation term is flat, so do not pay 2.3 h to measure
+# it on a second family") is false on our own later measurement. The arm re-opens by ANSWERING the
+# argument that closed it, not by re-quoting a number at it. Approved by mastermind 00:24Z.
+#
+# ONE VARIABLE AGAINST THE CONTROL. The control is `v3base_dense` = 0.8455 (peak e6, 2026-08-21): this
+# exact recipe with NO teacher term. So the single variable here is the presence of the teacher, and the
+# control costs ZERO card — it is already in the ledger. The teacher's weight is 0.7 rather than
+# distill_pairs' 0.3 because 0.7 is the point two separate arms each found best on a monotone line, and
+# because the operating point must be the one the term was shown to work at; a weight swept on a second
+# encoder before the term transfers at all would confound the family question with the operating point.
+#
+# WHY THIS ARM AND NOT MORE SEATS. Capacity ALONE is a measured LOSS on 3.5k studies: `base_dense`
+# (DINOv2 base, byte-identical geometry) reads 0.8512 against band_dense's 0.8578, -0.0066, and
+# `v3base_dense` reads 0.8455. The thesis is that distillation is the regulariser that flips that sign —
+# a bigger trunk can afford its capacity when it is handed an ordering instead of only 3.5k labels.
+#
+# AND IT IS THE MITIGATION FOR THE HOMOGENISATION TRAP. Six students pulled toward one teacher lose the
+# disagreement the ensemble's +0.015 is made of, which is why the six-seat retrain is held until this
+# reads. A student on the FAR family pulled toward the same teacher is the one construction that gains
+# the ordering WITHOUT collapsing into the pool's geometry. If the trap is real, this is what survives it.
+#
+# PRE-REGISTERED against `v3base_dense` 0.8455 — the bands are that file's own, with the teacher swapped:
+#   * >= 0.8598 — beats the best solo this project has ever fitted, on the far family. STEP-SIZED. Seat it
+#     as seat 8 the same day it lands (mastermind 00:24Z): a far-family member above 0.86 is diversity the
+#     vote has never had, and its board row prices the trap directly.
+#   * 0.8455-0.8598 — the term TRANSFERS across families. Read its delta beside `oof_teacher`'s +0.0107:
+#     if they match, what the teacher hands over is ORDER, and that is what licenses multiplying the
+#     treatment across all six seats.
+#   * <= 0.8455 — the interesting negative: the term is FAMILY-SPECIFIC, so what the teacher carries is
+#     not order but something the DINOv2 student's own family already had. That is a property of the
+#     TEACHER, not a verdict on distillation — and it is the single most useful thing we could learn
+#     before spending 7 h retraining six seats under that teacher.
+#
+# THE RATIO. 2.3 h (~680 s x 12 epochs), zero submission slots, no control arm to run. Every branch above
+# de-risks the 7 h six-seat retrain, so this is 2.3 h spent to decide 7 h — which is the same trade
+# `compose_v4b_oof` is making one place ahead of it in the queue.
+#
+# deliberate: --variant v3base (the far family; capacity AND distance in one trunk)
+# deliberate: --distill-weight 0.7 --teacher-targets teacher_oof_corpus.npz (the teacher that reads
+# deliberate: +0.0107, at the weight two arms found best; NOT distill_pairs' 0.3 / teacher_fold0.npz)
+# deliberate: --teacher-targets D:/data/volumetric/mri/processed/rsna_knee_abnormality/teacher_oof_corpus.npz
+# deliberate: --batch 6 (v3base at 20 slices does not fit the small-trunk batch; held from distill_v3base)
+# bead: knee-s9pjy
+# reading: distill_v3base_oof_s2026.holdout.npz
+# control  v3base_dense = 0.8455, base_dense = 0.8512, band_dense = 0.8578, oof_teacher = 0.8681
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+TEACHER="$PROCESSED/teacher_oof_corpus.npz"
+require "$TEACHER"
+require "$LABELS"
+
+HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head -1)"
+export HF_TOKEN
+[ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
+
+run_train distill_v3base_oof \
+  $RECIPE --epochs 12 --batch 6 --slice-pooling max --whole-stack $THROUGHPUT \
+  --variant v3base --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --distill-weight 0.7 --teacher-targets "$TEACHER" \
+  --labels "$LABELS" --out "$MODELS/distill_v3base_oof_s2026.pt"
