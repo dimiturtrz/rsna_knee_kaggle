@@ -3625,3 +3625,24 @@ six columns at once instead of one, at six times the leverage of `colmcl` and `c
 slot. Pre-registered before the slot was spent: **0.718-0.730** retires the per-label axis outright,
 **0.755-0.785** licenses the full-corpus relabel, **0.731-0.754** needs one confirming arm, and anything
 outside **0.718-0.785** is a harness defect to be found before the number is read.
+
+## `v4solo_v1` — 0.922 — the label table lost to its own control — 2026-09-07
+
+Ref 56070681, `kneemri-v4solo`, one member (`labels_v4hybrid_s2026`), instrument not a seating. The
+control is `holdsolo_v1` (0.8634 offline, **0.928**): the same trunk, the same serving, one seat each,
+and the only difference is the table the member was TRAINED on — `blend_hybrid_fx_v4b` here,
+`report_labels_v2` there.
+
+**It read 0.922, on the pre-registered low branch.** The kernel named `<=0.926` before the slot as "v4b
+grading HURTS generalisation, and v2 stands as the shipped table". It landed four thousandths under
+that line.
+
+**What it settles is a disagreement between two offline rulers.** The v2 holdout of 881 read the v4b
+student at −0.0049; the gold-58 twelve-mean read it at **+0.0131** and CLEARED its pre-registered bar.
+The board sided with the holdout. The gold census shares an origin with the table it grades (knee-vrioa),
+and this is the first held-out test of whether that shared origin was doing the work — it was. No
+gold-58 census delta licenses a seat again without a board control beside it.
+
+**What it does not touch.** The Lateral Meniscus cell (0.8273 → 0.9093, +0.0820, 2.7× the control
+column's own excursion) is a claim about the TABLE, not about re-grading every column, and a per-label
+repair of v2 is a different lever that this row prices nothing about.
