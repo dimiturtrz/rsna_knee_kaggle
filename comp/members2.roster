@@ -35,3 +35,12 @@ labels_v4hybrid_s2026.pt             # 0.8524 on the v2 ruler — a disagreement
 # teachers that are -0.0067 weaker by construction, which is what says the +0.0107 is a treatment
 # effect and not memorised fold-0 labels (knee-zwcyk). Seated as the honest member of that family.
 seat_clean_distill_s2026.pt          # 0.8634
+
+# The leak removed by dropping the HOLDOUT rather than by weakening the teachers: fitted at --fold -1
+# against teacher_oof5.npz, five REAL out-of-fold blocks covering all 4406 studies, each predicting only
+# the fold it held out. No evaluation set is left for a memorised label to leak into, by construction —
+# and by the same construction this member has NO offline number and can never have one. Its ruler is
+# the board (kneemri-oof5solo, pre-registered against holdsolo's 0.928). Its held-out twin
+# seat_clean_distill read 0.8634, matching the leaky 0.8633 out of teachers -0.0067 weaker, which is
+# what says the term being shipped here is a treatment effect. knee-zwcyk
+seat_oof5_distill_s2026.pt           # no offline number by construction, --fold -1
