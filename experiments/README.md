@@ -9387,3 +9387,66 @@ not size.
 Correction carried from D47: the split transcription is `kneemri/evaluation/foreign_split.py` (md5 of the report
 text, fallback UID, `hexdigest()[:8]` mod 5), NOT `oof_teacher.py`, which assembles our own pool's out-of-fold
 teacher. `teacher_foreign_corpus.npz` is written by `foreign_price.py:180`, fold-matched through it.
+
+## D50/D52 — the board's ruler is a REBUILT COMMON FRAME, not the ledger's `offline` column, and not gold
+
+Read 2026-09-07, researcher, CPU, read-only. Frame: 896 gold-removed fold-0 studies, L75mid, every member
+rebuilt on the SAME frame rather than quoted from its own record. 36 board rows that are honest (the entry's
+members did not train on the studies it is scored against) and rebuildable.
+
+| predictor of the board score | R² | slope | resid SD |
+|---|---|---|---|
+| **rebuilt common-frame L75mid** | **0.962** | **+1.14** | **0.0016** |
+| the ledger's own `offline` field | 0.802 | — | 0.0036 |
+| gold-13 (the radiologist rows) | 0.475 | — | 0.0059 |
+
+**The ledger's `offline` column is twice as noisy as a rebuild, and gold is not the board's ruler at all.**
+The `offline` field is a MIXED frame — each member's number was taken on whatever holdout its own arm wrote,
+under whatever variant of the macro was current — and re-scoring all 36 on one frame halves the residual. That
+is the single largest improvement to the offline→board transfer this project has made, and it is free: no card,
+no slot, no new member. **P1: `board_check` and the ledger should carry the rebuilt common-frame number as the
+`offline` column, and the mixed-frame one should be retired.** Until they do, every transfer constant quoted
+from this file is fitted on the 0.0036 ruler.
+
+**The band is 0.904-0.937 and the champion is 0.944, which is OUTSIDE it.** Every prediction made for an entry
+at the top of the board is an extrapolation by up to 0.007 above the fit's highest row, and it must be said out
+loud wherever the slope is used. `kneemri-stack`'s pre-registration says it in its own docstring.
+
+**D48's "+0.041 on ours5" is the POOL-WIDE offset, not a member effect.** Measured across the pool it reads
++0.030 ± 0.030 (n=256), so ours5's +0.041 is one draw from it. Spearman(gold-13, report-13) = **+0.63** against
+a disjoint-13 null of +0.43 [0.18, 0.63] — the reordering IS the thirteen rows, and the thread D48 opened
+(that L75mid ranks our members partly on report-derivable structure) does not survive its own falsification
+test. What remains true and unexplained is the seven board flats; this is no longer a candidate explanation.
+
+**The champion's five parents are mid-pool on the gold-vs-report axis** (+0.018…+0.057, percentiles 0.37-0.78),
+so selecting members on the report ruler did NOT buy a report bias. That was the mechanism worth fearing and it
+is measured absent.
+
+**v3 ≡ v2 on every AUC ruler BY CONSTRUCTION.** The v3 recalibration is a per-column MONOTONE remap, and every
+AUC-family metric is invariant to one. So pre-registration (2) of the recal family is undefined — not refuted,
+undefined — and the family does not re-open on an AUC number. It could only ever move a threshold metric.
+
+### The swap gate is now a module, and its guard had never been computed
+
+`kneemri/evaluation/seat_swap.py` (245ed896) ports D43's gate: `swap_gain = proxy(child in place of parent) −
+proxy(parents)`, GO iff `swap_gain ≥ +0.0010` AND the corr guard holds. The guard as D43 WROTE it — child
+against the rank-mean of the FOUR REMAINING parents, versus the parent against those same four, `GUARD_SLACK =
+0.01` — had never been coded, and computing it changes the published verdicts:
+
+| swap | gain | child-vs-rest | parent-vs-rest | verdict |
+|---|---|---|---|---|
+| `labelwise_dense` | +0.0013 | 0.909 | 0.911 | **GO** (the only one) |
+| `clean_calib` | −0.0008 | 0.953 | 0.905 | NO-GO, and the guard refuses it independently |
+| `recal_dense` | +0.0005 | 0.929 | 0.911 | NO-GO |
+| `base_clean` | −0.0005 | — | — | NO-GO |
+
+Acceptance, pre-registered with the researcher and reproduced exactly after the port: frame 896, champion proxy
+0.9237, five alone 0.8993, parents mean pairwise corr 0.871, 1 of 4 pass. Two facts the port produced that the
+prose gate could not: **`recal_holdannot`'s truth table differs from the frame's on 100% of cells**, so its
+published +0.0008 is a RULER move and not a seat move and it must be struck from the five published readings;
+and the rank-transform asymmetry that was suspected of carrying the readings is worth **0.0000**.
+
+**A four-swap table read as a one-swap one.** The module's `--pair` flag first shipped as `nargs="+"` without an
+accumulating action, so four `--pair` flags silently priced only the LAST one. Fixed with `action="extend"` and
+recorded here rather than in the diff, because a gate whose whole purpose is to refuse three of four swaps had a
+failure mode that reported one of them.
