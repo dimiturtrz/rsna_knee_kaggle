@@ -9732,3 +9732,53 @@ certify. Mastermind's withdrawn "ignore anything under 0.008" would have re-open
 owner's 0.955 is +0.011 board, roughly +0.008 offline kernel at the pairwise compression this file's own
 `--near` cell prints — five times the blur, which is why the target is a MEMBER question and not a seating
 one.
+
+## D87 — the strong teacher's lead is 3/4 signal and 1/4 ruler, and it is NOT strong everywhere: it LOSES the two fluid columns — 2026-09-08
+
+Zero card, CPU, ~15 s. `python -m kneemri.evaluation.column_surface --surface raptor_teacher.npz --against
+teacher_clean_full.npz` (`logs/raptor_teacher_midpoint.log`).
+
+Researcher's D86 found `raptor_teacher.npz` on disk at **0.9432@896 / 0.9460@4407** on the **L75mid rank**
+cut against our own `teacher_clean_full` at 0.8777 — a teacher stronger than the nine-seat kernel (0.9260),
+out-of-sample by construction, free. They named a confound they could not resolve: the L75mid recut moves the
+raptor family +0.045-0.050 and ours <= +0.030, so part of that gap is ruler rather than signal, and separating
+them needs a second ruler. **We own the second ruler** — the corpus surface reads the MIDPOINT cut, which is
+the field every transfer constant in this project was fitted on.
+
+**Both teachers on the midpoint cut, all 4407 corpus rows, paired intervals:**
+
+| finding | raptor_teacher | ours minus raptor | pos |
+|---|---|---|---|
+| ACL | 0.8930 +/-0.0109 | −0.0340 [−0.0438, −0.0250] | 1226 |
+| MCL | 0.8671 +/-0.0131 | −0.0612 [−0.0734, −0.0491] | 767 |
+| Medial Meniscus | 0.9404 +/-0.0063 | −0.0457 [−0.0520, −0.0391] | 2347 |
+| Lateral Meniscus | 0.9336 +/-0.0090 | −0.0991 [−0.1118, −0.0880] | 1121 |
+| Medial OA | 0.9337 +/-0.0071 | −0.0656 [−0.0731, −0.0583] | 1619 |
+| Lateral OA | 0.9122 +/-0.0097 | −0.0829 [−0.0941, −0.0724] | 1087 |
+| PF OA | 0.9109 +/-0.0082 | −0.0931 [−0.1018, −0.0842] | 1991 |
+| **Effusion** | 0.8391 +/-0.0113 | **+0.0141 [+0.0059, +0.0225]** | 2666 |
+| **Synovitis** | 0.8339 +/-0.0147 | **+0.0227 [+0.0105, +0.0358]** | 580 |
+| Baker's | 0.9529 +/-0.0075 | −0.0553 [−0.0651, −0.0457] | 1114 |
+| Contusion | 0.9130 +/-0.0092 | −0.0490 [−0.0579, −0.0398] | 1297 |
+| Fracture | 0.9486 +/-0.0144 | −0.0588 [−0.0767, −0.0427] | 314 |
+
+Macro over the twelve: **raptor 0.9065, ours 0.8559, gap +0.0507.** Every interval excludes zero, on 4407 rows
+with 314-2666 positives a column — not a frame that has to be argued about.
+
+**Two things follow, and the second is the one that changes the arm.**
+
+1. **The confound is real and it is a quarter of the gap, not the gap.** L75mid says +0.0683 (0.9460 vs
+   0.8777); the midpoint says **+0.0507**. So ~26% of the apparent teacher lead is the recut favouring that
+   family, and **74% survives on the cut every constant here was fitted on**. Researcher's confound #2 is
+   resolved rather than carried: the strong teacher is really that much stronger.
+
+2. **It is not stronger EVERYWHERE, and the exceptions are exactly the columns our stack is known for.** On
+   Effusion and Synovitis **our weak teacher beats it**, +0.0141 and +0.0227, both intervals clear of zero.
+   Those are the two fluid columns D-series after D-series has recorded as our fluid-column lead. A flat
+   re-teach on `raptor_teacher.npz` therefore hands 10 columns a much better target and 2 columns a WORSE one
+   — it would teach away the thing we are best at, which is a mechanism for "stronger teacher, smaller gain"
+   (README:8565-8570, +0.0107 at teacher 0.879 vs +0.0061 at teacher 0.905) that nobody had named.
+
+**The teacher to distil from is neither file: it is the per-column max of the two**, which costs one npz write
+and zero card, and which dominates both by construction on our own ruler (macro 0.9096). Any arm on this axis
+should carry the mixed target, and the flat `raptor_teacher.npz` is then the ablation rather than the arm.
