@@ -67,6 +67,7 @@ from random import Random
 from statistics import median
 
 from core import cli
+from kneemri.evaluation.score_scale import RAW, SCALES, Scale
 
 logger = logging.getLogger(__name__)
 
@@ -179,15 +180,16 @@ class BoardPair:
 
     better: BoardEntry
     worse: BoardEntry
+    scale: Scale = RAW
 
     @property
     def offline_delta(self) -> float:
-        """How much the holdout preferred `better`. Positive by construction."""
+        """How much the holdout preferred `better`, in raw AUC. Positive by construction."""
         return self.better.offline - self.worse.offline
 
     @property
     def board_delta(self) -> float:
-        """What the board paid for that preference. NEGATIVE means the ruler ordered this pair wrong."""
+        """What the board paid for that preference, in raw AUC. NEGATIVE means the ruler mis-ordered."""
         return self.better.board - self.worse.board
 
     @property
@@ -201,8 +203,18 @@ class BoardPair:
         return self.offline_delta >= RESOLVED
 
     def ratio(self) -> float:
-        """Board delta per unit of holdout delta — knee-7d1's compression factor, for this pair."""
-        return self.board_delta / self.offline_delta
+        """Board delta per unit of holdout delta ON THIS PAIR'S SCALE — knee-7d1's compression factor.
+
+        The scale enters HERE and nowhere else, which is the whole design. `offline_delta`,
+        `board_delta`, `resolved` and `inverted` stay in raw AUC, so `DELTA_FLOOR` and `RESOLVED` keep
+        meaning what they were measured to mean and the pair set is IDENTICAL between two readings.
+        A scale change then moves the ratios and nothing else, which is what makes the two comparable
+        — the alternative, re-deriving the floors per scale, compares two different populations and
+        calls the difference a finding.
+        """
+        return self.scale.delta(self.better.board, self.worse.board) / self.scale.delta(
+            self.better.offline, self.worse.offline
+        )
 
 
 class BoardTransfer:
@@ -215,9 +227,10 @@ class BoardTransfer:
     needs it.
     """
 
-    def __init__(self, record: Path = RECORD, scope: str = ENSEMBLE) -> None:
+    def __init__(self, record: Path = RECORD, scope: str = ENSEMBLE, scale: Scale = RAW) -> None:
         self.record = record
         self.scope = scope
+        self.scale = scale
 
     def _rows(self) -> list[dict[str, object]]:
         """Every recorded line, the notes included, exactly as the file holds them."""
@@ -265,7 +278,7 @@ class BoardTransfer:
         """Every pair of entries the holdout can order, better-by-the-holdout first."""
         found = self.entries()
         return [
-            BoardPair(better=better, worse=worse)
+            BoardPair(better=better, worse=worse, scale=self.scale)
             for index, worse in enumerate(found)
             for better in found[index + 1 :]
             if better.offline - worse.offline >= DELTA_FLOOR
@@ -349,6 +362,28 @@ class BoardTransfer:
         thin = THIN if count < PRICEABLE else ""
         return f"{count} resolved pairs, median {value:+.2f} [{low:+.2f}, {high:+.2f}]{thin}"
 
+    def required_offline(
+        self, target_board: float, from_board: float, from_offline: float, floor: float | None = None
+    ) -> tuple[int, float]:
+        """The holdout score an entry must reach for the board to pay `target_board`, and its cell's count.
+
+        The compression is re-read among the entries at or above `floor`, defaulting to `from_offline`,
+        because pricing a climb with the whole-record median prices it in a regime we have left. The
+        floor is separable for the case that keeps arising and refuses itself otherwise: a climb FROM
+        THE BEST ENTRY has no pair above it, so the regime it must be priced in is the one just below —
+        naming that floor is a stated assumption, and defaulting to it silently would hide one.
+
+        The arithmetic runs ON THE SCALE
+        this reading was built with and comes back as AUC, which is the step that keeps being done by
+        hand from a printed constant — three times wrongly (knee-dn4t9), and once badly enough to demand
+        an 8-hour arm for a gap that a second scale prices at a third of the size.
+        """
+        count, ratio = self.compression_above(from_offline if floor is None else floor)
+        if ratio == 0.0:
+            return count, from_offline
+        climb = self.scale.delta(target_board, from_board) / ratio
+        return count, self.scale.advance(from_offline, climb)
+
     def report(self, near: float | None = None) -> str:
         """What the holdout is worth as a selector, in the two numbers that decide a submission.
 
@@ -407,8 +442,44 @@ def main() -> None:
         help="the offline score an arm would be priced against. The compression is re-read among the "
         "entries at or above it, because the whole-record median describes a regime we have left.",
     )
+    command.parser.add_argument(
+        "--scale",
+        default="raw",
+        choices=sorted(SCALES),
+        help="the scale the ratios are taken on. `raw` is AUC as recorded, the scale every constant in "
+        "this module was fitted on. `probit` is the normal quantile, on which a bounded rate stops "
+        "compressing near its ceiling — run it whenever a regime FALL is about to be read as a fact "
+        "about transfer, because a fall is what raw AUC produces near 1.0 whether or not one is there.",
+    )
+    command.parser.add_argument(
+        "--target",
+        type=float,
+        default=None,
+        help="a board score to price a climb TO. Needs --from-board and --from-offline: the entry the "
+        "climb starts at. Prints the holdout score required, on this reading's scale.",
+    )
+    command.parser.add_argument("--from-board", type=float, default=None, help="the board score climbed from")
+    command.parser.add_argument("--from-offline", type=float, default=None, help="its holdout score")
     arguments = command.parsed()
-    logger.info("%s", BoardTransfer(arguments.record, arguments.scope).report(arguments.near))
+    reading = BoardTransfer(arguments.record, arguments.scope, SCALES[arguments.scale])
+    logger.info("scale: %s", arguments.scale)
+    logger.info("%s", reading.report(arguments.near))
+    if arguments.target is not None and arguments.from_board is not None and arguments.from_offline is not None:
+        count, required = reading.required_offline(
+            arguments.target, arguments.from_board, arguments.from_offline, arguments.near
+        )
+        thin = THIN if count < PRICEABLE else ""
+        logger.info(
+            "to reach board %.4f from (%.4f board, %.4f holdout): holdout %.4f needed, %+.4f above it, "
+            "off %d resolved pairs%s",
+            arguments.target,
+            arguments.from_board,
+            arguments.from_offline,
+            required,
+            required - arguments.from_offline,
+            count,
+            thin,
+        )
 
 
 if __name__ == "__main__":

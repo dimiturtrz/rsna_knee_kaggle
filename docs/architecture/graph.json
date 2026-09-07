@@ -1688,6 +1688,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.board_transfer",
+      "target": "kneemri.evaluation.score_scale",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.column_headroom",
       "target": "core.findings",
       "weight": 1
@@ -13021,6 +13027,18 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.board_transfer.BoardPair",
+      "target": "kneemri.evaluation.score_scale.Scale",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardPair.ratio",
+      "target": "kneemri.evaluation.score_scale.Scale.delta",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer",
       "target": "kneemri.evaluation.board_transfer.BoardEntry",
@@ -13030,6 +13048,12 @@
       "kind": "references",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer",
       "target": "kneemri.evaluation.board_transfer.BoardPair",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "target": "kneemri.evaluation.score_scale.Scale",
       "weight": 1
     },
     {
@@ -13190,6 +13214,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.required_offline",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.compression_above",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.required_offline",
+      "target": "kneemri.evaluation.score_scale.Scale.advance",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.required_offline",
+      "target": "kneemri.evaluation.score_scale.Scale.delta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.unmeasured",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer._carries_both",
       "weight": 1
@@ -13210,6 +13252,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.main",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.main",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.required_offline",
       "weight": 1
     },
     {
@@ -18190,6 +18238,24 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap.measured",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.score_scale.ProbitScale.advance",
+      "target": "kneemri.evaluation.score_scale.ProbitScale.back",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.score_scale.ProbitScale.advance",
+      "target": "kneemri.evaluation.score_scale.ProbitScale.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.score_scale.ProbitScale.delta",
+      "target": "kneemri.evaluation.score_scale.ProbitScale.of",
       "weight": 1
     },
     {
@@ -33549,7 +33615,7 @@
       "role": null
     },
     {
-      "descendants": 263,
+      "descendants": 264,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -33613,7 +33679,7 @@
       "role": null
     },
     {
-      "descendants": 90,
+      "descendants": 91,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -34088,6 +34154,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.run_comparison",
       "label": "run_comparison",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale",
+      "label": "score_scale",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -37778,6 +37852,30 @@
       "label": "RunComparison",
       "level": "class",
       "parent": "kneemri.evaluation.run_comparison",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.ProbitScale",
+      "label": "ProbitScale",
+      "level": "class",
+      "parent": "kneemri.evaluation.score_scale",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.RawScale",
+      "label": "RawScale",
+      "level": "class",
+      "parent": "kneemri.evaluation.score_scale",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.Scale",
+      "label": "Scale",
+      "level": "class",
+      "parent": "kneemri.evaluation.score_scale",
       "role": "primary"
     },
     {
@@ -45982,6 +46080,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer.required_offline",
+      "label": "required_offline",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.board_transfer.BoardTransfer.spread",
       "label": "spread",
       "level": "method",
@@ -49482,6 +49588,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.run_comparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.ProbitScale.advance",
+      "label": "advance",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.ProbitScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.ProbitScale.back",
+      "label": "back",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.ProbitScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.ProbitScale.delta",
+      "label": "delta",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.ProbitScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.ProbitScale.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.ProbitScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.RawScale.advance",
+      "label": "advance",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.RawScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.RawScale.back",
+      "label": "back",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.RawScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.RawScale.delta",
+      "label": "delta",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.RawScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.RawScale.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.RawScale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.Scale.advance",
+      "label": "advance",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.Scale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.Scale.back",
+      "label": "back",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.Scale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.Scale.delta",
+      "label": "delta",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.Scale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.score_scale.Scale.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.score_scale.Scale",
       "role": null
     },
     {

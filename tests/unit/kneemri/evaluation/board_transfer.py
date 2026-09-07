@@ -11,6 +11,7 @@ from kneemri.evaluation.board_transfer import (
     BoardPair,
     BoardTransfer,
 )
+from kneemri.evaluation.score_scale import ProbitScale, RawScale
 
 RECORD = [
     {"note": "a comment line carries no entry and must not be read as one"},
@@ -217,3 +218,35 @@ def test_entries_drops_a_row_carrying_only_one_of_the_two_numbers(tmp_path: Path
 def test_unmeasured(tmp_path: Path):
     """The dropped rows are NAMED, because a silent drop is how a blank submission stops being a result."""
     assert BoardTransfer(_record(tmp_path)).unmeasured() == ["unasked", "blanked"]
+
+
+def test_ratio_reads_on_the_scale_it_was_given_and_leaves_the_pair_set_alone(tmp_path: Path):
+    """A monotone scale may move the RATIOS and nothing else — same pairs, same inversions, same floors.
+
+    That invariance is the reason two scales can be compared at all: `DELTA_FLOOR` and `RESOLVED` were
+    measured in raw AUC, so re-deriving them per scale would compare two different populations and read
+    the difference as a finding about transfer.
+    """
+    raw = BoardTransfer(_record(tmp_path), scale=RawScale())
+    probit = BoardTransfer(_record(tmp_path), scale=ProbitScale())
+    assert [(pair.better.id, pair.worse.id) for pair in probit.pairs()] == [
+        (pair.better.id, pair.worse.id) for pair in raw.pairs()
+    ]
+    assert len(probit.inversions()) == len(raw.inversions())
+    assert probit.compression() != pytest.approx(raw.compression())
+
+
+def test_required_offline(tmp_path: Path):
+    """The climb a board target costs in holdout points, off the regime's own ratio rather than by hand."""
+    reading = BoardTransfer(_record(tmp_path))
+    count, required = reading.required_offline(target_board=0.920, from_board=0.900, from_offline=0.8500)
+    assert count == 2
+    assert required == pytest.approx(0.8563, abs=1e-4)
+
+
+def test_required_offline_refuses_a_regime_holding_no_pair(tmp_path: Path):
+    """A climb from the top entry has nothing above it to price with, and says so by not moving."""
+    reading = BoardTransfer(_record(tmp_path))
+    count, required = reading.required_offline(target_board=0.950, from_board=0.900, from_offline=0.9999)
+    assert count == 0
+    assert required == pytest.approx(0.9999)
