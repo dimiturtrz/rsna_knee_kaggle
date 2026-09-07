@@ -54038,6 +54038,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.members.Member.over_pixels",
+      "label": "over_pixels",
+      "level": "method",
+      "parent": "kneemri.inference.members.Member",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.members.Member.pixel_group",
       "label": "pixel_group",
       "level": "method",
