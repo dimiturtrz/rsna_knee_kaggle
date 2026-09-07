@@ -151,3 +151,33 @@ registered on top of them:
   the cell is a variance reading.
 - **The number to beat is A' = 0.8307, never coat384's 0.8508** — C is one fold at 16 epochs like A' is,
   and the budget term cancels only between them.
+
+### RETRACTION, 11:45Z, before C reads: coat384's 0.8508 is IN-SAMPLE and the comparison is void
+
+The section above reads the A'-minus-coat384 column table as evidence for the periphery. It is not, and
+the refutation is in his own file. `knee-mri-training-the-twelve-finding-model.py:350-351` defaults
+`--folds 0 / --fold -1`, and the TYPICAL RUN block at :53-56 — the invocation his released arms were
+trained by — passes neither. With `--folds 0` the fold hook at :391 never runs and nothing is held out,
+so **his released coat384 was fitted on every study, ours included**. A' held out fold 0 and was scored
+on those 896 out of sample. The −0.0201 is an out-of-sample number minus an in-sample one.
+
+That is the same defect that voided `raptor_v4_swa`'s 0.8938 on 2026-08-29 at 98.6% in-sample, and it
+lands the same way here: memorisation shows first on the rare columns, which is exactly the five that
+carry the deficit (Fracture 65 positives, LatMen 221, PCL 169, LCL 232, ACL 243) while the three columns
+where A' is AHEAD are among the commonest (MedOA 548, MedMen-adjacent, Baker's 214). **The column shape
+is as consistent with memorisation as with the periphery, and nothing in this reading separates them.**
+The budget objection is smaller than it looked — A' runs the same 16 epochs as TYPICAL RUN on 80% of the
+rows — but it does not need to be large, because the in-sample term alone is unbounded.
+
+**What survives.** A' = 0.8307 out of sample on OOF-896 under the LEDGER ruler, and its SWA at 0.8328.
+Nothing else. The band table at the top of this file was written against "v4's real level, centre 0.849",
+and that centre was itself an in-sample number, so the < 0.840 harness-signature verdict is withdrawn
+along with the rest — **A' has no honest comparator except C**, which shares its fold file, its epoch
+budget and its ruler exactly.
+
+The per-column branches registered above stand unchanged, because they are read C-minus-A' and both sides
+of that difference are out of sample. Only the sentence claiming the A'-minus-coat384 shape is evidence
+for the periphery is withdrawn. On C's own reading the first branch says "consistent with the periphery",
+never "the periphery is the mechanism": C separates periphery from capacity only if its gain concentrates
+in the ligament columns, and even then 44→64 slots adds density as well as reach, which nothing here
+measures apart.
