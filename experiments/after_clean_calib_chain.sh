@@ -3,6 +3,12 @@
 # mastermind letter set. REPLACES `after_clean_calib_read.sh`, which launched the six twins
 # unconditionally the moment the reading was printed.
 #
+# ORDER, 16:28Z: reading -> hisrecipe_distill -> recal_calib -> foreign_labels_dense -> twins. The two
+# arms in front of `foreign_labels_dense` are the two whose reads DECIDE something the same evening: a
+# slot (hisrecipe, ~19:15Z) and the twins' own recipe (recal_calib, 75 min). A hit at 19:15Z inserts
+# `hisrecipe_distill_full` ahead of recal_calib by hand — the chain cannot branch on a number that has
+# not been read yet.
+#
 # ORDER, 16:10Z: reading -> hisrecipe_distill -> foreign_labels_dense -> twins. `hisrecipe_distill`
 # (2.0-2.1 h) is the only one of the three whose read can decide a SLOT — pre-reg solo >= 0.895 is an
 # honest 1/3 seat of ~ +0.007, and a ~19:15Z read still leaves room for a 2 h full-fit twin.
@@ -104,9 +110,35 @@ else
   echo "(a) hisrecipe_distill absent at $(date -u +%Y-%m-%dT%H:%M:%SZ); foreign_labels_dense moves up" >> "$LOG"
 fi
 
-echo "(b) launching foreign_labels_dense at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+# (b) recal_calib — 75 min that decides what the twins TRAIN WITH (mastermind 16:28Z). The six seats
+# already carry calib and ema; labels v3 is the one priced knob on no seat (+0.0045 and +0.0052, two
+# pairs, neither with calib). If v3 composes with calib the twins' stack is distill + v3 and the block's
+# L doubles. 75 min against 5.7 h of dark fits.
+#
+# IT IS SMOKED HERE AND NOT BEFORE ARMING, because the card is full for the whole run-up: clean_calib
+# holds 29.6 of 32.6 GB and hisrecipe takes the card the moment it ends, so there is no gap in which a
+# 60-study smoke could run without being a second job of ours on the card. Here there IS one, it costs
+# under a minute, and it is a two-flag composition rather than a byte copy of a finished parent.
+# $MODELS is the ARM's variable (lib.sh), not this watcher's — the watcher spells the same root $HOLDOUTS.
+# Under `set -u` an unset $MODELS would have killed the chain HERE, taking foreign_labels_dense and the
+# twins with it, with the card idle and the log ending mid-line.
+SMOKE="$HOLDOUTS/smoke_recal_calib"
+rm -rf "$SMOKE"
+"$PY" -m kneemri.experiments.arm_check --only recal_calib --smoke "$SMOKE" --smoke-studies 60 >> "$LOG" 2>&1
+SMOKED=$?
+echo "(b) recal_calib smoke returned $SMOKED at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+if [ "$SMOKED" -eq 0 ]; then
+  echo "(b) launching recal_calib at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+  bash experiments/arms/recal_calib.sh >> "$LOG" 2>&1
+  echo "(b) recal_calib returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+else
+  echo "(b) recal_calib NOT RUN: its smoke refused. The twins' recipe stays undecided and the card" >> "$LOG"
+  echo "    moves on rather than spending 75 min on a composition that cannot start." >> "$LOG"
+fi
+
+echo "(c) launching foreign_labels_dense at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 bash experiments/arms/foreign_labels_dense.sh >> "$LOG" 2>&1
-echo "(b) foreign_labels_dense returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+echo "(c) foreign_labels_dense returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 
 # (c) the six twins, BEHIND the gate. Six seats retrained under one treatment are the block's w = 2/3,
 # so they run only if the treatment moved a solo by an amount the block can carry.
