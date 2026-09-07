@@ -96,6 +96,24 @@ The leak can be removed two ways, and they fail differently, which is why both r
 A miss on the starved arm cannot refute the full-strength one. That is the whole reason the four-row
 table above was worth taking before either number arrived.
 
+## The FOREIGN teacher is the same leak, by the same mechanism
+
+Added 02:55Z, from mastermind, and it is a correction to a comparison rather than to a member. The
+`foreign_distill` family distils from a teacher built out of **their** five released DINOv3 fold models
+(`experiments/README.md:8408`, `teacher_foreign_corpus.npz`, all 4,406 studies). Their fold-k model was
+fitted on their other four folds — which hold ~80% of OUR fold 0, with labels. So a student scored on
+our fold 0 is again mimicking functions that encode the labels it is graded against. Different corpus
+split, identical mechanism.
+
+**What that costs.** `foreign_distill_mix07` (0.8657) and `oof_teacher_s2026` (0.8681) sit 0.0025 apart,
+and that near-tie was read as "the teacher's SOURCE does not matter — a foreign family and our own buy
+the same thing". Both halves of that comparison are leaky, so the reading is not a null about source; it
+is two measurements of possibly the same leak. **Source is unpriced, not settled.** No arm may be
+planned on the premise that a foreign teacher is interchangeable with ours.
+
+The only clean full-strength reading of the term remains `seat_oof5_distill` on the board, and the only
+clean held reading remains `seat_clean_distill`.
+
 ## What was written off on the strength of this
 
 Five distilled members (`seat_distill_lr4e5` 0.8633, `foreign_distill_mix07` 0.8657,
