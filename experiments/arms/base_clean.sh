@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # bead: knee-5i6d
+# reading: base_clean_s2026.holdout.npz
 # base_clean.sh — dinov2-base at the best solo recipe, with the three confounds removed.
 #
 # WHY THIS ARM. `base_dense` read -0.0118 against `stackfit` and that reading is what the ledger has

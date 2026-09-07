@@ -9195,3 +9195,72 @@ sign flips only because of **LatMen at n=23 positives against 35 negatives**: on
 denominator too small to hold it. The two tables are not weighting columns differently. Nothing about
 D30/D31's ruler residual is implicated, and the general rule this fixes is: quote gold-58 for BETWEEN-member
 gaps of 0.01+, never for a within-arm knob.
+
+### `base_clean` — the settling arm for the trunk axis was run on 2026-08-31 and nobody wrote it down — 2026-09-07
+
+**Why this row exists a week late.** `base_clean` is `stackfit`'s line flag for flag with ONE variable,
+`--variant base` (arm header, bead knee-5i6d): 12 epochs, batch 6 x accumulate 2, slice-pooling max,
+whole-stack, `--variant base`, backbone-lr 4e-5, 20 slices, band 0.1-0.9, `--calibrated-targets`, `--ema`,
+`--hold-annotations`, `--recompute-activations` (via `$THROUGHPUT`), fold 0. It ran 2026-08-31 for 3.1 h of
+card (916-1031 s/epoch, median ~925; peak 27.49 GB reserved / 25.86 GB allocated), left
+`$MODELS/experiments/base_clean_s2026.full.log` with epochs 0-11 and `ARM DONE base_clean`, and then
+appeared nowhere: `grep -n base_clean experiments/README.md` had exactly one hit, the gold-58 leak table at
+:8257. No arm row, no `# reading:` line (added in this commit). Seven days of every gate reporting green
+over a three-hour measurement. Found by the researcher (D44) while pricing a base arm that had ALREADY RUN.
+
+**The curve, and that it converged.** e0 .7498 · e3 .8448 · e5 .8536 · **e7 .8570 (peak)** · e8 .8556 ·
+e11 .8533. Peak at 7 of 11 — not truncated, not budget-bound; `convergence_check`'s STOPPED/UNDERTRAINED
+distinction does not apply, the arm simply topped out. (It ran twice: a first attempt died at epoch 3,
+`base_clean_s2026_run1.holdout.npz` / `metrics.1.jsonl`, 4 rows.)
+
+**The reading.** Ledger ruler 0.8570 vs `calib_dense_hold` 0.8634 = **-0.0064**. On the 896 (L75mid)
+**0.8886** vs `calib_dense_hold` 0.8948 = **-0.0062**, and vs the seated parent `calib_span` 0.8895 = -0.0009.
+Swap under D43's gate (`d42_block.py --only base_clean_s2026:calib_span_s2026`): **-0.0005** proxy,
+-0.0006 five-alone. Sixth-seat (b) +0.0003. Corr to the block **0.918**, child/parent corr 0.866.
+
+**What it settles.** The arm's own pre-registered branches were >= +0.008 re-open / +0.003..+0.008 sixth seat
+/ < +0.003 closed. It landed 0.009 below the lowest branch, so **the trunk axis is CLOSED at this recipe**,
+on the richest recipe the project has (two knobs more than `base_dense`'s). Batch is not the alibi:
+`small_batch6` (:1780-1799) moved small by +0.0020 and `small_accum` by +0.0001, so at matched batch the base
+gap is -0.0086, wider not narrower. Three DINOv2-base arms at three recipes (224/12, band, stackfit) read
+-0.006 to +0.001 against their small controls **with the gap widening as the recipe improves**, and every
+other large trunk (v3base -0.0123, RadioDino -0.0188, RAD-DINO -0.044, CoAtNet -0.032, ConvNeXt -0.065) is
+further back still. No large trunk has ever reached parity here.
+
+**Why it is not a seat either, which is the part that matters after D43.** The two arms within 0.01 of small
+(`base_clean` 0.918, `base_dense` 0.914) sit at the SAME FAMILY's correlation without the same family's solo
+— precisely the combination D43 measured the block does not pay for. Priced on D35's fits: at what
+`base_clean` actually reads (0.8886, corr 0.918) an honest 1/3 seat is **+0.0005** and the measured swap is
+negative; six base twins as a block compose additively to **-0.003**. A base member would have to read
+**>= 0.905 solo at corr 0.85** to be worth +0.0096 offline (~+0.005 board) — a +0.019 solo jump nothing on
+disk predicts, at a corr 0.07 below anything base has ever read. **The trunk axis is closed as a seat, not
+just as a solo.** The one untried cell is base at a lower backbone-lr (1e-5..2e-5) on a 24-epoch budget:
+6.2 h of card for a trunk that has read -0.006 three times. Declined on the ratio, not on the number.
+
+### D43 — the block pays for CORR, not for solo: the six-twin retrain is cancelled — 2026-09-07
+
+**The measurement** (researcher, `d42_block.py` / `d42_block.out` / `d42_control.out`). Take the champion
+proxy — five fold-0 parents rank-mean at w = 2/3 plus `raptor_v4_swa` at 1/3, 0.9237; the five alone 0.8993,
+their mean pairwise corr 0.871 — and swap each parent for a DISTILLED CHILD of its own family, across all
+2^5 - 1 = 31 subsets. The children carry **+0.0052 of solo** between them. On the block they read
+**-0.0014**. The control — five UNDISTILLED siblings at **+0.0036 solo** — reads **-0.0002**. Composition is
+additive to 1e-4 at every k, so this is not a saturation artefact of one subset. Block internal corr climbs
+0.871 -> 0.931 (distilled) or 0.904 (control): the (1 - corr) term eats the solo term, five times out of five.
+
+**So the null belongs to the FAMILY, not to distillation.** A treatment that lifts a member's solo while
+leaving it inside its own family's error pattern reaches the block at roughly 0.08 of its solo, not at the
+w = 2/3 a seat-count argument would give it.
+
+**What it cancels.** The six-twin `retrain_six_distill` block — 5.7 h of card — was licensed by a solo gate
+(`clean_calib` >= +0.004, then the twins). Under this measurement that gate is the wrong instrument: it
+prices exactly the quantity the block does not credit. Cancelled in `after_clean_calib_chain.sh` (commit
+f776bc3e); the card went to `foreign_labels_dense` (75 min, the label axis) and `hisrecipe_distill` (2.4 h,
+a foreign recipe, corr 0.750-0.833) instead — both of them attempts to move CORR rather than solo.
+
+**The gate every seat treatment is judged by from here.** Not `delta >= 0.004` on a solo but
+
+    swap_gain = proxy(child in place of parent) - proxy(parents)      GO iff swap_gain >= +0.0010
+    corr guard: corr(child, block-minus-parent) <= corr(parent, block-minus-parent) + 0.01
+
+`clean_calib`'s own pre-registration under it is +0.000..+0.0005, **NO-GO** — and its reading is still taken
+and still printed, because a pre-registered number stays readable after it stops being deciding.
