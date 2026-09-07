@@ -8790,3 +8790,80 @@ rebuild is ~15 min and the worst array is well under an hour. `atime` cannot ran
 reads the same timestamp, so access-time updates are off on this volume, and the member mapping above is
 the only honest test. No process of ours holds any of them open: A', cell C and effv2l all read dread's
 corpora under `D:/kaggle/input/`, not a processed cache.
+
+## A' replicates his recipe at 0.8307 out of sample, and every number it was going to be compared against is in-sample — 2026-09-07
+
+`repl2x2_a` (A') is his released training script run under `foreign_run` on his corpus, at his TYPICAL
+RUN settings, with one change: `--folds 1 --fold 0 --fold_file external/raptor/fold0_909.json`, so it
+holds out our fold-0 909 and trains on the remaining ~3,511 of his 4,349 rows. It wrote
+`external/raptor/raptor_oof_repl2x2_a_fold0.npz` itself; `kneemri.evaluation.foreign_holdout --oof <npz>
+--out <ckpt>` re-scores that on CPU in seconds against `report_labels_v2.csv`. **No card is needed for
+the readout of a foreign arm** — the OOF file is written before the run ends, and the pass that turns it
+into a `.holdout.npz` is arithmetic.
+
+| | macro, OOF-896, LEDGER ruler |
+|---|---|
+| A' best epoch (ep12) | **0.8307** |
+| A' SWA (12/9/14) | **0.8328** |
+| A' gold-58 under HIS soft labels, best / SWA / epoch-ensemble | 0.9082 / 0.9107 / 0.9108 |
+
+corr(A', `raptor_coat384`) = 0.837 rank-mean over twelve columns, the highest pair in the foreign set
+(`cnv2b336` 0.789, `effv2l480` 0.758). A' is in his family and it is the weakest member of it: the
+researcher's seat test reads −0.0001, and it is below our core on all twelve columns under the LEDGER
+ruler.
+
+**And the comparators are worthless.** `raptor_coat384` 0.8508, `raptor_cnv2b336` 0.8550,
+`raptor_effv2l480` 0.8703 and `raptor_distill_s2026` 0.8613 are all readings of RELEASED weights on our
+909, and his training script defaults to `--folds 0` (`knee-mri-training-the-twelve-finding-model.py:350-351`)
+with the fold hook firing only above zero (`:391`) — while the TYPICAL RUN block his released arms were
+trained by (`:53-56`) passes no `--folds` at all. So those weights saw every study, ours included, and
+every one of those four numbers is **in-sample**. Same defect that voided `raptor_solo`'s 0.8938 on
+2026-08-29. The rule this yields is general: **any reading of a released foreign checkpoint on our
+909/896 is in-sample by construction**, and no `foreign_overlap` call is needed to establish it.
+
+Consequences already paid: `repl2x2_c`'s pre-registered band ("0.840-0.860 = replication of v4's real
+level, centre 0.849") took its centre from one of those numbers, so the band and its `< 0.840 harness
+signature` verdict are withdrawn. **A' has no honest comparator except cell C** — same fold file, same
+epoch budget, same ruler, both out of sample.
+
+Per-column A' minus coat384, on `report_labels_v2.csv`'s own header order — the first emission of this
+table used the raptor vocabulary (PCL, LCL, Cartilage) which our table does not contain, and four columns
+were misnamed:
+
+| LatMen | MCL | Fracture | LatOA | ACL | PF OA | MedOA | MedMen | Contusion | Baker's | Effusion | Synovitis |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| −0.0551 | −0.0446 | −0.0378 | −0.0335 | −0.0328 | −0.0208 | −0.0156 | −0.0107 | −0.0098 | **+0.0030** | **+0.0079** | **+0.0096** |
+
+A' leads on the three fluid findings and is behind on all three OA columns. The shape is NOT evidence for
+the periphery: memorisation shows on rare columns first, so an in-sample comparator predicts the same
+table. Column order is read from the file on every table from here.
+
+## His training table calls positives at half our rate on eleven columns, and double on Synovitis — 2026-09-07
+
+A' and cell C train on `D:/data/external/raptor/labels/labels_llm_soft.parquet` (identical csv beside it),
+his LLM read of the same reports: **4,349 of our 4,406 studies**, the same twelve column names, joined on
+`StudyInstanceUID` with 4,349 of 4,349 matching. They are then scored against `report_labels_v2.csv`.
+Positive rate at a 0.5 cut, **ours ÷ his**:
+
+| MCL | Effusion | ACL | Baker's | LatMen | Fracture | Contusion | LatOA | MedOA | MedMen | PF OA | Synovitis |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 3.6× | 2.4× | 2.1× | 2.1× | 1.9× | 1.9× | 1.9× | 1.7× | 1.5× | 1.4× | 1.35× | **0.54×** |
+
+His Synovitis rate is 0.245 against our 0.132; every other column runs the other way. This is a
+training-side difference the 2×2 does not vary: it cancels exactly in C-minus-A' and in no comparison
+against one of our own members. It is far larger than the ±0.006 annotation-vs-report ruler gap the
+ledger recorded, and larger than the −0.0020 our own `--calibrated-targets` knob moved, so the label axis
+is not the small axis it was priced as. Two of the three columns A' leads on (Effusion, Synovitis) sit at
+the extremes of the disagreement, which is a second explanation for the fluid-column lead with no
+geometry in it.
+
+## `dinov3f0_solo` is VOID — it served released weights — 2026-09-07
+
+`logs/dinov3f0_solo.log:42-46` records it loading `m_f0.pt … m_f4.pt`,
+`vit_small_patch16_dinov3.lvd1689m`, `pool=xcodex`, over 909 studies. Those files came from
+`kaggle.com/datasets/mattiaangeli/knee-mri-fold-weights` (`logs/pull_dinov3_folds.log:1`) — released
+foreign weights, so in-sample by the rule above; the researcher's independent md5-split count puts it at
+703 of 909 in-sample, fold 0 holding 206. Its reading and the +0.010 column gap D16 drew from it are
+inflation. The honest mask `foreign_dinov3_matched` reads +0.0074 LEDGER / +0.0030 HIS, and the family
+transfers at +0.001 (foreignsolo 0.882 board against 0.8812 offline) against our +0.054 — so a DINOv3
+column seat is pre-registered flat and was not built. Declined in writing.
