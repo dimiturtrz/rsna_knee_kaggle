@@ -9264,3 +9264,34 @@ a foreign recipe, corr 0.750-0.833) instead — both of them attempts to move CO
 
 `clean_calib`'s own pre-registration under it is +0.000..+0.0005, **NO-GO** — and its reading is still taken
 and still printed, because a pre-registered number stays readable after it stops being deciding.
+
+### `clean_calib` — ninth-best solo the project owns, worth nothing to the block — 2026-09-07
+
+**The arm.** `seat_clean_distill`'s clean-teacher line plus `--calibrated-targets`: does the clean teacher
+compose with level calibration? 12 epochs, fold 0, seed 2026, ruler pinned to v2. It converged — epochs 0-11
+recorded, peak **0.8649 at e9** on the ledger ruler (e11 0.8645, e10 0.8643), the holdout npz written at the
+best epoch and not rewritten after; `convergence_check` clean.
+
+**Solo (896, L75mid), the pairs that matter** (researcher D46, `d39_job1.py`): **0.8936**, which is
+**+0.0042** over `seat_clean_distill` 0.8894 (boot95 [+0.0010, +0.0076], corr 0.950) and **−0.0012** against
+the calib parent `calib_dense_hold` 0.8948 (boot95 [−0.0055, +0.0032], corr 0.946). Read those two together:
+the +0.0042 IS the calib term (`calib_dense_hold − seat_clean_distill` = +0.0054), and the clean teacher adds
+−0.0012 on top of calib with a CI spanning zero. **Calib + clean teacher lands where calib alone already was.**
+Ledger ruler +0.0015 vs the calib parent, inside the 0.0062 floor.
+
+**The block, under D43's gate.** `swap_gain` for `calib_span` = **−0.0008** (rank blend) / −0.0009 (kernel
+logit blend, boot95 [−0.0015, −0.0001] — the CI excludes zero on the wrong side); five-alone −0.0009; sixth
+seat (b) +0.0001; replaces raptor (c) −0.0240. Corr guard FAILS: block mean pairwise corr 0.871 → **0.889**
+with the single swap. **NO-GO**, and below the arm's own pre-registration of +0.000..+0.0005. This is the
+**sixth same-family instance of the D43 pattern**: a treated seat agrees MORE with the rest, and the block
+pays for corr.
+
+**Per-column, which is why the swap is negative.** Solo rank **#9 of 262** honest members on L75mid (#3 on
+HIS≥.75, #6 on R1 mid, #8 on R6 cut.75) — ACL 0.944 (#4 in the 262-pool), Effusion 0.928, Synovitis 0.922 —
+and only ACL and MCL move the kernel up (+0.001 each) while PFOA takes **−0.0036**. Against the calib parent
+it wins the two meniscus columns and LatMen by +0.004..+0.005 and loses seven columns by 0.002-0.006: **the
+clean teacher REDISTRIBUTES columns, it does not lift them.** A member can be the ninth-best solo on disk and
+be worth nothing to a block that already holds its columns.
+
+**Branch fired:** < +0.004 vs the calib parent → **not a block lever**. `kneemri-cleancalib` stays staged and
+never ships on this reading. It goes to the roster on the solo (#9 of 262), not to a seat.

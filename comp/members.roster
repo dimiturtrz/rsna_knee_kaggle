@@ -717,3 +717,10 @@ chainfour_s2026.pt          # 0.8648 solo, the BEST single member this project o
                             # redundant in ensemble - the third time this project has measured that.
                             # Its reading is logs/chainfour_ledger.log.
 
+
+clean_calib_s2026.pt        # 0.8649 ledger (peak e9 of 12) / 0.8936 on the 896 L75mid — NINTH-BEST SOLO of
+                            # 262 honest members (#3 on HIS>=.75, #6 on R1 mid, #8 on R6 cut.75), ACL 0.944
+                            # is 4th in the whole pool. Seated NEVER: swap for calib_span -0.0008, corr
+                            # guard fails (block 0.871 -> 0.889), sixth seat +0.0001. On the roster for the
+                            # SOLO, which is what a roster records; the seat argument is in the ledger row
+                            # (2026-09-07) and in D46. It redistributes columns rather than lifting them.
