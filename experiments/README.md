@@ -9511,3 +9511,93 @@ labels as a training target — three of the four open member axes, all on measu
 argument. What remains, ranked by weight x lift: block lift via better targets, an honest 1/3-class
 object (`hisrecipe_distill`), column lift on MCL / LatOA (`lean_weak_columns`, running), and a ruler for
 the two blind columns (`resnet50d_short`).
+
+---
+
+## D63-D68 — the per-column member weights, and where they stop
+
+**The rule.** One `(members x findings)` mixture, each column its own convex combination of the seats,
+served as `ColumnWeightedLogit` instead of `LogitAverage`. `kneemri/evaluation/column_weights.py` holds
+the table, its shrinkage, its column-flattening and the frame every seat reading is taken over; the fit
+itself was done outside the repo by the researcher.
+
+**The port reproduces the fit.** `comp/colweights_v2_fit.csv` is `d63_W8.csv` converted to the repo's
+name-keyed format, columns renormalised after rounding (they arrived at 0.9999-1.0002). Read through the
+repo path against the eight members' own holdouts:
+
+| shrink | uniform | weighted | delta |
+|---|---|---|---|
+| 1.00 | 0.9260 | 0.9316 | **+0.0055** |
+| 0.75 | 0.9260 | 0.9305 | +0.0044 |
+
+**+0.0055 at lambda=1 is D68's in-sample number to the digit**, which is what the equality check was for:
+a port that landed a different number would not be a smaller effect, it would be a different computation.
+`comp/colweights_v2.csv` is the shipped table at lambda=0.75 with ACL left FITTED — the r=0.30 that
+motivated flattening ACL was the TEN-member fit; the eight-member fold-r is 0.75.
+
+**The honest number is the OOF one: +0.0027 [+0.0012, +0.0040]**, 5 study-folds seed 0, 300 paired draws,
+against nine-uniform 0.9260. In-sample +0.0055 is what it was shrunk from (2.0x). 84 fitted numbers
+(12 columns x 7 free weights). Nested inner-CV chose 0.75 in 4 of 5 folds. Per-column OOF at lambda=1:
+Effusion +0.0021, ACL -0.0017, MCL +0.0068, LatOA +0.0102, Fracture +0.0083.
+
+**Denominator note.** An in-repo +0.0031 and the researcher's +0.0035 are the same reading against
+different baselines — ten-uniform 0.9265 versus nine-uniform 0.9260. Every number above is quoted
+against 0.9260.
+
+### D68b — the rule cannot reach the champion, and the blocker is DARKNESS
+
+The table's eight rows are `calib_span_s2026`, `grade_ladder_s2026`, `merged_blend_cf`,
+`lr4e-5_ws_s2026`, `through_dense_s2026`, `labelwise_dense_s2026`, `warm_calib_dense_s2026`,
+`warm_calib_lowlr_s2026` — all fold-0 members with real holdouts, which is what made a per-column fit
+possible at all.
+
+`comp/kernels/kneemri-stack/kneemri-stack.py:174-188` serves a different set: `final_ws_cf`,
+`calib_span_ff`, `grade_ladder_cf`, `merged_blend_cf`, `lr4e-5_ws_cf`, `through_dense_cf`,
+`labelwise_dense_ff`, `warm_calib_dense_s2026`, `warm_calib_lowlr_s2026`. `comp/members.roster` says the
+`_ff`/`_cf` suffixes are **not a naming convention** — `calib_span_ff` is "calib_span_s2026's flags plus
+`--fold -1 --ema`", `grade_ladder_cf` is "grade_ladder_ff's flags plus `--calibrated-targets`", and so on.
+They are different trainings.
+
+**Three of nine overlap.** `ColumnWeights.vote` joins by NAME and refuses the mismatch, which is correct:
+renaming the rows to make it pass is exactly the positional-join failure the class exists to prevent.
+
+To weight the CHAMPION you must refit on the champion's seats, and **six of its nine are `--fold -1`**:
+they hold nothing out, so no per-column holdout matrix exists for them and none can be produced without
+first training fold-0 twins of six dark members. The rule is not blocked by lambda, by ACL, or by the 84
+fitted numbers. It is blocked because the thing it would weight cannot be measured.
+
+**What shipping it anyway would cost.** The eight fold-0 members are a NEW package, not a champion
+variant, and its uniform baseline exists offline (0.9260) but **nowhere on the board** — all 116 rows of
+`comp/board.jsonl` were checked and hold no eight-member fold-0 uniform entry. So the pre-registration
+"X+0.0031" has no X, and reading it honestly costs TWO slots (uniform, then weighted) to price ~+0.004
+board on a stack that starts below the champion's 0.944. That is 40% of a day's slots spent on a package
+we would not ship.
+
+**Held, not killed.** `comp/colweights_v2.csv` and the passing equality check stay on the shelf. The
+asset that would unlock them is fold-0 twins of the six dark seats (~6 x 1.4 h of card), which would also
+give the champion's own seating its first honest offline number — it has never had one. That competes
+directly with the six labels-v3 twins queued behind `recal_calib`, and the choice is the coordinator's.
+
+### D69 — the labels-v3 twins, written and pre-registered
+
+`report_labels_v3.csv` is the one priced knob no W8 seat carries: +0.0045 (`band_dense_hold` ->
+`recal_dense`) and +0.0052 (`lr4e-5_ws` -> `recal_holdannot`), two pairs, neither carrying calibration.
+`recal_calib` prices the composition with calibration first, at 75 min against the twins' 8.5 h.
+
+Six twin arms are written and pre-registered, one moving token each (`--labels` v2 -> v3, with
+`--eval-labels` PINNED to v2 so the ruler cannot move with the arm — the `recal_holdannot` incident):
+
+| arm | parent | W8 mass | control (own holdout, L75mid, n=909) |
+|---|---|---|---|
+| `recal_labelwise` | `labelwise_dense` | 3.8248 | 0.8964 |
+| `recal_warm_dense` | `warm_calib_dense` | 1.6269 | 0.8916 |
+| `recal_warm_lowlr` | `warm_calib_lowlr` | 1.6110 | 0.8910 |
+| `recal_through` | `through_dense` | 1.0675 | 0.8867 |
+| `recal_ladder` | `grade_ladder` | 0.4601 | 0.8868 |
+| `recal_ws` | `lr4e-5_ws` | 0.3741 | 0.8840 |
+
+Order is W8 column mass, so the card spends its first hours on the mass that can actually move the block.
+**Six, not seven.** `merged_blend` is not twinned: it trains on `$MERGED_BLEND` (the Rijeka merged table),
+so a v3 swap is a different arm rather than one token — and it is the member carrying the open licence
+exposure (`research/2026-09-02_external_knee_mri_data_access_audit.md:11,37-38`, rule 2.6a), at W8 mass
+1.8088, the second-heaviest row in the very table above. Bead knee-7yug3.
