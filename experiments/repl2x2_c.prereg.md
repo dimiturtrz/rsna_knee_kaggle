@@ -72,3 +72,78 @@ series, one residual difference, named here rather than discovered later.
   which is what the peripheral slices are for.
 
 Noise floor for a paired OOF-896 read: 0.0062. A |delta| under that is not a reading in either direction.
+
+## AMENDED 11:40Z, after A' read and BEFORE any C number exists
+
+A' finished at 11:20Z. C's watcher took the card at 11:26Z and is at ep0-ep1; `logs/repl2x2_c.full.log`
+holds no epoch score, so nothing about C has been read and this amendment is still a pre-registration.
+The A' numbers below were taken on CPU from the OOF file A' wrote itself
+(`raptor_oof_repl2x2_a_fold0.npz`, 896 studies), re-scored under the LEDGER truth table by
+`kneemri.evaluation.foreign_holdout` — no card, seconds. The card exception offered at 11:33Z was not
+needed and was not taken.
+
+### A' on OOF-896 under the LEDGER ruler
+
+| | macro |
+|---|---|
+| A' best epoch (ep12) | **0.8307** |
+| A' SWA (ep 12/9/14) | 0.8328 |
+| `raptor_coat384` — HIS RELEASED WEIGHTS, same architecture | **0.8508** |
+| `raptor_cnv2b336` | 0.8550 |
+| `raptor_effv2l480` | 0.8703 |
+
+corr(A', coat384) = 0.837 rank-mean over 12 columns, the highest of any pair here (cnv2b336 0.789,
+effv2l480 0.758) — A' is in his family, it is simply worse. Overlap 896 of his 909.
+
+**A' − v4(coat384) = −0.0201**, three times the 0.0062 paired floor. Under the bands as issued that is
+the **< 0.840 harness-signature** cell. It is not a harness signature, and the per-column table is why.
+
+### The gap is not flat, and its shape is HIS claim
+
+| | A' | v4 coat384 | delta | pos |
+|---|---|---|---|---|
+| LatMen | 0.8129 | 0.8681 | **−0.0551** | 221 |
+| PCL | 0.7448 | 0.7894 | **−0.0446** | 169 |
+| Fracture | 0.8088 | 0.8465 | **−0.0378** | 65 |
+| LCL | 0.8110 | 0.8444 | **−0.0335** | 232 |
+| ACL | 0.8137 | 0.8465 | **−0.0328** | 243 |
+| Cartilage | 0.8342 | 0.8550 | −0.0208 | 403 |
+| MCL | 0.8640 | 0.8796 | −0.0156 | 327 |
+| MedMen | 0.8849 | 0.8956 | −0.0107 | 475 |
+| PFOA | 0.8689 | 0.8787 | −0.0098 | 265 |
+| Baker's | 0.9087 | 0.9056 | **+0.0030** | 214 |
+| MedOA | 0.8153 | 0.8074 | **+0.0079** | 548 |
+| LatOA | 0.8016 | 0.7920 | **+0.0096** | 116 |
+
+The five worst columns are the collateral and cruciate ligaments, the lateral meniscus and fracture.
+The three columns where A' is AHEAD are the OA columns and Baker's. That is, line for line, the claim at
+`knee-mri-twelve-findings-from-a-single-model.py:315-317`: the peripheral slices the 0.15-0.85 span
+throws away are where the collaterals and the lateral meniscus live. A' is fitted at 0.15-0.85; his
+released weights are fitted at 0.02-0.98.
+
+**Why this is not just a training-budget deficit.** A' is one fold at 16 epochs against his full program,
+so a uniform shortfall was expected and is the null. A budget shortfall depresses every column; it does
+not leave MedOA, LatOA and Baker's AHEAD by +0.003 to +0.010 while five ligament columns fall 0.033 to
+0.055. Budget is still in the gap — it is what the flat columns' size bounds — but it cannot be the
+STRUCTURE of it.
+
+### What this does to C's predicted direction: it FLIPS
+
+The direction registered above was NEGATIVE, from our own three-point span ladder (0.10-0.90 = 0.8565
+beats 0.00-1.00 = 0.8427 by 0.0138). That ladder moved span at a FIXED slice count, so every widening was
+paid for out of central density. C does not pay that: 44 slots become 64, so the periphery is added
+rather than traded, and his k=12 sampler redraws its window every step so the extra depth accrues across
+epochs. **The A' per-column signature is evidence for his side of exactly that distinction**, and it was
+not available when the negative direction was written.
+
+Both readings stand, and C separates them. So the bands are unchanged and a SECOND, sharper reading is
+registered on top of them:
+
+- **Macro, unchanged**: ≥ A'+0.005 → geometry is a lever · ±0.005 → closed · ≤ A'−0.005 → wider span hurts.
+- **Per column, registered now**: if C's gain over A' lands in **LatMen, PCL, LCL, ACL, Fracture** and
+  leaves **MedOA, LatOA, Baker's** flat to slightly down, the mechanism is the periphery and it is his,
+  not a budget or a seed. If C gains uniformly across all twelve, it is capacity from 44→64 slots and the
+  span claim is unproven. If C gains on the OA columns and not the ligaments, both stories are wrong and
+  the cell is a variance reading.
+- **The number to beat is A' = 0.8307, never coat384's 0.8508** — C is one fold at 16 epochs like A' is,
+  and the budget term cancels only between them.
