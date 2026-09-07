@@ -23,6 +23,17 @@ uvx nox -s lint test cov               # the merge gate, locally
 uvx nox -s gates                       # same, one entrypoint
 ```
 
+**A card arm does not block a COMMIT — `UV_NO_SYNC=1` does.** Every pre-commit entry is `uv run`, and
+`uv run` re-syncs the venv when it thinks the env is stale, which rewrites `.venv` under a live
+interpreter (the exit-127 arm death). That was read as "the tree cannot be committed while an arm
+runs", and it cost hours of held work. It is not true: `UV_NO_SYNC=1` tells `uv` not to touch the env
+at all, and hooks inherit it. Measured 2026-09-07 with a 16-epoch arm on the card —
+`stat -c %Y .venv/Scripts/python.exe .venv/pyvenv.cfg` returned `1761074124 1786993552` both before
+and after `UV_NO_SYNC=1 uv run python -c "print('ok')"`, and `UV_NO_SYNC=1 git commit` then landed
+`74245bef` with the arm running through it. So prefix `UV_NO_SYNC=1` while an arm is live and commit
+normally. What is still banned mid-arm is `uv sync --extra …`, which CHANGES extras — that is the one
+that actually killed the arms, and no env var makes it safe.
+
 **`uvx nox`, never bare `nox`.** It is not on PATH here and is not a project dependency, so both `nox`
 and `uv run nox` fail — and they fail in the way that costs you most: *silently*. `nox -s gates > log
 2>&1; echo "EXIT $?"` reports the ECHO's status, so a missing binary reads as a clean pass while the
