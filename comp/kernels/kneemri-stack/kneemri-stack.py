@@ -38,9 +38,10 @@ PRE-REGISTRATION, written before the number, against the champion's 0.944 and BO
   drag it down when averaged in flat, which would say the seat-value ruler is measuring something the
   serving vote does not reproduce, and every D45 extra-seat price becomes suspect.
 
-The refutation this cannot make: it cannot separate "width is flat" from "THESE three are flat". All three
-are fold-0 members, none has an `_ff`/`_cf` full-fit twin on disk, and the champion's six are all-data --
-so this entry also carries a mixed-corpus confound it did not choose, in the direction of UNDER-reading.
+The refutation this cannot make: it cannot separate "width is flat" from "THESE three are flat". The
+labelwise seat ships as its FULL-FIT twin (`labelwise_dense_ff`, --fold -1, found on disk and rostered for this
+entry); the two warm seats have no such twin and ship fold-0, priced by the D35 sixth-seat fit at about
+-0.0002 of block delta each. So +0.0026 is a FLOOR for the shipped version by roughly that much.
 """
 
 # >>> KERNEL-BOOTSTRAP
@@ -177,7 +178,7 @@ def main() -> None:
         "merged_blend_cf",
         "lr4e-5_ws_cf",
         "through_dense_cf",
-        "labelwise_dense_s2026",
+        "labelwise_dense_ff",
         "warm_calib_dense_s2026",
         "warm_calib_lowlr_s2026",
     )

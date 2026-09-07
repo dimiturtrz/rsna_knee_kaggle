@@ -82,3 +82,14 @@ calib_span_df.pt                     # no offline number by construction, --fold
 # this line. It is an INSTRUMENT seat, priced on a fit whose band (0.904-0.937) does not include the
 # champion's 0.944 -- the extrapolation is stated in the kernel's pre-registration, not hidden here.
 warm_calib_lowlr_s2026.pt            # 0.8577 solo; seated on decorrelation, +0.0009 as an extra seat
+
+# Added 2026-09-07 18:05Z for the D45 three-seat stack (kneemri-stack). The FULL-FIT twin of
+# labelwise_dense_s2026 -- fold -1, --ema, otherwise the identical recipe (labelwise pooling,
+# calibrated targets, v2 labels, lr 4e-5, lora 0, whole_stack). It has sat on disk since 2026-08-31
+# 05:17Z, converged (13 rows in metrics.jsonl, epoch 11 of 12), on NO roster and in NO ledger section,
+# unshippable for the reason this shelf exists. Its own arm declares it `# unmeasurable:` -- fitted at
+# --fold -1, so it holds nothing out and no offline ruler can read it, ever. It is seated on its fold-0
+# twin's number and on the D35 sixth-seat fit, which prices a full-fit seat about +0.0002 of block delta
+# above the fold-0 one (~+0.0029 solo lift, 0.076 pass-through). That is fit arithmetic, not a
+# measurement, and it moves the stack's +0.0026 by less than its own bootstrap width.
+labelwise_dense_ff.pt                # no offline number by construction, --fold -1; twin reads 0.8959
