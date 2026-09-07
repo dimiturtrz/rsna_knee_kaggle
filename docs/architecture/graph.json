@@ -13279,6 +13279,24 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer._combinations",
+      "target": "kneemri.evaluation.board_transfer.BoardPair",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer._combinations",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.blur",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.tied",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.compression",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
@@ -13327,15 +13345,9 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
-      "target": "kneemri.evaluation.board_transfer.BoardPair",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.pairs",
-      "target": "kneemri.evaluation.board_transfer.BoardTransfer.entries",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer._combinations",
       "weight": 1
     },
     {
@@ -13366,6 +13378,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.regimes",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.report",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer.blur",
       "weight": 1
     },
     {
@@ -13450,6 +13468,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer.required_offline",
       "target": "kneemri.evaluation.score_scale.Scale.delta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer.tied",
+      "target": "kneemri.evaluation.board_transfer.BoardTransfer._combinations",
       "weight": 1
     },
     {
@@ -13684,6 +13708,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.column_surface.ColumnSurface.delta",
       "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_surface.ColumnSurface.report",
+      "target": "kneemri.evaluation.column_surface.ColumnSurface.agreement",
       "weight": 1
     },
     {
@@ -47478,8 +47508,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer._combinations",
+      "label": "_combinations",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.board_transfer.BoardTransfer._rows",
       "label": "_rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer.blur",
+      "label": "blur",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
       "role": null
@@ -47584,6 +47630,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.board_transfer.BoardTransfer.spread",
       "label": "spread",
+      "level": "method",
+      "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.board_transfer.BoardTransfer.tied",
+      "label": "tied",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer.BoardTransfer",
       "role": null
@@ -47768,6 +47822,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.column_surface.ColumnSurface.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_surface.ColumnSurface",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_surface.ColumnSurface.agreement",
+      "label": "agreement",
       "level": "method",
       "parent": "kneemri.evaluation.column_surface.ColumnSurface",
       "role": null
