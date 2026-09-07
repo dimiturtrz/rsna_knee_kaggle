@@ -90,6 +90,49 @@ def test_vote(tmp_path: Path) -> None:
         weights.vote(("ghost",))
 
 
+def test_shrunk(tmp_path: Path) -> None:
+    """Half-way back to uniform is half the deviation, and shrinking all the way IS the uniform table."""
+    tilted = _uniform()
+    tilted[:, 0] = [1.0, 0.0, 0.0]
+    weights = ColumnWeights.load(_table(tmp_path, tilted))
+
+    half = weights.shrunk(0.5)
+
+    assert half.members == weights.members, "shrinking a table does not reseat it"
+    assert half.matrix[:, 0] == pytest.approx([2 / 3, 1 / 6, 1 / 6])
+    assert weights.shrunk(0.0).matrix == pytest.approx(_uniform())
+
+
+def test_flattened(tmp_path: Path) -> None:
+    """A named column goes back to one vote each; the columns beside it are untouched."""
+    tilted = _uniform()
+    tilted[:, 0] = [1.0, 0.0, 0.0]
+    tilted[:, 1] = [0.5, 0.25, 0.25]
+    weights = ColumnWeights.load(_table(tmp_path, tilted))
+
+    flat = weights.flattened((TARGETS[0],))
+
+    assert flat.matrix[:, 0] == pytest.approx([1 / 3, 1 / 3, 1 / 3])
+    assert flat.matrix[:, 1] == pytest.approx([0.5, 0.25, 0.25]), "only the named column is given back"
+
+    with pytest.raises(ValueError, match="are not findings"):
+        weights.flattened(("Sprain",))
+
+
+def test_written(tmp_path: Path) -> None:
+    """A shipped table round-trips: what `written` saves is what `load` reads, names included."""
+    tilted = _uniform()
+    tilted[:, 2] = [0.7, 0.2, 0.1]
+    weights = ColumnWeights.load(_table(tmp_path, tilted)).shrunk(0.5)
+
+    path = tmp_path / "shipped.csv"
+    weights.written(path)
+    read = ColumnWeights.load(path)
+
+    assert read.members == weights.members
+    assert read.matrix == pytest.approx(weights.matrix)
+
+
 def test_over(tmp_path: Path) -> None:
     """The frame is the shared studies minus the gold rows, and it carries values, not ranks."""
     frame = _frame(tmp_path)

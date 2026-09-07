@@ -31,6 +31,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
+from core.findings import TARGETS
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.evaluation.seat_swap import ANCHOR, ANCHOR_WEIGHT, GOLD_LEVELS, SeatFrame
 from kneemri.inference.vote import ColumnWeightedLogit, LogitAverage
@@ -62,6 +63,41 @@ class ColumnWeights:
             message = f"{path} names {len(members)} members and holds {matrix.shape[0]} rows"
             raise ValueError(message)
         return cls(members=members, matrix=matrix)
+
+    def shrunk(self, keep: float) -> "ColumnWeights":
+        """The table pulled `1 - keep` of the way back to the uniform block it deviates from.
+
+        D65 fitted the same 120 numbers at four shrinkages and the 896 studies cannot separate them —
+        the inner-fold spread between keep=0.5 and keep=1.0 is 0.0001 to 0.0005 in every fold. Nested
+        inner-CV picked 0.5 in three folds of five, and 0.5 holds the same OOF lower bound (+0.0010) at
+        half the width, which is why the shipped table is a shrunk one and this is arithmetic in the
+        repo rather than a second file to keep in step with the first.
+        """
+        uniform = np.full_like(self.matrix, 1 / len(self.members))
+        return ColumnWeights(members=self.members, matrix=keep * self.matrix + (1 - keep) * uniform)
+
+    def flattened(self, columns: tuple[str, ...]) -> "ColumnWeights":
+        """Named columns given back to the uniform vote — a fit that did not hold gets no say there.
+
+        ACL is the case: across the five outer fits the weight vectors correlate at r 0.30, the five
+        disagree on who carries the column, and it reads −0.0005 OOF. A column the fit cannot reproduce
+        is not a weighting, and uniform there costs nothing.
+        """
+        where = {name: index for index, name in enumerate(TARGETS)}
+        missing = [name for name in columns if name not in where]
+        if missing:
+            message = f"{missing} are not findings; the columns are {TARGETS}"
+            raise ValueError(message)
+        matrix = self.matrix.copy()
+        matrix[:, [where[name] for name in columns]] = 1 / len(self.members)
+        return ColumnWeights(members=self.members, matrix=matrix)
+
+    def written(self, path: Path) -> None:
+        """Save in the same shape this class reads, so a shipped table round-trips through `load`."""
+        with path.open("w") as handle:
+            handle.write(f"{MEMBER_HEADER} {','.join(self.members)}\n")
+            handle.write(f"# {','.join(TARGETS)}\n")
+            np.savetxt(handle, self.matrix, delimiter=",")
 
     def vote(self, members: tuple[str, ...]) -> ColumnWeightedLogit:
         """The rule, with this table's rows reordered onto the members the caller is combining."""
@@ -130,14 +166,23 @@ def main() -> None:
     command.parser.add_argument("--holdouts", type=Path, required=True)
     command.parser.add_argument("--table", type=Path, required=True)
     command.parser.add_argument("--anchor", default=ANCHOR)
+    command.parser.add_argument("--shrink", type=float, default=1.0)
+    command.parser.add_argument("--uniform-column", action="append", default=[])
+    command.parser.add_argument("--write", type=Path)
+    command.parser.add_argument("--drop-member", action="append", default=[])
     arguments = command.parsed()
 
-    weights = ColumnWeights.load(arguments.table)
-    frame = BlockFrame.over(arguments.holdouts, weights.members, arguments.anchor)
+    weights = ColumnWeights.load(arguments.table).shrunk(arguments.shrink)
+    weights = weights.flattened(tuple(arguments.uniform_column))
+    seated = tuple(name for name in weights.members if name not in arguments.drop_member)
+    frame = BlockFrame.over(arguments.holdouts, seated, arguments.anchor)
     uniform, weighted = frame.read(weights)
+    if arguments.write is not None:
+        weights.written(arguments.write)
     command.report(
         [
-            f"frame {len(frame.studies)} studies, {len(weights.members)} members + {arguments.anchor}",
+            f"frame {len(frame.studies)} studies, {len(frame.predictions)} members + {arguments.anchor}",
+            f"shrink {arguments.shrink} uniform columns {arguments.uniform_column or 'none'}",
             f"uniform {uniform:.4f}  weighted {weighted:.4f}  delta {weighted - uniform:+.4f}",
         ]
     )
