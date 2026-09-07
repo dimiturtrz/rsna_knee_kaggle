@@ -9000,3 +9000,53 @@ question, which is where it has gone.
 Denominator stated: every gold number above is 58 studies with the `n+` positives shown, not the corpus.
 A twelve-column table on 58 rows shows large per-column moves by construction and no per-column interval
 was computed, so no single column above is a finding on its own.
+
+## 2026-09-07 — `bend`: a cross-program equal-weight join is negative, and released foreign weights are not a member lever
+
+`bend_v1` scored **0.941** on the board against the pinned champion's 0.944. The entry joined our program's
+members with the foreign program's released fold weights at equal weight. It is not a seating question and
+it does not re-open under a re-weighting: the mechanism is that the two programs carry **no complementary
+ordering** on the columns the board reads, so their average sits BETWEEN the two solos rather than above
+either. The same shape already closed the per-column foreign weight (+0.0006) and the seat refit.
+
+Closed: foreign released weights are a RULER asset (they read our corpus, and `foreign_gate` prices that),
+not a member lever. Re-open only with a foreign member fitted on our feed, never with a new weighting of the
+released ones.
+
+## 2026-09-07 — maxspan (cell C) is a NULL, not a loss: the 44-slot corpus takes effv2l
+
+Cell C of the 2x2 (`repl2x2_c`, maxspan feed, coatnet_rmlp_2 384, 16 epochs, fold 0 of 909) against cell A'
+(`repl2x2_a`, 44-slot corpus, same recipe):
+
+| ruler | A' | C | move |
+|---|---|---|---|
+| gold (in-sample both sides) | 0.9107 | 0.9074 | −0.0033 |
+| his-feed macro, 896 rows | 0.8328 | 0.8334 | **+0.0006** |
+| LEDGER75 macro, 896 rows | 0.8787 | 0.8787 | +0.0000 |
+| his-feed at `--cut 0.75` | 0.8850 | 0.8860 | +0.0010 |
+
+Pre-registered bands were ≥0.8378 / ±0.005 / ≤0.8278; the his-feed reads inside the flat band on every
+ruler. The per-column table (ACL +0.0035, MCL +0.0000, MedMen +0.0060, LatMen +0.0080, Fracture −0.0239,
+Effusion −0.0140) is INDICATIVE only — paired half-widths are ±0.0357 and every column sits inside its own
+interval, so the gain is not ligament-concentrated and nothing here is a per-column finding.
+
+So the span neither buys nor dilutes: **effv2l goes on the 44-slot corpus.** Denominator: 896 rows of the
+909-study fold-0 holdout, our truth joined to the foreign OOF by identifier (`foreign_holdout`), never by
+position.
+
+## 2026-09-07 — D27: LEDGER75 is the seat ruler on board evidence
+
+Every R1 seat decision and every decline in `comp/members.declines` is re-openable under it (D28,
+researcher). The recut cuts board inversions 21 → 5 of ~530 pairs and 0 of 326 at the ≥.0053 floor, R² .80 →
+.96, with one slope 1.16–1.22 where the midpoint's wanders 1.05–1.41. The ordering gain is spread across
+columns (MedOA .58→.88, MedMen .75→.84, Synovitis .49→.69, LatOA .70→.81 board-correlation rise); no single
+column carries it. `python -m kneemri.evaluation.ledger75 --holdouts <dir>` prices every member on disk under
+BOTH rulers — 302 members on the first sweep — and changes no existing semantics: `ledger_check`,
+`convergence_check` and `roster_check` still read the midpoint macro. Two columns keep the midpoint (Medial
+Meniscus, Baker's): their 0.68 rung carries real positives, so the recut costs them their ruler.
+
+Top of the first sweep (LEDGER75, midpoint in brackets): `raptor_v4_swa` 0.9425 [0.8938], `raptor_v4` 0.9399
+[0.8915], `raptor_v9` 0.9265 [0.8769], `raptor_effv2l480` 0.9139 [0.8703], `foreign_oof_corpus` 0.9051
+[0.8929], `recal_holdannot_s2026` 0.9004 [0.8964]. The raptor family moves +0.045 to +0.050 under the recut
+while our own members move +0.030 or less — the recut is not a constant offset, and any seat ordering read
+at the midpoint across those two families was reading a different question.
