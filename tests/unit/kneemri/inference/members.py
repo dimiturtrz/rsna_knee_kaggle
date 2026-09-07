@@ -13,7 +13,7 @@ from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE
 from core.data.corpus.slot_reader import Band, Reading
 from core.data.corpus.slots import SCHEMES, Routing
 from kneemri.inference.member_package import MemberPackage
-from kneemri.inference.members import LEGACY_SLICES, Member, MemberConfig
+from kneemri.inference.members import LEGACY_SLICES, RESIZED_FROM, Member, MemberConfig
 from kneemri.models.backbone import SMALL
 from kneemri.models.model import StudyDesign, StudyModel
 
@@ -701,3 +701,28 @@ def test_on_scheme() -> None:
     assert member.scheme == "canonical", "the lookup cannot tell the three apart"
     assert member.on_scheme("merged3").scheme == "merged3"
     assert member.scheme == "canonical", "the transform returns a new member and leaves the fitted one alone"
+
+
+def test_over_pixels() -> None:
+    """The cache moves and the encoder's input does not — the exact mirror of `resized`.
+
+    Identity on an equal size is part of the contract: the `RESIZED_FROM` mark refuses a stored holdout
+    record, so stamping it on a member reading its own pixels would send a caller to the card for an
+    array it already has.
+    """
+    member = Member(
+        identifier="small",
+        file=Path("m_small.pt"),
+        fold=0,
+        config=cast(MemberConfig, {"img": 224, "group": 3, "slots": list(SLOTS)}),
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    wider = member.over_pixels(336)
+
+    assert wider.image_size == 336, "the array the pixels come out of"
+    assert wider.read_size == 224, "what the encoder is fed is a fitted fact and does not move"
+    assert RESIZED_FROM in wider.config, "a foreign-sized read must not claim the fitted member's record"
+    assert member.over_pixels(224) is member, "no mark when the sizes already agree"
+    assert member.image_size == 224, "the transform returns a new member and leaves the fitted one alone"

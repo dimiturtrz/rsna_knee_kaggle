@@ -69,12 +69,35 @@ def test_over_corpus() -> None:
         holdout=0.1,
         annot=0.1,
     )
-    (repointed,) = TeacherReadings.over_corpus([member], "merged3", 12, [0.2, 0.8])
+    (repointed,) = TeacherReadings.over_corpus([member], "merged3", 12, [0.2, 0.8], 0)
 
     assert repointed.scheme == "merged3"
     assert repointed.slices == 12
     assert repointed.band.recorded() == [0.2, 0.8]
+    assert repointed.image_size == 336, "size 0 leaves the member on its own pixels"
     assert member.slices == 20, "the fitted member is untouched"
+
+
+def test_over_corpus_reads_the_size_the_corpus_was_built_at() -> None:
+    """A 224 px twin over merged3 must resolve the 336 px array, still feeding its encoder 224.
+
+    This is the third transform, and its absence had no symptom until the file was opened:
+    `images_224px_12sl_merged3.npy` has never been written, because merged3 was only ever built at 336.
+    """
+    member = Member(
+        identifier="small",
+        file=Path("m_small.pt"),
+        fold=0,
+        config=cast(MemberConfig, {"img": 224, "group": 3, "slots": list(SLOTS), "slices": 12}),
+        fingerprint=np.zeros((2, 12), np.float32),
+        holdout=0.1,
+        annot=0.1,
+    )
+    (repointed,) = TeacherReadings.over_corpus([member], "merged3", 12, [0.2, 0.8], 336)
+
+    assert repointed.image_size == 336, "the cache the pixels come out of"
+    assert repointed.read_size == 224, "the size the encoder is still fed"
+    assert member.image_size == 224, "the fitted member is untouched"
 
 
 def test_teach_over_every_study_is_reachable_only_through_the_negative_fold(tmp_path: Path) -> None:

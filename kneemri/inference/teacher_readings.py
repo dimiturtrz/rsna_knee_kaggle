@@ -120,16 +120,26 @@ class TeacherReadings:
         return order / max(len(combined) - 1, 1)
 
     @staticmethod
-    def over_corpus(members: list[Member], scheme: str, slices: int, band: Sequence[float] | None) -> list[Member]:
-        """The members re-pointed at the STUDENT's cache — geometry through the regroup, studies through the scheme.
+    def over_corpus(
+        members: list[Member], scheme: str, slices: int, band: Sequence[float] | None, size: int
+    ) -> list[Member]:
+        """The members re-pointed at the STUDENT's cache — depth and band, then studies, then pixels.
 
-        Two transforms rather than one because they are two different facts and each already has an owner:
-        `SharedRead.regrouped` is what the kernel and `holdout_backfill` serve a member at another depth
-        through, and `Member.on_scheme` is the only thing that can say WHICH corpus, since the three merged
-        schemes share the canonical slot list and no checkpoint records a scheme at all.
+        Three transforms rather than one because they are three different facts and each already has an
+        owner: `SharedRead.regrouped` is what the kernel and `holdout_backfill` serve a member at another
+        depth through, `Member.on_scheme` is the only thing that can say WHICH corpus (the three merged
+        schemes share the canonical slot list and no checkpoint records a scheme at all), and
+        `Member.over_pixels` is the size that corpus was actually built at.
+
+        THE THIRD ONE WAS MISSING AND IT IS NOT OPTIONAL. A corpus exists at the sizes somebody built it
+        at — merged3 only at 336 — so a 224 px twin moved onto it without this resolves to an array that
+        was never written. `size` of 0 means the members' own, which is the honest spelling of "this
+        corpus holds what they were fitted on" and the only case where saying nothing was ever right.
         """
         regroup = SharedRead(slices or members[0].slices, (band[0], band[1]) if band else SLICE_BAND)
-        return [regroup.regrouped(member).on_scheme(scheme) for member in members]
+        return [
+            regroup.regrouped(member).on_scheme(scheme).over_pixels(size or member.image_size) for member in members
+        ]
 
 
 def main() -> None:
@@ -145,6 +155,12 @@ def main() -> None:
     command.parser.add_argument("--scheme", default="", help="teach over ANOTHER corpus's cache, e.g. merged3")
     command.parser.add_argument("--slices", type=int, default=0, help="the depth that cache holds, with --scheme")
     command.parser.add_argument("--band", type=float, nargs=2, default=None, help="the band that cache holds")
+    command.parser.add_argument(
+        "--cache-size",
+        type=int,
+        default=0,
+        help="pixels per side that cache was BUILT at (merged3 is 336-only); 0 means the members' own",
+    )
     command.parser.add_argument(
         "--teach-all",
         action="store_true",
@@ -163,7 +179,9 @@ def main() -> None:
     readings = TeacherReadings(command.rooted(arguments), torch.device(arguments.device), overlap=arguments.overlap)
     members = [Member.from_checkpoint(checkpoint) for checkpoint in arguments.checkpoints]
     if arguments.scheme:
-        members = TeacherReadings.over_corpus(members, arguments.scheme, arguments.slices, arguments.band)
+        members = TeacherReadings.over_corpus(
+            members, arguments.scheme, arguments.slices, arguments.band, arguments.cache_size
+        )
     _, identifiers = members[0].cache(readings.root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
 

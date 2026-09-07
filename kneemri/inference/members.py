@@ -260,6 +260,32 @@ class Member:
         """
         return replace(self, config={**self.config, "train_size": size, RESIZED_FROM: self.read_size})
 
+    def over_pixels(self, size: int) -> "Member":
+        """The same member READ OUT OF a cache stored at another size, still fed the size it was fitted at.
+
+        The exact mirror of `resized`, and the two are not interchangeable: `resized` keeps the cache and
+        changes what the encoder is fed (pricing a resolution), this keeps what the encoder is fed and
+        changes which array the pixels come out of. `StudyModel.forward` resamples its input to
+        `window(...).size`, which is `read_size` — so pinning `train_size` to the fitted size is what makes
+        336 px on disk arrive at a 224 px encoder as the resize it is, rather than as a different member.
+
+        IT EXISTS BECAUSE A CORPUS HAS A GEOMETRY AND A MEMBER DOES NOT GET TO CHOOSE IT. `on_scheme` moves
+        a member onto another corpus's cache and says nothing about size, so a 224 px twin pointed at
+        `merged3` resolved to `images_224px_12sl_merged3.npy` — a file that has never existed, because
+        merged3 was only ever built at 336. That is the same defect class as a member resolving to the
+        DEFAULT arrays: both sides agree they read "the cache" and name different files. It cost the
+        teacher pass at 04:56Z on 2026-09-07, and with it the noisy_student arm gated behind it.
+
+        Identity when the sizes already agree, so a caller may always state the corpus's size without
+        stamping `RESIZED_FROM` on a member that reads its own pixels — that mark is what stops
+        `TrainerRecord.instead_of` handing back a stored holdout, and a native read has earned its record.
+        """
+        if size == self.image_size:
+            return self
+        return replace(
+            self, config={**self.config, "img": size, "train_size": self.read_size, RESIZED_FROM: self.image_size}
+        )
+
     def on_scheme(self, scheme: str) -> "Member":
         """The same member READ over a DIFFERENT corpus's cache — for TEACHING studies its own cache
         does not hold, never for a number compared against its own.
