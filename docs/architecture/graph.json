@@ -11347,6 +11347,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.labels.table_blend.LabelBlend.coverage",
+      "target": "core.data.labels.table_blend.LabelBlend.readings",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.labels.table_blend.main",
       "target": "core.data.labels.table_blend.LabelBlend",
@@ -45012,6 +45018,14 @@
       "descendants": 0,
       "id": "core.data.labels.table_blend.LabelBlend._mean",
       "label": "_mean",
+      "level": "method",
+      "parent": "core.data.labels.table_blend.LabelBlend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_blend.LabelBlend._override",
+      "label": "_override",
       "level": "method",
       "parent": "core.data.labels.table_blend.LabelBlend",
       "role": null
