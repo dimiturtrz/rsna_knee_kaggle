@@ -2192,6 +2192,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.ledger75",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ledger75",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ledger75",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ledger75",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.level_calibration",
       "target": "core.cli",
       "weight": 1
@@ -15226,6 +15250,102 @@
       "kind": "inherits",
       "source": "kneemri.evaluation.labelling.PrevalenceTail",
       "target": "kneemri.evaluation.labelling.Labelling",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "target": "kneemri.evaluation.ledger75.Ledger75Row",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.macro",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.per_label",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "target": "kneemri.evaluation.ledger75.Ledger75Row",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.macro",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.table",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ledger75.main",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.main",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.table",
       "weight": 1
     },
     {
@@ -33999,7 +34119,7 @@
       "role": null
     },
     {
-      "descendants": 268,
+      "descendants": 269,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -34063,7 +34183,7 @@
       "role": null
     },
     {
-      "descendants": 93,
+      "descendants": 94,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -34306,6 +34426,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.labelling",
       "label": "labelling",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75",
+      "label": "ledger75",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -37773,6 +37901,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.labelling",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.Ledger75Row",
+      "label": "Ledger75Row",
+      "level": "class",
+      "parent": "kneemri.evaluation.ledger75",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "label": "LedgerSeventyFive",
+      "level": "class",
+      "parent": "kneemri.evaluation.ledger75",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -47924,6 +48068,70 @@
       "label": "assigned",
       "level": "method",
       "parent": "kneemri.evaluation.labelling.PrevalenceTail",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.Ledger75Row.moved",
+      "label": "moved",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.Ledger75Row",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.macro",
+      "label": "macro",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.per_label",
+      "label": "per_label",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
+      "label": "reading",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75",
       "role": null
     },
     {
