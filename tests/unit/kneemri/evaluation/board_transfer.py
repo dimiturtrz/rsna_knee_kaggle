@@ -6,6 +6,7 @@ import pytest
 from kneemri.evaluation.board_transfer import (
     PRICEABLE,
     REGIME_QUANTILES,
+    RULERS,
     THIN,
     BoardEntry,
     BoardPair,
@@ -48,6 +49,22 @@ def test_entries_reads_within_whichever_scope_it_is_asked_for(tmp_path: Path):
     entries = BoardTransfer(_record(tmp_path), scope="member_mean").entries()
 
     assert [entry.id for entry in entries] == ["averaged"]
+
+
+def test_entries_under_ledger75_read_the_recut_field_and_drop_rows_without_one(tmp_path: Path):
+    """The recut is a different recorded number, never a fallback: a row lacking it leaves the reading."""
+    path = tmp_path / "recut.jsonl"
+    rows = [
+        {"id": "recut", "offline": 0.8500, "offline75": 0.8900, "board": 0.860, "members": 1, "scope": "ensemble"},
+        {"id": "midpoint only", "offline": 0.8600, "board": 0.900, "members": 4, "scope": "ensemble"},
+    ]
+    path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+
+    entries = BoardTransfer(path, ruler=RULERS["ledger75"]).entries()
+
+    assert [entry.id for entry in entries] == ["recut"]
+    assert entries[0].offline == pytest.approx(0.8900), "the recut field, not the midpoint one"
+    assert BoardTransfer(path, ruler=RULERS["ledger75"]).unmeasured() == ["midpoint only"]
 
 
 def test_dropped(tmp_path: Path):
