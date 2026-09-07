@@ -81,4 +81,8 @@ uv run --no-sync --project "$REPO" python -m kneemri.experiments.foreign_run \
   --labels "$BLEND.parquet" \
   --folds 0 \
   --workers 4
+# The trainer's status, captured before `release_card` overwrites it — `lib.sh` runs under `set -u` and
+# not `set -e`, so without this a dead trainer exits 0 (see the sibling arm, which died twice that way).
+trainer_status=$?
 release_card
+exit "$trainer_status"

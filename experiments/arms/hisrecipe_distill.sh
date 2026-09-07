@@ -73,6 +73,13 @@ uv run --no-sync --project "$REPO" python -m kneemri.experiments.his_labels_blen
 
 hold_card
 export PYTHONPATH="$REPO"
+# STATUS IS PROPAGATED BY HAND, and it has to be. `lib.sh` runs under `set -u` and NOT `set -e`, so a
+# dead trainer falls through to `release_card` and the script exits with THAT command's status: this arm
+# died twice on 2026-09-07 (`ModuleNotFoundError: No module named 'sklearn'`, one second in) and the
+# chain recorded `returned 0` both times, with `queue_check` reading OK over an idle card. The trainer's
+# own status is captured before anything else can overwrite it, the card is released either way, and the
+# arm then exits with it.
+set +e
 uv run --no-sync --project "$REPO" python -m kneemri.experiments.foreign_run \
   --script "$SCRIPT" \
   --arch coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k \
@@ -81,4 +88,6 @@ uv run --no-sync --project "$REPO" python -m kneemri.experiments.foreign_run \
   --labels "$BLEND.parquet" \
   --folds 1 --fold 0 --fold_file "$FOLDS" \
   --workers 4
+trainer_status=$?
 release_card
+exit "$trainer_status"
