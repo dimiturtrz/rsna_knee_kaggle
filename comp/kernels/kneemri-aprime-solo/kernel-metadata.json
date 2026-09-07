@@ -1,0 +1,8 @@
+{"id": "dimiturnt/kneemri-aprime-solo", "title": "kneemri-aprime-solo",
+ "code_file": "kneemri-aprime-solo.py", "language": "python", "kernel_type": "script",
+ "is_private": true, "enable_gpu": true, "enable_internet": false,
+ "machine_shape": "NvidiaTeslaT4",
+ "dataset_sources": ["dimiturnt/kneemri-kit", "dimiturnt/kneemri-aprime"],
+ "competition_sources": ["rsna-knee-abnormality-detection"],
+ "kernel_sources": [],
+ "model_sources": []}

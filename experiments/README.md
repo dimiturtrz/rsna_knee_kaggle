@@ -8919,3 +8919,33 @@ term in it — and an A'-solo entry built through the same lift is priced agains
 against a feed-corrected number. The `A'_ourfeed` pass stays worth running as an INSTRUMENT (it prices
 what our cache costs a his-pixels model, and so re-prices the six released foreign readings that WERE
 served through `ForeignMember` on our cache), but it is not on the critical path for any entry.
+
+## `relabel_hold_s2026` — the unread-targets arm reads +0.0104 on the gold 58, inside its own interval — 2026-09-07
+
+The arm had no ledger row and no gold read after four days, which is the `recal_dense` failure again
+(knee-v78o1): a deciding number that lives in a second command nobody runs. Recipe: `--unread-targets`,
+the 58 annotated studies held out, 13 epochs, e11 holdout **0.8474**.
+
+`python -m kneemri.evaluation.annotated_readings --device cpu --checkpoints band_dense_hold_s2026.pt
+relabel_hold_s2026.pt --against band_dense_hold_s2026.pt` — seconds on CPU, the readings were cached:
+
+| | gold-58 macro |
+|---|---|
+| `band_dense_hold_s2026` (control) | 0.8956 |
+| `relabel_hold_s2026` | **0.9060** |
+| combined | 0.9058 |
+
+Paired against the control, 95% interval resampled over studies: **+0.0104 [−0.0039, +0.0241] — INSIDE
+the interval, no pairwise claim.** Directional only, well under the 1.5% bar, and it does not license an
+arm on its own.
+
+The pair is honest in the way the neighbouring numbers are not. `annotated_readings` states it: *"58
+annotated studies, 2 member(s), none of them TRAINED on these cells"*. That matters today because
+`level_calibration.py:156` fits the v3 levels ON the 58 (ledger 8246 already flags LEAK), so
+`labelwise_dense` 0.9170 gold and `recal_dense` +0.0172 [+0.0004, +0.0343] are gold-in-sample and are
+marked as such from here — the same mark the six released foreign readings carry on the 896. The honest
+control pair on this axis is `band_dense_hold` 0.8956 against `unread_dense` +0.0020 [−0.0155, +0.0200],
+and `relabel_hold`'s +0.0104 now sits beside it as the second clean reading. Both are inside their
+intervals; neither closes the relabelling axis, and neither opens it.
+
+`labelwise_dense`'s 896 number stays clean and it stays a member. Only its gold number is marked.
