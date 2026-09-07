@@ -1886,6 +1886,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_holdout",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_holdout",
+      "target": "kneemri.evaluation.gold_rows",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_holdout",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_member",
       "target": "core.cli",
       "weight": 1
@@ -14102,6 +14120,48 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.foreign_holdout.ForeignHoldout.written",
+      "target": "kneemri.evaluation.foreign_holdout.ForeignHoldout.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_holdout.ForeignHoldout.written",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_holdout.ForeignHoldout.written",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.reported",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_holdout.ForeignHoldout.written",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_holdout.ForeignHoldout.written",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_holdout.main",
+      "target": "kneemri.evaluation.foreign_holdout.ForeignHoldout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_holdout.main",
+      "target": "kneemri.evaluation.foreign_holdout.ForeignHoldout.written",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.foreign_member.ForeignMember.predicted",
       "target": "kneemri.evaluation.foreign_member.Decode.checked",
       "weight": 1
@@ -14494,6 +14554,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.of",
       "target": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.epoch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.of",
+      "target": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.restricted",
       "weight": 1
     },
     {
@@ -17953,7 +18019,7 @@
       "weight": 1
     },
     {
-      "kind": "holds",
+      "kind": "references",
       "source": "kneemri.evaluation.run_comparison.RunComparison",
       "target": "kneemri.evaluation.holdout_metrics.HoldoutMetrics",
       "weight": 1
@@ -17968,12 +18034,6 @@
       "kind": "references",
       "source": "kneemri.evaluation.run_comparison.RunComparison",
       "target": "kneemri.evaluation.run_comparison.PairedWidths",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.evaluation.run_comparison.RunComparison",
-      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -18010,12 +18070,6 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.__init__",
       "target": "kneemri.evaluation.run_comparison.RunComparison._intervals",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.__init__",
-      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -18199,21 +18253,9 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
-      "target": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.kept",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
       "target": "kneemri.evaluation.run_comparison.PairedWidths",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.paired",
-      "target": "kneemri.evaluation.scores.LabelScores.paired_interval",
       "weight": 1
     },
     {
@@ -18266,12 +18308,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.run_comparison.RunComparison.scored",
-      "target": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.of",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.RunComparison.unmatched",
       "target": "kneemri.evaluation.run_comparison.RunComparison.disagreements",
       "weight": 1
@@ -18303,6 +18339,12 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.run_comparison.main",
+      "target": "kneemri.evaluation.holdout_metrics.HoldoutMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.run_comparison.main",
       "target": "kneemri.evaluation.run_comparison.RunComparison",
       "weight": 1
     },
@@ -18316,6 +18358,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.run_comparison.main",
       "target": "kneemri.evaluation.run_comparison.RunComparison.resolved",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.run_comparison.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -33945,7 +33993,7 @@
       "role": null
     },
     {
-      "descendants": 267,
+      "descendants": 268,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -34009,7 +34057,7 @@
       "role": null
     },
     {
-      "descendants": 92,
+      "descendants": 93,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -34140,6 +34188,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.foreign_gate",
       "label": "foreign_gate",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_holdout",
+      "label": "foreign_holdout",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -37486,6 +37542,14 @@
       "label": "GateReading",
       "level": "class",
       "parent": "kneemri.evaluation.foreign_gate",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_holdout.ForeignHoldout",
+      "label": "ForeignHoldout",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_holdout",
       "role": "satellite"
     },
     {
@@ -47058,6 +47122,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_holdout.ForeignHoldout.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_holdout.ForeignHoldout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_holdout.ForeignHoldout.written",
+      "label": "written",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_holdout.ForeignHoldout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_holdout.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_holdout",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_member.Decode.checked",
       "label": "checked",
       "level": "method",
@@ -47364,6 +47452,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.of",
       "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.holdout_metrics.HoldoutMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.holdout_metrics.HoldoutMetrics.restricted",
+      "label": "restricted",
       "level": "method",
       "parent": "kneemri.evaluation.holdout_metrics.HoldoutMetrics",
       "role": null
@@ -50094,6 +50190,14 @@
       "label": "of",
       "level": "method",
       "parent": "kneemri.evaluation.score_scale.Scale",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.scores.LabelScores.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.scores.LabelScores",
       "role": null
     },
     {

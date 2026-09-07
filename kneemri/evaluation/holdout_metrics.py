@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
 
@@ -48,6 +48,16 @@ class HoldoutMetrics:
     def __init__(self, scores: LabelScores | None = None, excluded: frozenset[str] | None = None) -> None:
         self.scores = scores or LabelScores()
         self.excluded = excluded or frozenset()
+
+    def restricted(self) -> bool:
+        """Whether this instrument asks a question a recorded row cannot answer.
+
+        Two ways it can: studies removed from the set, or truth cut somewhere other than the midpoint
+        every recorded row was written at. Both make the recorded number an answer to a DIFFERENT
+        question, and one home for the test because the two arrived a day apart and the second would
+        otherwise have silently reused the first's recorded rows.
+        """
+        return bool(self.excluded) or self.scores.cut != MIDPOINT
 
     def kept(self, reading: HoldoutReading) -> HoldoutReading:
         """The same reading without the studies this instrument was told to drop.
@@ -118,7 +128,7 @@ class HoldoutMetrics:
         number computed here would be a score on training data wearing a holdout's name.
         """
         recorded = metrics.best()
-        if recorded is not None and not self.excluded:
+        if recorded is not None and not self.restricted():
             return ScoredEpoch(row=recorded, reconstructed=False)
         recipe = metrics.recipe()
         if recipe is not None and int(recipe.get("fold", 0)) < 0:

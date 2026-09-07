@@ -12,7 +12,7 @@ from core.data.corpus.anatomy import ScaleProfile
 from core.data.labels.label_power import FOLDS, LabelPower
 from kneemri.evaluation.gold_rows import GoldRows
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.evaluation.supervision_gap import Bottleneck, SupervisionGap
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
@@ -131,7 +131,7 @@ class RunComparison:
         arms: list[Path],
         labels: Path | None = None,
         bottleneck: Bottleneck | None = None,
-        excluded: frozenset[str] | None = None,
+        holdout: HoldoutMetrics | None = None,
     ) -> None:
         self.control = RunMetrics(control)
         self.arms = [RunMetrics(arm) for arm in arms]
@@ -140,12 +140,17 @@ class RunComparison:
         # annotations, which is `SupervisionGap`'s subject and not this module's. Absent, every arm still
         # reports which half it moved — it just does not get the deltas restricted to that half.
         self.bottleneck = bottleneck
-        self.scores = LabelScores()
+        # THE INSTRUMENT ARRIVES WHOLE. Where the truth is cut and which studies are dropped are two
+        # halves of one question — what ruler this report is read on — and `HoldoutMetrics` already
+        # holds both and already knows that either one forbids a recorded row. Taking them as two loose
+        # arguments here would let a caller set one and leave the other at a default it never argued for.
+        self.holdout = holdout or HoldoutMetrics()
+        self.scores = self.holdout.scores
+        self.cut = self.scores.cut
         # The studies every number in this report is taken WITHOUT. Empty for every comparison between
         # two of our own runs; non-empty when one side chose its weights on studies the other held out,
         # which is a property of the foreign arm and not of the fold.
-        self.excluded = excluded or frozenset()
-        self.holdout = HoldoutMetrics(self.scores, self.excluded)
+        self.excluded = self.holdout.excluded
         # CACHED because reading a run's account can cost a `torch.load` of the whole checkpoint, and
         # the report asks each arm for its recipe twice — once to say whether the pair is matched and
         # once to say which half of the pipeline it moved.
@@ -248,6 +253,7 @@ class RunComparison:
             f"control {self.control.path.stem}: mean {reference['auc']:.4f} at epoch {reference['epoch']}",
             f"  {control.named()}",
             *([f"  taken WITHOUT {len(self.excluded)} excluded studies"] if self.excluded else []),
+            *([f"  truth cut at {self.cut}, not the {MIDPOINT} of the ledger"] if self.cut != MIDPOINT else []),
             *self._stalled(self.control),
         ]
         for arm in self.arms:
@@ -569,6 +575,12 @@ def main() -> None:
         action="store_true",
         help="score without the radiologist-annotated studies, for an arm that selected its epoch on them",
     )
+    command.parser.add_argument(
+        "--cut",
+        type=float,
+        default=MIDPOINT,
+        help="where a graded target becomes a positive; 0.75 drops the level the gold calls negative",
+    )
     arguments = command.parsed()
     # OPT-IN, because the split costs the twenty published checkpoints and their alignment to the
     # annotations — seconds, and a `--labels` table this comparison does not otherwise need. Asking for
@@ -590,7 +602,8 @@ def main() -> None:
     # study inside our holdout then chose that arm's weights, and the delta credits it with a selection
     # it made. Which studies overlap is read from train.csv, never assumed to be a count.
     excluded = frozenset(GoldRows().annotated(root.raw() / "train.csv")[0]) if arguments.exclude_gold else None
-    logger.info("%s", RunComparison(control, arms, arguments.labels, split, excluded).report())
+    ruler = HoldoutMetrics(LabelScores(arguments.cut), excluded)
+    logger.info("%s", RunComparison(control, arms, arguments.labels, split, ruler).report())
 
 
 if __name__ == "__main__":

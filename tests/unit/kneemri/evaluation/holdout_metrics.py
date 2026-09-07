@@ -7,6 +7,7 @@ import numpy as np
 
 from core.findings import TARGETS
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
 
@@ -39,6 +40,14 @@ def test_epoch(tmp_path: Path):
     assert row["auc"] > 0.5, "predictions built to rank the truth must score above chance"
     assert np.isnan(row["loss"]), "the loss was never in the array, so it is absent rather than plausible"
     assert row["seconds"] == 0, "and so is the wall-clock"
+
+
+def test_restricted():
+    """Either an exclusion or a moved cut forbids the recorded row; the plain instrument allows it."""
+    assert not HoldoutMetrics().restricted(), "the default asks the question every ledger row answers"
+    assert HoldoutMetrics(excluded=frozenset({"s0"})).restricted(), "an aggregate cannot lose a study"
+    assert HoldoutMetrics(LabelScores(0.75)).restricted(), "nor can it be re-cut after the fact"
+    assert not HoldoutMetrics(LabelScores(MIDPOINT)).restricted(), "the midpoint named is still the midpoint"
 
 
 def test_kept(tmp_path: Path):

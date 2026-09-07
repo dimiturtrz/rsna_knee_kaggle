@@ -23,6 +23,21 @@ MIDPOINT = 0.5
 class LabelScores:
     """Per-label ROC AUC and its mean, computed by rank rather than by any library."""
 
+    def __init__(self, cut: float = MIDPOINT) -> None:
+        """`cut` is where a graded target becomes a positive — the midpoint unless a caller argues otherwise.
+
+        A PARAMETER because the reader's confidence levels are not evenly trustworthy and the project has
+        now measured it: our 0.68 level is 38% gold-positive pooled (MCL 0 of 6, Fracture 1 of 4), so at
+        the midpoint every one of those rows enters the ruler as a positive that the radiologist says is
+        not there. A cut at 0.75 asks the same question of the same predictions with the false positives
+        removed from the TRUTH rather than from the model.
+
+        It is not a default anybody may change. Every number in the ledger was read at the midpoint, and a
+        cut that moved globally would silently reprice the whole record; the argument is passed by the one
+        reading that wants it, which is why it lives here and not in a config.
+        """
+        self.cut = cut
+
     @staticmethod
     def area_under_curve(predictions: NDArray[np.float64], truth: NDArray[np.int64]) -> float:
         """ROC AUC by rank, which is its definition.
@@ -57,7 +72,7 @@ class LabelScores:
         targets: NDArray[np.float32],
         where: NDArray[np.bool_] | None = None,
     ) -> dict[str, float]:
-        """One AUC per finding, against graded targets binarised at their midpoint.
+        """One AUC per finding, against graded targets binarised at this instrument's `cut`.
 
         Binarising exists only so an AUC is defined; it decides which epoch is kept and never a
         submitted score, and the metric is invariant to any increasing map of the predictions anyway.
@@ -72,7 +87,7 @@ class LabelScores:
         return {
             target: self.area_under_curve(
                 predictions[scored[:, column], column].astype(np.float64),
-                (targets[scored[:, column], column] > MIDPOINT).astype(np.int64),
+                (targets[scored[:, column], column] > self.cut).astype(np.int64),
             )
             for column, target in enumerate(TARGETS)
         }
