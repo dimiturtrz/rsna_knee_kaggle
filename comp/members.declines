@@ -87,8 +87,18 @@ recal_holdannot_s2026.pt              # 0.8515 proxy on report_labels_v2 (`ruler
 # against them is one argument. A restart from a converged parent is a TIME mechanism with no quality
 # term - now measured on two different trunks from opposite directions - so neither member is worth a
 # seat on its own score, and the lane's value is that it reaches a given score faster, not higher.
-warm_calib_lowlr_s2026      # Restarted from a converged parent at a reduced rate and did not recover the
-                            # parent's peak. The first point of the warm lane's no-quality-term reading.
+#
+# RE-OPENED 2026-09-07 17:55Z, warm_calib_lowlr_s2026 only, and the answer is not a re-quote. The
+# decline above is a SOLO argument on a SOLO ruler: 0.8577 against the cold parent's 0.8634, no quality
+# term. That argument stands unchanged and is not disputed here. What re-opens the member is a
+# DIFFERENT ruler that the decline never asked: D45 prices it as an EXTRA SEAT in the champion's
+# ours-side block (+0.0009 alone, corr 0.898 against the seated members) rather than as a replacement
+# for one, and D50 makes that block delta readable on the board for the first time -- a rebuilt
+# common-frame L75mid predicts the board at R2 0.96 / resid SD 0.0016 on 36 rows, so an offline +0.0026
+# is now an instrument with a signal rather than a number below the transfer noise. A member with no
+# quality term of its own can still carry a seat if what it adds is DECORRELATION, which is the one
+# thing the solo ruler cannot see. It moves to comp/members2.roster; the lane's no-quality-term reading
+# is untouched, and cnx_warm_anneal stays declined because no seat read has ever been taken of it.
 cnx_warm_anneal_s2026       # 0.8142 peak at epoch 2 of 6, against a parent peak of 0.8186 - inside the
                             # CONVERGED band, not directional. The SHAPE carries it: loss fell monotonically
                             # 0.4636 -> 0.4172 while holdout AUC fell every epoch after the second, and the

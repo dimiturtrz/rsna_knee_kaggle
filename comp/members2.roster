@@ -70,3 +70,15 @@ final_ws_df.pt                       # no offline number by construction, --fold
 # has not been named: the researcher owes which fold-0 member differs from it in the teacher file alone.
 # Until then it may be packaged but not seated on a number.
 calib_span_df.pt                     # no offline number by construction, --fold -1
+
+# Added 2026-09-07 17:55Z, out of comp/members.declines (see the re-opening written there). 0.8577 solo,
+# CONVERGED (twelve of twelve, peak epoch 4, then eight declining epochs) -- a WORSE solo than every
+# seated member, and seated anyway. The argument is decorrelation, not quality: D45 reads it at +0.0009
+# as an extra seat in the ours-side block at corr 0.898, and D45's three-seat stack (this member,
+# labelwise_dense_s2026 and warm_calib_dense_s2026, all three added to the block, raptor's 1/3 untouched)
+# at +0.0026 offline. It ships because of D50: on the 36 rebuildable board rows a common-frame rebuilt
+# L75mid predicts the board at R2 0.962 with resid SD 0.0016, which is what makes +0.0026 readable at all.
+# The other two seats are already on shelf 1; this one is on NEITHER shelf, which is the whole reason for
+# this line. It is an INSTRUMENT seat, priced on a fit whose band (0.904-0.937) does not include the
+# champion's 0.944 -- the extrapolation is stated in the kernel's pre-registration, not hidden here.
+warm_calib_lowlr_s2026.pt            # 0.8577 solo; seated on decorrelation, +0.0009 as an extra seat
