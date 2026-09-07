@@ -9103,3 +9103,42 @@ disk. `calib_span_df` has no stand-in named at all and may be packaged but not s
 D34 also prices the seat itself: seat Δ / solo lift ≈ 0.25 within the DINOv2 family over three measured
 members, so `clean_calib`'s predicted seat read is +0.001-0.002 and `final_ws_df` **cannot reach +0.005 on
 the seat by that mechanism**. The same-family seat is saturated; `seat_clean_distill` seats −0.0001.
+
+## 2026-09-07 — D35: the seat axis is closed by a FIT, not by a tally
+
+201 honest fold-0 members, 896 gold-removed studies, L75mid, proxy = five parents rank-mean @2/3 +
+`raptor_v4_swa` @1/3 = 0.9237 (five parents alone 0.8993; parents' mean solo 0.8865). Three seat shapes per
+member, all paired against the proxy: (b) sixth ours-member at 1/6 x 2/3 = 0.111 · (c) REPLACES raptor at
+1/3, read against −0.0244 · (d) 1/7 beside raptor inside the foreign block.
+
+Two-variable fit, 151 members with lift > −0.03, ALL families:
+  (b) = −0.0009 + **0.076**·lift + 0.0139·(1−corr)   R² 0.87
+  (c) = −0.0290 + **0.313**·lift + 0.0557·(1−corr)   R² 0.98
+Within `small` alone the coefficients are the same (0.084/0.0194; 0.313/0.0554). So the FAMILY does not change
+the slope — the seat WEIGHT does (~0.7-0.9 per unit weight), and family enters only through corr. D34's 0.25
+was a paired child-replaces-parent read at weight 0.133 on three members: the high end of that frame's
+scatter, not a different mechanism.
+
+**What the bar costs, and why this is mechanism-closed rather than tally-closed.** (b) ≥ +0.005 needs solo
+**0.934** at corr 0.83, or 0.947 at corr 0.90. An honest 1/3 seat merely BEATING the in-sample raptor needs
+solo 0.949. The best honest solo on disk is 0.8972 and the best (b) over all 201 members is **+0.0014**
+(`labelwise_dense_s2026`). No single seat at weight ≤ 1/3 can pay +0.005 from any family at any solo that
+exists. The seven board flats were not seven unlucky draws; they are the fit. Denominator: 151 members, 896
+studies, one frame.
+
+Cross-family premium at equal solo is real and small: A''s four coatnet2-his cells read (b) +0.0002..+0.0003
+and honest-1/3 +0.0025..+0.0028 against 20 same-family `small` members at the same solo reading (b) −0.0009..
++0.0002 (median −0.0004). So ≈ **+0.0007 at weight 0.111, ≈ +0.005 at weight 1/3**, bought with corr 0.82-0.83
+against 0.88-0.94. Diversity pays at the WEIGHT the foreign block already has, and almost nothing at a sixth
+ours-seat's weight.
+
+**The in-sample raptor is inflated ~9x, and the board agrees with the honest number 1:1.** `raptor_v4_swa` at
+1/3 reads +0.0244 on the 896 — it trained on them. Its honest stand-in, his own recipe with fold 0 held out
+(`repl2x2_a_swa`, solo 0.8787), is worth **+0.0027** at the same 1/3 (0.8993 → 0.9020), and the BOARD's
+0 → 1/3 step read **+0.003**. Every offline reading that wanted raptor's share raised toward 0.9 was the
+inflation talking.
+
+Consequence for the entry staged today: `kneemri-cleancalib` seats `final_ws_df` as a SEVENTH ours-member,
+i.e. at (b)-like weight. The fit prices that at ≈ +0.001, not the +0.002-0.003 its pre-registration assumed —
+and `final_ws_df` cannot be measured offline at all (`--fold -1`). Its stand-in `clean_calib`'s solo gate is
+still the right gate; what changed is the size of the prize it can license.
