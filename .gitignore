@@ -129,3 +129,6 @@ commit.log
 !/.claude/mastermind_inbox/README.md
 /.claude/mastermind_inbox/read/
 .claude/mastermind_inbox/.listener_*
+
+# session scratch: probes, smoke checkpoints, throwaway npz
+scratchpad/

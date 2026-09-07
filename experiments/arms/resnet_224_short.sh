@@ -47,12 +47,14 @@
 #
 # HARNESS CHECK, BEFORE ANY NUMBER IS READ. The printed recipe must name "variant": "resnet50d",
 # "image_size": 224, "through_plane": true, "slice_pooling": "max", "slices": 20, "backbone_lr": 0.0002
-# and "unfreeze_last": 16. The log's `train mode pins N frozen norm layer(s)` must read a SMALL N — 36
-# means the default six-block window is still in force and the arm is fitting our usual frozen trunk
-# with a CNN in it, which answers a different question. And the train-mode BatchNorm batch must be 160
-# (8 studies x 20 slices), not 1 or 2: a BN layer seeing a batch of one normalises each sample against
-# itself and learns nothing. `radnet_family`'s 0.6716 against a pinned 0.7505 is the failure this check
-# exists for.
+# and "unfreeze_last": 16. The log's `train mode pins N frozen norm layer(s)` must read **3**, not 36:
+# 36 is the default six-block window still in force, and the arm would be fitting our usual frozen trunk
+# with a CNN in it, which answers a different question. The three that remain are the stem's, outside any
+# block `--unfreeze-last` can name, and pinned is where a frozen norm BELONGS — the `radnet_family`
+# defect was a frozen norm left in TRAIN mode rewriting the statistics its frozen weights consume.
+# And the train-mode BatchNorm batch must read **(960, ...)** — measured, 8 studies x 120 images per
+# study at `--slices 20` — never 1 or 2: a BN layer seeing a batch of one normalises each sample against
+# itself and learns nothing. `radnet_family`'s 0.6716 against a pinned 0.7505 is what this guards.
 #
 # PRE-REGISTERED, on the 909 at the ledger cut, against band224:
 #   >= 0.80   the plumbing is sound and the trunk trains. The long arm runs, and only then does the
