@@ -9653,3 +9653,20 @@ says Fracture/MedMen/Synovitis, the 4406 says MCL/PFOA/Baker's. D16's column-res
 which is ours and his and nothing else. A one-fold member costs a five-fold run to put on it. The two
 surfaces are out-of-fold under DIFFERENT splits, so a delta is a fair model-vs-model comparison per row and
 not a matched-fold one. `column_headroom.py` stays REFUTED (knee-zsyp4) and is not the thing to extend.
+
+### D85 addendum — what a change of frame alone does to a column ORDERING (the null ceiling)
+
+`ColumnSurface.agreement` re-reads ONE surface twice — the full 4407 rows and the 909 subset the frame
+holds — with the model, the truth table and the base all held fixed, so the only moving part is n. The
+column ordering agrees at **rho +0.713** on `teacher_clean_full` and **rho +0.839** on
+`teacher_foreign_corpus`.
+
+That is the CEILING for any per-column ranking claim in this project: shrinking a frame from 4407 rows to
+909 costs 0.16-0.29 of column order all by itself, with nothing else changed. It bears directly on
+researcher's D84c cross-frame profile rho of **0.056** — mastermind flagged that as confounded (the two
+frames also had different bases). This reading does not un-confound D84c, but it prices the frame half of
+the confound on its own: n alone leaves 0.71-0.84, so n alone cannot explain a 0.056.
+
+Honest limit: an ORDERING OF AREAS is more stable than an ordering of small per-column DELTAS, because the
+areas are separated by tenths and the deltas by thousandths. So +0.713/+0.839 is an upper bound on what a
+delta-profile could hope for, not a matched control for one.

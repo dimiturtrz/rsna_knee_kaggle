@@ -182,6 +182,19 @@ class ColumnSurface:
         return [str(identifier) for identifier in held[STUDIES]]
 
     @staticmethod
+    def agreement(corpus: list[SurfaceRow], frame: list[SurfaceRow]) -> float:
+        """Spearman of the twelve column areas between the two readings of ONE surface.
+
+        The base is held fixed by construction — same model, same truth, the frame's rows a subset of
+        the corpus's — so this isolates what a change of n alone does to a per-column ORDERING. Any
+        cross-model column ranking that does not clear this number is scatter, because this is what the
+        same model scores against itself.
+        """
+        wide = np.argsort(np.argsort([row.area for row in corpus]))
+        narrow = np.argsort(np.argsort([row.area for row in frame]))
+        return float(np.corrcoef(wide, narrow)[0, 1])
+
+    @staticmethod
     def shift(corpus: list[SurfaceRow], frame: list[SurfaceRow]) -> list[str]:
         """Both readings of each column, side by side — the re-read this instrument exists for.
 
@@ -215,7 +228,11 @@ class ColumnSurface:
             held = self.frame_studies(frame)
             narrow = self.onto(held, (rows, scores), surface.name)
             lines.append(f"the {len(held)}-study frame of {frame.name}, same surface, same truth")
-            lines += self.shift(self.rows(scores, truth), self.rows(narrow, self.truth(held)))
+            wide, tight = self.rows(scores, truth), self.rows(narrow, self.truth(held))
+            lines += self.shift(wide, tight)
+            lines.append(
+                f"column-order agreement, the two readings of this one surface: rho {self.agreement(wide, tight):+.3f}"
+            )
         return lines
 
 

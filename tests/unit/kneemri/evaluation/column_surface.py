@@ -137,6 +137,19 @@ def test_frame_studies_refuses_a_surface(tmp_path: Path):
         ColumnSurface.frame_studies(_surface(tmp_path, "surface.npz"))
 
 
+def test_agreement():
+    """A reordering of two columns has to cost rho — a metric that cannot see it measures nothing."""
+    corpus = [
+        SurfaceRow(name, 4406, 200, area, area - 0.01, area + 0.01)
+        for name, area in zip("abc", [0.80, 0.85, 0.90], strict=True)
+    ]
+    kept = [SurfaceRow(row.finding, 896, 40, row.area, row.low, row.high) for row in corpus]
+    swapped = [kept[1], kept[0], kept[2]]
+
+    assert ColumnSurface.agreement(corpus, kept) == pytest.approx(1.0)
+    assert ColumnSurface.agreement(corpus, swapped) < 1.0
+
+
 def test_shift():
     """Both readings on one line, and the shift between them signed — the re-read this exists for."""
     corpus = [SurfaceRow("Fracture", 4406, 192, 0.8861, 0.8607, 0.9115)]

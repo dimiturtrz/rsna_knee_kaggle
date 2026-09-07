@@ -31,14 +31,15 @@ The repo already tracks RAD-DINO (knee-vp8q), DINOv3 (knee-8hn), and the MRNet/f
 * Public abstract claims improvement over training-from-scratch and supervised pretraining on downstream tasks.
 * No weights found, no quantitative results in the public abstract. Not actionable until a paper or checkpoint appears.
 
-### OrthoDiffusion (2026) — diffusion-based, weights on Kaggle, licence unclear
+### OrthoDiffusion (2026) — diffusion-based, weights on Kaggle, licence VERIFIED MIT (2026-09-07)
 
 * Paper: [arXiv:2602.20752](https://arxiv.org/abs/2602.20752)
 * Code: [github.com/lt-0123/OrthoDiffusion](https://github.com/lt-0123/OrthoDiffusion)
 * Weights: [Kaggle dataset](https://www.kaggle.com/datasets/prvsiyan/orthodiffusion-official-knee-mri-foundation) (not an official Kaggle model mirror)
 * Pretraining corpus: 15,948 unlabeled knee MRI scans, three orientation-specific 3D diffusion models.
 * Downstream: segmentation of 11 knee structures + 8 abnormality labels; cross-joint transfer to ankle/shoulder.
-* Caveat: the GitHub repo does not show an open-source licence, and the weights are a community Kaggle re-upload. Before relying on it for a submission, verify licence and the Kaggle 2.6a "equally accessible at no cost" test.
+* **Licence: PASSES.** The authors' own Hugging Face release `lanstat0123/orthodiffusion` carries **MIT**, so the weights are usable and the Kaggle re-upload is not the licensing object — pull from HF, not from the community dataset. This corrects the "licence unclear" reading this section carried until 2026-09-07; it was never a blocker.
+* The remaining caveat is architectural, not legal: it is a 3D diffusion pipeline, not a drop-in 2D encoder. A frozen OrthoDiffusion trunk carried 0.7537 in LP-FT stage one and was declined on that number (`comp/members.declines:289-293`) — re-opened by a different recipe, never by re-quoting the licence.
 
 ### MRI-CORE (2025) — general MRI, SAM-based, Apache 2.0
 
@@ -70,5 +71,5 @@ The repo already tracks RAD-DINO (knee-vp8q), DINOv3 (knee-8hn), and the MRNet/f
 1. **Treat OrthoFoundation-L as the next encoder-init experiment.** It is a direct replacement for the DINOv3-L backbone, MIT-licensed, with public weights. The control is `dinov3_base_lora_s2026`/`dinov3_large` paths; the question is whether a knee-continued DINOv3-L buys more than the raw DINOv3-L checkpoint.
 2. **Resolve the Kaggle-shippability question before training.** The weights are MIT, but the base is DINOv3-L (Meta licence). The same DINOv3 Kaggle-mount issue already tracked in `knee-8hn` applies.
 3. **Skip OAI-DINO until a checkpoint or numbers appear.** It is too thin to act on.
-4. **Defer OrthoDiffusion until licence is verified.** It is a 3D diffusion pipeline, not a drop-in 2D encoder, and the release is not clearly licensed.
+4. **OrthoDiffusion's licence is verified MIT (HF `lanstat0123/orthodiffusion`) and is not the reason to defer it.** What defers it is the measurement: a frozen trunk reads 0.7537 in LP-FT stage one, and it is a 3D diffusion pipeline rather than a drop-in 2D encoder.
 5. **Keep MRI-CORE/PRISM on watch.** MRI-CORE is clean but segmentation-first; PRISM is strong but weights are not yet located.
