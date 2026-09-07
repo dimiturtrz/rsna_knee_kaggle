@@ -8864,9 +8864,19 @@ geometry in it.
 `kaggle.com/datasets/mattiaangeli/knee-mri-fold-weights` (`logs/pull_dinov3_folds.log:1`) — released
 foreign weights, so in-sample by the rule above; the researcher's independent md5-split count puts it at
 703 of 909 in-sample, fold 0 holding 206. Its reading and the +0.010 column gap D16 drew from it are
-inflation. The honest mask `foreign_dinov3_matched` reads +0.0074 LEDGER / +0.0030 HIS, and the family
-transfers at +0.001 (foreignsolo 0.882 board against 0.8812 offline) against our +0.054 — so a DINOv3
-column seat is pre-registered flat and was not built. Declined in writing.
+inflation. The honest mask `foreign_dinov3_matched` reads +0.0074 LEDGER / +0.0030 HIS, so a DINOv3 column
+seat is pre-registered flat and was not built. Declined in writing.
+
+**Two prose constants struck from this paragraph, 2026-09-08 (researcher D84f, mastermind concurring).** It
+read "the family transfers at +0.001 (foreignsolo 0.882 board against 0.8812 offline) against our +0.054".
+Both were prose and both are wrong. `foreignsolo_v1`'s **0.8812** was never in its board row — that row's
+`offline` is `null`, and `entry_offline` declines it `no-record` because its five `foreign_dinov3_fold*`
+members left no holdout predictions file, so there is no offline half to compute a transfer from. The
+**+0.054** is not a transfer rate at all: it is the board GAP between `solo_v1` (0.868) and `v4solo_v1`
+(0.922), two entries 0.0006 apart offline — the single largest outlier pair in the table. The measured
+transfer slope is **1.409 over 41 `ensemble` rows, boot95 [0.918, 2.149]**, which brackets D50's ×1.14;
+that one stands. Third prose-constant failure `CLAUDE.md` records: a constant is quoted from the file that
+fits it, or not at all.
 
 ## His training table is our corpus minus the 57 gold rows — exactly and only, so gold-58 UN-VOIDS the released foreign readings — 2026-09-07
 
@@ -9664,9 +9674,61 @@ column ordering agrees at **rho +0.713** on `teacher_clean_full` and **rho +0.83
 That is the CEILING for any per-column ranking claim in this project: shrinking a frame from 4407 rows to
 909 costs 0.16-0.29 of column order all by itself, with nothing else changed. It bears directly on
 researcher's D84c cross-frame profile rho of **0.056** — mastermind flagged that as confounded (the two
-frames also had different bases). This reading does not un-confound D84c, but it prices the frame half of
-the confound on its own: n alone leaves 0.71-0.84, so n alone cannot explain a 0.056.
+frames also had different bases).
 
-Honest limit: an ORDERING OF AREAS is more stable than an ordering of small per-column DELTAS, because the
-areas are separated by tenths and the deltas by thousandths. So +0.713/+0.839 is an upper bound on what a
-delta-profile could hope for, not a matched control for one.
+**RETRACTED the same day, by researcher's D85 split-half: the sentence this addendum originally closed on
+— "n alone leaves 0.71-0.84, so n alone cannot explain a 0.056" — does not follow, and n explains most of
+that 0.056.** Two reasons, both mine:
+
+1. **Different object.** +0.713/+0.839 ranks twelve column AREAS, separated by tenths. D84c's 0.056 ranks
+   twelve per-column seat DELTAS, separated by thousandths (+0.0006 … +0.0018). The limit paragraph below
+   said the first is an upper bound on the second — and an upper bound of 0.71 licenses no statement at all
+   about whether a 0.056 is explicable, which is exactly what the retracted sentence claimed.
+2. **Nested, not disjoint.** The 909 rows are a SUBSET of the 4407, so the two readings share every row of
+   the smaller one. Researcher's null splits the corpus into disjoint halves, which is the matched
+   construction; a nested subset is optimistic by construction.
+
+The number that governs is theirs: a per-column DELTA ranking split-half against itself reads **0.588** at
+n=4406 and **0.237** at n=896 (interval touching zero). So the ceiling on any cross-frame agreement is
+0.588, not 1.0, and D84c's 0.056 un-confounded rises to **0.189** — about a third of the achievable
+agreement. `ColumnSurface.agreement` stays: it is the right null for an AREA ordering, which is what it
+documents. It was quoted for a delta ordering, which is a denominator error of the usual shape.
+
+Honest limit (kept, and it is what should have been read the first time): an ORDERING OF AREAS is more
+stable than an ordering of small per-column DELTAS, because the areas are separated by tenths and the
+deltas by thousandths. So +0.713/+0.839 is an upper bound on what a delta-profile could hope for, not a
+matched control for one.
+
+## D86 — the board's own blur, measured on tied pairs instead of fitted as a residual: **0.0020** — 2026-09-08
+
+Zero card. `python -m kneemri.evaluation.board_transfer`, new `tied()` / `blur()`.
+
+The question is what board delta our record can certify at all, and it arrived as a regression residual:
+researcher's least-squares fit of board on offline over 41 `ensemble` rows read **sd 0.0076**, falling to
+**0.0039** when one 2026-08-12 one-member row (`solo_v1`) was dropped and **0.0021** on the modern >=4-member
+subset. One row carrying half a constant is the shape this project has been burned by three times, and
+`board_transfer`'s own docstring already declines a line through these points: the pairs are unmatched, so
+least squares reports its extremes.
+
+The instrument answers it without a line and without deleting a row. `tied()` is the complement of
+`pairs()` — every pair whose offline gap is under `DELTA_FLOOR`, i.e. the pairs the ruler called EQUAL. On
+those, the offline axis is held still by construction, so the remaining board gap is the board:
+
+| population | tied pairs | median abs board gap |
+|---|---|---|
+| all `ensemble` entries | 147 | **0.0020** |
+| entries with >= 4 members | 132 | **0.0020** |
+
+**0.0020, and the member floor does not move it.** That independently confirms researcher's 0.0021 by a
+different estimator, and it dissolves the question mastermind asked next: whether `solo_v1` should be
+`scope: excluded`. It should NOT, and it stays. Its distance from a fitted line is a property of the LINE —
+the estimator this record supports is a median over pairs, which one row cannot drag, and which reads the
+same number with the solos in as with them out. A row is excluded for being DISHONEST (`raptor_solo`'s
+98.6% in-sample offline), never for being far from a fit.
+
+**Consequence, and it is the operative one:** a board delta under **0.0020** is a move this record cannot
+certify. Mastermind's withdrawn "ignore anything under 0.008" would have re-opened axes closed on real
+0.006-0.008 falls; the cut is 0.002, and the 0.002-0.004 band is a direction. The champion's 0.944 -> the
+owner's 0.955 is +0.011 board, roughly +0.008 offline kernel at the pairwise compression this file's own
+`--near` cell prints — five times the blur, which is why the target is a MEMBER question and not a seating
+one.

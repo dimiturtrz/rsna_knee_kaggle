@@ -142,6 +142,14 @@ line says so in words, in the same place the number is, because an annotation so
 the last three corrections tried and none of them held.
 """
 
+BLUR_MEMBERS = 4
+"""The member count above which an entry is shaped like the ones we actually ship.
+
+Every entry submitted since 2026-08-19 carries at least this many seats, and the one-member rows are
+the whole of the disagreement in every board-scatter reading taken so far. So the blur is reported
+twice — over everything, and over this population — rather than fitted once on a mixture of two.
+"""
+
 THIN = " — DIRECTION ONLY, too few pairs to price an arm with"
 """What a cell under `PRICEABLE` says about itself, carried beside its own number and never elsewhere."""
 
@@ -288,15 +296,48 @@ class BoardTransfer:
         scopes = [str(row["scope"]) for row in self._rows() if "scope" in row and row["scope"] != self.scope]
         return {scope: scopes.count(scope) for scope in sorted(set(scopes))}
 
-    def pairs(self) -> list[BoardPair]:
-        """Every pair of entries the holdout can order, better-by-the-holdout first."""
+    def _combinations(self) -> list[BoardPair]:
+        """Every pair of entries, unfiltered — the population `pairs` and `tied` partition between them."""
         found = self.entries()
         return [
             BoardPair(better=better, worse=worse, scale=self.scale)
             for index, worse in enumerate(found)
             for better in found[index + 1 :]
-            if better.offline - worse.offline >= DELTA_FLOOR
         ]
+
+    def pairs(self) -> list[BoardPair]:
+        """Every pair of entries the holdout can order, better-by-the-holdout first."""
+        return [pair for pair in self._combinations() if pair.offline_delta >= DELTA_FLOOR]
+
+    def tied(self) -> list[BoardPair]:
+        """Every pair the holdout could NOT separate — the population that measures the BOARD.
+
+        The complement of `pairs`, and the only cell in this record where the offline axis is held
+        still. Two entries the ruler calls equal should score equally if the board were noiseless, so
+        whatever board gap remains between them is the board's own repeatability rather than a transfer.
+        """
+        return [pair for pair in self._combinations() if pair.offline_delta < DELTA_FLOOR]
+
+    def blur(self, least_members: int = 1) -> tuple[int, float]:
+        """Pairs the holdout called equal, counted, and their median absolute BOARD gap.
+
+        The board's repeatability at our own scale, measured on this record instead of quoted — which is
+        the whole reason it lives here. It arrived on 2026-09-08 as a regression's residual sd (0.0076
+        over 41 rows, halving to 0.0039 when ONE early one-member row was dropped), a shape this module
+        declines in its own docstring: a least-squares line through unmatched pairs reports its extremes,
+        and a constant whose value turns on which row is deleted is the next thing to be quoted from
+        prose. Tied pairs need no line, no row deleted and no slope — they hold the offline axis still by
+        construction.
+
+        `least_members` restricts to entries of at least that many members, because a solo and an
+        eight-seat stack are not the same instrument and every entry we now ship is the second kind.
+        """
+        gaps = [
+            abs(pair.board_delta)
+            for pair in self.tied()
+            if pair.better.members >= least_members and pair.worse.members >= least_members
+        ]
+        return len(gaps), median(gaps) if gaps else 0.0
 
     def inversions(self) -> list[BoardPair]:
         """The pairs the board ordered the other way — the ones that would have cost a slot."""
@@ -421,6 +462,13 @@ class BoardTransfer:
             f"  among entries at or above {floor:.4f}: {self.priced(count, value, spread)}"
             for floor, count, value, spread in self.regimes()
         ]
+        for least in (1, BLUR_MEMBERS):
+            count, gap = self.blur(least)
+            lines.append(
+                f"board blur over the {count} pairs the holdout could not separate "
+                f"(>= {least} member{'s' if least > 1 else ''}): median |board| {gap:.4f} — a delta "
+                f"smaller than this is a move the board cannot certify"
+            )
         if near is not None:
             count, value = self.compression_above(near)
             cell = self.priced(count, value, self.spread(self.ratios_above(near)))

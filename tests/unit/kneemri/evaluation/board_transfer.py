@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from kneemri.evaluation.board_transfer import (
+    DELTA_FLOOR,
     PRICEABLE,
     REGIME_QUANTILES,
     RULERS,
@@ -32,6 +33,40 @@ def _record(tmp_path: Path) -> Path:
     path = tmp_path / "board.jsonl"
     path.write_text("\n".join(json.dumps(row) for row in RECORD) + "\n", encoding="utf-8")
     return path
+
+
+TIED = [
+    {"id": "solo", "offline": 0.8500, "board": 0.860, "members": 1, "scope": "ensemble"},
+    {"id": "solo twin", "offline": 0.8505, "board": 0.900, "members": 1, "scope": "ensemble"},
+    {"id": "stack", "offline": 0.8600, "board": 0.930, "members": 6, "scope": "ensemble"},
+    {"id": "stack twin", "offline": 0.8610, "board": 0.932, "members": 8, "scope": "ensemble"},
+]
+"""Two pairs the ruler cannot separate and one it can — a solo pair scattering 0.040, a stack pair 0.002."""
+
+
+def _tied(tmp_path: Path) -> Path:
+    path = tmp_path / "tied.jsonl"
+    path.write_text("\n".join(json.dumps(row) for row in TIED) + "\n", encoding="utf-8")
+    return path
+
+
+def test_tied(tmp_path: Path):
+    """The complement of `pairs`: only the two the offline axis holds still, never the wide one."""
+    tied = BoardTransfer(_tied(tmp_path)).tied()
+
+    assert {(pair.better.id, pair.worse.id) for pair in tied} == {
+        ("solo twin", "solo"),
+        ("stack twin", "stack"),
+    }
+    assert all(pair.offline_delta < DELTA_FLOOR for pair in tied)
+
+
+def test_blur(tmp_path: Path):
+    """The member floor is the whole point: a solo pair scatters 0.040 and a shipped-shape pair 0.002."""
+    reading = BoardTransfer(_tied(tmp_path))
+
+    assert reading.blur() == (2, pytest.approx(0.021, abs=1e-6))
+    assert reading.blur(least_members=4) == (1, pytest.approx(0.002, abs=1e-6))
 
 
 def test_entries(tmp_path: Path):
