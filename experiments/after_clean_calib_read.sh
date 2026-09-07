@@ -13,7 +13,11 @@
 # to spend 75 minutes of card. `clean_calib` (fold 0, clean teacher, calibrated) is the only honest
 # offline stand-in for `final_ws_df` (fold -1, oof5 teacher, calibrated): a `--fold -1` fit holds
 # nothing out and cannot be priced by any offline ruler, so its knob has to be read on the fold-0
-# member that differs from it in the teacher file alone. Its delta against `seat_clean_distill_s2026`
+# member that differs from it in the teacher file — AND IN `--ema`, which is the honest version of that
+# sentence (researcher D34, 15:06Z): `final_ws_df` carries `--ema` and `clean_calib.sh` does not, so the
+# stand-in is a TWO-knob comparison and `ema` is unpriced at this corner, no one-knob pair existing.
+# Recorded rather than repaired: adding `--ema` now would move the arm mid-flight.
+# Its delta against `seat_clean_distill_s2026`
 # on the 909 under LEDGER75 is therefore what licences SEATING `final_ws_df` in the 23:30Z entry.
 #
 # THE LINE IS +0.005, NOT THE ARM'S OWN +0.008 (mastermind 15:04Z, on D33). D33 priced +0.008 as a coin
@@ -67,7 +71,8 @@ echo "LEDGER75 $CHILD - $PARENT = $DELTA" >> "$LOG"
 if [ "$DELTA" = "NA" ]; then
   echo "one of the two rows is missing from the reading; the seat licence has no number" >> "$LOG"
 elif awk -v d="$DELTA" 'BEGIN { exit !(d >= 0.005) }'; then
-  echo "SEAT READ LICENSED: >= +0.005 — price final_ws_df in the champion seat via the clean_calib stand-in" >> "$LOG"
+  echo "SOLO GATE HELD: >= +0.005 — researcher runs d34_seat.py clean_calib_s2026; the ENTRY still needs" >> "$LOG"
+  echo "  that seat read >= +0.002 out of sample (20 halves, >= 16/20 > 0) before kneemri-cleancalib ships" >> "$LOG"
 elif awk -v d="$DELTA" 'BEGIN { exit !(d > 0.001) }'; then
   echo "DIRECTIONAL: +0.001..+0.005 — seat read still runs; the entry ships only if it clears +0.005" >> "$LOG"
 else

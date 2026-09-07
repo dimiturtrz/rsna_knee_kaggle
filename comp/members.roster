@@ -724,9 +724,12 @@ final_ws_df.pt              # NO SOLO NUMBER AND THERE NEVER WILL BE ONE - fitte
                             # distill seat: 336 px / 20 slices / band 0.1-0.9, --ema, --calibrated-targets,
                             # --distill-weight 0.7 on teacher_oof5.npz, 12 epochs, converged (13 rows in
                             # final_ws_df.metrics.jsonl = recipe + twelve). ITS STAND-IN IS clean_calib
-                            # _s2026 - fold 0, same corner, differing in the teacher FILE alone (clean
-                            # vs oof5) - so clean_calib's paired delta against seat_clean_distill_s2026
-                            # on the 909 under LEDGER75 is what prices this seat. arm_check refused a
+                            # _s2026 - fold 0, same corner - and the stand-in is TWO knobs away, not
+                            # one: the teacher FILE (clean vs oof5) and --ema, which final_ws_df carries
+                            # and clean_calib.sh does not (researcher D34). ema is UNPRICED at this
+                            # corner; no one-knob pair exists on disk. So clean_calib's paired delta
+                            # against seat_clean_distill_s2026 on the 909 under LEDGER75 is the best
+                            # price this seat can be given, and it is an approximate one. arm_check refused a
                             # second name for this exact recipe (clean_calib_cf, knee-7uoq) and saved
                             # 75 minutes of card by doing it.
 
