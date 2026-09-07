@@ -9782,3 +9782,36 @@ with 314-2666 positives a column — not a frame that has to be argued about.
 **The teacher to distil from is neither file: it is the per-column max of the two**, which costs one npz write
 and zero card, and which dominates both by construction on our own ruler (macro 0.9096). Any arm on this axis
 should carry the mixed target, and the flat `raptor_teacher.npz` is then the ablation rather than the arm.
+
+### D87 addendum — the arm recommendation above is RETRACTED the same night. The measurement stands; what it is a measurement OF changed.
+
+Researcher's follow-up: **`raptor_teacher.npz` IS `raptor_v4_swa`** — max abs diff 0.0016 over the shared
+909 rows, column-averaged spearman 1.000, and `raptor_v4_swa` solo reads the same 0.9432 on the 896. It is
+the foreign member already seated at 1/3, extended from 909 rows to 4407. There is no unexploited teacher.
+Further, **nine arms already pass `--teacher-targets raptor_teacher.npz`** and seven have holdouts: their
+distilled-only pool reads **0.8936**, and swapped into the proxy at 2/3 it reads 0.9187 against the proxy's
+0.9237 (−0.0050). Students of the common teacher are the most correlated block in the pool (0.876 vs 0.870
+parent-parent). The all-seats re-teach is measured, at n=7, and it is flat-to-negative.
+
+**So the splice recommendation is withdrawn: no arm on this axis, mixed target or flat.** A better target
+for a distillation that does not pay is a better version of a thing not worth doing.
+
+**What survives, and it is not nothing:**
+
+1. **The ruler fraction is a general fact about the foreign family, not about a teacher.** L75mid reads the
+   foreign predictor +0.0683 over `teacher_clean_full`; midpoint reads +0.0507. **~26% of any foreign-family
+   lead quoted on L75mid is the recut.** That applies to every foreign number in this record, and it is the
+   second ruler D86 said it lacked.
+
+2. **The two-column exception is now a statement about a SEATED member.** `raptor_v4_swa` sits at 1/3, flat
+   across all twelve columns, and on our own 4407-row ruler it is **worse than our own teacher on Effusion
+   (+0.0141 [+0.0059, +0.0225]) and Synovitis (+0.0227 [+0.0105, +0.0358])** while beating it by 0.034-0.099
+   on the other ten. The ensemble therefore carries a member at full weight on two columns where it is
+   measurably the weaker predictor.
+
+   That is the colweight question — closed five times — but asked in a frame the closed readings never had.
+   Those fitted twelve weights on 896 rows whose own self-agreement is **0.237 [-0.003, 0.547]** (D85): a
+   fit on noise. This is **two** columns, named in advance by a mechanism, on **4407** rows, with both
+   intervals clear of zero. Different power, different arity, different provenance. It is still a
+   weighting operation, so by D88 it is composable-only and buys no slot — but it is priceable for free and
+   it should be priced rather than waved off by the name of the axis.
