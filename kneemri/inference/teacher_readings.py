@@ -65,7 +65,12 @@ class TeacherReadings:
         The training side, which is the opposite of every other caller of `holdout` in this repo, and
         deliberately so: these are exactly the studies the student will be fitted on, and exactly the
         studies whose ordering the labels cannot supply on their own.
+
+        A NEGATIVE fold means every study, for a student that holds nothing out. `teach` is what refuses
+        the combination that would make that a leak; here it is only the arithmetic.
         """
+        if fold < 0:
+            return np.arange(len(identifiers), dtype=np.int64)
         training, _ = folds.holdout(folds.assign(str(self.root.raw() / "train.csv"), identifiers), fold)
         return training
 
@@ -91,6 +96,11 @@ class TeacherReadings:
         if not members:
             message = "no checkpoints to teach from — a teacher file with no members orders nothing"
             raise ValueError(message)
+        if fold < 0:
+            logger.warning(
+                "teaching every study: some rows are IN-SAMPLE for some member, so the student's own holdout "
+                "score is void and only the board may price it"
+            )
 
         positions = self._split(identifiers, folds, fold)
         with Wakelock():
@@ -135,12 +145,18 @@ def main() -> None:
     command.parser.add_argument("--scheme", default="", help="teach over ANOTHER corpus's cache, e.g. merged3")
     command.parser.add_argument("--slices", type=int, default=0, help="the depth that cache holds, with --scheme")
     command.parser.add_argument("--band", type=float, nargs=2, default=None, help="the band that cache holds")
+    command.parser.add_argument(
+        "--teach-all",
+        action="store_true",
+        help="teach EVERY study, for a fold -1 student the board rules; voids the student's own holdout score",
+    )
     arguments = command.parsed()
 
     if arguments.fold < 0:
         message = (
             f"--fold {arguments.fold} names a full-data fit, whose members saw the holdout too — "
-            "teaching from one leaks the evaluation labels into the student"
+            "teaching from one leaks the evaluation labels into the student. --teach-all is the "
+            "deliberate spelling, and it is legal only for a student that holds nothing out"
         )
         raise ValueError(message)
 
@@ -151,7 +167,7 @@ def main() -> None:
     _, identifiers = members[0].cache(readings.root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
 
-    taught, scores = readings.teach(members, identifiers, folds, arguments.fold)
+    taught, scores = readings.teach(members, identifiers, folds, -1 if arguments.teach_all else arguments.fold)
     TeacherFile.write(arguments.out, taught, scores)
     logger.info("%s: %d studies taught by %d members", arguments.out, len(scores), len(members))
 

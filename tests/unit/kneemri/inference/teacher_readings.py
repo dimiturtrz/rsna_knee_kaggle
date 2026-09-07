@@ -75,3 +75,15 @@ def test_over_corpus() -> None:
     assert repointed.slices == 12
     assert repointed.band.recorded() == [0.2, 0.8]
     assert member.slices == 20, "the fitted member is untouched"
+
+
+def test_teach_over_every_study_is_reachable_only_through_the_negative_fold(tmp_path: Path) -> None:
+    """The all-studies split is arithmetic; the refusal that guards it lives in the command, not here.
+
+    `--fold -1` still raises at the CLI, because a teacher that saw the student's holdout is the defect
+    that voided two ledger rows. `--teach-all` is the deliberate spelling of the same split, and it is
+    legal only for a student that holds nothing out and is priced on the board.
+    """
+    readings = TeacherReadings(DataRoot(tmp_path), torch.device("cpu"))
+    every = readings._split(["s0", "s1", "s2"], ReportFolds(5, 2026), -1)
+    assert every.tolist() == [0, 1, 2], "no train.csv is read, and nothing is held out"
