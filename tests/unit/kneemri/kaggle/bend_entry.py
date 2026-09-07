@@ -11,7 +11,15 @@ import pandas as pd
 import pytest
 
 from core.findings import STUDY, TARGETS
-from kneemri.kaggle.bend_entry import BUDGET_SOURCE, FUTURE, SUBMISSION, WEIGHTS_SOURCE, BendEntry
+from kneemri.kaggle.bend_entry import (
+    BASE_SOURCE,
+    BUDGET_SOURCE,
+    FUTURE,
+    HIS_WEIGHTS,
+    SUBMISSION,
+    WEIGHTS_SOURCE,
+    BendEntry,
+)
 
 HOUR = 3600.0
 
@@ -19,7 +27,10 @@ HOUR = 3600.0
 def _entry(tmp_path: Path, seconds: float = 2.0 * HOUR) -> BendEntry:
     """An entry over a throwaway source file and a throwaway working directory."""
     source = tmp_path / "all_public.py"
-    source.write_text(f"{BUDGET_SOURCE}\nman = dict()\n{WEIGHTS_SOURCE}\n    pass\n{BUDGET_SOURCE}\n", encoding="utf-8")
+    source.write_text(
+        f"{BUDGET_SOURCE}\n{BASE_SOURCE}\nman = dict()\n{WEIGHTS_SOURCE}\n        pass\n{BUDGET_SOURCE}\n",
+        encoding="utf-8",
+    )
     return BendEntry(source=source, working=tmp_path, seconds=seconds)
 
 
@@ -39,9 +50,13 @@ def test_prepared(tmp_path: Path) -> None:
     assert text.count("TIME_BUDGET = 7200.0") == 2, "a single-site patch leaves his rad stage aiming at 8h"
     assert WEIGHTS_SOURCE not in text
     assert "pixel_group" in text, "his weights search must skip a package his loader cannot index"
+    assert text.count(HIS_WEIGHTS) == 2, "his own package is NAMED, not searched for among sixteen mounts"
 
     once = tmp_path / "once.py"
-    once.write_text(f"{BUDGET_SOURCE}\n{WEIGHTS_SOURCE}\n    pass\n", encoding="utf-8")
+    once.write_text(
+        f"{BUDGET_SOURCE}\n{BASE_SOURCE}\nman = dict()\n{WEIGHTS_SOURCE}\n        pass\n",
+        encoding="utf-8",
+    )
     with pytest.raises(ValueError, match="not 2"):
         BendEntry(source=once, working=tmp_path, seconds=HOUR).prepared(tmp_path / "no.py")
 
@@ -49,6 +64,14 @@ def test_prepared(tmp_path: Path) -> None:
     nosearch.write_text(f"{BUDGET_SOURCE}\n{BUDGET_SOURCE}\n", encoding="utf-8")
     with pytest.raises(ValueError, match="not 1"):
         BendEntry(source=nosearch, working=tmp_path, seconds=HOUR).prepared(tmp_path / "no.py")
+
+    nobase = tmp_path / "nobase.py"
+    nobase.write_text(
+        f"{BUDGET_SOURCE}\nman = dict()\n{WEIGHTS_SOURCE}\n        pass\n{BUDGET_SOURCE}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="find_weights"):
+        BendEntry(source=nobase, working=tmp_path, seconds=HOUR).prepared(tmp_path / "no.py")
 
 
 def test_flattened(tmp_path: Path) -> None:
@@ -67,7 +90,10 @@ def test_flattened(tmp_path: Path) -> None:
 def test_prepared_refuses_a_source_that_does_not_compile(tmp_path: Path) -> None:
     """A cell boundary the flattener does not know about dies HERE, not on a nine-hour slot."""
     broken = tmp_path / "broken.py"
-    broken.write_text(f"{BUDGET_SOURCE}\n{WEIGHTS_SOURCE}\n    pass\ndef (:\n{BUDGET_SOURCE}\n", encoding="utf-8")
+    broken.write_text(
+        f"{BUDGET_SOURCE}\n{BASE_SOURCE}\nman = dict()\n{WEIGHTS_SOURCE}\n        pass\ndef (:\n{BUDGET_SOURCE}\n",
+        encoding="utf-8",
+    )
     with pytest.raises(SyntaxError):
         BendEntry(source=broken, working=tmp_path, seconds=HOUR).prepared(tmp_path / "no.py")
 

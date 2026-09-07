@@ -4148,6 +4148,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.foreign_run",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.ledger_check",
       "target": "core.cli",
       "weight": 1
@@ -23047,6 +23053,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.foreign_run.main",
+      "target": "kneemri.experiments.foreign_run.ForeignRun",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.foreign_run.main",
+      "target": "kneemri.experiments.foreign_run.ForeignRun.ran",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.experiments.ledger_check.LedgerCheck",
       "target": "kneemri.runs.run_metrics.RunMetrics",
@@ -25630,6 +25648,18 @@
       "kind": "calls",
       "source": "kneemri.inference.vote.Vote.ranks",
       "target": "kneemri.inference.vote.Vote.midranks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.bend_entry.BendEntry.prepared",
+      "target": "kneemri.kaggle.bend_entry.BendEntry._replaced",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.bend_entry.BendEntry.prepared",
+      "target": "kneemri.kaggle.bend_entry.BendEntry.flattened",
       "weight": 1
     },
     {
@@ -28786,6 +28816,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.run_check.KernelLog.refusals",
       "target": "kneemri.kaggle.run_check.KernelLog.dropped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "target": "kneemri.kaggle.run_check.KernelLog.fell_back",
       "weight": 1
     },
     {
@@ -33873,7 +33909,7 @@
       "role": null
     },
     {
-      "descendants": 266,
+      "descendants": 267,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -34681,7 +34717,7 @@
       "role": null
     },
     {
-      "descendants": 20,
+      "descendants": 21,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -34780,6 +34816,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.convergence_check",
       "label": "convergence_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.foreign_run",
+      "label": "foreign_run",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -38846,6 +38890,14 @@
       "label": "RunConvergence",
       "level": "class",
       "parent": "kneemri.experiments.convergence_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignRun",
+      "label": "ForeignRun",
+      "level": "class",
+      "parent": "kneemri.experiments.foreign_run",
       "role": "satellite"
     },
     {
@@ -53130,6 +53182,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignRun.csv_instead",
+      "label": "csv_instead",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run.ForeignRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignRun.ran",
+      "label": "ran",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run.ForeignRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck.__init__",
       "label": "__init__",
       "level": "method",
@@ -55374,6 +55450,22 @@
       "label": "ranks",
       "level": "method",
       "parent": "kneemri.inference.vote.Vote",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.bend_entry.BendEntry._replaced",
+      "label": "_replaced",
+      "level": "method",
+      "parent": "kneemri.kaggle.bend_entry.BendEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.bend_entry.BendEntry.flattened",
+      "label": "flattened",
+      "level": "method",
+      "parent": "kneemri.kaggle.bend_entry.BendEntry",
       "role": null
     },
     {
@@ -57708,6 +57800,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.run_check.KernelLog.dropped",
       "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.fell_back",
+      "label": "fell_back",
       "level": "method",
       "parent": "kneemri.kaggle.run_check.KernelLog",
       "role": null

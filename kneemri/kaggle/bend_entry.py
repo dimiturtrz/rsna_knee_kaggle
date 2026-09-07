@@ -73,6 +73,34 @@ his search finds when our dataset is not mounted beside his."""
 WEIGHTS_SITES = 1
 """How many times that test is spelled. His five other `os.walk` prunes are by filename and unaffected."""
 
+BASE_SOURCE = "def find_weights(name='manifest.json'):\n    import json\n    base = Path('/kaggle/input')"
+"""Where his WEIGHTS search starts, anchored to the function it starts in.
+
+The assignment alone appears six times in his file - his competition data, his cache and his model
+mounts all begin the same walk. Rewriting all six would point every one of them at a weights package.
+The anchor is the function header, which appears once."""
+
+HIS_WEIGHTS = "/kaggle/input/datasets/mattiaangeli/knee-mri-fold-weights"
+"""His own 24-member fold package - the one the board scored 0.939 on, named rather than searched for.
+
+WHY NAMING IT IS THE FIX AND THE PREDICATE WAS NOT ENOUGH. Version 3 patched his search to skip a
+manifest his loader cannot index, which removed OUR package from the candidates. It then took
+`pilkwang/rsna-knee-weights` - 20 members, a manifest his loader CAN index, and not his. His program ran
+whole, printed twenty healthy `submission.csv = weighted rank mean of N member(s)` lines and exited 0 on
+somebody else's members. Sixteen sources are mounted here and his search is a walk in mount order, so
+every predicate is a guess about which package sorts first. The only statement that is actually true is
+which package is HIS, and it is a constant, so it is written down. The walk stays as the fallback: if
+his dataset ever moves, the search is what it was."""
+
+BASE_PATCH = (
+    "def find_weights(name='manifest.json'):\n"
+    "    import json\n"
+    f"    base = Path({HIS_WEIGHTS!r}) if Path({HIS_WEIGHTS!r}).is_dir() else Path('/kaggle/input')"
+)
+"""His package when it is mounted, and his own search when it is not."""
+
+BASE_SITES = 1
+
 
 @dataclass(frozen=True)
 class BendEntry:
@@ -94,6 +122,7 @@ class BendEntry:
         which is how version 1 spent a kernel run to learn about a duplicated `__future__` import.
         """
         text = self._replaced(self.source.read_text(encoding="utf-8"), WEIGHTS_SOURCE, WEIGHTS_PATCH)
+        text = self._replaced(text, BASE_SOURCE, BASE_PATCH, BASE_SITES)
         budget = f"TIME_BUDGET = {self.seconds:.1f}"
         patched = self.flattened(self._replaced(text, BUDGET_SOURCE, budget, BUDGET_SITES))
         compile(patched, str(destination), "exec")
