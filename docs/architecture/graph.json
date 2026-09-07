@@ -23305,6 +23305,42 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.his_labels_blend.Blend.table",
+      "target": "kneemri.experiments.his_labels_blend.Blend._marginal",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.his_labels_blend.Blend.table",
+      "target": "kneemri.experiments.his_labels_blend.Blend.columns",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.his_labels_blend.main",
+      "target": "kneemri.experiments.his_labels_blend.Blend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.his_labels_blend.main",
+      "target": "kneemri.experiments.his_labels_blend.Blend.table",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.his_labels_blend.main",
+      "target": "kneemri.experiments.his_labels_blend.Folds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.his_labels_blend.main",
+      "target": "kneemri.experiments.his_labels_blend.Folds.members",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.experiments.ledger_check.LedgerCheck",
       "target": "kneemri.runs.run_metrics.RunMetrics",
@@ -39206,6 +39242,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.his_labels_blend.Blend",
+      "label": "Blend",
+      "level": "class",
+      "parent": "kneemri.experiments.his_labels_blend",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.his_labels_blend.Folds",
+      "label": "Folds",
+      "level": "class",
+      "parent": "kneemri.experiments.his_labels_blend",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck",
       "label": "LedgerCheck",
       "level": "class",
@@ -53662,18 +53714,34 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.his_labels_blend.blended",
-      "label": "blended",
+      "id": "kneemri.experiments.his_labels_blend.Blend._marginal",
+      "label": "_marginal",
       "level": "method",
-      "parent": "kneemri.experiments.his_labels_blend",
+      "parent": "kneemri.experiments.his_labels_blend.Blend",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.his_labels_blend.fold_members",
-      "label": "fold_members",
+      "id": "kneemri.experiments.his_labels_blend.Blend.columns",
+      "label": "columns",
       "level": "method",
-      "parent": "kneemri.experiments.his_labels_blend",
+      "parent": "kneemri.experiments.his_labels_blend.Blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.his_labels_blend.Blend.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.experiments.his_labels_blend.Blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.his_labels_blend.Folds.members",
+      "label": "members",
+      "level": "method",
+      "parent": "kneemri.experiments.his_labels_blend.Folds",
       "role": null
     },
     {
