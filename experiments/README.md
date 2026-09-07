@@ -9050,3 +9050,56 @@ Top of the first sweep (LEDGER75, midpoint in brackets): `raptor_v4_swa` 0.9425 
 [0.8929], `recal_holdannot_s2026` 0.9004 [0.8964]. The raptor family moves +0.045 to +0.050 under the recut
 while our own members move +0.030 or less — the recut is not a constant offset, and any seat ordering read
 at the midpoint across those two families was reading a different question.
+
+## 2026-09-07 — D30/D31: the leak was never the fold-0 block, and the ruler does not invert above its floor
+
+`teacher_oof5.npz` and `teacher_oof_full.npz` both hold a CLEAN fold-0 block — it is `oof_fold0_s2026`,
+which held fold 0 out, every teacher row allclose-matched to exactly one producer run. The leak is the
+**3498 rows of folds 1-4**: in both files they come from `oof_fold{1,2,3,4}_s2026`, fitted without
+`--exclude-fold`, so every one of them trained ON fold 0 (README:8526-8540, knee-zwcyk). The consequence
+is directional, not general: a `--fold -1` consumer holds nothing out and is ruled by the board, so no
+leak can reach its number; a **fold-0-SCORED** consumer is inflated, which is exactly `merged_blend_df`,
+whose fold-0 read is the six-seat family's only kill switch. It is now pointed at `teacher_clean_full.npz`
+— `oof_clean_fold[1-4]_s2026` plus `oof_fold0_s2026` as the fifth block, 4407 studies, 12 targets, all
+224/8, not one row written by a model that saw fold 0. Known cost, recorded rather than argued away:
+starving the clean twins of one fold costs them −0.0067 as teachers (`compose_v4b_clean.sh:47`).
+
+D31 (n=37 priced entries): five L75mid inversions, all ruler residuals at board Δ −0.001..−0.003, and
+**zero** carry a leak-set member — every leaked entry has `offline: null` and was never among the 37. The
+`merged_blend_cf` proxy reads R1 0.8884 / LEDGER75 0.9290 / L75mid 0.9235, so D28's re-selection verdict
+is untouched by the leak. `oofsolo` vs `holdsolo` inverts under R1 (+0.0051) and is ordered exactly at the
+floor under L75mid (−0.0020). The ruler is ordered at the .0053 floor under every subset tried, not at .002.
+
+## 2026-09-07 — D32: the gap is flat across columns, so the lever is blend composition
+
+Gap by column, as share of distance-to-1 (n=896, L75mid): Fracture .114 / LatOA .108 / PFOA .103 /
+MCL .097. "MCL + LatOA = three quarters" — the reading recorded next to entry e82aa7e4 — was an **R1
+artefact** and does not survive the recut. Best-member column swap over the six-member blend: max +0.0010
+in sample (Synovitis, `hisfluid_hold`), **−0.0006 out of sample**; the blend beats the best owned solo on
+11 of 12 columns by 0.006-0.029 AUC. A perfect Fracture column would be worth +0.0087 L75mid — the whole
+gap — on 39 positives, needing column AUC 0.956 against the best solo's 0.871. The column-specialist route
+is closed and `hisfluid_hold_s2026` is declined in writing on that sweep rather than on its solo.
+
+Calibrated-targets gain per column, corner-mean: PFOA +.020, MCL +.018, Fracture +.015, Effusion +.014,
+LatOA +.012, and **NEGATIVE on Medial Meniscus (4/4 corners) and Baker's (3/4)** — precisely the two columns
+LEDGER75 keeps at the midpoint. The foreign-distill corner is the largest at +0.0140 macro.
+
+## 2026-09-07 — two `--fold -1` members were trained, converged, and on no roster line
+
+`arm_check` refused an arm written to build the whole-corpus calibrated-distill seat: "TWIN clean_calib_cf:
+is `final_ws_df` flag for flag, up to `--out`" (knee-7uoq). `final_ws_df.metrics.jsonl` holds thirteen rows
+— recipe plus twelve epochs — at fold −1, ema, 336 px, 20 slices, band 0.1-0.9, `--calibrated-targets`,
+`--distill-weight 0.7` on `teacher_oof5.npz`. The seat had been trained before it was ordered, twice. The
+check saved 75 minutes of card; what it could not save is the four days `final_ws_df` and `calib_span_df`
+spent in neither `comp/members.roster` nor `comp/members.declines`, invisible to every gate — the same hole
+`roster_check` exists for, reopened by two members nobody typed a line for.
+
+Both are now rostered with the fold-0 stand-in that can price them, because a `--fold -1` fit holds nothing
+out and has no offline number of its own, ever. `final_ws_df`'s stand-in is `clean_calib_s2026`, and it is
+**two knobs away, not one**: the teacher file (clean vs oof5) and `--ema`, which `final_ws_df` carries and
+`clean_calib.sh` does not (researcher D34). `ema` is unpriced at this corner and no one-knob pair exists on
+disk. `calib_span_df` has no stand-in named at all and may be packaged but not seated on a number.
+
+D34 also prices the seat itself: seat Δ / solo lift ≈ 0.25 within the DINOv2 family over three measured
+members, so `clean_calib`'s predicted seat read is +0.001-0.002 and `final_ws_df` **cannot reach +0.005 on
+the seat by that mechanism**. The same-family seat is saturated; `seat_clean_distill` seats −0.0001.
