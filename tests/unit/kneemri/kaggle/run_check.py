@@ -48,6 +48,14 @@ def test_changed():
     assert not KernelLog.of(WHOLE).changed()
 
 
+def test_fell_back():
+    """A two-producer run that shipped one producer's table says so, and a whole run does not."""
+    fallback = WHOLE + "his program did not produce a table - shipping our six alone\n"
+    assert KernelLog.of(fallback).fell_back()
+    assert not KernelLog.of(WHOLE).fell_back()
+    assert any("re-ship" in refusal for refusal in KernelLog.of(fallback).refusals())
+
+
 def test_refusals():
     """A whole run refuses nothing; the farseat shape refuses on the drop, the mark and the count.
 

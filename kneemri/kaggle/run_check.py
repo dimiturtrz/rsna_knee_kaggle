@@ -35,6 +35,14 @@ logger = logging.getLogger(__name__)
 IDENTITY_MARK = "ENTRY IDENTITY CHANGED"
 """What `KernelRun` prints when it served fewer members than it was named for."""
 
+FALLBACK_MARK = "shipping our six alone"
+"""What a two-producer kernel prints when the FOREIGN side did not run.
+
+`kneemri-bend` wraps mattiaangeli's program so that a crash there leaves the champion's own table in
+place — correct engineering, and a WRONG entry: what would then be submitted is the champion set under
+a new name, which `submit_check` compares by member SET and would wave through as new. The fallback
+exists so the kernel survives; this refusal exists so the slot is never spent on what it produced."""
+
 LOADED = re.compile(r"loaded and fingerprint-checked (\d+) of (\d+) members")
 """The run's own census of its seats, printed once, before a single study is decoded."""
 
@@ -89,9 +97,18 @@ class KernelLog:
         """Whether the run announced that it served an entry other than the one it was named for."""
         return any(IDENTITY_MARK in line for line in self.lines)
 
+    def fell_back(self) -> bool:
+        """Whether a two-producer run shipped one producer's table because the other did not arrive."""
+        return any(FALLBACK_MARK in line for line in self.lines)
+
     def refusals(self) -> list[str]:
         """Every reason this run's output must not be submitted under the entry's name; empty when whole."""
         found = [f"the run DROPPED a seat: {drop}" for drop in self.dropped()]
+        if self.fell_back():
+            found.append(
+                f"the run printed {FALLBACK_MARK!r} - the foreign producer never ran, so this table is the "
+                f"champion set under another entry's name and the slot would buy a re-ship"
+            )
         if self.changed():
             found.append(
                 f"the run printed {IDENTITY_MARK!r} - its submission.csv is a smaller ensemble than the "

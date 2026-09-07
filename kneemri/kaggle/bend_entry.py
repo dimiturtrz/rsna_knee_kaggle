@@ -49,6 +49,9 @@ SUBMISSION = "submission.csv"
 
 PROGRAM = "all_public.py"
 
+FUTURE = "from __future__ import annotations"
+"""The one statement Python allows only at the top of a file — and his file holds three of them."""
+
 
 @dataclass(frozen=True)
 class BendEntry:
@@ -64,16 +67,42 @@ class BendEntry:
         A copy rather than an edit in place: the mounted file is read-only on Kaggle, and a patched
         copy is the artefact a later reader can diff against the published original to see that one
         constant is the whole difference.
+
+        The patched text is `compile`d before it is written. A syntax hazard in a flattened notebook is
+        otherwise discovered by a subprocess that exits 1 with its message on a stream nobody keeps —
+        which is how version 1 spent a kernel run to learn about a duplicated `__future__` import.
         """
         text = self.source.read_text(encoding="utf-8")
         found = text.count(BUDGET_SOURCE)
         if found != BUDGET_SITES:
             message = f"{self.source} spells {BUDGET_SOURCE!r} {found} times, not {BUDGET_SITES}"
             raise ValueError(message)
-        patched = text.replace(BUDGET_SOURCE, f"TIME_BUDGET = {self.seconds:.1f}")
+        patched = self.flattened(text.replace(BUDGET_SOURCE, f"TIME_BUDGET = {self.seconds:.1f}"))
+        compile(patched, str(destination), "exec")
         destination.write_text(patched, encoding="utf-8")
         logger.info("his program patched to a %.2f h budget at %s", self.seconds / 3600.0, destination)
         return destination
+
+    def flattened(self, text: str) -> str:
+        """His three concatenated notebook CELLS made into one legal script.
+
+        `from __future__ import annotations` is legal only before any other statement, and his published
+        file is three cells pasted end to end — the statement sits at lines 1, 336 and 2210. Each cell
+        was legal where it was executed; run as ONE script by a subprocess it is a `SyntaxError` at 336,
+        which is exactly how version 1 of the kernel died at 0 s with the patcher blameless. Every
+        occurrence after the first is dropped. Nothing else about his source is touched, and the
+        statement is a no-op on the Python this runs under, so the program is unchanged by the deletion.
+        """
+        kept = 0
+        lines: list[str] = []
+        for line in text.splitlines(keepends=True):
+            if line.startswith(FUTURE):
+                kept += 1
+                if kept > 1:
+                    continue
+            lines.append(line)
+        logger.info("dropped %d trailing %r lines from his cell boundaries", max(kept - 1, 0), FUTURE)
+        return "".join(lines)
 
     def read(self) -> pd.DataFrame:
         """The table he left, refused rather than blended when it is not one.

@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 
 from core.findings import STUDY, TARGETS
-from kneemri.kaggle.bend_entry import BUDGET_SOURCE, SUBMISSION, BendEntry
+from kneemri.kaggle.bend_entry import BUDGET_SOURCE, FUTURE, SUBMISSION, BendEntry
 
 HOUR = 3600.0
 
@@ -42,6 +42,27 @@ def test_prepared(tmp_path: Path) -> None:
     once.write_text(f"{BUDGET_SOURCE}\n", encoding="utf-8")
     with pytest.raises(ValueError, match="not 2"):
         BendEntry(source=once, working=tmp_path, seconds=HOUR).prepared(tmp_path / "no.py")
+
+
+def test_flattened(tmp_path: Path) -> None:
+    """Three concatenated cells become one script that compiles; the first future line stays."""
+    entry = _entry(tmp_path)
+    cells = f"{FUTURE}\nprint(1)\n{FUTURE}\nprint(2)\n{FUTURE}\nprint(3)\n"
+    with pytest.raises(SyntaxError):
+        compile(cells, "cells.py", "exec")
+
+    one = entry.flattened(cells)
+    assert one.count(FUTURE) == 1, "the first one is kept — it is the only legal position for it"
+    assert one.count("print(") == 3, "nothing but the duplicate statements is dropped"
+    compile(one, "one.py", "exec")
+
+
+def test_prepared_refuses_a_source_that_does_not_compile(tmp_path: Path) -> None:
+    """A cell boundary the flattener does not know about dies HERE, not on a nine-hour slot."""
+    broken = tmp_path / "broken.py"
+    broken.write_text(f"{BUDGET_SOURCE}\ndef (:\n{BUDGET_SOURCE}\n", encoding="utf-8")
+    with pytest.raises(SyntaxError):
+        BendEntry(source=broken, working=tmp_path, seconds=HOUR).prepared(tmp_path / "no.py")
 
 
 def test_read(tmp_path: Path) -> None:
