@@ -3,7 +3,13 @@
 # mastermind letter set. REPLACES `after_clean_calib_read.sh`, which launched the six twins
 # unconditionally the moment the reading was printed.
 #
-# WHY THE ORDER CHANGED. The twins are a SEAT operation on a block already priced: D35 fits an added
+# ORDER, 16:10Z: reading -> hisrecipe_distill -> foreign_labels_dense -> twins. `hisrecipe_distill`
+# (2.0-2.1 h) is the only one of the three whose read can decide a SLOT — pre-reg solo >= 0.895 is an
+# honest 1/3 seat of ~ +0.007, and a ~19:15Z read still leaves room for a 2 h full-fit twin.
+# `foreign_labels_dense` (2.5 h) is an instrument on the label axis; nothing it decides is due before
+# 00:00Z, so it moves behind. Same total card, the shippable read lands earlier.
+#
+# WHY THE TWINS ARE LAST. The twins are a SEAT operation on a block already priced: D35 fits an added
 # honest seat at 1/6x2/3 to -0.0009 + 0.076*lift + 0.0139*(1-corr), so six retrained-but-similar seats
 # buy the block's w = 2/3 only if the treatment moves each seat's SOLO. `foreign_labels_dense` is the
 # arm that measures whether such a treatment exists: if his report table lifts OUR recipe's solo by
@@ -83,23 +89,24 @@ if awk -v d="$DELTA" 'BEGIN { exit !(d >= 0.0135) }' 2>/dev/null; then
   echo "SEPARATE FINDING: >= +0.0135 - distillation amplifies the knob; ledger it" >> "$LOG"
 fi
 
-echo "(a) launching foreign_labels_dense at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
-bash experiments/arms/foreign_labels_dense.sh >> "$LOG" 2>&1
-echo "(a) foreign_labels_dense returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
-
-# (b) the researcher's his-recipe port, if it has arrived. It is delivered as a script into the mail
-# attachment directory; a letter without a script is not runnable and must not stall the card.
+# (a) the researcher's his-recipe port. IT GOES FIRST (mastermind 16:10Z): same total card either way,
+# but its read is the only one of the three that can decide a SLOT — pre-reg solo >= 0.895 is an honest
+# 1/3 seat of ~ +0.007, read at ~19:15Z. `foreign_labels_dense` decides nothing before 00:00Z.
 if [ ! -f "$HISRECIPE" ] && [ -f "$ATTACH" ]; then
   cp "$ATTACH" "$HISRECIPE"
-  echo "(b) took hisrecipe_distill.sh from the mail attachment" >> "$LOG"
+  echo "(a) took hisrecipe_distill.sh from the mail attachment" >> "$LOG"
 fi
 if [ -f "$HISRECIPE" ]; then
-  echo "(b) launching hisrecipe_distill at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+  echo "(a) launching hisrecipe_distill at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
   bash "$HISRECIPE" >> "$LOG" 2>&1
-  echo "(b) hisrecipe_distill returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+  echo "(a) hisrecipe_distill returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 else
-  echo "(b) hisrecipe_distill absent at $(date -u +%Y-%m-%dT%H:%M:%SZ); the twins take its place in line" >> "$LOG"
+  echo "(a) hisrecipe_distill absent at $(date -u +%Y-%m-%dT%H:%M:%SZ); foreign_labels_dense moves up" >> "$LOG"
 fi
+
+echo "(b) launching foreign_labels_dense at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+bash experiments/arms/foreign_labels_dense.sh >> "$LOG" 2>&1
+echo "(b) foreign_labels_dense returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 
 # (c) the six twins, BEHIND the gate. Six seats retrained under one treatment are the block's w = 2/3,
 # so they run only if the treatment moved a solo by an amount the block can carry.
