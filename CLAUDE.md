@@ -296,6 +296,18 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   clock. Say the compressed interval out loud whenever a mark passes.
   Pacing is not licence to ship a reseating: with nothing mechanism-backed to beat the champion, spend the
   slot on an INSTRUMENT instead, and say which of the two it is in the submission message.
+- **Arms do not run in `.venv` — check an arm's dependency with `.venv-arm/Scripts/python.exe`.**
+  `experiments/lib.sh:34` exports `UV_PROJECT_ENVIRONMENT="$REPO/.venv-arm"`, a second environment
+  nothing else ever syncs. So a package declared in `pyproject.toml` and importable from `.venv` says
+  NOTHING about what an arm can import: `scikit-learn` was in both `pyproject.toml:67` and `.venv` and
+  absent from `.venv-arm`, and `hisrecipe_distill` died on `ModuleNotFoundError: No module named
+  'sklearn'` twice in one evening — the second time after a "proof" the env was healthy that had asked
+  the wrong interpreter. Add to it with `UV_NO_SYNC=1 uv pip install --python
+  .venv-arm/Scripts/python.exe <pkg>` (adds), never `uv sync --extra` (rewrites, and has killed live
+  arms). And **an exit code is not evidence an arm ran**: `foreign_run.py:71` calls
+  `runpy.run_path` and does not translate a failure into a non-zero status, so both deaths were recorded
+  as `returned 0` and `queue_check` read **OK** with an idle card behind it. The success marker is the
+  CHECKPOINT on disk.
 - **An arm's full log is named for its CHECKPOINT, not for the arm** — `_arm_log` (`experiments/lib.sh`)
   uses the basename of `--out` minus `.pt`, falling back to the `run_train` name only when a run has no
   `--out` (knee-tkyy). So `ortho_slow_trunk` writes `ortho_slow_trunk.full.log` and `mricore_corpus`

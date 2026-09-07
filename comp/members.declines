@@ -738,8 +738,12 @@ foreign_labels_dense_s2026.pt  # his 12-finding LABELS on our dense recipe, fold
                             # DOES clear — swap for lr4e-5_ws +0.0012 [+0.0002, +0.0021], add-as-sixth
                             # +0.0011 [+0.0004, +0.0017] — so if a fallback-to-five branch ever fires this
                             # is the member wanted, and this line is re-opened by that, not by re-quoting
-                            # 0.8862. Per column vs parent through_dense: MedOA +0.030, PFOA +0.026,
-                            # Baker's +0.019, Effusion +0.018, LatOA +0.017 against Synovitis -0.067, MCL
-                            # -0.030 — gains and the Synovitis loss cancel at the macro (0.8862 vs 0.8864).
+                            # 0.8862. AGAINST THE RIGHT TWIN (D58) the member is WORSE, not level: its
+                            # byte-identical control is `labelwise_dense_s2026` (arm header :21-23), not
+                            # `through_dense`, and against it macro reads **-0.0105**, Synovitis -0.074,
+                            # with only Baker's clearing (+0.0081 [+0.0003, +0.0192]). The +0.030 MedOA /
+                            # +0.026 PFOA table quoted on arrival was measured against the WRONG control
+                            # and does not survive. His labels retire as a TRAINING axis on our recipe;
+                            # what remains of his lead is his RECIPE (hisrecipe_distill).
                             # The general reading: decorrelation WITHOUT solo lift buys +0.0004 at nine
                             # seats, which is D53's width saturation seen from the member side.

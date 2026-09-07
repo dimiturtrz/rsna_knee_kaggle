@@ -9450,3 +9450,64 @@ and the rank-transform asymmetry that was suspected of carrying the readings is 
 accumulating action, so four `--pair` flags silently priced only the LAST one. Fixed with `action="extend"` and
 recorded here rather than in the diff, because a gate whose whole purpose is to refuse three of four swaps had a
 failure mode that reported one of them.
+
+## The width axis saturates at nine seats, and diversity without lift is worth +0.0004 (D53 / D56 / D58, 2026-09-07)
+
+Three researcher jobs land on one number from two directions. Kernel space throughout, frame 896
+gold-removed fold-0, L75mid, `LogitAverage` block with `RaptorSeat` at 1/3.
+
+**D53 — the seat curve is flat past nine.** Nine seats read **0.9260**, five read 0.9234. Over **189**
+candidate tenth seats the best is `ramp_dense_gate` at **+0.0004 [-0.0000, +0.0009]**; 0.11 of the 189
+are positive at all and **none** clears +0.0010. Greedy all the way to fifteen seats buys **+0.0014
+cumulative** — on D50's slope that is +0.0016 board, which is exactly the transfer ruler's own residual
+SD, and no individual step lands outside its own interval. Two independently constructed nines (the
+shipped one at 0.9260, a greedy-from-five one at 0.9264) sit inside noise of each other, so **the ceiling
+at nine is a property of the POOL, not of which nine**. Spearman(delta at 5, delta at 9) = **0.943** with
+top-10 overlap 8/10: seat value is a MEMBER property, but the BLOCK sets the exchange rate — delta9 is
+about **one third** of delta5 (delta5 range [-0.0018, +0.0011] vs delta9 [-0.0013, +0.0004]). D53 §4 adds
+that no candidate moves MCL / LatOA / Fracture by >= +0.005 beside the nine (best: MCL
+`merged_labelwise_cf` +0.0026, LatOA `finding_calib_dense_s2026` +0.0011, Fracture `margin_seat_s2026`
++0.0026) — the weak columns are weak in EVERY member, so a seat cannot buy them. §5: raptor's own fold-0
+checkpoints as an extra ours-member are +0.0000 (`repl2x2_a_swa`) and -0.0000 (`effv2l_f0_swa`), and
+splitting raptor's 1/3 into 1/6+1/6 costs **-0.0093 / -0.0104**.
+
+**D56 — the best-case diversity member confirms it from the member side.** `foreign_labels_dense_s2026`
+(his 12-finding labels, our dense recipe) is the ONLY member in the pool on the D45 decorrelation gate:
+corr-to-nine **0.881** at solo **0.8862**. Shape verdict SPREAD — 0.39 of the 0.533 total corr drop sits
+in Synovitis + MedMen + Baker's, under the 0.5 share that would call it an artefact, so the
+decorrelation is real. It still prices at **+0.0004 [-0.0001, +0.0008]** beside the nine and +0.0005 as a
+`calib_span` swap beside the five; both pre-registered GO rulers wanted +0.0010, so `warm_hislabels` was
+never armed. Beside the FIVE the same member clears easily (+0.0012 swapping `lr4e-5_ws`, +0.0011 as a
+sixth) — the 1/3 exchange rate again, not a contradiction. **Decorrelation without solo lift buys
++0.0004 at nine seats.** Any future arm whose pitch is "a more diverse member" is priced at ~0 before it
+runs; the pitch has to be solo LIFT or a different axis.
+
+**D58 — and the arrival table was read against the wrong control.** The +0.030 MedOA / +0.026 PFOA /
++0.019 Baker's column gains were measured against `through_dense`; the member's byte-identical twin is
+`labelwise_dense_s2026` (arm header :21-23). Against the RIGHT twin the member is **-0.0105 macro**,
+Synovitis **-0.074**, and only Baker's clears (+0.0081 [+0.0003, +0.0192]). A `mixed_labels_dense` arm
+and a six-twin block retrain on column-mixed labels were ordered at 18:40Z on the wrong table and
+**withdrawn at 18:50Z** before either was built — best case after the correction was +0.0005…+0.0009
+board for 7.5 h of card. His labels retire as a TRAINING axis on our recipe; what remains of his lead is
+his RECIPE, which is what `hisrecipe_distill` tests.
+
+**Two harness facts from the same job, both verified in `core/data/labels/targets.py`** (the letter said
+`kneemri/data/`; the module lives under `core/`):
+
+1. `:439-443` — a labels table with **no `__conf` column** trains every cell at weight **1.0** (`raw =
+   derived[confidence] … if confidence in derived.columns else ones`). His table has none, so the
+   his-labels arm moved VALUES and WEIGHTS in one step and never isolated the labels it was testing.
+2. `:332-343` — `Supervision.applied` remaps any cell `np.isclose` to one of our five levels
+   (`applied[np.isclose(value, level)] = rate`). His LatOA has **1176 cells at exactly 0.08**, which the
+   map rewrites to **0.041** — BELOW his own 0.05 negatives. That is an order inversion inside the one
+   column the arm existed to move. The docstring's promise ("values the reader never emits pass through
+   untouched") holds only while the foreign scale misses our levels; a collision is silent.
+
+Any future foreign-label arm nudges colliding values off the levels and states what it did with `__conf`.
+Guard bead filed (P2): `targets.py` should refuse or warn when a non-v2 table collides with a level.
+
+**What this closes.** Width (a tenth seat), diversity-without-lift (a decorrelated member), and foreign
+labels as a training target — three of the four open member axes, all on measurement rather than on
+argument. What remains, ranked by weight x lift: block lift via better targets, an honest 1/3-class
+object (`hisrecipe_distill`), column lift on MCL / LatOA (`lean_weak_columns`, running), and a ruler for
+the two blind columns (`resnet50d_short`).
