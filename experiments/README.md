@@ -9815,3 +9815,71 @@ for a distillation that does not pay is a better version of a thing not worth do
    intervals clear of zero. Different power, different arity, different provenance. It is still a
    weighting operation, so by D88 it is composable-only and buys no slot — but it is priceable for free and
    it should be priced rather than waved off by the name of the axis.
+
+## D89 — the contamination question was answered twice before it was asked, and its consequence is DIRECTIONAL: the corrupted axis is weight-on-the-foreign-seat, and it is biased against removing it — 2026-09-08
+
+Zero card, zero new compute. This is a ledger read, which is what it should have been the first time.
+
+**The P0 as posed — "run `foreign_overlap` on `raptor_v4_swa` against our 909" — needs no run.** The record
+already holds the answer in two places, one specific and one general:
+
+- `README:6629`: *"`foreign_overlap` reads raptor at 98.6% in-sample on this corpus."* 896 of our 909
+  holdout studies sit in their published label table; the 13 absent are exactly the gold studies falling in
+  fold 0.
+- `README:8822`, stated as a rule after the `repl2x2_c` band was withdrawn: *"any reading of a released
+  foreign checkpoint on our 909/896 is **in-sample by construction**, and no `foreign_overlap` call is
+  needed to establish it"* — his training script defaults to `--folds 0` with the fold hook firing only
+  above zero, and the block his released arms were trained by passes no `--folds` at all.
+
+So **`raptor_v4_swa`'s 0.9432 solo is in-sample**, and so is the 0.9260 nine-seat kernel that carries it at
+1/3. `foreign_overlap`'s own docstring closes it: on the two rulers where both models are honest — the gold
+58 and the board — the families **tie**.
+
+**What this does to D87.** My midpoint reading ran on all 4407 corpus rows, of which 4349 are in their
+table: **98.7%**. So **+0.0507 is an upper bound on the foreign family's real lead over our teacher, not an
+estimate of it** — the same defect that voided `raptor_solo`'s 0.8938, arriving one ruler later.
+
+**What it does NOT do to the two-column exception, and this is the point.** Contamination biases the
+foreign predictor **upward**. An inequality that survives a bias pointing the wrong way is stronger than
+one measured clean, not weaker. Our teacher beats it on Effusion (+0.0141 [+0.0059, +0.0225]) and Synovitis
+(+0.0227 [+0.0105, +0.0358]) **while it is memorising the rows**. And the record already carries an
+independent replication of exactly that pair: `README:8825-8835`, A′ minus `raptor_coat384`, a **different
+checkpoint** on a **different ruler**, twelve columns of which only three are positive — **Effusion
++0.0079, Synovitis +0.0096**, Baker's +0.0030. Two readings, two members of the family, two rulers, the same
+two columns. That is a property of the family, not a draw from noise.
+
+**The operative consequence — the corruption has a direction, and it is not uniform.**
+
+- Comparisons that **hold the foreign seat fixed** carry the inflation as a roughly constant offset. They
+  stay ordinally usable, and that is most of the record, including D88's frontier table.
+- Comparisons that **change the foreign seat's weight** are measured on a corrupted axis, and the sign is
+  knowable in advance: **down-weighting or removing a member that memorised the holdout looks worse offline
+  than it is.** Researcher's own d34_seat readings are all of this shape — replacing it costs −0.0227,
+  halving the foreign block costs −0.0100 — and every one of those penalties is an over-estimate.
+- Therefore **Job 35 is biased against its own hypothesis before it runs.** A negative from it is
+  uninformative; a positive would be strong. Pre-registered here rather than after the number lands.
+
+**And the honest comparator for the family already has a name in this file:** cell C (`README:8823`) — same
+fold file, same epoch budget, same ruler, both out of sample. `hisrecipe_distill` is that shape: his trunk
+and his labels with **fold 0 held out by us**, so its OOF-896 solo is honest by construction. Its teacher is
+`teacher_clean_full.npz` (`arms/hisrecipe_distill.sh:63`) — **ours, 0.8777, not raptor** — so it inherits
+none of this on its own offline number.
+
+### `weakdraw.sh` — KILLED, and not for being wrong about Fracture — 2026-09-08
+
+Held for a gate, then killed for two independent reasons, neither of which is its hypothesis.
+
+1. **Its gate is not constructible.** It was held pending a re-derivation of per-column decorrelation and
+   headroom for candidate seats on the 4,406 surface. Researcher measured all 307 `*.holdout.npz` under
+   `$MODELS`: **275 are 909 rows (fold 0)**, four are 896, the rest are stubs or partials, and **exactly one
+   member file covers the corpus** (`foreign_oof_corpus.holdout.npz`). Candidate-seat per-column statistics
+   cannot be computed on that surface at all. Holding an arm for a gate nobody can satisfy holds it forever.
+2. **Its axis has no plausible size.** D88: across 30 classifiable steps the offline frontier has never moved
+   by +0.004 on any ensembling axis, seating reads −0.0029, and the frontier has been flat for eleven days.
+   The arm needed 2.7 h of card for an operation whose best-ever realized instance is smaller than the
+   board's own 0.0020 blur.
+
+**What is NOT concluded:** nothing about whether Fracture is under-weighted. That question is untouched; it
+was never measured, and this arm's death is about a missing ruler and a missing size, not about its subject.
+If a corpus-wide candidate-seat surface ever exists, the question is re-opened by rebuilding the gate, not by
+re-quoting this decline.
