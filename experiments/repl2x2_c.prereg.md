@@ -177,7 +177,44 @@ budget and its ruler exactly.
 
 The per-column branches registered above stand unchanged, because they are read C-minus-A' and both sides
 of that difference are out of sample. Only the sentence claiming the A'-minus-coat384 shape is evidence
-for the periphery is withdrawn. On C's own reading the first branch says "consistent with the periphery",
+for the periphery is withdrawn.
+
+### SECOND CORRECTION, 11:56Z: the column NAMES in the table above are wrong
+
+The twelve-row table was labelled from HIS column vocabulary (PCL, LCL, Cartilage, MedOA/LatOA), which our
+truth table does not use. `report_labels_v2.csv`'s header, read from the file, is
+`ACL · MCL · Medial Meniscus · Lateral Meniscus · Medial OA · Lateral OA · PF OA · Effusion · Synovitis ·
+Baker's · Contusion · Fracture`. Re-labelled by index, A' minus coat384 is:
+
+| column | delta |
+|---|---|
+| Lateral Meniscus | −0.0551 |
+| MCL | −0.0446 |
+| Fracture | −0.0378 |
+| Lateral OA | −0.0335 |
+| ACL | −0.0328 |
+| PF OA | −0.0208 |
+| Medial OA | −0.0156 |
+| Medial Meniscus | −0.0107 |
+| Contusion | −0.0098 |
+| Baker's | **+0.0030** |
+| Effusion | **+0.0079** |
+| Synovitis | **+0.0096** |
+
+So the columns where A' leads are the three FLUID findings, not the OA columns, and A' is behind on all
+three OA columns. Any branch above phrased in his vocabulary is void with it; the C-minus-A' reading is
+re-registered on our names: **gain in Lateral Meniscus / MCL / ACL / Lateral OA / Fracture** is consistent
+with the periphery, **gain in Effusion / Synovitis / Baker's** is the fluid axis and says nothing about
+span, **uniform gain** is capacity. Column order comes from the file on every table from here.
+
+**And the training labels are not our labels.** A' and C train on `labels_llm_soft.csv` (4,349 of our 4,406
+studies, same twelve names) and are scored against `report_labels_v2.csv`. The two tables disagree on
+prevalence in one direction on eleven columns — positive rate at 0.5, ours ÷ his: MCL 3.6×, Effusion 2.4×,
+ACL 2.1×, Baker's 2.1×, Lateral Meniscus 1.9×, Fracture 1.9×, Contusion 1.9×, Lateral OA 1.7×, Medial OA
+1.5×, Medial Meniscus 1.4×, PF OA 1.35× — and invert on the twelfth, **Synovitis 0.54×** (his 0.245, ours
+0.132). Two of the three columns where A' leads (Effusion, Synovitis) sit at the extremes of that
+disagreement. This is a training-side difference the 2×2 does not vary and nothing has priced; it cancels
+in C-minus-A' and in nothing else. On C's own reading the first branch says "consistent with the periphery",
 never "the periphery is the mechanism": C separates periphery from capacity only if its gain concentrates
 in the ligament columns, and even then 44→64 slots adds density as well as reach, which nothing here
 measures apart.
