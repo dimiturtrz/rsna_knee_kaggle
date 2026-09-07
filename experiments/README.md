@@ -9332,9 +9332,58 @@ signature of the inflation README:9138 names.
 
 Unexplained, and worth naming: level-with-ours offline vs 0.06-below on the board. Candidates are his LLM-soft
 labels sitting closer to our report-derived ruler than to the hidden labels, or residual leakage through the
-reconstructed md5 split (`oof_teacher.py` rebuilds his folds; a wrong assignment on even 10% of rows scores those
+reconstructed md5 split (`kneemri/evaluation/foreign_split.py` transcribes his folds — corrected from `oof_teacher.py`
+by D48, which is our own pool's out-of-fold teacher and not his split; a wrong assignment on even 10% of rows scores those
 rows in-sample). Both would inflate the offline reading and leave the board alone. **Branch:** no slot tonight; the
 only entry this licenses is an INSTRUMENT — OOF-beside-raptor vs program-instead-of-raptor — pre-registered at
 <= +0.001 board, spare-slot class. His weights mount from `mattiaangeli/knee-mri-fold-weights` and `bend_entry.py`
 already does it. What Kaggle would run is his five-fold MEAN, not this per-row OOF object; the number above prices
 the object measured, not the one that would ship.
+
+### D48 — gold-58 is the only ruler that shows the board's sign for his family, and it moves OUR members by +0.041 — 2026-09-07
+
+Zero card. Researcher job 9 (`d48_job9.py`, `d48_gold.py`, scratchpad). Two questions were asked; the second
+answer is the one that matters to us.
+
+**Asked: does a member trained on his labels inherit his family's board deficit? No, not through the labels.**
+His soft table and our v2 levels are nearly the same object on the 896: label corr 0.73-0.89 per column, his
+label predicts our ruler at 0.947 macro and ours predicts his at 0.942, and his own OOF reads 0.8984 on OUR
+ruler against 0.8922 on HIS. A model fitted to his labels is not better read by his labels, so eleven of twelve
+columns are the same ruler twice and there is nothing there to import.
+
+**The exception is Synovitis, and it is where every his-family gain this project has measured lives.** He calls
+232 of 896 positive where we call 69 (label corr 0.29, cell disagreement 21%). It is the one column where his
+OOF beats `raptor_v4_swa` on OUR ruler (+0.070), and it carried +0.0124 of D47's +0.0063 seat gain. Rank corr
+across columns between "his OOF beats raptor" and "label disagreement" is +0.66. **Consequence, now the standing
+gate:** a corr-to-block drop concentrated in Synovitis / MedMen / Bakers is a LABELS artefact and does not fire
+the D45 decorrelation gate; only a drop spread across the ligament/OA columns does. Read per column, never on
+the macro.
+
+**Asked as a caveat, answered as the finding: the 13 fold-0 gold rows.** The 58 all-twelve-annotated studies are
+the only ruler on disk that is not derived from report text, and 13 of them sit in fold 0 where our members are
+honest. On those same rows, changing nothing but the truth table:
+
+| | report ruler (v2 L75mid) | gold ruler (radiologist) | move |
+|---|---|---|---|
+| ours5 (honest) | 0.866 | **0.907** | **+0.041** |
+| his DINOv3 OOF | 0.848 | 0.843 | -0.005 |
+| `raptor_v4_swa` (in-sample) | 0.867 | 0.890 | +0.023 |
+| gap ours5 - his | -0.018 | **-0.064** | boot95 [-0.127, -0.016] |
+
+Report-vs-gold cell disagreement on those rows: 22% (35 of 156). On all 58 gold rows his OOF reads 0.845, BELOW
+our v2 report LABEL's own 0.870 — his model tracks the reports less well than the reports track the radiologists.
+The -0.064 is the board's size and the board's sign; the report ruler on the identical rows shows -0.018. So the
+family's deficit is a RULER effect, not a labels effect and not a split-leak effect (an in-sample model reads
+high on the report ruler and not on gold; his reads the same on both, 0.848 / 0.843).
+
+**+0.041 is an order of magnitude larger than every seat delta argued this week (+0.0013, -0.0008, +0.0063).**
+If it is a constant offset it is harmless. If it moves member to member, L75mid has been ranking our members
+partly on report-derivable structure, and that is a live candidate for the thing this project has never
+explained: seven board flats against offline deltas that all pointed up. Job 11 asks exactly that and is
+falsifiable on one number — Spearman across the 262 honest members between the two rulers on those 13 rows; at
+0.95+ the thread dies and the +0.041 is an offset. Nothing is armed on 13 rows either way: sign and ordering,
+not size.
+
+Correction carried from D47: the split transcription is `kneemri/evaluation/foreign_split.py` (md5 of the report
+text, fallback UID, `hexdigest()[:8]` mod 5), NOT `oof_teacher.py`, which assembles our own pool's out-of-fold
+teacher. `teacher_foreign_corpus.npz` is written by `foreign_price.py:180`, fold-matched through it.
