@@ -716,3 +716,23 @@ chainfour_s2026.pt          # 0.8648 solo, the BEST single member this project o
                             # which is why kneemri-proxyseat ships nine seats and not ten. Best solo,
                             # redundant in ensemble - the third time this project has measured that.
                             # Its reading is logs/chainfour_ledger.log.
+
+final_ws_df.pt              # NO SOLO NUMBER AND THERE NEVER WILL BE ONE - fitted at --fold -1, so it
+                            # holds nothing out and no offline ruler can read it. It is here because a
+                            # member with no number is still shippable and was invisible to every gate
+                            # until roster_check asked (mastermind 14:58Z). The whole-corpus calibrated
+                            # distill seat: 336 px / 20 slices / band 0.1-0.9, --ema, --calibrated-targets,
+                            # --distill-weight 0.7 on teacher_oof5.npz, 12 epochs, converged (13 rows in
+                            # final_ws_df.metrics.jsonl = recipe + twelve). ITS STAND-IN IS clean_calib
+                            # _s2026 - fold 0, same corner, differing in the teacher FILE alone (clean
+                            # vs oof5) - so clean_calib's paired delta against seat_clean_distill_s2026
+                            # on the 909 under LEDGER75 is what prices this seat. arm_check refused a
+                            # second name for this exact recipe (clean_calib_cf, knee-7uoq) and saved
+                            # 75 minutes of card by doing it.
+
+calib_span_df.pt            # NO SOLO NUMBER, same reason: --fold -1. The narrow-span twin of the seat
+                            # above - 12 slices at band 0.1-0.9 against final_ws_df's 20 at the same
+                            # band - so the pair prices SPAN at the calibrated-distill corner and
+                            # nothing else. Its stand-in has not been named yet; the researcher owes
+                            # which fold-0 member differs from it in the teacher file alone. Until then
+                            # it may be packaged but not seated on a number.

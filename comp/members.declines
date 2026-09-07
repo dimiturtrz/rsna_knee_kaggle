@@ -692,3 +692,11 @@ oof_fold0_s2026                   # teacher block, not a seat: the vote would ca
 # +0.001 against our +0.054, so the seat is pre-registered flat as well as unreadable. Re-opened only by
 # an OUR-fold refit of the recipe, never by re-quoting the released weights' number.
 dinov3f0_solo                     # released foreign weights: 703 of 909 in-sample, reading is void
+hisfluid_hold_s2026               # gold-58 trunk, best-in-class on ONE column and unseatable on all
+                                  # twelve: D32 swept every column swap against the six-member blend
+                                  # and hisfluid's own best column (Synovitis) buys +0.0010 IN SAMPLE
+                                  # and -0.0006 out of it, on n=896 under L75mid. The blend already
+                                  # beats the best owned solo on 11 of 12 columns by 0.006-0.029 AUC,
+                                  # so a member that wins one column by less than the sampling noise
+                                  # has nothing to add to the vote. Declined on the swap, not on the
+                                  # solo - its gold-58 table is posted for the record either way.

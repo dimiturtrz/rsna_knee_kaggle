@@ -78,19 +78,39 @@ require "$LABELS"
 MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"
 require "$MERGED_BLEND"
 
-# THE TEACHER IS `teacher_oof5.npz`, NOT THE FILLED FILE (changed 2026-09-07, mastermind 03:03Z). The
-# fill was only ever a stand-in for a fifth block of the same kind: `oof_fold0.sh` now TRAINS that block
-# at the twins' own 224/12 geometry, so all five are real out-of-fold readers and the heterogeneity
-# caveat the header raises against a `band_dense` fill does not apply. It also makes seat six honest:
-# `merged_blend_df` is scored on fold 0, and fold 0's teacher rows come from the twin that HELD fold 0
-# out, so the leak that voided `seat_distill_lr4e5` cannot reach it (knee-zwcyk).
+# TWO TEACHERS, because the five `--fold -1` seats and the one fold-0 seat are ranked by different
+# rulers and only one of them can be inflated by a leak.
+#
+# `teacher_oof5.npz` for the five. Its fold-0 block IS `oof_fold0_s2026`, which held fold 0 out
+# (researcher 14:25Z, `scratchpad/d31_teacher.py`: every teacher row allclose-matched to exactly one
+# producer run). All five blocks are real out-of-fold readers at the twins' own 224/12 geometry, so the
+# heterogeneity caveat the header raises against a `band_dense` fill does not apply. A `--fold -1` seat
+# holds nothing out and is ranked on the board, so no leak can reach the number it is judged by.
+#
+# `teacher_clean_full.npz` for seat six, and the reason the earlier comment here was WRONG. It argued
+# from the fold-0 block alone. The leak was never in that block: it is in the 3498 rows of folds 1-4,
+# which in BOTH `teacher_oof5` and `teacher_oof_full` come from `oof_fold{1,2,3,4}_s2026` — fitted
+# without `--exclude-fold`, so every one of them trained ON fold 0 (README.md:8526-8540, knee-zwcyk).
+# `merged_blend_df` is SCORED on fold 0 against `merged_blend_cf` as its kill switch. Its targets on
+# those 3498 rows are read by models that saw fold 0, the student mimics them, and the fold-0 score it
+# is killed or kept by is inflated by the same mechanism that put +0.0127 of `oofsolo`'s offline number
+# in residual mimicry (D30). `teacher_clean_full.npz` is the same five blocks with folds 1-4 refitted
+# under `--exclude-fold 0` (`oof_clean_fold[1-4]_s2026`) and `oof_fold0_s2026` unchanged as the fifth:
+# 4407 rows, all 224/8, not one of them written by a model that saw fold 0.
+# KNOWN COST, recorded rather than argued away: starving the clean twins of one fold costs them −0.0067
+# as teachers (`compose_v4b_clean.sh:47`). A cheaper teacher read honestly beats a better one read on a
+# ruler the board has already refused.
 TEACHER="$PROCESSED/teacher_oof5.npz"
 require "$TEACHER"
+
+TEACHER_SIX="$PROCESSED/teacher_clean_full.npz"
+require "$TEACHER_SIX"
 
 FIT="--fold -1 --ema"
 DENSE="--slices 20 --band-low 0.1 --band-high 0.9"
 CALIB="--calibrated-targets"
 DISTILL="--distill-weight 0.7 --teacher-targets $TEACHER"
+DISTILL_SIX="--distill-weight 0.7 --teacher-targets $TEACHER_SIX"
 
 # SEAT SIX RUNS FIRST, and the reason is scheduling rather than modelling (mastermind 03:03Z). It stays
 # FOLD-0, exactly as its original is, so it is the only seat in this arm that any offline ruler can read
@@ -101,7 +121,7 @@ DISTILL="--distill-weight 0.7 --teacher-targets $TEACHER"
 run_train merged_blend_df \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --scheme merged $CALIB $DISTILL \
+  --scheme merged $CALIB $DISTILL_SIX \
   --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_blend_df.pt"
 
 run_train final_ws_df \
