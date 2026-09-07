@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# resnet50d_short.sh — the SHORT gate on the CNN lane. No ImageNet convolutional network has ever been
+# fitted on this task here, and the one CNN reading the project owns (`radnet_family`, 0.6716) is a
+# statement about RadImageNet's CORPUS, not about convolution: it is a DenseNet-121 pretrained on 1.35M
+# mixed-modality radiology images, so its floor confounds architecture with pretraining data. This arm
+# separates the two by holding the pretraining corpus at ImageNet — the corpus every strong member here
+# was pretrained on — and moving only the architecture.
+#
+# bead: knee-7niv7
+# reading: D:/models/rsna_knee_abnormality/resnet50d_short_s2026.holdout.npz
+#
+# WHAT IT BUYS, SAID AS A PRICE. ~1 card-hour that would otherwise be idle, and an expected board gain
+# tonight of ZERO — D53 closed the width axis at nine seats (a tenth is worth <= +0.0004 and every
+# greedy step to fourteen sits inside its own boot95), so nothing fitted tonight is going to be seated
+# into the champion. The buy is a RULER. `pool_ceiling --columns` puts three quarters of the 0.0097 pool
+# gap in MCL and Lateral OA, and MCL / Fracture are the two columns no 909-study read can resolve; if
+# the long arm clears 0.80 its 5-fold twin becomes the per-column ruler for exactly those. That is the
+# whole argument for spending an idle hour on a lane nobody expects to win.
+#
+# WHY 224 AND NOT 336. `resnet50d.ra4_e3600_r224_in1k` (foreign_encoders.py:259) is trained and released
+# AT 224 — the registry row names that revision because the other two `resnet50d` revisions disagree on
+# the ImageNet constants. Running it at 336 would test an out-of-distribution resolution and a new
+# architecture in one arm, and a null would not say which moved.
+#
+# WHY 12 EPOCHS. It GATES the 48-epoch arm, and the gate's whole point is to cost an hour rather than
+# four. A CNN at 224 is far under the DINOv2-S 336 corner's per-epoch cost, so the short arm is the
+# cheap half of a cost-tiered pair, not a shrunken version of the real one.
+#
+# PRE-REGISTERED, before it runs (README:355 and the bead):
+#   >= 0.80        the 48-epoch long arm queues, and its 5-fold twin becomes the MCL / Fracture ruler
+#   0.75 - 0.80    convolution reads like RadImageNet did; the lane is priced and closed ON ITS MERITS,
+#                  which is a different sentence from "closed because the corpus was wrong"
+#   < 0.75         the RECIPE is the suspect first, not the lane — 2.5D through-plane stacking and the
+#                  BatchNorm state a frozen-then-unfrozen CNN carries are both plausible causes, and
+#                  which one is named has to be argued BEFORE any verdict about convolution is written
+#
+# deliberate: --variant resnet50d (the arm)
+# deliberate: --image-size 224 (the revision's own resolution)
+# deliberate: --through-plane (2.5D stacking, the bead's recipe)
+# deliberate: --backbone-lr 4e-4 (a CNN's rate, as radnet_family used; 4e-5 is the ViT corner's)
+# deliberate: --epochs 12 (the SHORT half of the cost-tiered pair)
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train resnet50d_short \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack --through-plane $THROUGHPUT \
+  --variant resnet50d --image-size 224 --backbone-lr 4e-4 \
+  --slices 20 --band-low 0.1 --band-high 0.9 \
+  --labels "$LABELS" --out "$MODELS/resnet50d_short_s2026.pt"
