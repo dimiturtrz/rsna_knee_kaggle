@@ -95,59 +95,49 @@ if awk -v d="$DELTA" 'BEGIN { exit !(d >= 0.0135) }' 2>/dev/null; then
   echo "SEPARATE FINDING: >= +0.0135 - distillation amplifies the knob; ledger it" >> "$LOG"
 fi
 
-# (a) the researcher's his-recipe port. IT GOES FIRST (mastermind 16:10Z): same total card either way,
-# but its read is the only one of the three that can decide a SLOT — pre-reg solo >= 0.895 is an honest
-# 1/3 seat of ~ +0.007, read at ~19:15Z. `foreign_labels_dense` decides nothing before 00:00Z.
+# ORDER, 16:46Z — D43 OVERRIDES EVERYTHING BELOW THIS LINE. The researcher swapped the five parents for
+# their distilled children on 31 subsets of the champion proxy: children carrying +0.0052 of solo read
+# **-0.0014** on the block, undistilled siblings at +0.0036 solo read -0.0002. Same-family solo lift is
+# worth ~0 to the block, five of five, additive to 1e-4 — the block pays for CORR, not for solo. So the
+# six-twin block is CANCELLED (5.7 h that buys a number the block does not credit), and the gate on every
+# seat treatment stops being a solo delta. Order is now:
+#     reading -> foreign_labels_dense (75 min, best delta/h on D43 §2) -> hisrecipe_distill (2.4 h) -> stop.
+# `recal_calib` is LAST IN LINE and not launched here: it runs only if the researcher's `recal_dense` swap
+# read comes back >= +0.001, which is a number that does not exist yet. A full-fit twin of whichever of the
+# two HITS is launched BY HAND on the read, because a hit is read as SWAP and not as solo and this chain
+# cannot compute a swap. Whatever this script does at the end, the card is handed to a decision, not to a
+# queued fit.
+#
+# THE CLEAN_CALIB READING IS STILL TAKEN AND STILL PRINTED — it is a pre-registered number and D43 does not
+# make it unreadable, it makes it non-DECIDING. Its own pre-registration under the swap gate is
+# +0.000..+0.0005, NO-GO. Nothing branches on it below.
+
+# (a) foreign_labels_dense, FIRST (mastermind 16:46Z). 75 min, the label axis, best delta/h of what is left.
+echo "(a) launching foreign_labels_dense at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+bash experiments/arms/foreign_labels_dense.sh >> "$LOG" 2>&1
+echo "(a) foreign_labels_dense returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+
+# (b) the researcher's his-recipe port. WAS first (mastermind 16:10Z), now second:
+# its read is the only one that can decide a SLOT, and under D43 that read is a SWAP, not the >= 0.895 solo
+# the 16:10Z letter pre-registered. The solo is still recorded; it is no longer what licenses the seat.
 if [ ! -f "$HISRECIPE" ] && [ -f "$ATTACH" ]; then
   cp "$ATTACH" "$HISRECIPE"
   echo "(a) took hisrecipe_distill.sh from the mail attachment" >> "$LOG"
 fi
 if [ -f "$HISRECIPE" ]; then
-  echo "(a) launching hisrecipe_distill at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+  echo "(b) launching hisrecipe_distill at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
   bash "$HISRECIPE" >> "$LOG" 2>&1
-  echo "(a) hisrecipe_distill returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+  echo "(b) hisrecipe_distill returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 else
-  echo "(a) hisrecipe_distill absent at $(date -u +%Y-%m-%dT%H:%M:%SZ); foreign_labels_dense moves up" >> "$LOG"
+  echo "(b) hisrecipe_distill absent at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
 fi
 
-# (b) recal_calib — 75 min that decides what the twins TRAIN WITH (mastermind 16:28Z). The six seats
-# already carry calib and ema; labels v3 is the one priced knob on no seat (+0.0045 and +0.0052, two
-# pairs, neither with calib). If v3 composes with calib the twins' stack is distill + v3 and the block's
-# L doubles. 75 min against 5.7 h of dark fits.
-#
-# IT IS SMOKED HERE AND NOT BEFORE ARMING, because the card is full for the whole run-up: clean_calib
-# holds 29.6 of 32.6 GB and hisrecipe takes the card the moment it ends, so there is no gap in which a
-# 60-study smoke could run without being a second job of ours on the card. Here there IS one, it costs
-# under a minute, and it is a two-flag composition rather than a byte copy of a finished parent.
-# $MODELS is the ARM's variable (lib.sh), not this watcher's — the watcher spells the same root $HOLDOUTS.
-# Under `set -u` an unset $MODELS would have killed the chain HERE, taking foreign_labels_dense and the
-# twins with it, with the card idle and the log ending mid-line.
-SMOKE="$HOLDOUTS/smoke_recal_calib"
-rm -rf "$SMOKE"
-"$PY" -m kneemri.experiments.arm_check --only recal_calib --smoke "$SMOKE" --smoke-studies 60 >> "$LOG" 2>&1
-SMOKED=$?
-echo "(b) recal_calib smoke returned $SMOKED at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
-if [ "$SMOKED" -eq 0 ]; then
-  echo "(b) launching recal_calib at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
-  bash experiments/arms/recal_calib.sh >> "$LOG" 2>&1
-  echo "(b) recal_calib returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
-else
-  echo "(b) recal_calib NOT RUN: its smoke refused. The twins' recipe stays undecided and the card" >> "$LOG"
-  echo "    moves on rather than spending 75 min on a composition that cannot start." >> "$LOG"
-fi
-
-echo "(c) launching foreign_labels_dense at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
-bash experiments/arms/foreign_labels_dense.sh >> "$LOG" 2>&1
-echo "(c) foreign_labels_dense returned $? at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
-
-# (c) the six twins, BEHIND the gate. Six seats retrained under one treatment are the block's w = 2/3,
-# so they run only if the treatment moved a solo by an amount the block can carry.
-if [ "$DELTA" != "NA" ] && awk -v d="$DELTA" 'BEGIN { exit !(d >= 0.004) }'; then
-  echo "(c) twins LICENSED at delta $DELTA >= +0.004; launching retrain_six_distill" >> "$LOG"
-  bash experiments/arms/retrain_six_distill.sh >> "$LOG" 2>&1
-else
-  echo "(c) twins NOT RUN: delta $DELTA < +0.004. Six seats retrained under a treatment that did not" >> "$LOG"
-  echo "    move one solo cannot move the block, and the card goes to the next mechanism instead." >> "$LOG"
-fi
-
+echo "chain done: both arms launched. The card is now handed to a DECISION, not to a queued fit —" >> "$LOG"
+echo "  a full-fit twin of whichever of the two hits its SWAP read is launched by hand, and recal_calib" >> "$LOG"
+echo "  waits on the researcher's recal_dense swap number (>= +0.001). Twins cancelled by D43." >> "$LOG"
 echo "after_clean_calib_chain finished at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"
+exit 0
+
+# The cancelled tail (recal_calib smoke + the six-twin block) is deleted rather than commented: dead
+# bash after an `exit` is code nobody runs and everybody reads. It is recoverable at b6820a40, and the
+# header above states what killed it.
