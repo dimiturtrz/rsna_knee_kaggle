@@ -61,8 +61,8 @@
 #
 # deliberate: --distill-weight 0.7 (HELD from oof_teacher, foreign_distill_mix07 and seat_distill_lr4e5,
 # deliberate: all three of which found it the best point on the weight curve; not re-searched here)
-# deliberate: --teacher-targets teacher_oof_full.npz (the FILLED teacher; the corpus file cannot cover
-# deliberate: a --fold -1 fit and the raise is per batch)
+# deliberate: --teacher-targets teacher_oof5.npz (five REAL out-of-fold blocks, no fill; the corpus file
+# deliberate: cannot cover a --fold -1 fit and the raise is per batch)
 # deliberate: every other flag copied verbatim per seat from calibsix.sh / final_fit_six.sh
 # bead: knee-ygi2k
 #
@@ -78,13 +78,31 @@ require "$LABELS"
 MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"
 require "$MERGED_BLEND"
 
-TEACHER="$PROCESSED/teacher_oof_full.npz"
+# THE TEACHER IS `teacher_oof5.npz`, NOT THE FILLED FILE (changed 2026-09-07, mastermind 03:03Z). The
+# fill was only ever a stand-in for a fifth block of the same kind: `oof_fold0.sh` now TRAINS that block
+# at the twins' own 224/12 geometry, so all five are real out-of-fold readers and the heterogeneity
+# caveat the header raises against a `band_dense` fill does not apply. It also makes seat six honest:
+# `merged_blend_df` is scored on fold 0, and fold 0's teacher rows come from the twin that HELD fold 0
+# out, so the leak that voided `seat_distill_lr4e5` cannot reach it (knee-zwcyk).
+TEACHER="$PROCESSED/teacher_oof5.npz"
 require "$TEACHER"
 
 FIT="--fold -1 --ema"
 DENSE="--slices 20 --band-low 0.1 --band-high 0.9"
 CALIB="--calibrated-targets"
 DISTILL="--distill-weight 0.7 --teacher-targets $TEACHER"
+
+# SEAT SIX RUNS FIRST, and the reason is scheduling rather than modelling (mastermind 03:03Z). It stays
+# FOLD-0, exactly as its original is, so it is the only seat in this arm that any offline ruler can read
+# — the other five are `--fold -1` and hold nothing out. Running it first puts a reading on the board's
+# own timescale: its fold-0 number against `merged_blend_cf` lands ~1.2 h in, hours before the oof5
+# solo's board row, so the kill switch has evidence before the remaining seats are paid for. Nothing
+# about any fit changes; six independent runs have no order.
+run_train merged_blend_df \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
+  --scheme merged $CALIB $DISTILL \
+  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_blend_df.pt"
 
 run_train final_ws_df \
   $RECIPE $FIT --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
@@ -111,10 +129,3 @@ run_train lr4e-5_ws_df \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 $CALIB $DISTILL \
   --labels "$LABELS" --out "$MODELS/lr4e-5_ws_df.pt"
 
-# Seat six stays FOLD-0, exactly as its original is, and is therefore the only offline read this arm
-# produces. Converting it here would change two things at once.
-run_train merged_blend_df \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --scheme merged $CALIB $DISTILL \
-  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_blend_df.pt"
