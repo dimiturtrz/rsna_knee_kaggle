@@ -6,8 +6,12 @@ import torch
 from jaxtyping import Float
 from torch import Tensor, nn
 
-_PRESENT = 0.5
-"""Midpoint of the {0, 1} presence mask — a slot below it is absent and leaves the softmax."""
+PRESENT = 0.5
+"""Midpoint of the {0, 1} presence mask — a slot below it is absent and leaves the softmax.
+
+Public because `StudyModel.slot_features` must split present from absent on the SAME threshold the head
+masks on: a slot the encoder declines to compute and a slot the softmax keeps would be a hole in the
+features, and a second copy of `0.5` is exactly how the two would drift apart."""
 
 _ABSENT_LOGIT = -1e4
 """What an absent slot's attention logit becomes: negligible after softmax, finite in fp16."""
@@ -95,7 +99,7 @@ class SlotHead(nn.Module):
         """How much each diagnosis reads from each slot: a per-diagnosis softmax over the present ones."""
         att = torch.einsum("bsoh,oh->bos", h, self.query) / self.hidden**0.5
         att = att + self.prior.unsqueeze(0)
-        return att.masked_fill(mask.unsqueeze(1) < _PRESENT, _ABSENT_LOGIT).softmax(-1)
+        return att.masked_fill(mask.unsqueeze(1) < PRESENT, _ABSENT_LOGIT).softmax(-1)
 
     def projected(self, x: Float[Tensor, "b s *o d"]) -> Float[Tensor, "b s o h"]:
         """The slot features in the space the attention scores them in — one line, one home.
@@ -160,7 +164,7 @@ class SlotHead(nn.Module):
         this line changes nothing for any member on disk.
         """
         h = self.proj(self.per_diagnosis(x)).mean(dim=2) + self.slot_emb
-        present = (mask >= _PRESENT).float().unsqueeze(-1)
+        present = (mask >= PRESENT).float().unsqueeze(-1)
         pooled = (h * present).sum(dim=1) / present.sum(dim=1).clamp(min=1.0)
         return self.report(pooled)
 
@@ -190,7 +194,7 @@ class MeanSlotHead(SlotHead):
         would divide by zero, so the denominator is floored — it cannot occur in the corpus, and a
         silent NaN through a loss is not the way to discover that it has.
         """
-        present = (mask >= _PRESENT).float()
+        present = (mask >= PRESENT).float()
         weights = present / present.sum(dim=1, keepdim=True).clamp(min=1.0)
         return weights.unsqueeze(1).expand(-1, self.query.shape[0], -1)
 

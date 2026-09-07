@@ -24,7 +24,7 @@ from kneemri.models.encoder_surgery import NO_LAYER_DECAY, NO_OFFSET, BlockWindo
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slice_read import SliceRead
-from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
+from kneemri.models.slot_head import ATTENDED, PRESENT, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS, TOKEN_POOLINGS
 
 logger = logging.getLogger(__name__)
@@ -316,12 +316,13 @@ class StudyModel(nn.Module):
         img_size: int | None = None,
     ) -> Float[Tensor, "b o"]:
         """Encode every slot image of every study in the batch, then aggregate per diagnosis."""
-        return self.head(self.slot_features(imgs, img_size), mask)
+        return self.head(self.slot_features(imgs, img_size, mask), mask)
 
     def slot_features(
         self,
         imgs: UInt8[Tensor, "b s g p q"],
         img_size: int | None = None,
+        mask: Float[Tensor, "b s"] | None = None,
     ) -> Float[Tensor, "b s *o d"]:
         """One embedding per acquisition slot — everything before the head reads them.
 
@@ -332,8 +333,41 @@ class StudyModel(nn.Module):
         Split out of `forward` so a training step can take BOTH readouts from one encoder pass. The
         encoder is essentially the whole cost of a step, so computing it twice to also predict a report
         embedding would have doubled training time to add an auxiliary loss.
+
+        GIVEN THE MASK, AN ABSENT SLOT IS NOT ENCODED. `study.py:172` fills an absent slot with a block
+        of zeros so the cache can be a rectangular array, and `SlotHead` then masks that slot out of its
+        softmax -- so the encoder has always run a full forward pass over those zeros and the head has
+        always thrown the result away. Roughly a quarter of the fleet's slot-slices are that: 1.43 of
+        six slots absent per study, and depth is uniform, so the slot share and the slice share are the
+        same 23.9%. Skipping them is not a method change, which is why it takes no flag and no arm --
+        the embeddings it declines to compute are exactly the embeddings the head discards. See
+        `tests/unit/kneemri/models/model.py::test_slot_features_skips_absent_slots_bit_identically`.
+
+        WITHOUT the mask it encodes everything, and that is the right default rather than an oversight:
+        a feature-cache build (`embeddings.build_embeddings`) wants a row for every slot of every study
+        including the absent ones, because the cache is rectangular and is read back by consumers that
+        apply the mask themselves.
         """
-        stacked = self.slice_features(imgs, img_size)
+        if mask is None:
+            return self.folded(self.slice_features(imgs, img_size))
+        present = mask >= PRESENT
+        # Packed as ONE study of `n` slots rather than a ragged batch: every aggregator below acts
+        # within a (study, slot) pair and none of them reads across the slot axis, so the fold is
+        # indifferent to how the surviving slots are distributed over studies. This is also what makes
+        # the saving scale with the batch's SUM of present slots rather than its most complete study --
+        # a rectangular allocation would be pinned by the latter, and 38% of batches of six hold a
+        # complete study.
+        packed = imgs[present].unsqueeze(0)
+        if packed.shape[1] == 0:
+            message = "every slot of every study in the batch is absent - nothing to encode"
+            raise ValueError(message)
+        features = self.folded(self.slice_features(packed, img_size))[0]
+        scattered = features.new_zeros((*imgs.shape[:2], *features.shape[1:]))
+        scattered[present] = features
+        return scattered
+
+    def folded(self, stacked: Float[Tensor, "b s g w"]) -> Float[Tensor, "b s *o d"]:
+        """The slice axis collapsed by whichever aggregator this design owns."""
         if not self.per_slice:
             return stacked[:, :, 0]
         return self.slices(stacked) if self.slices is not None else self.over_depth(stacked)
@@ -393,7 +427,7 @@ class StudyModel(nn.Module):
         every published member read `forward`, so the inference contract stays exactly as it was and a
         member fitted with report supervision loads into the old path unchanged.
         """
-        features = self.slot_features(imgs, img_size)
+        features = self.slot_features(imgs, img_size, mask)
         context = self.head.context(features, mask)
         return Readout(
             logits=self.head.logits(context),

@@ -23,7 +23,7 @@ from kneemri.models.model import (
     StudyModel,
 )
 from kneemri.models.slice_pooling import ATTEND, SLICE_POOLINGS
-from kneemri.models.slot_head import REPORT_DIMS, SLOT_POOLINGS
+from kneemri.models.slot_head import PRESENT, REPORT_DIMS, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN_FOCAL, MEAN, POOL_PARTS
 from kneemri.models.volume_read import VolumeRead
 
@@ -711,6 +711,70 @@ def test_slot_features(study_model: StudyModel):
     features = study_model.slot_features(imgs, 14)
     assert features.shape[:2] == (2, SLOTS)
     assert torch.isfinite(features).all()
+
+
+def test_slot_features_skips_absent_slots_bit_identically():
+    """THE EQUALITY THAT LICENSES THE SKIP, and the reason it needs no arm and no pre-registration.
+
+    An absent slot is a block of zeros (`core/data/corpus/study.py:172`) that `SlotHead` masks out of
+    its softmax, so the encoder has always paid for embeddings the head discards -- about a quarter of
+    every forward pass, since 1.43 of six slots are absent per study and depth is uniform. Declining to
+    compute them may not move any output, and that is a bitwise claim rather than a small-delta one:
+    every slot the mask keeps must come back EXACTLY as the all-slots pass computed it.
+
+    `torch.equal`, not `allclose`. A tolerance here would hide the one failure mode that matters -- a
+    trunk with a cross-row op, where dropping rows silently changes the survivors' features. BatchNorm
+    is that op, which is why this asserts in `eval()`: with running statistics the pass is exact for
+    every family, and in TRAINING a BN trunk's batch statistics genuinely do change when a quarter of
+    the rows leave. That is a method change on those families and it is not what this test licenses.
+    """
+    imgs = torch.randint(0, 256, (2, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, SLOTS)
+    mask[0, 1] = 0.0
+    mask[1, 0] = 0.0
+    mask[1, 2] = 0.0
+    present = mask >= PRESENT
+
+    torch.manual_seed(SEED)
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")).eval()
+    with torch.no_grad():
+        every = model.slot_features(imgs, 14)
+        skipped = model.slot_features(imgs, 14, mask)
+
+    assert skipped.shape == every.shape, "the scatter must restore the study's own slot axis"
+    assert torch.equal(skipped[present], every[present]), "a kept slot must be bitwise what it always was"
+    assert not skipped[~present].any(), "an absent slot is never encoded, so it carries no features"
+    assert torch.equal(model(imgs, mask, 14), model.head(every, mask)), "the head cannot see the skip"
+
+
+def test_slot_features_refuses_a_batch_with_nothing_present():
+    """A study with no acquisitions at all is a corpus defect, and an empty encode is how it would hide.
+
+    `imgs[present]` on an all-absent batch is a zero-row pack, which most trunks accept and return an
+    empty tensor for -- the scatter then writes nothing and the head reads a study of pure zeros as a
+    prediction. Crash instead: `study.py` already reports an unroutable study as absent, so reaching
+    here means the reporting failed upstream.
+    """
+    model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")).eval()
+    imgs = torch.zeros((1, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    with pytest.raises(ValueError, match="nothing to encode"):
+        model.slot_features(imgs, 14, torch.zeros(1, SLOTS))
+
+
+def test_folded():
+    """The slice-axis collapse, named once so the masked and unmasked paths cannot fold differently.
+
+    Channel stacking has no slice axis to collapse, so its fold is the single position it produced —
+    the branch that would otherwise have been duplicated at both call sites of the skip.
+    """
+    stacked = torch.randn(2, SLOTS, GROUP, DIM * POOL_PARTS["cls_mean"])
+    torch.manual_seed(SEED)
+    per_slice = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
+    assert torch.equal(per_slice.folded(stacked), per_slice.over_depth(stacked))
+
+    torch.manual_seed(SEED)
+    stacking = StudyModel(_FakeBackbone(), DIM, SLOTS)
+    assert torch.equal(stacking.folded(stacked), stacked[:, :, 0])
 
 
 def test_over_depth(study_model: StudyModel):
