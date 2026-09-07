@@ -858,6 +858,19 @@ def _paced(ensemble: Ensemble, elapsed: list[float], chunks: list[list[dict[int,
     return chunks_for
 
 
+def _charged(ensemble: Ensemble, member: str) -> None:
+    """Charge a forward a FIXED second, so `worth` is decided by the holdout and not by the wall clock.
+
+    `attempt` times itself off `time.time()`, and the two members here are the same fake backbone —
+    their true costs are equal, so which one measures cheaper is decided by whatever else the machine
+    is doing. That made this test read the ORDERING of two microsecond timings: it passed alone and gave
+    up the STRONG member under a full suite on a loaded box, blocking the push. Charged here rather than
+    by patching the clock, because `Budget` reads the same module and a faked clock stops the projection
+    that the give-up is triggered by.
+    """
+    ensemble.spent[member] = ensemble.spent.get(member, 0.0) + 1.0
+
+
 def _forwarded(ensemble: Ensemble, monkeypatch: pytest.MonkeyPatch) -> list[str]:
     """Every member the loop actually forwards, in order — the record `failed` cannot give afterwards."""
     seen: list[str] = []
@@ -865,7 +878,9 @@ def _forwarded(ensemble: Ensemble, monkeypatch: pytest.MonkeyPatch) -> list[str]
 
     def spy(member: Member, sized: dict[int, tuple[Tensor, Tensor]], *, overlap: bool = True):
         seen.append(member.identifier)
-        return attempt(member, sized, overlap=overlap)
+        predicted = attempt(member, sized, overlap=overlap)
+        _charged(ensemble, member.identifier)
+        return predicted
 
     monkeypatch.setattr(ensemble, "attempt", spy)
     return seen
