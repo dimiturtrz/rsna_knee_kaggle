@@ -75,8 +75,12 @@ Noise floor for a paired OOF-896 read: 0.0062. A |delta| under that is not a rea
 
 ## AMENDED 11:40Z, after A' read and BEFORE any C number exists
 
-A' finished at 11:20Z. C's watcher took the card at 11:26Z and is at ep0-ep1; `logs/repl2x2_c.full.log`
-holds no epoch score, so nothing about C has been read and this amendment is still a pre-registration.
+A' finished at 11:20Z. C's watcher took the card at 11:26Z and is at ep1. Correcting this paragraph's
+first draft, which said C's log held no score: it holds two, gold-58 trajectory only — ep0 0.6933, ep1
+0.7851. Gold-58 is trajectory and never a reading by standing rule, and no OOF-896 number for C exists or
+can exist until it finishes, so this amendment is still a pre-registration of C's ruler. Reading two early
+epochs of a sixteen-epoch anneal as evidence is the number-watching this file exists to prevent, and A's
+own ep1 (0.8025 on its first fold pass) is not a comparator either.
 The A' numbers below were taken on CPU from the OOF file A' wrote itself
 (`raptor_oof_repl2x2_a_fold0.npz`, 896 studies), re-scored under the LEDGER truth table by
 `kneemri.evaluation.foreign_holdout` — no card, seconds. The card exception offered at 11:33Z was not
