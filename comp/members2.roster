@@ -44,3 +44,29 @@ seat_clean_distill_s2026.pt          # 0.8634
 # seat_clean_distill read 0.8634, matching the leaky 0.8633 out of teachers -0.0067 weaker, which is
 # what says the term being shipped here is a treatment effect. knee-zwcyk
 seat_oof5_distill_s2026.pt           # no offline number by construction, --fold -1
+
+# The two calibrated-distill twins that were trained, converged, and sat on NO roster line for four
+# days. They are on THIS shelf and not the shipped one for the reason this file exists: adding a member
+# to `kneemri-members` is a 14 GB re-push (measured at all_ours today) onto a disk with 38 GB free,
+# which is exactly the cost that made every member trained after the last big push unshippable. They
+# were first written onto the first shelf and moved here the same hour; a kernel seating either one must
+# declare BOTH mounts, and `mount_check` refuses it on the shelf line if it declares only the first.
+#
+# NEITHER HAS AN OFFLINE NUMBER AND NEITHER EVER WILL — both fitted at `--fold -1`, so they hold nothing
+# out and no offline ruler can read them, the same construction as `seat_oof5_distill_s2026` above.
+# `final_ws_df` is the whole-corpus calibrated-distill seat: 336 px / 20 slices / band 0.1-0.9, --ema,
+# --calibrated-targets, --distill-weight 0.7 on teacher_oof5.npz, 12 epochs, converged (13 rows in its
+# metrics.jsonl = recipe plus twelve). ITS STAND-IN IS `clean_calib_s2026` — fold 0, same corner — and
+# the stand-in is TWO knobs away, not one: the teacher FILE (clean vs oof5) and `--ema`, which
+# final_ws_df carries and clean_calib.sh does not (researcher D34). `ema` is UNPRICED at this corner and
+# no one-knob pair exists on disk, so clean_calib's paired delta against seat_clean_distill_s2026 on the
+# 909 under LEDGER75 is the best price this seat can be given — an approximate one, and it is what
+# licences seating it. `arm_check` refused a second name for this exact recipe (clean_calib_cf,
+# knee-7uoq) and saved 75 minutes of card by doing it.
+final_ws_df.pt                       # no offline number by construction, --fold -1
+
+# The narrow-span twin of the seat above — 12 slices at band 0.1-0.9 against final_ws_df's 20 at the
+# same band — so the pair prices SPAN at the calibrated-distill corner and nothing else. Its stand-in
+# has not been named: the researcher owes which fold-0 member differs from it in the teacher file alone.
+# Until then it may be packaged but not seated on a number.
+calib_span_df.pt                     # no offline number by construction, --fold -1
