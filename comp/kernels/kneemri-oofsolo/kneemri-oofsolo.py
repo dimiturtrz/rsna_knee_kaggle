@@ -22,8 +22,13 @@ fraction of that. The instrument that answers the bigger question is also the on
 is the one respect in which a solo is SAFER to read than a seat. `run_check` on the log before the slot
 is recorded either way.
 
-PRE-REGISTRATION, written before the number. Offline the member reads **0.8681** against `band_dense`'s
-0.8578, +0.0107 and the highest solo this project owns. Using board(ensemble) ~ best single + 0.015 and
+PRE-REGISTRATION, written before the number. **VOID as of 2026-09-07** — the offline read below is
+inflated by a label leak: each of the four teachers behind this member trained on fold 0, the fold its
+student is scored on, so the delta is function mimicry rather than a transferable term
+(`experiments/arms/teacher_clean.sh` carries the mechanism, `kneemri.evaluation.teacher_witness` the
+direct reading). The board is what caught it — the entry scored 0.926, BELOW `holdsolo`'s 0.928, from
+an offline read above it. Offline `oof_teacher_s2026` reads **0.8681**.
+Its control `band_dense_s2026` holds 0.8578. Using board(ensemble) ~ best single + 0.015 and
 the champion's 0.944:
 
 - **0.930 or above** — the distillation term transfers at full size to a corpus that is not ours. The
@@ -126,7 +131,10 @@ def boot() -> Path:
 def main() -> None:
     boot()
 
-    from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.inference.budget import (  # noqa: PLC0415 - the kit is on sys.path only after boot
+        KERNEL_SECONDS,
+        Budget,
+    )
     from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
     from kneemri.inference.vote import LogitAverage  # noqa: PLC0415 - same
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same

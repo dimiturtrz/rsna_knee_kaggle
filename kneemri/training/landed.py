@@ -115,6 +115,10 @@ NOT_A_SWITCH = {
     "split_seed": "same, and it moves the split rather than the recipe",
     "folds": "banned for the same reason",
     "fold": "which split half is held out, chosen per invocation",
+    "exclude_fold": "which fold is dropped from TRAINING as well as from the holdout — a cut of the "
+    "corpus, like `fold`, and the split line every run logs is what shows it landed. No model, trainer "
+    "or targets object holds it, so there is nothing here to compare against; the recipe block records "
+    "the value and the study count is what changes",
     "image_size": "a cache axis — guarded by the cache FILE NAME, not by a policy object",
     "crop_mm": "a cache axis",
     "centre": "a cache axis",

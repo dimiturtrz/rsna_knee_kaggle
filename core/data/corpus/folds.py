@@ -32,6 +32,14 @@ IT CHANGES NOTHING THAT EXISTS. Measured: 0 of our 4,407 studies are absent from
 a foreign corpus was on disk no study could reach this value.
 """
 
+EXCLUDE_NONE = -1
+"""The `excluded` fold that excludes nothing — no study is ever assigned it.
+
+NOT `-2`, which every foreign study carries: excluding that value by default would silently drop the
+merged corpus out of every run that uses one. `-1` is unassignable for the same reason `--fold -1`
+holds nothing out, and it is the same sentinel on both sides for that reason.
+"""
+
 
 class ReportFolds:
     """Study-to-fold assignment by report-text hash, so duplicate reports never straddle the divide."""
@@ -60,10 +68,20 @@ class ReportFolds:
             assignments[index] = int(digest[:8], 16) % self.folds
         return assignments
 
-    def holdout(self, assignments: NDArray[np.int64], fold: int) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
-        """Training and holdout positions for one fold — fixed rather than rotated within a run."""
+    def holdout(
+        self, assignments: NDArray[np.int64], fold: int, excluded: int = EXCLUDE_NONE
+    ) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
+        """Training and holdout positions for one fold — fixed rather than rotated within a run.
+
+        `excluded` drops a SECOND fold from training without putting it in the holdout, which is what an
+        out-of-fold teacher needs and `--fold` alone cannot express. A teacher fitted at `--fold k`
+        trains on every other fold, fold 0 included; a student distilled from four such teachers and
+        scored on fold 0 mimics four functions that each memorised fold 0's labels, and the fold-0
+        number is inflated by that mimicry rather than by the treatment. Excluding fold 0 from every
+        teacher's training set is the only thing that removes the path.
+        """
         holdout = np.flatnonzero(assignments == fold)
-        training = np.flatnonzero(assignments != fold)
+        training = np.flatnonzero((assignments != fold) & (assignments != excluded))
         return training, holdout
 
 

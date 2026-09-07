@@ -70,6 +70,29 @@ def test_holdout_with_fold_minus_one_trains_on_everything():
     assert training.tolist() == list(range(len(assignments)))
 
 
+def test_holdout_excludes_a_second_fold_from_training_without_scoring_it():
+    """An out-of-fold teacher: fold 1 is the holdout, fold 0 is dropped, and fold 0 is never scored.
+
+    Without this a teacher fitted at --fold 1 trains on fold 0, and a student distilled from four such
+    teachers and scored on fold 0 mimics four functions that memorised its own holdout.
+    """
+    assignments = np.array([0, 1, 2, 3, 4, 0, 1], dtype=np.int64)
+
+    training, holdout = ReportFolds(5, 2026).holdout(assignments, fold=1, excluded=0)
+
+    assert holdout.tolist() == [1, 6]
+    assert training.tolist() == [2, 3, 4]
+
+
+def test_holdout_leaves_a_foreign_corpus_training_when_a_fold_is_excluded():
+    """TRAIN_ONLY is -2 and the exclude sentinel is -1, so excluding nothing never drops a merged corpus."""
+    assignments = np.array([0, 1, TRAIN_ONLY, 2], dtype=np.int64)
+
+    training, _ = ReportFolds(5, 2026).holdout(assignments, fold=0)
+
+    assert 2 in training.tolist()
+
+
 def test_sampled():
     """A cap that keeps the fold's ratio, and NOTHING at all when no cap is asked for."""
     training, holdout = np.arange(800), np.arange(800, 1000)

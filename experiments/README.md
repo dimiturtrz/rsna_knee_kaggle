@@ -7857,7 +7857,7 @@ with no affordable instrument, not a branch anyone should re-derive from the ID 
 
 ## The public top of this leaderboard is running mechanisms we have already priced — 2026-09-05
 
-Board read 21:07Z: **rank 44 of 3234 at 0.944; leader 0.954; gap 0.010.** Our slope is
+Board read 21:07Z (rank line refreshed against the 2026-09-07T00:10Z read): **rank 45 of 3239 at 0.944; leader 0.954; gap 0.010.** Our slope is
 +0.00037/day against the frontier's +0.00024/day, so the gap closes in 62 days. Grinding does not get
 there and only a step change does, which makes "what is the top doing" a measurement worth taking
 before another arm is queued. It costs no slot: `kaggle kernels list --competition ... --sort-by
@@ -8522,6 +8522,18 @@ data, so what shrinks is the head's fit and not the representation.
 Card: zero. Two cpu reads of one csv.
 
 ### `oof_teacher` reads 0.8681 — the best solo on disk — and the teacher's SOURCE is not the mechanism — 2026-09-06
+
+> **THIS NUMBER IS LEAKY AND SO IS EVERY OTHER `--teacher-targets teacher_oof_corpus.npz` READING
+> BELOW, `seat_distill_lr4e5` 0.8632 INCLUDED — 2026-09-07, knee-zwcyk.** `oof_fold_k` (k=1..4) was
+> fitted at `--fold k`, which trains on every other fold, **fold 0 included**. Each teacher memorised
+> fold 0's labels; a student distilled from their targets and scored on fold 0 mimics four functions
+> that carry fold 0 inside them. The board is the un-leaked ruler and it refused this row: `oofsolo`
+> (ref 56065873) scored **0.926** against an offline 0.8681 that sits ABOVE `holdsolo`'s 0.8634 →
+> 0.928. This family transfers at ~0.79 of the offline delta; this one transferred at 0.37 from the
+> low anchor and negative from the high one. `foreign_distill_mix07`'s +0.0061 is from a FOREIGN
+> teacher and may be clean — unchecked. `--exclude-fold` now exists; `teacher_clean.sh` +
+> `seat_clean_distill.sh` re-read the term with the leak removed, pre-registered ≥0.864 / 0.860-0.864
+> / <0.860 against `band_dense` 0.8578.
 
 `--teacher-targets` set to OUR OWN out-of-fold predictions (`teacher_oof_corpus.npz`), `--distill-weight
 0.7` HELD from `foreign_distill_mix07`, everything else `band_dense`'s line. Twelve epochs, peak e10-e11,

@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# seat_clean_distill — the distillation term read through a teacher that never saw the holdout.
+#
+# THE QUESTION. Every distilled fold-0 number this project owns was produced under a teacher fitted on
+# fold 0 (see `teacher_clean.sh` for the mechanism). `oof_teacher` +0.0107, `seat_distill_lr4e5` +0.0107,
+# and a board row that says the solo term is ~+0.002. This arm re-reads the term with the leak removed
+# and nothing else moved. It is the ONLY thing standing between the lever and its close.
+#
+# ONE VARIABLE against `band_dense.sh`: `$DISTILL`. Same 336 px / 20 slices / 12 epochs / 4e-5 / max
+# pooling / whole stack, same labels, same fold-0 holdout. `band_dense_s2026` at **0.8578** is the
+# control and it is on disk, so no control arm is run.
+#
+# PRE-REGISTERED, before the card is spent, against 0.8578:
+#   >= 0.864   the term is real and the leak was partial. The retrain is re-priced HONESTLY on this
+#              number (not on +0.0107), and its own `--fold -1` teacher is a plain 5-fold OOF, which
+#              is not leaky on the board because a fold -1 fit has no holdout to leak into.
+#   0.860-0.864  a knob. Kept if free, never planned around, no 8.5 h arm multiplies it.
+#   < 0.860    distillation closes as a step lever, and the +0.0107 readings are recorded as artefacts
+#              of the teacher's fold structure rather than as a treatment effect.
+# The bar is ASYMMETRIC ON PURPOSE: the clean teachers fit on ~2,600 studies against the leaky ones'
+# ~3,500, so they are weaker teachers, and a weaker teacher can only push this number DOWN. Clearing
+# 0.864 through that handicap is a stronger reading than the original ever was.
+#
+# WHY THE band_dense CORNER AND NOT lr4e-5_ws. Two reasons, and the second is the one that matters. The
+# 336/20 corner is the project's best-read single control, 0.8578 over twelve epochs, so the bar is not
+# an estimate. And the leaky term was measured at the 224/12 corner twice; reading the clean term at a
+# DIFFERENT corner tests the treatment rather than re-testing one geometry.
+#
+# COST one twelve-epoch fit at 336/20, ~361 s an epoch measured on `band_dense` -> ~1.2 h.
+#
+# deliberate: --distill-weight 0.7 (the settled point on the weight curve; not re-searched)
+# deliberate: --teacher-targets teacher_clean.npz (the CLEAN teacher; the corpus file is the leaky one
+# deliberate: and reading this arm against it would answer nothing)
+# deliberate: every other flag verbatim from band_dense.sh
+# reading: seat_clean_distill_s2026.holdout.npz
+# bead: knee-ygi2k
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+TEACHER="$PROCESSED/teacher_clean.npz"
+require "$TEACHER"
+
+run_train seat_clean_distill \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --distill-weight 0.7 --teacher-targets "$TEACHER" \
+  --labels "$LABELS" --out "$MODELS/seat_clean_distill_s2026.pt"

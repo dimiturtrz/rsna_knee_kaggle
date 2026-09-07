@@ -66,6 +66,9 @@ class TrainingOptions:
 
     fold: int = 0
     folds: int = 5
+    exclude_fold: int = -1
+    """A fold dropped from training as well as from the holdout; -1 excludes nothing. What makes a
+    teacher fitted at `--fold k` genuinely out-of-fold for a student scored on fold 0."""
     epochs: int = 8
     batch: int = 12
     accumulate: int = 1

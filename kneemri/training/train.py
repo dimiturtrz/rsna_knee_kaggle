@@ -12,7 +12,7 @@ import logging
 
 import torch
 
-from core.data.corpus.folds import ReportFolds
+from core.data.corpus.folds import EXCLUDE_NONE, ReportFolds
 from core.data.corpus.slots import SCHEMES
 from core.data.labels.targets import Targets
 from core.paths import DataRoot
@@ -76,7 +76,11 @@ def main() -> None:
     # seed 2026's, so their holdout numbers were never comparable and scoring one on the other's split
     # was scoring a model on 717 studies it had trained on.
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    training, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    training, holdout = folds.holdout(
+        folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold, arguments.exclude_fold
+    )
+    if arguments.exclude_fold != EXCLUDE_NONE:
+        logger.warning("fold %d excluded from training: %d studies fit", arguments.exclude_fold, len(training))
     positions = arguments.positions
     training, holdout = positions.sampled(training, holdout)
     training = positions.thinned(training)

@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# teacher_gen2 — the born-again round: five fold twins refitted UNDER the gen-1 teacher, whose union is
+# a gen-2 teacher covering the whole corpus with no hole to fill.
+#
+# WHY A SECOND TEACHER IS THE SECOND LEVER. Everything downstream MULTIPLIES the teacher's term:
+# `seat_distill_lr4e5` turned a teacher 0.0103 above its student's control into +0.0107 on that student,
+# and `retrain_six_distill` then applies that same term six times. A damped pass-through multiplied by a
+# bigger term is a bigger number, and it is the only place left to grow the term without adding a member
+# — the member axis is closed on seven board flats. Gen-1's blocks are 224 px / 8-epoch twins reading
+# ~0.855 each; a gen-2 block is that twin's own recipe taught by gen-1 and should read where
+# `seat_distill_lr4e5` read, ~0.863, which is the term the next retrain multiplies.
+#
+# FIVE FOLDS, NOT FOUR, AND THAT IS THE OTHER THING IT FIXES. Gen-1 covers folds 1-4 only (3498 of
+# 4407), because `oof_teacher`'s hole is correct for an arm scored on fold 0. That forced
+# `retrain_six_distill` onto a FILLED file whose fold-0 block came from a differently-shaped model —
+# `oof_teacher --fill`'s witness reads it outside the fold-to-fold spread scatter on 9/12 labels, always
+# sharper. Fitting fold 0 here makes gen-2 homogeneous BY CONSTRUCTION: five blocks, one recipe, one
+# teacher, no fill and no witness needed. Fold 0 runs FIRST so its block alone can replace the fill in
+# `teacher_oof_full.npz` early, before the retrain starts, if the ordering of the night allows it.
+#
+# EACH BLOCK IS STILL OUT OF FOLD. Twin `k` holds out fold `k` and is taught by gen-1 — which contains
+# fold `k`'s readings, from a DIFFERENT model that also held fold `k` out. So no reading in gen-2 comes
+# from a model that trained on the study it reads, at either generation. That is the property
+# `oof_teacher`'s docstring turns on and this arm does not spend it.
+#
+# THE FOLD-0 BLOCK IS THE ONE TO WATCH, for the reason gen-1 has no fold-0 block at all: its teacher
+# rows for fold 0 come from the FILL, not from a twin. If the fill is `band_dense`, fold 0's gen-2 block
+# is taught by a sharper reader than the other four are, and gen-2 inherits a weakened version of the
+# heterogeneity it was built to remove. Running `oof_fold0.sh` first removes that too, for 25 minutes.
+#
+# ONE VARIABLE against `oof_folds.sh`: `$DISTILL`. Rate, slices, band, image size, epochs, pooling and
+# throughput are copied verbatim from that arm, and `--fold 0` is added as the fifth member of the loop.
+#
+# IT HAS NO PRE-REGISTRATION AND WANTS NONE. This is a producer, not a member and not a candidate. Each
+# block's holdout number is a fold twin's own score and prices nothing on its own; what the arm must do
+# is exist and cover 4407 studies, which `oof_teacher` then asserts by refusing a short corpus. The
+# reading that matters is the CONSUMER's, and the consumer is the second retrain.
+#
+# COST five eight-epoch fits at 224 px. `oof_folds` measured ~1.2 h per fold, so about **6 h of card**
+# and zero submission slots. It is the arm to run on the branch where `seat_distill` did NOT clear —
+# multiplying a damped term buys 0.952 at best, and a bigger term is what the retrain then multiplies.
+#
+# deliberate: --fold 0 (added to oof_folds.sh's loop; the fold gen-1 has never covered)
+# deliberate: --distill-weight 0.7 (HELD from every arm that has searched it; not re-searched here)
+# deliberate: --teacher-targets teacher_oof_full.npz (gen-1, FILLED — a fold-k twin trains on fold 0 and
+# deliberate: the raise in TeacherTargets.rows is per batch, so the corpus file cannot teach this arm)
+# deliberate: --image-size 224 --epochs 8 (oof_folds.sh's own cheap geometry, HELD so the five blocks of
+# deliberate: the gen-2 teacher are one kind)
+# bead: knee-ygi2k
+# reading: oof_gen2_fold*_s2026.holdout.npz
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+TEACHER="$PROCESSED/teacher_oof_full.npz"
+require "$TEACHER"
+
+DISTILL="--distill-weight 0.7 --teacher-targets $TEACHER"
+
+for fold in 0 1 2 3 4; do
+  run_train "oof_gen2_fold${fold}" \
+    $RECIPE --fold "$fold" --epochs 8 --slice-pooling max --whole-stack $THROUGHPUT \
+    --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 --image-size 224 $DISTILL \
+    --labels "$LABELS" --out "$MODELS/oof_gen2_fold${fold}_s2026.pt"
+done
