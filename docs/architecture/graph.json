@@ -1736,8 +1736,26 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.column_spread",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_spread",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.column_weights",
       "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_weights",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -13592,6 +13610,24 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.column_spread.ColumnSpread",
+      "target": "kneemri.evaluation.column_spread.ColumnSpread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_spread.ColumnSpread.mass",
+      "target": "kneemri.evaluation.column_spread.ColumnSpread.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_spread.main",
+      "target": "kneemri.evaluation.column_spread.ColumnSpread.over",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.column_weights.BlockFrame",
       "target": "kneemri.evaluation.column_weights.BlockFrame",
       "weight": 1
@@ -13702,6 +13738,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.column_weights.main",
       "target": "kneemri.evaluation.column_weights.ColumnWeights.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_weights.main",
+      "target": "kneemri.evaluation.column_weights.ColumnWeights.ported",
       "weight": 1
     },
     {
@@ -34641,7 +34683,7 @@
       "role": null
     },
     {
-      "descendants": 273,
+      "descendants": 274,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -34705,7 +34747,7 @@
       "role": null
     },
     {
-      "descendants": 96,
+      "descendants": 97,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -34796,6 +34838,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.column_mixing",
       "label": "column_mixing",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_spread",
+      "label": "column_spread",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -38151,6 +38201,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.column_mixing",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_spread.ColumnSpread",
+      "label": "ColumnSpread",
+      "level": "class",
+      "parent": "kneemri.evaluation.column_spread",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -47482,6 +47540,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.column_spread.ColumnSpread.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_spread.ColumnSpread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_spread.ColumnSpread.mass",
+      "label": "mass",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_spread.ColumnSpread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_spread.ColumnSpread.over",
+      "label": "over",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_spread.ColumnSpread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_spread.ColumnSpread.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_spread.ColumnSpread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_spread.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_spread",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.column_weights.BlockFrame.kernel",
       "label": "kernel",
       "level": "method",
@@ -47524,6 +47622,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.column_weights.ColumnWeights.load",
       "label": "load",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_weights.ColumnWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_weights.ColumnWeights.ported",
+      "label": "ported",
       "level": "method",
       "parent": "kneemri.evaluation.column_weights.ColumnWeights",
       "role": null

@@ -169,3 +169,30 @@ def test_read(tmp_path: Path) -> None:
     uniform, weighted = frame.read(ColumnWeights.load(_table(tmp_path, _uniform())))
 
     assert weighted == pytest.approx(uniform, abs=1e-12)
+
+
+SERVED = (
+    "member,fitted_on,ACL,MCL,MedMen,LatMen,MedOA,LatOA,PFOA,Effusion,Synovitis,Bakers,Contusion,Fracture",
+    "child_ff,parent_s2026,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6",
+    "own_s2026,own_s2026,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3",
+    "orphan_cf,uniform,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1",
+)
+
+
+def test_ported(tmp_path: Path):
+    """A served-name fit reads under the names a kernel votes with, and under its ancestors' names.
+
+    The parent keying is what can be CHECKED — only the fold-0 parents have holdouts — and the
+    ancestor-less row has nothing to substitute, so it is dropped rather than carried under its own name.
+    """
+    path = tmp_path / "served.csv"
+    path.write_text("# a comment\n" + "\n".join(SERVED) + "\n", encoding="utf-8")
+
+    served = ColumnWeights.ported(path)
+    assert served.members == ("child_ff", "own_s2026", "orphan_cf")
+    assert served.matrix.shape == (3, len(TARGETS))
+    assert served.matrix[0][0] == pytest.approx(0.6)
+
+    parents = ColumnWeights.ported(path, by_parent=True)
+    assert parents.members == ("parent_s2026", "own_s2026")
+    assert parents.matrix[0][0] == pytest.approx(0.6), "the child's row, under the name that has a holdout"

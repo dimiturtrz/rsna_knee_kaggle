@@ -42,6 +42,18 @@ logger = logging.getLogger(__name__)
 MEMBER_HEADER = "# rows=members:"
 """How the fitted table names its own rows. A positional table is refused rather than guessed at."""
 
+FITTED_ON = "fitted_on"
+"""The column of the researcher's SERVED-name fit naming which fold-0 run each row was fitted on.
+
+D76's ancestry join: a member's per-column profile is a property of its RECIPE, so a row fitted on
+`calib_span_s2026` is served under `calib_span_ff`. The served table is what a kernel votes with and
+the parent-substituted one is what can be CHECKED, because only the fold-0 parents have holdouts.
+"""
+
+UNIFORM_ROW = "uniform"
+"""What `fitted_on` says for a seat with no fold-0 ancestor at all (`final_ws_cf`). Its row is the mean
+row mass spread flat, so there is nothing to substitute and the equality check drops it."""
+
 
 @dataclass(frozen=True)
 class ColumnWeights:
@@ -61,6 +73,32 @@ class ColumnWeights:
         matrix = np.atleast_2d(np.loadtxt(path, delimiter=",", comments="#"))
         if matrix.shape[0] != len(members):
             message = f"{path} names {len(members)} members and holds {matrix.shape[0]} rows"
+            raise ValueError(message)
+        return cls(members=members, matrix=matrix)
+
+    @classmethod
+    def ported(cls, path: Path, *, by_parent: bool = False) -> "ColumnWeights":
+        """The researcher's SERVED-name fit, read into the shape this class votes with.
+
+        His file carries one row per served member plus a `fitted_on` column; the repo's format keys
+        rows by name alone. Reading it here rather than converting it by hand keeps ONE file
+        authoritative — the table that ships and the parent-substituted table that checks it are the
+        same source lines read two ways, so they cannot drift apart between one commit and the next.
+
+        `by_parent` returns the rows renamed onto the fold-0 runs they were fitted on, with the
+        ancestor-less row dropped: that is the only keying whose members have holdouts to score.
+        """
+        lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        rows = [line for line in lines if not line.startswith("#")]
+        header, *body = rows
+        fields = header.split(",")
+        name = fields.index(FITTED_ON) if by_parent else 0
+        keep = [cell.split(",") for cell in body]
+        chosen = [cells for cells in keep if not by_parent or cells[fields.index(FITTED_ON)] != UNIFORM_ROW]
+        members = tuple(cells[name] for cells in chosen)
+        matrix = np.array([[float(cell) for cell in cells[len(fields) - len(TARGETS) :]] for cells in chosen])
+        if matrix.shape[1] != len(TARGETS):
+            message = f"{path} holds {matrix.shape[1]} columns; the findings are {len(TARGETS)}"
             raise ValueError(message)
         return cls(members=members, matrix=matrix)
 
@@ -164,7 +202,11 @@ def main() -> None:
     """Print the frame size and the two macros the port has to reproduce."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--holdouts", type=Path, required=True)
-    command.parser.add_argument("--table", type=Path, required=True)
+    command.parser.add_argument("--table", type=Path)
+    command.parser.add_argument("--fitted", type=Path, help="a served-name fit carrying a fitted_on column")
+    command.parser.add_argument(
+        "--by-parent", action="store_true", help="score a served-name fit under its fold-0 ancestors"
+    )
     command.parser.add_argument("--anchor", default=ANCHOR)
     command.parser.add_argument("--shrink", type=float, default=1.0)
     command.parser.add_argument("--uniform-column", action="append", default=[])
@@ -172,7 +214,14 @@ def main() -> None:
     command.parser.add_argument("--drop-member", action="append", default=[])
     arguments = command.parsed()
 
-    weights = ColumnWeights.load(arguments.table).shrunk(arguments.shrink)
+    if (arguments.table is None) == (arguments.fitted is None):
+        raise SystemExit("give exactly one of --table (repo format) and --fitted (served-name format)")
+    read = (
+        ColumnWeights.load(arguments.table)
+        if arguments.table is not None
+        else ColumnWeights.ported(arguments.fitted, by_parent=arguments.by_parent)
+    )
+    weights = read.shrunk(arguments.shrink)
     weights = weights.flattened(tuple(arguments.uniform_column))
     seated = tuple(name for name in weights.members if name not in arguments.drop_member)
     frame = BlockFrame.over(arguments.holdouts, seated, arguments.anchor)
