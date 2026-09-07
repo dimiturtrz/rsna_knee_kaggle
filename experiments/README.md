@@ -9601,3 +9601,55 @@ Order is W8 column mass, so the card spends its first hours on the mass that can
 so a v3 swap is a different arm rather than one token — and it is the member carrying the open licence
 exposure (`research/2026-09-02_external_knee_mri_data_access_audit.md:11,37-38`, rule 2.6a), at W8 mass
 1.8088, the second-heaviest row in the very table above. Bead knee-7yug3.
+
+## D85 — the 4406 corpus surface is the per-column ruler from now on (2026-09-07, zero card)
+
+Every per-column claim this project made before today was read on the 896-study frame, where Fracture
+carries 39 positives and a half-width of +/-0.0553. The same twelve columns on the out-of-fold corpus
+surface carry 192 Fracture positives and 272 MCL, and the halves shrink 2.6x and 2.1x (researcher D84a).
+Committed as `kneemri/evaluation/column_surface.py` so the surface stops living in a scratch tree.
+
+**It is the same ruler at larger n, not a different one.** Labels rebuilt from `report_labels_v2.csv`
+via `GoldRows().reported` and binarised at the midpoint reproduce the frame's own truth table exactly:
+agreement **1.0000 over all 10752 cells**, all twelve columns 1.000. That validation is what licenses
+re-reading an old frame claim on the surface instead of re-measuring it.
+
+`teacher_clean_full.npz` (ours, 224/8 distillation teacher, five-fold OOF), n=4407:
+
+| finding | auc | +/- | pos | | finding | auc | +/- | pos |
+|---|---|---|---|---|---|---|---|---|
+| ACL | 0.8590 | 0.0128 | 1226 | | PF OA | 0.8178 | 0.0118 | 1991 |
+| MCL | 0.8059 | 0.0167 | 767 | | Effusion | 0.8532 | 0.0110 | 2666 |
+| Medial Meniscus | 0.8947 | 0.0091 | 2347 | | Synovitis | 0.8566 | 0.0141 | 580 |
+| Lateral Meniscus | 0.8345 | 0.0137 | 1121 | | Baker's | 0.8976 | 0.0124 | 1114 |
+| Medial OA | 0.8681 | 0.0104 | 1619 | | Contusion | 0.8640 | 0.0120 | 1297 |
+| Lateral OA | 0.8292 | 0.0136 | 1087 | | Fracture | 0.8898 | 0.0205 | 314 |
+
+Paired delta, `teacher_foreign_corpus.npz` (his DINOv3 five-fold OOF) minus ours, same 4407 rows:
+MCL +0.0576 [+0.0429,+0.0724], Synovitis +0.0547, PF OA +0.0501, Effusion +0.0487, Lateral OA +0.0431,
+Baker's +0.0407, Lateral Meniscus +0.0382, Medial OA +0.0350, Fracture +0.0306, Medial Meniscus +0.0303,
+ACL +0.0227, Contusion **-0.0081 [-0.0202,+0.0036]** — the one column he does not win, and the only
+interval spanning zero.
+
+**STATE THE DENOMINATOR (researcher D84b, mastermind's own correction).** That table is his family against
+our **224/8 distillation-teacher block at macro 0.879** — NOT against the nine-seat kernel (0.9260) and NOT
+against the five-parent block (0.8993). Measured the same way on the 896 frame his family reads 0.8984 and
+our block 0.8993: **the same number**. His honest seat price stays +0.0063 boot95 [+0.0052,+0.0073] (D47) /
++0.0074 LEDGER, never the +0.03 the column table looks like.
+
+**What the frame was reading instead** (`attend224_s2026.holdout.npz`, 909 rows of the same surface, same
+truth): Fracture corpus 0.8898 +/-0.0205 vs frame 0.8091 +/-0.0553, shift **+0.0808** on 70 positives —
+larger than any family gap on the board, invisible to the frame that produced a week of column rulings.
+Synovitis +0.0118 (120 pos), Baker's -0.0126, ACL -0.0228 (249 pos). Nine of twelve shifts sit inside the
+frame's own half-width, i.e. they are claims the frame never actually made.
+
+**And the per-column PROFILE is not an asset** (researcher D84c, same day): the restricted-seat curve is
+monotone in k on both frames and maximal at all twelve (896 +0.0055, 4406 +0.0151) — no subset beats the
+plain seat — and the ranking of which columns pay has Spearman **0.056** between the two frames. The 896
+says Fracture/MedMen/Synovitis, the 4406 says MCL/PFOA/Baker's. D16's column-restricted decline
+(README:8862-8868) now stands on measurement rather than on a flat reading.
+
+**What the surface cannot do:** only a model with five-fold out-of-fold predictions has an honest row here,
+which is ours and his and nothing else. A one-fold member costs a five-fold run to put on it. The two
+surfaces are out-of-fold under DIFFERENT splits, so a delta is a fair model-vs-model comparison per row and
+not a matched-fold one. `column_headroom.py` stays REFUTED (knee-zsyp4) and is not the thing to extend.
