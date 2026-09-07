@@ -4,6 +4,7 @@ from numpy.typing import NDArray
 
 from kneemri.inference.vote import (
     CHANCE,
+    ColumnWeightedLogit,
     LabelQualityRank,
     LogitAverage,
     MedianLogit,
@@ -229,3 +230,38 @@ def test_sharpened_rank_combine():
 
     assert RankAverage.agreement(gentle, flat) > NEARLY_IDENTICAL
     assert np.array_equal(SharpenedRank(8.0).combine(members[:1]), members[0]), "a lone member is untouched"
+
+
+def test_column_weighted_logit_combine():
+    """A uniform table reproduces `LogitAverage` to the last representable digit, and a column's own
+    weights move only that column.
+
+    To floating tolerance and not bit-for-bit: `mean(0)` and a sum of products by 1/M are the same
+    number in real arithmetic and different roundings in this one, so the equality is asserted at 1e-15
+    absolute rather than by `array_equal`. Nothing shipped depends on the tighter claim — every kernel
+    on the board constructs `LogitAverage` itself and is untouched by this class existing — but the
+    weighted table is measured as a deviation from the flat number, so the two must agree far below the
+    0.0028 the deviation is worth.
+    """
+    members = _members(3)
+    uniform = np.full((len(members), LABELS), 1 / len(members))
+
+    np.testing.assert_allclose(
+        ColumnWeightedLogit(uniform).combine(members), LogitAverage().combine(members), rtol=0, atol=1e-15
+    )
+
+    tilted = uniform.copy()
+    tilted[:, 0] = [1.0, 0.0, 0.0]
+    moved = ColumnWeightedLogit(tilted).combine(members)
+
+    np.testing.assert_allclose(moved[:, 0], members[0][:, 0], rtol=0, atol=1e-12)
+    np.testing.assert_allclose(moved[:, 1:], LogitAverage().combine(members)[:, 1:], rtol=0, atol=1e-15)
+
+
+def test_column_weighted_logit_refuses_a_table_that_is_not_a_mixture():
+    """A negative weight and an empty column are both fits pretending to be votes, and both refuse."""
+    with pytest.raises(ValueError, match="non-negative"):
+        ColumnWeightedLogit(np.array([[1.5, 0.5], [-0.5, 0.5]]))
+
+    with pytest.raises(ValueError, match="no vote"):
+        ColumnWeightedLogit(np.array([[0.0, 0.5], [0.0, 0.5]]))
