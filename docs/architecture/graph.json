@@ -47496,6 +47496,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.column_weights.ColumnWeights.flattened",
+      "label": "flattened",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_weights.ColumnWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.column_weights.ColumnWeights.load",
       "label": "load",
       "level": "method",
@@ -47504,8 +47512,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.column_weights.ColumnWeights.shrunk",
+      "label": "shrunk",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_weights.ColumnWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.column_weights.ColumnWeights.vote",
       "label": "vote",
+      "level": "method",
+      "parent": "kneemri.evaluation.column_weights.ColumnWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.column_weights.ColumnWeights.written",
+      "label": "written",
       "level": "method",
       "parent": "kneemri.evaluation.column_weights.ColumnWeights",
       "role": null
