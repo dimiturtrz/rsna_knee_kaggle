@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-# Chains the merged3 teachers, the noisy student and the composition behind the LAST retrain seat.
+# Chains the warm twin, the merged3 teachers, the noisy student and the composition behind the LAST
+# retrain seat.
+#
+# THE WARM TWIN GOES FIRST OF THE FOUR because it is the only step whose result changes the others'
+# SHAPE: `final_ws_wf` against the from-scratch `final_ws_df` prices the warm start itself, and if the
+# two land inside the floor every retrain after this one runs at four epochs instead of twelve.
 #
 # WHY IT IS GATED ON `lr4e-5_ws_df` AND NOT ON `final_ws_df`, WHICH IS WHAT WAS ORDERED. The marker a
 # chain waits on is written by the SEQUENCER (`_mark`, lib.sh:642) after the trainer exits, not by the
@@ -30,6 +35,12 @@ OOF_TWINS=("$MODELS"/oof_fold[0-4]_s2026.pt)
 
 until grep -q "$MARKER" "$ARM_LOG" 2>/dev/null; do sleep 60; done
 echo "$MARKER seen — the card is free $(date -u +%FT%TZ)"
+
+bash experiments/arms/final_ws_wf.sh || {
+  echo "QUEUE STOP final_ws_wf failed $(date -u +%FT%TZ)"
+  exit 1
+}
+echo "QUEUE final_ws_wf exited 0 $(date -u +%FT%TZ)"
 
 .venv/Scripts/python.exe -m kneemri.inference.teacher_readings \
   --checkpoints "${CLEAN_TWINS[@]}" --scheme merged3 --slices 12 --band 0.2 0.8 --cache-size 336 \
