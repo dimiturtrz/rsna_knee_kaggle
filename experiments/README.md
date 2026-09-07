@@ -9883,3 +9883,91 @@ Held for a gate, then killed for two independent reasons, neither of which is it
 was never measured, and this arm's death is about a missing ruler and a missing size, not about its subject.
 If a corpus-wide candidate-seat surface ever exists, the question is re-opened by rebuilding the gate, not by
 re-quoting this decline.
+
+## D93 — `d` is a PRE-POOL number, so the fleet-wide candidate list was already measured, and priced against the +0.011 bar it has exactly one live row — 2026-09-08
+
+Job 37, asked by mastermind after D91/D92 established that a single-member change enters the kernel at
+`1/(k+1)` (0.13 at k=8, measured on 248 real members) while a fleet-wide change enters at ~0.65 of `d`,
+making the fleet multiplier **≈5×, not 9×**, and converting the +0.007 pool bar into a **per-member
+`d` ≈ +0.008 to +0.011**.
+
+### The methodological point, which is the actual finding
+
+**`d` is measured solo-versus-its-own-control. It is fixed before any pool exists. The `1/k` damper acts on
+the POOL MOVE and never on `d`.**
+
+Two consequences, and the second reverses a plan:
+
+1. A fleet-wide mechanism costs **1.4 h to price, not 11** — one arm, read as `d`, multiplied by 0.65 only
+   afterwards. Eight retrains buy the *gain*, never the *measurement*.
+2. This project has been doing exactly that all along. `extended_slots`, `resolution`, `intensity_augment`
+   and the `rate_*` family are each a fleet-shaped mechanism run once for its `d`. **Their `d` column was
+   never divided by anything.** What was divided by `1/k` was their SEAT VALUE — a different column — and
+   the two were being read as one number.
+
+So D91's *"we simply stopped paying the entry fee"* and D92's *"every idea was tested as a single member and
+silently divided by nine"* are half wrong, and it is the load-bearing half. The cheap fleet-wide probes were
+run, at the correct price, and they came back **+0.0002, +0.0002, −0.0064**. The eleven flat days are not
+only a denominator artefact.
+
+### The list, priced in per-member `d` against +0.011 (card hours = 1.4 h/seat × 8)
+
+| # | candidate | seats | card h | per-member `d` | source | verdict |
+|---|---|---|---|---|---|---|
+| 1 | whole-stack reading | 8 | 11 | **+0.0185** | `README:829` | SPENT — fleet-wide since 08-16 |
+| 2 | overlap TTA | 0 | 0 | **+0.0146** | `README:868` | SPENT; mechanism #1 bought twice, does not compose |
+| 3 | encoder rate 8e-6 → 4e-5 | 8 | 11 | **+0.0068** | `README:885-925` | SPENT — `4e-5` is universal across the 285 arms; `8e-6` survives only in named slow-trunk controls |
+| 4 | routing / `EXTENDED_SLOTS` (6→9 slots, +1,139 coronal series) | 8 | 11 | **+0.0002** | `README:324` | **REFUTED, measured** |
+| 5 | resolution 392 → 448 | 8 | 18 | **+0.0002**, and **−0.0002** at the other rate | `README:885-925` | REFUTED twice, independently, against a 0.0053–0.0062 floor |
+| 6 | intensity augmentation @392 | 8 | 11 | **−0.0064** | `README:327` | REFUTED, behind at every epoch |
+| 7 | fleet teacher / labels change | 8 | 11 | **≤ 0** | D87 (7-student pool 0.8936 vs parents 0.8993); label axis closed at this detector, `README:7688` | REFUTED |
+| 8 | epoch budget 12 → 24 | 8 | 22 | **~0** | `convergence_check` this session | **DEAD, measured at zero card** |
+| 9 | **coatnet @ res 384 (his family)** | 8 | ~14 | **UNKNOWN** | `hisrecipe_distill`, on the card | **the only live row** |
+| 10 | bf16 train / fp16 serve | 8 | 11 | not a `d`-lever | fp16 serving ties 17% of the corpus, vote unchanged (`72fd98e2`) | owner directive; ship, do not price as a gain |
+
+**Ranked by `d` × coverage ÷ hours the ranking is degenerate**: nine of ten rows are measured at or below
++0.0007, three are already deployed, one is unknown. It is a single-candidate list, and the candidate was
+already on the card when the list was asked for.
+
+### Row 8 — the epoch axis, closed tonight at zero card
+
+`python -m kneemri.experiments.convergence_check`: **254 runs — 195 converged, 14 truncated, 3 stopped, 14
+undertrained, 28 unscored.** Every UNDERTRAINED row is a 4-epoch probe (`adapt_null`, `mae_matched`,
+`small_feat_pre`, `swin_distill_pre`, `raptor_feat_pre`) or an 8-epoch fold arm (`oof_clean_fold1-4`,
+`oof_fold1/4`). **Zero roster seats are undertrained.** A fleet-wide 12 → 24 epoch budget would cost 22 h to
+buy a `d` the convergence record already says is ~0.
+
+### Row 4 — the routing lever was surfaced as new the same night it was refuted
+
+`slots.py:79-95` documents `EXTENDED_SLOTS` — the canonical six plus `COR_FLUID_NOFS`, `AX_T1`,
+`AX_FLUID_NOFS` — with the measurement that **2,421 of 24,371 acquired series (9.9%) match no canonical
+slot, 2,335 of them in those three, 83,297 slices the model never sees.** That is a genuine and well-argued
+fleet-wide input change, and the arm was written: `experiments/arms/extended_slots.sh`. It scored **0.8459,
+`d` = +0.0002, refuted on the mean** (`README:324`), and its checkpoint `extended_ws_s2026.pt` is seat #5 on
+`comp/members.roster` — indeed `README:5752` defines the roster's MERIT cut AS that solo, *"the weakest
+member this roster has ever added on merit rather than as an instrument."*
+
+Recorded because the mechanism is sound and will be proposed again: **what is refuted is this execution at
+`d` = +0.0002, not the physics of showing the model more coronal series.** What it does refute is spending
+11 h to apply that execution eight times. The re-opening move is a different execution, never a re-quote of
+the slice count.
+
+Left open, and worth settling: `slots.py:87` says **9.9%** of series unrouted; `oof_oracle.py:176`,
+`README:1054` and `interpretations/kneemri/2026-08-11_what-actually-moved-the-number.md:920` all say
+**17.4%**. Two numbers for one quantity, 1.8× apart, in four places.
+
+### What this predicts about tonight's number
+
+Row 9 changes trunk **and** resolution at once, and row 5 prices the resolution half at +0.0002 fleet-wide,
+measured twice. So if `hisrecipe_distill`'s OOF-896 lands materially above our band, **the credit belongs to
+the architecture and not to 384 px**, and the fleet retrain is his trunk at OUR resolution — cheaper than
+1.7 h/seat, not dearer. If it lands inside our band, row 9 closes and the fleet-wide list is empty. That is
+a reportable state of the world, not a gap to fill with the next idea.
+
+### Caveats
+
+- Rows 4–8's `d` are each ONE arm against ONE control. A mechanism can be mis-executed once.
+- Row 3 reads `4e-5` off the arm scripts, not off the checkpoints' own configs; the checkpoint-config stamp
+  gap is a known open bead. If a seat was in fact trained at 8e-6, row 3 re-opens at `d` = +0.0068 — still
+  under the bar, but the largest live number on the list.
+- At D92's lower bar (+0.008) no row changes verdict.
