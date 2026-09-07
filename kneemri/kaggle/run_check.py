@@ -43,6 +43,15 @@ place — correct engineering, and a WRONG entry: what would then be submitted i
 a new name, which `submit_check` compares by member SET and would wave through as new. The fallback
 exists so the kernel survives; this refusal exists so the slot is never spent on what it produced."""
 
+FOREIGN_FALLBACK = "wrote fallback submission.csv"
+"""What mattiaangeli's program prints when its FIRST stage died and the rest ran on a stand-in.
+
+Version 2 of `kneemri-bend` printed this and then exited 0, with a real table, a real blend and no other
+sign: his `find_weights` walks `/kaggle/input` and took the first manifest it saw, which under our mounts
+is our 126-member package, and his loader died on a key our manifests do not have. Stages two to four
+then ran on top of a fallback. That is his program missing its largest stage while every other line in
+the log reads like a success - the exact shape `farseat_v1` cost five days to."""
+
 LOADED = re.compile(r"loaded and fingerprint-checked (\d+) of (\d+) members")
 """The run's own census of its seats, printed once, before a single study is decoded."""
 
@@ -104,6 +113,11 @@ class KernelLog:
     def refusals(self) -> list[str]:
         """Every reason this run's output must not be submitted under the entry's name; empty when whole."""
         found = [f"the run DROPPED a seat: {drop}" for drop in self.dropped()]
+        if any(FOREIGN_FALLBACK in line for line in self.lines):
+            found.append(
+                f"the foreign program printed {FOREIGN_FALLBACK!r} - its first stage died and the stages "
+                f"after it ran on a stand-in, so this is not the program the board scored"
+            )
         if self.fell_back():
             found.append(
                 f"the run printed {FALLBACK_MARK!r} - the foreign producer never ran, so this table is the "

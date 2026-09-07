@@ -52,6 +52,27 @@ PROGRAM = "all_public.py"
 FUTURE = "from __future__ import annotations"
 """The one statement Python allows only at the top of a file — and his file holds three of them."""
 
+WEIGHTS_SOURCE = "if isinstance(man.get('members'), list) and man['members']:"
+"""His `find_weights` test for whether a `manifest.json` it walked into is HIS weights package."""
+
+WEIGHTS_PATCH = (
+    "if isinstance(man.get('members'), list) and man['members'] "
+    "and all('pixel_group' in member for member in man['members']):"
+)
+"""The same test, restricted to a manifest whose members carry the key his loader then indexes.
+
+WHY THIS IS A FIX AND NOT A CHANGE. `find_weights` walks `/kaggle/input` and accepts the FIRST
+`manifest.json` holding a non-empty `members` list. On HIS kernel that is his fold package. On OURS
+`dimiturnt/kneemri-members` sorts first, so his stage one loaded 126 of OUR members and died three
+lines later on `m['pixel_group']` — a key our manifests have never had. He then wrote a fallback table
+and his stages two to four ran on top of it, which is a 0.939 program missing its largest stage and
+saying so nowhere a score can see. The predicate is his own contract made explicit: he indexes
+`pixel_group` on every member, so a package without it was never a candidate. It restores exactly what
+his search finds when our dataset is not mounted beside his."""
+
+WEIGHTS_SITES = 1
+"""How many times that test is spelled. His five other `os.walk` prunes are by filename and unaffected."""
+
 
 @dataclass(frozen=True)
 class BendEntry:
@@ -72,16 +93,27 @@ class BendEntry:
         otherwise discovered by a subprocess that exits 1 with its message on a stream nobody keeps —
         which is how version 1 spent a kernel run to learn about a duplicated `__future__` import.
         """
-        text = self.source.read_text(encoding="utf-8")
-        found = text.count(BUDGET_SOURCE)
-        if found != BUDGET_SITES:
-            message = f"{self.source} spells {BUDGET_SOURCE!r} {found} times, not {BUDGET_SITES}"
-            raise ValueError(message)
-        patched = self.flattened(text.replace(BUDGET_SOURCE, f"TIME_BUDGET = {self.seconds:.1f}"))
+        text = self._replaced(self.source.read_text(encoding="utf-8"), WEIGHTS_SOURCE, WEIGHTS_PATCH)
+        budget = f"TIME_BUDGET = {self.seconds:.1f}"
+        patched = self.flattened(self._replaced(text, BUDGET_SOURCE, budget, BUDGET_SITES))
         compile(patched, str(destination), "exec")
         destination.write_text(patched, encoding="utf-8")
         logger.info("his program patched to a %.2f h budget at %s", self.seconds / 3600.0, destination)
         return destination
+
+    def _replaced(self, text: str, spelling: str, replacement: str, sites: int = WEIGHTS_SITES) -> str:
+        """`text` with every `spelling` replaced, refusing unless it appears exactly `sites` times.
+
+        The count is the whole point. His file is published, not pinned, and a patch that silently lands
+        on none of its sites - or on one of two - is a run that costs a slot to discover, which is what
+        the single-site `TIME_BUDGET` case would have been: his rad stage would have gone on aiming at a
+        nine-hour ceiling that is not there.
+        """
+        found = text.count(spelling)
+        if found != sites:
+            message = f"{self.source} spells {spelling!r} {found} times, not {sites}"
+            raise ValueError(message)
+        return text.replace(spelling, replacement)
 
     def flattened(self, text: str) -> str:
         """His three concatenated notebook CELLS made into one legal script.
@@ -123,6 +155,10 @@ class BendEntry:
         nulls = int(frame[list(TARGETS)].isna().sum().sum())
         if nulls:
             message = f"his table holds {nulls} nulls over {len(frame)} studies"
+            raise ValueError(message)
+        flat = [target for target in TARGETS if frame[target].nunique() == 1]
+        if len(flat) == len(TARGETS) and len(frame) > 1:
+            message = f"his table is CONSTANT on all {len(TARGETS)} targets - this is his fallback, not his program"
             raise ValueError(message)
         logger.info("his table reads %d studies", len(frame))
         return frame

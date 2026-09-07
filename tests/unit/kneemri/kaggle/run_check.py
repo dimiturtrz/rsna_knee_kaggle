@@ -55,6 +55,9 @@ def test_fell_back():
     assert not KernelLog.of(WHOLE).fell_back()
     assert any("re-ship" in refusal for refusal in KernelLog.of(fallback).refusals())
 
+    stage_one_died = WHOLE + "wrote fallback submission.csv\nhis program exited 0 after 153s\n"
+    assert any("stand-in" in refusal for refusal in KernelLog.of(stage_one_died).refusals())
+
 
 def test_refusals():
     """A whole run refuses nothing; the farseat shape refuses on the drop, the mark and the count.
