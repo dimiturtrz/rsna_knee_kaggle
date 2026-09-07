@@ -72,3 +72,41 @@ evidence FOR the claim rather than against it.
 The honest caveat: these 44 rows are not an experiment. They differ in member count, selection style and
 kit, and the high-offline rows are largely reseatings of one pool, which attenuates a slope by itself.
 The tightening residual is the argument that attenuation is not the whole story; it is not proof.
+
+## CORRECTION, 04:15Z, ten minutes after the above was written
+
+**The fit tops out at 0.937 and I used it to price a move at 0.944.** Every one of the 44 rows carrying an
+offline number scores 0.937 or below. The regime we actually operate in is not in the regression at all,
+so extrapolating the 0.648 cut to price a change at 0.944 is unsupported — in either direction. State the
+denominator: 44 rows spanning 0.868 to 0.937, used to price a delta at 0.944.
+
+**What sits at 0.944 is better evidence than the regression, and it says something sharper.** Eight
+distinct entries land on exactly 0.9440, across four days:
+
+    n=7  raptorweight  2026-08-30      n=7  halfcham      2026-08-31
+    n=7  holdswap      2026-08-30      n=7  lensseat      2026-09-01
+    n=7  spanseat      2026-08-31      n=6  raptorweight  2026-09-02
+    n=7  stackseat     2026-08-31      n=6  monotone      2026-09-02
+
+Different member counts, different seats, different weighting, one foreign-bearing and one designed
+selection among them — and one number to four decimals. Board scores are quantised at 0.001, so a tie is
+cheap; eight in a row while the underlying entries differ substantially is not. This is the "seven board
+flats" the member axis was closed on, seen as one object.
+
+**So the conclusion changes shape.** It is not "the offline ruler has flattened" — that is the trend
+BELOW the plateau, and it is corroboration rather than the finding. The finding is that **0.944 is flat
+against every SELECTION operation we can perform on the current pool**: seating, weighting, re-lensing,
+member count, and the foreign fusion included, since `raptorweight` is the foreign family and is the
+champion. Both axes are spent at the same wall.
+
+**And that rehabilitates `retrain_six_distill`.** The plateau is over operations that rearrange a FIXED
+pool. The retrain does not rearrange it — it produces six new checkpoints under a training-side treatment
+never applied to the champion's seats. It is the only queued arm that attacks the plateau's actual cause
+rather than sampling it again. The downward re-price stands in direction (0.950 was reached for with the
+wrong constant) but its ceiling is now genuinely unknown rather than pinned at 0.947, because the pool
+changes and no row in this file measures that.
+
+What still holds from the original argument, and does not depend on the fit: our holdout is drawn from the
+corpus we train on and the test set is not, so a treatment whose gain is invisible offline cannot be
+priced by the offline column at all — it can only be read on the board. That is an argument about which
+arms deserve slots, and it survives the correction intact.
