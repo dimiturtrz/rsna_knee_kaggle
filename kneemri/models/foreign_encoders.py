@@ -40,6 +40,8 @@ from kneemri.models.variants import (
     RADIODINO_BASE,
     RADIODINO_SMALL,
     RADIODINO_SMALL_P8,
+    RESNET,
+    RESNET_50D,
     SWIN,
     SWIN_BASE,
     VIT,
@@ -238,6 +240,47 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
         # `depths` and `embed_dim` off coatnet_2_rw's own config, at the strides its four stages run at —
         # stated ahead of any fetch because the VRAM cap has to refuse an impossible run before weights.
         stages=(Stage(2, 4, 128), Stage(6, 8, 256), Stage(14, 16, 512), Stage(2, 32, 1024)),
+    ),
+    # THE PLAIN CNN, added 2026-09-07 — the trunk every one of this project's baselines skipped past.
+    # Twelve entries above are transformers or hybrids; the one pure convolutional line here is
+    # `radnet121`, and it closed EMPTY at 0.6716 against a 0.75 floor. That number was read as a verdict
+    # on a mixed-radiology CORPUS, and it cannot also be read as a verdict on convolution: no ImageNet
+    # CNN has ever been fitted here, so the CNN lane has never actually been priced.
+    #
+    # This row exists to price it, at the recipe the foreign 2x2 is replicating rather than at ours — 224
+    # px, 2.5D three-slice RGB, drop-path 0.1 — because the cell asks whether a CNN can reach the band at
+    # all, and answering with our own dense-window recipe would confound the trunk with the recipe.
+    #
+    # NO MOUNT, deliberately. A member fitted on this can be trained and read on the 909 and CANNOT be
+    # submitted until a Kaggle mirror is arranged; arranging one before the lane is priced would spend an
+    # upload on a trunk with no measured seat.
+    RESNET_50D: Encoder(
+        RESNET_50D,
+        "timm/resnet50d.ra4_e3600_r224_in1k",
+        2048,
+        patch=32,
+        family=RESNET,
+        leaf="resnet50d-224",
+        params_m=25.6,
+        normalization=HALF,
+        normalization_evidence=(
+            "timm ships no preprocessor_config.json; its config.json carries `pretrained_cfg` and that "
+            "document states mean and std (0.5, 0.5, 0.5) for THIS tag, fetched from the hub on "
+            "2026-09-07 and read off the file. The reading is tag-specific and the sibling tags "
+            "disagree: `resnet50d.ra2_in1k` and `resnet50d.a1_in1k` both state the ImageNet constants "
+            "on the same architecture, so a family-level default would be wrong here by (0.485, 0.456, "
+            "0.406) against (0.5, 0.5, 0.5)."
+        ),
+        # A map-emitting trunk called through `forward_features`, so both wrappers, as CoAtNet needs.
+        builder=TimmMapWeights(
+            "resnet50d.ra4_e3600_r224_in1k",
+            2048,
+            repository="timm/resnet50d.ra4_e3600_r224_in1k",
+            classes=1000,
+            drop_path=0.1,
+        ).build,
+        # ResNet-50's own (3, 4, 6, 3) bottleneck blocks, at the four strides and widths they run at.
+        stages=(Stage(3, 4, 256), Stage(4, 8, 512), Stage(6, 16, 1024), Stage(3, 32, 2048)),
     ),
     # THE FIRST TRUNK PRETRAINED ON MEDICAL IMAGES WITH LABELS, added 2026-09-01. Laid out on the two
     # axes this project has actually varied, every encoder above falls in one of two cells:

@@ -107,6 +107,16 @@ class TimmHubWeights:
     repository: str = ""
     """The HuggingFace repository holding `filename`, used only when no local source is given."""
 
+    drop_path: float = 0.0
+    """Stochastic depth, as the PRETRAINING recipe of the trunk being replicated states it.
+
+    A build keyword and not a training flag, because it is a property of the ARCHITECTURE timm assembles:
+    the rate is baked into each block at construction, so a run that sets it afterwards has already built
+    the wrong trunk. Zero is the identity for every architecture in this registry, which is why it is
+    passed unconditionally rather than through `options` — a keyword no family refuses needs no family
+    test.
+    """
+
     classes: int = 0
     """How wide a classifier the CHECKPOINT carries, which is not a thing this project ever runs.
 
@@ -156,7 +166,13 @@ class TimmHubWeights:
         # through `interpolate_pos_encoding`. It is the opposite of `SamVisionWeights`, whose table is
         # re-gridded ONCE at build — SAM's is absolute and its patch embedding asserts the input matches,
         # so there is nothing to interpolate per forward and the parameter itself has to move.
-        trunk = timm.create_model(self.architecture, pretrained=False, num_classes=self.classes, **self.options())
+        trunk = timm.create_model(
+            self.architecture,
+            pretrained=False,
+            num_classes=self.classes,
+            drop_path_rate=self.drop_path,
+            **self.options(),
+        )
         trunk.load_state_dict(load_file(str(self.resolve(source))), strict=True)
         return TimmTrunk(trunk, self.dim)
 
@@ -248,7 +264,13 @@ class TimmChunkedWeights(TimmHubWeights):
         import torch  # noqa: PLC0415 - see above
 
         stored = torch.load(self.resolve(source), map_location="cpu", weights_only=True)
-        trunk = timm.create_model(self.architecture, pretrained=False, num_classes=self.classes, **self.options())
+        trunk = timm.create_model(
+            self.architecture,
+            pretrained=False,
+            num_classes=self.classes,
+            drop_path_rate=self.drop_path,
+            **self.options(),
+        )
         trunk.load_state_dict(self.flattened(stored), strict=True)
         return TimmTrunk(trunk, self.dim)
 

@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# resnet_224_short.sh — the first plain ImageNet CNN this project has ever fitted, at 12 epochs.
+#
+# bead: knee-7niv7
+# reading: resnet_224_short_s2026.holdout.npz
+#
+# THE LANE HAS NEVER BEEN PRICED. Thirteen encoders are on the registry and twelve are transformers or
+# hybrids. The one convolutional line, `radnet121`, closed EMPTY at 0.6716 against a 0.75 floor — and
+# that number is a reading about a mixed-radiology CORPUS, not about convolution: those weights are
+# RadImageNet's, not ImageNet's. No ImageNet CNN has ever been trained here, so "CNNs are weak on this
+# task" is a belief the ledger cannot support either way. This arm is what makes it a number.
+#
+# WHY IT IS WORTH A CARD SLOT AT ALL. The foreign 2x2 is replicating a recipe whose leaders run CNN
+# backbones at 224 with three-slice RGB input, and every seat we own is a ViT reading 224-336 dense
+# windows. If a CNN reaches the band, the ensemble gains an ARCHITECTURE it has no member of — which is
+# the axis the owner has repeatedly said pays, and the seven board flats were all reseatings WITHIN the
+# ViT family. If it does not reach the band, the CNN lane closes with a measurement behind it instead of
+# an assumption, and the 2x2's remaining cells stop carrying a confound nobody priced.
+#
+# IT IS THE SHORT ARM AND ITS ONLY JOB IS TO GATE THE LONG ONE. Twelve epochs is the budget every seat
+# on the ledger was fitted under, so its number is directly comparable; 48 epochs is what the foreign
+# recipe actually asks for and costs four times as much. Running the long arm first would spend the card
+# on a recipe whose plumbing has never executed.
+#
+# CONTROL: `band224` — DINOv2-S at 224, already on disk, same 909 holdout (README:8302-8311). No control
+# run is queued and none is needed; the two differ in TRUNK and in the three flags this recipe states.
+#
+# THE RECIPE IS HIS, NOT OURS, AND THAT IS DELIBERATE. Reading a CNN under our dense-window recipe would
+# confound the trunk with the recipe and answer neither question. So: 224 px, `--through-plane` giving
+# each slice its two depth neighbours as the other two channels (the 2.5D RGB his loader builds), max
+# over 20 slices, a FULL-TRUNK finetune at one rate (2e-4) rather than our 125:1 head/backbone split,
+# weight decay 0.05, drop-path 0.1 (declared on the registry row, because timm bakes stochastic depth in
+# at construction and a flag set afterwards would have built the wrong trunk), and batch 8 x accumulate
+# 1 — his effective batch exactly.
+#
+# `--unfreeze-last 16` IS THE FULL-TRUNK FLAG, and `--whole-stack` is not. The smoke found this: with
+# `--whole-stack` alone the log read `train mode pins 36 frozen norm layer(s)`, because `--whole-stack`
+# selects the SLICE WINDOW (`trainer.whole_stack`, run_setup.py:638) and says nothing about which blocks
+# carry a gradient — that is `--unfreeze-last`, default 6. Sixteen is resnet50d's own block count
+# (3+4+6+3, the registry row's `stages`), and `BlockWindow.of` clamps, so it opens every block.
+#
+# BATCH 8 IS A BATCHNORM DECISION, NOT A THROUGHPUT ONE. `--accumulate` cannot substitute: accumulation
+# sums gradients while BN normalises per micro-batch, so batch 2 gives every BN layer two studies'
+# statistics per step. Wu & He 2018 (GroupNorm, Fig. 1) put ResNet-50 ImageNet val error at ~23.6 with
+# 32 images per worker, ~27 at 4 and ~35 at 2. The smoke measured 2.76 GB reserved at batch 2 with 29 GB
+# free, so 8 costs nothing we have.
+#
+# HARNESS CHECK, BEFORE ANY NUMBER IS READ. The printed recipe must name "variant": "resnet50d",
+# "image_size": 224, "through_plane": true, "slice_pooling": "max", "slices": 20, "backbone_lr": 0.0002
+# and "unfreeze_last": 16. The log's `train mode pins N frozen norm layer(s)` must read a SMALL N — 36
+# means the default six-block window is still in force and the arm is fitting our usual frozen trunk
+# with a CNN in it, which answers a different question. And the train-mode BatchNorm batch must be 160
+# (8 studies x 20 slices), not 1 or 2: a BN layer seeing a batch of one normalises each sample against
+# itself and learns nothing. `radnet_family`'s 0.6716 against a pinned 0.7505 is the failure this check
+# exists for.
+#
+# PRE-REGISTERED, on the 909 at the ledger cut, against band224:
+#   >= 0.80   the plumbing is sound and the trunk trains. The long arm runs, and only then does the
+#             lane's real number exist. [HIS ruler: 0.835]
+#   < 0.80    STOP. Do NOT read this as "CNNs are weak" — check the BN batch shape and the learning rate
+#             first. A 2e-4 whole-stack rate is 25x what every arm on this ledger used, and a trunk that
+#             diverged is a recipe defect wearing a result's clothes.
+#
+# PRICE: ~35 min at 12 epochs (estimate; 25.6M params at 224 is the cheapest trunk here, and the smoke
+# will replace this with a measured s/epoch). No submission slot. Report the s/epoch WITH the score.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+run_train resnet_224_short \
+  $RECIPE --epochs 12 --variant resnet50d --image-size 224 $THROUGHPUT \
+  --through-plane --slice-pooling max --slices 20 --band-low 0.1 --band-high 0.9 \
+  --whole-stack --unfreeze-last 16 --backbone-lr 2e-4 --head-lr 2e-4 --weight-decay 0.05 \
+  --batch 8 --accumulate 1 \
+  --labels "$LABELS" --out "$MODELS/resnet_224_short_s2026.pt"
