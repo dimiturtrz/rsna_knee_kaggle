@@ -15,7 +15,7 @@ from kneemri.inference.ensemble import BUDGET_WIDTH, IMAGE_BUDGET, Ensemble, Rea
 from kneemri.inference.member_package import MemberPackage
 from kneemri.inference.members import Member, MemberConfig, Window
 from kneemri.inference.read_groups import SharedRead
-from kneemri.inference.test_time import SpatialViews
+from kneemri.inference.test_time import SpatialViews, WindowPooling
 from kneemri.inference.vote import LogitAverage
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign, StudyModel
@@ -929,3 +929,15 @@ def test_predict_groups_gives_up_nothing_when_the_decode_keeps_pace(tmp_path: Pa
     assert seen.count("strong") == 4, "no member is given up on a run that keeps pace"
     assert seen.count("weak") == 4, "least of all the weakest one"
     assert combined.shape == (8, len(TARGETS))
+
+
+def test_pooled() -> None:
+    """The serving answers with its own window policy, so no caller reaches through it to the pooling.
+
+    THE DEFAULT ARM IS AN EQUALITY ORACLE: every array this project has served was a mean over windows,
+    and a serving that pooled any other way by default would silently re-price the whole roster.
+    """
+    windows = torch.tensor([[[0.2] * len(TARGETS), [0.8] * len(TARGETS)]])
+    assert torch.allclose(Serving().pooled(windows), windows.mean(dim=1))
+    forced = Serving(pooling=WindowPooling.uniform("max")).pooled(windows)
+    assert torch.allclose(forced, torch.full((1, len(TARGETS)), 0.8))

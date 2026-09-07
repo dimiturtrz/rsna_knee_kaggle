@@ -34,7 +34,7 @@ echo "$MARKER seen — the card is free $(date -u +%FT%TZ)"
 echo "QUEUE teacher witness exited $? $(date -u +%FT%TZ)"
 
 .venv/Scripts/python.exe -m kneemri.inference.teacher_readings \
-  --checkpoints "${TWINS[@]}" --scheme merged3 --slices 12 --band 0.2 0.8 \
+  --checkpoints "${TWINS[@]}" --scheme merged3 --slices 12 --band 0.2 0.8 --cache-size 336 \
   --fold 0 --out "$PROCESSED/teacher_merged3.npz"
 echo "QUEUE teacher_merged3.npz built $? $(date -u +%FT%TZ)"
 

@@ -3,8 +3,9 @@
 import pytest
 import torch
 
+from core.findings import TARGETS
 from kneemri.inference import test_time
-from kneemri.inference.test_time import SpatialViews
+from kneemri.inference.test_time import SpatialViews, WindowPooling
 
 SEED = 2026
 
@@ -53,7 +54,7 @@ def test_warp_is_indifferent_to_the_chunk_size(monkeypatch: pytest.MonkeyPatch) 
     assert torch.equal(whole, pieces), "a chunk boundary changed a pixel, so the fix moved the answer"
 
 
-def test_identity() -> None:
+def test_spatial_views_identity() -> None:
     """One unwarped view is the plain model; one ROTATED view is not, and length cannot tell them apart.
 
     Whoever asks whether an array computed elsewhere may stand in for this reading needs that
@@ -62,3 +63,60 @@ def test_identity() -> None:
     assert SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),)).identity
     assert not SpatialViews(degrees=(6.0,), shifts=((0.0, 0.0),)).identity
     assert not SpatialViews().identity
+
+
+def test_uniform() -> None:
+    """One reducer named for all twelve targets, and a name the reducers do not know is refused."""
+    assert WindowPooling.uniform("max").per_target == tuple("max" for _ in TARGETS)
+    assert WindowPooling.uniform("mean") == WindowPooling()
+    with pytest.raises(ValueError, match="unknown window reducers"):
+        WindowPooling.uniform("median")
+    with pytest.raises(ValueError, match="reducers for"):
+        WindowPooling(per_target=("mean", "max"))
+
+
+def test_focal() -> None:
+    """Max on the findings that occupy a few slices, top2 on the ligaments, mean on the diffuse ones."""
+    policy = dict(zip(TARGETS, WindowPooling.focal().per_target, strict=True))
+    assert policy["Fracture"] == "max"
+    assert policy["Contusion"] == "max"
+    assert policy["Medial Meniscus"] == "max"
+    assert policy["ACL"] == "top2"
+    assert policy["MCL"] == "top2"
+    assert policy["Synovitis"] == "mean"
+    assert policy["Medial OA"] == "mean"
+
+
+def test_pooled() -> None:
+    """Each target is read by the reducer it was given, and the default is the mean this path had.
+
+    THE MEAN ARM IS AN EQUALITY ORACLE, not a smoke test: every array this project has ever served was
+    computed as a mean over windows, so a default that is anything else silently re-prices every member
+    already on the roster.
+    """
+    # FOUR windows, chosen so the four reducers give four different answers: a three-window stack
+    # whose centre is also its maximum cannot tell `centre` from `max`, and the first draft did not.
+    levels = (0.1, 0.4, 0.6, 0.9)
+    windows = torch.tensor([[[level] * len(TARGETS) for level in levels]])
+    assert torch.allclose(WindowPooling().pooled(windows), windows.mean(dim=1))
+    assert torch.allclose(WindowPooling.uniform("max").pooled(windows), torch.full((1, len(TARGETS)), 0.9))
+    assert torch.allclose(WindowPooling.uniform("top2").pooled(windows), torch.full((1, len(TARGETS)), 0.75))
+    assert torch.allclose(WindowPooling.uniform("centre").pooled(windows), torch.full((1, len(TARGETS)), 0.6))
+
+    # A DIFFERENT COLUMN PER TARGET is the whole point, and a policy that reads one column with another
+    # column's reducer is the defect a uniform arm cannot see.
+    rising = torch.arange(len(TARGETS), dtype=torch.float32)
+    mixed = torch.stack([rising, rising * 3.0, rising * 2.0]).unsqueeze(0)
+    pooled = WindowPooling.focal().pooled(mixed)
+    fracture, acl, synovitis = TARGETS.index("Fracture"), TARGETS.index("ACL"), TARGETS.index("Synovitis")
+    assert pooled[0, fracture] == pytest.approx(rising[fracture].item() * 3.0)
+    assert pooled[0, acl] == pytest.approx(rising[acl].item() * 2.5)
+    assert pooled[0, synovitis] == pytest.approx(rising[synovitis].item() * 2.0)
+
+
+def test_window_pooling_identity() -> None:
+    """Whether a policy is the plain mean, which is what says an older array may stand in for it."""
+    assert WindowPooling().identity
+    assert WindowPooling.uniform("mean").identity
+    assert not WindowPooling.focal().identity
+    assert not WindowPooling.uniform("max").identity

@@ -16,12 +16,15 @@ NO FLIPS, ever, for the same reason training has none: a horizontal flip undoes 
 normalisation that five of the twelve targets depend on, turning a medial meniscus into a lateral one.
 """
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
+from typing import ClassVar
 
 import torch
 from jaxtyping import Float, UInt8
 from torch import Tensor, nn
+
+from core.findings import TARGETS
 
 WARP_CHUNK = 512
 """How many single-channel images one `grid_sample` call may hold.
@@ -112,3 +115,108 @@ class SpatialViews:
             )
             warped[begin : begin + WARP_CHUNK] = sampled.round().clamp(0, 255).to(torch.uint8)
         return warped.reshape(batch, slots, depth, height, width)
+
+
+TOP_TWO = 2
+"""How many windows `top2` averages. Named because a bare 2 in a `topk` is the whole policy."""
+
+
+@dataclass(frozen=True)
+class WindowPooling:
+    """How a member's overlapping windows become one answer, chosen PER TARGET.
+
+    THE TWO TEST-TIME AXES ARE NOT THE SAME AXIS, and this path averaged over both together until
+    2026-09-07 (`Ensemble.predict_member` accumulated one running total over the cross product of views
+    and window starts). A VIEW is a re-photograph of the same anatomy, so averaging is the whole point
+    — the errors made on one grid are not the errors made on another. A WINDOW is DIFFERENT ANATOMY,
+    and averaging over it asserts that every finding is spread evenly through the knee. Five of the
+    twelve are not: a fracture, a contusion, a meniscal tear and a Baker's cyst each occupy a few
+    slices, and a mean over fourteen windows divides their evidence by fourteen.
+
+    That is also the standing explanation for `knee-eeo` — overlap TTA measured flat on whole-stack
+    members — being a fact about the MEAN rather than about the windows. The default here reproduces
+    that mean exactly (every window is read under every view, so mean-then-mean equals mean over the
+    product), which is what lets the pooling be measured against it without a second variable.
+    """
+
+    @staticmethod
+    def _mean_over_windows(windows: Float[Tensor, "b w t"]) -> Float[Tensor, "b t"]:
+        """Every window counts equally — what this path has always done, on every target."""
+        return windows.mean(dim=1)
+
+    @staticmethod
+    def _max_over_windows(windows: Float[Tensor, "b w t"]) -> Float[Tensor, "b t"]:
+        """The most convinced window decides. For a finding that lives in ONE place: a fracture visible
+        in one of fourteen windows enters a mean at a fourteenth of its strength, and the study is
+        positive."""
+        return windows.amax(dim=1)
+
+    @staticmethod
+    def _top_two_over_windows(windows: Float[Tensor, "b w t"]) -> Float[Tensor, "b t"]:
+        """The two most convinced windows, averaged. A ligament runs THROUGH slices rather than sitting
+        in one, so a single window is thin evidence and the whole stack is dilution; two is the
+        compromise."""
+        return windows.topk(min(TOP_TWO, windows.shape[1]), dim=1).values.mean(dim=1)
+
+    @staticmethod
+    def _centre_window(windows: Float[Tensor, "b w t"]) -> Float[Tensor, "b t"]:
+        """The middle window alone — the reading a member gets with no overlap at all, kept as the
+        control arm: it says what the extra windows are worth without changing anything else."""
+        return windows[:, windows.shape[1] // 2, :]
+
+    REDUCERS: ClassVar[dict[str, Callable[[Float[Tensor, "b w t"]], Float[Tensor, "b t"]]]] = {
+        "mean": _mean_over_windows,
+        "max": _max_over_windows,
+        "top2": _top_two_over_windows,
+        "centre": _centre_window,
+    }
+    """The four ways a stack of window readings becomes one reading, by name."""
+
+    per_target: tuple[str, ...] = tuple("mean" for _ in TARGETS)
+
+    def __post_init__(self) -> None:
+        """Refuse a policy that does not name one reducer per target, spelled the way `REDUCERS` is."""
+        if len(self.per_target) != len(TARGETS):
+            message = f"pooling names {len(self.per_target)} reducers for {len(TARGETS)} targets"
+            raise ValueError(message)
+        unknown = sorted(set(self.per_target) - set(self.REDUCERS))
+        if unknown:
+            message = f"unknown window reducers {unknown}; known are {sorted(self.REDUCERS)}"
+            raise ValueError(message)
+
+    @classmethod
+    def uniform(cls, reducer: str) -> "WindowPooling":
+        """One reducer for all twelve — the arm that asks whether the AXIS matters before the split does."""
+        return cls(per_target=tuple(reducer for _ in TARGETS))
+
+    @classmethod
+    def focal(cls) -> "WindowPooling":
+        """Max on the findings that occupy a few slices, top2 on the ligaments, mean on the diffuse ones.
+
+        The split is anatomical, not fitted: effusion, synovitis and the three OA grades are properties
+        of the whole joint and a mean is the right reader of them. It matches the one published kernel
+        that pools per target (`external/dinov3folds`, lines 993-994) — which offers no measured delta
+        for the choice, so this is a hypothesis the 909 has to price, not a borrowed result.
+        """
+        focal = {"Medial Meniscus", "Lateral Meniscus", "Baker's", "Contusion", "Fracture"}
+        ligament = {"ACL", "MCL"}
+        return cls(
+            per_target=tuple(
+                "max" if target in focal else "top2" if target in ligament else "mean" for target in TARGETS
+            )
+        )
+
+    @property
+    def identity(self) -> bool:
+        """Whether this is the plain mean, and so may stand in for an array computed before it existed."""
+        return set(self.per_target) == {"mean"}
+
+    def pooled(self, windows: Float[Tensor, "b w t"]) -> Float[Tensor, "b t"]:
+        """One reading per study per target, out of one reading per window.
+
+        Every reducer runs over the whole batch and the column it owns is taken out of the result. That
+        is twelve times the arithmetic of a gather, on a tensor of a few thousand floats — and it keeps
+        the reducers total functions of the stack, which is what makes each one testable on its own.
+        """
+        columns = [self.REDUCERS[name](windows)[:, index] for index, name in enumerate(self.per_target)]
+        return torch.stack(columns, dim=1)

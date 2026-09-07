@@ -21,6 +21,6 @@ until grep -q "$MARKER" "$ARM_LOG" 2>/dev/null; do sleep 60; done
 echo "$MARKER seen — the card is free $(date -u +%FT%TZ)"
 
 .venv/Scripts/python.exe -m kneemri.inference.teacher_readings \
-  --checkpoints "${TWINS[@]}" --scheme merged3 --slices 12 --band 0.2 0.8 --teach-all \
+  --checkpoints "${TWINS[@]}" --scheme merged3 --slices 12 --band 0.2 0.8 --cache-size 336 --teach-all \
   --out "$PROCESSED/teacher_merged3_full.npz"
 echo "QUEUE teacher_merged3_full.npz built $? $(date -u +%FT%TZ)"

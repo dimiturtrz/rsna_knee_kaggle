@@ -157,8 +157,11 @@ class Supervision:
     Off makes a member whose predictions on those studies never saw their radiologist labels, which is
     the one input `kneemri.evaluation.supervision_gap` needs and cannot get from any member we fit: the
     override weights them at `ANNOTATED_WEIGHT`, so every member is scored against a ruler it trained
-    on. 696 cells at weight 3.0 is ~0.66% of total training weight — the cheapest thing in the project
-    to give up, and it buys back the only radiologist-truth ruler there is.
+    on. Measured on `report_labels_v2.csv`: 684 cells at weight 3.0 carry 2052.0 of 36579.2 total, so
+    gold is **5.61%** of training weight — the cheapest thing in the project to give up, and it buys
+    back the only radiologist-truth ruler there is. (This said "696 cells ... ~0.66%" until 2026-09-07;
+    both halves were wrong, and the 0.66% was quoted into a card plan as an 8x share deficit against
+    mattiaangeli's 8.1%. The real deficit is 1.44x. Re-measure before quoting it again.)
     """
 
     finding: bool = False

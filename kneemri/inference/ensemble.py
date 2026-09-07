@@ -32,7 +32,7 @@ from kneemri.inference.budget import SECONDS_PER_HOUR, Budget
 from kneemri.inference.member_package import MemberPackage
 from kneemri.inference.members import Member, Window
 from kneemri.inference.read_groups import ReadGroups, SharedRead
-from kneemri.inference.test_time import SpatialViews
+from kneemri.inference.test_time import SpatialViews, WindowPooling
 from kneemri.inference.vote import RankAverage, Vote
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyModel
@@ -141,6 +141,11 @@ class Serving:
     views: SpatialViews | None = None
     """None means the identity view alone, which is what every entry so far has run. Spatial views are
     the one test-time axis a whole-stack member has not already spent (knee-eeo)."""
+    pooling: WindowPooling = WindowPooling()
+    """How a member's windows become one reading, per target. The default is the plain mean, which is
+    what every entry before 2026-09-07 ran and what `knee-eeo`'s "overlap TTA is flat" was measured
+    under — so an array computed before this field existed is still this field's arithmetic. It does
+    nothing at all to a whole-stack member served without overlap: one window pools to itself."""
     budget: Budget | None = None
     """None means no wall-clock ceiling, which is right for a dry run and a witness — only a Kaggle
     batch session is killed for running long, and only the kernel knows it is inside one."""
@@ -186,6 +191,14 @@ class Serving:
         """
         served = member if self.group is None else self.group.regrouped(member)
         return served if self.read_size is None else served.resized(self.read_size)
+
+    def pooled(self, windows: Float[Tensor, "b w t"]) -> Float[Tensor, "b t"]:
+        """One reading per study out of one reading per window, under this entry's window policy.
+
+        Asked of the serving rather than reached through it: the caller has a stack of window readings
+        and wants the entry's answer, and which policy produced it is the serving's business.
+        """
+        return self.pooling.pooled(windows)
 
 
 class Ensemble:
@@ -410,8 +423,12 @@ class Ensemble:
         member = self.serving.read(member)
         window = member.window(images.shape[2], overlap=overlap)
         views = self.views or SpatialViews(degrees=(0.0,), shifts=((0.0, 0.0),))
-        total = torch.zeros(images.shape[0], len(TARGETS), device=self.device)
-        passes = 0
+        # ONE ACCUMULATOR PER WINDOW, not one for everything. Views and windows were summed into a
+        # single running total until 2026-09-07, which fixed the window arithmetic to a mean and made
+        # it unmeasurable — see `WindowPooling` for why the two axes are not the same axis. Views are
+        # still averaged here, unconditionally and by design; only the window axis is a policy.
+        per_window = [torch.zeros(images.shape[0], len(TARGETS), device=self.device) for _ in window.starts]
+        seen = 0
         # THE FORWARD IS SPLIT BY IMAGES, NOT BY STUDIES, and this cost a submission on 2026-08-12.
         # A chunk is 48 studies; what reaches the encoder is studies x slots x window width. A windowed
         # member sends 48 x 6 x 3 = 864 images and a whole-stack member sends 48 x 6 x 12 = 3,456 — four
@@ -442,7 +459,7 @@ class Ensemble:
         casting = self.device.type == "cuda" and precision is not torch.float32
         with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=casting):
             for view in views.apply(images):
-                for start in window.starts:
+                for index, start in enumerate(window.starts):
                     read = view[:, :, start : start + window.width]
                     logits = self.forwarded(model, read, mask, window, rows)
                     # THE ONLY FAILURE MODE fp16 HAS THAT fp32 DOES NOT: an activation past 65504 comes
@@ -454,9 +471,10 @@ class Ensemble:
                         logger.warning("%s produced non-finite logits — redoing this pass in fp32", member.identifier)
                         with torch.autocast("cuda", enabled=False):
                             logits = self.forwarded(model, read, mask, window, rows)
-                    total = total + torch.sigmoid(logits)
-                    passes += 1
-        return (total / passes).cpu().numpy().astype(np.float64)
+                    per_window[index] = per_window[index] + torch.sigmoid(logits)
+                seen += 1
+        stacked: Float[Tensor, "b w t"] = torch.stack([totals / seen for totals in per_window], dim=1)
+        return self.serving.pooled(stacked).cpu().numpy().astype(np.float64)
 
     def read_of(self, members: list[Member]) -> Read:
         """The one reading a group shares, asked of the group rather than taken from its first member.

@@ -108,6 +108,7 @@ comp/fout*/
 /.claude/mail_alerts.*.log
 /.agent-runtime/mail_alerts.*.log
 /.agent-runtime/scratch/
+/scratch/
 .runlogs/
 commit.log
 
