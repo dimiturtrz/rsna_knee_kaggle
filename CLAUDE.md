@@ -323,27 +323,25 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   that ensemble diversity beats member quality (six leaderboard entries built to isolate it). Both were
   filed as discoveries and then "corrected" by measurements the repo had already made. `bd search` will
   not find them; grep the ledger.
-- **Mailboxes, one per side, and this file is read from BOTH** — so the rule is written without a
-  first person. Letters TO Claude go to `.claude/inbox/`; letters TO Kimi go to `.agent-runtime/inbox/`.
-  Each side watches only its OWN box, with the listener that sits beside it: Claude runs
-  `python .claude/listen_for_mail.py`, Kimi runs `python .agent-runtime/listen_for_mail.py`. A THIRD box
-  exists: `.claude/mastermind_inbox/` holds letters TO the coordinator — it is the coordinator's box,
-  the way `.agent-runtime/inbox/` is Kimi's, and letters FROM the coordinator arrive in `.claude/inbox/`
-  like everyone else's. The rule that a box is armed by its OWNER holds there too: the listener
-  (`--box mastermind_inbox`, its own background task, one listener per box) is the coordinator's to run,
-  and arming it from this side archives their unread mail into `read/` where they will never see it.
-  That has happened. Replies to the coordinator are WRITTEN into that box and never watched from here;
-  replies to Kimi still go to `.agent-runtime/inbox/`. Both boxes
-  hold a `.txt` runtime side plus committed `.md` letter history per their README. Writing into your own
-  box, or watching the other side's, delivers nothing and looks perfectly healthy while doing it — that
-  already armed a watcher on the wrong directory once. Each listener resolves its box from its OWN
-  directory, so MOVING one silently relocates that side's mailbox and kills any arm in flight; that has
-  also happened, and it is why the two scripts are separate files rather than one shared path. A letter
-  is a `.txt` or `.md` file named `<utc-stamp>-<sender>-<subject>.<ext>`, one message per file, written
-  atomically (`.part` then `mv`). The listener is armed as a background task (timeout 86400) — it prints
-  bodies, files letters into its box's `read/`, and exits, so mail arrives as a task notification. On
-  every notification **re-arm FIRST**, then read, then work. Letters and `read/` are gitignored runtime
-  state. `.agent-runtime/agent_md_sync.sh` propagates `CLAUDE.md` OUTWARD — it copies it to
+- **Three mailboxes, one per side, on neutral ground, and this file is read from ALL of them** — so the
+  rule is written without a first person. `inbox/main/` holds letters TO the main agent,
+  `inbox/researcher/` letters TO the researcher, `inbox/mastermind/` letters TO the coordinator. They
+  live at the repo root because Claude Code hard-blocks writes under `.claude/` independent of
+  permission settings, so a box kept there could not be written to by the side that had to deliver into
+  it (moved 2026-09-07 from `.claude/inbox/`, `.agent-runtime/inbox/` and `.claude/mastermind_inbox/`).
+  **A box is armed by its OWNER**, one listener per box, its own background task:
+  `python inbox/listen_for_mail.py --box main|researcher|mastermind 86000`. Arming someone else's box
+  archives their unread mail into `read/` where they will never see it — that has happened. You WRITE
+  into the recipient's box and watch only your own; writing into your own box, or watching another's,
+  delivers nothing and looks perfectly healthy while doing it, which already armed a watcher on the
+  wrong directory once. `--box` is REQUIRED and has no default: the previous listeners resolved a box
+  from the directory the script sat in, so a copy watched the wrong side's mail and MOVING one silently
+  relocated that side's mailbox and killed the arm in flight — both happened, and a name cannot do
+  either. A letter is a `.txt` or `.md` file named `<utc-stamp>-<sender>-<subject>.<ext>`, one message
+  per file, written atomically (`.part` then `mv`). The listener prints bodies, files letters into its
+  box's `read/`, and exits, so mail arrives as a task notification. On every notification **re-arm
+  FIRST**, then read, then work. Letters and `read/` are gitignored runtime state; the listener and the
+  per-box READMEs are source. `.agent-runtime/agent_md_sync.sh` propagates `CLAUDE.md` OUTWARD — it copies it to
   `AGENTS.md` (Kimi auto-loads that name) and rebuilds the CLAUDE.md tier stack; the SessionStart
   hook (`.agent-runtime/kimi-session-start.sh`, wired in `~/.kimi-code/config.toml`) runs it and prints
   the upward tiers + mailbox digest.

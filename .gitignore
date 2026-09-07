@@ -111,6 +111,16 @@ comp/fout*/
 .runlogs/
 commit.log
 
+# inbox/{main,researcher,mastermind}/ are the three mailboxes, one per side, on neutral ground: a
+# harness that hard-blocks writes under .claude/ cannot deliver a letter into a box that lives there,
+# which is why the boxes moved out of the two agent directories. The listener and the per-box READMEs
+# are source; letters, their archive and listener state are runtime, exactly as in the old locations.
+/inbox/*/*.txt
+/inbox/*/*.md
+!/inbox/*/README.md
+/inbox/*/read/
+/inbox/*/.listener_*
+
 # .claude/mastermind_inbox/ is the coordinator's box (see its README): letters, archive and listener
 # state are runtime; only the README is source.
 /.claude/mastermind_inbox/*.txt
