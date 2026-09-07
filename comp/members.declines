@@ -725,3 +725,21 @@ raptor_ft_effv2l_f0_swa.pt  # weight average over the top-3 epochs [10, 13, 11] 
                             # same predictions under different truth tables, which is the ruler residual
                             # D30/D31 already priced. Declined for the same solo reason as its parent, and
                             # NOT rostered above it on SWA habit (raptor_v4_swa's lift is his recipe's fact).
+foreign_labels_dense_s2026.pt  # his 12-finding LABELS on our dense recipe, fold 0. Solo L75mid 0.8862 (the
+                            # checkpoint IS its peak, epoch 6 — fitting.py:224-234 keeps the best epoch, so
+                            # a .pt's number is the MAX of the auc column, never the last row). Priced as a
+                            # seat by D56 in kernel space: +0.0004 [-0.0001, +0.0008] beside the shipped
+                            # nine, and +0.0005 [-0.0005, +0.0013] as a calib_span swap beside the five —
+                            # BOTH pre-registered GO rulers wanted +0.0010, so `warm_hislabels` does not
+                            # arm. Declined on the SET ruler, not on the member: corr-to-nine 0.881 at solo
+                            # 0.8862 is the only pool member ON the D45 decorrelation gate, and its shape
+                            # verdict is SPREAD (0.39 of the 0.533 corr drop in the three artefact columns,
+                            # under the 0.5 share that would call it an artefact). Beside the FIVE alone it
+                            # DOES clear — swap for lr4e-5_ws +0.0012 [+0.0002, +0.0021], add-as-sixth
+                            # +0.0011 [+0.0004, +0.0017] — so if a fallback-to-five branch ever fires this
+                            # is the member wanted, and this line is re-opened by that, not by re-quoting
+                            # 0.8862. Per column vs parent through_dense: MedOA +0.030, PFOA +0.026,
+                            # Baker's +0.019, Effusion +0.018, LatOA +0.017 against Synovitis -0.067, MCL
+                            # -0.030 — gains and the Synovitis loss cancel at the macro (0.8862 vs 0.8864).
+                            # The general reading: decorrelation WITHOUT solo lift buys +0.0004 at nine
+                            # seats, which is D53's width saturation seen from the member side.
