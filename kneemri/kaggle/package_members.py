@@ -23,7 +23,6 @@ from typing import cast
 import torch
 
 from core import cli
-from kneemri.inference.member_package import MemberPackage
 from kneemri.models.backbone import ENCODERS, SMALL
 
 logger = logging.getLogger(__name__)
@@ -100,6 +99,10 @@ class MemberRoster:
         lines = [line.split(self.COMMENT)[0].strip() for line in self.text.splitlines()]
         return [line for line in lines if line]
 
+    def shelf(self) -> "RosterShelf":
+        """Which shelf this roster's members belong to, declared in the roster's own header."""
+        return RosterShelf.read(self.text)
+
     def checkpoints(self, source: Path) -> list[Path]:
         """Every named member, resolved under the processed root, in roster order."""
         resolved = []
@@ -110,6 +113,53 @@ class MemberRoster:
                 raise FileNotFoundError(message)
             resolved.extend(matched)
         return resolved
+
+
+@dataclass(frozen=True)
+class RosterShelf:
+    """WHERE a roster's members are written and WHICH dataset id stamps them — declared by the roster.
+
+    THE DEFAULT WAS THE FOOTGUN. `--out` used to default to the shipped package and `--title` to
+    `kneemri-members`, so `package_members --roster comp/members2.roster` — the SECOND shelf, every flag
+    spelled deliberately except the two that decide the destination — wrote a two-member package into
+    the shipped root (which is rmtree'd first) stamped with the LIVE dataset id, and it pushed. For
+    about fifteen minutes the shelf every champion kernel mounts held two files.
+
+    The roster is what decides which shelf, so the roster is what declares it. A default that is right
+    for the common case is a footgun on the rare one, and the rare one is the one being typed.
+    """
+
+    title: str
+    directory: str
+
+    TITLE = "# shelf:"
+    DIRECTORY = "# out:"
+
+    @classmethod
+    def read(cls, text: str) -> "RosterShelf":
+        """Both header directives, refusing a roster that declares neither, either twice, or one alone."""
+        declared = []
+        for marker in (cls.TITLE, cls.DIRECTORY):
+            found = [line.removeprefix(marker).strip() for line in text.splitlines() if line.startswith(marker)]
+            if len(found) != 1:
+                message = f"a roster declares its shelf with exactly one {marker!r} line; this one has {len(found)}"
+                raise ValueError(message)
+            declared.append(found[0])
+        return cls(title=declared[0], directory=declared[1])
+
+    def root(self, models: Path) -> Path:
+        """The directory this shelf is built in, under the models root both shelves live beneath."""
+        return models / self.directory
+
+    def agrees(self, out: Path | None, title: str | None, models: Path) -> None:
+        """Refuse a flag that points somewhere other than where the roster says these members go."""
+        wanted = self.root(models)
+        if out is not None and out.resolve() != wanted.resolve():
+            message = f"--out {out} contradicts the roster, which declares {wanted}"
+            raise ValueError(message)
+        if title is not None and title != self.title:
+            message = f"--title {title!r} contradicts the roster, which declares {self.title!r}"
+            raise ValueError(message)
 
 
 @dataclass(frozen=True)
@@ -161,7 +211,7 @@ class MemberManifest:
 def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument(
-        "--out", type=Path, default=None, help="where to write; default is the package that ships"
+        "--out", type=Path, default=None, help="where to write; the ROSTER decides, this may only agree with it"
     )
     command.parser.add_argument(
         "--roster",
@@ -172,12 +222,15 @@ def main() -> None:
         "the package it produced did not: two local directories both stamped the live dataset id, "
         "holding three members and four, while the live package held six.",
     )
-    command.parser.add_argument("--title", default="kneemri-members")
+    command.parser.add_argument("--title", default=None, help="the dataset id; the ROSTER decides, see --out")
     command.parser.add_argument("--owner", default="dimiturnt")
     arguments = command.parsed()
 
     source = command.rooted(arguments).models()
-    checkpoints = MemberRoster.read(arguments.roster).checkpoints(source)
+    roster = MemberRoster.read(arguments.roster)
+    shelf = roster.shelf()
+    shelf.agrees(arguments.out, arguments.title, source)
+    checkpoints = roster.checkpoints(source)
     # Named, not counted: a roster line that matched more than intended is invisible as a number and
     # obvious as a list, and this copies ~89 MB per member.
     logger.info("packaging %d checkpoint(s):", len(checkpoints))
@@ -194,7 +247,7 @@ def main() -> None:
     # without first deleting the previous package and writing ~89 MB per checkpoint.
     document = MemberManifest(members).document()
 
-    destination = arguments.out or MemberPackage.shipped_root(arguments.paths)
+    destination = shelf.root(source)
     if destination.exists():
         shutil.rmtree(destination)
     destination.mkdir(parents=True)
@@ -204,7 +257,7 @@ def main() -> None:
     (destination / "manifest.json").write_text(document, encoding="utf-8")
     (destination / "dataset-metadata.json").write_text(
         json.dumps(
-            {"title": arguments.title, "id": f"{arguments.owner}/{arguments.title}", "licenses": [{"name": "CC0-1.0"}]},
+            {"title": shelf.title, "id": f"{arguments.owner}/{shelf.title}", "licenses": [{"name": "CC0-1.0"}]},
             indent=2,
         ),
         encoding="utf-8",

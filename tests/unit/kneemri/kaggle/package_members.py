@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from kneemri.kaggle.package_members import FORMAT, MemberManifest, MemberRoster, PackagedMember
+from kneemri.kaggle.package_members import FORMAT, MemberManifest, MemberRoster, PackagedMember, RosterShelf
 
 CONFIG = {"crop_mm": 140.0, "whole_stack": True}
 FINGERPRINT = [0.1, 0.2]
@@ -147,3 +147,41 @@ def test_checkpoints_refuses_a_name_that_matches_nothing(tmp_path: Path):
     (source / "res392_ws_s2026.pt").touch()
     with pytest.raises(FileNotFoundError, match="sliceattn_s2026.pt"):
         _rostered(tmp_path).checkpoints(source)
+
+
+SHELF = "# shelf: kneemri-members-2\n# out: members_2\n#\n# prose\noof_teacher_s2026.pt  # 0.8681\n"
+
+
+def test_read_declares_both_halves_of_the_shelf():
+    """The roster names its dataset id and its directory; nothing else may decide them."""
+    shelf = RosterShelf.read(SHELF)
+    assert (shelf.title, shelf.directory) == ("kneemri-members-2", "members_2")
+
+
+def test_read_refuses_a_roster_that_does_not_declare_one():
+    """A missing header is the incident: the destination would otherwise fall back to the live shelf."""
+    with pytest.raises(ValueError, match="# shelf:"):
+        RosterShelf.read("oof_teacher_s2026.pt\n")
+
+
+def test_root():
+    """Both shelves sit under the models root, so the directory is one segment of it."""
+    assert RosterShelf.read(SHELF).root(Path("models")) == Path("models") / "members_2"
+
+
+def test_agrees():
+    """A flag pointing at the OTHER shelf is refused; one that agrees passes silently."""
+    shelf = RosterShelf.read(SHELF)
+    assert shelf.agrees(Path("models") / "members_2", "kneemri-members-2", Path("models")) is None
+    assert shelf.agrees(None, None, Path("models")) is None
+    with pytest.raises(ValueError, match="contradicts the roster"):
+        shelf.agrees(Path("models") / "all_ours", None, Path("models"))
+    with pytest.raises(ValueError, match="contradicts the roster"):
+        shelf.agrees(None, "kneemri-members", Path("models"))
+
+
+def test_shelf(tmp_path: Path):
+    """A roster hands out its own shelf, so a caller cannot read one file and package to another."""
+    path = tmp_path / "members2.roster"
+    path.write_text(SHELF, encoding="utf-8")
+    assert MemberRoster.read(path).shelf().title == "kneemri-members-2"

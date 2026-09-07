@@ -1,3 +1,6 @@
+# shelf: kneemri-members-2
+# out: members_2
+#
 # comp/members2.roster — the SECOND weights dataset, `kneemri-members-2`, mounted BESIDE the shipped one.
 #
 # WHY A SECOND PACKAGE EXISTS. The shipped package holds 127 members and about 10 GB. Adding one member
@@ -16,3 +19,12 @@
 # pre-registered prediction — synovitis — FAILED at -0.0040, which is what says this is an ordering
 # transfer rather than a calibration effect.
 oof_teacher_s2026.pt                 # 0.8681
+
+# The v4b label TABLE, carried by a member so the board can read it. Its offline number is not a
+# quality reading and must not be quoted as one: it is scored on report_labels_v2, so every place the
+# v4b grading DISAGREES with v2 is charged to it as an error (0.8524 against band_dense's 0.8578,
+# -0.0054 that is a disagreement rate and not a loss). On gold-58 the table it trains on leads v2 by
+# +0.0337, and that census shares an origin with the table, so neither ruler can settle it. The board
+# is the third ruler and the only independent one — this member exists to be read there, as a solo,
+# against holdsolo (0.8634 offline, 0.928 board).
+labels_v4hybrid_s2026.pt             # 0.8524 on the v2 ruler — a disagreement rate, see above

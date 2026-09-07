@@ -1,3 +1,6 @@
+# shelf: kneemri-members
+# out: all_ours
+#
 # The members `dimiturnt/kneemri-members` holds, one per line, read by
 # `python -m kneemri.kaggle.package_members`. THIS FILE IS THE PACKAGE'S ONLY DEFINITION: a kernel
 # names members out of what is mounted, so an entry that cannot be rebuilt from here is an entry

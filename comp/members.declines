@@ -643,3 +643,34 @@ through_dense_s2026_n12b0.1-0.9   # regroup price for through_dense_s2026
 through_dense_s2026_r224          # resize price for through_dense_s2026
 through_dense_s2026_r280          # resize price for through_dense_s2026
 aprior_fixed_s2026                # peak 0.8557 = the no-mechanism control exactly, -0.0021 under band_dense; anatomical prior added nothing over the band recipe, family closed for seats
+
+# The out-of-fold teacher blocks, 2026-09-07. Not candidates and never were: each is one fifth of a
+# PRODUCER, fitted at the cheap 224 px / 8-epoch geometry so the five blocks of a teacher file are one
+# kind. They exist to be averaged into teacher_*.npz; the reading that prices them is the student's.
+oof_fold1_s2026                   # teacher block, folds 2-5 -> fold 1; producer, not a member
+oof_fold2_s2026                   # teacher block; producer, not a member
+oof_fold3_s2026                   # teacher block; producer, not a member
+oof_fold4_s2026                   # teacher block; producer, not a member
+oof_clean_fold1_s2026             # teacher block with --exclude-fold 0; producer, not a member
+oof_clean_fold2_s2026             # teacher block with --exclude-fold 0; producer, not a member
+oof_clean_fold3_s2026             # teacher block with --exclude-fold 0; producer, not a member
+oof_clean_fold4_s2026             # teacher block with --exclude-fold 0; producer, not a member
+
+# The distilled members whose offline number is under the leak, 2026-09-07. Each was fitted against a
+# teacher file whose blocks trained on fold 0 — the fold they are scored on. `teacher_witness` measured
+# the path at +0.0127 difference-in-differences with the undistilled control moving the other way, so
+# these numbers are inflated by an amount nothing offline can subtract. Re-opened by ANSWERING that:
+# `seat_clean_distill` (starved teacher, held-out fold) and `seat_oof5_distill` (full-strength teacher,
+# no holdout) are the two readings that price the term, and a decline here is lifted by their result,
+# never by re-quoting the number in this line.
+seat_distill_lr4e5_s2026          # 0.8633 vs band_dense 0.8578, distilled from the leaky fold-0 teachers
+foreign_distill_s2026             # 0.8595, same distillation family with a foreign teacher
+foreign_distill_calib_s2026       # 0.8641, same family
+foreign_distill_mix07_s2026       # 0.8657, same family — the highest of the three, and the most exposed
+foreign_dissent_s2026             # 0.8538, under band_dense's 0.8578 on its own holdout
+foreign_recipe_v3small_336_20sl_s2026  # 0.8087, mattiaangeli's recipe as we read it — a replication, not a seat
+calib_span_s2026_r392             # resize price for calib_span_s2026
+grade_ladder_s2026_r392           # resize price for grade_ladder_s2026
+lr4e-5_ws_s2026_r392              # resize price for lr4e-5_ws_s2026
+merged_blend_cf_r392              # resize price for merged_blend_cf
+through_dense_s2026_r392          # resize price for through_dense_s2026
