@@ -8949,3 +8949,54 @@ and `relabel_hold`'s +0.0104 now sits beside it as the second clean reading. Bot
 intervals; neither closes the relabelling axis, and neither opens it.
 
 `labelwise_dense`'s 896 number stays clean and it stays a member. Only its gold number is marked.
+
+## The two rulers disagree about the SAME pair: gold-58 +0.0104 while LEDGER-896 −0.0058 — 2026-09-07
+
+`relabel_hold_s2026` (`--unread-targets`) against its control `band_dense_hold_s2026`, one variable,
+both reaching epoch 11, neither trained on the 58 annotated cells. Read on both rulers:
+
+| ruler | control | arm | delta |
+|---|---|---|---|
+| gold-58 macro | 0.8956 | 0.9060 | **+0.0104** [−0.0039, +0.0241] |
+| LEDGER-896 macro (best epoch) | 0.8573 (e7) | 0.8515 (e8) | **−0.0058** |
+
+Neither delta clears its own floor, and neither is a claim about the arm. The DIVERGENCE is the
+artefact: the same one-variable change moves the two rulers in opposite directions. That is the first
+paired evidence on the axis D22 opens — a ruler whose targets come from report text, measured against a
+ruler whose targets come from a radiologist, on a model whose one difference is which cells the text
+was allowed to leave unread.
+
+Per-column gold-58, twelve rows, sorted by delta:
+
+| finding | n+ | band_dense_hold | relabel_hold | delta |
+|---|---|---|---|---|
+| Effusion | 35 | 0.8522 | 0.9031 | +0.0509 |
+| Fracture | 18 | 0.8931 | 0.9403 | +0.0472 |
+| Baker's | 12 | 0.9547 | 0.9746 | +0.0199 |
+| Lateral Meniscus | 23 | 0.8832 | 0.8994 | +0.0162 |
+| MCL | 9 | 0.9229 | 0.9342 | +0.0113 |
+| Medial OA | 15 | 0.9535 | 0.9643 | +0.0108 |
+| Medial Meniscus | 26 | 0.9736 | 0.9820 | +0.0084 |
+| Lateral OA | 11 | 0.7872 | 0.7950 | +0.0078 |
+| Synovitis | 27 | 0.7515 | 0.7563 | +0.0048 |
+| Contusion | 19 | 0.8961 | 0.8826 | −0.0135 |
+| ACL | 24 | 0.9755 | 0.9596 | −0.0159 |
+| PF OA | 21 | 0.9035 | 0.8803 | −0.0232 |
+
+Nine up, three down; the top two moves are 3-10x the median column move, so this is not flat scatter.
+But it is **not the shape the arm's own mechanism predicted**. The mechanism says `--unread-targets`
+changes only cells the report text could not call, and D20 named those as Synovitis (84% UNK), Contusion
+and Effusion. Of the three, only Effusion fires; **Synovitis is the second-smallest positive in the
+table** and **Contusion goes the wrong way**. Fracture, which the mechanism says nothing about, is
+second-largest.
+
+So the pre-registered signature did not land, and the honest reading is that one of these is true and 58
+rows cannot separate them: either the UNK cells that matter are not where the corpus UNK RATE says they
+are — Synovitis sits at 0.75 on both members, i.e. the column is hard for the IMAGE, so freeing its
+labels cannot buy what the pixels do not carry — or the gain is a calibration effect on the two
+highest-prevalence columns and Fracture is noise. Nothing here licenses an arm; it licenses the ruler
+question, which is where it has gone.
+
+Denominator stated: every gold number above is 58 studies with the `n+` positives shown, not the corpus.
+A twelve-column table on 58 rows shows large per-column moves by construction and no per-column interval
+was computed, so no single column above is a finding on its own.
