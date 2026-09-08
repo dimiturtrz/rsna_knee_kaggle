@@ -284,3 +284,19 @@ def test_readable():
         assert not model.training
     assert model.config._attn_implementation == "sdpa"
     assert model.training
+
+
+def test_register_mass():
+    """The benign half of a sink, which is the whole reason the two masses are reported as a pair.
+
+    Both blocks below carry a large prefix mass and one of them is a defect. The first is dinov2's
+    shape — a prefix of one token, so every unit of it is on the class token and the difference is
+    exactly zero. The second is what a register trunk is supposed to look like when it works: the same
+    mass arrives, and almost none of it lands on the class token.
+    """
+    profile = AttentionProfile(entropy=(1.0, 1.0), prefix_mass=(0.75, 0.83), class_mass=(0.75, 0.04))
+
+    masses = profile.register_mass()
+
+    assert masses[0] == 0.0
+    assert masses[1] > masses[0]

@@ -3,7 +3,7 @@
 #
 # reading: latent_register_dense_s2026.holdout.npz
 # deliberate: variant v3small (4 register tokens) at mask 0.30 lr 1e-4 latent — a rung that REFUSED on dinov2-small
-# bead: knee-lm37v
+# bead: knee-lm37v (arm), knee-jwf2c (the gate this arm is a reading of)
 #
 # THE OBSERVATION. Epoch 1 of the mask ladder put 64% of every patch query's attention mass on the PREFIX at
 # block 11 (entropy 2.88 against a stock ~5.4, prefix mass 0.16 -> 0.64). That is an attention sink, and it is

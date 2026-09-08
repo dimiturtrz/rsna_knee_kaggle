@@ -157,6 +157,16 @@ class AttentionProfile:
     every reading would have stayed plausible.
     """
 
+    def register_mass(self) -> tuple[float, ...]:
+        """Per block, the prefix mass NOT on the class token — the share a register trunk parks benignly.
+
+        Subtraction rather than a third measurement, because the two measured quantities are nested: the
+        class token is the first prefix key, so their difference is exactly the registers and cannot
+        disagree with them. On a trunk with no registers this is zero on every block by construction,
+        which is the correct reading and not a missing one.
+        """
+        return tuple(whole - single for whole, single in zip(self.prefix_mass, self.class_mass, strict=True))
+
     def report(self) -> str:
         """Both statistics per block, so a log line is a reading and not a single number."""
         entropies = "  ".join(f"{value:.2f}" for value in self.entropy)
@@ -165,7 +175,8 @@ class AttentionProfile:
         if not self.class_mass:
             return line
         classes = "  ".join(f"{value:.2f}" for value in self.class_mass)
-        return f"{line} | cls {classes}"
+        registers = "  ".join(f"{value:.2f}" for value in self.register_mass())
+        return f"{line} | cls {classes} | registers {registers}"
 
 
 @dataclass(frozen=True)
