@@ -10941,3 +10941,80 @@ retires the ruler-artefact defence in `kneemri-v4solo.py:9-10` is the blinded ad
 touches no such column, and it contradicts D200's 5/5 in v4b's favour on that column. Filed rather than
 explained — a column that moves with no mechanism is either a second difference nobody has found or a
 correlated ruler effect, and neither is licensed to be assumed.
+
+---
+
+## D202 — the architecture-monoculture axis is measured, and it is negative six times out of six
+
+`comp/champion.json` carries "THE POOL IS AN ARCHITECTURE MONOCULTURE AND THAT IS THE PLATEAU" as a
+principle, and `comp/members.declines:205-207` licenses re-opening the trunk axis with "a trunk from a
+DIFFERENT family (RadImageNet DenseNet, supervised ImageNet VGG/ResNet), never with another DINOv3 size".
+Both were written before anything priced a cross-family member INTO A POOL. This does that, off holdout
+records already on disk — no card, no slot, twelve minutes.
+
+**The census first.** Eighteen non-DINO runs exist across eleven trunk families, every one already trained:
+
+| run | trunk | px | best (midpoint) |
+|---|---|---|---|
+| `resnet50d_short_s2026` | resnet50d (`timm/resnet50d.ra4_e3600_r224_in1k`) | 224 | 0.8393 @e6/12 |
+| `mricore_corpus_s2026` | mricore ViT | 336 | 0.8390 @e11/12 |
+| `vjepa_member_s2026` | V-JEPA2-L | 336 | 0.8343 @e9/10 |
+| `coatnet_hybrid_s2026` | coatnet2 | 336 | 0.8259 @e6/12 |
+| `radiodino_corpus_s2026` | radiodino-b16 | 336 | 0.8214 @e8/12 |
+| `resnet50d_lr_s2026` | resnet50d | 224 | 0.8196 @e7/12 |
+| `raddino_normfix_s2026` | raddino | 336 | 0.8155 @e7/12 |
+| `medsam_dense_s2026` | medsam | 336 | 0.8137 @e8/12 |
+| `radnet_pinned_s2026` | radnet121 | 336 | 0.7505 @e9/12 |
+
+against the DINOv2-small band's `band_dense` 0.8578. So the axis was never unexplored — it was explored
+and never SEATED. `comp/board.jsonl` contains the string `resnet` zero times: not one of these eighteen
+has appeared in a submitted entry.
+
+**The seat prices.** `seat_add --pool <the twelve seats of honest12> --candidate <stem>`, ruler
+**ledger75**, relation **EXACT** in all six cases (909 rows, the pool's own frame):
+
+| candidate | family | solo@ledger75 | ADD into honest12 |
+|---|---|---|---|
+| `resnet50d_short_s2026` | CNN | 0.8663 | **-0.0001** |
+| `vjepa_member_s2026` | video SSL | 0.8640 | **-0.0005** |
+| `radiodino_corpus_s2026` | medical ViT | 0.8499 | **-0.0005** |
+| `mricore_corpus_s2026` | MRI-corpus ViT | 0.8658 | **-0.0006** |
+| `coatnet_hybrid_s2026` | conv-attn hybrid | 0.8467 | **-0.0006** |
+| `medsam_dense_s2026` | SAM | 0.8363 | **-0.0010** |
+
+**Six families, six signs, all negative.** Every one is far under the +0.0015 add threshold and under the
+offline noise floor as a MAGNITUDE — no single row here is a result. What is not noise is the SIGN being
+uniform across six independent trunk families spanning CNN, hybrid, video-SSL, medical-ViT and SAM
+pretraining. A monoculture-diversity mechanism predicts at least one positive; none is.
+
+**What this does NOT close.** The offline seat ruler has been wrong in the UP direction before — the
+champion's own `base_dense` principle records a member that lost its matched control by -0.0066 and
+bought a board tick. So this refuses the OFFLINE case for a cross-family seat; it cannot refuse the board
+case, and no slot is being spent to find out, because six negatives is not a mechanism-backed candidate.
+
+**And it re-reads the one board fact that looked like support.** `raptorweight_v1`'s foreign seat
+(`raptor_v4_swa`, a coatnet) is cross-family and DID sit in the entry that took 0.941 to 0.943. Our own
+coatnet prices -0.0006. Whatever the foreign seat carried, ARCHITECTURE is the variable this measurement
+finds inert — the corpus and the decode are the two it does not control.
+
+### D202b — the learned combiner, re-read after its own bug was fixed
+
+`stack_combiner`'s docstring records a first honest reading of **-0.0179 own-finding / -0.0076 crossed**
+taken while the ridge shrank toward the ORIGIN, so the grid could not recover the flat vote as its limit
+and a negative delta meant nothing. The penalty is now centred on `prior`. Re-run over the same twelve
+seats, 909 studies, 5 contiguous blocks:
+
+| features | flat vote (RankAverage) | learned stack | delta |
+|---|---|---|---|
+| own finding | 0.8750 | 0.8745 | **-0.0005** |
+| every finding (`--cross`) | 0.8750 | 0.8669 | **-0.0081** |
+
+The fix worked — own-finding went -0.0179 → -0.0005, i.e. the combiner now recovers its control and finds
+nothing above it. A per-member-per-finding weight buys **0.0000 within resolution**, and letting a finding
+read the other eleven columns LOSES 0.0081, which is over the floor and is a real cost. `knee-orjq` asked
+whether directional gains ADD under a learned combiner; on the scoreable pool the answer is no, and the
+0.950 plan may not assume it. Caveat stated in the tool's own output and repeated here: this is a
+statement about the SCOREABLE pool, and five of the champion's six seats are `--fold -1` and invisible to it.
+
+**Cost of D202 + D202b: zero card-hours, zero slots.** Both were answerable off the 323 holdout records
+already on disk, and both had been standing as open axes in prose for days.
