@@ -9975,6 +9975,36 @@ would have been a serious error.
   here as **~0.89 from the `>= 0.88` band fit** so the next re-derivation does not land on 0.9662 and
   conclude the gate is far too soft.
 
+**SEAT arm, CORRECTED — the gate is D35, two variables, and the ~0.89 line above is D35 with the
+correlation term deleted — 2026-09-08 (C149 §3, on D146 §3).**
+
+```
+honest seat = -0.0046 + 0.313*(solo - 0.8865) + 0.0557*(1 - corr)
+```
+
+- Origin `experiments/repl2x2_c.prereg.md:38-41`, pre-registered in D36 **before the members it is now
+  validated on existed**. Out-of-sample validation: D146 §3 applies it unchanged to all nine Commission C
+  survivors, across the trunk gap, **max error +0.0004**.
+- `corr` is nearest-neighbour correlation to the pool. Every unit of `1 - corr` is worth **0.0557** — the
+  term the solo bar drops, and the reason no solo-monotone threshold can represent the pool: `repl2x2_a`
+  has the **lowest** solo of the nine and pays the **most**.
+- **The ~0.89 solo bar is a band-local special case, valid only near nn-corr ~0.92** — our own trunk family
+  and nothing else. Do not extrapolate it below corr 0.81 or above solo 0.90; nine points. D140 was never a
+  bar missing a domain clause; it was this model with a term deleted, and the deletion is why the best
+  candidate in the set was refused.
+
+**Provenance — four terms, and the FIRST is decisive on its own (D148 §3, correcting C146 §2).**
+
+1. **Did a LOCAL ARM TRAIN THE WEIGHTS.** `repl2x2` has `after_cellc.sh` plus a `[cv] fold 0/1` log line;
+   the void members have a decode arm that states it serves someone else's released program unchanged.
+2. mtime — the void stops cleanly at 2026-08-28.
+3. row count **896, not 909**.
+4. a committed prereg.
+
+`epoch=-1` and `source=foreign` are **NOT** discriminators: `raptor_ft_repl2x2_a.holdout.npz` carries both
+and is ours. Both are writer tags. Row-set identity cannot separate either, since honest `calib_span_s2026`
+carries the identical 909 study set.
+
 **FLEET-WIDE arm** — the product is a mechanism every seat carries.
 
 - Bar: **`d` ≥ +0.008 per member**, `d` measured **solo-versus-its-own-control**, ONE arm.
