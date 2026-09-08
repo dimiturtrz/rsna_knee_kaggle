@@ -67,3 +67,31 @@ cells is not automatically better; a reader that is more SILENT is measurably wo
 the table (`local_reader_annotated.csv`, 21.0% silent vs the lexicon's 25.9%) is the only one of the
 three surveyed readers that is less silent than the incumbent, which is why it is the candidate and
 Qwen3.8-27B (30.2% silent) is not.
+
+## 7. CORRECTION, same day, 16:41Z — the per-finding map does not transfer, and the axis was already closed
+
+Everything above is true of our holdout and false as a plan. Four board instruments, all spent
+2026-09-04/05, close the per-column axis as a class, and I wrote §1-§6 without reading them:
+
+- **`colnull_v1`** (ref 56020638) read **exactly 0.500** — the board metric is a plain unweighted mean of
+  twelve per-column AUCs. A column gaining *d* moves the board by *d*/12.
+- **`colmcl_v1`** (ref 56020054) → board MCL **0.980**, and **`colbaker_v1`** (ref 56023244) → board
+  Baker's **0.992**. Those are the LOWEST (0.8104) and HIGHEST (0.9208) columns of our own offline
+  ordering, and their board intervals **overlap**. `colbaker` explicitly retracts `colmcl`'s "the map
+  inverts" reading — two points cannot show ordering at this resolution. What they establish is LEVEL:
+  a 0.110-wide offline spread lands within noise of itself on the board.
+- **`colhalf_v1`** (ref 56037952) confirms it by an independent route — the six columns our pool scores
+  worst average **0.932** on the board against the strong six's **0.956**. A **0.024** gap against a
+  **0.110** offline spread. Its own words: *"the board's 0.056 of headroom is distributed, not pooled…
+  every one of the twelve columns has to move about 0.010 of AUC; there is no weak lane to attack and
+  no per-column shortcut exists."* It cancels the ten remaining single-column ablations.
+
+So the split in §2 ranks our SUPERVISION, not the board's difficulty, and §3's "the label lane is three
+findings" is a statement about which of our labels are worst — not about where board points are. **No
+per-finding plan may be priced off this table.** The `focal_dense` observation in the ledger keeps its
+value as mechanism (it is still the only intervention that moves ACL and Lateral Meniscus at all) and
+loses all of its value as a board projection.
+
+What survives, and it is the only thing that does: an intervention has to move **all twelve columns
+together**. That is what a supervision change does — it retrains every seat — and it is why the learned
+reader (`knee-wko44`, M227) is the lane this table hands off to, rather than any per-finding work.
