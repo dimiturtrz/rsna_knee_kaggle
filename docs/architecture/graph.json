@@ -24536,25 +24536,19 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.experiments.control_check.Comparability._recut",
+      "source": "kneemri.experiments.control_check.Comparability._recomputed",
       "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.control_check.Comparability._recut",
-      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.macro",
+      "source": "kneemri.experiments.control_check.Comparability._recomputed",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.control_check.Comparability._recut",
-      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.control_check.Comparability._recut",
+      "source": "kneemri.experiments.control_check.Comparability._recomputed",
       "target": "kneemri.runs.run_metrics.RunMetrics.checkpoint",
       "weight": 1
     },
@@ -24572,8 +24566,20 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.control_check.Comparability.recorded",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.Comparability.scoreable",
+      "target": "kneemri.experiments.control_check.Comparability._recomputed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.control_check.Comparability.sourced",
-      "target": "kneemri.experiments.control_check.Comparability._recut",
+      "target": "kneemri.experiments.control_check.Comparability._recomputed",
       "weight": 1
     },
     {
@@ -24598,6 +24604,12 @@
       "kind": "references",
       "source": "kneemri.experiments.control_check.ControlCheck",
       "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck._output_stem",
+      "target": "kneemri.experiments.control_check.ControlCheck._first",
       "weight": 1
     },
     {
@@ -24645,6 +24657,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.control_check.ControlCheck.findings",
+      "target": "kneemri.experiments.control_check.Comparability.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.findings",
       "target": "kneemri.experiments.control_check.Comparability.sourced",
       "weight": 1
     },
@@ -24658,6 +24676,18 @@
       "kind": "calls",
       "source": "kneemri.experiments.control_check.ControlCheck.findings",
       "target": "kneemri.experiments.control_check.ControlCheck.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.resolve",
+      "target": "kneemri.experiments.control_check.Comparability.scoreable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.resolve",
+      "target": "kneemri.experiments.control_check.ControlCheck._output_stem",
       "weight": 1
     },
     {
@@ -56344,8 +56374,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.control_check.Comparability._recut",
-      "label": "_recut",
+      "id": "kneemri.experiments.control_check.Comparability._recomputed",
+      "label": "_recomputed",
       "level": "method",
       "parent": "kneemri.experiments.control_check.Comparability",
       "role": null
@@ -56362,6 +56392,22 @@
       "descendants": 0,
       "id": "kneemri.experiments.control_check.Comparability.built",
       "label": "built",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability.recorded",
+      "label": "recorded",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability.scoreable",
+      "label": "scoreable",
       "level": "method",
       "parent": "kneemri.experiments.control_check.Comparability",
       "role": null
@@ -56394,6 +56440,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.control_check.ControlCheck._first",
       "label": "_first",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.ControlCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.ControlCheck._output_stem",
+      "label": "_output_stem",
       "level": "method",
       "parent": "kneemri.experiments.control_check.ControlCheck",
       "role": null
