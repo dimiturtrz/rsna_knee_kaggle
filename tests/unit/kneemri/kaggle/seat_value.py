@@ -70,6 +70,9 @@ def test_report(tmp_path: Path):
     assert lines[1].startswith("roster of 2:"), "the base every delta is against is stated"
     assert "+candidate.pt" in lines[2], "the candidate is named with its marginal contribution"
     assert "shipped" not in lines[2], "a roster member is never also priced as a candidate"
+    assert any("what DROPPING each member alone is worth" in line for line in lines), (
+        "the drop table follows the marginal one — a swap's displaced term is printed beside its candidate term"
+    )
 
 
 def test_scoreable(tmp_path: Path):

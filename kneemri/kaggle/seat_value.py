@@ -210,8 +210,8 @@ class SeatValue:
         )
         return [
             f"{denominator}; every score below is a macro read on the {scores.name()} ruler",
-            *curve.dropped(held),
             *MixReading(mixed, roster).lines(curve, None, paired=False, labels=False, routing=False),
+            *curve.dropped(held),
             *MemberDistance(held, rest, scores).report(),
             *MemberDivergence(held, rest).report(),
             *MemberAxes(held, rest).report(),
