@@ -29402,6 +29402,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.holdout_only",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.packaged",
       "target": "kneemri.kaggle.roster_check.RosterDrift.patterns",
       "weight": 1
@@ -29457,6 +29463,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.report",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.holdout_only",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.report",
       "target": "kneemri.kaggle.roster_check.RosterDrift.packaged",
       "weight": 1
     },
@@ -29476,24 +29488,6 @@
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.report",
       "target": "kneemri.kaggle.roster_check.RosterDrift.unreadable",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.checkpoints",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.scoreable",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
       "weight": 1
     },
     {
@@ -59348,6 +59342,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
       "label": "contradictory",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.holdout_only",
+      "label": "holdout_only",
       "level": "method",
       "parent": "kneemri.kaggle.roster_check.RosterDrift",
       "role": null
