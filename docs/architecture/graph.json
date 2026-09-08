@@ -314,6 +314,24 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.corpus_column",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.corpus_column",
+      "target": "core.data.corpus.merged_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.corpus_column",
+      "target": "core.data.corpus.study_metadata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.crop_alignment",
       "target": "core.cli",
       "weight": 1
@@ -7858,6 +7876,12 @@
       "kind": "construct",
       "source": "core.data.corpus.cache_flags.CacheFlags.cache",
       "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.corpus_column.main",
+      "target": "core.data.corpus.corpus_column.CorpusTags.tagged",
       "weight": 1
     },
     {
@@ -34503,7 +34527,7 @@
   ],
   "nodes": [
     {
-      "descendants": 74,
+      "descendants": 75,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -34527,7 +34551,7 @@
       "role": null
     },
     {
-      "descendants": 64,
+      "descendants": 65,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -34535,7 +34559,7 @@
       "role": null
     },
     {
-      "descendants": 38,
+      "descendants": 39,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -34618,6 +34642,14 @@
       "descendants": 0,
       "id": "core.data.corpus.cache_flags",
       "label": "cache_flags",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.corpus_column",
+      "label": "corpus_column",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -37420,6 +37452,14 @@
       "label": "CacheFlags",
       "level": "class",
       "parent": "core.data.corpus.cache_flags",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.corpus_column.CorpusTags",
+      "label": "CorpusTags",
+      "level": "class",
+      "parent": "core.data.corpus.corpus_column",
       "role": "primary"
     },
     {
@@ -42852,6 +42892,22 @@
       "label": "cache",
       "level": "method",
       "parent": "core.data.corpus.cache_flags.CacheFlags",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.corpus_column.CorpusTags.tagged",
+      "label": "tagged",
+      "level": "method",
+      "parent": "core.data.corpus.corpus_column.CorpusTags",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.corpus_column.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.corpus_column",
       "role": null
     },
     {

@@ -58,7 +58,21 @@
 # $MODELS/recal_holdannot_s2026.pt`. Both, per knee-9198. n=58 is a level, not a selector: it cannot
 # resolve 0.002 (knee-kddo), so only a difference at or above the floor is readable on it.
 #
+# THE RULER DEFECT THIS ARM SHIPPED WITH, AND WHY THE FLAG IS NOW EXPLICIT (knee-zya5d). Until
+# 2026-09-08 this line carried `--labels "$RECAL"` and NO `--eval-labels`, so the eval table defaulted
+# to the training table and the holdout truth WAS the recalibrated one. That is not a calibration
+# detail: the re-map sends level 0.68 to 0.378, which crosses the 0.5 midpoint every other member is
+# cut at, so cells positive for the whole pool are negative here — 2017 positives across the twelve
+# columns against the canonical 3336. Fewer, more extreme positives is an easier problem, and the row
+# read 0.8964, +0.0279 clear of the next-best trained solo, which is how it came back as a suspected
+# leak. It was a CUT. The same predictions against the canonical holdout truth (studies verified
+# identical to `holdannot_s2026`) read 0.8515 against a control of 0.8506: +0.0009, the arm's own
+# pre-registered FLAT band. The rank-AUC-invariance argument above is correct and is exactly why this
+# was invisible — a monotone re-map cannot move the score of a FIXED positive set, and what moved was
+# the positive set.
+#
 # bead: knee-8wa0
+# bead: knee-zya5d
 # The measurement it rests on is knee-7oep; the two-ruler rule is knee-9198.
 #
 # deliberate: --hold-annotations (the gold ruler refuses the checkpoint without it, and it closes the
@@ -75,4 +89,4 @@ run_train recal_holdannot \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
   --image-size 224 --hold-annotations \
-  --labels "$RECAL" --out "$MODELS/recal_holdannot_s2026.pt"
+  --labels "$RECAL" --eval-labels "$LABELS" --out "$MODELS/recal_holdannot_s2026.pt"

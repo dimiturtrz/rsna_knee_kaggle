@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# bead: knee-gpp93
+# reading: merged_chain_span_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   merged_span_cf's exact line plus two terms it does not carry: --hold-annotations and --ema.
+#
+# WHY IT IS NOT A REPEAT (the check extended_band failed)
+#   D187 §2 recomputed every flag off the holdout files. Over the thirteen arms that set
+#   --scheme merged: --hold-annotations is set on ZERO of them, and --ema on zero of the _cf
+#   family (merged_span_ff and merged3_tranche_one set it only alongside --fold -1, which holds
+#   nothing out and cannot be priced). So the pair has never been measured on this corpus.
+#
+# THE ARGUMENT
+#   The project's two best solos share no terms:
+#     chainfour_s2026   0.8648  labelwise + blend_three_v1 + --hold-annotations + --ema + calibrated
+#     merged_span_cf    0.8618  --scheme merged + span geometry + calibrated, max pooling
+#   The head/label lane and the corpus lane were built independently and never crossed. One half
+#   of the cross IS measured and is negative: merged_labelwise_cf (merged + labelwise + calibrated)
+#   read 0.8587, below merged_span_cf's 0.8618 — so the pooling term does not carry over and this
+#   arm keeps --slice-pooling max. What is left uncrossed is exactly the annotation-hold and the
+#   weight average.
+#
+#   D187 §1 is the reason to expect the merged corpus to answer differently rather than identically:
+#   geometry sign-flips ACROSS CORPORA (span costs -0.0013 on ours, pays +0.0021 on merged), which
+#   is the strongest single piece of evidence that the merged corpus is a materially different
+#   fitting problem and not our corpus with more rows.
+#
+# CONTROL, STATISTIC, POPULATION, CUT
+#   merged_span_cf 0.8618 — per-column ROC-AUC, unweighted 12-column macro, population holdout909,
+#   cut midpoint 0.5. Same recipe, same epochs, same labels, same eval labels, two flags fewer.
+#
+# PRE-REGISTRATION (written before the run, not a claim)
+#   >= +0.004 vs 0.8618  -> a member worth rostering and the corpus lane stays open
+#   +0.001 .. +0.004     -> directional only, keep if free, no axis re-opens on it
+#   <= +0.001            -> the annotation-hold/EMA pair does not transfer to the merged corpus,
+#                           and the head lane and the corpus lane are recorded as non-composing
+#
+# PRICE
+#   ~3 h of card at the merged corpus's row count. Plausible gain +0.003; odds of clearing the
+#   1.5% bar alone: near zero. It is justified as a MEMBER for the ensemble and as the one
+#   remaining uncrossed pair between the project's two best recipes, not as a finding on its own.
+#
+# WHAT IT DOES NOT TEST
+#   Q-POOL. Per-site conditioning, pool-then-specialise and harmonisation are all untouched here;
+#   this arm is naive concatenation like every merged arm before it.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+MERGED_BLEND="$PROCESSED/labels/merged_blend_v1.csv"
+require "$MERGED_BLEND"
+require "$LABELS"
+
+run_train merged_chain_span \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.2 --band-high 0.8 \
+  --scheme merged --calibrated-targets --hold-annotations --ema \
+  --labels "$MERGED_BLEND" --eval-labels "$LABELS" --out "$MODELS/merged_chain_span_s2026.pt"

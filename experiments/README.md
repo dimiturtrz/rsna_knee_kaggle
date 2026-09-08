@@ -10411,3 +10411,43 @@ interactions a four-parameter logistic cannot represent.
 studies disagree**; per-extra filled 699 / 467 / 443 identical; gainers 34.3% against 12sl's 34.3% on the
 same rows; index order identical to both the canonical 20sl and the 12sl index. D182 called this an
 argument; on 3,600 studies it is a measurement.
+
+## 2026-09-08 — the dense corner is an OFFSET, not an interaction: a flat knob does not get a re-run (D190)
+
+**A knob that reads flat at the default geometry does not get a dense-corner re-run.** Measured over the
+eleven knob axes that have a member at BOTH geometries, the dense corner is a **+0.0031 median offset**
+with ordering preserved (**Spearman 0.64, Pearson 0.73**), the largest swing any axis has ever shown
+between the corners is **0.0063**, and **no axis has ever crossed from a real negative to a real
+positive**. Controls read fresh at each corner: `base224_s2026` 0.8509, `base_dense_s2026` 0.8512.
+
+Five of the eleven flip SIGN, which is not a reversal: every flipping axis has a default-side delta of
+|d| ≤ 0.0028, against a 0.005 noise floor, and the largest a flip ever reaches at the dense corner is
++0.0057. A sign flip on a number that has no sign is a coin landing the other way. The axes that are
+CLEARLY negative at default stay negative and mostly get worse — label errors −0.0046 → −0.0092, ortho
+−0.0091 → −0.0060. The dense corner is not a different regime in which different things work; it is the
+same regime with a small constant added.
+
+**SCOPE LIMIT, AND IT IS REAL: this covers KNOBS, not trunk swaps.** The two encoder axes with a member
+at both corners move four to six times anything a knob shows, in both directions — convnext
+(`cnx_own_recipe_s2026` / `cnx_dense_s2026`) **−0.0262**, dinov3-base (`dinov3_base_lora_s2026` /
+`v3base_dense_s2026`) **+0.0184**. Neither crosses zero, so the rule's answer is unchanged, but a trunk
+that gains +0.0184 from the corner is not described by "a +0.0031 offset". **A KNOB that read flat at
+default geometry does not need a dense-corner re-run. An ENCODER might.**
+
+**WHAT IT DOES NOT SAY.** n=11, single seed throughout, twins hand-paired by name. The claim is a
+NEGATIVE one ("no reversal observed"), which is the kind a small n can carry; it would not support a
+positive claim about the offset's size, and +0.0031 should not be quoted as a quantity.
+`labelwise_dense_s2026` has no default twin on disk and is absent from the table.
+
+**CONSEQUENCE:** it frees no slot, but it closes a class of proposal that had been generating them —
+every dense-corner re-run of a flat knob was buying a ±0.006 look at a 0.015 question.
+
+### Two foreign readings that finished and were never ledgered — 2026-09-08
+
+Both watchers (`after_cellc.sh`, `after_effv2l.sh`) completed cleanly; the readings sat in their logs.
+
+- **`repl2x2_c`** — SWA gold **0.9074** (best-epoch 0.9068, epoch-ensemble 0.9077).
+- **`raptor_ft_effv2l_f0`** — SWA gold **0.8657**, best-epoch **0.8669**, epoch-ensemble 0.8659. Scored
+  against `after_effv2l.sh`'s OWN pre-registration, which put **0.840–0.865 as the expected null** and
+  **≥0.875 as the gate for "the family is a lane"**: this lands just above the null band and below the
+  lane gate. **The family is not a lane on this reading.**
