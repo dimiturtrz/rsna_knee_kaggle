@@ -166,6 +166,11 @@ def test_spectral_loss():
     assert objective.spectral_loss(blurred, images) > objective.spectral_loss(images + 1.0e-3, images)
 
 
+def test_term_names():
+    """The spectral term IS this module's claim, so the log line has to name it rather than a total."""
+    assert _objective().term_names() == ("pixel", "spectral")
+
+
 def test_forward():
     """Both terms come back separately, and the weight actually multiplies the spectral one.
 

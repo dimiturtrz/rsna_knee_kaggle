@@ -948,3 +948,22 @@ calib_dense_s2026.pt                 # Converged 12/12, convergence_check clean,
 # built by moving a label-side knob lands nearer the pool than the pool is to itself, which is D174 §3's
 # surface stated as a single member. Declined as a seat; the checkpoint stays and its recal_through pair
 # is what the arm was actually queued to read. Re-opened only by a ruler on which a TWIN can pay.
+extended_band_s2026_run1.pt          # LEDGER 0.8278 / L75 0.8489 at epoch 3 of 12 - a TRUNCATED re-run of
+                                     # extended_band_s2026 (rostered, 0.8519 at e9). A killed process is
+                                     # not a fact about an architecture; the converged twin ships instead.
+extended_band_s2026_run2.pt          # LEDGER 0.7379 / L75 0.7658 at epoch 0 - same run, died sooner. Same
+                                     # reason: the converged extended_band_s2026 is the member.
+merged3_oversample_s2026.pt          # LEDGER 0.8416 / L75 0.8690 at epoch 11. Converged, but it is an
+                                     # oversampling variant of the merged3 corpus, and this project does
+                                     # not queue against merged3_corpus_s2026 (its corpus is contested).
+resnet50d_lr_s2026.pt                # LEDGER 0.8196 / L75 0.8444 at epoch 7 - a rate-probe arm on a CNN
+                                     # trunk, below every packaged member and built to price a knob.
+raptor_ft_ourtrunk44.pt              # LEDGER 0.7857 / L75 0.8173 over 896 rows, epoch -1 (a foreign-run
+                                     # artefact, not our trainer's epoch). Read the cut before quoting it:
+                                     # this is the number the pool-label collision of knee-f9aao ran on.
+mricore_rate_s2026.pt                # LEDGER 0.7811 / L75 0.8034 at epoch 3 - a rate probe, truncated.
+recal_through_s2026.pt               # LEDGER 0.7464 / L75 0.7712 at epoch 0 - truncated at the first
+                                     # epoch, so the number is a floor about a killed process.
+mae_unitfix_s2026.pt                 # LEDGER 0.6957 / L75 0.7129 at epoch 2 - the weakest of the ten, and
+                                     # a masked-pretrain arm from the family the attention gate now
+                                     # refuses at epoch 0 (see the 2026-09-08 ledger section).

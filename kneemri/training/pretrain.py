@@ -32,7 +32,11 @@ from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.study_cache import CachedCorpus
 from core.wakelock import Wakelock
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.training.spectral_mae import BYTE_RANGE, SpectralMae, SpectralMaskConfig
+from kneemri.training.attention_health import AttentionHealth, AttentionProfile
+from kneemri.training.latent_mim import LatentMimConfig
+from kneemri.training.masked_objective import BYTE_RANGE, MaskConfig, MaskedObjective
+from kneemri.training.masked_objectives import Objectives
+from kneemri.training.spectral_mae import SpectralMaskConfig
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +99,7 @@ class Pretrainer:
 
     def __init__(
         self,
-        objective: SpectralMae,
+        objective: MaskedObjective[MaskConfig],
         corpus: CachedCorpus,
         device: torch.device,
         sampling: Sampling,
@@ -139,40 +143,86 @@ class Pretrainer:
         images = torch.from_numpy(np.ascontiguousarray(pixels)).to(self.device, non_blocking=True)
         return images.unsqueeze(1).float().div_(BYTE_RANGE)
 
-    def step(self, optimisation: "Optimisation") -> tuple[float, float]:
-        """One optimiser step, returning the pixel and spectral terms separately.
+    def _tokens(self, images: Float[Tensor, "b 1 h w"]) -> int:
+        """How many patch tokens the encoder will emit for a batch of this size."""
+        return (images.shape[-1] // self.objective.config.patch) ** 2
 
-        Separately because the spectral term IS the claim being tested: a total that falls while the
-        spectral term is flat means the run is a plain masked autoencoder wearing the name.
+    def step(self, optimisation: "Optimisation") -> tuple[float, float]:
+        """One optimiser step, returning the objective's two reported terms separately.
+
+        Separately because the second term IS the claim being tested — the spectral term for the pixel
+        objective, the teacher's feature spread for the latent one — and a total that falls while it is
+        flat means the run is doing something other than what it is named for.
         """
         images = self.batch()
-        tokens = (images.shape[-1] // self.objective.config.patch) ** 2
-        mask = self.objective.sample_mask(images.shape[0], tokens, self.device, self.sampling.generator)
+        mask = self.objective.sample_mask(images.shape[0], self._tokens(images), self.device, self.sampling.generator)
         with autocast("cuda", dtype=torch.bfloat16, enabled=self.device.type == "cuda"):
-            total, pixels, spectral = self.objective(images, mask)
+            total, first, second = self.objective(images, mask)
         optimisation.apply(total)
-        return float(pixels.detach()), float(spectral.detach())
+        self.objective.after_step()
+        return float(first.detach()), float(second.detach())
+
+    def _health(self) -> AttentionHealth:
+        """The collapse gate, with its reference MEASURED off the encoder as this run starts.
+
+        Measured rather than pasted from a letter: the run starts at the stock checkpoint, so the honest
+        baseline costs one forward pass, and a constant array would be wrong the moment the image size,
+        the patch or the trunk changed. Call it before the first step or it is a reference to damage.
+        """
+        images = self.batch()
+        tokens = self._tokens(images)
+        backbone = self.objective.backbone
+        return AttentionHealth.baseline(backbone, self.objective.normalise(images), tokens)
+
+    def _profile(self, health: AttentionHealth) -> AttentionProfile:
+        """The encoder's per-block attention entropy and prefix mass, on the gate's OWN held slices.
+
+        The gate is passed in rather than rebuilt for two reasons. It carries the epoch-zero reference,
+        and a rebuilt one would re-measure that reference off the encoder being judged, which reads every
+        collapse as healthy. And it carries the PROBE BATCH, so what is subtracted here is two encoders
+        on one set of slices rather than two batches — the first real run refused after three steps at
+        5e-5 because the reading was drawn fresh.
+        """
+        return health.profile(self.objective.backbone)
 
     def run(self, epochs: int, optimisation: "Optimisation") -> None:
-        """Every epoch, logging both loss terms and the throughput each epoch actually achieved."""
+        """Every epoch, logging both loss terms, the throughput, and whether attention is still routing.
+
+        The attention check ENDS the run rather than warning, because a loss that keeps falling while the
+        blocks stop routing is exactly what `pretrain_unitfix` did for eight hours, and a warning in a log
+        is what nobody was looking for. Its reference is taken here, BEFORE the first step, so it is stock
+        the run is measured against. See `attention_health`.
+        """
         steps = self.steps_per_epoch()
+        first_name, second_name = self.objective.term_names()
+        health = self._health()
+        # The span decides nothing now that the gate is a retained FRACTION of stock, but it is what broke
+        # the absolute margin it replaced (researcher D253), so every run still records its own.
+        logger.info("stock attention: %s | span %.2f nats", health.reference.report(), health.span())
         for epoch in range(epochs):
             started = time.monotonic()
             totals = torch.zeros(2)
             for index in range(steps):
-                pixels, spectral = self.step(optimisation)
-                totals += torch.tensor([pixels, spectral])
+                first, second = self.step(optimisation)
+                totals += torch.tensor([first, second])
                 if index % REPORT_EVERY == 0:
-                    logger.info("  step %d/%d  pixel %.4f  spectral %.4f", index, steps, pixels, spectral)
+                    logger.info("  step %d/%d  %s %.4f  %s %.4f", index, steps, first_name, first, second_name, second)
             elapsed = time.monotonic() - started
+            profile = self._profile(health)
             logger.info(
-                "epoch %d: pixel %.4f  spectral %.4f  (%.0fs, %.0f slices/s)",
+                "epoch %d: %s %.4f  %s %.4f  (%.0fs, %.0f slices/s)  %s",
                 epoch,
+                first_name,
                 totals[0] / steps,
+                second_name,
                 totals[1] / steps,
                 elapsed,
                 steps * self.sampling.slices_per_step / elapsed,
+                health.report(profile),
             )
+            if health.degenerate(profile):
+                message = f"attention left stock at epoch {epoch}: {health.report(profile)}"
+                raise RuntimeError(message)
 
     def save(self, destination: Path, variant: str, epochs: int, cache: str) -> None:
         """The adapted encoder plus the recipe that produced it, under one path.
@@ -227,6 +277,22 @@ def main() -> None:
         "chosen to keep a 12-epoch fine-tune from destroying a representation it cannot rebuild — the "
         "opposite of what this run is for.",
     )
+    command.parser.add_argument(
+        "--objective",
+        choices=Objectives.choices(),
+        default="latent",
+        help="what the hidden patches are scored against. `latent` predicts an EMA teacher's features; "
+        "`spectral` reconstructs pixels and is the arm that drove blocks 6-11 to uniform attention.",
+    )
+    command.parser.add_argument(
+        "--retention",
+        type=float,
+        default=LatentMimConfig.retention,
+        help="LATENT ONLY: the fraction of the STOCK teacher that must survive the whole run, from which "
+        "the EMA momentum is derived once the step count is known. 1.0 freezes the teacher. No published "
+        "momentum transfers here: they were fitted for hundreds of epochs from random init, and at "
+        "data2vec's 0.9998 this run would end with 0.65%% of DINOv2 left in the teacher.",
+    )
     command.parser.add_argument("--mask-ratio", type=float, default=SpectralMaskConfig.mask_ratio)
     command.parser.add_argument("--spectral-weight", type=float, default=SpectralMaskConfig.spectral_weight)
     command.parser.add_argument("--highpass", type=float, default=SpectralMaskConfig.highpass)
@@ -241,8 +307,6 @@ def main() -> None:
     command.parser.add_argument("--out", type=Path, required=True)
     arguments = command.parsed()
 
-    from transformers import AutoModel  # noqa: PLC0415 - a 90 MB import the unit gate must not pay for
-
     encoder = ENCODERS[arguments.variant]
     root = command.rooted(arguments)
     cache = CacheFlags.cache(arguments, root.processed())
@@ -250,15 +314,7 @@ def main() -> None:
     encoder.require_tiling(corpus.image_size)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    config = SpectralMaskConfig(
-        mask_ratio=arguments.mask_ratio,
-        spectral_weight=arguments.spectral_weight,
-        highpass=arguments.highpass,
-        patch=encoder.patch,
-    )
-    objective = SpectralMae(
-        AutoModel.from_pretrained(encoder.repository), encoder.dim, config, encoder.normalization
-    ).to(device)
+    objective = Objectives.named(arguments.objective, arguments, encoder).to(device)
     if device.type == "cuda":
         objective.backbone.compile()
 
@@ -269,6 +325,10 @@ def main() -> None:
     )
     trainer = Pretrainer(objective, corpus, device, sampling)
     steps = trainer.steps_per_epoch() * arguments.epochs
+    # The objective learns the run's LENGTH here and not in its constructor: a teacher momentum is only
+    # meaningful against the number of updates it will see, and that number is known only once the corpus
+    # and the batch width have been resolved.
+    objective.plan(steps)
     optimisation = Optimisation.one_cycle(objective.parameters(), arguments.lr, steps)
 
     logger.info(

@@ -6812,6 +6812,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.latent_mim",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.latent_mim",
+      "target": "kneemri.training.masked_objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.masked_objective",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.masked_objectives",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.masked_objectives",
+      "target": "kneemri.training.latent_mim",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.masked_objectives",
+      "target": "kneemri.training.masked_objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.masked_objectives",
+      "target": "kneemri.training.spectral_mae",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.objective",
       "target": "kneemri.training.grades",
       "weight": 1
@@ -6964,6 +7006,30 @@
       "kind": "import",
       "source": "kneemri.training.pretrain",
       "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.training.attention_health",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.training.latent_mim",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.training.masked_objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pretrain",
+      "target": "kneemri.training.masked_objectives",
       "weight": 1
     },
     {
@@ -7162,6 +7228,12 @@
       "kind": "import",
       "source": "kneemri.training.spectral_mae",
       "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.spectral_mae",
+      "target": "kneemri.training.masked_objective",
       "weight": 1
     },
     {
@@ -32732,6 +32804,102 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.attention_health.AttentionHealth",
+      "target": "kneemri.training.attention_health.AttentionHealth",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.attention_health.AttentionHealth",
+      "target": "kneemri.training.attention_health.AttentionProfile",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.attention_health.AttentionHealth.baseline",
+      "target": "kneemri.training.attention_health.AttentionProfile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.degenerate",
+      "target": "kneemri.training.attention_health.AttentionHealth.retention",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.maps",
+      "target": "kneemri.training.attention_health.AttentionHealth.readable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.profile",
+      "target": "kneemri.training.attention_health.AttentionHealth.entropy",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.profile",
+      "target": "kneemri.training.attention_health.AttentionHealth.maps",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.profile",
+      "target": "kneemri.training.attention_health.AttentionHealth.prefix_mass",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.attention_health.AttentionHealth.profile",
+      "target": "kneemri.training.attention_health.AttentionProfile",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.attention_health.AttentionHealth.readable",
+      "target": "kneemri.training.attention_health._Readable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.report",
+      "target": "kneemri.training.attention_health.AttentionHealth.retention",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.report",
+      "target": "kneemri.training.attention_health.AttentionProfile.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.retention",
+      "target": "kneemri.training.attention_health.AttentionHealth._share",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.retention",
+      "target": "kneemri.training.attention_health.AttentionHealth.uniform",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health._Readable.__enter__",
+      "target": "kneemri.training.attention_health._Readable._switch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health._Readable.__exit__",
+      "target": "kneemri.training.attention_health._Readable._switch",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.augmentation.AugmentConfig",
       "target": "kneemri.training.augmentation.AugmentConfig",
       "weight": 1
@@ -33481,6 +33649,84 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.training.latent_mim.LatentMim",
+      "target": "kneemri.training.latent_mim.LatentMimConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.latent_mim.LatentMim.forward",
+      "target": "kneemri.training.latent_mim.LatentMim.latent_loss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.latent_mim.LatentMim.forward",
+      "target": "kneemri.training.latent_mim.LatentMim.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.latent_mim.LatentMim.forward",
+      "target": "kneemri.training.latent_mim.LatentMim.target",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.latent_mim.LatentMimConfig",
+      "target": "kneemri.training.masked_objective.MaskConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.masked_objective.MaskedObjective.encode",
+      "target": "kneemri.training.masked_objective.MaskedObjective.normalise",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.masked_objective.MaskedObjective.encode",
+      "target": "kneemri.training.masked_objective.MaskedObjective.patches",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.masked_objectives.Objectives",
+      "target": "kneemri.training.masked_objective.MaskConfig",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.masked_objectives.Objectives",
+      "target": "kneemri.training.masked_objective.MaskedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.masked_objectives.Objectives.latent",
+      "target": "kneemri.training.latent_mim.LatentMim",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.masked_objectives.Objectives.latent",
+      "target": "kneemri.training.latent_mim.LatentMimConfig",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.masked_objectives.Objectives.spectral",
+      "target": "kneemri.training.spectral_mae.SpectralMae",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.masked_objectives.Objectives.spectral",
+      "target": "kneemri.training.spectral_mae.SpectralMaskConfig",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.mixup.Blend.images",
       "target": "kneemri.training.mixup.Blend.identity",
@@ -33885,6 +34131,30 @@
     {
       "kind": "references",
       "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.training.attention_health.AttentionHealth",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.training.attention_health.AttentionProfile",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.training.masked_objective.MaskConfig",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.pretrain.Pretrainer",
+      "target": "kneemri.training.masked_objective.MaskedObjective",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.pretrain.Pretrainer",
       "target": "kneemri.training.pretrain.Optimisation",
       "weight": 1
     },
@@ -33895,9 +34165,51 @@
       "weight": 1
     },
     {
-      "kind": "holds",
-      "source": "kneemri.training.pretrain.Pretrainer",
-      "target": "kneemri.training.spectral_mae.SpectralMae",
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer._health",
+      "target": "kneemri.training.attention_health.AttentionHealth.baseline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer._health",
+      "target": "kneemri.training.masked_objective.MaskedObjective.normalise",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer._health",
+      "target": "kneemri.training.pretrain.Pretrainer._tokens",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer._health",
+      "target": "kneemri.training.pretrain.Pretrainer.batch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer._profile",
+      "target": "kneemri.training.attention_health.AttentionHealth.profile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.run",
+      "target": "kneemri.training.masked_objective.MaskedObjective.term_names",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.run",
+      "target": "kneemri.training.pretrain.Pretrainer._health",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.run",
+      "target": "kneemri.training.pretrain.Pretrainer._profile",
       "weight": 1
     },
     {
@@ -33915,7 +34227,19 @@
     {
       "kind": "calls",
       "source": "kneemri.training.pretrain.Pretrainer.save",
-      "target": "kneemri.training.spectral_mae.SpectralMae.encoder_state",
+      "target": "kneemri.training.masked_objective.MaskedObjective.encoder_state",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.step",
+      "target": "kneemri.training.masked_objective.MaskedObjective.after_step",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.Pretrainer.step",
+      "target": "kneemri.training.masked_objective.MaskedObjective.sample_mask",
       "weight": 1
     },
     {
@@ -33927,13 +34251,13 @@
     {
       "kind": "calls",
       "source": "kneemri.training.pretrain.Pretrainer.step",
-      "target": "kneemri.training.pretrain.Pretrainer.batch",
+      "target": "kneemri.training.pretrain.Pretrainer._tokens",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.pretrain.Pretrainer.step",
-      "target": "kneemri.training.spectral_mae.SpectralMae.sample_mask",
+      "target": "kneemri.training.pretrain.Pretrainer.batch",
       "weight": 1
     },
     {
@@ -33952,6 +34276,18 @@
       "kind": "construct",
       "source": "kneemri.training.pretrain.main",
       "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.masked_objectives.Objectives.choices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pretrain.main",
+      "target": "kneemri.training.masked_objectives.Objectives.named",
       "weight": 1
     },
     {
@@ -33988,18 +34324,6 @@
       "kind": "construct",
       "source": "kneemri.training.pretrain.main",
       "target": "kneemri.training.pretrain.Sampling",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.pretrain.main",
-      "target": "kneemri.training.spectral_mae.SpectralMae",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.pretrain.main",
-      "target": "kneemri.training.spectral_mae.SpectralMaskConfig",
       "weight": 1
     },
     {
@@ -34783,15 +35107,9 @@
       "weight": 1
     },
     {
-      "kind": "holds",
+      "kind": "references",
       "source": "kneemri.training.spectral_mae.SpectralMae",
       "target": "kneemri.training.spectral_mae.SpectralMaskConfig",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.spectral_mae.SpectralMae.forward",
-      "target": "kneemri.training.spectral_mae.SpectralMae.encode",
       "weight": 1
     },
     {
@@ -34828,6 +35146,12 @@
       "kind": "calls",
       "source": "kneemri.training.spectral_mae.SpectralMae.spectral_loss",
       "target": "kneemri.training.spectral_mae.SpectralMae.highpass",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.spectral_mae.SpectralMaskConfig",
+      "target": "kneemri.training.masked_objective.MaskConfig",
       "weight": 1
     },
     {
@@ -35983,7 +36307,7 @@
       "role": null
     },
     {
-      "descendants": 280,
+      "descendants": 284,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -37935,7 +38259,7 @@
       "role": null
     },
     {
-      "descendants": 36,
+      "descendants": 40,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -37946,6 +38270,14 @@
       "descendants": 0,
       "id": "kneemri.training.accumulation",
       "label": "accumulation",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health",
+      "label": "attention_health",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -38066,6 +38398,30 @@
       "descendants": 0,
       "id": "kneemri.training.landed",
       "label": "landed",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim",
+      "label": "latent_mim",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective",
+      "label": "masked_objective",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objectives",
+      "label": "masked_objectives",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -42920,6 +43276,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth",
+      "label": "AttentionHealth",
+      "level": "class",
+      "parent": "kneemri.training.attention_health",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionProfile",
+      "label": "AttentionProfile",
+      "level": "class",
+      "parent": "kneemri.training.attention_health",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health._Readable",
+      "label": "_Readable",
+      "level": "class",
+      "parent": "kneemri.training.attention_health",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.augmentation.AugmentConfig",
       "label": "AugmentConfig",
       "level": "class",
@@ -43149,6 +43529,46 @@
       "level": "class",
       "parent": "kneemri.training.landed",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim",
+      "label": "LatentMim",
+      "level": "class",
+      "parent": "kneemri.training.latent_mim",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMimConfig",
+      "label": "LatentMimConfig",
+      "level": "class",
+      "parent": "kneemri.training.latent_mim",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskConfig",
+      "label": "MaskConfig",
+      "level": "class",
+      "parent": "kneemri.training.masked_objective",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective",
+      "label": "MaskedObjective",
+      "level": "class",
+      "parent": "kneemri.training.masked_objective",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objectives.Objectives",
+      "label": "Objectives",
+      "level": "class",
+      "parent": "kneemri.training.masked_objectives",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -63904,6 +64324,142 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth._share",
+      "label": "_share",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.baseline",
+      "label": "baseline",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.degenerate",
+      "label": "degenerate",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.entropy",
+      "label": "entropy",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.maps",
+      "label": "maps",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.prefix_mass",
+      "label": "prefix_mass",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.profile",
+      "label": "profile",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.readable",
+      "label": "readable",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.retention",
+      "label": "retention",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.span",
+      "label": "span",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.uniform",
+      "label": "uniform",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionProfile.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health._Readable.__enter__",
+      "label": "__enter__",
+      "level": "method",
+      "parent": "kneemri.training.attention_health._Readable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health._Readable.__exit__",
+      "label": "__exit__",
+      "level": "method",
+      "parent": "kneemri.training.attention_health._Readable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health._Readable.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.attention_health._Readable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health._Readable._switch",
+      "label": "_switch",
+      "level": "method",
+      "parent": "kneemri.training.attention_health._Readable",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.augmentation.AugmentConfig.geometric_only",
       "label": "geometric_only",
       "level": "method",
@@ -64608,6 +65164,198 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.after_step",
+      "label": "after_step",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.latent_loss",
+      "label": "latent_loss",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.plan",
+      "label": "plan",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.target",
+      "label": "target",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.latent_mim.LatentMim.term_names",
+      "label": "term_names",
+      "level": "method",
+      "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.after_step",
+      "label": "after_step",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.config",
+      "label": "config",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.encode",
+      "label": "encode",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.encoder_state",
+      "label": "encoder_state",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.normalise",
+      "label": "normalise",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.patches",
+      "label": "patches",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.plan",
+      "label": "plan",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.sample_mask",
+      "label": "sample_mask",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objective.MaskedObjective.term_names",
+      "label": "term_names",
+      "level": "method",
+      "parent": "kneemri.training.masked_objective.MaskedObjective",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objectives.Objectives._table",
+      "label": "_table",
+      "level": "method",
+      "parent": "kneemri.training.masked_objectives.Objectives",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objectives.Objectives.choices",
+      "label": "choices",
+      "level": "method",
+      "parent": "kneemri.training.masked_objectives.Objectives",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objectives.Objectives.latent",
+      "label": "latent",
+      "level": "method",
+      "parent": "kneemri.training.masked_objectives.Objectives",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objectives.Objectives.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.training.masked_objectives.Objectives",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.masked_objectives.Objectives.spectral",
+      "label": "spectral",
+      "level": "method",
+      "parent": "kneemri.training.masked_objectives.Objectives",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.mixup.Blend.identity",
       "label": "identity",
       "level": "method",
@@ -65066,6 +65814,30 @@
       "descendants": 0,
       "id": "kneemri.training.pretrain.Pretrainer.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer._health",
+      "label": "_health",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer._profile",
+      "label": "_profile",
+      "level": "method",
+      "parent": "kneemri.training.pretrain.Pretrainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pretrain.Pretrainer._tokens",
+      "label": "_tokens",
       "level": "method",
       "parent": "kneemri.training.pretrain.Pretrainer",
       "role": null
@@ -65672,22 +66444,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.spectral_mae.SpectralMae.encode",
-      "label": "encode",
-      "level": "method",
-      "parent": "kneemri.training.spectral_mae.SpectralMae",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.spectral_mae.SpectralMae.encoder_state",
-      "label": "encoder_state",
-      "level": "method",
-      "parent": "kneemri.training.spectral_mae.SpectralMae",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.spectral_mae.SpectralMae.forward",
       "label": "forward",
       "level": "method",
@@ -65728,16 +66484,16 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.spectral_mae.SpectralMae.sample_mask",
-      "label": "sample_mask",
+      "id": "kneemri.training.spectral_mae.SpectralMae.spectral_loss",
+      "label": "spectral_loss",
       "level": "method",
       "parent": "kneemri.training.spectral_mae.SpectralMae",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.spectral_mae.SpectralMae.spectral_loss",
-      "label": "spectral_loss",
+      "id": "kneemri.training.spectral_mae.SpectralMae.term_names",
+      "label": "term_names",
       "level": "method",
       "parent": "kneemri.training.spectral_mae.SpectralMae",
       "role": null

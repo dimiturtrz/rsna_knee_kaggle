@@ -28,9 +28,25 @@ class _Backbone(nn.Module):
         self.projection = nn.Linear(SIDE * SIDE, DIM)
 
     @override
-    def forward(self, pixel_values: torch.Tensor, bool_masked_pos: torch.Tensor | None = None) -> object:
+    def forward(
+        self,
+        pixel_values: torch.Tensor,
+        bool_masked_pos: torch.Tensor | None = None,
+        output_attentions: bool = False,
+    ) -> object:
         token = self.projection(pixel_values.mean(dim=1).flatten(1)).unsqueeze(1)
-        return type("Output", (), {"last_hidden_state": token.expand(-1, 1 + TOKENS, DIM).contiguous()})
+        width = 1 + TOKENS
+        # Attention maps because the trainer's per-epoch health gate reads them; peaked rather than
+        # uniform so an ordinary test run is not refused by the collapse check it is exercising.
+        attentions = tuple((torch.eye(width) * 20.0).softmax(dim=-1).expand(1, 1, width, width) for _ in range(2))
+        return type(
+            "Output",
+            (),
+            {
+                "last_hidden_state": token.expand(-1, width, DIM).contiguous(),
+                "attentions": attentions if output_attentions else (),
+            },
+        )
 
 
 def _corpus(absent: tuple[int, int] | None = None) -> CachedCorpus:

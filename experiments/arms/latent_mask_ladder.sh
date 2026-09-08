@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# latent_mask_ladder.sh — is the MASK RATIO what destroys routing? A ladder, 13 minutes a rung.
+#
+# reading: latent_mask_dense_s2026.holdout.npz
+# deliberate: mask ratio 0.30 then 0.15, latent target, everything else byte-identical to latent_adapt
+# bead: knee-lm37v
+#
+# WHAT THE PREVIOUS RUNG SETTLED. `latent_adapt` (mask 0.6, latent target, lr 1e-4) was REFUSED by the
+# attention gate at the end of epoch 0 — 790 s in, not at epoch 6-8 where D252's collapses were found:
+#
+#   keep 0.90 0.80 0.86 0.98 0.99 0.94 0.98 0.94 0.98 0.79 0.23 0.87   (floor 0.25)
+#   vs stock  ... b10 +1.55 nats, drifting to uniform
+#
+# So the TARGET is not the cause. Pixel+spectral and latent die the same way under the same masking, and
+# the axis narrows to what the two share. Rate was already excluded (1e-4 and 1e-5 both collapsed on the
+# small trunk). What is left that both runs share is the MASKING — 60% of patches hidden, on 224px slices
+# of a modality whose informative structure is sparse and thin.
+#
+# AND A PUBLISHED COUNTEREXAMPLE SAYS THE FAMILY IS FINE. Researcher D256 profiled OrthoFoundation —
+# THIS trunk continued with DINO-style self-distillation on 1.25M knee images — at n=240 raw rows: max
+# |delta| 0.423 nats, no block near either end, prefix mass unmoved. A latent-target on-domain
+# continuation of this exact architecture keeps its routing. Ours does not. The difference is not the
+# target and not the corpus; heavy masking is the largest remaining one.
+#
+# THE LADDER, and why it is a ladder rather than a sweep. The gate now returns a verdict in ONE epoch, so
+# a rung costs 13 minutes instead of five hours. 0.30 halves the corruption; 0.15 is roughly one patch in
+# seven, near the floor at which a masked objective still has a task at all. The ladder STOPS at the first
+# rung that survives epoch 0 and spends the remaining seven epochs plus the fine-tune on that one — so the
+# card is never spent proving a collapse twice.
+#
+# PRE-REGISTERED:
+#   1. BOTH RUNGS REFUSED. Masking at any usable ratio destroys this trunk on this corpus, and masked
+#      adaptation closes on a mechanism. The successor is then self-distillation WITHOUT a mask
+#      (OrthoFoundation's own recipe), which is a different objective and a separately-argued arm.
+#   2. A RUNG SURVIVES, fine-tune >= 0.8578. The mask ratio was the whole story and the adaptation path
+#      this project has failed at for a fortnight is open at a smaller ratio.
+#   3. A RUNG SURVIVES, fine-tune flat against the control. Routing survives and buys nothing — the damage
+#      was never what capped the gain, and the cap is in the data.
+#
+# control  band_dense = 0.8578 (best epoch 8), byte-identical fine-tune with the flag off.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+SURVIVOR=""
+for RATIO in 0.30 0.15; do
+  TAG="adapt_latent_m${RATIO/./}_e8"
+  OUT="$MODELS/$TAG.pt"
+  if "$REPO/.venv-arm/Scripts/python.exe" -m kneemri.training.pretrain \
+      --objective latent --epochs 8 --slices-per-step 96 --lr 1e-4 --seed 2026 \
+      --mask-ratio "$RATIO" --out "$OUT" 2>&1 | tee "$MODELS/experiments/$TAG.full.log" \
+      && [ -f "$OUT" ]; then
+    SURVIVOR="$OUT"
+    break
+  fi
+  echo "rung mask $RATIO was refused by the attention gate; next rung"
+done
+
+require "$SURVIVOR"
+
+run_train latent_mask_dense \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --encoder-weights "$SURVIVOR" \
+  --labels "$LABELS" --out "$MODELS/latent_mask_dense_s2026.pt"

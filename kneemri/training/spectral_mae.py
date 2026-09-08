@@ -1,18 +1,31 @@
 """Masked image modelling with a spectral reconstruction term, for adapting the encoder to knee MRI.
 
 THE GATE THIS STANDS ON IS ALREADY MEASURED. `kneemri.evaluation.encoder_drift` reported that in every
-DINOv2 member we have shipped, blocks 0-5 drift EXACTLY 0.0000 — `--unfreeze-depth 6` freezes them — and
+DINOv2 member we have shipped, blocks 0-5 drift EXACTLY 0.0000 — `unfreeze_last: 6` freezes them — and
 the most-adapted block of our best member moved 2.1% of its own norm. Supervision here re-weights a
 natural-image representation rather than rebuilding one, and it is arithmetically incapable of touching
 half the encoder. On-domain pretraining writes into precisely those blocks, so the usual objection to
 domain-adaptive pretraining (the fine-tune undoes it) does not apply to the frozen half at all.
 
-WHY RECONSTRUCTION RATHER THAN SELF-DISTILLATION, which is what knee-c5n originally proposed. On 3D
-brain MRI, masked autoencoding beats DINO-style and JEPA-style objectives, and the margin is widest in
-the FROZEN-encoder regime that half our encoder is permanently in. Our own ledger says the same thing
-from the other side: DINOv3 — strictly better natural-image self-distillation — scored ~0.04 WORSE than
-DINOv2 here, with the deficit in focal findings. More of the objective that already disappoints is not
-the change worth making.
+WHY RECONSTRUCTION RATHER THAN SELF-DISTILLATION — AND BOTH REASONS TURNED OUT TO BE DEFECTS. This
+docstring argued for pixels on two claims, and researcher D249 refuted both. The first, that "on 3D brain
+MRI masked autoencoding beats DINO-style and JEPA-style objectives", carried NO citation and none was
+found. The second compared two released CHECKPOINTS — DINOv3 scoring ~0.04 below DINOv2 here — to license
+a claim about self-distillation as an OBJECTIVE; those checkpoints differ in data, scale, recipe and
+registers, so the inference does not run.
+
+The measured direction is the other one. CAPI (Darcet et al., arXiv 2502.08769) on ViT-L/IN1k frozen
+probes: MAE 79.4, iBOT 80.9, CAPI 82.9, with pixel targets called out as "too low-level". And our own
+`ortholarge` pair — a LATENT continuation on 1.25M knee images — is +0.0194 / +0.0140 at matched recipe
+where this objective's arm ran -0.0885. `kneemri.training.latent_mim` is the sibling that changes only
+the target; this module is kept as its control, not as the recommended path.
+
+WHAT ACTUALLY HAPPENED TO THE ARM, which is a third story neither the pixel nor the latent argument
+predicts: researcher D251 measured `adapt_small_e8_unitfix` and found blocks 8-11 within 0.11 nats of
+`ln(256)` — uniform attention, no routing at all — where stock sits at 4.69. `unfreeze_last: 6` opens
+exactly the collapsed blocks, so the fine-tune spent twelve epochs rebuilding attention. The -0.0885 is a
+fact about a damaged initialisation and NOT a data point on pixel-vs-latent. `kneemri.training.
+attention_health` is the gate that now ends such a run at epoch one.
 
 THE SPECTRAL TERM IS THE POINT, not decoration. A plain pixel MSE is dominated by low frequencies —
 bulk intensity and large smooth structure — which is the half of the image our labels are already good
@@ -34,12 +47,7 @@ from jaxtyping import Bool, Float
 from torch import Tensor, nn
 
 from kneemri.models.backbone import IMAGENET, Normalization
-
-BYTE_RANGE = 255.0
-CHANNELS = 3
-"""What the encoder expects. The cache is single-channel, so one slice is replicated across all three —
-which is also why the decoder predicts ONE channel: predicting three identical ones would triple the
-output width to score the same pixel three times."""
+from kneemri.training.masked_objective import MaskConfig, MaskedObjective
 
 _VARIANCE_FLOOR = 1.0e-6
 """Added under the square root of a patch's own standard deviation before dividing by it.
@@ -51,17 +59,9 @@ arrives as NaN in the loss several hundred steps later, with nothing left pointi
 
 
 @dataclass(frozen=True)
-class SpectralMaskConfig:
-    """What the objective does to an image, and how the two loss terms are weighed against each other."""
-
-    mask_ratio: float = 0.6
-    """The share of patches replaced by the mask token.
-
-    0.6 rather than MAE's 0.75 because this encoder sees the FULL token sequence: MAE can afford to
-    discard 75% because its encoder never reads the masked positions at all, which both cheapens the
-    forward pass and removes the easy solution of copying a neighbour. Running the full sequence — the
-    only shape a stock `Dinov2Model` offers — makes a very high ratio pay full compute for a harder task
-    than the decoder can use. 0.6 is the ratio the full-sequence line (SimMIM) settled on."""
+class SpectralMaskConfig(MaskConfig):
+    """What this objective adds to the shared masking: how the two loss terms are weighed, and where the
+    frequency cutoff sits."""
 
     spectral_weight: float = 1.0
     """How much the high-frequency term counts against the pixel term.
@@ -81,12 +81,8 @@ class SpectralMaskConfig:
     (a meniscal horn is a few millimetres) and comfortably smaller than the bulk-intensity variation the
     pixel term already handles."""
 
-    patch: int = 14
-    """The encoder's patch side. DINOv2 is 14 and DINOv3 is 16; a mismatch would tile the image on a grid
-    the position embeddings were never trained for, so it comes from the `Encoder` record, not a default."""
 
-
-class SpectralMae(nn.Module):
+class SpectralMae(MaskedObjective[SpectralMaskConfig]):
     """A backbone, a linear pixel decoder, and the two-term reconstruction loss that trains them.
 
     The decoder is one `Linear` on purpose. MAE's eight-block transformer decoder exists to make a
@@ -95,9 +91,6 @@ class SpectralMae(nn.Module):
     thing we intend to keep. Only the encoder is saved at the end — the decoder is scaffolding.
     """
 
-    mean: Tensor
-    std: Tensor
-
     def __init__(
         self,
         backbone: nn.Module,
@@ -105,15 +98,8 @@ class SpectralMae(nn.Module):
         config: SpectralMaskConfig,
         normalization: Normalization = IMAGENET,
     ) -> None:
-        super().__init__()
-        self.backbone = backbone
-        self.config = config
+        super().__init__(backbone, config, normalization)
         self.decoder = nn.Linear(dim, config.patch * config.patch)
-        # The trunk's OWN pretraining constants, for the reason `StudyModel` states: pretraining a
-        # checkpoint through somebody else's normalisation is a silent handicap, and this path is the
-        # one where the trunk is the entire subject of the run.
-        self.register_buffer("mean", torch.tensor(normalization.mean).view(1, CHANNELS, 1, 1))
-        self.register_buffer("std", torch.tensor(normalization.std).view(1, CHANNELS, 1, 1))
 
     def patchify(self, images: Float[Tensor, "b 1 h w"]) -> Float[Tensor, "b n q"]:
         """One row per patch, in the raster order the backbone emits its patch tokens in.
@@ -140,38 +126,6 @@ class SpectralMae(nn.Module):
         batch = patches.shape[0]
         tiled = patches.reshape(batch, grid, grid, patch, patch, 1)
         return tiled.permute(0, 5, 1, 3, 2, 4).reshape(batch, 1, grid * patch, grid * patch)
-
-    def sample_mask(
-        self, batch: int, tokens: int, device: torch.device, generator: torch.Generator
-    ) -> Bool[Tensor, "b n"]:
-        """Which patches are hidden, with the SAME count hidden in every sample of the batch.
-
-        A per-sample Bernoulli draw would give each sample a different number of masked patches and so a
-        different loss denominator, which turns the batch mean into a weighted average whose weights are
-        noise. Ranking a uniform draw and taking a fixed-size prefix keeps the positions random and the
-        count exact.
-
-        DRAWN ON THE CPU AND MOVED, whatever the model's device is. `torch.rand` refuses a CPU generator
-        for a CUDA tensor outright, and the alternative — a second, CUDA-side generator — would mean the
-        run's seed no longer determines the masking, which is the reproducibility this arm's A/B rests
-        on. The mask is a few hundred booleans per sample; the transfer is not the cost here.
-        """
-        hidden = max(1, round(tokens * self.config.mask_ratio))
-        order = torch.rand(batch, tokens, generator=generator).argsort(dim=1).to(device)
-        mask = torch.zeros(batch, tokens, dtype=torch.bool, device=device)
-        return mask.scatter(1, order[:, :hidden], value=True)
-
-    def encode(self, images: Float[Tensor, "b 1 h w"], mask: Bool[Tensor, "b n"]) -> Float[Tensor, "b n d"]:
-        """Patch tokens for a masked image, with the prefix tokens dropped.
-
-        The prefix — one class token for DINOv2, plus four registers for DINOv3 — is dropped by counting
-        BACK from the end rather than forward from the start, because only the patch count is known here
-        and the prefix width is the backbone's business.
-        """
-        expanded = images.expand(-1, CHANNELS, -1, -1)
-        normalised = (expanded - self.mean) / self.std
-        hidden = self.backbone(pixel_values=normalised, bool_masked_pos=mask).last_hidden_state
-        return hidden[:, hidden.shape[1] - mask.shape[1] :]
 
     def pixel_loss(
         self, predicted: Float[Tensor, "b n q"], target: Float[Tensor, "b n q"], mask: Bool[Tensor, "b n"]
@@ -228,6 +182,10 @@ class SpectralMae(nn.Module):
         return (self.highpass(reconstruction) - self.highpass(original)).pow(2).mean()
 
     @override
+    def term_names(self) -> tuple[str, str]:
+        return ("pixel", "spectral")
+
+    @override
     def forward(
         self, images: Float[Tensor, "b 1 h w"], mask: Bool[Tensor, "b n"]
     ) -> tuple[Float[Tensor, ""], Float[Tensor, ""], Float[Tensor, ""]]:
@@ -249,14 +207,3 @@ class SpectralMae(nn.Module):
         merged = torch.where(mask.unsqueeze(-1), self.restore(predicted, target.detach()), target.detach())
         spectral = self.spectral_loss(self.unpatchify(merged, grid), images)
         return pixels + self.config.spectral_weight * spectral, pixels, spectral
-
-    def encoder_state(self) -> dict[str, Tensor]:
-        """The adapted backbone alone, keyed exactly as `AutoModel.from_pretrained` keys it.
-
-        Exactly, because the whole point is that the supervised trainer can load this in place of the
-        stock weights without touching any other part of its setup — and because `encoder_drift` then
-        measures this run against the same stock reference on the same key names. The decoder and the
-        normalisation buffers are dropped: they are scaffolding, and a state dict carrying extra keys is
-        a state dict `load_state_dict` refuses.
-        """
-        return {name: value.detach().cpu().clone() for name, value in self.backbone.state_dict().items()}

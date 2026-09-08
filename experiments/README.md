@@ -11349,3 +11349,146 @@ for the medial/lateral question to have relocated to, it was cheap to ask, and t
 would be free of card time — `Laterality.of_study` could prefer a unanimous geometry over a contradicted
 tag — but a change that can reach 0.70% of inputs cannot produce a measurable score move, so it stays
 unbuilt rather than unlogged. Re-open by answering the number, not by re-raising the mechanism.
+
+## Every masked adaptation this project ran switched attention OFF, and the gate that catches it is a RATIO — 2026-09-08
+
+**The finding, from researcher D251/D252 (n=240 raw softmax rows, five checkpoints).** Four of four
+adapted encoders are degenerate in per-block attention entropy; `adapt_null` (`--lr 0`) reproduces stock
+to three decimals, which is the control that makes the other four readable. Two opposite shapes, both
+fatal: `adapt_small_e8_unitfix` blocks 8-11 at 5.372 / 5.507 / 5.532 / 5.512 against `ln(257) = 5.549`
+(driven to UNIFORM), and `adapt_small_e6`, `adapt_small_e6_lr1e5`, `pretrain_small_matched_e8` block 11 at
+0.000 / 0.035 / 0.023 nats (collapsed onto one key). A one-sided margin-to-`ln(N)` test reads the last
+three as HEALTHIER than stock and passes the worst checkpoint most comfortably.
+
+**What this retires.** `pretrain_unitfix` drove its loss 0.9122 -> 0.5570 over eight epochs and was read
+for a fortnight as an objective fitting. It was an encoder switching attention off: a texture average
+needs no routing, and the loss falls while the trunk stops being a trunk. Every flat adaptation score in
+this ledger that ran through a masked pretrain is a fact about that, not about the adaptation axis.
+
+**The rate is already excluded as the lever.** `adapt_small_e6` collapsed at 1e-4 and `adapt_small_e6_lr1e5`
+at 1e-5; a tenfold cut bought nothing.
+
+**The gate, and the ruler defect it cost to find.** `kneemri.training.attention_health` measures stock at
+epoch zero on held slices and refuses any epoch where a block loses too much. Its FIRST version was an
+absolute 0.8-nat deviation, sized off D252 where stock spanned 1.7 nats. It refused a healthy encoder three
+optimiser steps into a 5e-5 smoke on a trunk spanning 2.48 — and researcher D256 derived the same defect
+from the opposite end, measuring stock v3large's top block at 4.657 against `ln(201) = 5.303`, so a block
+driven ALL the way to uniform moves 0.646 and PASSES a 0.8 gate. Nats do not survive a change of
+configuration. The replacement is `RETENTION_FLOOR = 0.25`: each block must keep at least a quarter of
+stock's OWN distance to whichever end it is closer to losing — headroom `ln(keys) - H` over stock's headroom
+toward uniform, `H` over stock's `H` away from it. Two-sided, because three of four failed the far way; a
+ratio to the same-trunk epoch-zero baseline, so nothing is re-derived per trunk. On D252's own table the
+degenerate population keeps <= 11.4% and stock keeps 100%, and that arithmetic is asserted in
+`tests/unit/kneemri/training/attention_health.py::test_floor_separates_the_d252_populations`.
+
+**Three harness defects found on the way, all real, none of them the cause.** (1) transformers 5.15.0
+defaults to `sdpa`, whose fused kernel never materialises the attention matrix, so `output_attentions=True`
+returns a tuple of `None` silently and the check reads as a clean pass — fixed with
+`set_attn_implementation('eager')` for the read. (2) A model in `train()` draws stochastic depth and dropout
+fresh per forward, so two readings of ONE encoder differ by their draws — the read is forced to `eval()`.
+(3) The probe batch is frozen. What settles that all three are now sound is the **`--lr 0` control**: with
+the weights pinned, every block of both epochs reads `+0.00` against the reference. The reading is
+deterministic to two decimals, so any deviation the gate reports IS the weights.
+
+**The target is not what drives the early transient.** Matched smoke, three steps at 5e-5, identical
+masking / seed / slices, only the objective moving: pixel+spectral min retention **0.63**, latent **0.65**.
+LIMIT: D252's collapse arrived at epoch 6-8, so this settles the transient and not the endpoint.
+
+**And a published latent-target continuation of this exact trunk is CLEAN** (D256, n=240, raw 201-key rows).
+OrthoFoundation — `dinov3-vitl16` continued with DINO-style self-distillation on 1.25M knee images — reads
+max |delta| 0.423 nats against stock, no block near either end, prefix mass unmoved (0.123 vs 0.128 at
+block 23). So on-domain adaptation of this architecture does NOT have to destroy routing, and the suspect
+list narrows from the objective family to OUR recipe: mask ratio 0.6, our rate, our target. That is the
+question `latent_adapt` (knee-lm37v) is on the card to answer, and it is why the next arm if it refuses is
+the mask ratio and not the objective.
+
+### The latent target dies exactly as the pixel one did, and the mask ratio only bites at 0.15 — 2026-09-08
+
+`latent_adapt` (v3small trunk, `--objective latent --epochs 8 --slices-per-step 96 --lr 1e-4`, mask
+ratio 0.6, the `SpectralMaskConfig` default) was **REFUSED by the attention gate at the end of epoch 0**,
+790 s in at 306 slices/s — not at epoch 6-8, where every earlier collapse in this family was found:
+
+```
+keep 0.90 0.80 0.86 0.98 0.99 0.94 0.98 0.94 0.98 0.79 0.23 0.87   (floor 0.25)
+vs stock +0.26 +0.65 +0.41 +0.08 -0.05 -0.25 -0.07 -0.28 -0.11 +0.34 +1.55 +0.12
+```
+
+Block 10 drifts **+1.55 nats toward uniform** and keeps 0.23 of stock's own headroom. The arm
+pre-registered this as outcome 1 and it is what arrived.
+
+**What it settles.** The TARGET is not the cause. The teacher never degenerated — spread held flat at
+0.3836-0.3881 while the latent loss fell 0.387 → 0.0611, so the objective was learning and the routing
+collapsed anyway. Pixel+spectral and latent, two unrelated target families, die the same way under the
+same masking. Rate was already excluded (1e-4 and 1e-5 both collapsed on this trunk). What the two runs
+still share is the **masking**: 60% of patches hidden, on 224px slices of a modality whose informative
+structure is sparse and thin.
+
+**And a published counterexample says the objective family is fine.** D256 profiled OrthoFoundation —
+this exact `dinov3-vitl16` architecture continued with DINO-style self-distillation on 1.25M knee images
+— at n=240 on raw 201-key softmax rows: max |Δ| 0.423 nats (block 10), top-block Δ 0.241, block 23 at
+4.416 against stock's 4.657 and 0.887 below uniform, prefix mass 0.123 vs 0.128. A latent-target
+on-domain continuation of this trunk keeps its routing. Ours does not. Neither the target nor the corpus
+separates them; heavy masking is the largest remaining difference.
+
+**What it costs to ask.** The gate now returns a verdict in ONE epoch, so a refusal costs 13 minutes
+rather than the 5.3 h a full 8-epoch pretrain costs. That is what turns the mask ratio from an expensive
+commit into an affordable ladder: `latent_mask_ladder.sh` runs 0.30, then 0.15 if 0.30 refuses, stops at
+the first rung that survives epoch 0, and spends the remaining seven epochs plus the 12-epoch fine-tune
+on that one — against the same `band_dense = 0.8578` control, byte-identical fine-tune stage.
+
+**What it does NOT settle.** It does not price our learning rate against OrthoFoundation's, which is not
+published in the abstract and has been asked for (M250 §4, arXiv:2601.18250). And a rung that survives
+epoch 0 is not a rung that survives epoch 8 — the gate runs every epoch, and the earlier collapses in
+this family all arrived late.
+
+**The ladder answered within the hour, and the ratio is a real but sharply NON-LINEAR dial.** Three rungs,
+one epoch each, everything else byte-identical:
+
+```
+mask 0.6   b10 +1.55   keep 0.23   REFUSED   790 s @ 306 sl/s
+mask 0.30  b10 +1.53   keep 0.24   REFUSED   431 s @ 560 sl/s
+mask 0.15  b10 +1.35   keep 0.33   SURVIVED  387 s @ 624 sl/s
+```
+
+The first halving moved the failing block by **0.02 nats** — nothing. The second moved it by **0.18**, nine
+times as much, and carried `keep` from 0.24 across the 0.25 floor to 0.33. So the ratio is not a dial you
+can turn a little: over 0.6 → 0.30 the collapse does not care at all, and only at 0.15 does the trunk begin
+to keep its routing. My own pre-registration called rung 0.15 a refusal at b10 ≈ +1.5 / keep ≈ 0.24 and it
+came back at +1.35 / 0.33 — the prediction was wrong in the direction that matters, and the ladder is the
+reason we know rather than guess.
+
+**What this does and does not license.** `keep 0.33` clears a floor of 0.25 with very little room, on the
+epoch where every earlier collapse in this family was still healthy — the gate runs every epoch and the
+D252 collapses all arrived at epoch 6-8, so surviving epoch 0 is not surviving the run. The rung is
+continuing to eight epochs and then into the 12-epoch fine-tune against the same `band_dense = 0.8578`
+control, and the honest reading of the ratio waits for whichever of the two ends it.
+
+**Epoch 1 answered part of that already, and it is the sharper finding: the collapse MIGRATED rather than
+stopped.**
+
+```
+epoch 0  vs stock … +0.33 +1.35 -0.07 | keep … 0.80 0.33 0.99    block 10 fails, TOWARD uniform
+epoch 1  vs stock … +0.03 +0.31 -2.53 | keep … 0.98 0.85 0.53    block 10 heals, block 11 fails, INTO a sink
+```
+
+Block 10's uniform drift healed from +1.35 to +0.31 on a single epoch, and block 11 fell the other way:
+entropy 2.88 against a stock ~5.4, prefix mass 0.16 → 0.64, two thirds of the attention on the prefix. The
+gate still passes on `keep 0.53`, so the arm continues, but "mask 0.15 keeps the routing" is not what the
+trunk did. It moved the damage one block up and reversed its sign.
+
+That costs the rate ladder its main argument. The case for walking the rate was that spectral@1e-5 collapsed
+into a sink while everything at 1e-4 collapsed toward uniform, so two modes at two rates meant the dial had
+never been walked — recorded two paragraphs below, and now half wrong. One run at ONE rate produced both
+shapes in adjacent blocks one epoch apart. The shapes are not a rate signature; they are two faces of the same
+destruction, the last blocks losing their learned routing with the direction of the fall unowned by any knob
+this family has. The ladder still runs (14 minutes for two rungs) but only as a test of whether MAGNITUDE
+modulates a destruction whose shape is now rate-independent, which is a much smaller question than the one it
+was written for.
+
+**What every collapsing run still shares:** `lr 1e-4` one-cycle, all blocks trainable, our normalisation,
+bf16 autocast. And the collapse SHAPES separate by RATE rather than by target or mask — spectral@1e-5
+collapsed *away* from uniform (an attention sink: 0.000 / 0.035 / 0.023 nats), while everything at 1e-4
+collapses *toward* uniform at the top blocks. Two failure modes at two rates is what `latent_rate_ladder.sh`
+is for, and it is armed behind this one: 3e-5 then 1e-5 at mask 0.30, everything else fixed. Drift at block
+10 that scales with the rate means gradient magnitude and the fix is rate plus a longer schedule; drift flat
+across a 10x rate change means rate is out and the suspect is the trunk/objective interaction itself.
