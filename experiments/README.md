@@ -10540,3 +10540,17 @@ quoted without its subject. It does not change the verdict.
 in nox invokes `reading_check`, so a crash in one method was invisible to every gate for a day. The
 assertion worth having on a check of this kind is *"exits 0 or 1, never raises"* against the live arm
 tree.
+
+## 2026-09-08 — `train --help` has never printed, and 87 flags were invisible behind the crash
+
+`python -m kneemri.training.train --help` exited 1 with `TypeError: %o format: an integer is required,
+not dict` from `argparse._expand_help`. argparse interpolates every help string against `%(default)s`
+params, so ONE unescaped `%` anywhere in the vocabulary takes down the whole help — not that flag's
+line, the entire listing. The offender was `--unread-targets`, whose text quotes *"the 27.3% of pairs
+carrying the constant 0.28"*; `flag_vocabulary.py:400` now escapes it `27.3%%`, which is how the three
+other percentages in that file were already written. `--help` now prints **87 flags**.
+
+This is the shape that hides for a long time: nothing in nox or CI asks a CLI to print its own help,
+and an agent that wants to know what flags exist greps the arm tree instead — which is exactly how the
+`--variant` axis came to have 24 registered values and no census. Found while looking for the trunk
+flag, not by any gate.
