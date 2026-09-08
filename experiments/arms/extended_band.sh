@@ -120,9 +120,15 @@
 # batch halves the part that overflows while the effective batch stays 12 — identical to the control's,
 # with no batch-norm in this stack to make accumulation differ from a wide step. It is the one change that
 # makes the recipe fit without moving a variable the reading depends on. Run 1's holdout is kept as
-# `extended_band_s2026_run1.holdout.npz` and is NOT a member: it is a 1-epoch paging crawl, not a result.
+# `extended_band_s2026_run2.holdout.npz` (`_run1` was already taken by an earlier run under this name)
+# and is NOT a member: it is a 1-epoch paging crawl, not a result.
 #
-# PRICE: ~2.5 h, the same as its control. Cache built 2026-09-08 06:39Z,
+# AND THE FIX IS MEASURED, NOT ARGUED. The relaunch reserves 14580 MiB and caps at 25.5 GB of 31.8 with
+# 30.3 free, against run 1's `capped at 32.5 GB of 31.8`. It runs 42.7 steps/min over 582 steps, i.e.
+# 13.6 min an epoch against run 1's 68 - the paging factor was ~5 of throughput, and the recipe's own
+# price stands.
+#
+# PRICE: ~2.7 h, the same as its control. Cache built 2026-09-08 06:39Z,
 # images_336px_20sl_0.1-0.9band_extended.npy, (4407, 9, 20, 336, 336) uint8 = 89.6 GB. No submission slot -
 # the reading is offline against a control already on the ledger.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
