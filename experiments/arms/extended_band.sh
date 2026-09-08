@@ -106,6 +106,22 @@
 #              fact about the HEAD, not the input, and `--slot-pooling attend` is the follow-up rather
 #              than a different scheme.
 #
+# THE FIRST LAUNCH DID NOT FIT ON THE CARD AND PAGED. Run 1 (2026-09-08 12:13Z) derived 32.5 GB against a
+# 31.8 GB card, printed `not waiting for VRAM ... no co-tenant can free enough`, and started anyway — which
+# is what `device_budget.await_headroom` documents as the failure it cannot refuse: "Windows pages over
+# PCIe instead of raising, so a run that starts into a held card does not fail — it crawls at a tenth of
+# the throughput." Measured: epoch 0 took 4064 s against its control `band_dense`'s 361 s, a factor of
+# 11.3, for a recipe whose extra work is +10% filled slots. 12 epochs would have been 13.5 h against the
+# ~2.5 h priced below, on a card holding nothing else (`card_check`: one process, ours). Epoch 0 landed
+# 0.7379 against the control's 0.7430, so nothing was bought for it either.
+#
+# THE FIX KEEPS THE COMPARISON EXACT: `--batch 6 --accumulate 2`. `DeviceBudget.needed` scales the
+# activation term linearly in batch (`step = (activation/fitted) * (batch/FITTED_BATCH)`), so halving the
+# batch halves the part that overflows while the effective batch stays 12 — identical to the control's,
+# with no batch-norm in this stack to make accumulation differ from a wide step. It is the one change that
+# makes the recipe fit without moving a variable the reading depends on. Run 1's holdout is kept as
+# `extended_band_s2026_run1.holdout.npz` and is NOT a member: it is a 1-epoch paging crawl, not a result.
+#
 # PRICE: ~2.5 h, the same as its control. Cache built 2026-09-08 06:39Z,
 # images_336px_20sl_0.1-0.9band_extended.npy, (4407, 9, 20, 336, 336) uint8 = 89.6 GB. No submission slot -
 # the reading is offline against a control already on the ledger.
@@ -115,4 +131,5 @@ require "$LABELS"
 run_train extended_band \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended \
+  --batch 6 --accumulate 2 \
   --labels "$LABELS" --out "$MODELS/extended_band_s2026.pt"
