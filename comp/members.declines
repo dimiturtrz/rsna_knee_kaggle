@@ -868,10 +868,14 @@ foreign_dinov3_tta3.pt               # LEDGER75 0.8917 - VOID; same decode arm, 
 foreign_dinov3_band1684.pt           # LEDGER75 0.8811 - VOID; another band of the same sweep.
 foreign_dinov3_band0892.pt           # LEDGER75 0.8804 - VOID; another band of the same sweep.
 foreign_dinov3_band208.pt            # LEDGER75 0.8698 - VOID; another band of the same sweep.
-foreign_dinov3_matched.pt            # LEDGER75 0.8964 - the honest comparator of the family and the one
-# that is NOT void, and it is ordinary: experiments/README.md:8907-8909 reads +0.0074 LEDGER / +0.0030
-# HIS and pre-registers a DINOv3 column seat FLAT, which is why it was never built. Declined on that
-# reading, not on provenance. Re-opened by the same door as the rest: an our-fold refit.
+foreign_dinov3_matched.pt            # LEDGER75 0.8964 - VOID, and the line below said the opposite until
+# 2026-09-08. It was declined as "the honest comparator of the family and the one that is NOT void",
+# ordinary at +0.0074 LEDGER / +0.0030 HIS (experiments/README.md:8907-8909) with a DINOv3 column seat
+# pre-registered FLAT. That reading is unusable: D176 §4 measured its predictions against
+# foreign_oof_corpus at max |delta| 7.689e-06 - float32 rounding, i.e. the SAME member under two names.
+# So the family has no honest comparator at all, and every number above was the void member's. The
+# decline stands and its GROUND changes: provenance, not reading. Re-opened only by an our-fold refit,
+# the same door as the rest of the family.
 #
 # --- The k-fold OOF members: a different holdout, so they are not seatable on our frame. -------------
 # Each holds out ITS OWN fold - 849, 884, 890 and 875 rows against our 909 - so a seat value measured
@@ -936,3 +940,11 @@ stack_increments_fx_s2026.pt         # LEDGER75 0.8803, epoch 4, 909 rows - the 
 mrnet_warm_s2026_run1.pt             # LEDGER75 0.8792, epoch 6, 909 rows - the higher of the MRNet
 # warm-start pair and a non-DINOv2 trunk we trained ourselves, with no checkpoint beside its record. The
 # lower run (mrnet_warm_s2026) does have one, which is why this pair reads as documented either way.
+
+# --- Priced 2026-09-08, TWIN on the honest12 roster. --------------------------------------------------
+calib_dense_s2026.pt                 # Converged 12/12, convergence_check clean, and it is a TWIN, not a
+# seat: nearest 0.0081 bits against honest12 - the CLOSEST any candidate has measured on that roster -
+# with rank 0.9396 / js 0.0081 / maha 4.011 against the roster's own 0.8956 / 0.0150 / 4.447. A member
+# built by moving a label-side knob lands nearer the pool than the pool is to itself, which is D174 §3's
+# surface stated as a single member. Declined as a seat; the checkpoint stays and its recal_through pair
+# is what the arm was actually queued to read. Re-opened only by a ruler on which a TWIN can pay.

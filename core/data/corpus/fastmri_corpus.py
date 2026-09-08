@@ -271,9 +271,13 @@ quiet synovium on the authority of a reader who was not looking, and writing 0.5
 are all exactly average. Omitting the key leaves the column weightless, which is what not-asked means.
 
 `Joint Effusion ` keeps its trailing space: that is the literal string in `Annotations/knee.csv`, and
-stripping it here while the CSV is read raw would silently match nothing. Its own term is COARSE rather
-than positive because our criterion asks for a MODERATE OR LARGE effusion and theirs is ungraded — so a
-box proves fluid was seen, not that it met our bar.
+stripping it here while the CSV is read raw would silently match nothing. Its own term is POSITIVE, not
+coarse — `EFFUSION_TERMS`' docstring argues that case with the box-size measurement that justifies it
+(median 36.7 mm, lower quartile 31 mm over the 142), and it is the one blocked term that asserts rather
+than blocks. This paragraph said COARSE until 2026-09-08 while the map one line up read
+`Reading(positive=EFFUSION_TERMS)`; the code and the constant agreed with each other and only the prose
+dissented. It cost nothing that runs, and it would have cost a census its second positive column — 142
+studies, the largest positive class this corpus has (D177 §4).
 
 Terms not named anywhere above are ignored by construction: `Bone - Lesion`, `Soft Tissue Lesion`,
 `Muscle Strain`, `Joint Bodies`, `artifact`, the PCL and LCL sprains, and the patellar retinaculum. None
