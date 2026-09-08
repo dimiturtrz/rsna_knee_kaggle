@@ -10780,3 +10780,69 @@ times, and the drift is now present in the module itself.
 **Direction-only caveat.** At k <= 10 the spread over splits is 0.16-0.22 on 6-12 pairs.
 `board_transfer.py:153` already stamps that regime `DIRECTION ONLY, too few pairs to price an arm with`.
 Read 0.5 as "clearly below 1.0", never as a third decimal.
+
+## The consensus frame is BLIND to the labeler axis by construction — the constraint is treatment DENSITY, not ruler width — 2026-09-08
+
+D198, researcher, 10:40Z, answering M199. Card-free, slot-free. **NO**, and not for the reasons M199
+pre-registered — the frame fails both bars (`acc@gold58/consensus` 0.8740 < 0.95; 1,890 studies with
+>= 8 of 12 findings < 2,000) but those were the wrong reasons to reject it.
+
+**THE STRUCTURAL REASON. A consensus frame keeps 4.1% of the treatment's own cells.** A cell enters the
+frame only where the two readers AGREE; a better label table earns its keep exactly where it DISAGREES
+with v2. The two sets are near-disjoint by construction, so the frame deletes the axis's footprint and
+then reports the axis flat. `blend_hybrid_fx_v4b` binarises differently from v2 on 1,254 cells and 51
+survive, against a 0.579 baseline keep rate — **Effusion, the column the arm was built to fix, keeps 8 of
+520**. Where the v2-truthed 909 frame MIS-SCORES the disputed cells, the consensus frame REMOVES them.
+
+**And the deeper finding, which is the one to carry: the gold 58 holds 19 treated cells of 684 (2.8%).**
+The ruler is not too narrow — the TREATMENT is too small a fraction of any random frame, and no increase
+in width fixes that. On those 19 cells v4b is **0.632 correct against v2's 0.368**; pooled over all 684
+it is 0.803 vs 0.795, because 665 of 684 cells are byte-identical between the tables. That is why
+`+0.0131 [-0.0045, +0.0332]` (README:8591) crosses zero, and it was never a width problem.
+
+**A GENERAL RULE, and it is the second one today: dropping noisy cells UN-ATTENUATES every delta, so no
+number measured on a cell-filtered frame is comparable to a v2-frame number.** Four control pairs that
+differ on architecture, geometry, density and recalibration — never on the label table — inflate by a
+median ~2x when moved onto the masked frame, and the treated pair's 3.81x sits inside that control range:
+
+    pair                                   v2 delta          consensus delta    ratio
+    TREATED   v4hybrid / holdannot     +0.0027 +/-0.0062     +0.0104 +/-0.0078    3.81
+    control   base224 / adjacent224    +0.0046 +/-0.0062     +0.0092 +/-0.0120    1.98
+    control   band224 / band_dense     -0.0044 +/-0.0054     -0.0087 +/-0.0074    1.98
+    control   holdannot / recal        -0.0013 +/-0.0054     -0.0083 +/-0.0064    6.18
+    control   band_dense / band_deep   +0.0125 +/-0.0061     +0.0142 +/-0.0126    1.14
+
+This is D197 §1's disattenuation arithmetic applied to LABEL noise instead of entry noise, and it stands
+beside this morning's stratified-slope rule: a subset ruler is not the same ruler.
+
+**The per-column read came back inverted from the arm's own pre-registration** (`labels_v4hybrid.sh:30-49`)
+— CAN MOVE 3 cols mean **-0.0018**, flat 4 cols +0.0046, CANNOT REACH 4 cols **+0.0173**, the only column
+clearing zero being Lateral Meniscus +0.0301 [+0.0100, +0.0509] on the CANNOT-REACH list. **This is NOT
+read as a refutation of the labeler axis**, because the keep-rate table says the instrument could not
+have seen a success. It refutes the FRAME.
+
+**What the axis actually needs: adjudicate the DISPUTED cells, do not annotate more studies.** 1,254
+treated cells over 1,076 studies (696 on the CAN MOVE columns), 4,917 reader-disputed cells. Annotating
+~150 treated cells is worth ~35x annotating 150 more studies (2.8% vs 100% treated-cell density), and at
+the +0.26 per-cell effect ~100 adjudicated cells separate the tables decisively (paired binomial
+half-width ~+/-0.10 at n=100, ~+/-0.07 at n=200) — a direct reading of the LABELER with no training run
+in it. Requested as a blinded pack in M200: the researcher builds it and holds the key, main answers it
+from report text alone, the researcher scores both tables against those verdicts, with untreated control
+rows mixed in to bound the adjudicator's own noise.
+
+**The limit to keep attached to that reading:** adjudicating against REPORT TEXT measures PARSER
+FIDELITY, which is Wollek's axis, not label correctness against the images. The gold-58 nineteen remain
+the underpowered but image-anchored check that the two readings agree in sign.
+
+**Two facts that change what is buildable.** Qwen3.8 has ALREADY swept the whole corpus —
+`.agent-runtime/scratch/report_labels_v3.csv`, (4407, 37), finished 2026-09-06 14:53 — so M199's
+UNBUILDABLE branch and its ~1.8 h estimate are dead. The local learned reader exists on **58 studies
+only**, which is what made the three-way frame unbuildable as specified; a third reader is not wanted
+anyway, since a stricter frame deletes MORE of the treatment.
+
+**Circularity checked and clean:** `blend_hybrid_fx_v4b` = `blend_hybrid` + `fracture_contusion`, and
+`table_blend`'s inputs are our v2 plus the foreign public tables — Qwen is not an ingredient. The frame
+is blind, not rigged.
+
+**Population warning.** D198's gold-58 row is a 13-study intersection (+/-0.0791), a different population
+from the 57-study reading behind the +/-0.015 half-width at README:7063. The two must not be compared.
