@@ -10612,3 +10612,30 @@ member's throughput number taken during either window is a fact about contention
 warning rather than a refusal. The cache was built at 08:27Z and the arm relaunched as pid 3592. That is the
 second time an UNCACHED warning has cost card time in two days, and it is the argument for making
 `arm_check` REFUSE on it.
+
+## 2026-09-08 — `--corpus-oversample 2.22` does not lift the mean, and the floor is why that is all it says
+
+`merged3_oversample_s2026` vs control `merged3_corpus_s2026` (0.8521 @e7), the only difference being
+`corpus_oversample 1.0 -> 2.22`. `convergence_check`: UNDERTRAINED, best e11 of 12 asked — not truncated,
+so the number is quotable. Reading at `logs/merged3_oversample_ledger.log`.
+
+    MEAN -0.0105     Fracture -0.0516*  MCL -0.0441*  Synovitis -0.0128  Baker's -0.0123
+    Medial Meniscus -0.0095  Lateral OA +0.0071  Medial OA +0.0060  ACL -0.0023  Effusion -0.0023
+    Lateral Meniscus -0.0020  Contusion -0.0015  PF OA -0.0006
+    paired floor, this pair's own: half-widths up to +/-0.0299
+    by structure scale: focal -0.0065  regional -0.0161
+
+**VERDICT: DID NOT RISE.** The pre-registration named +/-0.006 as reading B and the expected outcome. The
+point estimate is -0.0105, past that band's low edge and well INSIDE this pair's own paired floor of
++/-0.0299 — so the honest statement is that oversampling the merged corpus does not lift the mean, NOT that
+it harms it. The two starred columns are Fracture and MCL, the pool's two most label-bottlenecked findings
+(Fracture has ~68 positives on this frame, below `column_surface.py:8`'s own half-width), and
+`run_comparison` flags the pair as a READER change. A -0.05 on Fracture is what that column does.
+
+**Consequence: per-corpus head conditioning is not scoped as a build.** That was the decision this arm was
+run to make (`after_ourtrunk44.sh` header), and it is made. The flag stays available and documented; nothing
+follows it.
+
+**Note the floor.** +/-0.0299 is the widest paired floor this ledger has recorded, five times the
+significance bar. An arm read against this control cannot resolve anything smaller than a very large effect,
+which is a fact about the CONTROL's frame and should be checked before another arm is queued against it.
