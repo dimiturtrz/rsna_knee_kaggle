@@ -12,19 +12,27 @@ THE OPERATION IS A PURE DROP — nine of honest12's twelve seats, same kit, same
 - `merged_blend_cf`, `merged_dense_cf` — removed because `submit_check` REFUSES them: both train on the
   rijeka table, whose terms are unresolved against competition rule 2.5. Not a choice, a gate.
 
-PRE-REGISTRATION, from the per-seat leave-one-out over all twelve of honest12's seats (D169 §1):
+PRE-REGISTRATION, from the per-seat leave-one-out over all twelve of honest12's seats and from the
+joint three-drop measured directly (researcher, D169 §1 and D170 §2):
 
 ```
-  drop mae_matched_s2026   +0.0015 @l75   +0.0002 @mid     <- the term
-  drop merged_dense_cf     -0.0003 @l75   -0.0002 @mid     <- licence, and it subtracts
-  drop merged_blend_cf     -0.0004 @l75   -0.0005 @mid     <- licence, and it subtracts
-  net                      +0.0008 @l75   -0.0005 @mid
+  drop mae_matched_s2026   +0.0015 @l75                     <- the term being tested
+  drop merged_dense_cf     -0.0003 @l75                     <- licence, and it subtracts
+  drop merged_blend_cf     -0.0004 @l75                     <- licence, and it subtracts
+  all three, joint         +0.0012 @l75   -0.0004 @mid      <- this entry
 ```
 
-**+0.0008 offline at ledger75, untaxed** (a drop is not a selection over the pool), against honest12's
-own board 0.937 → **~0.938**. The board quantizes at 0.001, so UP reads 0.939+, FLAT 0.937-0.938. The
-midpoint ruler reads the same operation at **−0.0005**, so the two rulers DISAGREE IN SIGN here and the
-entry is also a read on the recut, which is a legitimate second thing for one slot to buy.
+**+0.0012 offline at ledger75, untaxed** (a drop is not a selection over the pool), against honest12's
+own board 0.937 → **~0.938**. The board quantizes at 0.001: UP reads 0.939+, FLAT 0.937-0.938. The
+midpoint ruler reads the same operation at **−0.0004**, so the two rulers DISAGREE IN SIGN and the entry
+is also a read on the recut.
+
+**THE READ IS AMBIGUOUS ON THE FLAT BRANCH, AND THAT IS FORCED BY THE LICENCE GATE, NOT CHOSEN.** The
+unambiguous instrument is honest12 minus `mae_matched_s2026` ALONE (+0.0015, one operation, no
+cancellation). It was built first and `submit_check` REFUSED it: seating either merged seat trips rule
+2.5. So a FLAT read here is consistent with *"the repair is worth nothing"* AND with *"the repair is
+real and the two licence-forced drops ate 0.0007 of it"*, and nothing on the board separates them. That
+limit is recorded here rather than discovered afterwards.
 
 WHAT EACH BRANCH BUYS, and both are decisions rather than numbers:
 
@@ -34,9 +42,12 @@ WHAT EACH BRANCH BUYS, and both are decisions rather than numbers:
 - **UP** — the drop term is real, and it is *only* a member repair: the same table prices ten of twelve
   drops negative, so it generalises to no other roster and this is the last entry the drop axis needs.
 
-WHAT IS ALREADY REFUTED AND IS THEREFORE NOT IN HERE. `distinct14` is `honest12` plus two
-DISTINCT-and-strong members and read 0.937 → 0.937 exactly, so the ADD half of the banked composite is
-board-refuted on this exact base. This entry carries the untested half alone.
+WHAT THE ADD HALF IS AND IS NOT. An earlier draft of this entry claimed `distinct14` (honest12 plus two
+DISTINCT-and-strong members, board 0.937 → 0.937) refutes the banked composite's ADD term. **It does
+not**: those two adds are worth **+0.0002 offline**, a fifth of the board's own 0.001 grid, so that entry
+could not have moved the board under any transfer and its flat carries no information (D170 §1). The add
+term (+0.0021) remains UNTESTED. This entry carries the drop half alone because the drop half is the
+larger one, not because the other was refuted.
 
 WHY THIS IS NOT THE CLOSED RESEAT AXIS. All seven board flats ADDED, swapped, reweighted or re-lensed a
 seat. **No entry this project owns has ever REMOVED one**, and none has measured what a collapsed member
