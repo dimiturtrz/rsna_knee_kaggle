@@ -292,6 +292,65 @@ own corpus, so it cannot see a distribution shift it does not contain, and the o
 holds: *the real Kaggle test set is not our dataset*. What is ruled out is fitting a rule on this frame
 and shipping it — which was the only thing that could have been done with one.
 
+## The last reopening, and the sharpest closure of the lot: real at p ≤ 0.005 and worth zero (D223–D225)
+
+The axis was reopened once more the same day on a different target. Everything above asks whether feature
+position predicts the LABEL. D223 asked whether it predicts a **member's ERROR** — a different target on
+the same features — and the answer was yes, emphatically:
+
+- **138 of 216 label × cache × truth-class cells clear ΔAUC ≥ 0.05** over a train-time 32-NN baseline,
+  medians +0.02 to +0.36, 5-fold cross-fitted so the increment carries no in-sample floor.
+- A 200-draw permutation of the probe column prices it as real: **16 of 17 cells at p ≤ 0.01, 15 at the
+  floor p = 0.005**, with the null median NEGATIVE in every cell (−0.003 to −0.061), which is the
+  instrument checking itself — a useless added column under cross-fitting should cost a little AUC, and it
+  does.
+
+This refuted a pre-registration that had expected ΔAUC ≈ 0 as *entailed* by the redundancy measured above.
+The entailment was wrong: that redundancy was between the probe and the 32-NN **as predictors of the
+label**, and it does not carry to predicting a member's error.
+
+**And the axis still closes, because the signal routes to nothing.** The only operation a per-study error
+prediction can buy on this task is weighting member *m* on study *s* by its predicted competence there —
+abstention is unavailable (AUC scores every study) and a per-study rescale common to all members is
+monotone in the ensemble score, so it changes no ranking and no AUC by construction. **The lever therefore
+exists if and only if the predictability is MEMBER-SPECIFIC.** Pre-registered discriminator, run card-free:
+
+    own      = AUC(m's error ~ probe), cross-fitted on m's own errors
+    transfer = AUC(m's error ~ a model fit on the OTHER members' pooled errors), evaluated on m, never fit on m
+
+    median over 23 cells of median(own − transfer) = −0.0157
+    bars set before the run: <= 0.02 MEMBER-COMMON   >= 0.05 MEMBER-SPECIFIC
+    negative in 23 of 23 cells, range −0.0041 to −0.0446
+
+A model that has **never seen member m predicts m's errors better than m's own cross-fitted model does.**
+The member-specific component of a member's error is not visible to feature position at all; what is
+visible is one shared difficulty axis, and weights built from it are common to every member.
+
+The instrument was biased toward exactly this answer — `transfer` fits on ~19× the rows `own` gets — and
+the control that separates bias from signal was run rather than argued: **shrink the donor pool.** At 2
+donors the gap is already −0.0111, 71% of the 19-donor −0.0157, and still negative in 23 of 23 cells. A
+2-donor fit has no estimation advantage worth the name over a 5-fold cross-fitted one, so the declared bias
+accounts for at most the −0.0046 between the two pools. The closure is not bought by it. And it could not
+have flipped: MEMBER-SPECIFIC needed +0.05 against a reading of −0.0157.
+
+### The two general rules this produced
+
+1. **A permutation null prices whether a signal EXISTS; it never prices whether the signal ROUTES.** An
+   operation test is a separate instrument and must be pre-registered separately. Stopping at the null
+   here would have read as a licence to spend card on an axis whose arithmetic value is zero — fifteen
+   cells at the floor p-value, pointing at nothing.
+2. **Name the operation before the statistic.** "Errors are predictable" is a fact about difficulty
+   structure until somebody states the operation it buys; here the operation's own arithmetic supplied the
+   decision variable (member-specific vs member-common) that no effect size or p-value could have
+   supplied.
+
+What this does NOT establish, and is the tempting over-read: transfer beating own is **not** an
+ensemble-diversity result and does not say the pool's errors are broadly redundant. Both models read the
+same two features, so what is shown is that the *feature-predictable component* of the error is shared.
+The member-specific part of the error may be large — it is simply invisible to feature position. Reading
+it needs the serve-time framing, which is UNMEASURABLE on this roster: the other 117 members predict a
+member's own error at AUC 0.93–0.98 before anything else speaks, ceilinging 95.7% of member-cells.
+
 ## What it cost
 
 One researcher sweep, no card time, no submission slot. That is the right price for an axis that closes.

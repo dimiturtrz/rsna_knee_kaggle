@@ -313,6 +313,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   script opens them, since he overwrites without a word and the overwritten run is usually one this
   project has already priced. `--anyway '<why>'` spends it deliberately. The success marker is still the
   CHECKPOINT on disk — the guard is what makes the exit code agree with it.
+- **The file you edited is not the code that is running — a live process froze its functions at launch.**
+  `after.sh` and every arm `source` `experiments/lib.sh` ONCE, at start, so an edit to a shell function
+  reaches only the processes that have not launched yet. Fixing `wait_for` to release on `ARM FAILED`
+  (knee, 2026-09-08) did nothing for the watcher already blocked on the old one: pid 16744 was still
+  carrying the pre-edit function and had to be killed and re-armed. So **after editing a `lib.sh` function
+  that gates or guards, sweep the process table and re-arm** — `Get-CimInstance Win32_Process -Filter
+  "Name='bash.exe'"` filtering on `CommandLine`, since MSYS `ps` shows only `/usr/bin/bash` with no argv.
+  Same family as the `.venv-arm` rule below: both are cases where the thing you verified is not the thing
+  executing.
 - **An arm's full log is named for its CHECKPOINT, not for the arm** — `_arm_log` (`experiments/lib.sh`)
   uses the basename of `--out` minus `.pt`, falling back to the `run_train` name only when a run has no
   `--out` (knee-tkyy). So `ortho_slow_trunk` writes `ortho_slow_trunk.full.log` and `mricore_corpus`
