@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# vjepa_cold.sh — the fair draw the volumetric family has never had: cold start, twelve epochs, finished.
+#
+# WHY THIS IS NOT A REPEAT. The family's arms are four, and not one of them is a matched twelve-epoch
+# cold fit:
+#   vjepa_member run1   died exit 127 at epoch 6 (knee-sx3a), no traceback
+#   vjepa_member run2   died at step 121 of epoch 0
+#   vjepa_member_s2026  TRUNCATED — `convergence_check` reads "best e9 of 10 run, 12 asked", so under
+#                       `one_cycle` the anneal never ran and its score is a FLOOR, not a measurement
+#   vjepa_warm          SIX epochs, `--encoder-weights vjepa_member_e5.encoder.pt` — warm-started off the
+#                       family's own earlier member, so it is a link in a chain rather than a draw
+#
+# WHAT THAT DOES TO THE FAMILY'S REJECTION. D118 §3: the order-statistic null prices this family at
+# p = F(best)^4 = 0.0126 and rejects it. Two of those four draws are the same run continued, so the
+# effective independent n is ~2, where the same statistic reads p = 0.112 and the family stops rejecting.
+# The four are also not budget-matched — every other family in that table runs twelve epochs, and this one
+# reached the highest non-`default` best in the project on half of them. The p-value is a measurement of
+# an unfair draw, not of the trunk.
+#
+# WHY THE FAMILY IS WORTH THE HOUR RATHER THAN ANOTHER DINOv3 SEAT. It is the only trunk here whose
+# pretraining READ of the corpus is different in kind — video/volumetric rather than per-slice 2D — and a
+# read change is the only thing that has ever paid above the floor on this task (`whole_stack`, +0.0103,
+# matched and budgeted). Every refinement axis the project owns measures sub-floor (D111), so a different
+# read is the only untested shape left, and this family is the cheapest instance of one.
+#
+# COST, SAID BEFORE IT RUNS. ~16 min an epoch at 20 slices / 256 train-size / batch 6 (vjepa_warm's own
+# rate), so ~3.2 h of card for twelve. That is the largest single-arm bill of the night and it buys a
+# VERDICT rather than a member: the honest prior on it clearing the +0.007 seat bar is low, and it is
+# queued as an INSTRUMENT — it retires the suspicion that the volumetric family was closed on an artefact.
+#
+# PRE-REGISTERED — vjepa_member's bands, unchanged, because a member is priced by its holdout mean
+# whatever path produced it:
+#   >= 0.845       the depth axis carries something the frozen probe could not see; the family re-opens
+#                  and the trunk census (`orthodiff`, `dinov2`, `ortholarge`) is worth its card time
+#   0.83 - 0.845   a tie; volume pretraining is retired AT THIS DATA SCALE, on a fair draw this time,
+#                  and D118 §2's "trunk-swap under a transferred recipe" closure extends to the family
+#   < 0.82         suspect the HARNESS first, not the trunk — the recipe below is `default`-fitted and
+#                  transferred, which is the exact confound D118 §2 names
+#
+# bead: knee-s9e03
+# reading: D:/models/rsna_knee_abnormality/vjepa_cold_s2026.holdout.npz
+#
+# `arm_check` REFUSES NOTHING HERE AND WARNS CORRECTLY: this is `vjepa_member` flag for flag, up to
+# `--out` (knee-7uoq). That is the point rather than a defect, and it is the one thing to be honest about
+# — this is not an untested CELL, it is a truncated arm re-run to completion. What the re-run buys is the
+# part `vjepa_member` never got: under `one_cycle` the last epochs ARE the anneal, and a run that died at
+# 10 of 12 never annealed, which is why `convergence_check` classes its score as a FLOOR rather than a
+# measurement. The family's whole rejection rests on that floor being read as a number. So the comparison
+# that matters is not vjepa_cold against vjepa_member — it is vjepa_cold against the FAMILY'S BAR, and
+# `vjepa_member`'s row has to be superseded by this one rather than averaged with it.
+#
+# WHY NOT RESUME FROM `vjepa_member_s2026.partial` INSTEAD, WHICH IS CHEAPER. Because that is exactly what
+# `vjepa_warm` did, and a warm start off the family's own earlier member is what collapsed the family's
+# effective n from 4 to 2. Buying the fair draw with the move that made the draw unfair would be paying
+# 3.2 h for the same defect at a discount.
+#
+# deliberate: --epochs 12 (matched to every other family in the null; the warm arm's 6 is what broke it)
+# deliberate: no --encoder-weights (a COLD start; the chain is what collapsed n=4 to n=2)
+# deliberate: identical to vjepa_member (a TRUNCATED arm re-run to completion, not a new cell)
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train vjepa_cold \
+  $RECIPE --epochs 12 --variant vjepa2l --pool mean --slice-pooling channels \
+  --whole-stack $THROUGHPUT --slices 20 --band-low 0.1 --band-high 0.9 --train-size 256 --batch 6 \
+  --backbone-lr 4e-5 \
+  --labels "$LABELS" --out "$MODELS/vjepa_cold_s2026.pt"

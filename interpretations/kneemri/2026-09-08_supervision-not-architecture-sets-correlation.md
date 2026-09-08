@@ -123,8 +123,18 @@ Cost of the kill: one grep. Cost had it run: 1.4 h of card on a trade that does 
 (`options.py:81` → `run_setup.py:192` → `augmentation.py:69,226-230`) and stamped into the member record, and
 **no member on disk has ever set it** (default 0.0). What it addresses is a train/serve distribution shift on
 ~43% of studies — absence was never in the training distribution — which is the same class as the only two
-mechanisms that have ever paid here (whole-stack +0.0185, overlap TTA +0.0146: "the model reads more of the
+mechanisms that have ever paid here (whole-stack +0.0147, overlap TTA +0.0146: "the model reads more of the
 study"), at the other end ("the model stays correct when there is less of the study").
+
+*(Corrected 2026-09-08: this line first read "whole-stack +0.0185". The ledger carries whole-stack at two
+sizes against two different controls — **+0.0147 against its own matched control** (`README:294`) and
+**+0.0185 against `rank24_s2026`** (`README:829`), the ORIGINAL baseline the running-total column is
+measured from. Quoting the running-total figure as the arm's size inflates it by a third. The matched
+number is the one that belongs in a sentence about a mechanism, and even it is read DOWN by `README:874`:
+the +0.0147 control was scored without the overlap TTA it gets at inference, and given both their own best
+reading `lr5x_d6` (0.8475) edges `wsfold0_e6` (0.8457). So the two mechanisms named here are not additive
+and the pair is the same lift bought twice — which is the whole reason `knee-eeo` says whole-stack members
+gain nothing from overlap TTA.)*
 
 Pitching it as a **diversity** arm prices it at **+0.0006** by the measured seat-value regression
 (`uniform 1/9 gain = -0.0424 - 0.0291·corr + 0.0765·solo`; a corr move of 0.871 → 0.85 at flat solo), which is
