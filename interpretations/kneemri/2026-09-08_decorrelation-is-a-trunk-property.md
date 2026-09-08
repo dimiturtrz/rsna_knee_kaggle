@@ -220,3 +220,58 @@ Effusion's 0.950 are the same number wearing different error bars. Quote it as `
 the closest of any candidate measured on that roster, rank 0.9396 / js 0.0081 / maha 4.011 against the
 roster's own 0.8956 / 0.0150 / 4.447. It is not a seat, and it is the cleanest confirmation of §1 there
 is: a member built by moving a label-side knob lands *closer* to the pool than the pool is to itself.
+
+## 9. The residual tail is structureless, the trunk term is a PENALTY, and the corner was never refused (D180)
+
+Researcher D180, card-free, 242 priced members, `nine` base 0.9024 @ledger75 on the 896 gold-dropped
+frame. The plane refits to its published coefficients to four decimals and is unbiased on its own pool
+(residual mean +0.00008 against SD 0.00060), so everything below is read against the fixed surface.
+
+**The positive tail is not a family.** Fifteen distinct lineages in the top twenty, and the only
+repetition — `calib_span` x4, `through_dense` x3 — is one member exported at several resolutions, not
+several members agreeing. Composition: top20 = 9 no-arm / 9 supervision / 2 recipe, **0 trunk, 0
+geometry**; bottom20 = **10 trunk** / 7 no-arm / 2 supervision / 1 geometry.
+
+**The grouping that DOES hold is on the negative side, and it inverts a year of framing.** Alternative
+trunks sit ~0.0005 BELOW what their own (solo, nnCorr) buys: non-default trunk n=36 mean residual
+-0.00049, best +0.00060; swinbase -0.00058, cnxbase -0.00080, ortholarge -0.00017; default n=141
++0.00019. A trunk swap pays for its decorrelation twice — once in solo, and again in something the
+surface does not name. It is a penalty term, not a lever.
+
+**Every recipe knob dies against its own permutation null** (400 draws, p95): epochs +0.0018 vs +0.0083,
+slices +0.0001 vs +0.0088, band +0.0000 vs +0.0068, image px +0.0001 vs +0.0070, backbone lr +0.0044 vs
++0.0099. Only trunk survives, and it survives collapsed to ONE degree of freedom (alt vs default,
++0.0695 vs null +0.0081), so it is not a level-count artefact. It weakens but never dies as the two
+extreme-leverage members are dropped (+0.069 -> +0.030 -> +0.013).
+
+**M186's caveat is upheld and it changes the edge of the conclusion.** The geometry regressors carry
+CV 0.12-0.25 with a 64-96% modal share — 96% of resolved sizes are 224, and only 52 of 242 members set
+the flag at all. A null on a regressor with that spread is a fact about the SAMPLE. What can be said is
+the size: **the geometry variation the pool does contain moves nnCorr by 0.008 where the corner needs
+0.09** (12 vs 20 slices: 0.9211 vs 0.9131 @pool251, solo flat at 0.8778 vs 0.8788; at 336 px the median
+nnCorr is HIGHER, 0.9450, n=5). A tenth of the required move, on the axis with the most spread of the
+three. It does not touch knee-nas5's within-group pixel collapse, and it says nothing about a geometry
+change of KIND — a different plane, a mm-based field of view, true 3D.
+
+**The correction that matters most: "the corner is unreachable" is not something either surface could
+ever say.** A full quadratic fits this pool better (R^2 0.78, resid SD 0.00043 against 0.58 / 0.00060)
+and diverges from the linear plane by 4x toward the empty corner (+0.0045 vs +0.0176 at solo 0.8959 /
+nnCorr 0.60). We hold exactly one out-of-region point to arbitrate them and it prefers the linear one:
+`ourtrunk44` measured -0.0010, linear -0.0012 (+0.0002, a third of one SD), quadratic -0.0021 (+0.0011,
+~2.5 SD). So the plane stays the instrument and D179 s4 stands — but **both surfaces are extrapolating
+out there and what is established is EXHAUSTION, not refusal**: no member built along four axes has
+reached the corner. That is a strong argument and it is not the same claim. Both sides had been using
+the stronger form.
+
+**The break-even geometry.** Gradient (0.0443, -0.0153), ||g|| 0.0469. The nearest real member to the
++0.0015 line is `merged_labelwise_cf` at euclidean 0.0304, needing **+0.032 of solo OR -0.093 of
+nnCorr**. +0.032 solo means solo 0.920, which is 0.024 past the best member this project has ever
+produced (`labelwise_dense_s2026`, 0.8959). -0.093 nnCorr means nnCorr@9 0.77 at solo ~0.89, where the
+only members under 0.80 nnCorr sit at solo 0.46-0.82 and `ourtrunk44` paid 0.078 of solo to buy 0.7469.
+Zero of 242 have a measured add >= +0.0015 (best +0.0011); zero are PREDICTED to under the quadratic
+either (max +0.0007).
+
+**So M185's second branch fires: member generation is closed as this project has posed it, in these two
+coordinates.** The lever moves to what a member SEES — and per the 0.008-vs-0.09 reading, only to a
+change of kind. M187 asks the inventory question that decides whether that is an arm or a code change:
+which SEE-axis flag is settable today and has never been set off its default by any committed arm.
