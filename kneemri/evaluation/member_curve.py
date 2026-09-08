@@ -407,6 +407,33 @@ class MemberCurve:
             lines.append(f"best {size}: {score:.4f}  {pool.named(subset)}")
         return lines
 
+    def dropped(self, pool: Pool) -> list[str]:
+        """What REMOVING each member does — the control a swap number cannot be read without.
+
+        A swap is `seat(candidate) − seat(displaced)`, and until 2026-09-08 nothing here could price the
+        second term. That mattered the moment the same three candidates were priced under two rulers:
+        all three took the same seat, so a ruler that repriced the DISPLACED member alone would produce
+        the whole table with no candidate doing anything (C176 §2). This is that term, alone.
+
+        It is also a reading in its own right, and the cheaper one: a member whose removal RAISES the
+        roster is free board with no card, no candidate and no slot. `marginal` and `swap` can only ever
+        propose an addition, so a roster has never been asked whether it should be smaller.
+
+        Positive means the roster scores HIGHER without that member. Ordered worst-kept first, so the
+        line that would pay is the line on top.
+        """
+        seats = range(len(pool))
+        whole = self.scores.mean(pool.combined(list(seats)), pool.truth)
+        rows = sorted(
+            (self.scores.mean(pool.combined([seat for seat in seats if seat != index]), pool.truth) - whole, name)
+            for index, name in enumerate(pool.names)
+        )
+        return [
+            f"roster of {len(pool)} at {whole:.4f}, and what DROPPING each member alone is worth "
+            f"(positive = the roster is better without it), read on the {self.scores.name()} ruler:",
+            *(f"  -{name}: {whole + delta:.4f}  ({delta:+.4f})" for delta, name in reversed(rows)),
+        ]
+
     def routing(self, pool: Pool) -> list[str]:
         """Per-label member selection at every k, split-half beside in-sample — routing, priced honestly.
 

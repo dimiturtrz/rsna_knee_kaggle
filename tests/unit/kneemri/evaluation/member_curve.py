@@ -383,3 +383,21 @@ def test_honest():
     assert len(lines) == 1 + len(members) + 1, "one line per seat, plus the header and the verdict"
     assert all("bias" in line for line in lines[1 : 1 + len(members)])
     assert lines[-1].startswith("best honest count "), "the count is the answer, and it is named as held-out"
+
+
+def test_dropped():
+    """A member that ranks the truth BACKWARDS must read as the roster's most profitable removal.
+
+    The reading exists to price the displaced half of a swap, so the sign convention is the assertion:
+    positive means the roster scores higher without that member, and the payer sorts to the top.
+    """
+    members = [_member(2.0, 1), _member(2.0, 2), _member(-2.0, 3)]
+    pool = Pool(_names(members), members, _truth())
+
+    lines = MemberCurve(LabelScores()).dropped(pool)
+
+    assert lines[0].startswith("roster of 3 at "), "the whole roster's score is the baseline the deltas are from"
+    assert lines[0].endswith("read on the cut0.5 ruler:"), "a leave-one-out is a macro and macros name their cut"
+    assert lines[1].startswith("  -m2.pt: "), "the backwards member is the one worth dropping, so it sorts first"
+    assert "(+" in lines[1], "dropping it must RAISE the roster"
+    assert all("(-" in line for line in lines[2:]), "dropping either honest member must cost"
