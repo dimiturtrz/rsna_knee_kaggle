@@ -34479,6 +34479,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.spectral_mae.SpectralMae.forward",
+      "target": "kneemri.training.spectral_mae.SpectralMae.restore",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.spectral_mae.SpectralMae.forward",
       "target": "kneemri.training.spectral_mae.SpectralMae.spectral_loss",
       "weight": 1
     },
@@ -65138,6 +65144,14 @@
       "descendants": 0,
       "id": "kneemri.training.spectral_mae.SpectralMae.pixel_loss",
       "label": "pixel_loss",
+      "level": "method",
+      "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.spectral_mae.SpectralMae.restore",
+      "label": "restore",
       "level": "method",
       "parent": "kneemri.training.spectral_mae.SpectralMae",
       "role": null
