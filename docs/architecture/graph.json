@@ -21951,6 +21951,12 @@
     {
       "kind": "references",
       "source": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "target": "kneemri.evaluation.transfer_strata.BandSpread",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata",
       "target": "kneemri.evaluation.transfer_strata.Stratum",
       "weight": 1
     },
@@ -22083,6 +22089,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
+      "target": "kneemri.evaluation.transfer_strata.TransferStrata.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.lines",
       "target": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
       "weight": 1
     },
@@ -22120,6 +22132,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.transfer_strata.TransferStrata.readings",
       "target": "kneemri.evaluation.transfer_strata.TransferStrata.strata",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.transfer_strata.TransferStrata.spread",
+      "target": "kneemri.evaluation.transfer_strata.BandSpread",
       "weight": 1
     },
     {
@@ -40016,6 +40034,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.BandSpread",
+      "label": "BandSpread",
+      "level": "class",
+      "parent": "kneemri.evaluation.transfer_strata",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.transfer_strata.Stratum",
       "label": "Stratum",
       "level": "class",
@@ -53866,6 +53892,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.transfer_strata.TransferStrata.rows",
       "label": "rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.transfer_strata.TransferStrata.spread",
+      "label": "spread",
       "level": "method",
       "parent": "kneemri.evaluation.transfer_strata.TransferStrata",
       "role": null
