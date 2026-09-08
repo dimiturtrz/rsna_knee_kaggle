@@ -14343,12 +14343,30 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.encoder_drift.EncoderDrift.blocks",
+      "target": "kneemri.evaluation.encoder_drift.EncoderDrift.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.changes",
+      "target": "kneemri.evaluation.encoder_drift.EncoderDrift.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.constructed",
+      "target": "kneemri.evaluation.encoder_drift.EncoderDrift.concentration",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.pairs",
       "target": "kneemri.evaluation.encoder_drift.EncoderDrift.grouped",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.blocks",
+      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.pairs",
       "target": "kneemri.evaluation.encoder_drift.EncoderDrift.trained",
       "weight": 1
     },
@@ -14361,7 +14379,25 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.encoder_drift.EncoderDrift.report",
+      "target": "kneemri.evaluation.encoder_drift.EncoderDrift.changes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.report",
       "target": "kneemri.evaluation.encoder_drift.EncoderDrift.concentration",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.report",
+      "target": "kneemri.evaluation.encoder_drift.EncoderDrift.constructed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.encoder_drift.EncoderDrift.report",
+      "target": "kneemri.evaluation.encoder_drift.EncoderDrift.opened",
       "weight": 1
     },
     {
@@ -49476,6 +49512,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.encoder_drift.EncoderDrift.changes",
+      "label": "changes",
+      "level": "method",
+      "parent": "kneemri.evaluation.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.encoder_drift.EncoderDrift.concentration",
       "label": "concentration",
       "level": "method",
@@ -49484,8 +49528,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.encoder_drift.EncoderDrift.constructed",
+      "label": "constructed",
+      "level": "method",
+      "parent": "kneemri.evaluation.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.encoder_drift.EncoderDrift.grouped",
       "label": "grouped",
+      "level": "method",
+      "parent": "kneemri.evaluation.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.encoder_drift.EncoderDrift.opened",
+      "label": "opened",
+      "level": "method",
+      "parent": "kneemri.evaluation.encoder_drift.EncoderDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.encoder_drift.EncoderDrift.pairs",
+      "label": "pairs",
       "level": "method",
       "parent": "kneemri.evaluation.encoder_drift.EncoderDrift",
       "role": null
