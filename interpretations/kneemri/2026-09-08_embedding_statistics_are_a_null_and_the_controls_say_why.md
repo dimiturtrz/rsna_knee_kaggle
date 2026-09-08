@@ -113,6 +113,66 @@ axis these encoders collapse. That is a ranking of the open levers, produced for
 Also worth carrying: the standing owner correction applies to the sign result. An anticorrelation is not
 a result to take — the take-home is the blind spot, not a rule that bets against the neighbourhood.
 
+## And the blind spot is not on any input axis we control (D217, same day)
+
+D214 says the blind spot is in the representation. The cheap hope was that it is concentrated on
+something a FLAG could fix — too few slices, the wrong band, an unoccupied slot, a protocol we
+under-sample, a resolution we resample badly. Twelve axes were pre-registered with their bars, their
+permutation floor and their null control BEFORE the sweep ran (D216), and the answer is **flat**.
+
+The statistic is `E(s) = W(s) − W_rand(s)`, the count of `wrong` cells per study (12 labels, averaged
+over the 9 complete caches) minus the same count under a random 32-neighbourhood. E and not W, because
+**the random neighbourhood accounts for 81% of W** — W is bounded almost entirely by how many positives
+the ensemble missed. `E mean 0.1001, sd 0.4077`; 310 of 909 studies have E > 0. Everything below is
+`@holdout909/base-rate` — the ensemble-miss cut is the base rate, not this repo's default midpoint.
+
+Bars: continuous `|rho| ≥ 0.10`, categorical `η² ≥ 0.01`, above a 2000-shuffle Bonferroni floor
+(α = 0.05/12); CONCENTRATION Cohen's d ≥ 0.30 on the top decile of E; and a SPECIFICITY veto —
+if `|rho(axis, W_rand)| ≥ |rho(axis, E)|` the axis is measuring the difficulty channel, not the features.
+
+**The largest |rho| anywhere on the four real axes is 0.0645, against a bar of 0.10 set deliberately
+low.** Slice count total, deepest-series depth, series count, slot fill, weighting combination,
+fat-suppressed fraction and count, pixel spacing, minimum pixel spacing, slice spacing — nothing clears,
+and the nearest thing to a signal (`slice_spacing_mm`, d_top −0.263) points backwards from the coverage
+story and is vetoed because W_rand tracks it harder.
+
+**What this costs the plan: the next move is in the weeks bucket, not the flag bucket.** No card arm goes
+to `--slices`, the band, or slot routing on the strength of a coverage argument. That is a real saving —
+it is the arm that was about to be written.
+
+Three things worth keeping from the sweep independent of its null:
+
+1. **E is decontaminated of prevalence and NOT of difficulty.** `rho(positive mass, E) = −0.0635`
+   (against +0.1034 on W and +0.2027 on W_rand — the subtraction worked), but
+   **`rho(missed positives, E) = +0.3388`.** No future reading may call E a feature-only quantity.
+2. **The dominant flag setting means materially different things across the corpus.** With `--slices 20`
+   and band 0.1–0.9 (196 and 198 of ~300 arms respectively), the implied stride runs
+   **min 0.60 · median 1.40 · max 12.80 — a 21.3x spread**, and **128 of 909 studies have stride < 1.0**,
+   meaning the sampler fills its 20 slots with duplicate slices. That is a description of our sampling, not
+   a lever: `rho(stride, E) = −0.0193`, vetoed. It is also not an independent test — `stride = deepest ×
+   0.04` is an affine rescale of depth, and rank correlation is invariant under it, so registering it added
+   nothing to k. Rescaling a variable cannot disambiguate it from a confound; the prevalence control and
+   the W_rand veto are what do that.
+3. **`Fat_Suppression` is a duplicate column.** `population_split.py:16-18` finds it equal to
+   `Fluid_Sensitive` on **24,371 of 24,371** rows, so every reading anyone took off the shipped column was
+   reading the other one. The header-derived flag is genuinely different and genuinely varying —
+   fat-suppressed series present in **902 of 909** studies, `frac_fatsat` median 0.600, and **no study is
+   entirely fat-suppressed** — and it is flat against E. Two more columns the headers fill that the
+   shipped table does not: `pixel_spacing_mm` 909/909 against 64/909, `slice_spacing_mm` 909/909 against
+   159/909.
+
+**The null control fired and it was not the retraction condition.** D216 pre-registered retraction as
+*everything fires including axis 5*. What happened is the opposite: nothing fired except one column
+inside axis 5. That column was `source` — how laterality was DETERMINED (`tag` / `geometry` /
+`unresolved`) — which is header completeness, and header completeness is a vendor fingerprint (Siemens is
+77% of `tag`; `tag` holds zero Canon studies). Conditioning on scanner kills it: pooled within-scanner
+η² **0.0097** against 0.0164 unconditioned, below the 0.01 bar. `side`, the actual laterality and the
+actual null, is flat (η² 0.0024, vetoed). **A mis-registered column is a correction, not a retraction.**
+
+**What it does NOT say:** that the hard set has no structure. It says it has no structure on these twelve
+axes at these bars. A DIFFICULTY axis is what this design deliberately could not see, since E retains
++0.34 coupling to missed-positive count.
+
 ## Two cache defects found on the way
 
 Both are repo defects the sweep surfaced, fixed the same day (`knee-` beads filed 2026-09-08):
@@ -129,6 +189,32 @@ Both are repo defects the sweep surfaced, fixed the same day (`knee-` beads file
    reports 20130 slot-instances present while the features are non-zero at 26442 of 26442: an absent slot
    holds the encoder's ordinary response to a BLANK IMAGE. The mask is more load-bearing than the wording
    implied — an unmasked mean ingests blank-image features for 24% of slot-instances, invisibly.
+
+## Where that leaves the levers, after the audit these two results forced
+
+D214 named three ways to reach the blind spot. Two of them are already spent on this ledger, which is
+only visible if you read it rather than re-deriving the list:
+
+- **Different pretraining is spent at the trunk-swap level.** RadImageNet DenseNet, `radnet_pinned`
+  (0.7505), RadioDino b16/s16/s8 — `radiodino_corpus` at 0.8214 moved the pretraining CORPUS with the
+  architecture and objective held fixed, and priced its seat at **−0.0008** on honest12 despite carrying
+  the strongest prior any non-DINOv2 candidate has had. MedSAM, MRI-CORE, Swin, ViT-in21k, ConvNeXt,
+  ResNet-50d, CoatNet are all on the ledger too.
+- **Different input is what D217 measured flat.**
+- **Supervision is spent at one attach point, and explicitly reserved at another.** `contrast_dense`
+  (SupCon at batch 12) read −0.0087; `contrast_pool` (SupCon + a remembered pool, 96 keys per anchor)
+  read 0.8515, −0.0119 against the no-contrast control, **seat value 0.0000 to four decimals**, with the
+  training loss moving exactly as widening a log-sum-exp denominator eightfold must. That closes the lane
+  on MECHANISM rather than on price. Its own closing paragraph reserves one cell: *a representation term
+  that shapes a different space, or attaches at a different stage.*
+
+**Both contrastive arms attach at the head's per-finding contexts — the readout. D214 measured the blind
+spot in the frozen TRUNK feature space.** So the one cell these results jointly leave open is a metric
+term attached at the pooled trunk embedding, in the same space the 32-neighbour statistic was computed
+in — a single-variable change against `contrast_pool` whose variable is the attach point. Gated, before
+any card is spent, on a card-free reachability probe: if a fitted metric over the trunk features cannot
+lift the 32-neighbour sign rate off its 0.487 null on held-out `wrong` cells, no term attached there has
+anything to descend.
 
 ## What it cost
 
