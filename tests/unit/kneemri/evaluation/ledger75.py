@@ -47,6 +47,16 @@ def test_reading_refuses_a_member_with_no_record(tmp_path: Path) -> None:
         LedgerSeventyFive().reading(tmp_path / "dark.pt")
 
 
+def test_scorer(tmp_path: Path) -> None:
+    """The mixed cut as a plain scorer: a caller holding arrays reads exactly what `macro` reads."""
+    ruler = LedgerSeventyFive()
+    reading = ruler.reading(_member(tmp_path, "m6", RECUT_COLUMN))
+    scorer = ruler.scorer()
+    assert scorer.cut_for(RECUT_COLUMN) == pytest.approx(0.75)
+    assert scorer.cut_for(HELD_COLUMN) == pytest.approx(0.5)
+    assert scorer.mean(reading.predictions, reading.truth) == pytest.approx(ruler.macro(reading))
+
+
 def test_per_label(tmp_path: Path) -> None:
     """A member that ranks only the 0.94 row scores 1.0 where the cut is 0.75 and worse where it is not."""
     reading = LedgerSeventyFive().reading(_member(tmp_path, "m2", RECUT_COLUMN))

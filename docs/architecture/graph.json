@@ -3122,6 +3122,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.seat_add",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.seat_add",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.seat_add",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.seat_add",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.seat_add",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.seat_bonus",
       "target": "core.cli",
       "weight": 1
@@ -15745,6 +15775,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.scorer",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.table",
       "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
@@ -19030,6 +19066,156 @@
       "kind": "calls",
       "source": "kneemri.evaluation.scores.LabelScores.per_label",
       "target": "kneemri.evaluation.scores.LabelScores.cut_for",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.seat_add.SeatAdd",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.seat_add.SeatAdd",
+      "target": "kneemri.evaluation.seat_add.Relation",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.seat_add.SeatAdd",
+      "target": "kneemri.evaluation.seat_add.SeatAddRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.seat_add.SeatAdd",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.seat_add.SeatAdd",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.__init__",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.__init__",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.scorer",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.__init__",
+      "target": "kneemri.inference.vote.LogitAverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.macro",
+      "target": "kneemri.evaluation.seat_add.SeatAdd.stacked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.macro",
+      "target": "kneemri.evaluation.seat_add.SeatAdd.truth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
+      "target": "kneemri.evaluation.seat_add.SeatAdd.macro",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
+      "target": "kneemri.evaluation.seat_add.SeatAdd.reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
+      "target": "kneemri.evaluation.seat_add.SeatAdd.relation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
+      "target": "kneemri.evaluation.seat_add.SeatAdd.shared",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
+      "target": "kneemri.evaluation.seat_add.SeatAddRow",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.stacked",
+      "target": "kneemri.evaluation.seat_add.SeatAdd._indices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.truth",
+      "target": "kneemri.evaluation.seat_add.SeatAdd._indices",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.seat_add.SeatAddRow",
+      "target": "kneemri.evaluation.seat_add.Relation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.SeatAddRow.clears",
+      "target": "kneemri.evaluation.seat_add.SeatAddRow.add",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.seat_add.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.seat_add.main",
+      "target": "kneemri.evaluation.seat_add.SeatAdd",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_add.main",
+      "target": "kneemri.evaluation.seat_add.SeatAdd.price",
       "weight": 1
     },
     {
@@ -34917,7 +35103,7 @@
       "role": null
     },
     {
-      "descendants": 275,
+      "descendants": 276,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -34981,7 +35167,7 @@
       "role": null
     },
     {
-      "descendants": 98,
+      "descendants": 99,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -35512,6 +35698,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.scores",
       "label": "scores",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add",
+      "label": "seat_add",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -39339,6 +39533,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.scores",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.Relation",
+      "label": "Relation",
+      "level": "class",
+      "parent": "kneemri.evaluation.seat_add",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd",
+      "label": "SeatAdd",
+      "level": "class",
+      "parent": "kneemri.evaluation.seat_add",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAddRow",
+      "label": "SeatAddRow",
+      "level": "class",
+      "parent": "kneemri.evaluation.seat_add",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -49318,6 +49536,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.scorer",
+      "label": "scorer",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.table",
       "label": "table",
       "level": "method",
@@ -51698,6 +51924,102 @@
       "label": "per_label",
       "level": "method",
       "parent": "kneemri.evaluation.scores.LabelScores",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd._indices",
+      "label": "_indices",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.macro",
+      "label": "macro",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.price",
+      "label": "price",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.reading",
+      "label": "reading",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.relation",
+      "label": "relation",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.shared",
+      "label": "shared",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.stacked",
+      "label": "stacked",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAdd.truth",
+      "label": "truth",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAdd",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAddRow.add",
+      "label": "add",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAddRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.SeatAddRow.clears",
+      "label": "clears",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add.SeatAddRow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_add.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_add",
       "role": null
     },
     {

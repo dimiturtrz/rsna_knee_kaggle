@@ -72,6 +72,18 @@ class LedgerSeventyFive:
         self.midpoint = LabelScores(MIDPOINT)
         self.midpoint_columns = midpoint_columns
 
+    def scorer(self) -> LabelScores:
+        """This ruler as a plain scorer, for a caller holding ARRAYS rather than a member's record.
+
+        `scores.py` records the gap this closes: the mixed cut lived only inside this class, which takes
+        a `HoldoutReading`, so no scorer-taking caller — `seat_value`, `member_curve`, `member_distance`,
+        `seat_add` — could ask for LEDGER75 at all and every one of them silently read the midpoint. That
+        is the mechanism behind the whole cut seam (knee-f9aao): not that 0.5 was chosen, but that it was
+        the only thing reachable. The cut map is derived from this instrument's own two fields, so a
+        caller can never hold a LEDGER75 that has drifted from the one `macro` reads.
+        """
+        return LabelScores(self.recut.cut, dict.fromkeys(self.midpoint_columns, MIDPOINT))
+
     def reading(self, path: Path) -> HoldoutReading:
         """One member's kept predictions and the truth they were scored against."""
         record = HoldoutRecord(path)
