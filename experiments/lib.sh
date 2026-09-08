@@ -299,7 +299,7 @@ WAIT_HEARTBEAT_MINUTES=5
 # How often a parked arm repeats that it is still parked. Five minutes is short against the ~45-minute
 # arms it waits behind and long enough that an hour of parking costs twelve lines, not sixty.
 
-FOREIGN_WAITS=60
+FOREIGN_WAITS=${FOREIGN_WAITS:-60}
 # How many minutes to wait out a foreign tenant before starting anyway, loudly. Unbounded would let a
 # process that parks 20 GB and never exits idle our whole queue in silence; an hour is longer than any
 # arm we run, so a real trainer on the other side clears well within it.
