@@ -8535,8 +8535,14 @@ Card: zero. Two cpu reads of one csv.
 > `seat_clean_distill.sh` re-read the term with the leak removed, pre-registered ≥0.864 / 0.860-0.864
 > / <0.860 against `band_dense` 0.8578. **IT READ 0.8634 — the leaky twin's 0.8633 to within 0.0001,
 > out of teachers −0.0067 weaker by construction. See the `seat_clean_distill` row at the end of this
-> file: the leak is real in the residuals and worth ~zero AUC, so `seat_distill_lr4e5`'s +0.0107 is a
-> treatment effect. This warning still stands for THIS row (0.8681) and the board inversion under it,
+> file: the leak is real in the residuals and worth ~zero AUC, so the distillation term is a treatment
+> effect **whose size is +0.0055, not +0.0107** (corrected 2026-09-08, D122/D123). `seat_distill_lr4e5`
+> is 0.8633 and 0.8633 − 0.8578 = +0.0055; the clean twin `seat_clean_distill` is 0.8634 → +0.0056.
+> +0.0107 is `oof_teacher_s2026` 0.8681 − 0.8578 — the TEACHER's delta, on the row this very warning
+> block voids. Attaching it to the student put a **teacher's** number inside a **student's** sentence,
+> and three consumers read it: this row, line ~8692 below, and knee-ygi2k's price, from which D121
+> ordered 8.5 h of card. Both student deltas are UNDER the 0.0062 holdout floor, which is the `knob`
+> band of this arm's own pre-registration. This warning still stands for THIS row (0.8681) and the board inversion under it,
 > which that arm does not explain.**
 
 `--teacher-targets` set to OUR OWN out-of-fold predictions (`teacher_oof_corpus.npz`), `--distill-weight
@@ -8688,9 +8694,24 @@ That row is a different arm at a different corner and its board refusal (0.926 o
 unexplained by this reading. It also cannot speak for `--fold -1` at full teacher strength; that is
 `seat_oof5_distill`'s job and its ruler is the board.
 
-**What it licenses immediately.** `retrain_six_distill` (knee-ygi2k, priced: 8.5 h of card, zero slots
-to produce, P(clears 0.948) ~0.45). Its per-seat term is the +0.0107 this arm just defended. The kill
-switch written for it — "disarm if the clean student reads <0.860 with the witness null" — did not fire.
+**What it licensed, and no longer does.** `retrain_six_distill` (knee-ygi2k) was priced here at 8.5 h of
+card, zero slots to produce, P(clears 0.948) ~0.45, on a per-seat term of "+0.0107 this arm just
+defended". **That price is void and the arm is closed (2026-09-08, D122–D125).** The +0.0107 is
+`oof_teacher_s2026`'s leaked delta, not this arm's; this arm's own term is **+0.0056** (ledger frame)
+and **+0.0024** on the 896-row `L75mid` frame, both under the 0.0062 floor. Nine distilled members were
+then re-scored on one matched fold-0 ruler and **exactly one clears the floor upward**
+(`foreign_distill_calib_s2026`, +0.0102, a FOREIGN teacher). The pool term was measured on the one
+control pair that isolates exactly what the six-seat arm does per seat — `band_dense` −0.0000 →
+`seat_clean_distill` −0.0003 — and it is **negative**; every distilled member added as a 13th seat to
+`honest12` (0.9013) reads +0.0008 down to −0.0003 against a 0.0015 bar. The per-label MCL match that
+made the six-seat case is the leaked table's: MCL goes +0.0310 → +0.0158 → **−0.0072** as the leak is
+removed, second-worst of twelve on the clean student. LatMen survives at +0.0122 clean — one column,
+half the floor, directional. The kill switch written here ("disarm if the clean student reads <0.860
+with the witness null") did not fire and was the wrong switch: the student read 0.8634 and the arm still
+should not run, because the bar it had to clear was the FLOOR, not 0.860. **The own-pool distillation
+lane is closed for score** — not as an improvement and not as an instrument, since the retirement was
+bought card-free. Independently, `teacher_oof5.npz` is not on disk, so the arm would have died in epoch
+one had it been queued.
 
 The five distilled members declined under the leak argument in `comp/members.declines` are answered by
 this row, not re-quoted into it: the decline says in writing that it is lifted by this arm and
