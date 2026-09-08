@@ -10555,43 +10555,95 @@ and an agent that wants to know what flags exist greps the arm tree instead — 
 `--variant` axis came to have 24 registered values and no census. Found while looking for the trunk
 flag, not by any gate.
 
-## 2026-09-08 — transfer is SATURATION, not blindness: the slope is 0.42 easy, 0.74 mid-hard
+## 2026-09-08 — blindness above 0.870 is REFUTED; the band-to-band slope spread is an artefact, not saturation
 
 `python -m kneemri.evaluation.transfer_strata`, run 09:12Z, output at `logs/transfer_strata.log`. 37
 rebuildable ensemble entries, 5 difficulty bands of ~182 studies cut on member disagreement across a fixed
-41-member reference pool, 12 of 12 findings scoreable in every band.
+41-member reference pool, 12 of 12 findings scoreable in every band. **Correlation and spread columns added
+09:35Z; the slope-only version of this row, published 09:20Z, carried a mechanism that is now retracted.**
 
-    Q1 (easiest)  182 studies  disagreement 0.0764  slope +0.42
-    Q2            182          0.1014               +0.58
-    Q3            182          0.1147               +0.74
-    Q4            182          0.1237               +0.74
-    Q5 (hardest)  181          0.1382               +0.66
+    band  studies  disagreement   ratio*  sd(offline)  sd(board)   OLS r  OLS slope
+    Q1        182        0.0764   +0.42        0.0145     0.0080   0.822     +0.455
+    Q2        182        0.1014   +0.58        0.0100     0.0080   0.870     +0.697
+    Q3        182        0.1147   +0.74        0.0084     0.0080   0.871     +0.836
+    Q4        182        0.1237   +0.74        0.0079     0.0080   0.748     +0.757
+    Q5        181        0.1382   +0.66        0.0094     0.0080   0.906     +0.772
 
-Independently, the 443 resolved entry PAIRS split at the median hard-share: a gain made on HARD studies
-transfers at +0.71, one made on EASY studies at +0.62.
+`*` is the tool's own column and is NOT an OLS slope: `transfer_strata.py:233 compression()` returns the
+**median board-per-holdout ratio over the entry PAIRS the band resolves**. The last three columns are an
+OLS fit computed separately over the same 37 entries. Two different estimators; they agree on the ordering
+and on Q1 being the lowest, which is what makes the artefact below common to both.
 
-**This settles the fork `transfer_strata.py:17-21` states.** The module pre-registered three causes with
-different predictions about this cut. SATURATION predicted the compression would be worst in the EASY
-stratum — it is, by a factor of 1.8 against the mid bands. DISTRIBUTION GAP predicted the board's ordering
-would be recovered in the HARD stratum — Q5 instead reads 0.66, *below* Q3 and Q4. NEITHER predicted ~1
-everywhere — no band is near 1.
+**The blindness branch is REFUTED, and it is the whole of the result.** `transfer_strata.py:19` named the
+live possibility that the holdout is blind above 0.870, in which case every plan ending in "improve the
+offline number" is unfunded. Every stratum reads a positive ratio AND an OLS correlation of 0.75 or better.
+Offline movement is funded, at about 0.7 of face value, uniformly.
 
-**The blindness branch is REFUTED, and that matters more than the slope.** `transfer_strata.py:19` named
-the live possibility that the holdout is blind above 0.870, in which case every plan ending in "improve the
-offline number" is unfunded. Every stratum reads a positive slope and three of five read 0.58-0.74. Offline
-movement is funded, at about 0.7 of face value.
+**RETRACTED: that the compression is SATURATION, and the rule that a gain be re-priced by WHERE it landed.**
+Both estimators divide by a per-band offline spread, and that spread is what actually varies. Board score is
+a per-entry constant, so `sd(board)` is identical in every band and the OLS slope is
+`r · sd(board)/sd(offline)` — the ordering is the offline-SPREAD ordering unless r moves, and r does not
+move with difficulty (0.748 at Q4, in the MIDDLE, is the lowest). The published "1.8x compression in the
+easy band" is the 1.84x spread ratio 0.0145/0.0079. The median-pair-ratio column inherits the same defect
+by a shorter route: a band whose per-pair `delta offline` is noisier has a noisier DENOMINATOR, which drags
+the median ratio down without anything about transfer changing.
 
-**Pricing rule that follows.** An offline delta is worth ~0.7 of itself on the board, and WHERE it landed
-now matters as much as its size: +0.005 on the easy band is ~+0.002 of board, the same +0.005 on the
-mid-to-hard bands is ~+0.0037. Nearly 2x, and invisible to the macro alone. This RAISES the bar on
-knob-sized arms rather than lowering it — an offline +0.006 is a board +0.004, still directional only.
+Saturation additionally predicts its own signature — entries BUNCHED near a ceiling — and Q1 is the
+opposite on both counts: the widest entry spread of the five, and per D195 §3 the lowest mean member macro
+(0.7773, sd 0.0213). Regression dilution (a noisier per-entry offline estimate in Q1) fits both columns but
+is not established either: disattenuating Q1 fully would push r above 1, so part of that spread is real.
+The band-dependence is UNEXPLAINED and must not be planned against.
 
-**What it cannot say.** ~180 studies a band, so per-label AUCs inside one are wide. The 37 entries span days
-and a kit that changed underneath them, exactly as `board_transfer` states; stratifying asks the confounded
-question where the hypotheses differ, it does not repair the confound. Q5's dip below Q3/Q4 is a single
-non-monotonicity at the smallest, widest stratum, consistent with noise, and is NOT read as a hard-stratum
-effect of its own. Full write-up:
-`interpretations/kneemri/2026-09-08_transfer-is-saturation-not-blindness.md`.
+**Method rule this buys.** A ratio or slope fitted inside a subset divides by that subset's own spread and
+is not comparable across subsets. **Report the correlation and the spreads alongside every stratified
+slope.** The tool prints neither; that is why the artefact reached a published file, fifteen minutes ahead
+of the check that killed it. The pair split (hard +0.71 vs easy +0.62) is the same comparison at a smaller
+effect size with no interval — directional at best, and not independent support for the retracted rule.
+
+**What it still cannot say.** ~180 studies a band, so per-label AUCs inside one are wide. The 37 entries span
+days and a kit that changed underneath them, exactly as `board_transfer` states; stratifying asks the
+confounded question where the hypotheses differ, it does not repair the confound. Full write-up:
+`interpretations/kneemri/2026-09-08_transfer-is-saturation-not-blindness.md` (filename retained for the
+inbound links; its title now states the amended reading).
+
+## 2026-09-08 — a member's HARD-BAND profile is REDUNDANT, and its residual does not replicate (D195)
+
+Researcher letter D195, 09:30Z, card-free and slot-free, answering M197. Reuses `TransferStrata.members()`
+and `.strata()` directly, so the bands are identical to the row above by construction. Canonical truth from
+`base224_s2026`; pool 264 scored, **219 competent** (overall >= 0.82).
+
+    hard_macro@holdout909-Q3Q5/midpoint  vs macro@holdout909/midpoint   r 0.9777  slope 1.243  resid sd 0.0029
+    hardtop_macro@holdout909-Q4Q5/midpoint  vs the same                 r 0.9675  slope 1.356  resid sd 0.0038
+
+**Closed on a mechanism, not a threshold.** Split-half reliability of the hard residual is **+0.2493**
+(Spearman-Brown +0.3991): ~60% of the observed residual is measurement noise, implying a TRUE per-member
+residual sd of **0.0020** against a 0.0062 paired floor. A member two true sd "better on hard than its
+headline says" is +0.0040 — a quarter of the 0.015 bar. There is no member the profile can promote. Slope
+> 1 means the hard bands AMPLIFY the same ordering rather than reorder it.
+
+**Do NOT quote the full-pool r = 0.9816 / residual sd 0.0093.** It is inflated by `focus_latmen_s2026`
+(0.4747) and `focus_mcl_s2026` (0.5332), whose enormous residuals replicate perfectly because being broken
+is a stable property. Competent-pool numbers only.
+
+**Spelling, binding from here.** `transfer_strata.py:269` defines `hard` as `self.strata()[self.bands // 2 :]`
+= **Q3-Q5**. `hardtop` = Q4-Q5. M197's prose said "Q4/Q5" while pointing at the code's `hard`; same verdict,
+different numbers.
+
+**Three of the top eight hard residuals are DECLINED members** (`swin_distill_fit_s2026` +0.0074,
+`v3large_stack_s2026` +0.0053, `swin_wholetop_s2026` +0.0047, `ortho_pool_read` +0.0084 hardtop). Recorded
+so nobody re-greps it, and it re-opens nothing: each sits below the 0.0062 floor and inside the +/-0.0029
+half-width of its own measurement. A decline is an argument and is answered on its own terms —
+`swin_wholetop`'s names `swin_calib_dense` (knee-csxq).
+
+**Bug D195 found and fixed mid-analysis, worth carrying.** Its first run scored each member against its OWN
+`reading.truth`, putting `recal_holdannot_s2026` at 0.8964 against the 0.8515 it carries in D194's matched
+table — a member fitted under a recalibrated label table scoring itself against its own easier truth. Five
+members carry a different own truth (`confident224_s2026`, `recal_holdannot_s2026`,
+`ortholarge@focal-attend_mean_probe`, `radnet121@focal-max_mean_probe`, `v3large@focal-attend_mean_probe`).
+This is exactly what `RecordMix.per_member` refuses on; reading records directly bypasses that guard.
+
+**Also from D195: nothing more should be queued against `merged3_corpus_s2026` until its frame is fixed.**
+Its paired floor is +/-0.0299, so only a >0.03 gain is readable there, which almost nothing predicts.
 
 ## 2026-09-08 — a third duplicate `ourtrunk44` took the card, and the 08:21Z idle gap was a missing cache
 
