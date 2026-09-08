@@ -24223,6 +24223,30 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.experiments.foreign_run.ForeignRun",
+      "target": "kneemri.experiments.foreign_run.ForeignArtefacts",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.foreign_run.ForeignRun.artefacts",
+      "target": "kneemri.experiments.foreign_run.ForeignArtefacts",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.foreign_run.ForeignRun.artefacts",
+      "target": "kneemri.experiments.foreign_run.ForeignRun.tagged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.foreign_run.ForeignRun.ran",
+      "target": "kneemri.experiments.foreign_run.ForeignRun.artefacts",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.experiments.foreign_run.main",
       "target": "kneemri.experiments.foreign_run.ForeignRun",
@@ -40360,6 +40384,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignArtefacts",
+      "label": "ForeignArtefacts",
+      "level": "class",
+      "parent": "kneemri.experiments.foreign_run",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.foreign_run.ForeignRun",
       "label": "ForeignRun",
       "level": "class",
@@ -55424,6 +55456,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignArtefacts.found",
+      "label": "found",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run.ForeignArtefacts",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignRun.artefacts",
+      "label": "artefacts",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run.ForeignRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.foreign_run.ForeignRun.csv_instead",
       "label": "csv_instead",
       "level": "method",
@@ -55434,6 +55482,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.foreign_run.ForeignRun.ran",
       "label": "ran",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run.ForeignRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignRun.tagged",
+      "label": "tagged",
       "level": "method",
       "parent": "kneemri.experiments.foreign_run.ForeignRun",
       "role": null
