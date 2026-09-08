@@ -16004,6 +16004,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.dropped",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.dropped",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_curve.MemberCurve.dropped",
+      "target": "kneemri.evaluation.scores.LabelScores.name",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.member_curve.MemberCurve.forward",
       "target": "kneemri.evaluation.pool.Pool.combined",
       "weight": 1
@@ -16417,6 +16435,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.member_distance.MemberDistance",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.member_distance.MemberDistance.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.member_distance.MemberDistance.against",
       "target": "kneemri.inference.vote.RankAverage.agreement",
@@ -16432,18 +16462,6 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_distance.MemberDistance.report",
       "target": "kneemri.evaluation.member_distance.MemberDistance.spread",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.member_distance.MemberDistance.report",
-      "target": "kneemri.evaluation.scores.LabelScores",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.member_distance.MemberDistance.report",
-      "target": "kneemri.evaluation.scores.LabelScores.mean",
       "weight": 1
     },
     {
@@ -19006,6 +19024,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.scores.LabelScores.per_label",
       "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.scores.LabelScores.per_label",
+      "target": "kneemri.evaluation.scores.LabelScores.cut_for",
       "weight": 1
     },
     {
@@ -29911,6 +29935,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.kaggle.seat_value.SeatValue",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.kaggle.seat_value.SeatValue",
       "target": "kneemri.kaggle.champion_check.Champion",
@@ -29932,6 +29962,12 @@
       "kind": "construct",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.evaluation.member_curve.MemberCurve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.evaluation.member_curve.MemberCurve.dropped",
       "weight": 1
     },
     {
@@ -29983,12 +30019,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.kaggle.seat_value.SeatValue.report",
-      "target": "kneemri.evaluation.scores.LabelScores",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.kaggle.seat_value.SeatValue.named",
@@ -30003,6 +30033,12 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
+      "target": "kneemri.kaggle.seat_value.SeatValue.ruler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.kaggle.seat_value.SeatValue.scoreable",
       "weight": 1
     },
@@ -30010,6 +30046,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.SeatValue.report",
       "target": "kneemri.kaggle.seat_value.SeatValue.unpriceable",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seat_value.SeatValue.ruler",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -49436,6 +49478,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_curve.MemberCurve.dropped",
+      "label": "dropped",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_curve.MemberCurve",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_curve.MemberCurve.forward",
       "label": "forward",
       "level": "method",
@@ -51588,6 +51638,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.scores.LabelScores.cut_for",
+      "label": "cut_for",
+      "level": "method",
+      "parent": "kneemri.evaluation.scores.LabelScores",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.scores.LabelScores.mean",
       "label": "mean",
       "level": "method",
@@ -51606,6 +51664,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.scores.LabelScores.mean_of",
       "label": "mean_of",
+      "level": "method",
+      "parent": "kneemri.evaluation.scores.LabelScores",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.scores.LabelScores.name",
+      "label": "name",
       "level": "method",
       "parent": "kneemri.evaluation.scores.LabelScores",
       "role": null
@@ -59774,6 +59840,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.seat_value.SeatValue.roster",
       "label": "roster",
+      "level": "method",
+      "parent": "kneemri.kaggle.seat_value.SeatValue",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seat_value.SeatValue.ruler",
+      "label": "ruler",
       "level": "method",
       "parent": "kneemri.kaggle.seat_value.SeatValue",
       "role": null
