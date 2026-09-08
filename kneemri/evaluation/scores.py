@@ -10,6 +10,8 @@ is deliberately no calibration, no threshold, and no probability transform anywh
 is invariant under any strictly increasing map, so such a step could only add a bug.
 """
 
+from collections.abc import Mapping
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -23,7 +25,7 @@ MIDPOINT = 0.5
 class LabelScores:
     """Per-label ROC AUC and its mean, computed by rank rather than by any library."""
 
-    def __init__(self, cut: float = MIDPOINT) -> None:
+    def __init__(self, cut: float = MIDPOINT, column_cuts: Mapping[str, float] | None = None) -> None:
         """`cut` is where a graded target becomes a positive — the midpoint unless a caller argues otherwise.
 
         A PARAMETER because the reader's confidence levels are not evenly trustworthy and the project has
@@ -35,8 +37,30 @@ class LabelScores:
         It is not a default anybody may change. Every number in the ledger was read at the midpoint, and a
         cut that moved globally would silently reprice the whole record; the argument is passed by the one
         reading that wants it, which is why it lives here and not in a config.
+
+        `column_cuts` overrides `cut` for named findings, because the project's second ruler is NOT a
+        scalar: `ledger75` reads ten columns at 0.75 and leaves Medial Meniscus and Baker's at the
+        midpoint, whose 0.68 rung carries real positives (`ledger75.py:44-49`). Until 2026-09-08 that
+        instrument existed only inside `LedgerSeventyFive`, which takes a `HoldoutReading` rather than
+        arrays, so no scorer-taking caller — `seat_value`, `member_curve`, `member_distance` — could be
+        asked for it at all. That is the mechanism behind the whole cut seam: not that 0.5 was chosen,
+        but that it was the only thing reachable (knee-f9aao).
         """
         self.cut = cut
+        self.column_cuts: Mapping[str, float] = column_cuts or {}
+
+    def cut_for(self, target: str) -> float:
+        """This finding's cut — its own override if it has one, else the instrument's."""
+        return self.column_cuts.get(target, self.cut)
+
+    def name(self) -> str:
+        """What this instrument is called, for printing BESIDE a number it produced.
+
+        A macro is not comparable across cuts — the recut moves the whole `honest12` roster by +0.026,
+        about three times the board gap — so a number printed without this is a number waiting to be
+        substituted into a term fitted under the other ruler. That happened twice on 2026-09-08.
+        """
+        return "ledger75" if self.column_cuts else f"cut{self.cut:g}"
 
     @staticmethod
     def area_under_curve(predictions: NDArray[np.float64], truth: NDArray[np.int64]) -> float:
@@ -87,7 +111,7 @@ class LabelScores:
         return {
             target: self.area_under_curve(
                 predictions[scored[:, column], column].astype(np.float64),
-                (targets[scored[:, column], column] > self.cut).astype(np.int64),
+                (targets[scored[:, column], column] > self.cut_for(target)).astype(np.int64),
             )
             for column, target in enumerate(TARGETS)
         }

@@ -79,9 +79,10 @@ so it says so rather than inventing one.
 class MemberDistance:
     """Rank-space distance between members: label-free to compute, read beside the solo score."""
 
-    def __init__(self, roster: Pool, candidates: Pool) -> None:
+    def __init__(self, roster: Pool, candidates: Pool, scores: LabelScores | None = None) -> None:
         self.roster = roster
         self.candidates = candidates
+        self.scores = scores or LabelScores()
 
     def against(self, member: Float[np.ndarray, "studies targets"], skip: int | None = None) -> list[float]:
         """One member's agreement with each seated member, optionally skipping one seat.
@@ -121,18 +122,22 @@ class MemberDistance:
         column when their solo scores are comparable; a distant candidate half a point below the seat bar
         is not a find.
         """
-        scores = LabelScores()
         rows = [
-            (max(agreements), float(np.mean(agreements)), scores.mean(candidate, self.candidates.truth), name)
+            (max(agreements), float(np.mean(agreements)), self.scores.mean(candidate, self.candidates.truth), name)
             for name, candidate, agreements in (
                 (name, candidate, self.against(candidate))
                 for name, candidate in zip(self.candidates.names, self.candidates.predictions, strict=True)
             )
         ]
+        qualifier = f"@roster{len(self.roster.predictions)}/{self.scores.name()}"
         lines = [f"roster of {len(self.roster.predictions)}, its own nearest-neighbour spread:", *self.spread()]
-        lines.append("candidates, most distant first (nearest = twin detector; compare within a solo band):")
+        lines.append(
+            f"candidates, most distant first (nearest = twin detector; compare within a solo band). "
+            f"EVERY number below is {qualifier}: `nearest` is a max over THIS roster, not over the "
+            f"member pool that D35/D157 are fitted on, and `solo` is a macro at THIS cut:"
+        )
         lines.extend(
-            f"  {name}: nearest {nearest:.4f}  mean {mean:.4f}  solo {solo:.4f}"
+            f"  {name}: nearest {nearest:.4f}{qualifier}  mean {mean:.4f}  solo {solo:.4f}@{self.scores.name()}"
             for nearest, mean, solo, name in sorted(rows)
         )
         return lines

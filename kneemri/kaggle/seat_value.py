@@ -68,12 +68,13 @@ import logging
 from pathlib import Path
 
 from core import cli
+from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, RECUT
 from kneemri.evaluation.member_axes import MemberAxes
 from kneemri.evaluation.member_curve import COMBINE_SEED, MemberCurve
 from kneemri.evaluation.member_distance import MemberDistance
 from kneemri.evaluation.member_divergence import MemberDivergence
 from kneemri.evaluation.record_mix import MixReading, RecordMix
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.kaggle.champion_check import BOARD, Champion
 from kneemri.kaggle.priceable_entries import PriceableEntries
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -172,7 +173,19 @@ class SeatValue:
             PriceableEntries(self.processed, self.board).suggestion(PRICEABLE),
         ]
 
-    def report(self, candidates: list[Path], combine_seed: int = COMBINE_SEED) -> list[str]:
+    @staticmethod
+    def ruler(name: str) -> LabelScores:
+        """The scoring instrument by name — the midpoint every ledger number was read at, or `ledger75`.
+
+        Both are reachable here because C172's question needs the same seat under both: a seat is a
+        DIFFERENCE of two macros and a cut is close to a level shift, so seats may be near cut-invariant
+        even though levels move +0.026. That was unanswerable until this argument existed.
+        """
+        if name == "ledger75":
+            return LabelScores(RECUT, dict.fromkeys(MIDPOINT_COLUMNS, MIDPOINT))
+        return LabelScores(MIDPOINT)
+
+    def report(self, candidates: list[Path], combine_seed: int = COMBINE_SEED, ruler: str = "midpoint") -> list[str]:
         """Each candidate's marginal contribution to the champion, best first — and its DISTANCE beside it.
 
         The two are printed together because the 2026-08-21 split is a statement about the pair, not
@@ -186,7 +199,8 @@ class SeatValue:
             return self.unpriceable(roster, unscoreable)
         named = [self.named(candidate) for candidate in candidates]
         mixed = RecordMix(list(dict.fromkeys([*roster, *named])), foreign=self.foreign).per_member()
-        curve = MemberCurve(LabelScores(), combine_seed)
+        scores = self.ruler(ruler)
+        curve = MemberCurve(scores, combine_seed)
         held, rest = mixed.split(roster)
         denominator = (
             f"priced against {len(roster)} of {len(roster) + len(unscoreable)} champion members; "
@@ -195,9 +209,9 @@ class SeatValue:
             else f"priced against all {len(roster)} champion members"
         )
         return [
-            denominator,
+            f"{denominator}; every score below is a macro read on the {scores.name()} ruler",
             *MixReading(mixed, roster).lines(curve, None, paired=False, labels=False, routing=False),
-            *MemberDistance(held, rest).report(),
+            *MemberDistance(held, rest, scores).report(),
             *MemberDivergence(held, rest).report(),
             *MemberAxes(held, rest).report(),
         ]
@@ -208,6 +222,12 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--candidates", type=Path, nargs="+", required=True, help="checkpoints to price")
     command.parser.add_argument("--combine-seed", type=int, default=COMBINE_SEED)
+    command.parser.add_argument(
+        "--ruler",
+        default="midpoint",
+        choices=("midpoint", "ledger75"),
+        help="scoring cut; every ledger number and every seat this tool has ever printed is `midpoint`",
+    )
     command.parser.add_argument(
         "--against",
         default=None,
@@ -223,7 +243,7 @@ def main() -> None:
     champion = Champion.from_board(arguments.against) if arguments.against else Champion.recorded()
     logger.info("%s scored %.3f on the board with %d members", champion.entry, champion.board, len(champion.members))
     seats = SeatValue(champion, command.rooted(arguments).models(), foreign=arguments.foreign)
-    command.report(seats.report(arguments.candidates, arguments.combine_seed))
+    command.report(seats.report(arguments.candidates, arguments.combine_seed, arguments.ruler))
 
 
 if __name__ == "__main__":

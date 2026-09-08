@@ -174,3 +174,35 @@ def test_paired_mean_interval():
     assert low <= observed <= high, "the band must bracket the delta it bounds"
     assert (tight[1] - tight[0]) < (high - low), "a near-identical arm must read a narrower band"
     assert scores.paired_mean_interval(first, distant, truth, resamples=120) == (low, high), "seeded"
+
+
+def test_cut_for():
+    """A per-column override beats the instrument's scalar, and every other column keeps the scalar."""
+    scores = LabelScores(0.75, {TARGETS[0]: 0.5})
+    assert scores.cut_for(TARGETS[0]) == 0.5, "the named finding takes its own cut"
+    assert scores.cut_for(TARGETS[1]) == 0.75, "an unnamed finding takes the instrument's"
+    assert LabelScores().cut_for(TARGETS[0]) == 0.5, "no overrides means the scalar everywhere"
+
+
+def test_cut_for_reaches_the_metric():
+    """The override has to reach the binarisation, or naming a cut is decoration.
+
+    One column's truth sits between the two cuts, so it is a positive at the midpoint and a negative at
+    0.75 — and the predictions rank it so that flipping it flips that label's AUC from 1 to 0.
+    """
+    predictions = np.tile(np.array([[0.9], [0.1]]), (1, len(TARGETS)))
+    targets = np.tile(np.array([[0.68], [0.0]], dtype=np.float32), (1, len(TARGETS)))
+
+    midpoint = LabelScores().per_label(predictions, targets)
+    recut = LabelScores(0.75, {TARGETS[0]: 0.5}).per_label(predictions, targets)
+
+    assert midpoint[TARGETS[1]] == 1.0, "at the midpoint the 0.68 row is a positive, ranked first"
+    assert np.isnan(recut[TARGETS[1]]), "at 0.75 it is a negative, leaving that label single-class"
+    assert recut[TARGETS[0]] == 1.0, "the overridden column still reads at the midpoint"
+
+
+def test_name():
+    """The instrument prints what it is, because a macro is not comparable across cuts."""
+    assert LabelScores().name() == "cut0.5"
+    assert LabelScores(0.75).name() == "cut0.75"
+    assert LabelScores(0.75, {TARGETS[0]: 0.5}).name() == "ledger75", "a mixed cut is the project's ruler"

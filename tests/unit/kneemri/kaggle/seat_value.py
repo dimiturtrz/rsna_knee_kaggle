@@ -5,6 +5,9 @@ from pathlib import Path
 
 import numpy as np
 
+from core.findings import TARGETS
+from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, RECUT
+from kneemri.evaluation.scores import MIDPOINT
 from kneemri.kaggle.champion_check import Champion
 from kneemri.kaggle.seat_value import SeatValue
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -62,7 +65,8 @@ def test_report(tmp_path: Path):
 
     lines = SeatValue(_champion(), tmp_path).report([tmp_path / "candidate.pt"])
 
-    assert lines[0] == "priced against all 2 champion members", "the denominator leads, even when it is whole"
+    assert lines[0].startswith("priced against all 2 champion members"), "the denominator leads, even whole"
+    assert lines[0].endswith("macro read on the cut0.5 ruler"), "and it names the ruler it was read on"
     assert lines[1].startswith("roster of 2:"), "the base every delta is against is stated"
     assert "+candidate.pt" in lines[2], "the candidate is named with its marginal contribution"
     assert "shipped" not in lines[2], "a roster member is never also priced as a candidate"
@@ -89,7 +93,7 @@ def test_report_states_the_subset_it_priced_against(tmp_path: Path):
 
     lines = SeatValue(champion, tmp_path).report([tmp_path / "candidate.pt"])
 
-    assert lines[0] == "priced against 2 of 3 champion members; held unscoreable (fold -1)"
+    assert lines[0].startswith("priced against 2 of 3 champion members; held unscoreable (fold -1)")
     assert lines[1].startswith("roster of 2:"), "the proxy roster is the scoreable subset, and it is labelled"
 
 
@@ -145,3 +149,20 @@ def test_report_prices_a_candidate_given_by_name(tmp_path: Path):
     lines = SeatValue(_champion(), tmp_path).report([Path("candidate.pt")])
 
     assert any("+candidate.pt" in line for line in lines), "a candidate named without a directory is priced"
+
+
+def test_ruler():
+    """Both rulers resolve by name, and `ledger75` is the MIXED cut rather than a scalar 0.75.
+
+    The distinction is the whole reason this exists: `ledger75` recuts ten columns and leaves Medial
+    Meniscus and Baker's at the midpoint, so a scalar `LabelScores(0.75)` is a different instrument
+    wearing the same number.
+    """
+    midpoint = SeatValue.ruler("midpoint")
+    recut = SeatValue.ruler("ledger75")
+
+    assert midpoint.name() == "cut0.5"
+    assert recut.name() == "ledger75"
+    assert set(recut.column_cuts) == set(MIDPOINT_COLUMNS), "exactly the columns ledger75 leaves alone"
+    assert all(cut == MIDPOINT for cut in recut.column_cuts.values())
+    assert recut.cut_for(next(target for target in TARGETS if target not in MIDPOINT_COLUMNS)) == RECUT
