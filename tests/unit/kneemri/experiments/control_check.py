@@ -3,7 +3,12 @@
 import json
 from pathlib import Path
 
+import numpy as np
+
+from core.findings import TARGETS
+from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.experiments.control_check import Comparability, Comparison, ControlCheck
+from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.run_metrics import RunMetrics
 
 BAND_DENSE_PEAK = 0.8578
@@ -11,7 +16,11 @@ BAND_DENSE_PEAK = 0.8578
 ADAPT_NULL_PEAK = 0.8240
 GOLD_OFFSET = 0.0383
 """How far `rank966_hold`'s declared 0.8956 sits above `band_dense_hold_s2026`'s own curve. A GOLD-ruler
-score quoted as a holdout-ruler control — the sign is what separates it from a transcription slip."""
+score quoted as a holdout-ruler control — the sign is what separates it from a transcription slip. It is
+NOT a defect: the arm's own line says `gold`, and gold is the one ruler this side cannot recompute."""
+GOLD_DECLARATION = " gold / ~0.857 proxy (same recipe, no flags)."
+"""`rank966_hold.sh`'s declaration tail, verbatim. The check reads one keyword out of it rather than
+parsing the ruler's spelling, because `L75mid`, `own holdout`, `ledger75` and `896, L75mid` all appear."""
 
 
 def write_run(directory: Path, name: str, *, peak: float, epochs: int, recipe: dict[str, str]) -> RunMetrics:
@@ -73,14 +82,48 @@ def test_resolve(tmp_path: Path) -> None:
     assert check.resolve("never_ran") is None
 
 
+def write_holdout(directory: Path, name: str, *, studies: int) -> None:
+    """A holdout record beside a run, graded so the two cuts actually disagree.
+
+    Truth at 0.68 is the reader's "possible" rung — the one the midpoint counts as a positive and the
+    0.75 recut does not. A record of 0s and 1s would score identically under both rulers and prove
+    nothing about which one the check read.
+    """
+    rows = np.arange(studies)
+    truth = np.where(rows % 3 == 0, 1.0, np.where(rows % 3 == 1, 0.68, 0.0)).astype(np.float32)
+    predictions = np.linspace(0.1, 0.9, studies)
+    HoldoutRecord(directory / f"{name}.metrics.jsonl").write(
+        [f"study{row}" for row in rows],
+        np.repeat(predictions[:, None], len(TARGETS), axis=1),
+        np.repeat(truth[:, None], len(TARGETS), axis=1),
+        epoch=8,
+    )
+
+
 def test_sourced(tmp_path: Path) -> None:
-    """A quoted score is measured only if it is on some epoch of the control's own curve."""
+    """A quoted score is measured if it is on the control's own curve UNDER ANY RULER this side has."""
     control = write_run(tmp_path, "band_dense", peak=BAND_DENSE_PEAK, epochs=12, recipe={})
     comparability = Comparability()
     assert comparability.sourced(control, BAND_DENSE_PEAK), "the peak is on the curve"
     assert comparability.sourced(control, round(BAND_DENSE_PEAK - 0.03, 4)), "so is a matched earlier epoch"
-    assert not comparability.sourced(control, BAND_DENSE_PEAK + GOLD_OFFSET), "a gold-ruler score is on no epoch"
     assert not comparability.sourced(control, 0.8232), "the number `adapt_null` was priced against"
+    assert not comparability.sourced(control, BAND_DENSE_PEAK + GOLD_OFFSET), "and no ruler here reaches gold"
+
+    # THE RECUT IS A RULER, NOT A DEFECT. `.metrics.jsonl`'s `auc` is the MIDPOINT macro, and an arm may
+    # legitimately declare its control at LEDGER75 — three of them do, and the first version of this
+    # check reported all three as fabricated because it knew only the one column.
+    write_holdout(tmp_path, "band_dense", studies=60)
+    recut = round(LedgerSeventyFive().macro(LedgerSeventyFive().reading(control.checkpoint())), 4)
+    assert recut not in {round(float(row["auc"]), 4) for row in control.rows()}, "the cuts disagree here"
+    assert comparability.sourced(control, recut), "a control declared at ledger75 is sourced, not invented"
+
+
+def test_gold(tmp_path: Path) -> None:
+    """The one ruler this side cannot compute is read off the declaration, by keyword and not by parse."""
+    declared = Comparison("rank966_hold", "band_dense_hold", 0.8956, tmp_path / "a.sh", GOLD_DECLARATION)
+    assert declared.gold(), "the arm names its ruler on its own line"
+    assert not Comparison("adapt_null", "band_dense", BAND_DENSE_PEAK, tmp_path / "a.sh").gold()
+    assert not Comparison("a", "b", 0.85, tmp_path / "a.sh", " (own holdout, L75mid, n=909)").gold()
 
 
 def test_budgeted(tmp_path: Path) -> None:
@@ -111,11 +154,20 @@ def test_findings(tmp_path: Path) -> None:
     assert found == ("BUDGET", "BUILD(1)"), "sourced, but neither the budget nor the build matched"
     assert measured == BAND_DENSE_PEAK
 
-    gold = Comparison("adapt_null", "band_dense", BAND_DENSE_PEAK + GOLD_OFFSET, tmp_path / "a.sh")
-    assert check.findings(gold)[0][0] == "UNSOURCED", "the ruler collision leads, because it moves the delta"
+    off_curve = Comparison("adapt_null", "band_dense", BAND_DENSE_PEAK + GOLD_OFFSET, tmp_path / "a.sh")
+    assert check.findings(off_curve)[0][0] == "UNSOURCED", "a score on no ruler leads, because it moves the delta"
+
+    gold = Comparison("adapt_null", "band_dense", BAND_DENSE_PEAK + GOLD_OFFSET, tmp_path / "a.sh", GOLD_DECLARATION)
+    assert check.findings(gold)[0][0] == "UNRULED", "the arm declared a ruler this side cannot recompute"
 
     missing = Comparison("adapt_null", "never_ran", BAND_DENSE_PEAK, tmp_path / "a.sh")
-    assert check.findings(missing) == (("UNRESOLVED",), None), "a fact about this disk, not about the arm"
+    assert check.findings(missing) == (("UNRESOLVED",), None), "a control nothing on disk produced"
+
+    # THE OPPOSITE READING, and merging the two said neither: an arm queued behind another arm has no
+    # metrics file either, and reporting that as an unfindable control put 37 waiting arms in the same
+    # bucket as five write-ups citing a run that does not exist.
+    queued = Comparison("not_yet", "band_dense", BAND_DENSE_PEAK, tmp_path / "a.sh")
+    assert check.findings(queued) == (("UNRUN",), None), "an arm that has not spent the card is not a defect"
 
 
 def test_audit(tmp_path: Path) -> None:

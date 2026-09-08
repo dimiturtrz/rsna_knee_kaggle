@@ -41,11 +41,12 @@ from pathlib import Path
 
 from core import cli
 from core.denominator import Denominator
+from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
-DECLARATION = re.compile(r"^#\s+control\s+(?P<name>[A-Za-z0-9_.-]+)\s*=\s*(?P<score>[01]\.\d+)")
+DECLARATION = re.compile(r"^#\s+control\s+(?P<name>[A-Za-z0-9_.-]+)\s*=\s*(?P<score>[01]\.\d+)(?P<rest>.*)")
 """The convention an arm states its comparison in, at the foot of its header block.
 
 Anchored at the line start and requiring the `#` so a control named inside prose is not harvested: an
@@ -71,6 +72,18 @@ EPOCHS = "epochs"
 
 AUC = "auc"
 
+GOLD = "gold"
+"""The one ruler word this check cannot compute, and the reason it reads the rest of the declaration.
+
+A gold macro is scored against the radiologist's own annotations, which are not in a holdout record, so
+no arithmetic here can reproduce one. `rank966_hold` declares `band_dense_hold_s2026 = 0.8956 gold /
+~0.857 proxy` — the arm is right, the number is real, and it is unreachable from this side. Reporting
+that as a score with no producer is the same error this check exists to catch, so it gets its own
+verdict and does not block. This is ONE keyword rather than a parse of the ruler's spelling: `L75mid`,
+`own holdout`, `ledger75` and `896, L75mid` all appear on declaration lines, and a check that had to
+recognise them would fail on the next one somebody invents.
+"""
+
 
 @dataclass(frozen=True)
 class Comparison:
@@ -80,6 +93,12 @@ class Comparison:
     control: str
     quoted: float
     source: Path
+    rest: str = ""
+    """Whatever the declaration line says after the number — where the arm names its ruler, if it does."""
+
+    def gold(self) -> bool:
+        """Whether the arm declared a GOLD-ruler control, which nothing on this side can reproduce."""
+        return GOLD in self.rest.lower()
 
     def line(self, findings: tuple[str, ...], measured: float | None) -> str:
         """One flagged comparison, with the control's OWN best beside the score the arm quoted for it.
@@ -103,16 +122,48 @@ class Comparability:
     budget: str = "BUDGET"
     build: str = "BUILD"
     unresolved: str = "UNRESOLVED"
+    unruled: str = "UNRULED"
+    unrun: str = "UNRUN"
+    """The ARM has no metrics file, so there is no comparison to judge yet.
+
+    Split out of UNRESOLVED because the two are opposite readings and the merged bucket said neither.
+    UNRESOLVED is a claim about a CONTROL that cannot be found and is a defect in the write-up; UNRUN is
+    an arm that has not spent the card yet — `mae_unitfix` is queued behind a pretrain as this is
+    written — and is not a finding at all. Merged, the check reported 42 UNRESOLVED against a
+    researcher's independently-swept 4, and the whole difference was arms waiting their turn."""
 
     def sourced(self, control: RunMetrics, quoted: float) -> bool:
-        """Whether the quoted score is any epoch of the control's own curve.
+        """Whether the quoted score is the control's, under ANY ruler this side can compute.
 
         Any epoch rather than the best one, because a write-up legitimately quotes a matched epoch — the
         defect this catches is a number that is on NO epoch, which is the one thing a measured score
         cannot be.
+
+        AND UNDER BOTH CUTS, because the first version of this check compared a declared number against
+        `.metrics.jsonl`'s `auc` alone — which is the MIDPOINT macro — and then reported three arms as
+        quoting a fabricated control. All three were right: `recal_through`'s declared 0.8867 is
+        `through_dense_s2026`'s LEDGER75 macro to four decimals, and its own line says so
+        (`= 0.8867 (own holdout, L75mid, n=909)`). The recut is worth about +0.031 and every one of the
+        three sat there. That is `statistic / population / cut` (knee-f9aao) — the rule this check
+        enforces on arms — broken by the check itself, which is why the fix is to score under every
+        ruler rather than to parse the one the arm named.
         """
-        scored = {round(float(row[AUC]), QUOTED_PLACES) for row in control.rows() if row.get(AUC) is not None}
-        return round(quoted, QUOTED_PLACES) in scored
+        target = round(quoted, QUOTED_PLACES)
+        midpoint = {round(float(row[AUC]), QUOTED_PLACES) for row in control.rows() if row.get(AUC) is not None}
+        return target in midpoint or target == self._recut(control)
+
+    def _recut(self, control: RunMetrics) -> float | None:
+        """The control's LEDGER75 macro off its kept predictions, or None when it kept none.
+
+        A dark member (`--fold -1`) holds nothing back and can never have one, and a member whose source
+        cache was deleted cannot be re-scored — both are silence here rather than an error, because the
+        question asked is "is the declared number reachable", and an unreachable ruler answers no.
+        """
+        try:
+            reading = LedgerSeventyFive().reading(control.checkpoint())
+        except (FileNotFoundError, OSError, ValueError):
+            return None
+        return round(LedgerSeventyFive().macro(reading), QUOTED_PLACES)
 
     def budgeted(self, arm: RunMetrics, control: RunMetrics) -> bool:
         """Whether both runs asked for the same number of epochs.
@@ -156,7 +207,7 @@ class ControlCheck:
         trained = self._first(TRAINED, lines)
         if control is None or trained is None:
             return None
-        return Comparison(trained["name"], control["name"], float(control["score"]), arm)
+        return Comparison(trained["name"], control["name"], float(control["score"]), arm, control["rest"])
 
     def resolve(self, name: str) -> RunMetrics | None:
         """The metrics file for a run named either with or without the seed suffix."""
@@ -170,10 +221,13 @@ class ControlCheck:
         """Every reason this arm's delta says something other than its own change, and the control's best."""
         arm = self.resolve(comparison.arm)
         control = self.resolve(comparison.control)
-        if arm is None or control is None:
+        if arm is None:
+            return (self.comparability.unrun,), None
+        if control is None:
             return (self.comparability.unresolved,), None
         best = control.best()
-        found = [] if self.comparability.sourced(control, comparison.quoted) else [self.comparability.unsourced]
+        sourced = self.comparability.sourced(control, comparison.quoted)
+        found: list[str] = [] if sourced else [self._unmatched(comparison)]
         found += [] if self.comparability.budgeted(arm, control) else [self.comparability.budget]
         drifted = self.comparability.built(arm, control)
         found += [f"{self.comparability.build}({len(drifted)})"] if drifted else []
@@ -184,6 +238,14 @@ class ControlCheck:
         declared = [found for arm in sorted(arms.glob("*.sh")) if (found := self.declared(arm)) is not None]
         seen = [(comparison, *self.findings(comparison)) for comparison in declared]
         return sorted((row for row in seen if row[1]), key=lambda row: (-len(row[1]), row[0].arm))
+
+    def _unmatched(self, comparison: Comparison) -> str:
+        """What to call a declared score that matches no ruler this side can compute.
+
+        A gold-ruler declaration is UNRULED and does not block: the number is real and unreachable here,
+        and calling it unsourced would be this check inventing the defect it was written to find.
+        """
+        return self.comparability.unruled if comparison.gold() else self.comparability.unsourced
 
     def _first(self, pattern: re.Pattern[str], lines: list[str]) -> re.Match[str] | None:
         return next((found for line in lines if (found := pattern.match(line)) is not None), None)
@@ -203,11 +265,14 @@ def main() -> None:
         logger.info("%s", comparison.line(found, measured))
     unsourced = [row for row in seen if Comparability().unsourced in row[1]]
     logger.info(
-        "%d declared comparisons flagged: %d unsourced, %d budget, %d build",
+        "%d declared comparisons flagged: %d unsourced, %d unruled, %d budget, %d build, %d unresolved, %d unrun",
         len(seen),
         len(unsourced),
+        sum(Comparability().unruled in found for _, found, _measured in seen),
         sum(Comparability().budget in found for _, found, _measured in seen),
         sum(any(item.startswith(Comparability().build) for item in found) for _, found, _measured in seen),
+        sum(Comparability().unresolved in found for _, found, _measured in seen),
+        sum(Comparability().unrun in found for _, found, _measured in seen),
     )
     if unsourced:
         # Only UNSOURCED blocks. A budget or build mismatch is a real comparison that needs a caveat;
