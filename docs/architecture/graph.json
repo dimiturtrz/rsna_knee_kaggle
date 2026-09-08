@@ -5397,6 +5397,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.entry_offline",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.entry_offline",
       "target": "kneemri.evaluation.record_mix",
       "weight": 1
     },
@@ -28675,6 +28681,48 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "target": "kneemri.kaggle.board_check.BoardCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "target": "kneemri.kaggle.board_check.BoardCensus.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "target": "kneemri.kaggle.entry_offline.EntryOffline.declined",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.kaggle.entry_offline.EntryOffline.report",
       "target": "kneemri.kaggle.entry_offline.EntryOffline.filled",
@@ -28706,6 +28754,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.rows",
+      "target": "kneemri.kaggle.entry_offline.EntryOffline.stored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.entry_offline.EntryOffline.scopes",
       "target": "kneemri.kaggle.entry_offline.EntryOffline.declined",
       "weight": 1
@@ -28729,18 +28783,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.kaggle.entry_offline.EntryOffline.scored",
-      "target": "kneemri.evaluation.scores.LabelScores",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.entry_offline.EntryOffline.scored",
-      "target": "kneemri.evaluation.scores.LabelScores.mean",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.kaggle.entry_offline.EntryOffline.written",
       "target": "kneemri.kaggle.entry_offline.EntryOffline.filled",
@@ -28756,6 +28798,12 @@
       "kind": "construct",
       "source": "kneemri.kaggle.entry_offline.main",
       "target": "kneemri.kaggle.entry_offline.EntryOffline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.entry_offline.main",
+      "target": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
       "weight": 1
     },
     {
@@ -59846,6 +59894,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.entry_offline.EntryOffline.mismatched",
+      "label": "mismatched",
+      "level": "method",
+      "parent": "kneemri.kaggle.entry_offline.EntryOffline",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.entry_offline.EntryOffline.report",
       "label": "report",
       "level": "method",
@@ -59872,6 +59928,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.entry_offline.EntryOffline.scored",
       "label": "scored",
+      "level": "method",
+      "parent": "kneemri.kaggle.entry_offline.EntryOffline",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.entry_offline.EntryOffline.stored",
+      "label": "stored",
       "level": "method",
       "parent": "kneemri.kaggle.entry_offline.EntryOffline",
       "role": null
