@@ -45,7 +45,10 @@
 # traverses the whole trunk to reach the early adapters, so expect a modest step-time saving rather than
 # a large one. Two minutes of smoke against ~2.5 h of arm.
 #
-# control  v3base_dense = 0.8512 (best epoch 8), byte-identical recipe on the same encoder, fully adapted.
+# control  v3base_dense = 0.8455 (best epoch 8), byte-identical recipe on the same encoder, fully adapted.
+#          CORRECTED 2026-09-08 by control_check: this line read 0.8512, which is `base_dense`'s number —
+#          the DINOv2 base, a different encoder family. The arm would have been judged against a control
+#          0.0057 too high, close enough to the 0.0062 floor to flip an UNDECIDED into a decline.
 # seat     priced against comp/champion.json's greedy7_v1, seven members, roster 0.8712.
 # cost     v3base_dense ran ~750-850 s/epoch; LoRA trims the backward modestly, so roughly 2.2-2.6 h.
 #

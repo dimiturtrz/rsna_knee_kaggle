@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from kneemri.kaggle.entry_offline import SCOPE_KEY, EntryOffline
+from kneemri.kaggle.entry_offline import FRAME_GAP, SCOPE_KEY, EntryOffline
 from kneemri.runs.holdout_record import HoldoutRecord
 
 LABELS = 12
@@ -53,6 +53,26 @@ def _entries(tmp_path: Path) -> EntryOffline:
     return EntryOffline(tmp_path, _board(tmp_path))
 
 
+def test_stored(tmp_path: Path):
+    """The recorded line by id, because a column this file writes is one `BoardRow` cannot see."""
+    stored = _entries(tmp_path).stored()
+
+    assert stored[CLEAN]["offline"] is None, "the raw cell, not a parsed row's view of it"
+    assert "offline75" not in stored[CLEAN], "absent is what makes a row eligible for a ruler's column"
+
+
+def test_mismatched(tmp_path: Path):
+    """A recorded cell a fresh midpoint read cannot reproduce is a different statistic, not a tolerance."""
+    entries = _entries(tmp_path)
+
+    gaps = entries.mismatched()
+
+    assert set(gaps) == {"priced"}, "only rows that already carry a number, and only when they disagree"
+    recorded, fresh = gaps["priced"]
+    assert recorded == 0.86, "the cell as written"
+    assert abs(fresh - recorded) > FRAME_GAP, "which is the whole claim"
+
+
 def test_rows(tmp_path: Path):
     """An entry already carrying a number, and the memberless note, are not this file's business."""
     rows = _entries(tmp_path).rows()
@@ -97,7 +117,7 @@ def test_report(tmp_path: Path):
     """The survey closes with the counts it was asked for."""
     lines = _entries(tmp_path).report()
 
-    assert lines[-1] == "1 fillable, 3 declined, of 4 entries with a null"
+    assert lines[-1] == "1 fillable, 3 declined, of 4 entries missing offline", "the count names its own column"
 
 
 def test_written(tmp_path: Path):

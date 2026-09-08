@@ -62,7 +62,8 @@
 # bead: knee-440m
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
-# control  base224 = 0.8502 (declared 2026-09-03 from this header own prose, knee-sgzgc)
+# control  base224 = 0.8509 (best epoch on disk; was 0.8502, declared 2026-09-03 from this header's own
+#          prose per knee-sgzgc, and corrected 2026-09-08 by control_check against the run itself)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
