@@ -134,15 +134,27 @@ members were fitted on were deliberately kept, so no existing member became unre
 
 ## 8. `ourtrunk44` — the honest foreign trunk, fitted on our fold, priced
 
-The arm §3 asked for already ran. `raptor_ft_ourtrunk44` is a timm-pretrained trunk fitted on OUR studies
-and OUR fold, converged (best ep14 0.8342, ep15 0.8322 over 16 epochs).
+**IT IS NOT THE ARM §3 ASKED FOR, and this section said it was.** `experiments/arms/ourtrunk44.sh` opens
+*"Cell D of the 2x2 — HIS 44-slot corpus, HIS recipe, OUR trunk"*: `foreign_run` over his training
+script, `--labels labels_llm_soft.parquet` (HIS soft label table), his 44-slot corpus, `--ckpt timm`.
+Only the trunk and the fold are ours. It is **honest** — his script holds our fold 0 out at
+`knee-mri-training-the-twelve-finding-model.py:393-397` and the arm passes `--fold_file fold0_909.json
+--fold 0`, so this is nothing like the 98.6%-in-sample hisprog shape — but a member fitted on his labels
+prices his labels' TRANSFER, not our recipe's ceiling. **D178 §4's branch — a trunk fitted on OUR studies
+with OUR labels — remains unrun**, and it is the arm this file twice claimed had already run.
+
+`raptor_ft_ourtrunk44` converged (best ep14 0.8342, ep15 0.8322 over 16 epochs).
 
 - **`nnCorr@honest12` 0.7469**, against the roster's own boundary 0.8947. js **0.0415** against 0.0150 —
   nearly 3x the roster's internal divergence. maha 4.760 vs 4.366. The tool calls it **DISTINCT**, the
   only cell that is a seat.
-- **`solo@oof896` 0.8440**, and it is **cut-invariant**: midpoint and ledger75 give the identical 0.8440
-  because this member's stored truth is already binary, so the midpoint-vs-ledger75 hazard that moves
-  `honest12` by +0.026 does not apply to it at all.
+- **`solo@own896` 0.7857 at the midpoint, 0.8173 at ledger75.** An earlier draft of this section quoted
+  **0.8440 and called it cut-invariant, on the argument that this member's stored truth is binary. It is
+  not binary** — `np.unique` over its truth returns the five graded levels `0.08 0.28 0.68 0.82 0.94`,
+  and the roster's returns seven (those five plus a hard 0 and 1). So the recut moves it like everything
+  else, and the two numbers it moves between are 0.7857 and 0.8173 — which is, letter for letter, the
+  midpoint-vs-ledger75 pair CLAUDE.md's C-rule names as the trap. The 0.8440 belonged to another
+  statistic and should never have been written beside a `solo`.
 
 **So the standing non-claim survives, with one more point under it.** D176 said nobody has shown a
 foreign-pretrained trunk fitted on our fold reaching solo 0.89; this is the arm that asked, and it lands
@@ -150,14 +162,52 @@ foreign-pretrained trunk fitted on our fold reaching solo 0.89; this is the arm 
 pay: the surface wants solo 0.8953 at nnCorr 0.80, and this is half a point of solo short of the foreign
 family's own 0.8505 cap while being the most decorrelated member the project has produced.
 
-**THE NUMBER THAT WOULD DECIDE IT IS NOT COMPUTED, AND THAT IS THE NEXT ACTION.** Its OOF holds **896**
-studies against our frame's **909**, so `seat_value` prints divergence and no add — a marginal
-contribution over two different question sets is arithmetic, not a seat. Thirteen studies stand between
-the most decorrelated member we own and a priced add into `nine`. Aligning them is card-free.
+**THE NUMBER IS NOW COMPUTED, AND IT IS ZERO.** Priced into `honest12` — the pool whose twelve members
+are named on the board (`comp/board.jsonl:71`, board 0.937) and all twelve of which carry a holdout
+record — under `LogitAverage` at ledger75, base recomputed on the same rows:
+
+```
+BASE   k=12 @ledger75 on 896 rows   0.9032
++cand  k=13                         0.9033
+ADD ourtrunk44                     +0.0000
+```
+
+**And the 13-study gap was never an obstruction.** The 896 ids **nest inside** the 909 — `set(cand) -
+set(roster)` is **empty** — and the two truth tables are byte-identical on every shared row (max |Δ|
+exactly 0.0). So the intersection IS the candidate's own row set, the base needs no re-derivation beyond
+subsetting, and `seat_value`'s divergence refusal was protecting against a hazard that this particular
+pair does not have. **That refusal cost a day of treating a solved alignment as the project's blocker.**
+The tool is right to refuse in general — two row sets that merely overlap cannot be differenced — but it
+reports divergence without reporting NESTING, and nesting is the case where the answer is free.
+
+**Against the surface, it is a hit, not a miss.** The plane wants `add = -0.0260 + 0.0443*solo -
+0.0153*nnCorr`; at solo 0.8173 and nnCorr 0.7469 it predicts **-0.0012** against an observed **+0.0000**,
+a residual of +0.0012 — two SD of the fitted 0.0006, and the same sign and size as the residuals D178
+found across all 51 supervision rows. **A surface fitted over nnCorr 0.71-0.98 with a median of 0.9285
+predicts, to two SD, a member sitting at the extreme low end of that range.** That is the most
+load-bearing thing this file records: the plane extrapolates.
+
+**So the fourth axis closes with the other three.** Cache, supervision and every knob leave nnCorr where
+it was; this member moves nnCorr all the way to 0.7469 and STILL adds nothing, because it pays for the
+decorrelation in solo — 0.8173 against the 0.8953 the surface demands at nnCorr 0.80. Decorrelation is
+purchasable and it has never once been affordable.
+
+**Priced twice, on two pools, by two agents.** D179 priced it into `nine` (base 0.9024 @ledger75, k=9)
+at **−0.0010**; this section priced it into `honest12` (base 0.9032, k=12) at **+0.0000**. Two disjoint
+base pools, two independently written scripts, one conclusion. The 0.0010 between them is the pools, not
+a disagreement.
+
+**And the arm's OWN pre-registration fires the opposite branch to the one this file argued.** Written
+before it started: *"if it lands below 0.85: the CORPUS carries it, the trunk term is small."* It landed
+at 0.7469, twelve points under the low edge of its predicted 0.87–0.92 band. So on its own pre-registered
+reading the decorrelation here is a property of **his corpus**, not of the trunk swap — the reverse of
+§2's encoder-class reading, and pre-registered rather than fitted afterward. The same run refutes D35's
+seat gate, which predicted **~+0.0033** for a member at that nnCorr against a measured −0.0010. Of the
+two models this run tested, **the D174 plane survives and the D35 seat gate does not.**
 
 **Two population labels, stated because this file would otherwise invite the substitution it warns
 about.** `nnCorr@honest12` (max over 12 seats) is NOT comparable to D176's encoder-class median
-`nnCorr@pool251`, and `solo@oof896` is NOT comparable to a `@ledger75` solo over 909. The 0.7469 and the
+`nnCorr@pool251`, and `solo@own896` is NOT comparable to a `@ledger75` solo over 909. The 0.7469 and the
 0.7767 are close enough to look like the same quantity and they are not.
 
 **And `gold_macro@gold58` is not a solo at all.** The run log's headline `BEST GOLD macro-AUC 0.8342` is
