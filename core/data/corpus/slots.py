@@ -261,6 +261,31 @@ cares about neither's provenance, so canonical+Rijeka is an ordinary base — bu
 was ALSO its base would grow the same file on every invocation, and that is what stays refused.
 """
 
+FASTMRI_MERGED_SCHEME = "mergedf"
+"""Our corpus and fastMRI in one array — the canonical six slots, and the only licence-clean merge.
+
+WHY A THIRD MERGED NAME. `merged` is canonical+Rijeka and `merged3` adds MRNet, and both foreign corpora
+carry a no-derivatives clause: CC BY-NC-ND on Rijeka bars sharing an adaptation, the Stanford research-use
+agreement bars creating one. The NYU fastMRI agreement has no such clause and writes algorithm development
+in by name, so a member fitted here is the first merged member this project can ship. It cannot be built
+into either existing name for the reason `TRIPLE_SCHEME` already records — every `merged_*` member on disk
+was fitted on the 5,143-study cache, and growing it in place makes those runs unreproducible with every
+gate still green.
+
+IT IS A SECOND SITE, NOT A FOURTH. `merged3_corpus` measured the site axis at +0.0043 for the second site
+and -0.0024 for the third, which closes fastMRI-as-a-fourth-site before a card is spent on it. This is the
+corner that PAID: 4,407 + 974 = 5,381 studies over two sites, the same operation the positive point was
+measured on.
+
+WHAT IT COSTS, STATED BEFORE THE RUN. `MergedCache.positions` matches slots by NAME, so of
+`FASTMRI_SLOTS` only `SLOTS[1]` is carried and `COR_FLUID_NOFS` is dropped — a fastMRI row fills one of
+six slots and leaves five zero, and its mask says so. That is the same shape the Rijeka merge has, and
+that merge produced `merged_span_cf` at 0.8618, so the pattern is not disqualifying on its own
+measurement. It does mean a flat read here is ambiguous between "the corpus does not transfer" and "one
+filled slot is too little input", which belongs in the arm's pre-registration rather than in its
+post-mortem.
+"""
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
@@ -270,11 +295,19 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     FASTMRI_SCHEME: FASTMRI_SLOTS,
     MERGED_SCHEME: SLOTS,
     TRIPLE_SCHEME: SLOTS,
+    FASTMRI_MERGED_SCHEME: SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
 
-FOREIGN_SCHEMES = (RIJEKA_SCHEME, MRNET_SCHEME, FASTMRI_SCHEME, MERGED_SCHEME, TRIPLE_SCHEME)
+FOREIGN_SCHEMES = (
+    RIJEKA_SCHEME,
+    MRNET_SCHEME,
+    FASTMRI_SCHEME,
+    MERGED_SCHEME,
+    TRIPLE_SCHEME,
+    FASTMRI_MERGED_SCHEME,
+)
 """Schemes that name a corpus THIS repo's own decoder cannot produce, each owned by its own builder.
 
 WHY THIS TUPLE EXISTS. `--scheme` selects a FILENAME, not a corpus: `Routing.suffix()` appends it and
