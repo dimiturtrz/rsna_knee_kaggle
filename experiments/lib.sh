@@ -701,9 +701,34 @@ _mark() {
 }
 
 wait_for() {
-  # wait_for <completion-marker> <file>. Blocks until the marker appears.
+  # wait_for <completion-marker> <file>. Blocks until the marker appears, OR until the paired failure
+  # marker does. Returns 0 on the completion marker, 3 on the failure marker.
+  #
+  # IT USED TO WAIT ONLY FOR SUCCESS, AND A CRASHED ARM THEN HELD THE CARD IDLE FOREVER. `run_train`
+  # writes `ARM DONE <name>` on success and `ARM FAILED <name> (...)` on failure (:631, :637, :642) into
+  # the same file, so a gate on the DONE spelling never releases when the arm dies - it just sleeps 60 s
+  # in a loop with nothing running behind it and `queue_check` reading OK, because a live process gating
+  # an owed arm is all that check can see. Measured 2026-09-08 (researcher D223 G.1): `after_trunkdraws`
+  # and `after_instruments` were both blocked ~15 h on `ARM DONE deep32_batch6`, whose arm had died at
+  # 02:02:56Z on a FileNotFoundError. It cost no card only because a third watcher on a different gate
+  # happened to own the arm they were both waiting to run.
+  #
+  # A BROKEN GATE RELEASES THE QUEUE RATHER THAN ABANDONING IT. The gate exists to serialise the CARD,
+  # not to express a data dependency: the producer failing means the card is free NOW. An arm that truly
+  # consumes the producer's output dies at its own `require` or in `after.sh --smoke`, which is a loud,
+  # bounded failure; an idle card is a silent, unbounded one.
   local marker="$1" file="$2"
-  until grep -q "$marker" "$file" 2>/dev/null; do sleep 60; done
+  local failed="${marker/ARM DONE /ARM FAILED }"
+  while true; do
+    grep -q "$marker" "$file" 2>/dev/null && return 0
+    if [ "$failed" != "$marker" ] && grep -q "$failed" "$file" 2>/dev/null; then
+      echo "GATE BROKEN: '$failed' in $file - the arm this gate waits on FAILED. Releasing the queue"
+      echo "GATE BROKEN: because the card is free; a dependent arm will die at its own require/smoke."
+      grep -m1 "$failed" "$file"
+      return 3
+    fi
+    sleep 60
+  done
 }
 
 wait_for_pid() {

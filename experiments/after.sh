@@ -45,10 +45,17 @@ for entry in "$@"; do
 done
 
 echo "waiting for '$MARKER' in $WATCH before running: $*"
+# `wait_for` returns 3 when the arm it gates on FAILED rather than finished. That is not this queue's
+# failure and does not abandon it - see the `GATE BROKEN` note in lib.sh's wait_for. The status is caught
+# rather than allowed to propagate so the queue still runs on a freed card.
+GATE=0
 case "$MARKER" in
   pid:*) wait_for_pid "${MARKER#pid:}" ;;
-  *) wait_for "$MARKER" "$WATCH" ;;
+  *) wait_for "$MARKER" "$WATCH" || GATE=$? ;;
 esac
+if [ "$GATE" = 3 ]; then
+  echo "gate broke at $(date -u +%Y-%m-%dT%H:%M:%SZ) - running the queue anyway"
+fi
 for entry in "$@"; do
   echo "=== $entry ==="
   # --as-queued takes the entry in the SPELLING it will run in, arguments included, which is the only
