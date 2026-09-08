@@ -16275,6 +16275,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.between",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
       "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.macro",
       "weight": 1
     },
@@ -50702,8 +50708,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.Ledger75Row.recut_blind",
+      "label": "recut_blind",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.Ledger75Row",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.between",
+      "label": "between",
       "level": "method",
       "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
       "role": null
