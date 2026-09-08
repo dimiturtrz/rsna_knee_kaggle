@@ -95,3 +95,40 @@ loses all of its value as a board projection.
 What survives, and it is the only thing that does: an intervention has to move **all twelve columns
 together**. That is what a supervision change does — it retrains every seat — and it is why the learned
 reader (`knee-wko44`, M227) is the lane this table hands off to, rather than any per-finding work.
+
+## 8. Correction (2026-09-08 16:50Z) — §3's mechanism is an arithmetic identity, not a finding
+
+§3 above is left standing because deleting it would hide what the error looked like from the inside. It
+is wrong. The researcher's D230 §2 shows why, and the argument is short enough to state in full.
+
+The table's ordering column is `deficit = ACHIEVED − REFERENCE`. REFERENCE therefore appears on **both
+sides** of any correlation between the deficit and the reader's own quality, so a negative relationship
+is manufactured by the subtraction before any data is consulted:
+
+```
+sd(REFERENCE) 0.0920   sd(ACHIEVED) 0.0981   corr(REFERENCE, ACHIEVED) +0.472
+corr(deficit, REFERENCE)  observed  -0.467
+                          null if the two were independent  -0.684
+```
+
+The observed anti-correlation is **weaker than the arithmetic guarantees**. So §3's claim — "the three
+findings where the model most beats its labels are the three worst reader cells, in the same order" —
+carries no information in either direction. It is what subtracting a quantity from itself looks like.
+
+**Standing rule adopted from this: a baseline must not be a deterministic function of the target.**
+
+### What replaces it
+
+Rank by **ACHIEVED** — what the model actually cannot do, with no reader term in it:
+
+```
+model-bound      Lateral Meniscus 0.6497 · Lateral OA 0.7099 · Synovitis 0.7378
+NOT model-bound  ACL 0.8640 (7th of 12) · MCL 0.8798 (8th of 12)
+```
+
+ACL and MCL entered §3's "pixel-bound triple" only because the reader is near-perfect on them
+(0.9865, 0.9762). They are among our **better** columns. Lateral Meniscus survives both rankings and is
+the one cell in the table unambiguously ours.
+
+This does not resurrect any per-column plan: §7 stands, and `colhalf_v1` still says every one of the
+twelve columns has to move about 0.010. It only fixes which columns a future pre-registration may name.
