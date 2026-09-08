@@ -10642,6 +10642,15 @@ members carry a different own truth (`confident224_s2026`, `recal_holdannot_s202
 `ortholarge@focal-attend_mean_probe`, `radnet121@focal-max_mean_probe`, `v3large@focal-attend_mean_probe`).
 This is exactly what `RecordMix.per_member` refuses on; reading records directly bypasses that guard.
 
+**The 264 x 5 table is in the tree**, so the cells are never recomputed:
+`interpretations/kneemri/converging/2026-09-08_member-macro-by-difficulty-stratum.md` (D196). 264 member
+rows, `overall | Q1..Q5 | hard | hardtop | resid`, `resid` fitted over the competent pool only (slope
+1.2431, intercept **-0.2479**) and left BLANK for the 45 members below the 0.82 cut, who were not in the
+fit. D196's letter body quotes the intercept as -0.2547; the FILE is the correct one — -0.2479 reproduces
+the published `resid` column to the fourth decimal on every row checked, -0.2547 does not. The table carries
+its own "does not license" section in place, which is what stops a `resid` column becoming the evidence for
+a reseating later: measured 95% half-width +/-0.0029 per member against a true spread of sd 0.0020.
+
 **Also from D195: nothing more should be queued against `merged3_corpus_s2026` until its frame is fixed.**
 Its paired floor is +/-0.0299, so only a >0.03 gain is readable there, which almost nothing predicts.
 
