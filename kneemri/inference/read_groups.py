@@ -26,8 +26,17 @@ class SharedRead:
     group because `SlotReader.cropped` stops before the resize, but the slice count and the band do not
     — they decide WHICH files are opened. `raptorweight_v1`'s six seats span three groups (20 slices at
     the 0.1-0.9 band, 12 at that band, 12 at the historic one), and its Kaggle log decodes the same
-    three visible studies three times over: `decode 4s`, then `2s`, then `2s`, projecting 7.6 h of a
-    9 h limit. One group would decode 12 slices per study instead of 44.
+    three visible studies three times over: `decode 4s`, then `2s`, then `2s`. One group would decode
+    12 slices per study instead of 44.
+
+    THE COST OF THAT IS A BOARD NUMBER, NOT A RUNTIME ONE. This paragraph read "projecting 7.6 h of a
+    9 h limit" until 2026-09-08. There is no projection in it: `Budget.report` prints
+    `projecting {projected}h of {seconds}h` and `seconds` is the CEILING, so 7.6 h is the deadline the
+    run was given and 0.0 h is what it projected against it. The public rerun scores THREE studies, which
+    leaves every decode-and-forward in these entries inside 4-8 s of a run that spends 20-35 s importing;
+    `experiments/README.md` documents that instrument as BACKWARDS rather than merely weak, and it had
+    already refuted this exact sentence once. What IS measured is `onegroup_v1` — the champion's six seats
+    served out of ONE group, 0.942 against 0.944. Price a regroup against that, never against a log.
 
     So the question this asks is not "how much accuracy does a shallower read cost" but "how much does
     it cost to serve every seat out of ONE decode". It lives beside `Serving` because the same object
