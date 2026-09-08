@@ -10555,6 +10555,36 @@ and an agent that wants to know what flags exist greps the arm tree instead — 
 `--variant` axis came to have 24 registered values and no census. Found while looking for the trunk
 flag, not by any gate.
 
+## 2026-09-08 — `mricore_rate` REFUTES, decided by a CEILING at e4 and truncated 8 epochs early
+
+`mricore` at `--backbone-lr 4e-4` against its control `mricore_corpus_s2026 = 0.8390 @midpoint/n909/e11`,
+one variable, every other flag byte-identical. Pre-registered branches in `experiments/arms/mricore_rate.sh`:
+LANDS >= 0.8590, PARTIAL +0.0060..+0.0200, FLAT +/-0.0060, REFUTES <= 0.8330. Reading at
+`logs/mricore_rate_ledger.log`, bead `knee-m69u`.
+
+    e4 0.7751   needs +0.0579 for the 0.8330 REFUTES ceiling
+    gain e4 -> peak over 191 corpus runs: median +0.0108, p90 +0.0240, max +0.0562
+    generous ceiling 0.8313  ->  CANNOT REACH, at either boundary
+
+**REFUTES, and the branch was decided by an upper bound rather than by a final score.** This is the one
+shape in which a truncated run is fully readable: truncation leaves a FLOOR on the score, and REFUTES needs
+a CEILING. Even the single largest e4->peak gain in the whole 191-run corpus lands at 0.8313, under the
+0.8330 boundary — so the remaining 8 epochs could not move the branch, and were not spent. `trajectory_check`
+exited non-zero at both boundaries; the arm was truncated 10:08Z and the watcher handed the card to
+`extended_band` inside a minute. **~90 minutes of card recovered.** `convergence_check` will read this run
+TRUNCATED and its score as a floor, which is correct and does not weaken the verdict.
+
+**The margin is thin and is stated rather than smoothed: 0.8313 against 0.8330 is 0.0017.** The criterion met
+is the tool's own — arm plus the LARGEST historical gain still misses — not a comfortable one. A trajectory
+better than any of the 191 would have flipped this to the low edge of FLAT, never to PARTIAL or LANDS.
+
+**What it costs the rate axis, per the arm's own pre-registration.** 4e-4 is past this trunk's optimum, so
+the convnext curve's shape (peak 4e-4, collapse by 1.2e-3) is NARROWER than the argument assumed, and the
+probe for the remaining four one-LR families (`vjepa2`, `medsam`, `radiodino`, `raddino`) is **1.2e-4, not
+4e-4**. The transfer from the two convolutional sweeps was flagged in the arm as an ANALOGY and it did not
+hold off the convolutional families. What is NOT refuted is that a borrowed `4e-5` default is unpriced on
+five families — that hole is still open, and it is now a smaller-step question.
+
 ## 2026-09-08 — blindness above 0.870 is REFUTED; the band-to-band slope spread is an artefact, not saturation
 
 `python -m kneemri.evaluation.transfer_strata`, run 09:12Z, output at `logs/transfer_strata.log`. 37
