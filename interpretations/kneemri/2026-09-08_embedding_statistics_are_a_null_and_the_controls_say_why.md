@@ -80,6 +80,39 @@ Unequal width agrees slightly MORE than equal, so width is not what separates th
 it means a future distance statistic taken across trunks is comparable if and only if it is common-ranked,
 and that is a free fix rather than a caveat.
 
+## The follow-up that made this worth the sweep (D214, same day)
+
+The redundancy control above says the members have already taken what the features carry. The obvious
+next question is where they have NOT — a study the frozen features get right and the fitted members get
+wrong would be the cleanest instance of failing to generalise this project can produce. Pre-registered
+with three bars; **all three cleared, and two unregistered controls dismantled the clear.**
+
+- The intersection of the nine per-cache subsets is 166 of 909 against a pre-registered bar of 18. But
+  nine RANDOM neighbour subsets intersect at **106.6 ± 3.7**, so the feature-attributable part is
+  **+59.4 studies, not 166** — 64% of the headline was a fact about the ensemble.
+- On that subset the kNN is **flat**: 0.6027 there against 0.6039 on the complement, corpus 0.6037. It is
+  equally mediocre everywhere. The subset is not where the features are good; it is where the ensemble
+  drops below a constant predictor's line. The reading the bar was built to produce is false.
+- The sharpness-immune sign test has a null of **0.5, not 0** — a random 32-neighbourhood's expectation is
+  the base rate. Measured null 0.487. Pooled real **0.375**, z **-4.66**, ten of twelve labels below the
+  null, label 7 at -6.39 on 1611 cells. The apparent best cell (label 10, 0.518) is z +0.53, a coin flip.
+
+**So the redundancy is worse than total.** On the positives the ensemble misses, the frozen-feature
+neighbourhood is on the correct side LESS often than chance. The members and the features share a blind
+spot and the features are *anti-informative* inside it — the fitted heads are in fact slightly better than
+their own substrate there, which is what a trained head is for. Not a prevalence artefact: intersection
+positive mass 4.030 vs complement 4.310.
+
+**This is the load-bearing consequence for the plan.** The failure to generalise is not a head-fitting
+problem and cannot be fixed downstream of the trunk: a better head, a better pooling, a better seat
+selection, or any reweighting over these nine trunks **cannot reach these studies, because the
+information is not in the nine trunks.** What could reach them is a representation that separates them —
+different pretraining, a different input (resolution, slice span, series), or supervision that forces the
+axis these encoders collapse. That is a ranking of the open levers, produced for no card time.
+
+Also worth carrying: the standing owner correction applies to the sign result. An anticorrelation is not
+a result to take — the take-home is the blind spot, not a rule that bets against the neighbourhood.
+
 ## Two cache defects found on the way
 
 Both are repo defects the sweep surfaced, fixed the same day (`knee-` beads filed 2026-09-08):
