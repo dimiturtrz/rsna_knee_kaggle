@@ -9905,6 +9905,62 @@ was never measured, and this arm's death is about a missing ruler and a missing 
 If a corpus-wide candidate-seat surface ever exists, the question is re-opened by rebuilding the gate, not by
 re-quoting this decline.
 
+#### AMENDMENT, same day, 01:30Z — the kill stands as a QUEUEING decision and the running arm was NOT stopped
+
+The entry above was written while `weakdraw_frx_s2026` was **live on the card**, and mastermind's D139 §1
+read that correctly as a defect and defaulted to killing the process. The default is overturned here on one
+line of evidence, and the evidence is the marginal price rather than a preference:
+
+- `weakdraw_flat_s2026` had **already completed all twelve epochs** (holdout + checkpoint on disk, 00:36Z).
+  It is the α=0.0 control; `frx` is the α=1.0 arm. The reading is the PAIR, so killing `frx` does not
+  recover `flat`'s hour — it spends it.
+- `frx` stood at **epoch 7 of 12, 50 min elapsed, ~24 min remaining** (366 s/epoch, `started` 1788827841).
+  The decline priced this arm at **2.7 h of card not yet spent**. That price was real when it was written
+  and is not the price of the decision in front of anyone now: the choice is 24 minutes against destroying
+  a completed pair.
+- Under `one_cycle` the last epochs ARE the anneal, so a kill at e7 does not yield a cheap negative — it
+  yields a **FLOOR**, which `convergence_check` will then refuse to let anyone quote. Paying 50 minutes to
+  buy an unquotable number is the one outcome worse than either state.
+
+So: the arm ran to completion, its holdout is a real record, and **the decline stands for what it was about
+— `weakdraw.sh` does not get queued again** on the two reasons above. Nothing here re-opens the Fracture
+question or the axis.
+
+**The check this cost, filed as knee-wk9dl:** *an arm's script must not be recorded as KILLED or declined
+while that arm is live.* `arm_check` can read this file's heading for the script it is about to arm, and
+`queue_check` can read it for the scripts already running. Both directions are the same defect: the ledger
+and the process table disagreeing with nobody noticing.
+
+## Card gate for an arm — the two rows, and they are priced differently — 2026-09-08
+
+Mastermind D137 §1(d), **amended by D139 §2 and re-derived by D140 §3**. An arm is one of two shapes and the
+bar is not the same one. Getting the shape wrong is not conservative: applied literally to a FLEET-WIDE arm,
+the seat row would have refused `deep32_batch6` (a `band_dense`-family member lands near 0.864 solo), which
+would have been a serious error.
+
+**SEAT arm** — the product is one more candidate member.
+
+- Bar: expected solo **≥ ~0.89** on the 896 / `L75mid` frame. 110 of 182 members are below it.
+- Derivation, and quote THIS one: the seat-value-vs-solo slope is **not linear across the pool**. D140 §1
+  refits it on nested bands and the CIs are disjoint — honest12 full-range [+0.0044,+0.0165] against
+  `>= 0.860` [+0.0419,+0.0559], and the slope rises monotonically with the band floor in all three rosters.
+  On the `>= 0.88` band (n=73–77, tight CI) the +0.0015 seat bar lands at **0.889 (honest12) / 0.892 (twin5)
+  / 0.894 (twin6)**, and the board-blur bar at 0.897 / 0.894 / 0.898.
+- **Do NOT re-derive it from D133 §2.** That fit ran across solo 0.4597–0.8959, where 70 of 182 candidates
+  below 0.87 flatten it, and it produces **0.9662** — a threshold outside the measured range, in the same
+  letter that measured 18 of 182 candidates clearing +0.0015 with max solo 0.8959. D133 §2 is WITHDRAWN.
+- 0.885 (D137's figure) is below all six local bars. It is defensible and is not being moved; it is written
+  here as **~0.89 from the `>= 0.88` band fit** so the next re-derivation does not land on 0.9662 and
+  conclude the gate is far too soft.
+
+**FLEET-WIDE arm** — the product is a mechanism every seat carries.
+
+- Bar: **`d` ≥ +0.008 per member**, `d` measured **solo-versus-its-own-control**, ONE arm.
+- **Exempt from the ~0.89 line entirely.** The member the arm produces is an instrument for `d`, not a seat.
+- The `×0.65` fleet damper is applied **afterwards, to the pool move**, and never to `d` (D93). A fleet-wide
+  mechanism therefore costs **1.4 h to price, not 11** — eight retrains buy the gain, never the measurement.
+- Untouched by D140: `d` never passes through a seat slope.
+
 ## D93 — `d` is a PRE-POOL number, so the fleet-wide candidate list was already measured, and priced against the +0.011 bar it has exactly one live row — 2026-09-08
 
 Job 37, asked by mastermind after D91/D92 established that a single-member change enters the kernel at
