@@ -14,7 +14,18 @@
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO" || exit 1
 
-while ps -W 2>/dev/null | grep -q '\.venv-arm/Scripts/python'; do
+# EITHER SLASH, and the character class is the whole point. `ps -W` prints WINDOWS argv, so a job shows
+# as `D:\...\.venv-arm\Scripts\python.exe` — but an arm calling `"$REPO/.venv-arm/Scripts/python.exe"`
+# itself shows FORWARD slashes, because $REPO is spelled that way. So the two halves of one arm are
+# spelled differently in the process table: the pretrain matches a forward-slash pattern and the
+# `run_train` fine-tune, launched from a snapshot, does not.
+#
+# Measured 2026-09-08: this loop waited out all eight pretrain epochs correctly and then released the
+# instant the 12-epoch fine-tune started, because that half is backslashed. It read as "the ladder is off
+# the card" with the ladder's second half just beginning. Nothing was lost only because `run_pretrain`
+# now takes the card lock, so the register arm parked behind it instead of stacking on it — the lock is
+# what makes a premature arm survivable, not this gate.
+while ps -W 2>/dev/null | grep -qE 'venv-arm[\\/]Scripts[\\/]python'; do
   sleep 30
 done
 

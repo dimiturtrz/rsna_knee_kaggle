@@ -9,7 +9,7 @@
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO" || exit 1
 
-while ps -W 2>/dev/null | grep -q '\.venv-arm/Scripts/python'; do
+while ps -W 2>/dev/null | grep -qE 'venv-arm[\\/]Scripts[\\/]python'; do
   sleep 30
 done
 
