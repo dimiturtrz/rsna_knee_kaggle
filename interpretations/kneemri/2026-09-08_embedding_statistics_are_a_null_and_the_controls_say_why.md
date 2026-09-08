@@ -216,6 +216,82 @@ any card is spent, on a card-free reachability probe: if a fitted metric over th
 lift the 32-neighbour sign rate off its 0.487 null on held-out `wrong` cells, no term attached there has
 anything to descend.
 
+## The gate fired, and the last reserved cell is closed too (D219–D221, same day)
+
+The probe above was run. Everything here is `@holdout909/base-rate` — the `wrong` cut is the
+ensemble-miss cut, not this repo's default midpoint. 64-dim trunk PCA, 9 caches, 12 labels, logistic
+`max_iter 2000` fitted on 3,498 cells; wrong-cell n 426–508 per cache (pooled 4,335), right-cell 263–345
+(pooled 2,604).
+
+**`LIFT = R_fit − R_null = 0.1190 − 0.1390 = −0.0201`, against a pre-registered bar of +0.05.** The
+fitted metric recovers *less* of the blind spot than the same probe fitted to permuted labels.
+
+**The null is the whole lesson, and without it this would have been written up as a 12% recovery.**
+`R_null = 0.1390` is not noise, it is selection: `wrong = miss & (knn <= base)` picks cells *on* the
+neighbourhood pointing the wrong way, so the sign rate there is 0.000 by construction and **any**
+perturbation flips some back by regression to the mean. A probe fitted to shuffled labels is such a
+perturbation. Every future probe on a selected subset must carry a permuted-label null or it is
+measuring its own selection.
+
+**The null was then matched on churn rather than assumed comparable**, because a shuffled fit and a real
+fit need not perturb equally. Interpolating `w(a) = (1−a)·1 + a·w_null` over nine points, `a = 0.995`
+lands at churn 0.3478 against the fit's 0.3479 — matched `R_null = 0.1283`, **matched LIFT −0.0093**.
+Clearing the bar would need matched `R_null ≤ 0.0690`: missed by 1.9x in the null and ~6x in the lift.
+Three readings of the same quantity, worst to best for the idea: −0.0196 unmatched, −0.0047
+linear-rescaled, **−0.0093 measured**. Recovery is **sub-linear in churn** — the curve bows above its own
+chord by +0.0150, and half the final recovery (0.0744 of 0.1386) is bought by the first 38% of churn — so
+**a linear rescale of a null is the charitable assumption**, under-charging it for churn it never spent.
+Measure the crossing; do not rescale.
+
+**And the ceiling says redundancy, not silence.** With `wrong` as the positive class the probe's AUC is
+**0.2928** pooled, all nine caches 0.219–0.327. That is 0.21 from chance **on the far side**: a high probe
+score predicts a cell the ensemble gets *right*. AUC 0.50 would have meant the trunk features are silent
+about these cells, which would have left room for a different objective to find something there. 0.29
+means they speak clearly and say exactly what the 32-NN already says. There is nothing left for a term
+attached in that space to descend.
+
+**The reserved cell was not open in the first place.** Read off the run logs rather than the arm scripts
+(the arms delegate to `$RECIPE`): `contrast_pool_s2026.full.log` and `contrast_dense_s2026.full.log` both
+carry `unfreeze_last 6`, `backbone_lr 4e-05`, `layer_decay 1.0`, `lora_rank 0`. **`contrast_pool`'s trunk
+was trainable**, and the contrastive gradient already flowed through the same last block the pooled
+embedding is taken from. Seat value 0.0000. The "different attach point" was the attach point already
+used. Caveat kept and not converted into a reservation: the bottom half of the trunk moved in neither arm.
+
+One consistency check worth keeping: `radnet121` is the lone cache that inverts on both churn diagnostics
+(PR 16.9 fit vs 28.9 null; churn ratio 1.125), which is what a real per-cache effect looks like against a
+pooled statistic.
+
+**Closed on four independent reasons** (bead `knee-osnmj`, closed, no card spent): the lift fails by ~6x
+under the most favourable churn matching; the probe is redundant with the neighbourhood at AUC 0.29; the
+most favourable case the attach point can ever see is the case it was measured on; and the arm that was
+supposed to be its control had already made the change. **Killed:** any term whose effect is a metric over
+trunk features, frozen or trainable. **Not claimed:** that supervision is exhausted at every attach point —
+nothing here touches the bottom half of the trunk, or a term that acts before pooling.
+
+Two method rules earned here, both general:
+
+1. **A baseline must not be a deterministic function of the target.** A drafted follow-up fitted
+   `error ~ member_score` where `error = (prediction < base)` inside a truth class — a threshold of the
+   baseline itself, giving `AUC = 1.000` and `ΔAUC ≡ 0` before any data spoke. Print the baseline-alone
+   statistic first and refuse a degenerate instrument.
+2. **Do not pool across truth classes when the effect is signed.** A probe that scores positives low and
+   negatives high cancels under pooling; a pooled `|AUC−0.5| < 0.05` bar would have closed a live axis on
+   an averaging artefact.
+
+## So: is the embeddings queue worth keeping?
+
+No, and it is now closed with a mechanism rather than abandoned. Five statistics (Mahalanobis, PCA
+residual, NN distance, kNN truth, kNN prediction) are nulls against a pre-registered bar; the control says
+why (redundancy, not blindness); the blind spot that redundancy implies is flat on twelve input axes; and
+a fitted metric over the same space cannot reach it either, by a factor of six, with the ceiling
+confirming redundancy rather than silence. The one thing that survives is an identification result worth
+reusing — a cross-trunk distance statistic is comparable if and only if it is common-ranked at rank 64.
+
+What this does NOT license is "embeddings are useless". Every measurement here is fitted and scored on our
+own corpus, so it cannot see a distribution shift it does not contain, and the owner's standing point
+holds: *the real Kaggle test set is not our dataset*. What is ruled out is fitting a rule on this frame
+and shipping it — which was the only thing that could have been done with one.
+
 ## What it cost
 
 One researcher sweep, no card time, no submission slot. That is the right price for an axis that closes.
