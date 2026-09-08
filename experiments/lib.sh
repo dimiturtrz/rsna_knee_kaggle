@@ -492,6 +492,32 @@ _out_path() {
   done
 }
 
+run_pretrain() {
+  # $1 is the log tag; the rest are kneemri.training.pretrain flags. The ONE seam an arm may reach the
+  # pretrainer through, for the same reason run_train is the one seam to the trainer.
+  #
+  # THE ABSOLUTE INTERPRETER PATH IS THE DEFECT THIS EXISTS TO CLOSE. `stub_lib.sh` neutralises an arm
+  # by no-opping this lib's functions and shadowing `uv` on PATH — but `"$REPO/.venv-arm/Scripts/python.exe"`
+  # names the interpreter directly, and no PATH entry can shadow an absolute path. So `arm_check`, whose
+  # whole job is to READ an arm without running it, LAUNCHED an eight-epoch GPU pretrain for every arm
+  # that did this; arm_check.py's 30 s timeout then `continue`s without killing, leaving it orphaned.
+  # Measured 2026-09-08: three `arm_check --only latent_register` invocations put six orphaned pretrain
+  # processes on the card, and the live mask-ladder epoch went from ~400 s to over 29 minutes.
+  #
+  # It takes the card, which the raw calls never did — that lock alone would have refused the six.
+  local tag="$1"
+  shift
+  hold_card
+  "$REPO/.venv-arm/Scripts/python.exe" -m kneemri.training.pretrain "$@" 2>&1 \
+    | tee "$MODELS/experiments/$tag.full.log"
+  # THE PRETRAINER'S STATUS, NOT THE TEE'S — same rule run_train states below, and the reason it is
+  # stated twice is that a pretrain that dies at the attention gate exits non-zero and a contented
+  # `tee` would report the rung as survived.
+  local status="${PIPESTATUS[0]}"
+  release_card
+  return "$status"
+}
+
 run_train() {
   # $1 is the arm's name; the rest are kneemri.training.train flags.
   #

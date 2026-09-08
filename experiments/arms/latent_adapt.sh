@@ -47,9 +47,9 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 ADAPTED="$MODELS/adapt_latent_e8.pt"
 require "$LABELS"
 
-"$REPO/.venv-arm/Scripts/python.exe" -m kneemri.training.pretrain \
+run_pretrain adapt_latent_e8 \
   --objective latent --epochs 8 --slices-per-step 96 --lr 1e-4 --seed 2026 \
-  --out "$ADAPTED" 2>&1 | tee "$MODELS/experiments/adapt_latent_e8.full.log"
+  --out "$ADAPTED"
 
 require "$ADAPTED"
 

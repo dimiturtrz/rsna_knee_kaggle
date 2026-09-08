@@ -48,6 +48,18 @@ chmod +x "$_ARM_CHECK_BIN/uv"
 PATH="$_ARM_CHECK_BIN:$PATH"
 export PATH
 
+run_pretrain() {
+  # SILENT, unlike run_train — and that silence is the whole design, not an omission.
+  #
+  # The checker hands every printed line to `kneemri.training.train`'s parser. A pretrain invocation
+  # (`--objective`, `--mask-ratio`, `--slices-per-step`) is not a training one, so printing it here
+  # would report four working arms as REFUSED for flags the trainer was never meant to see. Saying
+  # nothing means the pretrain flags go unchecked, which is honest and is strictly better than the
+  # status quo it replaces: before this seam existed the arms named `.venv-arm/Scripts/python.exe`
+  # directly, and `arm_check` "checked" those flags by RUNNING them for eight epochs on the GPU.
+  :
+}
+
 run_train() {
   # The arm's name, a tab, then its flags — one line, so the caller can split it without a parser.
   #

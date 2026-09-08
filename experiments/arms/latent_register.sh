@@ -53,9 +53,9 @@ require "$LABELS"
 TAG="adapt_latent_v3small_m30_e8"
 OUT="$MODELS/$TAG.pt"
 
-"$REPO/.venv-arm/Scripts/python.exe" -m kneemri.training.pretrain \
+run_pretrain "$TAG" \
   --variant v3small --objective latent --epochs 8 --slices-per-step 96 --lr 1e-4 --seed 2026 \
-  --mask-ratio 0.30 --out "$OUT" 2>&1 | tee "$MODELS/experiments/$TAG.full.log"
+  --mask-ratio 0.30 --out "$OUT"
 
 require "$OUT"
 

@@ -46,9 +46,9 @@ SURVIVOR=""
 for RATIO in 0.30 0.15; do
   TAG="adapt_latent_m${RATIO/./}_e8"
   OUT="$MODELS/$TAG.pt"
-  if "$REPO/.venv-arm/Scripts/python.exe" -m kneemri.training.pretrain \
+  if run_pretrain "$TAG" \
       --objective latent --epochs 8 --slices-per-step 96 --lr 1e-4 --seed 2026 \
-      --mask-ratio "$RATIO" --out "$OUT" 2>&1 | tee "$MODELS/experiments/$TAG.full.log" \
+      --mask-ratio "$RATIO" --out "$OUT" \
       && [ -f "$OUT" ]; then
     SURVIVOR="$OUT"
     break

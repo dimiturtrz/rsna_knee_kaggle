@@ -59,9 +59,9 @@ SURVIVOR=""
 for RATE in 3e-5 1e-5; do
   TAG="adapt_latent_lr${RATE/-/}_e8"
   OUT="$MODELS/$TAG.pt"
-  if "$REPO/.venv-arm/Scripts/python.exe" -m kneemri.training.pretrain \
+  if run_pretrain "$TAG" \
       --objective latent --epochs 8 --slices-per-step 96 --lr "$RATE" --seed 2026 \
-      --mask-ratio 0.30 --out "$OUT" 2>&1 | tee "$MODELS/experiments/$TAG.full.log" \
+      --mask-ratio 0.30 --out "$OUT" \
       && [ -f "$OUT" ]; then
     SURVIVOR="$OUT"
     break
