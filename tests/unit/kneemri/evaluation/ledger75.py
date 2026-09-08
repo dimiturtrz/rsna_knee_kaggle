@@ -91,6 +91,35 @@ def test_moved(tmp_path: Path) -> None:
     assert row.moved() == pytest.approx(row.ledger75 - row.ledger)
 
 
+def _binary_member(directory: Path, name: str) -> Path:
+    """A member whose truth is 0/1 only, so the two cuts read the identical array."""
+    truth = np.tile(np.array([1.0, 0.0, 1.0, 0.0], dtype=np.float32)[:, None], (1, len(TARGETS)))
+    predictions = np.tile(np.array([0.9, 0.2, 0.8, 0.1])[:, None], (1, len(TARGETS)))
+    path = directory / f"{name}.pt"
+    HoldoutRecord(path).write(STUDIES, predictions, truth, epoch=5)
+    return path
+
+
+def test_between(tmp_path: Path) -> None:
+    """Only the truth cells the two rulers disagree about are counted, over the whole array."""
+    ruler = LedgerSeventyFive()
+    reading = ruler.reading(_member(tmp_path, "m6", RECUT_COLUMN))
+
+    assert ruler.between(reading) == 2 * len(TARGETS), "the two 0.68 rows, on every finding"
+
+
+def test_recut_blind(tmp_path: Path) -> None:
+    """A record with no truth between the cuts is priced identically by both, so its pair says nothing."""
+    ruler = LedgerSeventyFive()
+
+    graded = ruler.row(_member(tmp_path, "m7", RECUT_COLUMN))
+    binary = ruler.row(_binary_member(tmp_path, "probe"))
+
+    assert not graded.recut_blind(), "0.68 rows are exactly what the recut moves"
+    assert binary.recut_blind(), "0/1 truth cannot land between the cuts"
+    assert binary.moved() == pytest.approx(0.0), "which is why its zero is construction, not measurement"
+
+
 def test_table(tmp_path: Path) -> None:
     """A dark arm beside the records must not take the sweep down, and the order is LEDGER75's."""
     strong = _member(tmp_path, "strong", RECUT_COLUMN)

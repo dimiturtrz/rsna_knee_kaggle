@@ -58,10 +58,27 @@ class Ledger75Row:
     ledger75: float
     epoch: int
     studies: int
+    between_cut: int = -1
 
     def moved(self) -> float:
         """LEDGER75 minus the midpoint macro. A member's own re-pricing, not a comparison to anything."""
         return self.ledger75 - self.ledger
+
+    def recut_blind(self) -> bool:
+        """Is this row's PAIR of numbers empty of information — no truth mass between the two cuts?
+
+        A record whose truth never lands in `[MIDPOINT, RECUT)` is scored identically by both rulers, so
+        `moved()` is 0.0000 BY CONSTRUCTION rather than as a measurement, and reading it as "the recut does
+        not touch this member" is the `knee-f9aao` error one level down: a number whose population cannot
+        express the question. Researcher D245 is the source, and its criterion is deliberately the truth
+        mass and NOT a level count — the twenty-four five-level `*_smoke` records are fully recut-sensitive,
+        so counting levels would have refused exactly the wrong set.
+
+        The refusal lives HERE, on the row, and not on `macro()` or `scorer()`: a pool's combined score is
+        a legitimate number even when one member in it is blind, and a refusal at the scorer layer would
+        void the whole pool for one probe.
+        """
+        return self.between_cut == 0
 
 
 class LedgerSeventyFive:
@@ -113,7 +130,17 @@ class LedgerSeventyFive:
             ledger75=self.macro(reading),
             epoch=reading.epoch,
             studies=len(reading.studies),
+            between_cut=self.between(reading),
         )
+
+    def between(self, reading: HoldoutReading) -> int:
+        """How many truth cells sit in `[MIDPOINT, RECUT)` — the only cells the two rulers disagree about.
+
+        Counted over the WHOLE truth array rather than per column, because the pair of macros this row
+        carries is a whole-array statistic; the per-column version belongs to whoever reads `per_label`.
+        """
+        truth = np.asarray(reading.truth, dtype=np.float64)
+        return int(np.count_nonzero((truth >= MIDPOINT) & (truth < self.recut.cut)))
 
     def table(self, paths: list[Path]) -> list[Ledger75Row]:
         """Every member that left a record, best LEDGER75 first — the order a seat decision reads.
