@@ -1,0 +1,88 @@
+finding,idx,v2,reader,gold
+Medial Meniscus,4,YES,NO,0
+Medial Meniscus,5,YES,NO,0
+Medial Meniscus,7,YES,NO,0
+Medial Meniscus,12,YES,NO,0
+Medial Meniscus,20,YES,NO,0
+Medial Meniscus,23,YES,NO,0
+Medial Meniscus,35,YES,NO,0
+Medial Meniscus,37,YES,NO,0
+Medial Meniscus,39,YES,NO,0
+Medial Meniscus,56,YES,NO,0
+Medial Meniscus,57,YES,NO,0
+Medial Meniscus,59,YES,NO,0
+Medial Meniscus,60,YES,NO,0
+Medial Meniscus,81,YES,NO,0
+Medial Meniscus,89,YES,NO,0
+Medial Meniscus,94,YES,NO,0
+Medial Meniscus,95,YES,NO,0
+Medial Meniscus,100,YES,NO,0
+Lateral Meniscus,2,UNK,NO,0
+Lateral Meniscus,37,YES,NO,0
+Lateral Meniscus,56,YES,NO,0
+Lateral Meniscus,59,YES,NO,0
+Lateral Meniscus,67,YES,NO,0
+Lateral Meniscus,73,YES,NO,0
+Lateral Meniscus,88,YES,NO,0
+Lateral Meniscus,94,YES,NO,0
+Lateral Meniscus,95,YES,NO,0
+Medial OA,7,UNK,NO,0
+Medial OA,9,UNK,NO,0
+Medial OA,22,UNK,YES,0
+Medial OA,44,UNK,NO,0
+Medial OA,51,UNK,NO,0
+Lateral OA,9,UNK,NO,0
+Lateral OA,18,NO,YES,0
+Lateral OA,20,UNK,NO,0
+Lateral OA,22,UNK,YES,0
+Lateral OA,44,UNK,NO,0
+Lateral OA,51,UNK,NO,0
+Lateral OA,52,UNK,NO,0
+Lateral OA,87,UNK,YES,0
+Lateral OA,99,NO,YES,0
+PF OA,9,UNK,NO,0
+PF OA,26,NO,UNK,0
+Synovitis,7,NO,UNK,0
+Synovitis,20,NO,UNK,0
+Synovitis,37,YES,UNK,0
+Synovitis,99,YES,UNK,0
+Baker's,43,NO,UNK,0
+Baker's,44,NO,UNK,0
+Baker's,65,NO,UNK,0
+Baker's,100,NO,UNK,0
+Contusion,6,NO,UNK,0
+Contusion,8,NO,UNK,0
+Contusion,9,YES,UNK,0
+Contusion,22,UNK,NO,0
+Contusion,65,YES,NO,0
+Contusion,66,NO,YES,0
+Contusion,87,NO,UNK,0
+Contusion,89,UNK,NO,0
+Contusion,93,UNK,NO,0
+Contusion,95,NO,UNK,0
+Contusion,96,UNK,YES,0
+Fracture,2,UNK,NO,0
+Fracture,3,UNK,NO,0
+Fracture,10,UNK,NO,0
+Fracture,14,NO,UNK,0
+Fracture,20,UNK,NO,0
+Fracture,22,UNK,NO,0
+Fracture,26,UNK,NO,0
+Fracture,30,UNK,NO,0
+Fracture,32,UNK,NO,0
+Fracture,39,NO,UNK,0
+Fracture,50,UNK,NO,0
+Fracture,52,UNK,NO,0
+Fracture,60,UNK,NO,0
+Fracture,66,NO,UNK,0
+Fracture,68,UNK,NO,0
+Fracture,70,UNK,NO,0
+Fracture,72,UNK,NO,0
+Fracture,74,UNK,NO,0
+Fracture,75,NO,UNK,0
+Fracture,84,NO,UNK,0
+Fracture,89,UNK,NO,0
+Fracture,90,UNK,NO,0
+Fracture,93,UNK,NO,0
+Fracture,94,NO,UNK,0
+Fracture,95,NO,UNK,0

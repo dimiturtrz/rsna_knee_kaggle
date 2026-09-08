@@ -59,8 +59,13 @@ class EmbeddedCorpus:
     """The encoder's output for every slice of every slot, with the presence mask that indexes it.
 
     The sibling of `CachedCorpus` one stage further along: that one holds pixels, this one holds what
-    the encoder made of them. The mask is carried for the same reason — a feature vector for a slot
-    that was never acquired is zeros, and only the mask can say so.
+    the encoder made of them. The mask is carried because NOTHING IN THE FEATURES CAN SAY A SLOT WAS
+    ABSENT — this docstring said the opposite until 2026-09-08, and the opposite is measurable: across
+    the healthy caches the mask reports 20130 slot-instances present while the features are non-zero at
+    26442 of 26442. An unacquired slot's pixels are blank, and a blank image is not a zero feature; it
+    is the encoder's perfectly ordinary response to a blank image. So the mask is MORE load-bearing
+    than the old wording implied, not less: an unmasked mean over slots silently ingests blank-image
+    features for 24% of slot-instances, and no inspection of the features would reveal it.
     """
 
     features: NDArray[np.float16]
@@ -150,12 +155,30 @@ class EmbeddingCache:
         return self.directory / f"features_index_{self.key}.json"
 
     def exists(self) -> bool:
-        """Whether all three artefacts are present.
+        """Whether all three artefacts are present AND the build that wrote them finished.
 
         All three, not just the features: a features file without its index is a matrix nobody can
         align to labels, and it would otherwise read as a usable cache.
+
+        PRESENCE ALONE IS NOT COMPLETION, and that gap was measured rather than imagined. `build` opens
+        the features with `open_memmap(mode="w+")`, which allocates the whole file up front, and writes
+        the mask and the index only after the encode loop returns. So a build that DIES leaves a
+        features file of exactly the right byte length whose tail is zeros — and a REBUILD that dies
+        leaves the previous build's mask and index sitting beside it, at which point all three paths
+        exist and nothing says the pixels stopped at study 2644. Two caches on this machine are in that
+        state: `orthodiff_336px_12sl_r256_gap256_volume` holds 284 of 4407 studies (0.0644) and
+        `large_336px_12sl_r252_cls_mean_focal_max` holds 504 (0.1144), each a contiguous prefix from
+        study 0 with no interior gaps, which is what a dead build looks like and no slot rule does.
+
+        The ORDER OF THE MTIMES is the oracle, and it costs nothing: a completed build writes the index
+        LAST, so on a healthy cache the index is never older than the features. On both broken ones it
+        is — by 108 minutes on one and by two days on the other. Checked instead of the zero tail
+        because reading the last study back means opening a multi-gigabyte memmap on every consumer's
+        startup, and this answers the same question from the directory entry.
         """
-        return all(path.exists() for path in (self.features_path, self.mask_path, self.index_path))
+        if not all(path.exists() for path in (self.features_path, self.mask_path, self.index_path)):
+            return False
+        return self.index_path.stat().st_mtime >= self.features_path.stat().st_mtime
 
     def build(
         self,

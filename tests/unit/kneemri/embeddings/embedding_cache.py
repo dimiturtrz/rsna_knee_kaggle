@@ -1,5 +1,6 @@
 """The encoded corpus: what its name states, and that what it stores is what a head will read."""
 
+import os
 from pathlib import Path
 from typing import override
 
@@ -102,6 +103,14 @@ def test_exists(tmp_path: Path):
     cache.index_path.unlink()
     assert not cache.exists(), "features without their index must not read as a usable cache"
 
+    cache.build(_FakeEncoder().slice_features, _corpus(), _identifiers(), torch.device("cpu"), batch=2)
+    assert cache.exists()
+    # The dead-rebuild shape: the features were rewritten and the build never reached the index, so all
+    # three paths exist and only their order says the encode stopped part-way.
+    newer = cache.index_path.stat().st_mtime + 10.0
+    os.utime(cache.features_path, (newer, newer))
+    assert not cache.exists(), "an index older than its features is a build that died mid-encode"
+
 
 def test_build(tmp_path: Path):
     """What is written is what the encoder produced, for the right study, in the right place.
@@ -151,7 +160,13 @@ def test_slices(tmp_path: Path):
 
 
 def test_embedded_corpus_carries_its_mask():
-    """A feature vector for a slot that was never acquired is zeros, and only the mask can say so."""
+    """An absent slot's features are the encoder's answer to a BLANK image, so only the mask can say so.
+
+    Not zeros — that wording stood here until 2026-09-08 and is measurably wrong: across the healthy
+    caches the mask reports 20130 slot-instances present while the features are non-zero at 26442 of
+    26442. Which makes the mask more load-bearing, not less: an unmasked mean ingests blank-image
+    features for 24% of slot-instances and nothing in the features would reveal it.
+    """
     features = np.zeros((STUDIES, SLOTS, SLICES, WIDTH), dtype=np.float16)
     mask = np.zeros((STUDIES, SLOTS), dtype=np.float32)
     corpus = EmbeddedCorpus(features, mask)
