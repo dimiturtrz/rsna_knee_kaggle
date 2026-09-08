@@ -76,11 +76,39 @@ def test_checkpoints(tmp_path: Path):
     assert "crashed_s2026" in drift.checkpoints(), "a checkpoint with no record is still a checkpoint"
 
 
+FOREIGN = "foreign_s2026"
+"""Predictions and no checkpoint of ours — the class the check was blind to until knee-s39kk."""
+
+
+def _foreign(root: Path, name: str = FOREIGN) -> None:
+    """Someone else's weights, scored on our fold: a holdout record with no `.pt` beside it."""
+    truth = (RNG.random((STUDIES, LABELS)) > 0.5).astype(np.float32)
+    HoldoutRecord(root / f"{name}.pt").write(
+        [f"s{index}" for index in range(STUDIES)], RNG.random((STUDIES, LABELS)), truth, epoch=1
+    )
+
+
 def test_scoreable(tmp_path: Path):
-    """A checkpoint that wrote no holdout predictions cannot take a seat, so it is not this file's business."""
+    """What makes a member scoreable is the RECORD, and a checkpoint is only the usual way one arrives."""
     drift = _clean(tmp_path)
+    _foreign(tmp_path)
 
     assert "crashed_s2026" not in drift.scoreable(), "it left nothing to price"
+    assert FOREIGN in drift.scoreable(), "a foreign member has predictions to price and no checkpoint of ours"
+
+
+def test_holdout_only(tmp_path: Path):
+    """A member with predictions and no local checkpoint is surveyed, and it is a finding when undocumented.
+
+    The regression this closes: enumerating the pool as `*.pt` hid every foreign member from the one gate
+    that guards what can be shipped, so five of them sat in neither the roster nor the declines with this
+    check reporting green (knee-s39kk).
+    """
+    drift = _clean(tmp_path)
+    _foreign(tmp_path)
+
+    assert drift.holdout_only() == [FOREIGN], "only the one with no checkpoint beside its record"
+    assert FOREIGN in drift.undocumented(), "and it is in neither file, which is the defect"
 
 
 def test_read(tmp_path: Path):
@@ -208,4 +236,7 @@ def test_report(tmp_path: Path):
     """The survey closes with the counts, whether or not anything drifted."""
     lines = _clean(tmp_path).report()
 
-    assert lines[-1] == "4 scoreable of 5 checkpoints: 1 packaged, 3 declined, 0 undocumented"
+    assert lines[-1] == (
+        "4 scoreable (of which 0 carry no local checkpoint) against 5 checkpoints: "
+        "1 packaged, 3 declined, 0 undocumented"
+    )

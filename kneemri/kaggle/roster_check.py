@@ -46,7 +46,7 @@ from pathlib import Path
 from core import cli
 from kneemri.inference.members import Member
 from kneemri.kaggle.package_members import MemberRoster
-from kneemri.runs.holdout_record import HoldoutRecord
+from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
 
 logger = logging.getLogger(__name__)
 
@@ -133,8 +133,29 @@ class RosterDrift:
         return sorted(path.stem for path in self.processed.glob(CHECKPOINT_GLOB))
 
     def scoreable(self) -> list[str]:
-        """The checkpoints that could take a seat: the ones that left holdout predictions to price."""
-        return [name for name in self.checkpoints() if HoldoutRecord(self.processed / f"{name}.pt").exists()]
+        """Every member that could take a seat: the ones that left holdout predictions to price.
+
+        Enumerated from the HOLDOUT RECORDS, not from the checkpoints. Until 2026-09-08 this walked
+        `*.pt` and asked each one for its record, which meant a member with predictions and no local
+        checkpoint was never enumerated at all — and that is every FOREIGN member, someone else's
+        weights served through `foreign_member` and scored on our fold. So the one gate that guards what
+        can be shipped was blind to an entire class of shippable member: the five `raptor_ft_hisrecipe_distill*`
+        sat in neither the roster nor the declines for hours with this check green, and `raptor_v4_swa`
+        — a seat in the SHIPPED champion — is invisible to it to this day. The record is what makes a
+        member scoreable; the checkpoint is only the usual way one arrives (knee-s39kk).
+        """
+        return sorted(path.name[: -len(HOLDOUT_SUFFIX)] for path in self.processed.glob(f"*{HOLDOUT_SUFFIX}"))
+
+    def holdout_only(self) -> list[str]:
+        """Scoreable members with predictions and no checkpoint of ours — the class this check used to miss.
+
+        Named in the survey every run rather than complained about, because being holdout-only is not a
+        defect: it is what a foreign member IS. What was the defect is that such a member could be in
+        neither file and nothing said so, and `scoreable` now closes that. A roster line for one of these
+        is still a `phantom`, correctly — `package_members` ships checkpoints, so the shelf cannot reach
+        it and the honest home for it is a decline that says how it reaches Kaggle instead.
+        """
+        return [name for name in self.scoreable() if not (self.processed / f"{name}{CHECKPOINT_SUFFIX}").exists()]
 
     def patterns(self) -> list[str]:
         return [pattern for roster in self.rosters for pattern in MemberRoster.read(roster).patterns()]
@@ -180,7 +201,13 @@ class RosterDrift:
         """
         gone: list[str] = []
         for name in sorted(self.packaged()):
-            member = Member.from_checkpoint(self.processed / f"{name}{CHECKPOINT_SUFFIX}")
+            checkpoint = self.processed / f"{name}{CHECKPOINT_SUFFIX}"
+            # A HOLDOUT-ONLY MEMBER HAS NOTHING TO ASK. A foreign member is scoreable through its record
+            # and carries no checkpoint of ours, so there is no stamped config to name a cache with — and
+            # it never read our cache in the first place, having been served through its own decode.
+            if not checkpoint.exists():
+                continue
+            member = Member.from_checkpoint(checkpoint)
             if not member.reads_pixels:
                 continue
             cache = member.cache(self.pixels)
@@ -215,7 +242,8 @@ class RosterDrift:
         scoreable = self.scoreable()
         declined = MemberDeclines.read(self.declines).reasons()
         summary = (
-            f"{len(scoreable)} scoreable of {len(self.checkpoints())} checkpoints: "
+            f"{len(scoreable)} scoreable (of which {len(self.holdout_only())} carry no local checkpoint) "
+            f"against {len(self.checkpoints())} checkpoints: "
             f"{len(self.packaged())} packaged, {len(declined)} declined, {len(self.undocumented())} undocumented"
         )
         return [*self.complaints(), *unreadable, summary]
