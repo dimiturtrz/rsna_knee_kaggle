@@ -161,6 +161,31 @@ def test_prefix_mass():
     assert health.prefix_mass(flat) == pytest.approx(PREFIX / KEYS, abs=1.0e-4)
 
 
+def test_class_mass():
+    """The class token's own share — the half of the prefix that is a defect rather than a mechanism.
+
+    The two cases below are the whole reason the field exists. `prefix_mass` scores ~1.0 on BOTH: a
+    trunk whose patch queries have collapsed onto the class token, and one whose queries have parked
+    on its four registers exactly as Darcet et al. intend. Summed they are one number and the second
+    reads as the first; split, the register case leaves `class_mass` near zero.
+    """
+    health = _health()
+    registers = 4
+    wide = KEYS + registers
+
+    onto_class = torch.zeros(1, 1, wide, wide)
+    onto_class[..., 0] += 30.0
+    onto_class = onto_class.softmax(dim=-1)
+    assert health.prefix_mass(onto_class) > 0.99
+    assert health.class_mass(onto_class) > 0.99
+
+    onto_registers = torch.zeros(1, 1, wide, wide)
+    onto_registers[..., 1 : 1 + registers] += 30.0
+    onto_registers = onto_registers.softmax(dim=-1)
+    assert health.prefix_mass(onto_registers) > 0.99
+    assert health.class_mass(onto_registers) < 0.01
+
+
 def test_retention():
     """The share of stock's own room a block still holds, whichever end it is closer to losing.
 

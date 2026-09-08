@@ -139,11 +139,33 @@ class AttentionProfile:
     because the prefix is the trunk's business — one class token for DINOv2, four registers more for
     DINOv3 — and `ln(keys)` is what a uniform row would have scored."""
 
+    class_mass: tuple[float, ...] = ()
+    """The share of `prefix_mass` sitting on the CLASS TOKEN alone, which is the half that is a defect.
+
+    `prefix_mass` sums the whole prefix, and at DINOv2's prefix of one that is the same number. At a
+    trunk with registers it is not, and the difference is the entire claim of Darcet et al.: a sink
+    parked on the REGISTERS is the mechanism working as designed, and a sink on the class token is the
+    pathology registers exist to prevent. Summed, the two are indistinguishable.
+
+    Measured 2026-09-08 on `adapt_latent_v3small_m30_e8`, which cleared the gate at mask 0.30 where
+    dinov2-small refused, and then printed a LARGER prefix mass than the trunk it was meant to fix
+    (b11 0.83 against 0.75). Whether that reads as a success or a worse failure is exactly the split
+    this field carries, and the arm was queued to answer it with a statistic that could not.
+
+    It sits BEHIND `keys` rather than beside `prefix_mass`, where it reads better, because callers
+    build this dataclass positionally — a third field would have bound a key count into a mass and
+    every reading would have stayed plausible.
+    """
+
     def report(self) -> str:
         """Both statistics per block, so a log line is a reading and not a single number."""
         entropies = "  ".join(f"{value:.2f}" for value in self.entropy)
         masses = "  ".join(f"{value:.2f}" for value in self.prefix_mass)
-        return f"H {entropies} | prefix {masses}"
+        line = f"H {entropies} | prefix {masses}"
+        if not self.class_mass:
+            return line
+        classes = "  ".join(f"{value:.2f}" for value in self.class_mass)
+        return f"{line} | cls {classes}"
 
 
 @dataclass(frozen=True)
@@ -257,6 +279,7 @@ class AttentionHealth:
         return AttentionProfile(
             entropy=tuple(self.entropy(block) for block in blocks),
             prefix_mass=tuple(self.prefix_mass(block) for block in blocks),
+            class_mass=tuple(self.class_mass(block) for block in blocks),
             keys=int(blocks[0].shape[-1]),
         )
 
@@ -274,9 +297,24 @@ class AttentionHealth:
 
         The whole prefix rather than the class token alone, because DINOv3 prepends four registers and a
         sink can form on any of them; at DINOv2's prefix of one the two are the same number.
+
+        That makes it the DETECTION statistic and not the diagnosis: it says a sink arrived, never which
+        token took it, and on a register trunk those are opposite verdicts. `class_mass` is the other
+        half, and neither is read alone.
         """
         prefix = attention.shape[-1] - self.tokens
         return float(attention[:, :, -self.tokens :, :prefix].float().sum(dim=-1).mean())
+
+    def class_mass(self, attention: Float[Tensor, "b heads t t"]) -> float:
+        """The same statistic over the CLASS TOKEN alone — key 0, never the registers behind it.
+
+        Reported beside `prefix_mass` rather than instead of it, because the pair is the reading: their
+        DIFFERENCE is the register mass, and a sink is benign exactly insofar as that difference carries
+        it. Key 0 is the class token in both families — DINOv2 has nothing else in the prefix, and DINOv3
+        prepends its four registers after it — so this indexes the same object on either trunk and needs
+        no per-family branch.
+        """
+        return float(attention[:, :, -self.tokens :, :1].float().sum(dim=-1).mean())
 
     def degenerate(self, profile: AttentionProfile) -> bool:
         """Has ANY block dropped below the floor on either side of stock?
