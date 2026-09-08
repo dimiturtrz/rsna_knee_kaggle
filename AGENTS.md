@@ -304,10 +304,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   'sklearn'` twice in one evening — the second time after a "proof" the env was healthy that had asked
   the wrong interpreter. Add to it with `UV_NO_SYNC=1 uv pip install --python
   .venv-arm/Scripts/python.exe <pkg>` (adds), never `uv sync --extra` (rewrites, and has killed live
-  arms). And **an exit code is not evidence an arm ran**: `foreign_run.py:71` calls
-  `runpy.run_path` and does not translate a failure into a non-zero status, so both deaths were recorded
-  as `returned 0` and `queue_check` read **OK** with an idle card behind it. The success marker is the
-  CHECKPOINT on disk.
+  arms). And **an exit code was not evidence an arm ran** — `foreign_run` ran the script through
+  `runpy.run_path` and did not translate a failure into a non-zero status, so both deaths were recorded
+  as `returned 0` and `queue_check` read **OK** with an idle card behind it. FIXED 2026-09-08: the runner
+  now guards both ends on the artefacts his script writes for its `--tag` (`raptor_ft_*`, `raptor_gold_*`,
+  `raptor_oof_*`, beside the script — his `HERE`). A run that returns having written NONE raises, so a
+  silent death is now a non-zero exit; and a tag whose artefacts ALREADY exist is refused before the
+  script opens them, since he overwrites without a word and the overwritten run is usually one this
+  project has already priced. `--anyway '<why>'` spends it deliberately. The success marker is still the
+  CHECKPOINT on disk — the guard is what makes the exit code agree with it.
 - **An arm's full log is named for its CHECKPOINT, not for the arm** — `_arm_log` (`experiments/lib.sh`)
   uses the basename of `--out` minus `.pt`, falling back to the `run_train` name only when a run has no
   `--out` (knee-tkyy). So `ortho_slow_trunk` writes `ortho_slow_trunk.full.log` and `mricore_corpus`
