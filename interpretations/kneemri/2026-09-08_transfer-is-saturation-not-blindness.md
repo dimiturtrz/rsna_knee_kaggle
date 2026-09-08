@@ -94,7 +94,35 @@ live possibility that the holdout says nothing above 0.870 — which would leave
 "improve the offline number" unfunded. Every stratum reads a positive slope; every stratum reads a
 correlation of 0.75 or better. There is no band in which offline movement buys nothing.
 
-**Price an offline delta at ~0.7 of face value, uniformly.** The pooled figure stands. What is RETRACTED is
+**Price an offline delta at ~0.7 of face value for any arm aimed at the champion — and the band cut is
+retired as a planning axis (D197, 10:24Z).** The researcher re-measured the constant on an independent
+37-entry population with three estimators that do not share `board_transfer`'s machinery, and the answer
+is that there is no single constant: the slope is **~1.0 across the whole ladder** (+1.0169 OLS,
++0.9399 median pair ratio, +1.05 from the live module) and **~0.5-0.7 in the top ten to fifteen entries**
+(0.71 at k=15, 0.59 at k=12, 0.49 at k=10). The 0.7 this project has been multiplying by is
+`compression_above`, a top-regime conditional, and essentially every arm we run is aimed there. **The
+practical output: to move the board +0.010 from where the champion sits, an arm must deliver +0.017
+offline.** Not +0.010, not +0.014.
+
+The top-regime fall survived four separate attempts to explain it away — noisy-denominator bias in the
+pair ratio (ratio flat across delta quartiles, 0.90/1.05/0.93/0.93), entry-level selection-on-noise
+(honest select-A-measure-B sits at or BELOW its matched control at every k, the opposite of what
+selection bias predicts), pair-level selection (a selection-free OLS with the regressor measured on an
+independent half falls just as steeply, 0.9956 → 0.4826), and within-slice regression dilution (the
+in-slice reliability barely moves, 0.949 → 0.914, while sd(offline) more than halves; the correction is
+worth +0.047 at k=37 and +0.001 at k=10). It is a property of the board, not of the ruler.
+
+**And every corrected band slope sits BELOW the whole-frame +1.0169** — 0.614 / 0.788 / 0.957 / 0.863 /
+0.866 against 1.0169. Cutting the frame into difficulty bands and regressing inside one loses
+board-relevant information whichever band is picked, so **score on the whole 909**. The Q3−Q1 gap does
+survive the dilution correction (+0.343, 95% [−0.015, +0.589], 0.972 of bootstrap draws above zero) but
+does not clear its interval — 0.972 is precisely the value that gets written down as a finding and then
+fails to replicate. Entry-side and member-side (D195) now close the same axis by different statistics.
+
+Reliability is NOT the story: entry-level `offline@holdout909/midpoint` measures itself at **0.9763**, so
+disattenuating the whole-frame slope is worth +0.025. The ATTENUATED branch I pre-registered is dead.
+
+What is RETRACTED is
 the follow-on rule that a gain should be re-priced by WHERE it landed (the published version said easy-band
 gains were worth ~half of mid-band ones). The pair split — hard +0.71 vs easy +0.62 — is the same
 comparison at a smaller effect size and carries no interval; it is directional at best and is not

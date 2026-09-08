@@ -10730,3 +10730,53 @@ follows it.
 **Note the floor.** +/-0.0299 is the widest paired floor this ledger has recorded, five times the
 significance bar. An arm read against this control cannot resolve anything smaller than a very large effect,
 which is a fact about the CONTROL's frame and should be checked before another arm is queued against it.
+
+## The transfer constant is CONDITIONAL: ~1.0 mid-ladder, ~0.5-0.7 at the champion — and the band cut is retired — 2026-09-08
+
+D197, researcher, 10:24Z, answering M198. Card-free and slot-free; an independent 37-entry rebuildable
+population and three estimators that do not share `board_transfer`'s machinery.
+
+**There is no single constant.** The slope of board on offline is ~1.0 across the whole ladder and
+~0.5-0.7 inside the top ten to fifteen entries, and the difference is real.
+
+| quantity | value | population | cut |
+|---|---|---|---|
+| reliability of `offline@holdout909/midpoint` | 0.9763 (sd 0.0133, 200 stratified split-halves, Spearman-Brown) | 37 rebuildable ensemble entries | midpoint 0.5 |
+| observed OLS slope, board on offline | +1.0169 (r 0.8854, sd(off) 0.0070) | same 37 | same |
+| disattenuated slope | +1.0416 | same 37 | same |
+| slope in the top 10, selection-free and dilution-corrected | +0.487 (sd 0.216) | top 10 of the 37 | same |
+
+**THE PRACTICAL OUTPUT, and it is the number to write into every plan: to move the board +0.010 from
+where the champion sits, an arm must deliver +0.017 OFFLINE.** Not +0.010, not +0.014. The 0.7 this
+project multiplies by is `compression_above`, a TOP-REGIME CONDITIONAL — `board_transfer.py:370-374`
+already says `compression` answers the whole-record question while pricing an arm uses
+`compression_above`, and `:458-459` prints the whole-record figure with "the wrong number to price an arm
+with" attached. Since essentially every arm we run is aimed at the champion, 0.7 is the right constant
+for our plans and at the very top it is if anything generous (0.5-0.6 there).
+
+**The fall survived four attempts to explain it away.** (a) Noisy-denominator bias in the pair ratio:
+median ratio by delta quartile is flat, 0.9031 / 1.0466 / 0.9339 / 0.9274, and a separation-floor sweep
+climbs only 0.9399 → 0.9616 while n falls 380 → 40. (b) Entry-level selection-on-noise: selecting on
+half A and measuring on the independent half B puts the honest estimate at or BELOW its matched control
+at every k — selection bias predicts the opposite. (c) Pair-level selection: a selection-free OLS with
+the regressor measured on an independent half falls just as steeply, 0.9956 → 0.4826, and reads 0.9956
+at k=37 against the +1.0169 computed a different way. (d) Within-slice regression dilution, the
+strongest candidate: in-slice reliability barely moves (0.949 → 0.914) while sd(offline) more than
+halves, so the correction is worth +0.047 at k=37 and +0.001 at k=10. **The fall is a property of the
+board, not of the ruler.**
+
+**The band cut is RETIRED as a planning axis.** Every corrected band slope sits BELOW the whole-frame
++1.0169: Q1 0.614, Q2 0.788, Q3 0.957, Q4 0.863, Q5 0.866. Cutting the frame into difficulty bands and
+regressing inside one loses board-relevant information whichever band is chosen — **score on the whole
+909**. The Q3-Q1 gap survives the dilution correction (+0.343) but does not clear its interval
+(95% [-0.015, +0.589], 0.972 of bootstrap draws above zero), and 0.972 is exactly the value that gets
+written down as a finding and then fails to replicate. This closes from the entry side the axis D195
+closed from the member side, by a different statistic.
+
+**A docstring defect to fix.** `board_transfer.py:23-24` records +1.55 / +0.99; the live run says
++1.05 / +0.72. The module warns in its own header that this constant has been misquoted from prose three
+times, and the drift is now present in the module itself.
+
+**Direction-only caveat.** At k <= 10 the spread over splits is 0.16-0.22 on 6-12 pairs.
+`board_transfer.py:153` already stamps that regime `DIRECTION ONLY, too few pairs to price an arm with`.
+Read 0.5 as "clearly below 1.0", never as a third decimal.
