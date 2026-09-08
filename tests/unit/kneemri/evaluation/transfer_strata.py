@@ -136,6 +136,27 @@ def test_compression(strata: TransferStrata):
     assert np.isnan(strata.compression([]))
 
 
+def test_spread(strata: TransferStrata):
+    """Both spreads and their correlation, and NaN correlation where a band cannot have one.
+
+    A perfectly ordered ladder correlates at +1; one entry has no spread to correlate, and an offline
+    axis that does not move has no ratio to report either — which is exactly the case a bare slope
+    hides.
+    """
+    ladder = [
+        StratumReading(entry="low", band=0, offline=0.80, board=0.920, scoreable=LABELS),
+        StratumReading(entry="mid", band=0, offline=0.81, board=0.930, scoreable=LABELS),
+        StratumReading(entry="high", band=0, offline=0.82, board=0.940, scoreable=LABELS),
+    ]
+    found = strata.spread(ladder)
+    assert found.offline == pytest.approx(np.std([0.80, 0.81, 0.82]))
+    assert found.board == pytest.approx(np.std([0.920, 0.930, 0.940]))
+    assert found.correlation == pytest.approx(1.0)
+    flat = [StratumReading(entry=r.entry, band=0, offline=0.80, board=r.board, scoreable=LABELS) for r in ladder]
+    assert np.isnan(strata.spread(flat).correlation)
+    assert np.isnan(strata.spread(ladder[:1]).correlation)
+
+
 def test_attribution(strata: TransferStrata):
     """Both halves are priced off the pairs the holdout resolved, and an unresolvable set says so.
 

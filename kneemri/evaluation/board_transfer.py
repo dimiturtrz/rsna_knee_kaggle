@@ -20,8 +20,9 @@ pairwise ratio is a confounded read and only the DISTRIBUTION is worth quoting; 
 the ruler and the board disagreed, not that the ruler is wrong about the axis its entry was built on.
 
 ONE MEDIAN IS THE WRONG SHAPE FOR THIS, and the report says so in its own output. The ratio is not
-constant across the record: re-read over only the strongest entries it FALLS, from +1.55 over
-everything to +0.99 [+0.77, +1.18] among the entries at the top. Whatever that is - a real saturation,
+constant across the record: re-read over only the strongest entries it FALLS. As FITTED ON 2026-08-29,
+from +1.55 over everything to +0.99 [+0.77, +1.18] among the entries at the top; as fitted on 2026-09-08
+against a board file `board_check` had since completed, from +1.05 to +0.72. Whatever that is - a real saturation,
 or the attenuation you get from dividing a board gap by an offline gap barely wider than the offline
 noise - it decides how far a target is. Pricing an arm against today's champion at the whole-record
 median reports what a holdout point USED to be worth, and the two differ by about a third. So

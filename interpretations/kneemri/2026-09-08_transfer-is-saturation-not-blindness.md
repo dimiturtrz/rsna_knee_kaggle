@@ -179,3 +179,40 @@ the next reader does not reach for it a second time.
 against a whole-entry y, so its denominator is the subset's own spread and it is not comparable across
 subsets. Report the CORRELATION alongside every stratified slope, or the spread ordering will be read as a
 transfer ordering — which is precisely what happened here, within fifteen minutes of publication.
+
+## Postscript, 2026-09-08 11:11Z — the method note above is now enforced, and it settles the band ordering
+
+`transfer_strata.lines()` prints `sd(offline)`, `sd(board)` and pearson `r` beside every band's slope
+(`kneemri/evaluation/transfer_strata.py`, `BandSpread`). The first run of the instrumented report,
+`logs/transfer_strata_spread.log`:
+
+    band  studies  disagreement   slope   sd(offline)  sd(board)     r
+    Q1        182       0.0764    +0.42       0.0143     0.0079   +0.82
+    Q2        182       0.1014    +0.58       0.0099     0.0079   +0.87
+    Q3        182       0.1147    +0.74       0.0083     0.0079   +0.87
+    Q4        182       0.1237    +0.74       0.0078     0.0079   +0.75
+    Q5        181       0.1382    +0.66       0.0093     0.0079   +0.91
+
+    pairs split at the median hard-share (443 resolved): HARD +0.71, EASY +0.62
+
+**`sd(board)` is 0.0079 in every band, and it has to be.** A band re-scores the OFFLINE axis only; the
+board number is per-entry and is carried unchanged into all five rows. So the numerator of every band
+slope is one constant, and the ordering of the slopes is the inverse ordering of `sd(offline)` and
+nothing else. Q1's +0.42 is the lowest slope because the holdout SPREADS THE ENTRIES MOST on easy
+studies (0.0143, nearly twice Q4's 0.0078) — the ruler is at its most discriminative there, not at its
+least transferable. Reading `slope ~ r * sd(board)/sd(offline)` reproduces every row (Q1: 0.82 x
+0.0079/0.0143 = 0.45 against a measured median-pair +0.42).
+
+**And `r` is 0.75 to 0.91 in all five bands.** Every band orders the entries the way the board does.
+There is no band in which the holdout fails to transfer; there is only a band in which it separates
+entries more, which divides the same board gap by a bigger offline gap. Any future claim of the form
+"gains made in band X do not reach the board" must first show an `r` that falls, and none does.
+
+The one comparison the band cut does NOT reduce to a spread artefact is the attribution line, which
+splits PAIRS at their median hard-share and so divides both halves by their own gain: **+0.71 hard vs
++0.62 easy, over 443 resolved pairs.** That difference is small, unbanded, and stated without a
+threshold — it is not a finding, and it is the only shape of this question worth re-asking.
+
+Consequence for planning: unchanged. The D197 bar stands — **+0.017 offline to move the board +0.010**
+— and the band cut remains retired as a planning axis, now for a second, sharper reason: the bands
+never disagreed about transfer in the first place.

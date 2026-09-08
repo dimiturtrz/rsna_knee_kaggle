@@ -83,6 +83,14 @@ STRATA = 5
 """How many difficulty bands the holdout is cut into. Five over 909 studies is ~180 a band, which is the
 smallest stratum in which a twelve-label mean is worth printing at all."""
 
+CORRELATABLE = 2
+"""How many entries a band needs before a correlation between the two axes exists at all."""
+
+MOVED = 1e-9
+"""The spread below which an axis is treated as constant. Not zero: a set of byte-identical readings has
+a standard deviation of ~1e-16, and `> 0.0` calls that movement and reports a correlation of 4e-15 as if
+it were a measurement. Both axes are recorded to four decimals, so anything under 1e-9 is float noise."""
+
 REPO = Path(__file__).resolve().parents[2]
 CONFIG = REPO / "paths.yaml"
 
@@ -113,6 +121,26 @@ class StratumReading:
     scoreable: int
     """How many of the twelve findings had both classes present in this band. A band that loses a rare
     finding is scoring a different metric from the whole-holdout number, and the reader must see it."""
+
+
+@dataclass(frozen=True)
+class BandSpread:
+    """How much the two axes actually MOVED inside one band, and how tightly they moved together.
+
+    A slope is a ratio of two spreads, so it can be large because the board moved or because the
+    holdout did not. D197 quoted five band slopes without these three numbers and a fall in the ratio
+    was read as a fall in transfer; the same fall follows from an offline spread shrinking toward the
+    entry-level noise floor. A stratified slope is not reportable without them.
+    """
+
+    offline: float
+    """Standard deviation of the band's offline readings — the denominator of every pair ratio."""
+    board: float
+    """Standard deviation of the band's board scores — the numerator, and constant across bands, so a
+    slope that differs between bands differs because the OFFLINE spread differed."""
+    correlation: float
+    """Pearson r between the two axes over the band's entries. NaN when a band holds fewer than two
+    entries or either axis is constant, which is a statement about the band and not a failure."""
 
 
 @dataclass(frozen=True)
@@ -246,6 +274,22 @@ class TransferStrata:
         ]
         return float(np.median(ratios)) if ratios else float("nan")
 
+    def spread(self, readings: list[StratumReading]) -> BandSpread:
+        """The two spreads and their correlation for one band's readings.
+
+        Reported beside every slope because a slope divides one by the other: a band whose offline
+        spread has collapsed toward the noise floor prints a small ratio whether or not transfer fell.
+        """
+        offline = np.asarray([reading.offline for reading in readings], dtype=np.float64)
+        board = np.asarray([reading.board for reading in readings], dtype=np.float64)
+        movable = len(readings) >= CORRELATABLE and float(offline.std()) > MOVED and float(board.std()) > MOVED
+        correlation = float(np.corrcoef(offline, board)[0, 1]) if movable else float("nan")
+        return BandSpread(
+            offline=float(offline.std()) if len(readings) else float("nan"),
+            board=float(board.std()) if len(readings) else float("nan"),
+            correlation=correlation,
+        )
+
     def attribution(self) -> "Attribution":
         """Whether a pair whose holdout gain sits in the HARD bands out-transfers one whose gain sits easy.
 
@@ -304,6 +348,10 @@ class TransferStrata:
             out.append(
                 f"{stratum.named()}  {len(stratum.rows):>4} studies  disagreement {stratum.difficulty:.4f}  "
                 f"slope {ratio:+.2f}  ({scoreable} of {len(TARGETS)} findings scoreable)"
+            )
+            spread = self.spread(band)
+            out.append(
+                f"      sd(offline) {spread.offline:.4f}  sd(board) {spread.board:.4f}  r {spread.correlation:+.2f}"
             )
             out.extend(
                 f"    {reading.entry:<20} offline {reading.offline:.4f}  board {reading.board:.3f}"
