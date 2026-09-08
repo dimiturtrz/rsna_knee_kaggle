@@ -15,6 +15,7 @@ records: a method that downloads 90 MB is a method that cannot be tested.
 
 import logging
 import re
+from collections.abc import Iterator
 from pathlib import Path
 
 import torch
@@ -41,12 +42,25 @@ STEM = -1
 """The group for every encoder tensor outside the repeated blocks — patch embedding, class token,
 positional table, the final norm. Negative so it sorts before block 0 and can never collide with one."""
 
-CONCENTRATION_BLOCKS = 4
-"""How many of the deepest blocks the concentration ratio is read over.
+UNFREEZE_KEY = "unfreeze_last"
+OFFSET_KEY = "unfreeze_offset"
+"""The two fields `MemberRecord` writes into a checkpoint's config to record the window supervision was
+allowed to move (`member_record.py`, "the value this run USED, never the module constant").
 
-Four because that is what `--unfreeze-depth` opens by default, so the ratio answers the question the
-trainer actually poses: did the part we allowed to move carry the adaptation, or did it leak into
-blocks that were meant to stay put."""
+THE CONSTANT THAT USED TO SIT HERE WAS WRONG, and it is worth saying how rather than deleting it
+quietly. It read `CONCENTRATION_BLOCKS = 4`, justified as "what `--unfreeze-depth` opens by default" —
+a flag the trainer does not define. The real boundary is `--unfreeze-last`, whose default is 6, so the
+ratio was read over the top FOUR blocks while supervision opened the top SIX: two opened blocks were
+being counted as leak. It is `knee-jkqrg`, and the fix is not 4 -> 6. A legislated number cannot be
+right for a checkpoint at all, because 274 of 296 arms take the default and the rest name their own
+window, and `kneemri.evaluation` may not import `kneemri.training` to ask what the default is
+(import-linter, "evaluation measures predictions"). The window belongs to the MEMBER and is recorded on
+it; a checkpoint that does not record one is refused rather than assumed."""
+
+CONSTRUCTED_SHARE = 0.9999
+"""Where an in-window share stops being a measurement. Not a tolerance on a noisy quantity: outside a
+supervised window the drift is arithmetically 0.0 over the same tensors, so the true value is exactly
+1.0 and this absorbs only the float division."""
 
 
 class EncoderDrift:
@@ -105,13 +119,8 @@ class EncoderDrift:
             groups.setdefault(int(found.group(1)) if found else STEM, []).append(name)
         return groups
 
-    def blocks(self, stock: dict[str, Tensor]) -> dict[int, float]:
-        """Relative drift per block: the norm of the change over the norm of the pretrained weights.
-
-        Relative, because absolute norms grow with width and depth and would rank a large encoder's
-        blocks against a small one's by size alone. A tensor the stock model does not have is skipped
-        rather than counted as infinite drift — that is a new parameter, not a moved one.
-        """
+    def pairs(self, stock: dict[str, Tensor]) -> Iterator[tuple[int, float, float]]:
+        """Per block: the squared norm of the change, and of the pretrained weights it is measured on."""
         trained = self.trained()
         # A COMPARISON THAT MATCHES NOTHING IS A FAILURE, not a drift of zero. The first run of this
         # module reported `top-4 share of drift 0.000` for a compiled checkpoint whose every key carried
@@ -122,38 +131,95 @@ class EncoderDrift:
                 f"{len(stock)} stock ones, so nothing was compared"
             )
             raise ValueError(message)
-        drift: dict[int, float] = {}
         for block, names in self.grouped(trained).items():
             shared = [name for name in names if name in stock]
             if not shared:
                 continue
-            changed = sum(float((trained[name] - stock[name]).pow(2).sum()) for name in shared)
-            original = sum(float(stock[name].pow(2).sum()) for name in shared)
-            drift[block] = (changed**0.5) / (original**0.5) if original else 0.0
-        return drift
+            yield (
+                block,
+                sum(float((trained[name] - stock[name]).pow(2).sum()) for name in shared),
+                sum(float(stock[name].pow(2).sum()) for name in shared),
+            )
 
-    def concentration(self, drift: dict[int, float]) -> float:
-        """The share of total drift sitting in the deepest `CONCENTRATION_BLOCKS` blocks.
+    def blocks(self, stock: dict[str, Tensor]) -> dict[int, float]:
+        """Relative drift per block: the norm of the change over the norm of the pretrained weights.
 
-        This is the number the gate turns on. Near 1.0 means supervision only re-weighted the top of a
-        representation it could not afford to rebuild, and the room on-domain pretraining would fill is
-        real. Spread evenly — near `CONCENTRATION_BLOCKS / n_blocks` — means the fine-tune rewrites the
-        whole encoder anyway, and pretraining it differently first would be overwritten.
+        Relative, because absolute norms grow with width and depth and would rank a large encoder's
+        blocks against a small one's by size alone. A tensor the stock model does not have is skipped
+        rather than counted as infinite drift — that is a new parameter, not a moved one.
+
+        AND FOR EXACTLY THAT REASON IT MUST NOT BE READ ACROSS BLOCKS OF ONE ENCODER, which is what
+        `changes` is for and why that method exists. Measured 2026-09-08 on stock `dinov2-small`: the
+        per-block weight norm is not flat and does not trend smoothly — 69.8 at block 4, 204.6 at block
+        11, with a 167.5 spike at block 3. So a CONSTANT absolute change prints here as a falling curve.
+        Reading `adapt_small_e8_unitfix` off this method alone gave a 4.7x monotone early-heavy slope
+        (0.1518 at block 4 down to 0.0321 at block 11) that is 1.8x and non-monotone in absolute terms,
+        with block 11 above blocks 9 and 10 and block 3's "dip" entirely its own large norm. The profile
+        was most of the way to a mechanism for a live arm's failure before the denominator was checked.
+        """
+        measured = self.pairs(stock)
+        return {block: (changed**0.5) / (original**0.5) if original else 0.0 for block, changed, original in measured}
+
+    def changes(self, stock: dict[str, Tensor]) -> dict[int, float]:
+        """Absolute drift per block: the norm of the change, with no denominator at all.
+
+        The companion `blocks` needs to be read against, and the only one of the two that compares
+        blocks WITHIN one encoder honestly. It is meaningless ACROSS encoders — that is the direction
+        `blocks` owns — so neither number is the real one and a shape claim needs both.
+        """
+        return {block: changed**0.5 for block, changed, _ in self.pairs(stock)}
+
+    def opened(self) -> tuple[int, int] | None:
+        """The block window supervision could move, as this member itself recorded it — or None.
+
+        None is a refusal and not a zero: a checkpoint written before the fields existed, or by another
+        project's trainer, cannot say which of its blocks were allowed to move, and a share read over a
+        guessed window measures the guess.
+        """
+        config = self.saved.get("config", {})
+        if UNFREEZE_KEY not in config:
+            return None
+        return int(config[UNFREEZE_KEY]), int(config.get(OFFSET_KEY) or 0)
+
+    def concentration(self, drift: dict[int, float], window: tuple[int, int]) -> float:
+        """The share of total drift sitting INSIDE the window supervision was allowed to move.
+
+        Near 1.0 means the movement stayed where the trainer put it. Spread out — near the window's own
+        share of the block count — means the encoder moved in blocks the trainer never opened, which for
+        a member fitted from STOCK weights is impossible (`encoder_surgery.py` calls
+        `requires_grad_(False)` on the rest) and therefore says the member did not start from stock.
         """
         blocks = sorted(index for index in drift if index != STEM)
-        if not blocks:
-            return 0.0
+        opened, offset = window
+        hi = max(len(blocks) - offset, 0)
+        inside = blocks[max(hi - opened, 0) : hi]
         total = sum(drift[index] for index in blocks)
-        deepest = sum(drift[index] for index in blocks[-CONCENTRATION_BLOCKS:])
-        return deepest / total if total else 0.0
+        return sum(drift[index] for index in inside) / total if total else 0.0
+
+    def constructed(self, drift: dict[int, float], window: tuple[int, int]) -> bool:
+        """Is the share 1.000 because nothing outside the window moved AT ALL — i.e. by construction?
+
+        This is the reading the old constant hid, and it is the same defect as `Ledger75Row.recut_blind`
+        one axis over: a number whose population cannot express the question. A member fine-tuned from
+        stock has its frozen blocks bit-identical to stock, so their drift is exactly 0.0 and the share
+        is exactly 1.0 — a restatement of `--unfreeze-last`, never a measurement of where supervision
+        chose to spend. The share becomes a real reading only when the frozen prefix DIFFERS from stock,
+        which happens exactly when the member was fitted from a self-supervised checkpoint: then the
+        outside-window drift is the PRETRAIN, and the ratio prices SSL against supervision rather than
+        detecting a leak.
+        """
+        return self.concentration(drift, window) >= CONSTRUCTED_SHARE
 
     def report(self, stock: dict[str, Tensor]) -> dict[int, float]:
         """Log the profile and hand it back, so a caller can compare two members without re-reading."""
         drift = self.blocks(stock)
+        absolute = self.changes(stock)
         logger.info("%s (%s)", self.checkpoint.name, self.variant())
+        # BOTH COLUMNS, ALWAYS, because the shape of the relative one is partly the shape of the stock
+        # norms it divides by and a reader comparing blocks needs the undivided number in the same view.
         for block in sorted(drift):
             label = "stem" if block == STEM else f"block {block:2d}"
-            logger.info("  %-9s %.4f", label, drift[block])
+            logger.info("  %-9s %.4f  (abs %8.3f)", label, drift[block], absolute[block])
         # THE MAGNITUDE IS REPORTED BEFORE THE SHARE, because it turned out to be the number that
         # decides this question: every member measured moves its most-adapted block by 0.2-2.1% of that
         # block's own norm. A share of a quantity that small says where a little went, not how much.
@@ -164,7 +230,14 @@ class EncoderDrift:
             # that looks like a measurement of an adapted encoder.
             logger.info("  base weights untouched — adapters or a fully frozen encoder")
             return drift
-        logger.info("  top-%d share of drift  %.3f", CONCENTRATION_BLOCKS, self.concentration(drift))
+        window = self.opened()
+        if window is None:
+            logger.info("  no %s recorded — this member cannot name a window to read a share over", UNFREEZE_KEY)
+            return drift
+        opened, offset = window
+        logger.info("  last-%d (offset %d) share  %.3f", opened, offset, self.concentration(drift, window))
+        if self.constructed(drift, window):
+            logger.info("  ...which is 1.000 BY CONSTRUCTION: fitted from stock, so the frozen blocks cannot move")
         return drift
 
 
