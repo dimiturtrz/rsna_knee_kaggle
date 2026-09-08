@@ -4442,6 +4442,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.control_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.control_check",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.control_check",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.convergence_check",
       "target": "core.cli",
       "weight": 1
@@ -24494,6 +24512,150 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.experiments.control_check.Comparability",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.Comparability._asked",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.Comparability._keys",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.Comparability.budgeted",
+      "target": "kneemri.experiments.control_check.Comparability._asked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.Comparability.built",
+      "target": "kneemri.experiments.control_check.Comparability._keys",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.Comparability.sourced",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.control_check.ControlCheck",
+      "target": "kneemri.experiments.control_check.Comparability",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.control_check.ControlCheck",
+      "target": "kneemri.experiments.control_check.Comparison",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.control_check.ControlCheck",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.audit",
+      "target": "kneemri.experiments.control_check.ControlCheck.declared",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.audit",
+      "target": "kneemri.experiments.control_check.ControlCheck.findings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.control_check.ControlCheck.declared",
+      "target": "kneemri.experiments.control_check.Comparison",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.declared",
+      "target": "kneemri.experiments.control_check.ControlCheck._first",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.findings",
+      "target": "kneemri.experiments.control_check.Comparability.budgeted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.findings",
+      "target": "kneemri.experiments.control_check.Comparability.built",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.findings",
+      "target": "kneemri.experiments.control_check.Comparability.sourced",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.findings",
+      "target": "kneemri.experiments.control_check.ControlCheck.resolve",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.control_check.ControlCheck.resolve",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.ControlCheck.resolve",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.control_check.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.control_check.main",
+      "target": "kneemri.experiments.control_check.Comparability",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.control_check.main",
+      "target": "kneemri.experiments.control_check.ControlCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.control_check.main",
+      "target": "kneemri.experiments.control_check.ControlCheck.audit",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.experiments.convergence_check.ConvergenceCheck",
       "target": "kneemri.experiments.convergence_check.Convergence",
       "weight": 1
@@ -35653,7 +35815,7 @@
       "role": null
     },
     {
-      "descendants": 279,
+      "descendants": 280,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -36541,7 +36703,7 @@
       "role": null
     },
     {
-      "descendants": 23,
+      "descendants": 24,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -36632,6 +36794,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.claims_check",
       "label": "claims_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check",
+      "label": "control_check",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -40907,6 +41077,30 @@
       "level": "class",
       "parent": "kneemri.experiments.claims_check",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability",
+      "label": "Comparability",
+      "level": "class",
+      "parent": "kneemri.experiments.control_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparison",
+      "label": "Comparison",
+      "level": "class",
+      "parent": "kneemri.experiments.control_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.ControlCheck",
+      "label": "ControlCheck",
+      "level": "class",
+      "parent": "kneemri.experiments.control_check",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -56082,6 +56276,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.claims_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability._asked",
+      "label": "_asked",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability._keys",
+      "label": "_keys",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability.budgeted",
+      "label": "budgeted",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability.built",
+      "label": "built",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparability.sourced",
+      "label": "sourced",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.Comparison.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.Comparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.ControlCheck._first",
+      "label": "_first",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.ControlCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.ControlCheck.audit",
+      "label": "audit",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.ControlCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.ControlCheck.declared",
+      "label": "declared",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.ControlCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.ControlCheck.findings",
+      "label": "findings",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.ControlCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.ControlCheck.resolve",
+      "label": "resolve",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check.ControlCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.control_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.control_check",
       "role": null
     },
     {
