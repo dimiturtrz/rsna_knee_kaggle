@@ -132,7 +132,39 @@ the path it implies is wrong.
 after verifying zero live processes referenced them. The 12sl/224px merged caches that most `merged_*`
 members were fitted on were deliberately kept, so no existing member became unreproducible.
 
-## 8. calib_dense, priced
+## 8. `ourtrunk44` — the honest foreign trunk, fitted on our fold, priced
+
+The arm §3 asked for already ran. `raptor_ft_ourtrunk44` is a timm-pretrained trunk fitted on OUR studies
+and OUR fold, converged (best ep14 0.8342, ep15 0.8322 over 16 epochs).
+
+- **`nnCorr@honest12` 0.7469**, against the roster's own boundary 0.8947. js **0.0415** against 0.0150 —
+  nearly 3x the roster's internal divergence. maha 4.760 vs 4.366. The tool calls it **DISTINCT**, the
+  only cell that is a seat.
+- **`solo@oof896` 0.8440**, and it is **cut-invariant**: midpoint and ledger75 give the identical 0.8440
+  because this member's stored truth is already binary, so the midpoint-vs-ledger75 hazard that moves
+  `honest12` by +0.026 does not apply to it at all.
+
+**So the standing non-claim survives, with one more point under it.** D176 said nobody has shown a
+foreign-pretrained trunk fitted on our fold reaching solo 0.89; this is the arm that asked, and it lands
+0.8440. Decorrelation is real and purchasable exactly where D176 said — the trunk — and it still does not
+pay: the surface wants solo 0.8953 at nnCorr 0.80, and this is half a point of solo short of the foreign
+family's own 0.8505 cap while being the most decorrelated member the project has produced.
+
+**THE NUMBER THAT WOULD DECIDE IT IS NOT COMPUTED, AND THAT IS THE NEXT ACTION.** Its OOF holds **896**
+studies against our frame's **909**, so `seat_value` prints divergence and no add — a marginal
+contribution over two different question sets is arithmetic, not a seat. Thirteen studies stand between
+the most decorrelated member we own and a priced add into `nine`. Aligning them is card-free.
+
+**Two population labels, stated because this file would otherwise invite the substitution it warns
+about.** `nnCorr@honest12` (max over 12 seats) is NOT comparable to D176's encoder-class median
+`nnCorr@pool251`, and `solo@oof896` is NOT comparable to a `@ledger75` solo over 909. The 0.7469 and the
+0.7767 are close enough to look like the same quantity and they are not.
+
+**And `gold_macro@gold58` is not a solo at all.** The run log's headline `BEST GOLD macro-AUC 0.8342` is
+measured on **58 studies** — `raptor_gold_ourtrunk44.npz` is `(58, 12)`. At that n, MCL's 0.678 and
+Effusion's 0.950 are the same number wearing different error bars. Quote it as `gold58` or not at all.
+
+## 9. calib_dense, priced
 
 `calib_dense_s2026` converged 12/12 and prices as a **TWIN** against `honest12`: nearest **0.0081 bits**,
 the closest of any candidate measured on that roster, rank 0.9396 / js 0.0081 / maha 4.011 against the
