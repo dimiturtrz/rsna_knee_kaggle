@@ -8842,6 +8842,28 @@ every one of those four numbers is **in-sample**. Same defect that voided `rapto
 2026-08-29. The rule this yields is general: **any reading of a released foreign checkpoint on our
 909/896 is in-sample by construction**, and no `foreign_overlap` call is needed to establish it.
 
+> **QUALIFIED 2026-09-08, and the qualification is about the NUMBERS, not the sentence.** Mastermind's
+> D144 re-read this set on `truth >= 0.75` and found the ordering inverts — coat384 0.8507 → 0.9039 while
+> our best goes 0.8627 → 0.9035 — and asked for the binarization to be written in. It is: **every macro on
+> this page is the midpoint (LEDGER) cut**, and `raptor_coat384` on the repo's own `LedgerSeventyFive`
+> ruler (`kneemri.evaluation.ledger75`, which is NOT a flat 0.75 — Medial Meniscus and Baker's keep the
+> midpoint) reads **0.8953 against `labelwise_dense_s2026` 0.8964 and `stackfit_s2026` 0.8962**. So on our
+> actual L75 ruler it is third in the project, not ahead of it, and mastermind's flat-0.75 inversion is
+> ~0.009 of binarization difference.
+>
+> **But none of that touches what "worthless" was claiming.** The word is not a judgement of the members'
+> strength — the paragraph it sits in says these are **RELEASED weights read on studies they trained on**,
+> which is a provenance verdict no threshold repairs. `raptor_coat384` carries **909 rows** and unrecorded
+> provenance; it stays void on the rule stated above. What the qualification does buy is one member the
+> rule does not reach: **`raptor_ft_hisrecipe_distill` carries 896 rows and is held out BY CONSTRUCTION**
+> (`logs/hisrecipe_distill.launch2.log:21` — `[cv] fold 0/1: train 3453 | OOF held-out 896`), so it is a
+> legitimate reading. Its number is **0.8875 (variants `_swa` / `_epens` 0.8880)** on the repo ruler, not
+> the 0.8940 D144 quotes — **below D140's ~0.89 seat bar, not above it.** It is a candidate for a
+> per-column read (Fracture, where our pool mean is 0.805), not a seat.
+>
+> The general rule this makes explicit, and it is the part worth keeping: **a macro quoted without its
+> binarization is not a number.** Every one on this page is the midpoint cut unless it says LEDGER75.
+
 Consequences already paid: `repl2x2_c`'s pre-registered band ("0.840-0.860 = replication of v4's real
 level, centre 0.849") took its centre from one of those numbers, so the band and its `< 0.840 harness
 signature` verdict are withdrawn. **A' has no honest comparator except cell C** — same fold file, same
@@ -9926,7 +9948,7 @@ So: the arm ran to completion, its holdout is a real record, and **the decline s
 — `weakdraw.sh` does not get queued again** on the two reasons above. Nothing here re-opens the Fracture
 question or the axis.
 
-**The check this cost, filed as knee-wk9dl:** *an arm's script must not be recorded as KILLED or declined
+**The check this cost, filed as knee-jc5z3:** *an arm's script must not be recorded as KILLED or declined
 while that arm is live.* `arm_check` can read this file's heading for the script it is about to arm, and
 `queue_check` can read it for the scripts already running. Both directions are the same defect: the ledger
 and the process table disagreeing with nobody noticing.

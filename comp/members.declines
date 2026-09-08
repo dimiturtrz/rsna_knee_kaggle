@@ -745,5 +745,18 @@ foreign_labels_dense_s2026.pt  # his 12-finding LABELS on our dense recipe, fold
                             # +0.026 PFOA table quoted on arrival was measured against the WRONG control
                             # and does not survive. His labels retire as a TRAINING axis on our recipe;
                             # what remains of his lead is his RECIPE (hisrecipe_distill).
+                            # AMENDED 2026-09-08 (mastermind D144, re-measured by main on the repo's own
+                            # LedgerSeventyFive ruler rather than a flat 0.75). The recipe now HAS a
+                            # reading and it does not overturn this line: `raptor_ft_hisrecipe_distill`
+                            # is held out by construction (`logs/hisrecipe_distill.launch2.log:21`,
+                            # 896 OOF rows) and reads LEDGER75 **0.8875** (`_swa` / `_epens` 0.8880) —
+                            # BELOW D140's ~0.89 seat bar, not above it. D144 quoted 0.8940 from a flat
+                            # `truth >= 0.75` cut; the repo ruler keeps the midpoint on Medial Meniscus
+                            # and Baker's, and the difference is ~0.006. So the recipe is a per-column
+                            # candidate (Fracture, where our pool column mean is 0.805) and not a seat.
+                            # `raptor_coat384` reads LEDGER75 0.8953 and is NOT admitted by this: it
+                            # carries 909 rows on released weights with unrecorded provenance, which is
+                            # in-sample by construction (`experiments/README.md:8836` and its 09-08
+                            # qualification). A ruler change does not repair a provenance verdict.
                             # The general reading: decorrelation WITHOUT solo lift buys +0.0004 at nine
                             # seats, which is D53's width saturation seen from the member side.
