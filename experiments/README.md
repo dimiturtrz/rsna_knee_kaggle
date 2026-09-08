@@ -10110,27 +10110,38 @@ price a seat without it, and so the closure is not re-opened by whichever mechan
 |---|---|---|
 | **D149** board k-slope, n=33 at board ≥ 0.92 | board, direct | **+0.00000/seat**, CI [−0.00049, +0.00035]; the naive +0.0023/seat is 100% the quality confound (corr(k, offline) = +0.741) |
 | **D157** refit over 29 measured `honest12` swaps | offline, direct | `+0.0015 + 0.0385·(solo−0.8865) − 0.0030·(1−corr)`, R² 0.775, resid SD 0.0003; measured range −0.0002..+0.0019 |
-| **cell D** (`ourtrunk44`), this file's row below | offline, direct, far out of band | **−0.0010** at (solo 0.7857, nn-corr 0.7469) |
+| **cell D** (`ourtrunk44`), this file's row below | offline, direct, out of band | **−0.0007 add / +0.0007 swap** at (solo 0.8173 `ledger75`, nn-corr@pool251 0.8251) |
 | **D154/C161** k-decay at pool corr 0.9161 | offline, mechanism | flat at k=6; averaging removes only independent error |
 | D35 `−0.0046 + 0.313·(solo−0.8865) + 0.0557·(1−corr)` | offline, older population | large — **and it is what every plan was being priced with** |
 
-**The three populations are widely separated and they agree.** nn-corr 0.747 (cell D), 0.812–0.827 (the
-foreign families), 0.884–1.000 (D157's 29); solo 0.786 to 0.891. At every one of them a single added member
+**The three populations are separated and they agree.** nn-corr@pool251 0.825 (cell D), 0.812–0.827 (the
+foreign families), 0.884–1.000 (D157's 29); solo 0.817 to 0.891. At every one of them a single added member
 is worth between **−0.001 and +0.002** offline. D35 **ranks** candidates well (Spearman +0.763 against
-measured) and **prices** them roughly an order too high. Rank with it; never price with it.
+measured) and **prices** them roughly an order too high. **D35 is retired as a pricer** (C169 §2); it stays
+quotable as a ranker and is refused as a pricer.
 
-Coefficients as they now stand, from cell D's residual against D157's solo-only prediction
-(+0.0014 at (1−corr) = 0.2531):
+Coefficients as they now stand — **D157's refit, validated OUT OF BAND by cell D to +0.0002** (it predicts
+−0.0012 against −0.0007 measured at solo 0.8173):
 
 ```
-corr coefficient ~ +0.0055 per unit (1 - corr)     (D35: +0.0557.  D157 refit: -0.0030)
-solo coefficient ~ +0.025                          (D35: +0.313.   D157 refit: +0.0385)
+corr coefficient   bounded above by ~ +0.006, consistent with ZERO   (D35: +0.0557.  D157 refit: -0.0030)
+solo coefficient ~ +0.0385                                           (D35: +0.313)
 ```
 
-Both signs are positive and both magnitudes are ~10x under D35. Two consequences worth having in writing:
-**decorrelation alone would need (1 − corr) = 1.6 to buy the gap**, which is impossible; and a member at
-solo 0.920 with ordinary correlation prices at **+0.0028 offline ≈ +0.0032 board** at the refitted transfer
-constant +1.135, not the +0.0120 that was being planned against.
+**Corrected 2026-09-08 (M167 / C169 / D158).** This block first read `corr ~ +0.0055`, `solo ~ +0.025`,
+derived from a cell D pair of (solo 0.7857, nn-corr 0.7469) that was **two different rulers, not one**:
+`seat_value` scores through `member_distance.py:124 LabelScores()`, whose default is `scores.py:19
+MIDPOINT = 0.5`, while every regression here is `ledger75` — so the solo was withdrawn in favour of 0.8173.
+And 0.7469 is `max(agreements)` (`member_distance.py:126`) over the **12 seats of `honest12`**, not over the
+251-member pool D35 and D157 are fitted on, where the same member reads 0.8251. **Standing rule from this:
+a correlation number carries its STATISTIC and its POOL** — `nn_corr@roster12` and `nn_corr@pool251` are
+different quantities and may not be substituted. The lever arm shrank from 0.253 to 0.175 and the residual
+it was derived from vanished, which is why the corr term now reads as consistent with zero rather than
+small-and-positive.
+
+Consequences, unchanged in direction: **decorrelation alone cannot buy the gap at any reachable (1 − corr)**;
+and a member at solo 0.920 with ordinary correlation prices at **+0.0028 offline ≈ +0.0032 board** at the
+refitted transfer constant +1.135, not the +0.0120 that was being planned against.
 
 **What is NOT closed by this.** Every one of those instruments prices the MARGINAL operation — add or swap
 ONE member into a fixed pool. **Nothing in this repo prices making all twelve better**, which is a
@@ -10145,21 +10156,32 @@ collected, and the next number to measure is the exchange rate `d(ensemble)/d(me
 fold-0 studies against `report_labels_v2.csv`:
 
 ```
-solo 0.7857   nn-corr 0.7469   mean-corr 0.6780
-seat into honest12: -0.0010  [-0.0017, -0.0003]
-best seat available to it (for mae_matched): -0.0007
+ruler ledger75, pool 251 all-ours members (the frame D35/D157 are fitted on):
+  solo 0.8173   nn-corr@pool251 0.8251 (nearest = small_feat_pre_s2026)
+  ADD  into honest12 (k 12 -> 13): -0.0007
+  SWAP into honest12 (k fixed 12) : +0.0007, displacing mae_matched_s2026
 foreign-frame gold: best-epoch 0.8136 | SWA [11,14,15] 0.8113 no gain | epoch-ensemble 0.8125 no gain
+
+superseded (0.5 cut, pool = the 12 seats of honest12) — NOT comparable to any regression here:
+  solo 0.7857   nn-corr@roster12 0.7469   mean-corr 0.6780   add -0.0010 [-0.0017, -0.0003]
 ```
 
-**It refuted its own pre-registered branch in both directions.** The arm predicted nn-corr 0.87–0.92 with
-"trunk carries the decorrelation"; it landed at 0.747, below `repl2x2`. The fallback branch — below 0.85,
-"the corpus carries it, the geometry arm is the right next spend, D35 seat ~+0.0033" — got the corr but not
-the payoff: measured **−0.0010**. So the *prediction rule* is what broke. C149 §2's geometry arm is priced
-**DOWN** and its licence is withdrawn (C166 §1).
+Two rules this row now carries, both earned by getting them wrong first: **a seat value states ADD or SWAP
+and, if a swap, the seat it DISPLACES** (D158 §4 — four of four best swaps displaced `mae_matched_s2026`,
+so an undisplaced swap value is unreadable); and **a correlation states its statistic and its pool**.
 
-Mechanism, and it is why "decorrelated" is the wrong word for this member: swapping the trunk to OURS made
-it **more** distant and much weaker at once, so the 2×2's corpus-versus-trunk decomposition is still not
-separated — cell D moved trunk and effective capacity together, and capacity is doing the visible work.
+**It refuted its own pre-registered branch in both directions.** The arm predicted nn-corr 0.87–0.92 with
+"trunk carries the decorrelation"; it landed at 0.825 on the pool it was predicted against — below the
+band, at `repl2x2`'s level rather than above `hisrecipe`'s. The fallback branch — below 0.85, "the corpus
+carries it, the geometry arm is the right next spend, D35 seat ~+0.0033" — got the corr and not the payoff:
+measured **−0.0007 add / +0.0007 swap**. So the *prediction rule* is what broke, at both ends. C149 §2's
+geometry arm is priced **DOWN** and its licence is withdrawn (C166 §1).
+
+Mechanism, and it is why "decorrelated" is the wrong word for this member: swapping the trunk to OURS left
+it **no closer** to our pool than the foreign families are (0.825 against their 0.812–0.827) while making it
+much weaker, so the 2×2's corpus-versus-trunk decomposition is still not separated — cell D moved trunk and
+effective capacity together, and capacity is doing the visible work. The prediction that our trunk would
+pull it INTO the pool (0.87–0.92) is refuted on the pool's own ruler.
 Supporting that: neither SWA nor the epoch-ensemble pays anything, which is what a flat noisy basin looks
 like. **Distance bought by weakness is not distance that pays.**
 
