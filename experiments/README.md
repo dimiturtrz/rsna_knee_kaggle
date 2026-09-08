@@ -10554,3 +10554,61 @@ This is the shape that hides for a long time: nothing in nox or CI asks a CLI to
 and an agent that wants to know what flags exist greps the arm tree instead — which is exactly how the
 `--variant` axis came to have 24 registered values and no census. Found while looking for the trunk
 flag, not by any gate.
+
+## 2026-09-08 — transfer is SATURATION, not blindness: the slope is 0.42 easy, 0.74 mid-hard
+
+`python -m kneemri.evaluation.transfer_strata`, run 09:12Z, output at `logs/transfer_strata.log`. 37
+rebuildable ensemble entries, 5 difficulty bands of ~182 studies cut on member disagreement across a fixed
+41-member reference pool, 12 of 12 findings scoreable in every band.
+
+    Q1 (easiest)  182 studies  disagreement 0.0764  slope +0.42
+    Q2            182          0.1014               +0.58
+    Q3            182          0.1147               +0.74
+    Q4            182          0.1237               +0.74
+    Q5 (hardest)  181          0.1382               +0.66
+
+Independently, the 443 resolved entry PAIRS split at the median hard-share: a gain made on HARD studies
+transfers at +0.71, one made on EASY studies at +0.62.
+
+**This settles the fork `transfer_strata.py:17-21` states.** The module pre-registered three causes with
+different predictions about this cut. SATURATION predicted the compression would be worst in the EASY
+stratum — it is, by a factor of 1.8 against the mid bands. DISTRIBUTION GAP predicted the board's ordering
+would be recovered in the HARD stratum — Q5 instead reads 0.66, *below* Q3 and Q4. NEITHER predicted ~1
+everywhere — no band is near 1.
+
+**The blindness branch is REFUTED, and that matters more than the slope.** `transfer_strata.py:19` named
+the live possibility that the holdout is blind above 0.870, in which case every plan ending in "improve the
+offline number" is unfunded. Every stratum reads a positive slope and three of five read 0.58-0.74. Offline
+movement is funded, at about 0.7 of face value.
+
+**Pricing rule that follows.** An offline delta is worth ~0.7 of itself on the board, and WHERE it landed
+now matters as much as its size: +0.005 on the easy band is ~+0.002 of board, the same +0.005 on the
+mid-to-hard bands is ~+0.0037. Nearly 2x, and invisible to the macro alone. This RAISES the bar on
+knob-sized arms rather than lowering it — an offline +0.006 is a board +0.004, still directional only.
+
+**What it cannot say.** ~180 studies a band, so per-label AUCs inside one are wide. The 37 entries span days
+and a kit that changed underneath them, exactly as `board_transfer` states; stratifying asks the confounded
+question where the hypotheses differ, it does not repair the confound. Q5's dip below Q3/Q4 is a single
+non-monotonicity at the smallest, widest stratum, consistent with noise, and is NOT read as a hard-stratum
+effect of its own. Full write-up:
+`interpretations/kneemri/2026-09-08_transfer-is-saturation-not-blindness.md`.
+
+## 2026-09-08 — a third duplicate `ourtrunk44` took the card, and the 08:21Z idle gap was a missing cache
+
+Two separate card defects in one morning, both invisible to `nvidia-smi` utilisation and both caught only
+by `card_check`.
+
+**The duplicate.** `ourtrunk44` completed at 02:47:28Z (`logs/after_resnet50d_lr.log`, and
+`raptor_ft_ourtrunk44.holdout.npz` is on disk from that run). A second identical `foreign_run` launched at
+08:56:17Z and a THIRD at 09:12:41Z, each on top of the live `merged3_oversample`, halving it — 2130 -> 887
+img/s on the first, 2097 -> 1170 on the second. Both were orphans under `nohup.exe` with no surviving
+parent, and at the time of the second kill NO live watcher process owed an `ourtrunk44` launch, so the
+launcher had already fired and exited. Two scripts can launch that tag (`after_ourtrunk44.sh`,
+`after_resnet50d_lr.sh`) and both their logs are stale. The cost is never the card — it is the READING: a
+member's throughput number taken during either window is a fact about contention.
+
+**The idle gap.** `merged3_oversample`'s FIRST attempt died at 08:21:29Z with
+`FileNotFoundError: images_336px_12sl_merged3.npy`, i.e. `arm_check`'s UNCACHED warning was real and was a
+warning rather than a refusal. The cache was built at 08:27Z and the arm relaunched as pid 3592. That is the
+second time an UNCACHED warning has cost card time in two days, and it is the argument for making
+`arm_check` REFUSE on it.
