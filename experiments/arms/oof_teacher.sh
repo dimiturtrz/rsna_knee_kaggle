@@ -11,9 +11,22 @@
 #
 # WHAT THE NEW TEACHER IS. `kneemri.evaluation.oof_teacher` concatenates `oof_fold1..4_s2026.holdout.npz`
 # — 875 + 884 + 849 + 890 = 3498 studies, the whole TRAINING half, each study read by the one fold model
-# that did not train on it. Fold 0 is absent and must be: it is the holdout every arm is scored on, so a
-# teacher covering it would leak the evaluation labels through this file. 3498 is the complete
-# denominator, not a gap in a 4407 one.
+# that did not train on it. 3498 is the complete denominator, not a gap in a 4407 one.
+#
+# RETRACTED 2026-09-08: THIS FILE IS LEAKY, AND THE PARAGRAPH THAT USED TO SIT HERE ARGUED THE WRONG
+# TEST. It said fold 0 is absent from the coverage and must be, so nothing leaks. COVERAGE IS NOT THE
+# TEST — the teachers' TRAINING is. `oof_fold_k` (k=1..4) was each fitted at `--fold k`, which trains on
+# every other fold, FOLD 0 INCLUDED. So the file excludes fold 0 from what it COVERS while every teacher
+# that wrote it had already seen those studies. See `experiments/README.md:8526-8540` (knee-zwcyk) and
+# `clean_calib.sh:12-19`, which says it outright: "This arm was written against `oof_teacher` first, on
+# the claim that `teacher_oof_corpus.npz` is out-of-fold. IT IS NOT."
+#
+# THE LEAK'S SIZE IS MEASURED AND IT IS ~ZERO, which is why this is a retraction and not a void.
+# `teacher_clean.npz` is the same four blocks refitted with `--exclude-fold 0`, and its student
+# `seat_clean_distill_s2026` against the leaky twin `seat_distill_lr4e5_s2026` reads solo 0.8894 vs
+# 0.8900 and seat -0.0005 vs -0.0001 (D178 §3b). Both differences are far under the noise bar and neither
+# row is near the top of any table, so no conclusion downstream of this teacher moves. What was wrong was
+# the ARGUMENT, and the argument is what a future arm reads first.
 #
 # THE MECHANISM IT ADDRESSES. Our label table is five discrete levels; `label_disagreement` prices ~20%
 # of read cells wrong and 38.5% of cell PAIRS tied. Every label treatment so far reached a fraction of
