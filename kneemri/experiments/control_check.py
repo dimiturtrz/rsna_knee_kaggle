@@ -57,6 +57,14 @@ TRAINED = re.compile(r"^run_train\s+(?P<name>[A-Za-z0-9_.-]+)")
 """How an arm names its own run. `foreign_run` arms have no such line and are skipped — their trainer
 writes no metrics file here, so there is nothing on this side of the comparison to read."""
 
+OUTPUT = re.compile(r".*?--out\s+\"?(?P<path>\S+?)\.pt\"?")
+"""Where an arm says its checkpoint goes, which is what the run is actually NAMED on disk.
+
+A control token is not always a checkpoint stem — `whole_stack` and `rate_wholestack` are ARM names and
+their checkpoints are `wholestack_s2026` and `lr4e-5_ws_s2026`. This is the same `--out`-is-the-truth
+rule `_arm_log` names an arm's log by; the control resolver is its second consumer and never learned it,
+which put three arms that ran into the same bucket as one that never did."""
+
 SEED_SUFFIX = "_s2026"
 """Some runs are spelled with the seed in the checkpoint and some are not, and a control line quotes
 whichever spelling the author had in mind. Resolving both is not laxity: refusing the other spelling
@@ -150,20 +158,43 @@ class Comparability:
         """
         target = round(quoted, QUOTED_PLACES)
         midpoint = {round(float(row[AUC]), QUOTED_PLACES) for row in control.rows() if row.get(AUC) is not None}
-        return target in midpoint or target == self._recut(control)
+        return target in midpoint or target in self._recomputed(control)
 
-    def _recut(self, control: RunMetrics) -> float | None:
-        """The control's LEDGER75 macro off its kept predictions, or None when it kept none.
+    def scoreable(self, control: RunMetrics) -> bool:
+        """Whether the control kept predictions, which is a run this side can price with no metrics file.
 
-        A dark member (`--fold -1`) holds nothing back and can never have one, and a member whose source
-        cache was deleted cannot be re-scored — both are silence here rather than an error, because the
+        An epoch export carries the checkpoint and the holdout record and leaves the metrics file under
+        the training run's own stem. It is a real control and the four arms citing one were right.
+        """
+        return bool(self._recomputed(control))
+
+    def _recomputed(self, control: RunMetrics) -> frozenset[float]:
+        """Both macro rulers off the control's kept predictions, or nothing when it kept none.
+
+        BOTH, because the recut is not a correction to the midpoint — they are two rulers and an arm may
+        declare against either. Taking only the recut here would have read `wsfold0_e6`'s four citing
+        arms as quoting a fabricated 0.8457 when 0.8457 is its midpoint macro and 0.8662 its ledger75.
+
+        A dark member (`--fold -1`) holds nothing back and can never have either, and a member whose
+        source cache was deleted cannot be re-scored — both are silence rather than an error, because the
         question asked is "is the declared number reachable", and an unreachable ruler answers no.
         """
+        ruler = LedgerSeventyFive()
         try:
-            reading = LedgerSeventyFive().reading(control.checkpoint())
+            row = ruler.row(control.checkpoint())
         except (FileNotFoundError, OSError, ValueError):
-            return None
-        return round(LedgerSeventyFive().macro(reading), QUOTED_PLACES)
+            return frozenset()
+        return frozenset({round(row.ledger, QUOTED_PLACES), round(row.ledger75, QUOTED_PLACES)})
+
+    def recorded(self, arm: RunMetrics, control: RunMetrics) -> bool:
+        """Whether both runs wrote a recipe, which is what BUDGET and BUILD are read out of.
+
+        An epoch export has predictions and no metrics file, so its recipe is unreadable — and an absent
+        recipe is not a differing one. Judging it anyway reports every key of the arm as drift and every
+        budget as mismatched, which is this check inventing the defect it exists to find, on the exact
+        control (`wsfold0_e6`) whose four citing arms it had already accused once.
+        """
+        return arm.recipe() is not None and control.recipe() is not None
 
     def budgeted(self, arm: RunMetrics, control: RunMetrics) -> bool:
         """Whether both runs asked for the same number of epochs.
@@ -198,6 +229,7 @@ class ControlCheck:
     """Reads every arm's declared control and says which comparisons their deltas cannot support."""
 
     models: Path
+    arms: Path
     comparability: Comparability = Comparability()
 
     def declared(self, arm: Path) -> Comparison | None:
@@ -210,12 +242,32 @@ class ControlCheck:
         return Comparison(trained["name"], control["name"], float(control["score"]), arm, control["rest"])
 
     def resolve(self, name: str) -> RunMetrics | None:
-        """The metrics file for a run named either with or without the seed suffix."""
+        """The run a control token names, under every spelling this repository gives one run.
+
+        Three, because a token is written by whoever remembered the run and they remembered a different
+        artefact each time: the checkpoint stem, the stem without its seed, or the ARM whose `--out` wrote
+        it. The last one is the `--out`-is-the-truth rule, and without it three arms that ran read as
+        never-run — `whole_stack` is `wholestack_s2026` and `rate_wholestack` is `lr4e-5_ws_s2026`.
+
+        A checkpoint with a holdout record and NO metrics file resolves too, with an empty curve: it is a
+        real, scoreable run (`wsfold0_e6` is `wholestack`'s epoch-6 export under a second name), and
+        `sourced` recomputes both cuts off the record. Its recipe is unreadable, so budget and build
+        cannot be judged — that is silence about them, never a pass.
+        """
         for spelling in (name, f"{name}{SEED_SUFFIX}"):
             record = RunMetrics(self.models / f"{spelling}.pt")
-            if record.rows():
+            if record.rows() or self.comparability.scoreable(record):
                 return record
-        return None
+        stem = self._output_stem(name)
+        return None if stem is None or stem == name else self.resolve(stem)
+
+    def _output_stem(self, arm: str) -> str | None:
+        """The checkpoint basename the arm of this name writes, or nothing if no such arm exists."""
+        script = self.arms / f"{arm}.sh"
+        if not script.is_file():
+            return None
+        found = self._first(OUTPUT, script.read_text(encoding="utf-8", errors="replace").splitlines())
+        return None if found is None else Path(found["path"]).name
 
     def findings(self, comparison: Comparison) -> tuple[tuple[str, ...], float | None]:
         """Every reason this arm's delta says something other than its own change, and the control's best."""
@@ -228,14 +280,20 @@ class ControlCheck:
         best = control.best()
         sourced = self.comparability.sourced(control, comparison.quoted)
         found: list[str] = [] if sourced else [self._unmatched(comparison)]
+        if not self.comparability.recorded(arm, control):
+            return tuple(found), None if best is None else best[AUC]
         found += [] if self.comparability.budgeted(arm, control) else [self.comparability.budget]
         drifted = self.comparability.built(arm, control)
         found += [f"{self.comparability.build}({len(drifted)})"] if drifted else []
         return tuple(found), None if best is None else best["auc"]
 
-    def audit(self, arms: Path) -> list[tuple[Comparison, tuple[str, ...], float | None]]:
-        """Every declared comparison that cannot carry its own delta, worst first."""
-        declared = [found for arm in sorted(arms.glob("*.sh")) if (found := self.declared(arm)) is not None]
+    def audit(self) -> list[tuple[Comparison, tuple[str, ...], float | None]]:
+        """Every declared comparison that cannot carry its own delta, worst first.
+
+        The arm directory is the check's, not this call's: resolving a control now READS those scripts,
+        so a second path here could audit one tree while resolving names against another.
+        """
+        declared = [found for arm in sorted(self.arms.glob("*.sh")) if (found := self.declared(arm)) is not None]
         seen = [(comparison, *self.findings(comparison)) for comparison in declared]
         return sorted((row for row in seen if row[1]), key=lambda row: (-len(row[1]), row[0].arm))
 
@@ -257,8 +315,8 @@ def main() -> None:
     command.parser.add_argument("--arms", type=Path, default=Path("experiments/arms"), help="the arm scripts")
     arguments = command.parsed()
 
-    check = ControlCheck(command.rooted(arguments).models())
-    seen = check.audit(arguments.arms)
+    check = ControlCheck(command.rooted(arguments).models(), arguments.arms)
+    seen = check.audit()
     Denominator(len(list(arguments.arms.glob("*.sh"))), f"no arm scripts under {arguments.arms}").refuse_empty()
 
     for comparison, found, measured in seen:

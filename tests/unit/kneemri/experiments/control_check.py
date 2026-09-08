@@ -55,7 +55,7 @@ def write_arm(directory: Path, name: str, *, trains: str, control: str, quoted: 
 
 def test_declared(tmp_path: Path) -> None:
     """The declaration is read off the `# control` line alone, and the arm off its own `run_train`."""
-    check = ControlCheck(tmp_path)
+    check = ControlCheck(tmp_path, tmp_path)
     arm = write_arm(tmp_path, "adapt_null", trains="adapt_null", control="band_dense", quoted=BAND_DENSE_PEAK)
     declared = check.declared(arm)
     assert declared is not None
@@ -74,12 +74,28 @@ def test_declared(tmp_path: Path) -> None:
 
 def test_resolve(tmp_path: Path) -> None:
     """Both spellings a control line uses, because an author quotes whichever they had in mind."""
-    check = ControlCheck(tmp_path)
+    check = ControlCheck(tmp_path, tmp_path)
     write_run(tmp_path, "band_dense_s2026", peak=BAND_DENSE_PEAK, epochs=12, recipe={})
     seeded = check.resolve("band_dense")
     assert seeded is not None and seeded.name() == "band_dense_s2026", "the seed suffix is resolved"
     assert check.resolve("band_dense_s2026") is not None, "and so is the spelling that carries it"
     assert check.resolve("never_ran") is None
+
+    # THE ARM NAME IS THE THIRD SPELLING. `whole_stack` is an arm whose `--out` writes `wholestack_s2026`,
+    # and reading the token as a checkpoint stem put three arms that RAN in the bucket for never-run.
+    (tmp_path / "whole_stack.sh").write_text(
+        '# control  band_dense = 0.8578\nrun_train whole_stack $RECIPE --out "$MODELS/wholestack_s2026.pt"\n',
+        encoding="utf-8",
+    )
+    write_run(tmp_path, "wholestack_s2026", peak=BAND_DENSE_PEAK, epochs=12, recipe={})
+    through_arm = check.resolve("whole_stack")
+    assert through_arm is not None and through_arm.name() == "wholestack_s2026", "resolved through --out"
+
+    # AND AN EPOCH EXPORT HAS A HOLDOUT RECORD AND NO METRICS FILE. It is a scoreable run, not a hole:
+    # `wsfold0_e6` is `wholestack`'s epoch 6 under a second name, and four arms price against it.
+    write_holdout(tmp_path, "wsfold0_e6", studies=60)
+    exported = check.resolve("wsfold0_e6")
+    assert exported is not None and not exported.rows(), "resolved on its predictions, with no curve"
 
 
 def write_holdout(directory: Path, name: str, *, studies: int) -> None:
@@ -126,6 +142,15 @@ def test_gold(tmp_path: Path) -> None:
     assert not Comparison("a", "b", 0.85, tmp_path / "a.sh", " (own holdout, L75mid, n=909)").gold()
 
 
+def test_scoreable(tmp_path: Path) -> None:
+    """A run this side can price off its own predictions, which is what makes a curve-less export real."""
+    comparability = Comparability()
+    exported = write_run(tmp_path, "wsfold0_e6", peak=BAND_DENSE_PEAK, epochs=0, recipe={})
+    assert not comparability.scoreable(exported), "no kept predictions, so no ruler reaches it"
+    write_holdout(tmp_path, "wsfold0_e6", studies=60)
+    assert comparability.scoreable(exported), "the holdout record is the producer, not the metrics file"
+
+
 def test_budgeted(tmp_path: Path) -> None:
     """Same asked-for epochs or the delta is a best-of-4 against a best-of-12."""
     comparability = Comparability()
@@ -146,7 +171,7 @@ def test_built(tmp_path: Path) -> None:
 
 def test_findings(tmp_path: Path) -> None:
     """Every reason at once, and the control's own best beside the score the arm quoted for it."""
-    check = ControlCheck(tmp_path)
+    check = ControlCheck(tmp_path, tmp_path)
     write_run(tmp_path, "adapt_null", peak=ADAPT_NULL_PEAK, epochs=4, recipe={"layer_decay": "0.75"})
     write_run(tmp_path, "band_dense", peak=BAND_DENSE_PEAK, epochs=12, recipe={})
 
@@ -174,7 +199,7 @@ def test_audit(tmp_path: Path) -> None:
     """Only the comparisons that cannot carry their delta, worst first — a clean pair is silent."""
     arms = tmp_path / "arms"
     arms.mkdir()
-    check = ControlCheck(tmp_path)
+    check = ControlCheck(tmp_path, arms)
     recipe = {"layer_decay": "0.75"}
     write_run(tmp_path, "band_dense", peak=BAND_DENSE_PEAK, epochs=12, recipe=recipe)
     write_run(tmp_path, "adapt_null", peak=ADAPT_NULL_PEAK, epochs=4, recipe=recipe)
@@ -182,7 +207,7 @@ def test_audit(tmp_path: Path) -> None:
 
     write_arm(arms, "adapt_null", trains="adapt_null", control="band_dense", quoted=BAND_DENSE_PEAK)
     write_arm(arms, "clean", trains="clean", control="band_dense", quoted=BAND_DENSE_PEAK)
-    seen = check.audit(arms)
+    seen = check.audit()
     assert [row[0].arm for row in seen] == ["adapt_null"], "a same-budget same-build sourced pair is not a finding"
     assert seen[0][1] == ("BUDGET",)
 
@@ -194,3 +219,14 @@ def test_line(tmp_path: Path) -> None:
     assert "+0.0383" in line, "a signed offset, so a gold-ruler quote reads as one at a glance"
     assert "rank966_hold.sh" in line, "the declaring script, which is not always the arm's own name"
     assert "no curve" in comparison.line(("UNRESOLVED",), None)
+
+
+def test_recorded(tmp_path: Path) -> None:
+    """An unreadable recipe is silence about the build, never a drift in every key it cannot see."""
+    comparability = Comparability()
+    run = write_run(tmp_path, "band_dense", peak=BAND_DENSE_PEAK, epochs=12, recipe={"layer_decay": "0.75"})
+    write_holdout(tmp_path, "wsfold0_e6", studies=60)
+    exported = RunMetrics(tmp_path / "wsfold0_e6.pt")
+    assert comparability.recorded(run, run)
+    assert not comparability.recorded(run, exported), "an epoch export writes predictions, not a recipe"
+    assert comparability.built(run, exported) == ("epochs", "layer_decay"), "which is why built() may not be asked"
