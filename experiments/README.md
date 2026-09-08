@@ -10100,3 +10100,104 @@ a reportable state of the world, not a gap to fill with the next idea.
   gap is a known open bead. If a seat was in fact trained at 8e-6, row 3 re-opens at `d` = +0.0068 — still
   under the bar, but the largest live number on the list.
 - At D92's lower bar (+0.008) no row changes verdict.
+
+## 2026-09-08 — the marginal-member lane, closed at every point we can reach
+
+Four instruments, three lanes, one night. Recorded as a CONVERGENCE so that D35 is never again used to
+price a seat without it, and so the closure is not re-opened by whichever mechanism is freshest.
+
+| instrument | what it measures | verdict on ONE added/swapped member |
+|---|---|---|
+| **D149** board k-slope, n=33 at board ≥ 0.92 | board, direct | **+0.00000/seat**, CI [−0.00049, +0.00035]; the naive +0.0023/seat is 100% the quality confound (corr(k, offline) = +0.741) |
+| **D157** refit over 29 measured `honest12` swaps | offline, direct | `+0.0015 + 0.0385·(solo−0.8865) − 0.0030·(1−corr)`, R² 0.775, resid SD 0.0003; measured range −0.0002..+0.0019 |
+| **cell D** (`ourtrunk44`), this file's row below | offline, direct, far out of band | **−0.0010** at (solo 0.7857, nn-corr 0.7469) |
+| **D154/C161** k-decay at pool corr 0.9161 | offline, mechanism | flat at k=6; averaging removes only independent error |
+| D35 `−0.0046 + 0.313·(solo−0.8865) + 0.0557·(1−corr)` | offline, older population | large — **and it is what every plan was being priced with** |
+
+**The three populations are widely separated and they agree.** nn-corr 0.747 (cell D), 0.812–0.827 (the
+foreign families), 0.884–1.000 (D157's 29); solo 0.786 to 0.891. At every one of them a single added member
+is worth between **−0.001 and +0.002** offline. D35 **ranks** candidates well (Spearman +0.763 against
+measured) and **prices** them roughly an order too high. Rank with it; never price with it.
+
+Coefficients as they now stand, from cell D's residual against D157's solo-only prediction
+(+0.0014 at (1−corr) = 0.2531):
+
+```
+corr coefficient ~ +0.0055 per unit (1 - corr)     (D35: +0.0557.  D157 refit: -0.0030)
+solo coefficient ~ +0.025                          (D35: +0.313.   D157 refit: +0.0385)
+```
+
+Both signs are positive and both magnitudes are ~10x under D35. Two consequences worth having in writing:
+**decorrelation alone would need (1 − corr) = 1.6 to buy the gap**, which is impossible; and a member at
+solo 0.920 with ordinary correlation prices at **+0.0028 offline ≈ +0.0032 board** at the refitted transfer
+constant +1.135, not the +0.0120 that was being planned against.
+
+**What is NOT closed by this.** Every one of those instruments prices the MARGINAL operation — add or swap
+ONE member into a fixed pool. **Nothing in this repo prices making all twelve better**, which is a
+pool-wide shift with no term in any model held here. The pool being saturated as an averaging device is
+consistent with everything: it is why the ensemble reaches 0.944 from a best solo of 0.8964, and why the
+thirteenth member buys nothing. Saturation is not failure — it means the averaging lever has been fully
+collected, and the next number to measure is the exchange rate `d(ensemble)/d(mean solo)` at fixed k.
+
+### Cell D — `ourtrunk44`, HIS 44-slot corpus, HIS recipe, OUR dinov2-small trunk
+
+`raptor_oof_ourtrunk44_fold0.npz` → `foreign_holdout` → `seat_value --against honest12 --foreign`, 896
+fold-0 studies against `report_labels_v2.csv`:
+
+```
+solo 0.7857   nn-corr 0.7469   mean-corr 0.6780
+seat into honest12: -0.0010  [-0.0017, -0.0003]
+best seat available to it (for mae_matched): -0.0007
+foreign-frame gold: best-epoch 0.8136 | SWA [11,14,15] 0.8113 no gain | epoch-ensemble 0.8125 no gain
+```
+
+**It refuted its own pre-registered branch in both directions.** The arm predicted nn-corr 0.87–0.92 with
+"trunk carries the decorrelation"; it landed at 0.747, below `repl2x2`. The fallback branch — below 0.85,
+"the corpus carries it, the geometry arm is the right next spend, D35 seat ~+0.0033" — got the corr but not
+the payoff: measured **−0.0010**. So the *prediction rule* is what broke. C149 §2's geometry arm is priced
+**DOWN** and its licence is withdrawn (C166 §1).
+
+Mechanism, and it is why "decorrelated" is the wrong word for this member: swapping the trunk to OURS made
+it **more** distant and much weaker at once, so the 2×2's corpus-versus-trunk decomposition is still not
+separated — cell D moved trunk and effective capacity together, and capacity is doing the visible work.
+Supporting that: neither SWA nor the epoch-ensemble pays anything, which is what a flat noisy basin looks
+like. **Distance bought by weakness is not distance that pays.**
+
+Two defects from the same run, both filed:
+
+- Cell D was **relaunched twice on a finished result** (~02:58Z, after `ARM DONE ourtrunk44` at ~02:57Z),
+  and the duplicates overwrote `raptor_ft_ourtrunk44.pt`, `.json` and `raptor_gold_ourtrunk44.npz` with
+  ep3-of-a-killed-run artefacts. The OOF `.npz` files survived, which is the only reason the reading above
+  exists; **the trained member's weights are gone.** `queue_check` cannot see this class — a live process
+  gating an owed arm is all it reads.
+- `band_wide_s2026` was priced independently on two rulers the same night and they disagree in size:
+  main reads corr-to-rest **0.934** / Δ **+0.0002** in the five-parent `seat_swap` frame, D157 reads
+  nn-corr **0.9267** / seat **+0.0011** into `honest12`. Same verdict (NO-GO, and above the pool median
+  either way), two frames. The disagreement is the rulers, not a defect.
+
+### Reader axes, closed on the seat ruler too (D157 §3)
+
+29 members, six axes, three rosters: band/span 17 (best seat +0.0014), crop/field 3 (+0.0015), tissue
+centring 3 (+0.0006), window/adjacency 2 (+0.0010), **in-plane resolution 3 (+0.0019, the best of any
+axis)**, intensity normalisation 1 (+0.0015). **Not one axis clears the 0.0062 family floor.** C157 §2 was
+right to object that the eight axes had been closed on solo macro and never priced as seats; the
+measurement it demanded has now been made and it comes back null, which is a different thing from the
+objection being wrong. Ordering by nn-corr inverts the mechanism: Spearman(1−corr, seat) = **−0.331**,
+Spearman(solo, seat) = **+0.906**.
+
+### Two ruler corrections that came with it
+
+- `d16_colseat.py:83`'s `gold` mask is **exactly the 13 radiologist-annotated studies in fold 0** (13 of
+  58, zero rows either way), NOT LLM-certain rows — an all-0/1 row is the signature of the annotation
+  override (`core/data/labels/targets.py:413`). The frame drops them because scoring there compares the
+  annotation with itself (`gold_rows.py:46-51`). D156 §5's wording is corrected; its practical conclusion
+  gets stronger.
+- `honest12` per-column, weakest first: Fracture 0.8475, LatOA 0.8665, PFOA 0.8822, **MCL 0.8830**,
+  LatMen 0.8870, Contusion 0.9077, MedMen 0.9078, MedOA 0.9115, Bakers 0.9221, Effusion 0.9286,
+  Synovitis 0.9304, **ACL 0.9409**. The gold instrument resolves **ACL** as the largest model-side deficit
+  (−0.1225) while the soft ruler calls it our strongest column. **"The three deficit columns" is not a set
+  the 896-study soft ruler can see**, and neither claim should be quoted without naming its ruler. 28 of 29
+  candidates raise MCL (bootstrap-resolved, e.g. `band_wide` +0.0078 [+0.0024, +0.0132]) while macro reads
+  +0.0011 — the gain is real and it is spent, Contusion −0.0034..−0.0044 every time. Reported as an
+  observation about the roster, NOT as a seat to take: choosing a member because it wins a column is the
+  D32 operation, measured at −0.0006 out of sample with +0.0033 of selection overfit.

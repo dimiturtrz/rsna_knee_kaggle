@@ -379,7 +379,12 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   from the directory the script sat in, so a copy watched the wrong side's mail and MOVING one silently
   relocated that side's mailbox and killed the arm in flight — both happened, and a name cannot do
   either. A letter is a `.txt` or `.md` file named `<utc-stamp>-<sender>-<subject>.<ext>`, one message
-  per file, written atomically (`.part` then `mv`). The listener prints bodies, files letters into its
+  per file, written atomically (`.part` then `mv`). **A letter's NUMBER carries its sender's prefix —
+  `M` from main, `D` from the researcher, `C` from the coordinator** — because numbers are cited across
+  letters and the boxes share no counter. Two `C166`s went out nine minutes apart on 2026-09-08
+  (mastermind's and main's), both live in the same hour; the `D86` collision is the same defect. Take the
+  next free number in YOUR OWN series, never the next after the last letter you read.
+  The listener prints bodies, files letters into its
   box's `read/`, and exits, so mail arrives as a task notification. On every notification **re-arm
   FIRST**, then read, then work. Letters and `read/` are gitignored runtime state; the listener and the
   per-box READMEs are source. `.agent-runtime/agent_md_sync.sh` propagates `CLAUDE.md` OUTWARD — it copies it to
