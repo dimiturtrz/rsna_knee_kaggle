@@ -10451,3 +10451,44 @@ Both watchers (`after_cellc.sh`, `after_effv2l.sh`) completed cleanly; the readi
   against `after_effv2l.sh`'s OWN pre-registration, which put **0.840–0.865 as the expected null** and
   **≥0.875 as the gate for "the family is a lane"**: this lands just above the null band and below the
   lane gate. **The family is not a lane on this reading.**
+
+## 2026-09-08 — `--corpus-oversample` was unrunnable, and the merged3 cache is a 90-second CONCATENATION
+
+`merged3_oversample` is the first arm in 292 to set `--corpus-oversample` (D189 §6, word-boundary
+census). It took three launches to get onto the card, and each failure was a different thing that had
+never been exercised because no arm had ever asked. All three are now fixed; the arm is training.
+
+**1. The cache had been reclaimed, and rebuilding it is cheap.** `images_336px_12sl_merged3.npy`
+(51.97 GB) was absent — the control `merged3_corpus` ran on it 2026-09-01 and it was deleted since.
+`arm_check` said `UNCACHED 336px_12sl_merged3` and I dismissed the warning in the prior window on the
+control's `"recompute_activations": "True"`, which is a memory-for-compute trade INSIDE the backward
+pass and says nothing about the image array. The arm died in 19 s and the card sat idle 08:21–08:36Z.
+**Read `arm_check`'s UNCACHED line as blocking; it has no false-positive mode.** The rebuild is
+`build_merged --scheme merged --extra-scheme mrnet --merged-scheme merged3 --slices 12 --image-size 336`
+and it is a CONCATENATION of two caches already on disk (merged 5143 studies + mrnet 1250 = 6393), not a
+decode: **90 seconds**, disk-bound. A merged3-geometry cache is therefore never a reason to defer an arm.
+
+**2. THE TRAP IN THAT COMMAND, which cost a label table.** `--extra-labels` defaults to `rijeka_acl.csv`
+and is NOT slaved to `--extra-scheme`. With `--extra-scheme mrnet` the array is merged correctly and the
+LABEL table is not: it wrote `merged3_labels.csv` at **5142 rows against the correct 6390**, silently,
+over the control's own training table. Nothing downstream could have noticed — every value in it still
+looks like a label. Restored exactly, because `merged3_labels_tagged_raw.csv` IS that table plus the
+`corpus` column: dropping the column reproduces it at (6390, 37). **Pass `--extra-labels` explicitly, or
+pass `--labels-only` never — the array and the table are written by one command and only one of them
+carries the scheme.**
+
+**3. THE PLUMBING DEFECT: a run refused for landing exactly what it asked for** (bead filed P1).
+`landed.py:360` computed the expected `sampling_tilt` as `sample_alpha if sample_spread is not None else
+0.0` — modelling the disagreement-spread draw policy and not the corpus one. `MixedCorpus.tilt()`
+reports its FACTOR on that same key, deliberately (`sampling.py:268`: "how many times heavier a
+non-target position is than a target one"), so the arm died in its first second on
+`sampling_tilt: asked 0.0, the model shows 2.22`. The switch-coverage partition is TOTAL over
+`TrainingOptions` FIELDS and `corpus_oversample` IS compared on its own key, so the gate was green while
+a SECOND key also carried the flag — **the coverage forcing-move is over fields, and this hole is over
+KEYS.** Fixed by mirroring `run_setup.drawing`'s own precedence (MixedCorpus first; the two flags are
+refused together at `run_setup.py:208`), with the null case (`--sample-alpha` and no spread file) kept.
+
+The general lesson, and it is the one CLAUDE.md already states from the other side: **a flag no arm has
+ever set has an untested path from the CLI to the card, and the three things that break are the cache,
+the companion flag nobody slaved, and the assertion that was written when only one producer existed.**
+Budget a first-of-its-kind flag at three launches, not one.

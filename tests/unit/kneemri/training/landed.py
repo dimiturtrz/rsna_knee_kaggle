@@ -1,6 +1,7 @@
 """Whether a built model shows the switches its run asked for, on CPU-sized objects."""
 
 from dataclasses import fields, replace
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -40,6 +41,7 @@ from kneemri.training.trainer import (
     ONE_CYCLE_WARMUP,
     OPTIMISER_DECAY,
     READ_SIZE,
+    SAMPLING,
     SCHEDULED,
     WARMUP,
     WEIGHT_DECAY,
@@ -398,3 +400,14 @@ def test_wanted() -> None:
     assert PLAIN.wanted()[CLIPPING] == UNCLIPPED
     tuned = replace(PLAIN, weight_decay=0.1, warmup=0.05, grad_clip=1.0).wanted()
     assert (tuned[OPTIMISER_DECAY], tuned[WARMUP], tuned[CLIPPING]) == (0.1, 0.05, 1.0)
+
+    # BOTH draw policies report on the one SAMPLING key, and modelling only the spread one refused
+    # every `--corpus-oversample` arm in its first second for landing exactly what it asked for.
+    assert PLAIN.wanted()[SAMPLING] == 0.0, "the uniform draw asks for no tilt from either policy"
+    assert replace(PLAIN, sample_spread=Path("spread.npz"), sample_alpha=0.5).wanted()[SAMPLING] == 0.5
+    assert replace(PLAIN, corpus_oversample=2.22).wanted()[SAMPLING] == 2.22, (
+        "`MixedCorpus.tilt` reports its factor here, so the request has to want the factor"
+    )
+    assert replace(PLAIN, sample_alpha=0.5).wanted()[SAMPLING] == 0.0, (
+        "an alpha with no spread file weights nothing — the run gets the uniform draw"
+    )

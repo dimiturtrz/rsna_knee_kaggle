@@ -357,7 +357,15 @@ class Request:
             UNFOCUSED: self.unfocused_weight if self.focus_label else 0.0,
             # RE-DERIVED FROM THE FLAG PAIR, the way WINDOW is: an alpha without a spread file weights
             # nothing, so the honest request there is the uniform draw the run will actually get.
-            SAMPLING: self.sample_alpha if self.sample_spread is not None else 0.0,
+            #
+            # AND FROM THE OTHER DRAW POLICY TOO. `MixedCorpus.tilt` reports its FACTOR on this same key
+            # — deliberately, since tilt is "how much of the draw the weight controls" and for that
+            # policy the weight IS the factor. Modelling only the spread policy here made every
+            # `--corpus-oversample` arm die in its first second on `sampling_tilt: asked 0.0, the model
+            # shows 2.22`, a run refused for landing exactly what it asked for (knee-zya5d follow-on).
+            # The order mirrors `run_setup.drawing`, which builds `MixedCorpus` first and refuses the
+            # two flags together, so no request can want both.
+            SAMPLING: self.corpus_oversample or (self.sample_alpha if self.sample_spread is not None else 0.0),
             SAMPLING_RAMP: self.sample_ramp if self.sample_spread is not None else 0,
             CORPUS_OVERSAMPLE: self.corpus_oversample,
             TARGET_CORPUS: self.target_corpus if self.corpus_oversample > 0.0 else "",
