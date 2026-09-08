@@ -107,6 +107,20 @@ def test_encode():
     assert registers.encode(_images(), mask).shape == (BATCH, TOKENS, DIM), "counted from the wrong end"
 
 
+def test_restore():
+    """A perfect standardised prediction comes back as the target itself, in the target's own units."""
+    objective = _objective()
+    target = torch.rand(BATCH, TOKENS, PATCH * PATCH)
+
+    centred = target - target.mean(dim=-1, keepdim=True)
+    exact = centred / centred.var(dim=-1, keepdim=True).sqrt()
+    recovered = objective.restore(exact, target)
+    assert torch.allclose(recovered, target, atol=1.0e-4), "the inverse of the pixel loss's standardisation"
+
+    flat = torch.zeros(1, 1, PATCH * PATCH)
+    assert torch.isfinite(objective.restore(flat, flat)).all(), "a background patch has variance zero"
+
+
 def test_pixel_loss():
     """Only the hidden patches are scored, and a flat patch does not divide by its own zero variance."""
     objective = _objective()

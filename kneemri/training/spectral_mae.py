@@ -186,6 +186,20 @@ class SpectralMae(nn.Module):
         error = (predicted - standardised).pow(2).mean(dim=-1)
         return (error * mask).sum() / mask.sum()
 
+    def restore(self, predicted: Float[Tensor, "b n q"], target: Float[Tensor, "b n q"]) -> Float[Tensor, "b n q"]:
+        """Put a standardised prediction back into the target's own pixel units.
+
+        `pixel_loss` scores the decoder against per-patch standardised targets, so the decoder's output
+        lives at mean 0 and unit variance while a patch of the image lives in [0, 1] at a standard
+        deviation of order 0.15. Merging the two without this step builds a mosaic in two different
+        units, and the spectral term then measures the block discontinuity between them rather than the
+        detail the model invented. That is not a scaling nicety: the two terms want opposite outputs
+        from the same decoder, the spectral term carries the larger gradient, and the pixel term parks
+        at the 1.0 that predicting the patch mean scores. Both eight-epoch runs did exactly that.
+        """
+        deviation = (target.var(dim=-1, keepdim=True) + _VARIANCE_FLOOR).sqrt()
+        return predicted * deviation + target.mean(dim=-1, keepdim=True)
+
     def highpass(self, images: Float[Tensor, "b 1 h w"]) -> Float[Tensor, "b 1 h w"]:
         """The log-magnitude spectrum with the low frequencies removed.
 
@@ -229,8 +243,10 @@ class SpectralMae(nn.Module):
         grid = images.shape[-1] // self.config.patch
         # The visible patches are restored from the ORIGINAL rather than predicted, so the spectral term
         # scores the model on the detail it had to invent and not on how faithfully it copied what it was
-        # shown. Detaching them additionally keeps the gradient off the copy.
-        merged = torch.where(mask.unsqueeze(-1), predicted, target.detach())
+        # shown. Detaching them additionally keeps the gradient off the copy. The predicted patches pass
+        # through `restore` first: they arrive standardised, the visible ones do not, and merging the two
+        # unconverted is what made both eight-epoch runs optimise the spectrum and abandon the pixels.
+        merged = torch.where(mask.unsqueeze(-1), self.restore(predicted, target.detach()), target.detach())
         spectral = self.spectral_loss(self.unpatchify(merged, grid), images)
         return pixels + self.config.spectral_weight * spectral, pixels, spectral
 

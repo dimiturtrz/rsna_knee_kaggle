@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# mae_unitfix.sh — the same in-domain MAE, with the two loss terms finally in the same units.
+# bead: knee-c3qfe
+# reading: encoder_drift_mae_unitfix*
+#
+# WHAT WAS WRONG, and it is arithmetic rather than a hypothesis. `SpectralMae.pixel_loss` scores the
+# decoder against PER-PATCH STANDARDISED targets — mean 0, unit variance. `forward` then built the image
+# the spectral term reads as `torch.where(mask, predicted, target.detach())`: the masked patches in that
+# standardised space, the visible ones raw, in [0, 1] at a patch standard deviation of order 0.15. The
+# tensor handed to `spectral_loss` was a mosaic in two different units, compared against the raw image.
+#
+# WHICH MAKES THE TWO TERMS WANT OPPOSITE OUTPUTS FROM ONE DECODER. The pixel term's optimum is a
+# standardised patch; the spectral term's optimum is a raw-valued one, because anything else is a block
+# discontinuity at every mask boundary, and a `log1p` magnitude spectrum over the full 336x336 plane
+# prices those discontinuities across every frequency it keeps. At `spectral_weight` 1.0 the spectral
+# term carries by far the larger gradient and it won. Both runs on disk are that fight, not slow
+# convergence:
+#
+#   pretrain_matched_e8   e0 pixel 0.9859  spectral 1.2171  ->  e7 pixel 0.9682  spectral 0.4276
+#   pretrain_lr1e5        e1 pixel 0.9775  spectral 0.7936  ->  e5 pixel 0.9799  spectral 0.6196
+#
+# A pixel MSE against unit-variance targets scores EXACTLY 1.0 for a decoder that predicts the patch
+# mean. Eight epochs and 33,544 optimiser steps over 402,600 knee-MRI slices moved it to 0.9682 — 3.2% of
+# the hidden-patch variance explained — and the 1e-5 run moved it the wrong way from epoch 1. The machine
+# and the data path are not the suspects: `mrnet_acl_pretrain` ran 1.1177 -> 0.5153 in the same box on the
+# same corpus, so a loss here fits when the objective is not self-contradictory.
+#
+# WHAT THIS COSTS THE LEDGER. `mae_matched` 0.6735, 0.6875, `encoder_adapt` 0.6902, `encoder_adapt_thawed`
+# 0.7162 and `encoder_adapt_lower` 0.7309 are all written up as evidence that on-domain SSL initialisation
+# loses 0.09-0.15 against stock DINOv2 at 0.8578, across two objectives and two import depths. Every
+# suspect was cleared before that verdict — plumbing by `adapt_null` at 0.8240 with drift exactly 0.0000,
+# data by a stamped cache key, variant by `PretrainedEncoder.into`, test by matched epochs. The one
+# suspect nobody checked was whether the pretraining CONVERGED, and it did not. A trunk that explains 3%
+# of its own reconstruction target carries no representation, so the fine-tune overwriting it is correct
+# behaviour and says nothing about domain adaptation. The ledger's own diagnosis — "the score rises
+# monotonically with how much of the SSL representation the fine-tune is allowed to overwrite" — is
+# exactly what an empty representation predicts. The axis was closed on a broken harness.
+#
+# THE FIX IS ONE LINE and it is the inverse of the standardisation the pixel loss already applies:
+# `restore(predicted, target)` multiplies by the target patch's own standard deviation and adds its mean
+# before the merge, so the spectral term reads one image in one unit. Nothing else moves — mask ratio,
+# high-pass radius, spectral weight, rate, schedule and corpus are byte-identical to `pretrain_matched_e8`,
+# which is what makes the pixel curve below a one-variable reading against it.
+#
+# THE MECHANISM CHECK IS PRE-REGISTERED AND IT COMES FIRST, at epoch 2 of the pretrain, before this arm
+# may run at all: PIXEL MUST FALL BELOW 0.90. The old run sat at 0.9704 after one epoch and 0.9682 after
+# eight, so 0.90 is far outside anything the broken objective produced and far above where a fitting
+# masked autoencoder settles. If pixel is still pinned near 1.0 at epoch 2 the fix is not the whole story,
+# the pretrain is killed there, and the next suspects are the single `nn.Linear(384, 196)` decoder and a
+# 0.6 mask ratio on an encoder that reads the masked positions. That branch costs ~15 minutes, not a day.
+#
+# THE SECOND GATE IS THE ESTABLISHED ONE and it is measured, not asserted: `kneemri.evaluation.
+# encoder_drift` must put every early block inside supervision's own range (<= ~0.02) before a fine-tune
+# spends the card. `encoder_adapt` failed it at 3.4-8.3% and `encoder_adapt_gentle` passed it at
+# 0.46-1.79%. A drift reading is not a score, but it is the one-minute CPU read that has already guarded
+# seventy-five minutes of card twice on this axis.
+#
+# THE FALSIFIABLE PART, unchanged from `encoder_adapt_gentle` because the hypothesis is unchanged and only
+# the harness moved: the gain must CONCENTRATE IN THE FOCAL FINDINGS — Medial Meniscus, Lateral Meniscus,
+# ACL, MCL, PF OA. Effusion, Baker's, Contusion and Synovitis are large, diffuse, already our best labels,
+# and they are the frequencies the high-pass term discards; they should barely move. A UNIFORM lift
+# credits a better initialisation, which is a real result and a DIFFERENT one. A lift in the DIFFUSE FOUR
+# refutes the stated mechanism outright.
+#
+# AND THE OUTCOME THAT IS STILL AVAILABLE: indistinguishable from the control. That would say the objective
+# now fits and the representation it builds is worth no more to this task than ImageNet's, which closes the
+# axis on a mechanism for the first time rather than on a bug.
+#
+# control  band_dense = 0.8578 (best epoch 8), byte-identical recipe with the flag off.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+ADAPTED="$MODELS/adapt_small_e8_unitfix.pt"
+require "$LABELS" "$ADAPTED"
+
+run_train mae_unitfix \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --encoder-weights "$ADAPTED" \
+  --labels "$LABELS" --out "$MODELS/mae_unitfix_s2026.pt"
