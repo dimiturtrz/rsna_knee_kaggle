@@ -10223,3 +10223,157 @@ Spearman(solo, seat) = **+0.906**.
   +0.0011 — the gain is real and it is spent, Contusion −0.0034..−0.0044 every time. Reported as an
   observation about the roster, NOT as a seat to take: choosing a member because it wins a column is the
   D32 operation, measured at −0.0006 out of sample with +0.0033 of selection overfit.
+
+## The SEE axis, opened 2026-09-08 (D181-D184, zero card, zero slot)
+
+D180 closed the marginal-member lane on the (solo, nnCorr) surface: 242 priced members, 0 clearing
++0.0015, every recipe knob inside its own permutation null, geometry worth 0.008 of the 0.09 needed. The
+question that survived it was whether any lever changes what the trunk SEES rather than what it does with
+what it sees. This section is the inventory of that axis and the one arm it produced.
+
+### The inventory (D181)
+
+`CacheFlags.add_to` is called by the trainer (`kneemri/training/flag_vocabulary.py:104`), so every cache
+flag is settable on `train` today. Over 290 committed arm scripts with comment lines stripped:
+
+```
+  flag                settable  default   distinct non-default values used
+  --slices               yes    12        4   (20 x171, 36 x3, 32 x1, 16 x1)
+  --image-size           yes    336       3   (224 x57, 448 x2, 420 x1)
+  --crop-mm              yes    130.0     3   (80 x3, 160 x1, 140 x1)
+  --centre               yes    image     1   (tissue x7)
+  --band-low/--band-high yes    0.20/0.80 3   (0.1/0.9 x180, 0.05/0.95 x3, 0.0/1.0 x1)
+  --spacing              yes    spread    1   (adjacent x1)
+  --scheme               yes    canonical 5   (merged x10, merged3 x3, multiscale x1, mrnet x1, extended x1)
+  --tie                  yes    first     0   <- the only settable-and-never-set flag
+```
+
+**`--tie` is the only literally-never-set flag, and it is not the lever.** `TIES = ("first","last")`
+(`slots.py:107`); it decides which acquisition fills a slot when several tie for maximal slice density.
+Three facts, the third decisive: a smoke index `index_336px_12sl_last_first60.json` exists from 2026-08-18
+and was abandoned; the rule has a measured correlate (`slots.py:362-364`, residual against the published
+members correlates **+0.664** with contested-slot count, +0.496 controlling for series count); and its own
+docstring, `slots.py:100-106` verbatim, says *"For TESTING against the published members' recorded
+predictions, not for switching on."* It changes the input only for studies with a contested slot, and that
+fraction is not on disk in any artefact. A change of DEGREE over an unmeasured denominator — refused as an
+arm, recorded here so nobody surfaces it as new.
+
+**A single-plane member is NOT buildable today, and the blocker is the name space, not the machinery.**
+`RIJEKA_SLOTS = (SLOTS[0],)` (sagittal-only, `slots.py:166`) and `FASTMRI_SLOTS = (SLOTS[1],
+COR_FLUID_NOFS)` (coronal-only, `:214`) both exist and `SCHEMES` (`:289`) is an open registry — but every
+corpus decodes into the same directory, and those two names mean FOREIGN corpora. Measured:
+`index_336px_20sl_0.1-0.9band_rijeka.json` 736 studies, overlap with our 4,407 index **0**;
+`index_336px_12sl_mrnet.json` 1,250, overlap **0**. `train --scheme rijeka` on our corpus reads
+identifiers FROM THE CACHE (`train.py:52`, into `Targets.pair` at `:66`), so it would train on 736 Rijeka
+studies or die in the label join; with the cache absent it would BUILD, writing our corpus over theirs.
+The fix is ~3 lines (a new scheme name plus a `SCHEMES` entry), not an arm.
+
+**Twelve cache keys have mask+index and no images** — completed builds whose pixels were reclaimed
+(`study_cache.py:383` unlinks progress once the mask is written), so `StudyCache.decoded()` refuses them
+and each needs a full re-decode: `224px_12sl_adjacent`, `224px_36sl_0.05-0.95band`, `336px_12sl_0-1band`,
+`336px_12sl_80mm_tissue`, `336px_12sl_80mm_tissue_0.1-0.9band`, `336px_12sl_extended`,
+`336px_12sl_merged3`, `336px_16sl_0.1-0.9band`, `336px_20sl_0.1-0.9band_merged`,
+`336px_20sl_140mm_0.1-0.9band`, `336px_20sl_merged`, `448px_12sl`. **"The flag was set once" and "the
+cache is loadable" are different questions and the arm scripts answer only the first.** And one build is
+stopped in flight: `progress_336px_20sl_0.1-0.9band_adjacent.npz`, mtime 2026-09-05 18:26, done **2,200 of
+4,407**, with no images file — so `_resumed`'s precondition (`study_cache.py:404`) fails and it restarts
+from zero. The adjacent axis was already being built at the working geometry three days ago.
+
+### `--scheme extended` is strictly additive, and it gains a slot on 34.2% of studies (D182)
+
+Read off `mask_336px_12sl_extended.npy` (4407x9) against `mask_336px_12sl.npy` (4407x6), both on disk, no
+decode:
+
+```
+  canonical six, extended mask vs canonical mask     IDENTICAL, 0 cells differ
+  extra slots filled  COR_FLUID_NOFS / AX_T1 / AX_FLUID_NOFS   841 / 564 / 566  of 4,407
+  studies gaining >= 1 extra slot                    1,508 = 34.2%
+    gaining exactly 1 / 2 / 3                        1,052 / 449 / 7
+  mean filled slots per study                        4.568 -> 5.015  (+0.447, +9.8%)
+  studies with zero canonical slots that gain one    0
+```
+
+**Denominator: the whole 4,407-study corpus, not a fold and not a holdout.** `slots.py:79-93`'s own 9.9%
+is a rate over SERIES (2,421 of 24,371) and is the wrong denominator for sizing an arm; the per-study rate
+is three and a half times larger. Behind it: **83,297 slices of imaging no member has ever seen**, none of
+them localisers — coronal PD without fat suppression is a standard meniscus sequence and axial T1 reads
+patellar cartilage.
+
+**The identity matters more than the 34%.** `EXTENDED_SLOTS` appends and never inserts, and the mask
+confirms the routing agrees cell for cell, so an extended member is not a re-decode under different rules
+— it is **every current member's input plus three channels**. Nothing is taken away, so a flat read cannot
+be blamed on having disturbed the six.
+
+**The head takes nine slots.** `n_slot` is a constructor argument threaded `model.py:182/204/226/239` ->
+`slot_head.py:54` and `:62` (`slot_emb = nn.Parameter(torch.randn(n_slot, hidden) * 0.02)`), sourced from
+the cache. Two hardcoded-six sites remain: `ortho_diffusion.py:163` iterates `SLOTS` directly, so the
+ortho family cannot be fed by this cache; and `SlotAffinity.requested` (`anatomy.py:230-248`) **raises**
+when the head's slot count is not six, so **`--anatomical-prior` cannot be passed to an extended arm**.
+That one closes rather than blocks: `aprior_dense` is `band_dense` plus that flag and reads **0.8557,
+−0.0021**.
+
+### The shipped CSV is NOT the routing (D183) — and D181's computability claim is withdrawn
+
+The `Fluid_Sensitive` / `Fat_Suppression` columns cannot reproduce the slot assignment. The CSV says
+`SAG_FLUID_NOFS` is fillable on **0** studies where the decoded mask has it filled on **2,760**; `SAG_T1`
+4,266 vs 1,871, a factor of 2.3. `StudyCache.planes_of` (`study_cache.py:490`) reads exactly one column,
+`Anatomical_Plane`, and `Slot.accepts` compares `Acquisition` properties recovered from a DICOM header
+probe (`acquisition.py:277-279`, `:287`). **The 40.1%-contested figure derived from the CSV is void.**
+
+Per-slot occupancy over 4,407, which is the fact that survives:
+
+```
+  SAG_FLUID_FS 4,119 (93.5%)   COR_FLUID_FS 4,210 (95.5%)   AX_FLUID_FS 4,343 (98.5%)
+  SAG_FLUID_NOFS 2,760 (62.6%) COR_T1 2,827 (64.1%)         SAG_T1 1,871 (42.5%)
+  COR_FLUID_NOFS 841 (19.1%)   AX_T1 564 (12.8%)            AX_FLUID_NOFS 566 (12.8%)
+```
+
+**The canonical six are already 24% empty on average.** The extended scheme is not adding a fourth plane
+to a full table; it is filling a table that was never full.
+
+### What the three extras carry, who gains them, and the confound (D184)
+
+**The 12x9 affinity table**, computed by calling `FindingAnatomy.affinity` for every `ANATOMY` row against
+every `EXTENDED_SLOTS` slot. The extras score **1.00 (primary plane, matched sequence) on seven cells
+across seven findings**: MCL and both menisci via `COR_FLUID_NOFS`, PF OA via `AX_T1`, Effusion /
+Synovitis / Baker's via `AX_FLUID_NOFS`. **PF OA has NO 1.00 cell among the canonical six** — its primary
+plane is axial with `needs_fluid` false, and the only canonical axial slot (`AX_FLUID_FS`) mismatches on
+sequence at 0.50. `AX_T1` is the single slot in the nine that reads patellofemoral OA properly. The extras
+LOSE for ACL, both OA columns, Contusion and Fracture — all three extras are non-fat-suppressed and marrow
+oedema is invisible without fat suppression.
+
+**The gainers are the corpus's SICKER third.** Population 4,406 with a `report_labels_v2.csv` row, cut
+midpoint, Fisher exact two-sided, gainers vs non-gainers: **Lateral OA 1.90x**, ACL 1.53x, MCL 1.44x,
+Medial OA 1.44x, PF OA 1.32x (all p<1e-4), Contusion 1.22x, Lateral Meniscus 1.19x, Medial Meniscus 1.09x,
+Effusion 1.06x; flat: Synovitis 1.01 (p .888), Baker's 0.92 (.144), Fracture 0.85 (.174). Ordering and
+signs survive on the 909-study holdout frame (319 gainers / 590 non). **They are not the rare-positive
+third**: Fracture has ~20 positives on the 909 gainer frame, below `column_surface.py:8`'s ±0.067
+half-width, so no per-column Fracture or Synovitis claim off an extended arm is readable.
+
+**THE CONFOUND, stated before any delta exists.** Protocol extension is indication-driven. `AX_T1` arrives
+where PF OA is **LESS** common (0.399 vs 0.460, p 0.008) — opposite in sign to the affinity mechanism —
+and `AX_T1` studies carry 1.54x the Synovitis rate and 0.42x the Baker's rate. Under the canonical scheme
+a study with `AX_T1` is indistinguishable from one without; under extended, **the presence bit itself is an
+input**. So a positive delta is attributable to three channels of PIXELS *or* to three bits of PROTOCOL
+METADATA correlating with pathology. Separator, no training: re-score with the three extra channels zeroed
+and the mask left intact. Upper bound requested card-free in M189: fit the three presence bits alone
+against the twelve columns on the 909 frame and read the macro.
+
+### The arm, and why its control is the one it is
+
+`experiments/arms/extended_band.sh` = `band_dense`'s invocation verbatim plus `--scheme extended`. **Of the
+79 members at 336/20/0.1-0.9band on the default trunk, `band_dense` is the ONLY one whose `run_train` line
+is recipe + geometry + `--labels` and nothing else** — no distillation, calibrated targets, EMA, held
+annotations, encoder weights, slot dropout or batch override. Its ledger row is **0.8578** at the midpoint
+on the 909 frame, recomputed off `band_dense_s2026.holdout.npz` and matching this file's earlier row.
+Nearest alternatives rejected: `band_dense_long` 0.8587 (24 epochs, and `aug_long` reads peak-to-finish
+−0.0182 at that budget) and `attend_dense` 0.8569 (its gate sat outside every optimiser group and ran as a
+fixed mean). The arm is built on this rather than on `labelwise_dense` (0.8959 @ledger75, the pool's best
+solo) because that member differs from the control by three flags; the labelwise extension is the
+follow-up that produces a shippable member, and only if the axis reads.
+
+Cache: `images_336px_20sl_0.1-0.9band_extended.npy`, (4407, 9, 20, 336, 336) uint8 = **89.6 GB**, built
+2026-09-08 06:39Z. Pre-registered: **>= +0.0015 add into honest12 @ledger75 -> the SEE axis is live** (the
+plane scheme and mm-FOV multiscale follow); **+0.0000 to +0.0015 -> real input, inert evidence, stop paying
+decode-scale costs**; **negative -> nine slots dilute slot attention faster than three channels inform it,
+which is a fact about the HEAD and makes `--slot-pooling attend` the follow-up.**
