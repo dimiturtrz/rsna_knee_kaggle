@@ -10889,3 +10889,55 @@ column, and neither is void — but the +0.0131 twelve-mean on the gold 58 was e
 by it. The oracle's residual is 5 Effusion values of 4,406 (0.9989), all at `(origin 0.68, donor 0.68)` —
 a level the re-read did not change and the hand-built table moved anyway, so the residual is in the shipped
 table, not in the rule.
+
+### D201: the champion never carried the column, and the board had already run the A/B
+
+Two questions were open after the graft was identified: does anything SHIPPED carry it, and is the
+−0.0054 ledger delta the column or the ruler? Both are now answered off disk, no card and no slot.
+
+**Carriers census (researcher, 2026-09-08).** 0 of the 6 `raptorweight_v1` seats carry the grafted table —
+every seat traces to `experiments/arms/calibsix.sh:115-133,141` and `final_fit_six.sh:48`, all passing
+`--labels "$LABELS"` = `experiments/lib.sh:72` = `report_labels_v2.csv`. Of 287 label-naming arms, **3**
+name v4b and only ONE ran (`labels_v4hybrid_s2026`, on `comp/members2.roster:30`, absent from
+`comp/champion.json`'s `chosen`); `compose_v4b_clean` and `compose_v4b_oof` have zero files on disk. Every
+teacher is v2-derived (`teacher_clean.sh:49`, `oof_fold0.sh:54`), so no distilled member inherits it
+second-hand. **The champion is clean; the axis closes with no re-fit and no slot.**
+
+**Per-column decomposition** (matched, same 909 studies, byte-identical truth, arm vs control):
+
+| column | delta | share of macro |
+|---|---|---|
+| Effusion | −0.0252 [−0.0407, −0.0105] | 39% |
+| Medial OA | −0.0148 [−0.0248, −0.0053] | 23% |
+| the other ten | each straddles 0 | — |
+
+macro arm 0.8524 vs control 0.8578, **delta −0.0054** — reproduces the ledger row exactly.
+
+**This is NOT a decomposition of the graft, and I mis-read it as one for an hour.** The arm trains on
+`blend_hybrid_fx_v4b.csv`; the control `band_dense_hold` trains on `$LABELS` = `report_labels_v2.csv`
+(`experiments/arms/band_dense_hold.sh:39`, `lib.sh:72`). Those two tables differ on EVERY column —
+measured over the 4,406 shared studies, Medial OA differs in 4,404 cells (mean |d| 0.0481), Effusion in
+4,406 (0.1016), ACL in 4,404, Lateral OA in 4,397. So the pair prices *blend + fracture lift + graft*
+against v2, not the graft. Against the graft's own base the same diff reads **0 Medial OA cells and 559
+Effusion cells** (`fx` vs `v4b`), which is the ColumnGraft footprint and nothing else. Medial OA therefore
+needs no second mechanism: it is the BLEND, and the bead opened for it closes on that arithmetic.
+The Effusion −0.0252 is likewise blend-plus-graft, so it may not be quoted as the graft's price.
+**Nor may the board A/B**: `v4solo_v1` trained on `blend_hybrid_fx_v4b` and `holdsolo_v1` on
+`report_labels_v2` (`comp/SUBMISSIONS.md:3629-3638` says so in as many words), which is the same
+whole-table comparison. The ONLY reading that prices the graft's own cells is D200's blinded
+adjudication, because it scores the 520 moved cells directly from the report text and never touches a
+label table at all.
+
+**The confound this table CANNOT remove, stated before the reading is used.** Truth here IS the v2 table,
+so an Effusion-local loss is predicted by both hypotheses (a worse column, and a correct column measured
+against a v2 ruler). What separates them is ONE non-v2 reading, not two: D200's blinded report-text
+adjudication, 58/59 against the graft over the 520 cells the graft itself moves. The board A/B
+(`v4solo_v1` **0.922** vs `holdsolo_v1` **0.928**, `comp/SUBMISSIONS.md:3629-3638`) agrees on the sign
+and is worth having, but it compares `blend_hybrid_fx_v4b` against `report_labels_v2` — a whole-table
+difference, every column moved — so it prices the TABLE and cannot be cited against the column. What
+retires the ruler-artefact defence in `kneemri-v4solo.py:9-10` is the blinded adjudication alone.
+
+**Medial OA is unexplained and stays open.** Its interval excludes zero, it is 23% of the delta, the graft
+touches no such column, and it contradicts D200's 5/5 in v4b's favour on that column. Filed rather than
+explained — a column that moves with no mechanism is either a second difference nobody has found or a
+correlated ruler effect, and neither is licensed to be assumed.
