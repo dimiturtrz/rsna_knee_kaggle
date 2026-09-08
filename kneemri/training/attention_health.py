@@ -157,6 +157,25 @@ class AttentionProfile:
     every reading would have stayed plausible.
     """
 
+    patch_entropy: tuple[float, ...] = ()
+    """The same entropy over the PATCH keys alone, renormalised — how much a block still discriminates.
+
+    `entropy` counts the prefix keys, because the sink is real and a reading that hides it hides the
+    failure this gate exists for. But that makes it two quantities added together: how much mass left
+    the patches, and how evenly what remains is spread. On a register trunk those move in opposite
+    directions, and only the second one is what a downstream head reads.
+
+    Measured 2026-09-08 on `adapt_latent_v3small_m30_e8`, whose block 11 parks 0.88 on the registers
+    and 0.00 on the class token. Its raw entropy collapses to 1.67 and the retention gate reads that as
+    a block that has run out of room — while the patch distribution behind the sink may be untouched.
+    Renormalising asks the question the sink was never evidence about.
+
+    This is the axis the gate is judged on — see `AttentionHealth.axis`, which also records the reading
+    on the known-degenerate checkpoints that licensed the change. It became the ruler only after every
+    one of them stayed refused: a ruler that stops refusing its control set is a broken ruler, not a
+    better one, and the floor was deliberately left where it was so the two are comparable.
+    """
+
     def register_mass(self) -> tuple[float, ...]:
         """Per block, the prefix mass NOT on the class token — the share a register trunk parks benignly.
 
@@ -176,7 +195,11 @@ class AttentionProfile:
             return line
         classes = "  ".join(f"{value:.2f}" for value in self.class_mass)
         registers = "  ".join(f"{value:.2f}" for value in self.register_mass())
-        return f"{line} | cls {classes} | registers {registers}"
+        line = f"{line} | cls {classes} | registers {registers}"
+        if not self.patch_entropy:
+            return line
+        patches = "  ".join(f"{value:.2f}" for value in self.patch_entropy)
+        return f"{line} | Hpatch {patches}"
 
 
 @dataclass(frozen=True)
@@ -228,8 +251,8 @@ class AttentionHealth:
         headroom `ln(keys) - H` over stock's headroom; away from it, `H` over stock's `H`. Stock scores
         1.0 on both against itself; every degenerate cell D252 measured scores below 0.115 on one of them.
         """
-        uniform = self.uniform()
-        blocks = zip(profile.entropy, self.reference.entropy, strict=True)
+        uniform, values, reference = self.axis(profile)
+        blocks = zip(values, reference, strict=True)
         return tuple(
             min(
                 self._share(uniform - value, uniform - stock),
@@ -237,6 +260,29 @@ class AttentionHealth:
             )
             for value, stock in blocks
         )
+
+    def axis(self, profile: AttentionProfile) -> tuple[float, tuple[float, ...], tuple[float, ...]]:
+        """Which entropy the gate is judged on: the PATCH distribution when both sides carry it.
+
+        Measured 2026-09-08 off the weights, with `encoder_profile`. `adapt_latent_v3small_m30_e8` sits
+        at raw H 1.67 on block 11 with 0.88 of the mass on its REGISTERS and 0.00 on the class token —
+        Darcet's mechanism doing exactly what it was added to do — and the raw ruler read that as a block
+        two points from refusal. Renormalised, the same block reads 4.46: the patches behind the sink are
+        spread as widely as ever, which is the only thing a downstream head sees.
+
+        Validated on the checkpoints the ruler must keep refusing before it was allowed to replace one.
+        `adapt_small_e6` block 11 is a total CLASS-token sink (prefix 1.00) and renormalises to -0.00;
+        `adapt_small_e6_lr1e5` is a single-patch lock at 0.07 and is untouched by renormalising, since
+        its prefix mass is 0.01; `adapt_small_e8_unitfix` walked to the uniform end with prefix mass
+        never above 0.27, so both axes read it the same. The new axis moves exactly one class of block —
+        the one whose mass went somewhere harmless — and that is the entire claim.
+
+        Falls back when either side lacks the statistic, which is what an older reading is: a profile
+        cannot be judged against a reference measured on a different quantity.
+        """
+        if profile.patch_entropy and self.reference.patch_entropy:
+            return math.log(max(1, self.tokens)), profile.patch_entropy, self.reference.patch_entropy
+        return self.uniform(), profile.entropy, self.reference.entropy
 
     def _share(self, value: float, stock: float) -> float:
         """`value / stock`, with a reference of zero meaning stock had no room to lose and cannot lose it."""
@@ -291,6 +337,7 @@ class AttentionHealth:
             entropy=tuple(self.entropy(block) for block in blocks),
             prefix_mass=tuple(self.prefix_mass(block) for block in blocks),
             class_mass=tuple(self.class_mass(block) for block in blocks),
+            patch_entropy=tuple(self.patch_entropy(block) for block in blocks),
             keys=int(blocks[0].shape[-1]),
         )
 
@@ -315,6 +362,19 @@ class AttentionHealth:
         """
         prefix = attention.shape[-1] - self.tokens
         return float(attention[:, :, -self.tokens :, :prefix].float().sum(dim=-1).mean())
+
+    def patch_entropy(self, attention: Float[Tensor, "b heads t t"]) -> float:
+        """Entropy over the PATCH keys after renormalising, so a sink cannot lower it by leaving.
+
+        `entropy` reads the row as served, which mixes two things: how much mass the prefix took, and
+        how the rest is distributed. Dividing by what remains asks only the second. The clamp is not
+        cosmetic — a row that has given the prefix essentially all of its mass leaves a denominator near
+        zero, and that is precisely the class-token lock this gate must keep refusing, so it stays a
+        division that produces a real number rather than a guard that skips the block.
+        """
+        rows = attention[:, :, -self.tokens :, -self.tokens :].float()
+        rows = rows / rows.sum(dim=-1, keepdim=True).clamp_min(torch.finfo(torch.float32).tiny)
+        return float(-(rows * rows.clamp_min(torch.finfo(torch.float32).tiny).log()).sum(dim=-1).mean())
 
     def class_mass(self, attention: Float[Tensor, "b heads t t"]) -> float:
         """The same statistic over the CLASS TOKEN alone — key 0, never the registers behind it.

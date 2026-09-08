@@ -16,7 +16,7 @@ import logging
 from argparse import Namespace
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypedDict, cast
+from typing import NotRequired, TypedDict, cast
 
 import torch
 from jaxtyping import Float
@@ -51,7 +51,7 @@ class Adaptation(TypedDict):
     """
 
     variant: str
-    cache: str
+    cache: NotRequired[str]
     config: dict[str, float]
     encoder: dict[str, Tensor]
 
@@ -83,15 +83,30 @@ class SavedAdaptation:
         """The recorded `vars(config)`, shaped as the namespace an objective builder reads its flags from."""
         return Namespace(**self.state["config"])
 
-    def require_cache(self, key: str) -> None:
+    def require_cache(self, key: str, anyway: str = "") -> None:
         """Refuse a probe drawn from a different slice population than the one the weights were fitted on.
 
         A profile on other pixels is a reading of another experiment. The key is checkable only because
         `save` wrote it down, which is the whole argument for writing recipes beside weights.
+
+        A checkpoint written before `save` recorded the key carries no claim either way, and the three
+        that matter here are exactly those: the known-degenerate adaptations a new ruler has to keep
+        refusing. Unreadable, they cannot validate anything — so the refusal is overridable by SAYING
+        why, in writing, rather than by a bare flag that would also wave through a genuine mismatch.
         """
-        if key != self.state["cache"]:
+        recorded = self.state.get("cache")
+        if recorded is None:
+            if not anyway:
+                message = (
+                    "this checkpoint predates recorded cache keys, so nothing here can say the probe is "
+                    "drawn from the pixels it was fitted on; pass --anyway '<why that is acceptable>'"
+                )
+                raise RuntimeError(message)
+            logger.warning("unrecorded cache, profiling on %s anyway: %s", key, anyway)
+            return
+        if key != recorded:
             message = (
-                f"adapted on cache {self.state['cache']!r}, and these flags resolve to {key!r}; "
+                f"adapted on cache {recorded!r}, and these flags resolve to {key!r}; "
                 f"a profile on different pixels is not a reading of this checkpoint"
             )
             raise RuntimeError(message)
@@ -134,6 +149,9 @@ def main() -> None:
     # different populations and argparse refuses the collision, which is the correct outcome — the flag
     # that picks the probe's width must not be confusable with the one that decides which pixels exist.
     command.parser.add_argument("--slices-per-step", type=int, default=PROBE_SLICES, help="probe batch width")
+    command.parser.add_argument(
+        "--anyway", default="", help="why profiling a checkpoint with no recorded cache key is acceptable"
+    )
     command.parser.add_argument("--seed", type=int, default=2026, help="which slices the probe batch draws")
     command.parser.add_argument(
         "--device",
@@ -145,7 +163,7 @@ def main() -> None:
 
     saved = SavedAdaptation.load(arguments.checkpoint)
     cache = CacheFlags.cache(arguments, command.rooted(arguments).processed())
-    saved.require_cache(cache.key)
+    saved.require_cache(cache.key, arguments.anyway)
     corpus, _ = cache.load()
     saved.encoder.require_tiling(corpus.image_size)
 
@@ -158,7 +176,12 @@ def main() -> None:
     )
     images = Pretrainer(objective, corpus, device, sampling).batch()
 
-    logger.info("%s on %d slices of %s", arguments.checkpoint.name, arguments.slices_per_step, saved.state["cache"])
+    logger.info(
+        "%s on %d slices of %s",
+        arguments.checkpoint.name,
+        arguments.slices_per_step,
+        saved.state.get("cache", cache.key),
+    )
     logger.info("%s", saved.profile(objective, images).report())
 
 

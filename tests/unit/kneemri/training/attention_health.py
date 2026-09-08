@@ -300,3 +300,63 @@ def test_register_mass():
 
     assert masses[0] == 0.0
     assert masses[1] > masses[0]
+
+
+def test_patch_entropy():
+    """A sink cannot lower this by leaving, which is the whole reason it is measured beside `entropy`.
+
+    One block, two readings. As served, a row that hands a prefix key almost all of its mass has very
+    little entropy left over the patches, and the raw statistic reports that collapse. Renormalised, the
+    patches are still spread exactly as evenly as they were, so the number is the uniform one — which is
+    the true statement about what a downstream head reads through this block.
+    """
+    logits = torch.zeros(BATCH, HEADS, KEYS, KEYS)
+    logits[..., 0] += 30.0
+    sunk = logits.softmax(dim=-1)
+    health = _health()
+
+    assert health.entropy(sunk) < math.log(TOKENS) / 2
+    assert health.patch_entropy(sunk) == pytest.approx(math.log(TOKENS), abs=1e-3)
+
+
+def test_patch_entropy_reported():
+    """The reading carries it, so a log line is judged on the statistic the sink does not move."""
+    profile = AttentionProfile(entropy=(1.0,), prefix_mass=(0.9,), class_mass=(0.0,), patch_entropy=(2.5,))
+
+    assert "Hpatch 2.50" in profile.report()
+
+
+def test_axis():
+    """A register sink stops being a refusal, and a class-token sink does not.
+
+    Both profiles below collapse on the raw statistic. The first is the register case: the mass left
+    the patches, and what remains is spread. The second is the class-token lock, where renormalising
+    recovers nothing because there was nothing behind the sink. The gate must separate them, and the
+    axis is what does it -- the floor is untouched.
+    """
+    health = _health()
+    stock = AttentionProfile(entropy=(5.0,), prefix_mass=(0.0,), class_mass=(0.0,), patch_entropy=(5.0,))
+    benign = AttentionProfile(entropy=(0.5,), prefix_mass=(0.9,), class_mass=(0.0,), patch_entropy=(4.8,))
+    locked = AttentionProfile(entropy=(0.5,), prefix_mass=(0.9,), class_mass=(0.9,), patch_entropy=(0.1,))
+    gate = AttentionHealth(tokens=health.tokens, reference=stock, probe=health.probe)
+
+    uniform, values, reference = gate.axis(benign)
+
+    assert values == benign.patch_entropy
+    assert reference == stock.patch_entropy
+    assert uniform == pytest.approx(math.log(TOKENS))
+    assert not gate.degenerate(benign)
+    assert gate.degenerate(locked)
+
+
+def test_axis_falls_back():
+    """A reading taken before the statistic existed is judged on the ruler it was taken with."""
+    health = _health()
+    stock = AttentionProfile(entropy=(5.0,), prefix_mass=(0.0,), keys=KEYS)
+    older = AttentionProfile(entropy=(0.5,), prefix_mass=(0.9,))
+    gate = AttentionHealth(tokens=health.tokens, reference=stock, probe=health.probe)
+
+    uniform, values, _ = gate.axis(older)
+
+    assert values == older.entropy
+    assert uniform == pytest.approx(math.log(KEYS))
