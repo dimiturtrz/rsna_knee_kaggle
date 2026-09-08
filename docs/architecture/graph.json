@@ -11576,6 +11576,12 @@
     },
     {
       "kind": "references",
+      "source": "core.data.labels.table_correction.ColumnGraft",
+      "target": "core.data.labels.table_correction.LabelSources",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "core.data.labels.table_correction.Correction",
       "target": "core.data.labels.table_correction.LabelSources",
       "weight": 1
@@ -38266,6 +38272,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.table_correction.ColumnGraft",
+      "label": "ColumnGraft",
+      "level": "class",
+      "parent": "core.data.labels.table_correction",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.table_correction.Correction",
       "label": "Correction",
       "level": "class",
@@ -46470,6 +46484,14 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.labels.table_blend",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.table_correction.ColumnGraft.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "core.data.labels.table_correction.ColumnGraft",
       "role": null
     },
     {
