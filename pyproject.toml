@@ -65,6 +65,11 @@ dependencies = [
     # transitively with cleanlab and lives in Kaggle's image, so it costs no wheel in the kit; declared
     # because the import is direct and DEP003 is enforced.
     "scikit-learn",
+    # `kneemri/evaluation/seat_swap.py` reads the paired-swap significance off `scipy.stats`. It arrives
+    # transitively with scikit-learn — which is exactly what DEP003 refuses: a transitive dep is one the
+    # upstream is free to drop, and the swap test is how a seat decision is priced. Direct import,
+    # declared. Costs no wheel in the kit; it is already in Kaggle's image.
+    "scipy",
 ]
 
 [project.optional-dependencies]
@@ -145,7 +150,10 @@ python_classes = []
 [tool.deptry]
 # `comp/` holds deploy scripts + Kaggle kernels: they import sibling modules (`survey`) resolved by
 # `sys.path[0]` in the deploy runtime, and the MOUNTED kit inside a kernel — neither is a project dep.
-extend_exclude = ["noxfile.py", "comp"]
+# `inbox/` is the same shape one directory over: `listen_for_mail.py` imports its sibling `agents.py`,
+# resolved by `sys.path[0]` because the listener is launched as a SCRIPT (`python inbox/listen_for_mail.py
+# --box main`), never as a package module. Declaring `agents` would name a dependency that does not exist.
+extend_exclude = ["noxfile.py", "comp", "inbox"]
 
 # deptry does not scan tests/ (its default exclude), so DEP002 (declared-but-unused) fires for anything
 # only exercised by the test suite or by tooling. PERMANENT ignores (never imported in scanned source by
@@ -190,7 +198,16 @@ line-length = 120
 # >>> LOCAL-SLOT: ruff-exclude — edit freely, the template will not overwrite intent here
 # `.agent-runtime/` is the OTHER agent's tree — their listener, their session hook. It is theirs to
 # format, and holding it to our gate means their file blocks our commit, which is exactly what it did.
-extend-exclude = ["docs", "learning", "research", "interpretations", ".agent-runtime", "scratch"]
+# `comp/kout*/` is downloaded Kaggle kernel OUTPUT, not source: it holds `_coat_env/`, an unpacked
+# wheel tree (cv2's stubs alone carry thousands of E501/N findings). It is gitignored, and ruff still
+# descends into it when `comp` is named on the command line, so the ignore has to be stated here too.
+# The carve-out is a BACKSTOP, not the rule: downloaded kernel output belongs under `logs/kout/`, which
+# no gate is pointed at. It has to live outside `lint_paths` because pyrefly cannot be excluded the way
+# ruff can — `pyrefly check --help`: when files are supplied on the command line, "`project_excludes` in
+# any config files loaded for these files to check are ignored". `lint_paths` names `comp`, so a
+# `project-excludes` entry for it is inert, and three such directories under `comp/` put 2,280 errors
+# into the type gate that no edit here could suppress (moved to `logs/kout/` 2026-09-08).
+extend-exclude = ["docs", "learning", "research", "interpretations", ".agent-runtime", "scratch", "comp/kout*"]
 # <<< LOCAL-SLOT: ruff-exclude
 
 [tool.ruff.lint]
@@ -244,6 +261,13 @@ ignore-names = ["X*", "Y*", "B", "C", "H", "W", "F"]
 preset = "strict"
 check-unannotated-defs = true
 search-path = ["."]
+# There is deliberately NO `project-excludes` here. It would be inert for the way the gate invokes this
+# checker: `pyrefly check core kneemri tests comp` supplies paths on the command line, and `--help` states
+# that when it does, "`project_excludes` in any config files loaded for these files to check are ignored"
+# and the DEFAULT excludes are used instead. Four spellings of a `comp/kout*` exclusion were measured
+# against 2,280 errors in downloaded kernel output and all four changed nothing; the fix was to move that
+# output to `logs/kout/`, outside `lint_paths`. Anything unlintable must live outside the gate's paths —
+# it cannot be excused from inside this file.
 # MUST equal the `requires-python` floor above. pyrefly does NOT infer it from requires-python — left
 # unset it checks against its own default (>=3.12), so a repo declaring 3.11 would get a GREEN type check
 # for `from typing import override` and then ImportError at runtime on the version it claims to support.

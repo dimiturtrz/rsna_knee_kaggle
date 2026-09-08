@@ -54,6 +54,7 @@ NOT_A_WRAPPER = {
     "check_whole_stack",
     "context_width",
     "fingerprint",
+    "folded",
     "forward",
     "from_config",
     "load_trained",
@@ -84,7 +85,14 @@ run cannot ask for it and no builder attaches it: it exists because `nn.Module.t
 every child and would re-enable the BatchNorm statistics that freezing a trunk is supposed to hold
 still, so the model re-pins them on the way out. A wrapper a run turns on is a choice; this one fires
 on every call whether anything asked or not, which is the point — the drift it prevents cost one whole
-trunk-family arm before it existed."""
+trunk-family arm before it existed.
+
+`folded` is the slice axis being collapsed, and the aggregator it delegates to is the choice — `slices`
+when a run asked for one, `over_depth` otherwise, and neither when the design is not per-slice. It is
+the SITE of that choice, not the switch: it appeared as a public method when `slot_features` learned to
+skip absent slots (5561bd4a), because both the masked and the unmasked path collapse the same way and
+one of them had to name it. A run cannot ask for it and a builder attaching it would attach nothing —
+same standing as `over_depth` and `slice_features` beside it."""
 
 TRAINER_REPORTER = {"policies", "encoder_rate_decay", "weight_decay", "backbone_rate"}
 MODEL_REPORTER = {"applied"}

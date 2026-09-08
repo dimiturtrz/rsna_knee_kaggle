@@ -8847,7 +8847,8 @@ every one of those four numbers is **in-sample**. Same defect that voided `rapto
 > our best goes 0.8627 → 0.9035 — and asked for the binarization to be written in. It is: **every macro on
 > this page is the midpoint (LEDGER) cut**, and `raptor_coat384` on the repo's own `LedgerSeventyFive`
 > ruler (`kneemri.evaluation.ledger75`, which is NOT a flat 0.75 — Medial Meniscus and Baker's keep the
-> midpoint) reads **0.8953 against `labelwise_dense_s2026` 0.8964 and `stackfit_s2026` 0.8962**. So on our
+> midpoint) reads **ledger75 0.8953 against `labelwise_dense_s2026` ledger75 0.8964 and `stackfit_s2026`
+> ledger75 0.8962**. So on our
 > actual L75 ruler it is third in the project, not ahead of it, and mastermind's flat-0.75 inversion is
 > ~0.009 of binarization difference.
 >
@@ -9283,7 +9284,7 @@ further back still. No large trunk has ever reached parity here.
 **Why it is not a seat either, which is the part that matters after D43.** The two arms within 0.01 of small
 (`base_clean` 0.918, `base_dense` 0.914) sit at the SAME FAMILY's correlation without the same family's solo
 — precisely the combination D43 measured the block does not pay for. Priced on D35's fits: at what
-`base_clean` actually reads (0.8886, corr 0.918) an honest 1/3 seat is **+0.0005** and the measured swap is
+`base_clean` actually reads (L75mid 0.8886, corr 0.918) an honest 1/3 seat is **+0.0005** and the swap is
 negative; six base twins as a block compose additively to **-0.003**. A base member would have to read
 **>= 0.905 solo at corr 0.85** to be worth +0.0096 offline (~+0.005 board) — a +0.019 solo jump nothing on
 disk predicts, at a corr 0.07 below anything base has ever read. **The trunk axis is closed as a seat, not
@@ -9326,8 +9327,9 @@ recorded, peak **0.8649 at e9** on the ledger ruler (e11 0.8645, e10 0.8643), th
 best epoch and not rewritten after; `convergence_check` clean.
 
 **Solo (896, L75mid), the pairs that matter** (researcher D46, `d39_job1.py`): **0.8936**, which is
-**+0.0042** over `seat_clean_distill` 0.8894 (boot95 [+0.0010, +0.0076], corr 0.950) and **−0.0012** against
-the calib parent `calib_dense_hold` 0.8948 (boot95 [−0.0055, +0.0032], corr 0.946). Read those two together:
+**+0.0042** over `seat_clean_distill` L75mid 0.8894 (boot95 [+0.0010, +0.0076], corr 0.950) and **−0.0012**
+against the calib parent `calib_dense_hold` L75mid 0.8948 (boot95 [−0.0055, +0.0032], corr 0.946). Read the
+two together:
 the +0.0042 IS the calib term (`calib_dense_hold − seat_clean_distill` = +0.0054), and the clean teacher adds
 −0.0012 on top of calib with a CI spanning zero. **Calib + clean teacher lands where calib alone already was.**
 Ledger ruler +0.0015 vs the calib parent, inside the 0.0062 floor.
@@ -9966,8 +9968,11 @@ would have been a serious error.
 - Derivation, and quote THIS one: the seat-value-vs-solo slope is **not linear across the pool**. D140 §1
   refits it on nested bands and the CIs are disjoint — honest12 full-range [+0.0044,+0.0165] against
   `>= 0.860` [+0.0419,+0.0559], and the slope rises monotonically with the band floor in all three rosters.
-  On the `>= 0.88` band (n=73–77, tight CI) the +0.0015 seat bar lands at **0.889 (honest12) / 0.892 (twin5)
-  / 0.894 (twin6)**, and the board-blur bar at 0.897 / 0.894 / 0.898.
+  On the `>= 0.88` band (n=73–77, tight CI) the +0.0015 seat bar lands at a SOLO score of **0.889 against
+  the honest12 roster / offline solo 0.892 against twin5 / offline solo 0.894 against twin6**, and the
+  board-blur bar at 0.897 /
+  0.894 / 0.898. Those six are candidate SOLO bars on the 896 / `L75mid` frame — they are not board
+  numbers and none of them is a score of the honest12 entry, which scored 0.937.
 - **Do NOT re-derive it from D133 §2.** That fit ran across solo 0.4597–0.8959, where 70 of 182 candidates
   below 0.87 flatten it, and it produces **0.9662** — a threshold outside the measured range, in the same
   letter that measured 18 of 182 candidates clearing +0.0015 with max solo 0.8959. D133 §2 is WITHDRAWN.
@@ -11018,3 +11023,329 @@ statement about the SCOREABLE pool, and five of the champion's six seats are `--
 
 **Cost of D202 + D202b: zero card-hours, zero slots.** Both were answerable off the 323 holdout records
 already on disk, and both had been standing as open axes in prose for days.
+
+## D203 — sixteen candidates, sixteen negative seat ADDs, and the ruler has failed upward on both board ticks
+
+The ten diverse-RECIPE members this project trained once and abandoned on their SOLO score, priced as a
+seat into `honest12` for the first time. Ruler **ledger75**, relation **EXACT**, **909 rows**, pool =
+the twelve stems in `comp/kernels/kneemri-honest12/kneemri-honest12.py:119-133`.
+
+| candidate | lever it varied | solo@ledger75 | ADD |
+|---|---|---|---|
+| `crop160_span_s2026` | `crop_mm` 160 (vs 130 in 264/288 runs) | 0.8873 | **-0.0001** |
+| `band140_s2026` | `crop_mm` 140 | 0.8826 | **-0.0003** |
+| `mixup_dense_s2026` | `mixup` 0.2 (vs 0.0) | 0.8849 | **-0.0005** |
+| `mixup224_strong_s2026` | `mixup` 0.4 | 0.8806 | **-0.0004** |
+| `aug_long_s2026` | `intensity_aug` True (vs False in 286/288) | 0.8798 | **-0.0002** |
+| `tissue224_s2026` | `centre` tissue (vs image in 264/288) | 0.8783 | **-0.0004** |
+| `band_deep_matched_s2026` | `unfreeze_last` 12 + `layer_decay` 0.7 (vs 6 + 1.0 in 280/288) | 0.8781 | **-0.0004** |
+| `band_dense_llrd_s2026` | `unfreeze_last` 12 + `layer_decay` 0.7 | 0.8765 | **-0.0004** |
+| `llrd224_s2026` | `layer_decay` 0.75 | 0.8737 | **-0.0006** |
+| `intensity392_ws_s2026` | `intensity_aug` True at 448 px | 0.8703 | **-0.0006** |
+
+Several of these solos sit ABOVE members currently seated. The ADD is negative anyway, in every case.
+
+**With D202's six non-DINO architecture families that is sixteen candidates and sixteen negative ADDs**,
+spanning architecture, augmentation, mixup, field of view, centring, unfreeze depth, layer-wise decay and
+resolution. Each magnitude is under the noise floor; the uniform SIGN is what carries, and no diversity
+mechanism predicts sixteen negatives out of sixteen.
+
+**The recipe census that produced the candidate list** (288 runs with a recorded recipe, modal value and
+its share): `intensity_aug` False 286/288 · `unfreeze_last` 6 in 280/288 · `head_lr` 0.001 in 286/288 ·
+`one_cycle` True 284/288 · `contrast_weight` 0.0/None 286/288 · `crop_mm` 130.0 in 264/288 · `centre`
+image 264/288 · `lora_rank` 0 in 269/288 · `patience` 0 in 262/288 · `pool` cls_mean 258/288 ·
+`slice_regions` 1 in 246/288 · `ema` False 247/288 · `encoder_adapt_depth` 0 in 228/288 · `layer_decay`
+1.0 in 216/288 · `mixup` 0.0 in 172/288. `seed` and `split_seed` are 2026 in 288/288 and are NOT levers
+(folds and seeds are banned). The VARYING set is labels, distillation, seating, and slice/band knobs.
+
+**THE RULER HAS FAILED UPWARD ON BOTH THINGS THAT EVER MOVED THE BOARD.** `base_dense` priced -0.0066
+against its matched control and ticked the board. And by the researcher's D203 §6 the foreign
+`raptor_v4_swa` member reads about **-0.079** against our own members on our ruler, and that seat moved
+0.941 -> 0.943. Sixteen offline rejections stand unshipped; the two accepted seats were both offline
+negatives.
+
+**THAT IS NOT AN ANTI-CORRELATION AND MUST NOT BE WRITTEN AS ONE.** A ruler that is reliably wrong is a
+ruler you invert and win with; nobody wins that way, so the sign is not the finding. The finding is that
+the offline ADD and the board measure **different distributions**. Our holdout is 909 studies drawn from
+OUR corpus, decoded by OUR pixel path, supervised by OUR label table — the same three things every
+candidate was fitted under. So an ADD asks only *"do you add on studies you were built to fit?"*, which
+is an **in-distribution redundancy** measure, and sixteen negatives is exactly what a saturated
+in-distribution pool looks like. Both seats that moved the board were **out-of-distribution** members —
+`base_dense` a different architecture, `raptor_v4_swa` a different pixel path — and they paid where this
+ruler is blind, not against it.
+
+**The consequence: this project has never measured generalisation, and that is the lever.** The open
+question is not the ruler's sign but whether an out-of-distribution readout exists, and one does at zero
+training cost: the researcher's D203 §1 establishes his `all_vols.npy` covers all 4,407 of our studies
+at (44, 336, 336) — **a different pixel path over the same studies and the same labels**. Scoring the
+members we already own on HIS decode is a distribution-shift readout with the corpus and the supervision
+held fixed, and it needs a loader adapter and no card. That, not the sixteen ADDs, is what decides which
+arm to build next — and it re-opens `intensity_aug` (off in 286/288 runs), which lost on the
+in-distribution ruler and was never asked the question it exists to answer.
+
+**`extended_band_s2026` was killed at epoch 3** on this reading (0.8278, needing +0.0300 against a
+median cohort gain of +0.0202, pre-registered P = 0.18) — it is a slice/band knob whose ADD would land
+where the other sixteen did. Cost of D203: **zero card-hours, zero slots**, and 3.5 h of card returned.
+
+## D207 — the board's own noise floor, the saturation statement, and the seat queue closed for cause
+
+Researcher D207, 2026-09-08. Zero card-hours, zero slots. It answers M208 §3 (*"fit the offline->board
+slope; if n is too small to separate the branches, say so and stop"*) with **stop**, and the two things
+it produced on the way are worth more than the coefficient would have been.
+
+**1. The board's retest noise, measured — nothing in this repo has ever quoted it.** Seven member SETS
+appear on the board more than once (different `ref`, identical `members_named`), and they separate:
+
+```
+same members, same aggregation      solotop_v1/topviews_v1   0.925, 0.925          spread 0.0000
+                                    sixfresh_v1/sixfresh_v2  0.931, 0.931          spread 0.0000
+same members, aggregation varied    5 groups, 3-7 seats      median 0.0010   max   0.0030
+```
+
+`sixfresh_v2`'s own prose is *"identical code and members to sixfresh_v1 on the REFRESHED kit (cf6a99f,
+was e3c884e) — the kit is the only variable"*, so **the KIT confound is measured at 0.0000**. Hold every
+future board delta against **0.000 same-aggregation / 0.001-0.003 aggregation-varied**. This constant is
+written here because `board_transfer`'s slope has now been quoted wrong from prose twice.
+
+**2. The saturation statement, reached from the board side.** Over every nested one-seat pair the project
+has ever submitted, **the largest offline ADD any single seat has ever made is 0.0013, median 0.0002.**
+Under a *perfect* slope of 1 the record's biggest step predicts a board move of 0.0013 — **1.3
+quantisation steps** of a board quoted to 0.001, and below the 0.0030 the board moves when only the
+combiner changes. So the ruler is not failing to transfer: **the pool has stopped producing steps big
+enough for the board to resolve.** That is D203's conclusion arriving from the opposite direction, and it
+sharpens it — the pool looks saturated because every seat now added is *in-distribution* with the ones
+already seated.
+
+**3. Why the slope itself is not usable, stated so nobody refits it.** A naive OLS reads **+1.832, se
+0.663, 95% CI [+0.533, +3.132], r +0.777, permutation p 0.030** — and must not be used. n is **7**
+distinct set-to-set comparisons over 9 board rows, so the rows are dependent (`basedense_v1` is an
+endpoint of three) and the se is understated, not conservative. Jackknife: dropping the single leftmost
+point (`longseat_v1 -> crossenc_v1`, x -0.0013 y -0.0040) takes the slope **+1.83 -> +0.83** and r
+**0.78 -> 0.56**; that point's y is itself larger than the 0.0030 six identical members produce. And the
+decisive fact is not n: **all seven pairs are dated 2026-08-20 to 2026-08-22**, board span 0.925-0.932,
+against a plateau of 0.937-0.944. Fifteen fit-eligible rows postdate 08-22 and **not one of them nests by
+exactly one seat** — after 08-22 the record changes seating, fold discipline and combiner together. The
+fit is entirely twelve board points below the regime the question was about. Neither M208 §3 branch is
+licensed.
+
+What WOULD answer it: two submissions, an entry and that entry plus one seat, everything else held
+including combiner and kit, **the seat chosen so its offline ADD is at least 0.004** (3x the
+identical-member spread). No seat that has ever existed adds that much, so it is a two-slot experiment on
+a member that does not exist yet.
+
+**4. Denominator correction — D206 §9 must not be quoted.** D206 said `members_named` is on 89 of 123
+rows and *"all 89 also carry `board` AND `offline`"*. The second half is wrong (that census tested key
+PRESENCE; 47 carry `offline: null` explicitly):
+
+```
+rows in comp/board.jsonl                             123
+  carrying members_named                              89
+  board not None                                      88
+  board AND offline not None                          41   <- the real pool
+  after dropping scope=excluded                       38   <- the denominator
+  minus in-sample / no-record / LEAKED offline_scope  37   <- fit-eligible
+```
+
+**The denominator for anything joining offline to board is 38, not 89.**
+
+**5. THE SEAT / DISTANCE QUEUE IS CLOSED FOR CAUSE.** Prediction-space member distance — rank
+correlation, JS divergence, Mahalanobis, `NEAREST`, `MEAN` over predictions
+(`kneemri/evaluation/member_distance.py`) — is **done, priced and finished**, and this line records the
+kill so it is not re-opened in a new coordinate system:
+
+- The ruler was validated at **+0.7086** and then produced **sixteen offline rejections** while the two
+  seats that moved the board were both offline negatives (D203).
+- Raw, all four statistics correlate **negatively** with gain (-0.5313), because distance is confounded
+  with quality. That negative sign is the anti-correlation reading, and it is **rejected on principle**:
+  a reliably wrong ruler is one you invert and win with, and nobody wins that way.
+- The board has answered the seating axis **seven times flat**, and §2 above says why it must: no seat
+  the pool can produce moves the board by more than one quantisation step.
+
+So: **no card and no slot to a seating, selection, weighting, distance or re-lensing operation.** The
+axis is not "unpromising", it is *measured out* — the ceiling on the whole family is 0.0013 offline,
+against a board that cannot see 0.0030.
+
+What is NOT killed, and is the successor: **the same question asked in a space the pool is not saturated
+in.** D203/D206 put an out-of-distribution readout within reach at zero training cost (his decode over
+our studies and our labels), and `kneemri/embeddings/` already builds and caches trunk features that
+**nothing has ever run an analysis over** — no Mahalanobis, no PCA, no kNN, no OOD score in feature
+space. Feature-space distance is worth building **only** as the representational half of that
+generalisation readout, never as a seat selector; the selector is what lost sixteen times.
+
+## D208/D209 — the sagittal slice axis is ALREADY canonical, the pool cannot see slice order anyway, and the medial/lateral question relocates to the coronal mirror
+
+Two letters, one axis, and a retraction the researcher wrote against their own finding. Recorded here
+because the first version of it would have queued a training arm and the second version closes the family.
+
+### 1. What was measured, and the denominators
+
+`frac_reversed@sag_series = 0.0000` over **9864 of 9864** sagittal series in `corpus4407` — zero
+unreadable orientation tags, zero ambiguous planes, so there is no parsed-subset denominator underneath.
+Every sagittal acquisition in the archive is stored with the through-plane normal `r_x x r_y` pointing to
+the patient's right. The headers carry NO per-study variation.
+
+`frac_reversed@sag_series_cached = 0.4752` over **9651 of 9864** (side resolved on 97.8%). The bimodality
+D208 measured is manufactured by us, on purpose, by `Laterality.normalise`
+(`core/data/corpus/laterality.py:51-63`), which for a right knee flips the sagittal stack along
+`dims=[0]` — the SLICE axis. `side` is per STUDY, which is why all three sagittal slots flip together and
+why a one-bit-per-study shape was the right thing to look for.
+
+Agreement of the cached sign with the per-study Spearman direction: **401 of 401**, all three sagittal
+slots, zero exceptions. The header sign sits at the coin value (0.4920 / 0.5120 / 0.4831) because it is
+constant while the correlation is not.
+
+**These two numbers describe the same corpus and a reader handed either one alone draws the opposite
+conclusion.** They are the denominator rule earning its keep.
+
+### 2. The attribution problem, and why the first reading did not survive it
+
+D208 section 2 read the bimodality as a defect in our pipeline and concluded that every member with a
+sagittal slot had trained on a slice axis whose direction was random across studies. That reading is
+**RETRACTED** by its own author (D209), on the argument M212 raised: the statistic correlates OUR order
+against HIS index, so the sign of the correlation is the XOR of two orderings and cannot name a side. The
+1.000 within-plane agreement does not attribute it either, because our three sagittal slots map to only
+TWO of his blocks (slot 0 from 0-11; slots 3 and 5 from 12-21), so one per-study bit on HIS side hitting
+both his sagittal blocks predicts the same table. Crossing pairs at 0.476-0.568 rule out a whole-volume
+flip on his side and nothing narrower.
+
+The header read settles it from our side alone, with no his-data: the archive is constant, so the bit is
+ours, and it is deliberate. **Our sagittal order is the anatomically canonical one** (medial to lateral
+the same way for both knees); his is raw header order, which is constant in patient coordinates and
+therefore INCONSISTENT in anatomy across knees. No canonicalisation arm. Nothing to canonicalise.
+
+Recorded as a retraction and not a correction, because a reader who meets only the first version queues
+the arm.
+
+### 3. The independent reason the arm was void: the pool is order-blind by construction
+
+Measured on our side while the attribution was in flight. `kneemri/models/slice_pooling.py` defines six
+poolings; usage across every arm in the tree:
+
+```
+max 311 - labelwise 28 - attend 18 - depth 4 - channels 4 - moments 1
+```
+
+`MAXIMUM` is a bare per-dimension `amax`. `attend` and `labelwise` score each slice FROM THAT SLICE ALONE,
+so scoring is permutation-equivariant and the pooled output is permutation-INVARIANT. `moments` is
+mean+spread. Only `depth` (DepthAttention — mixes each slice with its through-plane neighbours) and
+`channels` (three consecutive slices as encoder channels) can observe order at all. The file states this
+itself at `slice_pooling.py:28-32` — DEPTH is *"the one slice pooling that can see ORDER... Named beside
+the two order-blind ones because that is the comparison it exists to make"* — and `depth_attention.py:36`
+adds *"ABSOLUTE DEPTH IS DELIBERATELY NOT SUPPLIED."*
+
+**8 of 366 arms can observe a sagittal reversal.** So even had the bit been his, the arm was void: 97.8%
+of the pool is invariant to the thing it would have fixed. Two independent closures of the same arm, from
+opposite ends, and neither cost card time.
+
+Splice consequence: the per-study sign in `kneemri/evaluation/foreign_readout.py` stays and is exactly
+`side == "R"` (free, from `Study.side`, no correlation and no his-data needed); the static
+`reversed_=True` constant in `BLOCKS` goes. A constant was never the right shape for a per-study bit and
+is now provably the wrong one. On the 213-of-9864 side-unresolved series the empirical sign remains the
+only source.
+
+### 4. The inversion hypothesis this raised, and why it is DEAD — recorded so it is not re-raised
+
+The hypothesis was worth stating and is worth killing in writing: sagittal depth IS the medial-lateral
+axis, Medial Meniscus and Lateral Meniscus are separate findings in our twelve, so order-blind pooling
+might be destroying the exact axis two labels are defined on — which would make `depth` pooling's measured
+null a FAULTY-DATA verdict (an order-aware operator tested on randomly-ordered stacks) rather than a
+refutation.
+
+**Section 1 removes the faulty-data clause.** The cached sagittal order is anatomy-canonical by
+construction, so `depth_true` was measured on correctly-ordered data. It read **0.8461, -0.0015 against
+`attend_true`, second-worst of four operators** spanning 0.0019 (max 0.8457, order-aware 0.8461, mean
+0.8473, permutation-blind gate 0.8476). The existing ledger row already concluded *"SLICE ORDER IS NOT A
+LEVER EITHER"*; what D209 adds is that the row was ENTITLED to conclude it. The family is correctly closed
+and this is the second time in two weeks a closed family was nearly re-opened on a mechanism that had
+already been controlled for.
+
+### 5. Where the question DOES survive — the coronal/axial mirror, and the open number
+
+`Laterality.normalise` does two different things with opposite visibility:
+
+```python
+if plane in (Plane.CORONAL, Plane.AXIAL):
+    return torch.flip(images, dims=[-1])   # WIDTH — a within-slice MIRROR
+return torch.flip(images, dims=[0])        # SLICE ORDER — sagittal
+```
+
+Sagittal `dims=[0]` is a slice reorder — invisible to 97.8% of the pool per section 3, so a
+wrongly-resolved side costs almost nothing there. Coronal/axial `dims=[-1]` is a left-right mirror INSIDE
+every slice, visible to every pooling, every trunk, every member without exception: `amax` over a mirrored
+image is a mirrored feature. And a left-right mirror on a coronal slice IS a medial-lateral swap, against
+the same two labels, on the plane that carries them.
+
+So the canonicalisation is only as good as the side resolution behind it, and the exposure is
+plane-asymmetric in a way nothing has measured. `side` is unresolved on **213 of 9864 sagittal series
+(2.2%)**; where resolved it comes from a Type 2C `Laterality` tag on **4636 of 9864 series (47.0%,** split
+2296 L / 2340 R, so not a biased corner **)** and a `centre_x` geometry fallback on the rest.
+`core/data/corpus/diagnose_laterality.py` exists to measure the tag-vs-geometry-vs-used disagreement in
+seconds of header reads, and its own docstring says it was written for the medial/lateral target
+asymmetry.
+
+**OPEN, unpriced, assigned to the researcher in M213 and deliberately not turned into an arm:**
+`side_disagreement@corpus4407`, the both-present-subset rate with its denominator stated, which source
+wins in `Laterality.of_study`, and the count of disagreeing studies that have a coronal or axial slot
+populated. A fraction of a percent makes this a footnote. A few percent on the plane every member can see
+makes it the first data defect this project has found that is both universally visible and cheap to
+correct — and only then is an arm priced. No number, no arm.
+
+### 6. Unrelated, delivered alongside: the permutation refits to nothing on the 909
+
+D206's slot permutation, refitted on `holdout909` (909 of 909 in our 336px cache index AND served by one
+of his two shards, so this is the holdout itself, not a shard intersection), holds with a smallest argmax
+margin of **0.599**. Slots 3 and 5 both take his block 12-21 on their own votes (0.863 / 0.976) — his
+layout, not a tie. Nothing in the splice needs refitting.
+
+### 7. D210 CLOSES it — the number came back a footnote, so there is no arm
+
+Section 5 said "No number, no arm". The number is in, header reads only, no card and no slot:
+
+```
+side_disagreement@corpus4407      three-way tag / tag-stripped-geometry / used, 4407 studies, 24371 series
+  tag present, study level         2203 of  4407   0.4999
+  tag present, series level       12000 of 24371   0.4924
+  used side resolved               4335 of  4407   0.9837
+  geometry resolvable              4267 of  4407   0.9682
+
+frac_side_wrong@tag_and_geometry     30 of 2135    0.0141   (in-subset; the subset is 2135/4407 = 0.4845)
+                                     30 of 4407    0.0068   (the corpus rate, and it is a FLOOR)
+  direction   tag L / geometry R  18      tag R / geometry L  12
+```
+
+Converted to the thing a member actually eats — mirrored coronal/axial slot-instances — it is **80 of
+11380, 0.0070**. Every study in the corpus populates at least one coronal or axial slot (4407 of 4407),
+so exposure is TOTAL and the study rate converts to an input rate with no attenuation at all. That is
+the one structural fact worth keeping: there is no corner of the corpus a side error cannot reach. The
+rate is still 0.70%, which is below every bar this project uses, so it is a footnote and it is written
+as one.
+
+Three things recorded beside it, none of them priced, all of them the same ledger line:
+
+- **The tag wins outright, and arbitrarily.** `Laterality.of_study` (`core/data/corpus/laterality.py:39-49`)
+  takes `tagged[0]` — the first tagged series in `sorted(iterdir())` order. Not a vote, never cross-checked
+  against geometry, which is reached only when NO series in the study carries a tag. **25 of 2203 tagged
+  studies (0.0113) carry both an L and an R tag across their own series**, and `tagged[0]` resolves those
+  by directory sort order; ten of them are in the disagreeing 30 and the other fifteen agree with geometry
+  by coin flip, not by resolution.
+- **0.0068 is a lower bound, not an estimate.** Neither source is ground truth, so the 2105 agreeing pairs
+  could still be wrong together. It is a rate of OBSERVABLE disagreement over the 48.45% of the corpus
+  where both sources exist at all. Against the dead-zone reading: `median |centre_x|` on the disagreeing 30
+  is 95.1 mm against 81.0 mm on the agreeing 2105, so these are not marginal geometry calls.
+- **The larger neighbour: 72 studies (0.0163) resolve NO side.** `normalise` returns `images` unchanged
+  when `side != "R"`, so a right knee among those is simply never mirrored — 152 mirrored slot-instances
+  of 11380 (0.0134), roughly half of them wrong, arriving by a different mechanism and twice the count of
+  the disagreement set. Still a footnote.
+
+**And a denominator correction to section 5 above**, which is the same error the `@`-scoping rule exists
+to catch: the 47.0% tag rate quoted there is `4636 / 9864` — `tag_rate@sag_series`, the sagittal cut,
+because that section's whole population was sagittal. Over all three planes it is `12000 / 24371 = 0.4924`
+series-level and `0.4999` study-level, and `Study.side` consumes the STUDY-level rate because one tagged
+series anywhere in a study is enough. Same archive, different denominator. The number in section 5 is
+right; its label was not.
+
+**Verdict: the coronal/axial mirror axis is CLOSED at 0.70% of mirrored inputs.** It is the correct place
+for the medial/lateral question to have relocated to, it was cheap to ask, and the answer is no. A fix
+would be free of card time — `Laterality.of_study` could prefer a unanimous geometry over a contradicted
+tag — but a change that can reach 0.70% of inputs cannot produce a measurable score move, so it stays
+unbuilt rather than unlogged. Re-open by answering the number, not by re-raising the mechanism.

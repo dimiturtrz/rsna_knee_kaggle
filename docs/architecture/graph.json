@@ -572,6 +572,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.foreign_cache",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.kmar_stats",
       "target": "core.cli",
       "weight": 1
@@ -1952,6 +1958,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_blocks",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_blocks",
+      "target": "kneemri.inference.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_gate",
       "target": "core.cli",
       "weight": 1
@@ -2066,6 +2084,102 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "core.data.corpus.foreign_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.evaluation.foreign_blocks",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.evaluation.foreign_slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.inference.holdout_predictions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.inference.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.inference.member_readings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.inference.prediction_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_ruler",
       "target": "core.cli",
       "weight": 1
@@ -2086,6 +2200,18 @@
       "kind": "import",
       "source": "kneemri.evaluation.foreign_ruler",
       "target": "kneemri.evaluation.supervision_gap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_slots",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_slots",
+      "target": "kneemri.inference.holdout_slab",
       "weight": 1
     },
     {
@@ -8792,6 +8918,72 @@
     },
     {
       "kind": "references",
+      "source": "core.data.corpus.foreign_cache.ForeignCache",
+      "target": "core.data.corpus.foreign_cache.ForeignShard",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.foreign_cache.ForeignCache",
+      "target": "core.data.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_cache.ForeignCache.identifiers",
+      "target": "core.data.corpus.foreign_cache.ForeignCache.shards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_cache.ForeignCache.load",
+      "target": "core.data.corpus.foreign_cache.ForeignCache.positions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_cache.ForeignCache.load",
+      "target": "core.data.corpus.foreign_cache.ForeignCache.shards",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.foreign_cache.ForeignCache.load",
+      "target": "core.data.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_cache.ForeignCache.positions",
+      "target": "core.data.corpus.foreign_cache.ForeignCache.shards",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.foreign_cache.ForeignCache.shards",
+      "target": "core.data.corpus.foreign_cache.ForeignShard",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_cache.ForeignShard.identifiers",
+      "target": "core.data.corpus.foreign_cache.ForeignShard.ids_path",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_cache.ForeignShard.masks",
+      "target": "core.data.corpus.foreign_cache.ForeignShard.masks_path",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_cache.ForeignShard.volumes",
+      "target": "core.data.corpus.foreign_cache.ForeignShard.vols_path",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "core.data.corpus.kmar_corpus.KmarCorpus",
       "target": "core.data.corpus.kmar_corpus.KmarPair",
       "weight": 1
@@ -14540,6 +14732,24 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "target": "core.data.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "target": "kneemri.evaluation.foreign_blocks.SlotBlock",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.foreign_gate.FeedGate",
       "target": "kneemri.evaluation.foreign_gate.GateReading",
       "weight": 1
@@ -14864,6 +15074,240 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.evaluation.foreign_readout.ShiftPair",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.evaluation.foreign_readout.ShiftedReading",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.models.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
+      "target": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
+      "target": "kneemri.evaluation.foreign_readout.ShiftedReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
+      "target": "kneemri.evaluation.foreign_readout.ShiftedReading.logged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.rebuilt",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
+      "target": "kneemri.evaluation.foreign_readout.ForeignReadout.rebuilt",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
+      "target": "kneemri.inference.members.Member.window",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.foreign_readout.ShiftPair",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "core.data.corpus.folds.ReportFolds",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "core.data.corpus.folds.ReportFolds.assign",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "core.data.corpus.folds.ReportFolds.holdout",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "core.data.corpus.foreign_cache.ForeignCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "core.data.corpus.foreign_cache.ForeignCache.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "core.data.labels.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.foreign_readout.ShiftPair",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.foreign_slots.SlotsKept",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.cached",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.member_readings.MemberReadings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.member_readings.MemberReadings.reference",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.member_readings.MemberReadings.slabs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.members.Member.held_out_from",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.prediction_cache.PredictionCache",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.foreign_ruler.ForeignReading",
       "target": "kneemri.evaluation.foreign_ruler.ForeignReading",
       "weight": 1
@@ -14962,6 +15406,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_ruler.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_slots.SlotsKept",
+      "target": "core.data.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.foreign_slots.SlotsKept",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
       "weight": 1
     },
     {
@@ -34575,7 +35031,7 @@
   ],
   "nodes": [
     {
-      "descendants": 75,
+      "descendants": 76,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -34599,7 +35055,7 @@
       "role": null
     },
     {
-      "descendants": 65,
+      "descendants": 66,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -34607,7 +35063,7 @@
       "role": null
     },
     {
-      "descendants": 39,
+      "descendants": 40,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -34778,6 +35234,14 @@
       "descendants": 0,
       "id": "core.data.corpus.folds",
       "label": "folds",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache",
+      "label": "foreign_cache",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -35183,7 +35647,7 @@
       "role": null
     },
     {
-      "descendants": 276,
+      "descendants": 279,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -35247,7 +35711,7 @@
       "role": null
     },
     {
-      "descendants": 99,
+      "descendants": 102,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -35400,6 +35864,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_blocks",
+      "label": "foreign_blocks",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_gate",
       "label": "foreign_gate",
       "level": "module",
@@ -35440,8 +35912,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout",
+      "label": "foreign_readout",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_ruler",
       "label": "foreign_ruler",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_slots",
+      "label": "foreign_slots",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -37696,6 +38184,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignCache",
+      "label": "ForeignCache",
+      "level": "class",
+      "parent": "core.data.corpus.foreign_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignShard",
+      "label": "ForeignShard",
+      "level": "class",
+      "parent": "core.data.corpus.foreign_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.kmar_corpus.KmarCorpus",
       "label": "KmarCorpus",
       "level": "class",
@@ -38840,6 +39344,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "label": "MappedSlab",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_blocks",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_blocks.SlotBlock",
+      "label": "SlotBlock",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_blocks",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_gate.FeedGate",
       "label": "FeedGate",
       "level": "class",
@@ -38896,6 +39416,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "label": "ForeignReadout",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_readout",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ShiftPair",
+      "label": "ShiftPair",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ShiftedReading",
+      "label": "ShiftedReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_ruler.ForeignReading",
       "label": "ForeignReading",
       "level": "class",
@@ -38925,6 +39469,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.foreign_ruler",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_slots.SlotsKept",
+      "label": "SlotsKept",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_slots",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -43492,6 +44044,86 @@
       "label": "holdout",
       "level": "method",
       "parent": "core.data.corpus.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignCache.identifiers",
+      "label": "identifiers",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignCache.load",
+      "label": "load",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignCache.positions",
+      "label": "positions",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignCache.shards",
+      "label": "shards",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignShard.identifiers",
+      "label": "identifiers",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignShard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignShard.ids_path",
+      "label": "ids_path",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignShard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignShard.masks",
+      "label": "masks",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignShard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignShard.masks_path",
+      "label": "masks_path",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignShard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignShard.vols_path",
+      "label": "vols_path",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignShard",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_cache.ForeignShard.volumes",
+      "label": "volumes",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_cache.ForeignShard",
       "role": null
     },
     {
@@ -48784,6 +49416,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_blocks.MappedSlab.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_blocks.MappedSlab.batch",
+      "label": "batch",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_blocks.SlotBlock.taken",
+      "label": "taken",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_blocks.SlotBlock",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_gate.FeedGate.reading",
       "label": "reading",
       "level": "method",
@@ -48992,6 +49648,78 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ForeignReadout.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ForeignReadout.rebuilt",
+      "label": "rebuilt",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ShiftedReading.decode_cost",
+      "label": "decode_cost",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ShiftedReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ShiftedReading.drop",
+      "label": "drop",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ShiftedReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ShiftedReading.logged",
+      "label": "logged",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ShiftedReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ShiftedReading.slot_cost",
+      "label": "slot_cost",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.ShiftedReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_ruler.ForeignReading.load",
       "label": "load",
       "level": "method",
@@ -49060,6 +49788,22 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.foreign_ruler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_slots.SlotsKept.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_slots.SlotsKept",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_slots.SlotsKept.batch",
+      "label": "batch",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_slots.SlotsKept",
       "role": null
     },
     {

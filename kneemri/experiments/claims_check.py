@@ -154,6 +154,9 @@ NOT_A_MEMBER_SCORE = (
     "tta",
     "bar",
     "gold 58",
+    "ledger75",
+    "l75mid",
+    "ledgerseventyfive",
 )
 """Line markers that put the number's subject somewhere other than one member's holdout. Training loss
 lands squarely in the AUC band (`0.7493 -> 0.7113`); a greedy search line reads `greedy 54: 0.8670
@@ -172,7 +175,15 @@ twenty-two of them were a number whose subject the line NAMES, in a word this tu
 not one member's holdout; `tighter`, `distant` and `displacing` mark a comparison whose number belongs to
 the thing compared against; `tta` marks the second ruler this check's own docstring already names as a
 blind spot; `champion seven` is `champion five` one champion later. Six real defects survived that sweep
-and were corrected in place."""
+and were corrected in place.
+
+THE LAST THREE ARE THE CUT, and they are the largest remaining class. A run's recorded score is on the
+MIDPOINT cut (`scores.py` `MIDPOINT = 0.5`), and this project also reads the same predictions on
+`LedgerSeventyFive` — which is worth about +0.03 on the same member, so an L75 number read as a midpoint
+claim is wrong by ten times the significance bar and reads as a fabricated score. A line that NAMES its
+cut is not making a claim about the run's recorded holdout; it is naming a second ruler, exactly as `tta`
+does. This is the check's half of the repo rule that a scalar carries STATISTIC, POPULATION and CUT:
+a line without one of these markers is asserting midpoint, and is still adjudicated."""
 
 
 class ClaimsCheck:

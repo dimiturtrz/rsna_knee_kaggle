@@ -6,7 +6,7 @@ this document; every number in it is a re-reading of members already on disk.
 ## 1. The bar the pool is now judged against
 
 D174 §3 priced 242 members one at a time into `nine` (base 0.9024 @ledger75, k=9). **Zero of 242 clear
-+0.0015.** The best add in the clean pool is `labelwise_dense_s2026` at **+0.0011** (solo 0.8959,
++0.0015.** The best add in the clean pool is `labelwise_dense_s2026` at **+0.0011** (solo 0.8959 @ledger75,
 nnCorr@pool251 0.8925). Fitting the adds gives
 
 ```
@@ -266,7 +266,7 @@ the stronger form.
 **The break-even geometry.** Gradient (0.0443, -0.0153), ||g|| 0.0469. The nearest real member to the
 +0.0015 line is `merged_labelwise_cf` at euclidean 0.0304, needing **+0.032 of solo OR -0.093 of
 nnCorr**. +0.032 solo means solo 0.920, which is 0.024 past the best member this project has ever
-produced (`labelwise_dense_s2026`, 0.8959). -0.093 nnCorr means nnCorr@9 0.77 at solo ~0.89, where the
+produced (`labelwise_dense_s2026`, 0.8959 @ledger75). -0.093 nnCorr means nnCorr@9 0.77 at solo ~0.89, where the
 only members under 0.80 nnCorr sit at solo 0.46-0.82 and `ourtrunk44` paid 0.078 of solo to buy 0.7469.
 Zero of 242 have a measured add >= +0.0015 (best +0.0011); zero are PREDICTED to under the quadratic
 either (max +0.0007).
