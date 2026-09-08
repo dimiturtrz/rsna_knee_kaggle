@@ -75,6 +75,28 @@
 # correlate with pathology. The separator costs no training and is run only if the arm reads positive:
 # re-score with the three extra channels zeroed and the mask left intact.
 #
+# AND THAT CONFOUND IS NOW PRICED, BEFORE THE CARD (D185, card-free, on THIS arm's own 909 frame at the
+# midpoint). The three presence bits fitted ALONE against the twelve columns are above chance - cross-fit
+# macro 0.5431, in-sample ceiling 0.5895 - so the metadata channel is real, and `COR_FLUID_NOFS` carries
+# almost all of it (ACL 0.593, Lateral OA 0.576). `AX_T1` alone is at or below chance nearly everywhere and
+# its two most negative columns are Baker's 0.446 and PF OA 0.472, which is the indication effect pointing
+# opposite to the affinity argument, measured rather than argued. But the quantity that decides the arm is
+# what the bits add ON TOP OF THE MEMBER: a per-column logistic on [logit(band_dense), bit0, bit1, bit2],
+# 5-fold cross-fit, same rows, same cut, reads member 0.8578 -> 0.8557, delta -0.0021. The member column
+# reproduces the ledger's band_dense to four decimals on a path that never read the ledger.
+#
+# So the channel is real and ALREADY SPENT: the pathology those bits mark is pathology the canonical six
+# already show. A positive extended delta cannot be charged to three bits of protocol. The zeroed re-score
+# is therefore NOT mandatory - it stays a follow-up conditional on a positive read, because -0.0021 bounds
+# the POST-HOC channel only and a trunk trained on those channels can exploit bit-by-image interactions a
+# four-parameter logistic cannot represent.
+#
+# THE 20-SLICE ROUTING IS THE 12-SLICE ROUTING (D185 3, read off the live decode's progress file at 3,600
+# of 4,407). Canonical six, 20sl-extended vs 20sl-canonical: 0 cells differ. Extras, 20sl vs 12sl: 0
+# studies disagree, per-extra filled 699/467/443 identical, gainers 34.3% against 12sl's 34.3% on the same
+# rows, index order identical. D182 called slot routing's independence from slice depth an argument; on
+# 3,600 studies it is a measurement, and this header is quoting the right corpus at itself.
+#
 # PRE-REGISTERED (M188 3, written before the decode finished), against band_dense 0.8578 @midpoint:
 #   >= +0.0015 add into honest12 @ledger75   the SEE axis is live, and the plane scheme (~3 lines in
 #              slots.py) and the mm-FOV multiscale scheme follow in that order.

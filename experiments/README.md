@@ -10377,3 +10377,37 @@ Cache: `images_336px_20sl_0.1-0.9band_extended.npy`, (4407, 9, 20, 336, 336) uin
 plane scheme and mm-FOV multiscale follow); **+0.0000 to +0.0015 -> real input, inert evidence, stop paying
 decode-scale costs**; **negative -> nine slots dilute slot attention faster than three channels inform it,
 which is a fact about the HEAD and makes `--slot-pooling attend` the follow-up.**
+
+### The confound is real, redundant, and therefore not a threat to the arm (D185)
+
+Statistic / population / cut, once: per-column ROC-AUC and its unweighted 12-column macro, population
+**holdout909** (the `studies` array of `band_dense_s2026.holdout.npz` — the frame the arm is read on), cut
+**midpoint**. Bits read off `mask_336px_12sl_extended.npy` columns 6:8.
+
+**The three presence bits fitted ALONE against the twelve columns are above chance**: cross-fit macro
+**0.5431**, in-sample ceiling 0.5895 (three binary features admit 8 patterns, so the ceiling is what a
+learner with the labels in hand gets and nothing generalises there — quote 0.5431). `COR_FLUID_NOFS`
+carries almost all of it (ACL 0.593, Lateral OA 0.576, PF OA 0.568). `AX_T1` alone is at or **below** chance
+nearly everywhere and its two most negative columns are **Baker's 0.446 and PF OA 0.472** — the indication
+effect pointing opposite to the affinity table, on the arm's own frame, on the one slot the affinity table
+called PF OA's only proper read. Bit prevalence on the 909: 170 / 112 / 124.
+
+**On top of the member the same bits are worth −0.0021.** Per-column logistic on `[logit(band_dense
+prediction), bit0, bit1, bit2]`, 5-fold cross-fit, same rows, same cut: macro **0.8578 -> 0.8557**. The
+member column reproduces the ledger's `band_dense` figure to four decimals on a path that never read the
+ledger, which is the harness check that validates D184 §4's control under two independent computations.
+Per-column deltas run −0.0181 (Fracture, 68 positives, noise) to +0.0065 (Baker's); dropping Fracture the
+other eleven still average about −0.0006.
+
+**So the metadata channel is non-empty and ALREADY SPENT** — the pathology those bits mark is pathology the
+canonical six already show. A positive extended delta cannot be charged to three bits of protocol. The
+zeroed re-score is therefore NOT mandatory; it stays a follow-up conditional on a positive read, because
+−0.0021 bounds the POST-HOC channel only and a trunk trained on those channels can exploit bit-by-image
+interactions a four-parameter logistic cannot represent.
+
+**And slot routing is independent of slice depth — measured, not argued** (read off the live decode's
+`progress_336px_20sl_0.1-0.9band_extended.npz`, which carries a `(4407, 9)` mask and a `(4407,)` done, at
+3,600 of 4,407): canonical six 20sl-extended vs 20sl-canonical **0 cells differ**; extras 20sl vs 12sl **0
+studies disagree**; per-extra filled 699 / 467 / 443 identical; gainers 34.3% against 12sl's 34.3% on the
+same rows; index order identical to both the canonical 20sl and the 12sl index. D182 called this an
+argument; on 3,600 studies it is a measurement.
