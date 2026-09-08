@@ -25,6 +25,16 @@ NEITHER RULE HARD-FLIPS A CELL. `overcall_audit`'s own audit puts the clean extr
 with that residual left standing, never as a zero. A hard flip asserts the rule is never wrong, and this
 one is wrong about one cell in seven.
 
+`effusion_reread` — a second reader pass over the same reports, grafted in as a whole column. It is here
+because the table it built SHIPPED to the board with no builder in the repo, not because it is endorsed;
+its own docstring carries the adjudication that prices it.
+
+THE SECOND ORACLE: `--rule effusion_reread` over `blend_hybrid_fx.csv` reproduces `blend_hybrid_fx_v4b.csv`
+— measured 2026-09-08 over the 4,406 shared studies, zero difference on eleven of twelve columns, the
+Effusion verdict column exact, and 5 of 4,406 Effusion VALUES off (0.9989). Those five all read
+`(origin 0.68, donor 0.68)` — a level the re-read did not change and the hand-built table moved anyway,
+so the residual is in the shipped table, not in the rule.
+
 THE ORACLE THIS MODULE IS PROVED BY: `--rule fracture_contusion` over `blend_hybrid.csv` reproduces
 `blend_hybrid_fx.csv` — that table was written by hand before this module existed and its gold numbers
 are already recorded. Measured: zero difference on all twelve target columns. NOT byte-identical, and
@@ -52,11 +62,16 @@ DECIMALS = 4
 
 @dataclass(frozen=True)
 class LabelSources:
-    """Everything a correction may read: the table it rewrites, the reports behind it, the annotations."""
+    """Everything a correction may read: the table it rewrites, the reports behind it, the annotations.
+
+    `labels` is the directory the label tables live in, so a rule whose knowledge is ANOTHER TABLE can name
+    its donor by filename instead of by an absolute path baked into a registry entry.
+    """
 
     table: pd.DataFrame
     reports: pd.DataFrame
     truth: pd.DataFrame
+    labels: Path
 
 
 class Correction(Protocol):
@@ -123,12 +138,68 @@ class RubricPull:
         return table.reset_index()
 
 
+VERDICT = "__verdict"
+CONF = "__conf"
+
+
+@dataclass(frozen=True)
+class ColumnGraft:
+    """One column replaced by a DONOR table's re-read of it: `column := donor[column]`, verdict and all.
+
+    This is the third shape of correction and the only one that hard-flips, because a re-read is not a
+    rule with a failure rate — it is a second pass by the same reader over the same reports, and half a
+    re-read is not a reading. The value is carried through `levels`, the donor's own level ladder mapped
+    onto the base column's scale, because a blended base column is continuous while a reader's column
+    sits on five levels; grafting the donor's raw value would put the graft on a different scale from the
+    eleven columns beside it.
+
+    IT IS RECORDED HERE BECAUSE IT ALREADY SHIPPED, NOT BECAUSE IT IS ENDORSED. `blend_hybrid_fx_v4b` is
+    `blend_hybrid_fx` plus exactly this graft of `report_labels_v4`'s Effusion column, and that table
+    trained `labels_v4hybrid_s2026` and the board's `kneemri-v4solo` (0.922) with no builder anywhere in
+    the repo — `experiments/README.md` recorded it as `blend_hybrid + fracture_contusion`, which is
+    `blend_hybrid_fx`, and the graft went unwritten. D200's blinded adjudication then priced the grafted
+    column: of the 520 Effusion cells the graft moves, 508 go from a stated `YES` to `UNK`, and a reader
+    working from the report text alone scored those cells `YES` at 0.983. So the one column this graft
+    changes is a recall regression, and the table it built is dominated by its own base.
+    """
+
+    column: str
+    donor: str
+    origin: str
+    levels: dict[float, float]
+
+    def applied(self, sources: LabelSources) -> pd.DataFrame:
+        """The table with `column`'s value, verdict and confidence taken from the donor's re-read.
+
+        A cell's VALUE moves only where the re-read landed on a different level than the `origin` reader
+        did — the base table is a blend, so where the two passes agree its blended value is the better
+        number and is carried. Verdict and confidence come from the donor everywhere.
+        """
+        table = sources.table.set_index(STUDY)
+        donor = pd.read_csv(sources.labels / self.donor).set_index(STUDY)
+        origin = pd.read_csv(sources.labels / self.origin).set_index(STUDY)
+        shared = table.index.intersection(donor.index).intersection(origin.index)
+        reread = donor.loc[shared, self.column].astype(float).round(DECIMALS)
+        moved = shared[reread.to_numpy() != origin.loc[shared, self.column].astype(float).round(DECIMALS).to_numpy()]
+        table.loc[shared, self.column + VERDICT] = donor.loc[shared, self.column + VERDICT]
+        table.loc[shared, self.column + CONF] = donor.loc[shared, self.column + CONF]
+        table.loc[moved, self.column] = [round(self.levels[level], DECIMALS) for level in reread.loc[moved]]
+        return table.reset_index()
+
+
 FRACTURE_CONTUSION = "fracture_contusion"
 RUBRIC_SUBTHRESHOLD = "rubric_subthreshold"
+EFFUSION_REREAD = "effusion_reread"
+
+EFFUSION_LEVELS = {0.08: 0.0, 0.28: 0.265, 0.68: 0.795, 0.82: 0.9, 0.94: 0.98}
+"""`report_labels_v4`'s five Effusion levels on `blend_hybrid_fx`'s scale. Only the middle two are
+CONSTRAINED by the shipped table — every one of the 559 cells the graft moves carries a donor value of
+0.28 or 0.68 — so the outer three reproduce the ladder's shape and are not evidence of anything."""
 
 CORRECTIONS: dict[str, Correction] = {
     FRACTURE_CONTUSION: PartnerLift("Fracture", "Contusion", 0.25),
     RUBRIC_SUBTHRESHOLD: RubricPull(0.15),
+    EFFUSION_REREAD: ColumnGraft("Effusion", "report_labels_v4.csv", "report_labels_v2.csv", EFFUSION_LEVELS),
 }
 
 
@@ -142,7 +213,7 @@ class CorrectionSequence:
         """Each rule in turn, reading the table the one before it wrote."""
         table = sources.table
         for name in self.rules:
-            table = CORRECTIONS[name].applied(LabelSources(table, sources.reports, sources.truth))
+            table = CORRECTIONS[name].applied(LabelSources(table, sources.reports, sources.truth, sources.labels))
         return table
 
 
@@ -156,7 +227,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     truth = pd.read_csv(root.raw() / "train.csv")
-    sources = LabelSources(pd.read_csv(arguments.base), truth[[STUDY, "Report"]], truth)
+    sources = LabelSources(pd.read_csv(arguments.base), truth[[STUDY, "Report"]], truth, arguments.base.parent)
     table = CorrectionSequence(tuple(arguments.rule)).applied(sources)
 
     moved = [column for column in TARGETS if not table[column].equals(sources.table[column])]

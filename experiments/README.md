@@ -10840,9 +10840,52 @@ UNBUILDABLE branch and its ~1.8 h estimate are dead. The local learned reader ex
 only**, which is what made the three-way frame unbuildable as specified; a third reader is not wanted
 anyway, since a stricter frame deletes MORE of the treatment.
 
-**Circularity checked and clean:** `blend_hybrid_fx_v4b` = `blend_hybrid` + `fracture_contusion`, and
+**Circularity checked and clean** (the equation is CORRECTED below, 2026-09-08 — `blend_hybrid` +
+`fracture_contusion` is `blend_hybrid_fx`, and v4b is that plus a third, then-unwritten step; the
+circularity verdict survives it, since `report_labels_v4` predates the Qwen sweep by three days):
+`blend_hybrid_fx_v4b` = `blend_hybrid` + `fracture_contusion`, and
 `table_blend`'s inputs are our v2 plus the foreign public tables — Qwen is not an ingredient. The frame
 is blind, not rigged.
 
 **Population warning.** D198's gold-58 row is a 13-study intersection (+/-0.0791), a different population
 from the 57-study reading behind the +/-0.015 half-width at README:7063. The two must not be compared.
+
+## `blend_hybrid_fx_v4b` is `blend_hybrid_fx` plus ONE grafted column, and that column is the regression
+
+2026-09-08, main, card-free and slot-free, off tables on disk plus D200's blinded adjudication.
+
+The ledger recorded v4b as `blend_hybrid` + `fracture_contusion`. That composition is `blend_hybrid_fx`,
+which is a DIFFERENT FILE that also exists, and the step between them went unwritten for five days. It is
+now named, implemented and proved by an oracle: `--rule effusion_reread` over `blend_hybrid_fx.csv`
+reproduces `blend_hybrid_fx_v4b.csv` (`core/data/labels/table_correction.py`, `ColumnGraft`).
+
+**What the graft is.** `report_labels_v4` is v2 with the missing study and ONE column re-read — Effusion,
+positive rate 0.605 → 0.490 (researcher's label-source audit, 2026-09-07). v4b takes that column whole:
+verdict and `__conf` from the donor on every row, and the VALUE re-levelled wherever the re-read landed on
+a different level than v2 did. Measured over the 4,406 shared studies:
+
+| column | v4b vs `blend_hybrid_fx` | v4b verdict vs `report_labels_v4` |
+|---|---|---|
+| Effusion | 559 values, 520 verdicts | 1.0000 |
+| the other eleven | 0 | — |
+
+So **every difference between v4b and `blend_hybrid_fx` is the Effusion column**, and the eight columns
+D200 scored v4b as WINNING are `blend_hybrid_fx`'s wins, not v4b's. The graft's own footprint splits
+508 cells `YES` → `UNK` (value onto the UNK sentinel 0.265) and 51 cells lowered 0.88ish → 0.795.
+
+**And D200 prices exactly that footprint at 58/59 against it.** A blinded reader scored those cells `YES`
+from the report text at **0.983**. It is not a cut artefact: every one of the 520 flips separates by more
+than 0.20, median |v4b − v2| = 0.4150.
+
+**The conclusion follows without a card.** v4b differs from its own base in one column, that column is a
+confirmed recall regression, therefore **`blend_hybrid_fx` dominates `blend_hybrid_fx_v4b` and no further
+arm should take `--labels blend_hybrid_fx_v4b.csv`.** This is not selection-on-the-measurement: the column
+is identifiable as the only one whose UNK rate moves (0.099 → 0.214, every other column identical to three
+decimals) with no adjudication at all, and the adjudication only supplied the SIGN.
+
+**What it costs backwards.** `labels_v4hybrid_s2026` (README:8590) and the board's `kneemri-v4solo`
+(0.922) were trained on the grafted table; both are now readings of `blend_hybrid_fx` plus a bad Effusion
+column, and neither is void — but the +0.0131 twelve-mean on the gold 58 was earned DESPITE the graft, not
+by it. The oracle's residual is 5 Effusion values of 4,406 (0.9989), all at `(origin 0.68, donor 0.68)` —
+a level the re-read did not change and the hand-built table moved anyway, so the residual is in the shipped
+table, not in the rule.
