@@ -93,3 +93,17 @@ warm_calib_lowlr_s2026.pt            # 0.8577 solo; seated on decorrelation, +0.
 # above the fold-0 one (~+0.0029 solo lift, 0.076 pass-through). That is fit arithmetic, not a
 # measurement, and it moves the stack's +0.0026 by less than its own bootstrap width.
 labelwise_dense_ff.pt                # no offline number by construction, --fold -1; twin reads 0.8959
+
+# ADDED 2026-09-08 02:00Z - six members that had a holdout record and no line anywhere (knee-s39kk).
+# LEDGER75 on the repo ruler, --holdouts D:/models/rsna_knee_abnormality, read 01:51Z. A macro quoted
+# without its binarization is not a number, so the cut is named once here and applies to every line.
+recal_calib_s2026.pt                 # LEDGER75 0.8945, epoch 8, 909 rows - fourth-best solo the project
+# owns, behind labelwise_dense 0.8964 / stackfit 0.8962 / calib_dense_hold 0.8949. Unfiled since 09-07
+# 20:39. This is the 2026-08-29 defect exactly: a top-five member unshippable because nobody typed a line.
+weakdraw_flat_s2026.pt               # LEDGER75 0.8807, epoch 9, 909 rows - the alpha=0.0 control of the
+# sample-spread pair. Its job as a control is priced in the ledger against weakdraw_frx; it ships here on
+# its own number.
+resnet50d_short_s2026.pt             # LEDGER75 0.8663, epoch 6 - the n=1 resnet50d family. Below the
+# solo band and kept anyway, because D146 section 3 restored the two-variable D35 gate and a member off
+# our own trunk is priced on correlation as well as solo.
+lean_weak_columns_s2026.pt           # LEDGER75 0.8662, epoch 11, 909 rows.

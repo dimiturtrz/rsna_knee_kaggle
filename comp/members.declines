@@ -760,3 +760,179 @@ foreign_labels_dense_s2026.pt  # his 12-finding LABELS on our dense recipe, fold
                             # qualification). A ruler change does not repair a provenance verdict.
                             # The general reading: decorrelation WITHOUT solo lift buys +0.0004 at nine
                             # seats, which is D53's width saturation seen from the member side.
+
+# =====================================================================================================
+# 2026-09-08 02:00Z - THE FIFTY-SIX THAT WERE INVISIBLE BY CONSTRUCTION (knee-s39kk)
+#
+# Until this morning roster_check enumerated the pool as *.pt and asked each checkpoint for its holdout
+# record, so a member with PREDICTIONS AND NO LOCAL CHECKPOINT was never enumerated at all. That is every
+# foreign member: sixty of the 314 scoreable members on disk, raptor_v4_swa - a seat in the SHIPPED
+# champion - among them. The check now enumerates from the records. Every line below was in neither file
+# while every gate in this repo reported green.
+#
+# All numbers are LEDGER75 on the repo per-column cut, read 2026-09-08 01:51Z over
+# D:/models/rsna_knee_abnormality. Seat values, where quoted, are SWAPS (displace the weakest seat, k
+# held) from D145/D147/D148 - never adds; the two differ by ~40% and D147 section 0 says why.
+#
+# --- The published raptor weights: VOID, and not on a threshold. -------------------------------------
+# His script defaults --folds 0, the fold hook fires only above zero, and the TYPICAL RUN block his
+# released arms used passes no --folds at all. These are released weights read on studies they trained
+# on - foreign_overlap priced the set at 98.6% in-sample. All five share raptor_v4_swa's exact 909-row
+# study set, which is how the verdict carries verbatim to each. A ruler change cannot repair
+# in-sample-ness, so the readings below are the SIZE OF THE MIRAGE and nothing else.
+raptor_v4_swa.pt                     # LEDGER75 0.9425 - void, in-sample. NOTE: this member DOES reach
+# Kaggle, as the champion's foreign seat via comp/champion.json's foreign_seat / foreign_weight keys and
+# its own encoder dataset - never through members.roster, which ships checkpoints and this has none
+# locally. The decline is of the ROSTER PATH, not of the member.
+raptor_v4.pt                         # LEDGER75 0.9399 - void, in-sample, same 909-row set.
+raptor_v9.pt                         # LEDGER75 0.9265 - void, in-sample, same set.
+raptor_effv2l480.pt                  # LEDGER75 0.9139 - void, in-sample, same set.
+raptor_cnv2b336.pt                   # LEDGER75 0.9005 - void, in-sample, same set.
+raptor_coat384.pt                    # LEDGER75 0.8953 - void, in-sample, same set. Re-opened on
+# 2026-09-08 by C144 on a flat-0.75 reading that put it ahead of our best solo; on the repo ruler it is
+# THIRD in the project at -0.0011, and the provenance verdict was never a ruler question. Its swaps
+# (+0.0039/+0.0065/+0.0053) are 2.6x the honest cross-trunk members' and that ratio is the shape of the
+# leak - see the dinov3 block below, where the same fingerprint reappears at twice the size.
+foreign_oof_corpus.pt                # LEDGER75 0.9051 over 4406 rows - the WHOLE CORPUS. In-sample by
+# construction; there is no held-out set in a 4406-row reading of a 4407-study corpus.
+#
+# --- The honest cross-trunk family: NOT declined on merit. It cannot reach the roster. ----------------
+# hisrecipe_distill is a RECIPE we own, run on OUR studies with OUR fold held out -
+# logs/hisrecipe_distill.launch2.log:21 reads [cv] fold 0/1: train 3453 | OOF held-out 896, and
+# experiments/arms/hisrecipe_distill.sh:41 carries --arch coatnet_rmlp_2_rw_384 --fold 0 --fold_file.
+# repl2x2 is the same lineage via experiments/after_cellc.sh:41. D145 measures every one of the nine at
+# +0.0019..+0.0031 of SWAP value into honest12 / twin5 / twin6 - three of three rosters - and D146
+# section 3 prices all nine to within +0.0004 with the two-variable D35 model that was fitted before they
+# existed. These are the best seat candidates the project has ever measured, and they are written HERE
+# only because package_members ships checkpoints and they have none locally: the roster cannot reach
+# them, the kernel's foreign-seat path can. THE DECLINE IS OF THE ROSTER PATH. Do not read a line in this
+# file as a verdict on these nine.
+#
+# TWO MEMBERS WEARING NINE NAMES (D147 section 2b). Within-family nn-corr is 0.988 to 0.9997 -
+# hisrecipe_swa and _epens sit at 0.9997, which is a rounding difference and not a member. And the two
+# FAMILIES collapse onto each other: cross-family corr 0.89-0.91, so once repl2x2_c is seated the best
+# hisrecipe adds +0.0004 to +0.0007, under the 0.0020 board blur, under the 0.0025 paired resolution and
+# under the 0.0062 family noise floor. SEAT EXACTLY ONE. The seven non-shipped variants below are
+# declined as near-duplicates, which is not a quality argument - they are the same member.
+raptor_ft_repl2x2_c.pt               # LEDGER75 0.8791, 896 rows - swap +0.0027/+0.0030/+0.0026, nn-corr
+# 0.8231 (2.6th percentile of a pool whose median is 0.9161), z +6.43 against the all-ours residual
+# spread, 0 of 182 all-ours candidates matching. THE SEATED ONE. It is below the 0.89 solo bar and pays
+# more than our 0.8959 best member on two of three rosters, which is the measurement that established the
+# bar is D35 with its correlation term deleted (D146 section 3). Its D36 pre-registration
+# (experiments/repl2x2_c.prereg.md) called solo 0.8787, corr 0.830 and seat +0.0027 three weeks early and
+# matches to 4dp - an independent reproduction, and the strongest single item in the Commission C file.
+raptor_ft_repl2x2_c_swa.pt           # LEDGER75 0.8787 - near-duplicate of repl2x2_c at corr 0.99+.
+raptor_ft_repl2x2_a.pt               # LEDGER75 0.8770 - swap +0.0026/+0.0030/+0.0027 at nn-corr 0.8120,
+# the floor of 182 members and the LOWEST solo of the nine paying the MOST, which no solo-monotone gate
+# represents at any threshold. Near-duplicate of repl2x2_c at corr 0.99+; seated one is enough.
+raptor_ft_repl2x2_a_swa.pt           # LEDGER75 0.8787 - near-duplicate of repl2x2_a at corr 0.99+.
+raptor_ft_hisrecipe_distill_epens.pt # LEDGER75 0.8880 - the best of the weaker family, swap
+# +0.0022/+0.0024/+0.0019 at nn-corr 0.8878 (~20th percentile). Adds +0.0004-0.0007 once repl2x2_c is
+# seated (D147 section 1): the second foreign seat is not distinguishable from zero by any instrument
+# this project owns.
+raptor_ft_hisrecipe_distill_swa.pt   # LEDGER75 0.8880 - near-duplicate of _epens at corr 0.9997.
+raptor_ft_hisrecipe_distill.pt       # LEDGER75 0.8875 - near-duplicate at corr 0.99+. Its Fracture column
+# reads 0.872 against a pool column mean of 0.805, +0.038 over stackfit, reproducing to ~0.001 across two
+# binarizations; that is a per-column candidate and not a second seat.
+raptor_ft_hisrecipe_distill_ep10.pt  # LEDGER75 0.8870 - near-duplicate at corr 0.99+.
+raptor_ft_hisrecipe_distill_ep13.pt  # LEDGER75 0.8865 - near-duplicate at corr 0.99+.
+#
+# --- The DINOv3 decode family: VOID. The coat384 mirage at twice the size. ---------------------------
+# These read the best numbers in the project - solo up to 0.8959 tying our ceiling, nn-corr 0.734 against
+# a pool median of 0.9161, swaps +0.0060/+0.0117/+0.0100, and they COMPOUND on top of repl2x2_c. None of
+# it is real. experiments/arms/foreign_decode_fine.sh is a BAND SWEEP OVER A SERVED PROGRAM, not a
+# training run - :34 says --band is the only moving variable and their lifted program is otherwise
+# untouched, :7 calls 0.12-0.88 the band their released kernel serves - and it serves mattiaangeli's
+# released fold weights m_f0.pt..m_f4.pt unchanged. So all of them inherit the defect that voided the
+# sibling dinov3f0_solo at members.declines:698-703: IN-SAMPLE ON 703 OF 909 by the md5 split, fold 0
+# holding only 206. Our 896-row frame is OUR fold-0 holdout, not theirs.
+#
+# The signature is worth keeping because it fired twice in one night: solo inflated to our ceiling,
+# correlation COLLAPSED (no honest member of ours can reproduce memorised rows), and seat value scaling
+# with the contamination rather than with skill. coat384 was +0.0039/+0.0065/+0.0053 against honest
+# +0.0019-0.0031; these are +0.0060/+0.0117/+0.0100. The magnitude of a mirage is proportional to the
+# contamination and bounded by nothing, so "this number is too good" is a real prior.
+#
+# THE DISCRIMINATOR THAT WORKS (D148 section 3): not the npz fields, not the row count - our honest
+# calib_span_s2026 carries the identical 909-row set - but WHETHER A LOCAL ARM TRAINED THE WEIGHTS.
+# repl2x2 has after_cellc.sh plus a [cv] fold 0/1 log line; these have a decode arm that says in its own
+# comments that it serves someone else's program.
+#
+# RE-OPENED ONLY BY AN OUR-FOLD REFIT OF THE RECIPE, NEVER BY RE-QUOTING THESE NUMBERS.
+foreign_dinov3_band1189.pt           # LEDGER75 0.8941 (j81 solo 0.8959) - VOID, 703/909 in-sample.
+foreign_dinov3_band1387.pt           # LEDGER75 0.8905 - VOID, 703/909 in-sample, same served weights.
+foreign_dinov3_band1486.pt           # LEDGER75 0.8882 - VOID, 703/909 in-sample, same served weights.
+foreign_dinov3_band1090.pt           # LEDGER75 0.8879 - VOID, 703/909 in-sample, same served weights.
+foreign_dinov3_tta4.pt               # LEDGER75 0.8894 - VOID; the same served weights with TTA.
+foreign_dinov3_tta3.pt               # LEDGER75 0.8917 - VOID; same decode arm, same served weights, TTA.
+foreign_dinov3_band1684.pt           # LEDGER75 0.8811 - VOID; another band of the same sweep.
+foreign_dinov3_band0892.pt           # LEDGER75 0.8804 - VOID; another band of the same sweep.
+foreign_dinov3_band208.pt            # LEDGER75 0.8698 - VOID; another band of the same sweep.
+foreign_dinov3_matched.pt            # LEDGER75 0.8964 - the honest comparator of the family and the one
+# that is NOT void, and it is ordinary: experiments/README.md:8907-8909 reads +0.0074 LEDGER / +0.0030
+# HIS and pre-registers a DINOv3 column seat FLAT, which is why it was never built. Declined on that
+# reading, not on provenance. Re-opened by the same door as the rest: an our-fold refit.
+#
+# --- The k-fold OOF members: a different holdout, so they are not seatable on our frame. -------------
+# Each holds out ITS OWN fold - 849, 884, 890 and 875 rows against our 909 - so a seat value measured
+# against a fold-0 roster would be arithmetic over two different questions. They exist to fit the OOF
+# corpus and that is what prices them.
+oof_clean_fold3_s2026_n12b0.2-0.8.pt # LEDGER75 0.8824 over 849 rows, its own fold.
+oof_clean_fold2_s2026_n12b0.2-0.8.pt # LEDGER75 0.8807 over 884 rows, its own fold.
+oof_clean_fold4_s2026_n12b0.2-0.8.pt # LEDGER75 0.8773 over 890 rows, its own fold.
+oof_clean_fold1_s2026_n12b0.2-0.8.pt # LEDGER75 0.8734 over 875 rows, its own fold.
+#
+# --- Feature probes: not members at all. --------------------------------------------------------------
+# A ridge fitted on a trunk's CACHED features (feature_probe --emit-holdout, source probe, epoch -1). No
+# layer was fine-tuned, so the number is a property of the frozen representation and not of a checkpoint
+# we could ship. radnet121 probes 0.8197 and the same trunk FITTED reads 0.6716 - a probe row mistaken
+# for a member's is off by 0.15 with every gate green.
+ortholarge@focal-attend_mean_probe.pt # LEDGER75 0.8249 - a probe, not a member.
+radnet121@focal-max_mean_probe.pt     # LEDGER75 0.8197 - a probe, not a member.
+v3large@focal-attend_mean_probe.pt    # LEDGER75 0.8046 - a probe, not a member.
+#
+# --- Smoke runs: too few rows to be a reading of anything. --------------------------------------------
+dinov3_f0_smoke.pt                   # 8 rows. A smoke run of the arm, not a member.
+base224_smoke.pt                     # 12 rows. Smoke.
+margin_smoke.pt                      # 12 rows. Smoke.
+smoke_vjepa.pt                       # 11 rows. Smoke.
+#
+# --- Below the band, and each says what it was. -------------------------------------------------------
+# A full 909-row reading, well under the pool. Not defects - arms that answered their question and lost.
+# The line exists so the next reader knows somebody looked.
+weakdraw_frx_s2026.pt                # LEDGER75 0.8785 at epoch 7 - READ WHILE THE ARM WAS STILL RUNNING
+# (e7 of 12, one_cycle, so the anneal had not happened). This number is a FLOOR and must be replaced by
+# the post-ARM-DONE reading before anything is concluded from the alpha=1.0 vs alpha=0.0 pair.
+ortho_pool_read_run1.pt              # LEDGER75 0.8676, epoch 5 - the ortho pooling read's repeat run.
+vjepa_member_s2026.pt                # LEDGER75 0.8640, epoch 9 - the volumetric family, closed by D128
+# section 2 at -0.0141 below its null (p=0.055).
+vjepa_member_s2026_run2.pt           # LEDGER75 0.8565 - same family, repeat run.
+base_clean_s2026_run1.pt             # LEDGER75 0.8584 at epoch 2 - a short repeat run.
+aprior_dense_s2026_run1.pt           # LEDGER75 0.8480 at epoch 2 - a short repeat run.
+band_mid_s2026.pt                    # LEDGER75 0.8443, epoch 3 - the mid band of the band scan.
+raddino_dense_s2026_run2.pt          # LEDGER75 0.8392, epoch 6 - RadDINO dense, repeat run.
+ortho_stack_s2026_run1.pt            # LEDGER75 0.8387, epoch 3.
+raddino_dense_s2026_run1.pt          # LEDGER75 0.8242, epoch 4.
+ortho_lpft_s2026.pt                  # LEDGER75 0.8199, epoch 4 - linear-probe-then-fine-tune.
+merged_dense_cf_run1.pt              # LEDGER75 0.8191 at epoch 1 - a one-epoch repeat run.
+cnx_top_rate_s2026.pt                # LEDGER75 0.8042, epoch 3 - the top-rate arm of the ConvNeXt rate
+# pair; the family cancelled against effv2 and was closed on that, not on this number.
+vjepa_member_s2026_run1.pt           # LEDGER75 0.8019 at epoch 1.
+coatnet_hybrid_s2026_voidnorm.pt     # LEDGER75 0.7673 at epoch 0 - the same trunk family as
+# hisrecipe_distill, run under a norm later found void, one epoch. Not evidence against the coatnet trunk.
+raddino_normfix_s2026_run1.pt        # LEDGER75 0.7470 at epoch 0.
+cnx_mid_rate_s2026_run1.pt           # LEDGER75 0.7422 at epoch 0.
+radiodino_corpus_s2026_run1.pt       # LEDGER75 0.6907, epoch 3.
+focus_latmen_s2026.pt                # LEDGER75 0.4593 over 909 rows - a per-column focus arm reading
+# BELOW chance on the macro. It answered its question in the negative; the line exists so nobody re-runs it.
+#
+# --- Two of ours that the roster cannot reach either. ------------------------------------------------
+# Both left a holdout record and no checkpoint, which is the same shape as the foreign nine above and the
+# same consequence: package_members ships .pt files, so a roster line for either is a phantom. They are
+# declined from the ROSTER PATH, not on their numbers, and either becomes shippable the moment its arm is
+# re-run to a checkpoint.
+stack_increments_fx_s2026.pt         # LEDGER75 0.8803, epoch 4, 909 rows - the fx arm of the increments
+# pair. Only stack_increments_fx_s2026.partial is on disk; the run died before it wrote its checkpoint.
+mrnet_warm_s2026_run1.pt             # LEDGER75 0.8792, epoch 6, 909 rows - the higher of the MRNet
+# warm-start pair and a non-DINOv2 trunk we trained ourselves, with no checkpoint beside its record. The
+# lower run (mrnet_warm_s2026) does have one, which is why this pair reads as documented either way.
