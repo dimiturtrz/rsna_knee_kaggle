@@ -10492,3 +10492,51 @@ The general lesson, and it is the one CLAUDE.md already states from the other si
 ever set has an untested path from the CLI to the card, and the three things that break are the cache,
 the companion flag nobody slaved, and the assertion that was written when only one producer existed.**
 Budget a first-of-its-kind flag at three launches, not one.
+
+## 2026-09-08 — `reading_check` had been dead for a day, and behind it `lean_weak_columns` was REFUTED
+
+**The check could not refuse.** `python -m kneemri.experiments.reading_check` exited 1 with
+`NotImplementedError: Non-relative patterns are unsupported` on every invocation from 2026-09-07
+`84660bf5` — a traceback, no report. `pathlib.Path.glob` rejects an absolute pattern, and five arms
+declare one (`base_lr2e5`, `deep32_batch6`, `resnet50d_lr`, `resnet50d_short`, `vjepa_cold`), four of
+them landed the same day. `found()` now resolves an absolute declaration directly and only a relative
+one falls through to the three roots: the absolute spelling is the MORE honest one, because it names
+the artefact without depending on which root the checker happens to try. A `test_found_absolute`
+mirror test holds it. Found by the researcher (D193 §1) reading the module rather than its exit code —
+`| tail` had been reporting tail's status over the traceback.
+
+**The one finding it was holding.** `lean_weak_columns` ran Sep 7 22:40, wrote checkpoint, holdout
+record and metrics, declared `# reading: logs/lean_weak_columns_ledger.log`, and never wrote it. The
+`recal_dense` shape exactly: every other gate green, the deciding number never taken. Taken now with
+`run_comparison --control margin_seat_s2026 --arms lean_weak_columns_s2026`, which is the arm's own
+named control (same fold, same recipe, differing only in `focus_label None -> MCL+Lateral OA`):
+
+    lean_weak_columns_s2026  e11  mean 0.8501    control margin_seat_s2026  e10  0.8525    MEAN -0.0024
+
+      Lateral Meniscus +0.0210*   PF OA -0.0122*   Contusion -0.0088   Baker's -0.0087
+      Fracture -0.0082   MCL -0.0081   Synovitis +0.0060   Medial Meniscus -0.0055
+      Lateral OA -0.0046   ACL +0.0022   Effusion -0.0013   Medial OA -0.0005
+
+**REFUTED on its own pre-registered terms.** The arm named MCL and Lateral OA and predicted +0.02 to
++0.05 on them if label balance were the binding constraint. MCL fell 0.0081, Lateral OA fell 0.0046,
+and no column rose by the predicted amount. The header said to disregard the mean, so the flat mean
+carries nothing either way — the refutation is the two named columns failing to rise, which is the
+claim a single fold can support.
+
+**And the paired floor says nothing else in that table is readable.** `run_comparison` prints this
+pair's own half-widths at **up to +/-0.0203**, so both target deltas are deep inside noise: read them
+as *did not rise*, never as *got worse*. The only column past 0.02 is Lateral Meniscus, which the arm
+did not name and did not upweight — on the standing rule (an unnamed column that moves is a candidate,
+not a result) it is not offered as a consolation. It licenses one cheap question if the axis is ever
+revisited: `--focus-label` moved a column it was not pointed at by more than the two it was, which is
+either seed scatter or evidence the mechanism re-allocates capacity rather than fixing balance.
+
+**One correction to the arm's header.** It calls its control *"`margin_seat` itself at 0.8578-class"*.
+Measured, `margin_seat_s2026` is **0.8525** @midpoint/n909/e10; **0.8578** is `band_dense_s2026`. The
+header attached the wrong member's number to the right control — the `nn_corr@pool251` shape, a scalar
+quoted without its subject. It does not change the verdict.
+
+**The generalised lesson.** A check with no test that it RUNS is a check that can die silently: nothing
+in nox invokes `reading_check`, so a crash in one method was invisible to every gate for a day. The
+assertion worth having on a check of this kind is *"exits 0 or 1, never raises"* against the live arm
+tree.

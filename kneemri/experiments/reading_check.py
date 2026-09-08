@@ -123,7 +123,17 @@ class ReadingDrift:
         writes `<checkpoint>.holdout.npz` beside its `.pt`, so every arm whose ruler is its own holdout
         record read as DECLARED-AND-MISSING the moment it finished. `foreign_recipe` was refused with its
         `.holdout.npz` on disk, which is the failure mode that teaches a check to be ignored.
+
+        AN ABSOLUTE DECLARATION IS ACCEPTED, NOT FORBIDDEN (D193 §1). `pathlib.Path.glob` raises
+        `NotImplementedError: Non-relative patterns are unsupported` on an absolute pattern, so this
+        whole check exited 1 with a traceback and NO report from 2026-09-07 `84660bf5` — dead for a
+        day, and four of the five absolute spellings landed inside it. An absolute path is the MORE
+        honest declaration: it names the artefact without depending on which of three roots the checker
+        happens to try. Resolve it directly, and only a relative one falls through to the roots.
         """
+        candidate = Path(glob)
+        if candidate.is_absolute():
+            return candidate.exists() or any(candidate.parent.glob(candidate.name))
         return any(self.models.glob(glob)) or any(self.processed.glob(glob)) or any(Path().glob(glob))
 
     def missing(self) -> list[str]:

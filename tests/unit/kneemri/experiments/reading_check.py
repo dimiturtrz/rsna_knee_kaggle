@@ -78,6 +78,21 @@ def test_found_in_models(tmp_path: Path) -> None:
     assert drift.found("one_*sl_s2026.holdout.npz")
 
 
+def test_found_absolute(tmp_path: Path) -> None:
+    """An ABSOLUTE declaration resolves directly — `Path.glob` raises on one, which killed the whole check.
+
+    Five arms declare `D:/models/…holdout.npz`, and from 2026-09-07 `84660bf5` every invocation of
+    `reading_check` exited 1 on `NotImplementedError: Non-relative patterns are unsupported`, reporting
+    nothing at all (D193 §1).
+    """
+    drift = _drift(tmp_path)
+    array = drift.models / "abs_s2026.holdout.npz"
+    assert not drift.found(str(array))
+    array.write_bytes(b"")
+    assert drift.found(str(array))
+    assert drift.found(str(drift.models / "abs_*.holdout.npz"))
+
+
 def test_missing(tmp_path: Path) -> None:
     drift = _drift(tmp_path)
     _arm(drift.arms, "one", "# reading: gold/one*\n")
