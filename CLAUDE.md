@@ -379,7 +379,18 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   from the directory the script sat in, so a copy watched the wrong side's mail and MOVING one silently
   relocated that side's mailbox and killed the arm in flight — both happened, and a name cannot do
   either. A letter is a `.txt` or `.md` file named `<utc-stamp>-<sender>-<subject>.<ext>`, one message
-  per file, written atomically (`.part` then `mv`). **A letter's NUMBER carries its sender's prefix —
+  per file, written atomically (`.part` then `mv`).
+  **A scalar read off the pool carries STATISTIC, POPULATION and CUT, or it may not be substituted into a
+  term fitted elsewhere.** Write `nn_corr@pool251`, `solo@ledger75` — never a bare `nn_corr` or `solo`.
+  Two "blocking defects" in one night on 2026-09-08 were the same error on different axes and neither was
+  a bug: `corr 0.7469` vs `0.8251` is `max` over the 12 seats of `honest12` vs `max` over 251 all-ours
+  members (`member_distance.py:126` maxes over whatever pool it was handed and prints a bare `nearest`);
+  `solo 0.7857` vs `0.8173` is the 0.5 midpoint vs `ledger75` (`member_distance.py:124` builds
+  `LabelScores()`, and `scores.py:19 MIDPOINT = 0.5`). The cut alone moves the whole `honest12` roster by
+  **+0.026 — about 3x the board gap** — and 47 call sites in 41 files take the default while exactly three
+  paths can produce a recut number, so **a number in this repo is midpoint unless it says otherwise**
+  (knee-f9aao). Both errors put a wrong coefficient in the ledger before they were caught.
+  **A letter's NUMBER carries its sender's prefix —
   `M` from main, `D` from the researcher, `C` from the coordinator** — because numbers are cited across
   letters and the boxes share no counter. Two `C166`s went out nine minutes apart on 2026-09-08
   (mastermind's and main's), both live in the same hour; the `D86` collision is the same defect. Take the
