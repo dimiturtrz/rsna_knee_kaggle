@@ -400,9 +400,17 @@ class AttentionHealth:
         return any(share < self.floor for share in self.retention(profile))
 
     def report(self, profile: AttentionProfile) -> str:
-        """The profile beside its own reference, so a log line carries the comparison it is judged on."""
-        deviations = "  ".join(
-            f"{value - stock:+.2f}" for value, stock in zip(profile.entropy, self.reference.entropy, strict=False)
-        )
+        """The profile beside its own reference, so a log line carries the comparison it is judged on.
+
+        BOTH COLUMNS COME OFF `axis`, and that is the whole point of this method rather than a detail of
+        it. `vs stock` used to subtract raw `entropy` while `keep` was already reading the patch axis, so
+        one line carried two rulers with nothing saying so — and on a register trunk they disagree by
+        design. `latent_register_deep` epoch 7 printed `vs stock -2.88` beside `keep 0.74` for block 11,
+        which reads as a gate tolerating a collapse; the -2.88 was the raw drop and the 0.74 was the patch
+        distribution, which had not moved. It cost a wrong entry in the ledger before it was caught. A
+        deviation and the share derived from it have to be the same subtraction.
+        """
+        _, values, reference = self.axis(profile)
+        deviations = "  ".join(f"{value - stock:+.2f}" for value, stock in zip(values, reference, strict=False))
         kept = "  ".join(f"{share:.2f}" for share in self.retention(profile)) if profile.entropy else ""
         return f"{profile.report()} | vs stock {deviations} | keep {kept} (floor {self.floor:.2f})"

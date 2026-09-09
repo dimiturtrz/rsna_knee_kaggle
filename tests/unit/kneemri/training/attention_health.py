@@ -360,3 +360,22 @@ def test_axis_falls_back():
 
     assert values == older.entropy
     assert uniform == pytest.approx(math.log(KEYS))
+
+
+def test_report():
+    """The deviation column and the share column are the same subtraction, on a profile where they differ.
+
+    A register sink moves raw entropy a long way and the patch distribution barely at all, so a report
+    that mixed the two would print a large negative deviation beside a high retention. Both must come
+    off `axis`: here that means the patch axis, where the block is 0.2 nats down and keeping 0.96.
+    """
+    health = _health()
+    stock = AttentionProfile(entropy=(5.0,), prefix_mass=(0.0,), class_mass=(0.0,), patch_entropy=(5.0,))
+    benign = AttentionProfile(entropy=(0.5,), prefix_mass=(0.9,), class_mass=(0.0,), patch_entropy=(4.8,))
+    gate = AttentionHealth(tokens=health.tokens, reference=stock, probe=health.probe)
+
+    line = gate.report(benign)
+
+    assert "vs stock -0.20" in line
+    assert "vs stock -4.50" not in line
+    assert f"keep {gate.retention(benign)[0]:.2f}" in line

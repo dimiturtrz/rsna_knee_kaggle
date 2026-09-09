@@ -11562,3 +11562,38 @@ by a ruler that could not see the axis it was refusing on.
 mass, 0.01 cls. So the sink is this trunk's resting behaviour and the adaptation deepens it rather than
 introducing it, which is the second reason a gate calibrated on dinov2 (1 prefix key, cls == prefix) could
 not be carried across to it unexamined.
+
+### RETRACTION: `latent_adapt` is a dinov2-small run, so it never capped anything on v3small — 2026-09-09
+
+The section immediately above ("Mask 0.60 survives the corrected ruler through epoch 2") is wrong in its
+central claim and this is the correction, written thirty minutes later off the same log.
+
+**`latent_adapt` did not run on v3small.** `experiments/arms/latent_adapt.sh` carries no `--variant`, and
+`pretrain.py:262` reads `--variant`, `default=SMALL`, where `SMALL` is `facebook/dinov2-small`
+(`backbone.py:167`). Its own stock line proves it — `H 3.81 3.18 ...` with no `cls`/`registers` columns,
+against v3small's `H 0.00 3.28 ...`. Different family, different block-0 behaviour, and **no registers at
+all**, so its refusal at mask 0.6 was taken on the axis that was correct for it. The 2026-09-08 entry
+above it calls it "v3small trunk"; that is the same error one day earlier, and it is what I read.
+
+**So the ruler change did not enable this run, and I checked rather than assumed.** Recomputing epoch 7's
+retention on the RAW axis by hand — `uniform = ln(446) = 6.100`, `_share` and the two-sided `min` exactly
+as `AttentionHealth.retention` spells them — gives `1.00 0.95 0.90 0.94 0.95 0.93 0.96 0.98 0.98 0.99
+0.71 0.45`. The minimum is **0.447 against a 0.25 floor: the old ruler passes this run too.** All eight
+pretrain epochs completed either way.
+
+**What is actually true, and it is still a finding.** The 0.30 cap on v3small was never measured on
+v3small. It was inherited from a dinov2-small refusal and carried across a family boundary — the same
+cross-trunk-control defect that leaves `latent_register_dense`'s 0.8385 pricing nothing (knee-j2ovn), in
+the same axis, found the same night. v3small at mask 0.60 does not collapse on either ruler. The mask
+ladder was closed by a number about a different architecture.
+
+**And the log line that produced the misreading is a real defect, now fixed.** `AttentionHealth.report`
+subtracted raw `entropy` for its `vs stock` column while `keep` already read the patch axis, so epoch 7
+printed `vs stock -2.88` beside `keep 0.74` for block 11 with nothing saying they were two different
+rulers. Both columns now come off `axis` (`test_report`). The `-2.88` was real and so was the `0.74`;
+what did not exist was the collapse I read from putting them side by side.
+
+**What survives from the retracted section:** the block-11 masses (prefix 0.85, registers 0.85, cls
+**0.00** at epoch 7), the patch distribution holding at 5.46 against stock's 5.24, and stock v3small
+already resting at 0.31 register mass on block 10. The mechanism reading stands. The claim that the
+corrected ruler is what let the run proceed does not.
