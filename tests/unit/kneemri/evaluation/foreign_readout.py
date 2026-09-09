@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 
 from core.data.corpus.study_cache import CachedCorpus
 from kneemri.evaluation.foreign_blocks import BLOCKS, MappedSlab
-from kneemri.evaluation.foreign_readout import ForeignReadout, ShiftedReading, ShiftPair
+from kneemri.evaluation.foreign_readout import ForeignReadout, PerStudyDump, ScoredPass, ShiftedReading, ShiftPair
 from kneemri.evaluation.foreign_slots import SlotsKept
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
@@ -84,21 +84,23 @@ def test_logged() -> None:
     assert "total -0.0700" in line
 
 
-def test_read() -> None:
-    """The three numbers assemble in one reading, the native one taken as given rather than recomputed."""
+class _Canned(ForeignReadout):
+    """A readout whose scoring is answered without a card — the arithmetic is what is under test."""
 
-    class Canned(ForeignReadout):
-        """A readout whose scoring is answered without a card — the arithmetic is what is under test."""
+    @override
+    def scored(self, member: Member, slab: HoldoutSlab, truth: NDArray[np.float32], *, overlap: bool) -> ScoredPass:
+        """The self-check reproduces native and the shifted slab does not, so an order swap is visible."""
+        ours = isinstance(slab, SlotsKept)
+        return ScoredPass(0.8800 if ours else 0.8100, np.full((2, 12), 1.0 if ours else 2.0, dtype=np.float64))
 
-        @override
-        def scored(self, member: Member, slab: HoldoutSlab, truth: NDArray[np.float32], *, overlap: bool) -> float:
-            """The self-check reproduces native and the shifted slab does not, so an order swap is visible."""
-            return 0.8800 if isinstance(slab, SlotsKept) else 0.8100
 
+def _read(dump: PerStudyDump | None = None) -> ShiftedReading:
+    """One canned reading over the tiny corpora, with the dump optional exactly as the caller has it."""
     holdout = np.arange(2, dtype=np.int64)
-    reading = Canned(
+    return _Canned(
         None,  # pyrefly: ignore[bad-argument-type]
         None,  # pyrefly: ignore[bad-argument-type]
+        dump,
     ).read(
         _member(),
         0.8800,
@@ -109,8 +111,43 @@ def test_read() -> None:
         np.zeros((2, 12), dtype=np.float32),
     )
 
+
+def test_read() -> None:
+    """The three numbers assemble in one reading, the native one taken as given rather than recomputed."""
+    reading = _read()
+
     assert reading.name == "member.pt"
     assert reading.native == pytest.approx(0.8800)
     assert reading.kept == pytest.approx(0.8800)
     assert reading.foreign == pytest.approx(0.8100)
     assert reading.slot_cost == pytest.approx(0.0), "the self-check is clean, so the drop is all decode"
+
+
+def test_add() -> None:
+    """Both shifted passes are kept under the member's name, so no reader depends on a column order."""
+    dump = PerStudyDump(Path("unused.npz"), ["a", "b"])
+    dump.add("m.pt", np.full((2, 12), 1.0, dtype=np.float64), np.full((2, 12), 2.0, dtype=np.float64))
+
+    assert sorted(dump.passes) == ["m.pt::foreign", "m.pt::kept"]
+    assert dump.passes["m.pt::kept"][0, 0] == pytest.approx(1.0), "the passes are not interchanged"
+
+
+def test_reading_fills_the_dump() -> None:
+    """A reading routes BOTH its passes into the dump it was given, and neither into the other's key."""
+    dump = PerStudyDump(Path("unused.npz"), ["a", "b"])
+    _read(dump)
+
+    assert dump.passes["member.pt::kept"][0, 0] == pytest.approx(1.0)
+    assert dump.passes["member.pt::foreign"][0, 0] == pytest.approx(2.0)
+
+
+def test_written(tmp_path: Path) -> None:
+    """The ids and the truth ride with the probabilities — a subset reading joins on one and scores the other."""
+    dump = PerStudyDump(tmp_path / "per_study.npz", ["a", "b"])
+    _read(dump)
+    dump.written(np.zeros((2, 12), dtype=np.float32))
+
+    written = np.load(tmp_path / "per_study.npz")
+    assert list(written["studies"]) == ["a", "b"]
+    assert written["truth"].shape == (2, 12)
+    assert written["member.pt::foreign"][0, 0] == pytest.approx(2.0)

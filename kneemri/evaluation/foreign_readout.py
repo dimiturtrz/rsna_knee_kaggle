@@ -54,7 +54,7 @@ from the run's own holdout record, and every drop would come back at exactly 0.0
 """
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -115,6 +115,64 @@ class ShiftedReading:
 
 
 @dataclass(frozen=True)
+class ScoredPass:
+    """One pass's mean label score beside the per-study probabilities it was computed from.
+
+    The two travel together because the mean is a POPULATION statistic — an AUC has no per-study value —
+    so a subset reading cannot be recovered from it afterwards. Handing back only the float is what makes
+    every later split another run on the card.
+    """
+
+    mean: float
+    probabilities: NDArray[np.float64]
+
+
+@dataclass(frozen=True)
+class PerStudyDump:
+    """Every member's raw per-study probabilities on both shifted passes, so a SUBSET costs no card.
+
+    The metric is an AUC and an AUC has no per-study value, so every question of the form *does this
+    member's toll concentrate on the studies where X* is a re-score over a SUBSET of the same
+    probabilities. Written once they turn each such question into arithmetic; unwritten, each one is
+    another readout on the card with the encoders reloaded.
+
+    The first buyer is the padding hypothesis (D269 §c). `crop_coverage` reads only ~40% of series wide
+    enough to fill a 160 mm field, so `crop160_span`'s lower toll is either concentrated in the studies
+    that fill it — which makes it an EXTENT effect — or it is flat across both subsets, which makes the
+    extent story wrong whatever the pooled number says. That split is a subset AUC over these arrays and
+    nothing else.
+
+    The native pass is deliberately absent: it comes from the cache, which does not key on the pixels, so
+    a native column here would be the one array in the file that is not about the decode being priced.
+    """
+
+    path: Path
+    studies: list[str]
+    passes: dict[str, NDArray[np.float64]] = field(default_factory=dict)
+
+    def add(self, name: str, kept: NDArray[np.float64], foreign: NDArray[np.float64]) -> None:
+        """One member's two shifted passes, keyed by member and pass so a reader needs no column order."""
+        self.passes[f"{name}::kept"] = kept
+        self.passes[f"{name}::foreign"] = foreign
+
+    def written(self, truth: NDArray[np.float32]) -> None:
+        """The file, with the study ids and the truth beside the probabilities.
+
+        All three travel together because a subset reading joins on the study and re-scores against the
+        truth: a file holding probabilities alone would need a join nobody could check afterwards.
+        """
+        # The ignore is the stub's `allow_pickle` keyword: any typed `**arrays` reads as an attempt to
+        # pass an array there. The values are arrays and nothing else.
+        arrays: dict[str, NDArray[np.float64] | NDArray[np.float32] | NDArray[np.str_]] = {
+            "studies": np.array(self.studies),
+            "truth": truth,
+            **self.passes,
+        }
+        np.savez_compressed(self.path, **arrays)  # pyrefly: ignore[bad-argument-type]
+        logger.info("per-study probabilities for %d members -> %s", len(self.passes) // 2, self.path)
+
+
+@dataclass(frozen=True)
 class ShiftPair:
     """The two shifted slabs for one member — never one without the other, since one alone has no control."""
 
@@ -125,9 +183,10 @@ class ShiftPair:
 class ForeignReadout:
     """Scores one member on our pixels, on our pixels stripped to the corresponded slots, and on his."""
 
-    def __init__(self, predictions: HoldoutPredictions, scores: LabelScores) -> None:
+    def __init__(self, predictions: HoldoutPredictions, scores: LabelScores, dump: PerStudyDump | None = None) -> None:
         self.predictions = predictions
         self.scores = scores
+        self.dump = dump
 
     def rebuilt(self, member: Member) -> StudyModel:  # devtools-ignore: test-mirror (needs an encoder download)
         """The member's own network. Both shifted passes miss every cache, so it is loaded once."""
@@ -136,14 +195,18 @@ class ForeignReadout:
 
     def scored(  # devtools-ignore: test-mirror (one line over `rebuilt`, which needs an encoder download)
         self, member: Member, slab: HoldoutSlab, truth: NDArray[np.float32], *, overlap: bool
-    ) -> float:
-        """This member's mean label score over the studies this slab serves, computed on the card.
+    ) -> ScoredPass:
+        """This member's score over the studies this slab serves, WITH the probabilities it was read off.
 
         Goes straight to `predict`: `cached` keys on the checkpoint and the studies and NOT on the
         pixels, so it would answer a shifted pass with the native probabilities and report exactly zero.
+
+        Returns both halves rather than the mean alone because the mean is a population statistic and
+        cannot be split afterwards; see `PerStudyDump` for what the array buys.
         """
         window = member.window(slab.depth, overlap=overlap)
-        return self.scores.mean(self.predictions.predict(self.rebuilt(member), slab, window, member.precision), truth)
+        probabilities = self.predictions.predict(self.rebuilt(member), slab, window, member.precision)
+        return ScoredPass(self.scores.mean(probabilities, truth), probabilities)
 
     def read(
         self,
@@ -155,12 +218,11 @@ class ForeignReadout:
         overlap: bool = False,
     ) -> ShiftedReading:
         """The three numbers for one member, in the order they get cheaper to explain."""
-        reading = ShiftedReading(
-            member.file.name,
-            native,
-            self.scored(member, pair.ours, truth, overlap=overlap),
-            self.scored(member, pair.his, truth, overlap=overlap),
-        )
+        kept = self.scored(member, pair.ours, truth, overlap=overlap)
+        foreign = self.scored(member, pair.his, truth, overlap=overlap)
+        if self.dump is not None:
+            self.dump.add(member.file.name, kept.probabilities, foreign.probabilities)
+        reading = ShiftedReading(member.file.name, native, kept.mean, foreign.mean)
         logger.info("%s", reading.logged())
         return reading
 
@@ -177,6 +239,12 @@ def main() -> None:
     command.parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
     command.parser.add_argument("--device", default=VisibleCards().device().type, choices=("cuda", "cpu"))
     command.parser.add_argument(
+        "--per-study",
+        type=Path,
+        help="also write the raw per-study probabilities of both shifted passes here (.npz), so a later "
+        "SUBSET reading — coverage, vendor, anything — is arithmetic instead of another run on the card",
+    )
+    command.parser.add_argument(
         "--adapt",
         action="store_true",
         help="tune each study's LayerNorm affines to it before reading it (CARVE), then undo it",
@@ -188,7 +256,6 @@ def main() -> None:
         torch.device(arguments.device), adaptation=CardinalityAwareLN() if arguments.adapt else None
     )
     scores = LabelScores()
-    readout = ForeignReadout(predictions, scores)
 
     readings = MemberReadings(Member.held_out_from(arguments.fold, arguments.checkpoints), root.processed())
     corpus, reference = readings.reference()
@@ -208,6 +275,8 @@ def main() -> None:
     cache = PredictionCache(root.processed() / "holdout_predictions", held_out, predictions.views, refresh=False)
 
     results: list[ShiftedReading] = []
+    dump = PerStudyDump(arguments.per_study, held_out) if arguments.per_study else None
+    readout = ForeignReadout(predictions, scores, dump)
     with Wakelock():
         for member, slab, held in readings.slabs(holdout, reference, corpus):
             window = member.window(held.slices, overlap=arguments.overlap)
@@ -217,6 +286,8 @@ def main() -> None:
                 MappedSlab(foreign, positions, member.slot_count, held.slices, BLOCKS),
             )
             results.append(readout.read(member, native, pair, truth, overlap=arguments.overlap))
+    if dump is not None:
+        dump.written(truth)
 
     command.report("\n".join(reading.logged() for reading in results))
 
