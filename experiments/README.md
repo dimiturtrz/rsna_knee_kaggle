@@ -11841,6 +11841,28 @@ survives; if it is flat across the two subsets, the extent story is wrong whatev
 says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
 writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
 
+### `fovjitter160_reflect` was KILLED at epoch 6/12 — the padding rule is UNANSWERED (2026-09-09)
+
+The arm asked one thing: does a REFLECTED margin beat the border-replicate one when the jitter window
+runs off the acquired field. Control was `fovjitter160_s2026` — same cache, same recipe, same seed, same
+0.20 jitter, one flag moved — so it cost no extra card. It was killed at epoch 6 of 12, holdout 0.8422 at
+epoch 5.
+
+**Nothing from those six epochs is a fact about padding.** The recipe is `one_cycle`, so a run truncated
+mid-schedule never runs its anneal; `convergence_check` reads such a score as a FLOOR, and no comparable
+`decode_cost` exists because the checkpoint the reading needs was never written. Both pre-registered
+branches — PADDING CARRIES (≥0.0038 better, the pool's own sd) and NULL (within ±0.0038) — remain open.
+It may be re-run; it may not be cited.
+
+Why it was killed, stated so the decision is auditable rather than a gap in the log: the arm produces no
+shippable member and neither of its branches is an improvement — it is an INSTRUMENT, and the only thing
+it licenses is a widened-jitter arm whose mechanism the D270 survey undercut the same morning (no paper
+prices a classifier toll against reflection or crop-inside, and the FOV axis itself already read NULL one
+section above). Against that it was holding the card in front of `carve_adapt_read`, which is minutes of
+card for a published +0.035 against a 0.010 board gap. Zeros padding was never tried and stays rejected
+on mechanism: 60% of series are already pad-filled at 160 mm (`crop_coverage`: image@160 over 733 of 1822
+series), so a zeros margin would be indistinguishable from padding the pipeline already produces.
+
 ### D270 — what the literature says can shrink a toll like ours, and the two numbers withdrawn (2026-09-09)
 
 The −0.0336 foreign-decode toll is flat across eleven members (sd 0.0038, ρ(native, decode_cost) 0.1727,
