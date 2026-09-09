@@ -11597,3 +11597,49 @@ what did not exist was the collapse I read from putting them side by side.
 **0.00** at epoch 7), the patch distribution holding at 5.46 against stock's 5.24, and stock v3small
 already resting at 0.31 register mass on block 10. The mechanism reading stands. The claim that the
 corrected ruler is what let the run proceed does not.
+
+## The optimiser-path family already ran, and all three axes close — 2026-09-09
+
+`knee-s9cr` is a P0 that prices six 224 px arms at ~19 min each and asks for the card. All six are on
+disk, converged, and scored. The bead has been planning card time for work that was already spent, and
+nothing in this file said the family had a reading. Taking it, at zero card cost:
+
+| run | the one flag | holdout | vs control |
+| --- | --- | --- | --- |
+| `native224_s2026` | control | **0.8502** | — |
+| `warm224_long_s2026` | `--warmup 0.25` | 0.8512 | +0.0010 |
+| `warm224_brief_s2026` | `--warmup 0.05` | 0.8498 | −0.0004 |
+| `clip224_tight_s2026` | `--grad-clip 0.5` | 0.8488 | −0.0014 |
+| `decay224_high_s2026` | `--weight-decay 0.1` | 0.8487 | −0.0015 |
+| `decay224_low_s2026` | `--weight-decay 0.005` | 0.8454 | −0.0048 |
+| `clip224_s2026` | `--grad-clip 1.0` | 0.8439 | −0.0063 |
+
+`convergence_check` flags none of the seven as TRUNCATED, so every row is the recipe's number and not a
+floor. n=909, midpoint cut.
+
+**All three axes close, and they close the strong way — by BRACKETING.** Each is a pair straddling the
+inherited constant: warmup 0.05 / 0.25 around 0.15, decay 0.005 / 0.1 around 0.02, clip 0.5 / 1.0 against
+no ceiling at all. A single arm on one side of a constant cannot close anything, because a null there is
+also what a wrongly-signed step looks like. A pair that is flat on BOTH sides says the constant sits on a
+plateau. Every one of the six lands inside [−0.0063, +0.0010] against a 0.0062 floor, and the widest
+excursion is NEGATIVE. There is no unnamed optimiser tweak here.
+
+**What that does to `knee-s9cr`'s thesis.** The bead's argument was that a forum poster went 0.934 → 0.942
+on unnamed "tweaks" at 224 px, and that the way to find an unnamed tweak is to try many cheaply. The
+throughput half of that argument stands and is measured — 94 s/epoch against 290, for −0.0023. The search
+half has now been run on the three most obvious candidates and returned three plateaus. Whatever carried
+that poster's +0.008, it is not the optimiser path.
+
+### Correction: `clip224_tight` is gradient clipping, not a CLIP trunk
+
+The 2026-09-04 section above records it as "CLIP trunk, tight 224 px crop". Both halves are wrong.
+`experiments/arms/clip224_tight.sh` is `native224`'s recipe with `--grad-clip 0.5` and nothing else moved,
+on the same trunk and the same 224 px cache; its own header says so. The row was written from the arm's
+NAME, and `clip` was read as the contrastive-language-image model rather than as the ceiling on a
+gradient norm.
+
+The number in that row, 0.8488, is right. Its description is not, and it mattered: read as a CLIP trunk
+the row is evidence about architectural diversity in the pool, and read correctly it is one point on the
+clipping dose curve above. This is the second name-read-instead-of-flag defect found today; the first is
+`latent_adapt`'s absent `--variant` (retraction above, knee-q8ah2). Both were found by opening the arm
+file rather than by reasoning about the ledger entry.
