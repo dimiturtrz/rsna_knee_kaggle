@@ -20,12 +20,19 @@
 # single flag `--adapt`. The comparison is therefore against a control taken on the same card in the
 # same hour, not against a remembered figure.
 #
-# WHAT IS PROVISIONAL, STATED SO IT CANNOT BE FORGOTTEN. CARVE's Eq. 8-9 were built here from a prose
-# description rather than from the equations (M265 asks the researcher for them, still unanswered). The
-# reduction, the sharpening term's exact form, and whether the label mean is taken before or after the
-# backward are THIS repo's reading of the recipe. Any number this produces is a first read, and a NULL
-# does not refute CARVE -- it refutes this reading of CARVE. That distinction is the whole reason the
-# objective is a strategy object with the departure written into its docstring.
+# THE OBJECTIVE IS NOW THE PUBLISHED ONE, AND IT WAS WRONG UNTIL 11:49Z TODAY. M265 is answered (D270):
+# Eq. 8 is k_hat = clip(round(sum_j p_j), k_min, k_max) and Eq. 9 means EACH term over ITS OWN set,
+# -(1/|P|) sum_P log p - 0.8 (1/|N|) sum_N log(1-p). The version written from prose divided both sums by
+# the LABEL COUNT, and with our median k_hat of 3 of 12 that arrived as roughly a quarter of the
+# sharpening term against 10/12 of the suppression -- an objective that mostly pushes everything down.
+# Corrected before this arm ran, so the branches below now price CARVE rather than that arithmetic.
+#
+# WHAT IS STILL OURS, STATED SO IT CANNOT BE FORGOTTEN. Two departures remain. k_min is 0, not CARVE's 1,
+# because over a tenth of our studies read clean and a floor of 1 manufactures a positive on every
+# healthy knee. And k_hat is counted from ONE graded pass rather than from CARVE's average over the
+# lowest-entropy 25% of eight weak views -- that is what keeps the arm minutes rather than hours, and it
+# is the first thing to try if the reading lands short. So a NULL still refutes THIS reading of CARVE
+# rather than CARVE; it just no longer refutes a reduction bug.
 #
 # OUR ONE DELIBERATE DEPARTURE. CARVE's k_min is at least one because a CT findings task assumes
 # something is there to find. Over a tenth of our studies read clean (p10 = 0 over all 4406 studies of
@@ -49,15 +56,16 @@
 #               corpus boundary, it goes into the submission path behind witness_check, and the next
 #               question is whether it composes with the extent axis fovjitter160 is testing.
 #   PARTIAL   — 0.0050 to 0.0149. Directional and mechanism-sound but under the bar. KEEP the code, do
-#               not re-cut the operating point on it, and the follow-up is CARVE's actual equations
-#               (M265) before a second reading, because a mis-read objective is the likeliest cause of
-#               a shortfall this size.
+#               not re-cut the operating point on it. The follow-up is no longer the equations — those
+#               are in — it is the ENTROPY-RETAINED VIEW AVERAGE of Eq. 8, the one remaining piece of the
+#               recipe this arm does not run, which is the likeliest cause of a shortfall this size.
 #   NULL      — -0.0050 to 0.0049. Adaptation does not touch this toll. That is a FINDING and it is the
 #               one CARVE's own ceiling predicts: the toll would then be representation-bound, the
 #               model-side lever is closed, and the whole weight moves to the data axis (M266).
 #   REGRESSION— worse than -0.0050. The objective is actively harming the reading. The suspect is THIS
-#               repo's reading of Eq. 8-9, not the recipe; the re-test is blocked on M265 and the code
-#               stays behind its default-off flag until then.
+#               repo's two remaining departures — k_min 0 and the single-pass count — not the recipe,
+#               whose equations this now implements. The code stays behind its default-off flag, and the
+#               re-test is the view average, which is the departure that can plausibly change a sign.
 #
 # WHAT THIS ARM CANNOT SETTLE. It reads three members, all of ours, all on one foreign corpus. A gain
 # here is evidence about THAT boundary, not about the Kaggle private set, which is a third corpus

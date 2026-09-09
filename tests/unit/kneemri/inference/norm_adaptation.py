@@ -9,6 +9,7 @@ from torch import Tensor, nn
 
 from kneemri.inference.norm_adaptation import (
     CARDINALITY_BOUNDS,
+    NEGATIVE_WEIGHT,
     CardinalityAwareLN,
     NoAdaptation,
     NotAdaptableError,
@@ -127,6 +128,25 @@ def test_loss() -> None:
     sharper[:, 3:] = -LOUD
     recipe = CardinalityAwareLN()
     assert float(recipe.loss(sharper)) < float(recipe.loss(flat))
+
+
+def test_loss_means_each_term_over_its_own_set() -> None:
+    """CARVE Eq. 9 divides by |P| and |N|, not by the label count — the difference is the whole weight.
+
+    A study whose top-k̂ is small gets a sharpening term meaned over those few labels. Dividing by the
+    twelve instead would shrink it by |P|/L and leave the objective mostly suppression, which is the
+    draft this replaced. Priced here against the arithmetic rather than against a remembered shape.
+    """
+    reading = torch.zeros(1, LABELS)
+    reading[:, :3] = LOUD
+    recipe = CardinalityAwareLN()
+    probability = torch.sigmoid(reading.float())
+    wanted = recipe.wanted(probability)
+
+    sharpen = float(-(torch.log(probability) * wanted).sum() / int(wanted.sum()))
+    suppress = float(-(torch.log1p(-probability) * ~wanted).sum() / int((~wanted).sum()))
+
+    assert float(recipe.loss(reading)) == pytest.approx(sharpen + NEGATIVE_WEIGHT * suppress, abs=1e-5)
 
 
 def test_loss_suppresses_everything_when_the_study_reads_clean() -> None:

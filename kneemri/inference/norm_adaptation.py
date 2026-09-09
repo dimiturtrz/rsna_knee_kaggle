@@ -155,12 +155,14 @@ class NoAdaptation:
 class CardinalityAwareLN:
     """CARVE's objective over a member's LayerNorm affines, episodic: adapt to one study, then forget it.
 
-    PROVISIONAL IN ONE PLACE, STATED SO IT CANNOT BE FORGOTTEN. CARVE's Eq. 8-9 were read here from a
-    prose description ("sharpen the top-k labels, suppress the rest with lambda_neg 0.8") rather than
-    from the equations, which had not been fetched when this was written (M265 asks for them). The
-    reduction, the sharpening term's exact form, and whether the label mean is taken before or after the
-    backward are therefore THIS repo's reading of the recipe, not a replication of it. Any number this
-    produces is a first read until those three are confirmed.
+    THE OBJECTIVE IS NOW THE PUBLISHED ONE — Eq. 8 and Eq. 9 arrived with D270 (2026-09-09) and the
+    reduction was corrected against them, which was NOT a formality: the draft written from prose meaned
+    both terms over the label count instead of over their own sets, quartering the sharpening term.
+    Two departures remain, both deliberate and both stated where they live: `CARDINALITY_BOUNDS` admits
+    k̂ = 0 for the clean knees CARVE's CT task cannot have, and the count is taken from ONE graded pass
+    rather than from CARVE's average over the lowest-entropy 25% of eight weak views — the adapt pass in
+    this repo is one view at one start, which is what keeps it minutes rather than hours. The view
+    average is the next thing to try if a reading lands short; the arithmetic no longer is.
 
     EPISODIC IS WHY THERE IS NO ENTROPY GUARD. SAR carries a moving average of batch entropy and resets
     to source weights below e_0 = 0.2, because an online stream can drift for a thousand batches before
@@ -220,7 +222,23 @@ class CardinalityAwareLN:
         return rank < self.cardinality(probability).unsqueeze(1)
 
     def loss(self, logits: Float[Tensor, "studies labels"]) -> Float[Tensor, ""]:
-        """Sharpen each study's own top-k̂ labels and suppress the rest, weighted by `negative_weight`.
+        """CARVE Eq. 9: sharpen each study's own top-k̂ and suppress the rest, at `negative_weight`.
+
+        EACH TERM IS MEANED OVER ITS OWN SET, and that is the equation rather than a preference:
+
+            L = -(1/|P|) sum_{j in P} log p_j - lambda_neg (1/|N|) sum_{j in N} log(1 - p_j)
+
+        An earlier draft divided BOTH sums by the label count, which is the plausible-looking spelling and
+        is wrong in a direction that matters. Our k̂ has median 3 of 12, so |P|/L is about a quarter: the
+        sharpening term arrived at roughly a quarter of its weight while suppression arrived at 10/12 of
+        its own, and the objective this repo would have priced was mostly a push-everything-down. A NULL
+        or a REGRESSION from that arm would have been a fact about the arithmetic, not about CARVE
+        (D270 supplied Eq. 8-9; M265 is answered).
+
+        THE EMPTY SET IS OURS, not CARVE's, and it is why the denominators are guarded. CARVE's k_min is 1
+        so |P| is never zero; ours is 0 because over a tenth of our studies read clean, and a mean over no
+        labels is a division by zero rather than a small number. A study with nothing to sharpen
+        contributes suppression alone.
 
         THE ROWS ARE STUDIES, NOT WINDOWS, and that is a correction rather than a choice. A member pools
         its windows INTERNALLY — `StudyReadings.Member.__call__` is typed `b n` and `StudyModel` takes the
@@ -230,9 +248,17 @@ class CardinalityAwareLN:
         """
         probability = torch.sigmoid(logits.float()).clamp(PROBABILITY_FLOOR, 1.0 - PROBABILITY_FLOOR)
         wanted = self.wanted(probability)
-        sharpen = -(torch.log(probability) * wanted).sum(dim=1)
-        suppress = -(torch.log1p(-probability) * ~wanted).sum(dim=1)
-        return ((sharpen + self.negative_weight * suppress) / probability.shape[1]).mean()
+        sharpen = self._over_set(-torch.log(probability), wanted)
+        suppress = self._over_set(-torch.log1p(-probability), ~wanted)
+        return (sharpen + self.negative_weight * suppress).mean()
+
+    @staticmethod
+    def _over_set(
+        term: Float[Tensor, "studies labels"], chosen: Bool[Tensor, "studies labels"]
+    ) -> Float[Tensor, " studies"]:
+        """One study's mean of `term` over the labels `chosen` selects, or zero where it selects none."""
+        counted = chosen.sum(dim=1)
+        return (term * chosen).sum(dim=1) / counted.clamp(min=1)
 
     @contextmanager
     def on(self, member: object, logits: "Forward") -> Iterator[None]:
