@@ -27579,6 +27579,12 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN._over_set",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
       "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.wanted",
       "weight": 1
     },
@@ -59964,6 +59970,14 @@
       "descendants": 0,
       "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
       "label": "_descend",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN._over_set",
+      "label": "_over_set",
       "level": "method",
       "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
       "role": null

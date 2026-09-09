@@ -11841,6 +11841,69 @@ survives; if it is flat across the two subsets, the extent story is wrong whatev
 says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
 writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
 
+### D270 — what the literature says can shrink a toll like ours, and the two numbers withdrawn (2026-09-09)
+
+The −0.0336 foreign-decode toll is flat across eleven members (sd 0.0038, ρ(native, decode_cost) 0.1727,
+p 0.61). D270 is the researcher's ranked survey of every published method that shrinks a CLASSIFIER toll
+in that cell, with its denominator attached, and it contains two retractions of their own earlier D266.
+
+**CARVE (arXiv:2607.15556) is the only published result in our exact cell** — model fixed, multi-label,
+normalisation already paid. Its equations, which arrived while `carve_adapt_read.sh` was still queued and
+so corrected the objective before it read anything (`kneemri/inference/norm_adaptation.py`, commit
+`36a3e2d2`):
+
+- Eq. 8 — `k̂ = clip(round(Σⱼ p̄ⱼ), k_min, k_max)`, p̄ the entropy-retained-view average, k_min 1, k_max 8.
+  Estimated label-free from the Bernoulli probabilities, which is what makes it usable here at all.
+- Eq. 9 — with 𝒫 = TopK_k̂(p) and 𝒩 its complement,
+  `L = −(1/|𝒫|) Σ_𝒫 log p − λ_neg (1/|𝒩|) Σ_𝒩 log(1−p)`, λ_neg 0.8. **Each term is meaned over its OWN
+  set.** The draft written from prose divided both by the label count; at our median k̂ of 3 of 12 that is
+  a quarter-weight sharpening term against 10/12 suppression.
+- Recipe constants: V=8 weak views, retain the lowest-entropy 25%, Adam 1e-5, 2 steps, norm-affine only,
+  episodic reset per scan. The dispersion gate τ=0.091 is for ABSTENTION only — the paper's own Fig. 6
+  shows it is near-random as a viability detector, so it must not be used as one.
+
+**THE HONEST COMPARATOR IS +0.036, NOT +0.034.** Internal CT-RATE 0.713→0.749 = +0.036; external
+RAD-ChestCT 0.499→0.533 = +0.034 **from a near-chance base**, which is an operating-point repair rather
+than a toll recovery; fVLM external 0.612→0.642 = +0.030. Our ρ=0.8818 ruler transfer is the paper's
+INTERNAL regime, so +0.036 is the number `carve_adapt_read`'s branches are set against. Both cohorts were
+HU-clipped and mm-resampled, so the toll CARVE shrinks is post-physical-normalisation — the same cell as
+ours. The paper also warns the base-model gap (+0.11 between backbones) exceeds any adapter gain.
+
+**The ranking below CARVE, and why every larger number is not larger.** CoWA (arXiv:2607.03715) is the one
+unpriced neighbour — co-occurrence-weighted entropy on BN affines, six cross-institution CXR shifts; its
+norm ablation is verifiable (AUROC 74.7±8.0 for ℓ_F vs 71.1/69.8/70.6) but **its Table 1 absolutes are
+image-locked in both HTML and PDF**, so pull them from github.com/woojin716/CoWA before quoting a
+CoWA-vs-TENT delta. DISARM++ +0.32 AUC (n=41, logistic regression on PCA'd features) and Saponaro +0.09
+(ABIDE, ComBat on FreeSurfer morphometry with a Random Forest) are both measured against RAW baselines or
+a feature endpoint: their delta buys back normalisation this repo already pays. LUMINA's deltas are
+figure-only. Kim 2026 TB-SFDA is +0.011 AUROC and says itself that AUROC is harder to move than F1.
+
+**Albert 2023 is independent literature-side support for our flat −0.0336.** Rectal MRI, 201 patients, six
+centres, all arms N4-corrected: z-score is significantly worse than percentile+HM (which matches our
+Lu-2024 null), normaliser choice buys ~0.01–0.03 AUC, and **no normaliser repairs the cross-centre
+classifier toll** — Dworak collapses to ~0.52–0.58 AUC regardless. The most honest controlled comparison
+found, and it says from the literature's side what our eleven members say from ours.
+
+**A standing warning against the obvious next move.** "I Can't Believe TTA Is Not Better"
+(arXiv:2604.09697) measures standard augmentation-averaging TTA on twelve medical combos: it DEGRADES
+accuracy in 11 of 12, up to −31.6 points, mechanism BN-statistic mismatch. Our backbones are ViT/LN so the
+named mechanism may not transfer, but shift-axis TTA is a hypothesis here, not a free lunch — gate it
+per-member against a single-pass control.
+
+**Two numbers withdrawn, both the researcher's own.** D266's "Caldera/DISARM++ 0.857→0.899" **does not
+appear in the paper** — the verifiable DISARM++ classifier number is 0.6284→0.9459 (n=41, feature-LR, raw
+baseline). And D266's mechanism claim for Saponaro was wrong: it is ComBat on FreeSurfer morphometric
+FEATURES, not histogram matching and not pixels.
+
+**Silent cells — nothing published, so no slot may be spent expecting a comparator.** BN/LN statistic
+re-estimation on an MRI acquisition-shift classifier; test-time-only histogram matching; re-sampling TTA
+over the decode axis; physics-parameter randomisation on a classifier; N4 on a classifier endpoint. And
+the train-time side is thinner still: the medical shift-robustness literature is overwhelmingly
+segmentation (BigAug, LDDG, RAS4DG, Karani, SITTA, InTEnt, DG-TTA), VORTEX's endpoint is reconstruction
+with zero classifier numbers, and **no paper prices a classifier toll against consistency-across-decodes
+or shift-invariance losses.** LDDG reports BigAug FAILED to generalise for skin-lesion classification,
+which is consistent with our own n=11 flatness under mixup/crop/size variation.
+
 ### The field of view, per study, for all 4407 — 46% fill 160 mm and 97% fill 130 mm (2026-09-09)
 
 The ~40% figure the paragraph above leans on came from `crop_coverage`, which measures RETAINED TISSUE
