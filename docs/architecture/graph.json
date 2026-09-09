@@ -23665,6 +23665,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck._printed",
+      "target": "kneemri.experiments.arm_shadow.ArmShadow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck._printed",
+      "target": "kneemri.experiments.arm_shadow.ArmShadow.unshadowed",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck._spawned",
       "target": "kneemri.experiments.arm_check.ArmCheck._environment",
@@ -23961,6 +23973,18 @@
     {
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_shadow.ArmShadow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.main",
+      "target": "kneemri.experiments.arm_shadow.ArmShadow.reported",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.main",
       "target": "kneemri.experiments.arm_smoke.ArmSmoke",
       "weight": 1
     },
@@ -24196,6 +24220,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_read.main",
       "target": "kneemri.experiments.arm_read.ArmRead.uncontrolled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_shadow.ArmShadow.reported",
+      "target": "kneemri.experiments.arm_shadow.ArmShadow.unshadowed",
       "weight": 1
     },
     {
@@ -36751,7 +36781,7 @@
       "role": null
     },
     {
-      "descendants": 287,
+      "descendants": 288,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -37639,7 +37669,7 @@
       "role": null
     },
     {
-      "descendants": 25,
+      "descendants": 26,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -37682,6 +37712,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_read",
       "label": "arm_read",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_shadow",
+      "label": "arm_shadow",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -41997,6 +42035,14 @@
       "level": "class",
       "parent": "kneemri.experiments.arm_read",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_shadow.ArmShadow",
+      "label": "ArmShadow",
+      "level": "class",
+      "parent": "kneemri.experiments.arm_shadow",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -57012,6 +57058,22 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.arm_read",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_shadow.ArmShadow.reported",
+      "label": "reported",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_shadow.ArmShadow",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_shadow.ArmShadow.unshadowed",
+      "label": "unshadowed",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_shadow.ArmShadow",
       "role": null
     },
     {
