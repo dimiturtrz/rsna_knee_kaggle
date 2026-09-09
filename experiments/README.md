@@ -11841,6 +11841,44 @@ survives; if it is flat across the two subsets, the extent story is wrong whatev
 says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
 writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
 
+### The field of view, per study, for all 4407 — 46% fill 160 mm and 97% fill 130 mm (2026-09-09)
+
+The ~40% figure the paragraph above leans on came from `crop_coverage`, which measures RETAINED TISSUE
+and so answers a related but different question. The physical width itself had never been read: the
+`field_of_view_mm` axis was DECLARED on `StudyMetadata` and filled by nothing, and no
+`canonical_metadata.csv` existed on disk. Three edits (`3fd73ee1`) and one `build_cache --metadata-only`
+pass — **3.5 min of CPU, no card** — now answer it for every study, with no study unanswered.
+
+The statistic is `min(rows × spacing[0], columns × spacing[1])`, the NARROWEST side, because a square mm
+crop is bounded by whichever side runs out first; a 320×160 px frame at 0.5 mm is pad on two sides of a
+130 mm crop however wide the other axis reads. `pixel_spacing` alone reports the ROW pitch and cannot
+answer this. Per study it is the minimum over the series that answered, which is the one axis in
+`Study.metadata()` deliberately NOT unanimity-gated: the study is fed to a member through several series
+and the binding constraint on padding is the narrowest of them, so disagreement is not an absence of an
+answer, it is the answer being the minimum — and gating it would blank exactly the multi-plane studies
+the padding split needs.
+
+| statistic | mm | | extent | studies that fill it |
+|---|---|---|---|---|
+| mean | 154.39 | | 120 mm | 97.8% |
+| sd | 16.67 | | 130 mm | 97.2% |
+| min | 70.33 | | 140 mm | 83.3% |
+| median | 159.36 | | 150 mm | 66.6% |
+| 75th pct | 160.00 | | **160 mm** | **46.0% (2027/4407)** |
+| max | 220.01 | | 180 mm | 8.5% |
+
+Two consequences, both for the padding split and neither obtainable from `crop_coverage`. **46.0%** fill
+160 mm — an independent corroboration of the ~40%, from a different quantity, which is what makes the
+D269 (c) split worth taking at all. And **97.2%** fill 130 mm, so the default-extent members are padding
+essentially nothing: `band_dense_hold` is a near-perfect CONTROL for a 160 mm padding question, exactly
+as `fov_perstudy_read.sh` pre-registered before this was measured.
+
+The arithmetic that turns the readout into the verdict is committed and tested ahead of the card
+(`kneemri/evaluation/padding_split.py`, 7 tests). It prints the pooled toll FIRST — a run whose pooled
+number does not reproduce may not be split at all — and it carries TWO masks rather than one, because
+`nan >= 160` is False and a single-mask spelling files every unmeasured study under PADDED. That is this
+project's denominator error in the shape a boolean makes easiest to make; here it is pinned by a test.
+
 ### The mm-vs-pixel-grid axis is NOT open here — every member is already mm-normalised (2026-09-09)
 
 D266 reports that mm-resampling versus a fixed pixel grid is unpublished on a classifier endpoint
