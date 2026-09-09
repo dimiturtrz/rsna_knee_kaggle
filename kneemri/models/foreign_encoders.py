@@ -251,9 +251,21 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
     # px, 2.5D three-slice RGB, drop-path 0.1 — because the cell asks whether a CNN can reach the band at
     # all, and answering with our own dense-window recipe would confound the trunk with the recipe.
     #
-    # NO MOUNT, deliberately. A member fitted on this can be trained and read on the 909 and CANNOT be
-    # submitted until a Kaggle mirror is arranged; arranging one before the lane is priced would spend an
-    # upload on a trunk with no measured seat.
+    # THE MOUNT WAS ARRANGED ON 2026-09-09, ONCE THE LANE WAS PRICED AND NOT BEFORE. This row read "NO
+    # MOUNT, deliberately" until `resnet_224_short` cleared its own pre-registered 0.80 plumbing gate on
+    # the 909 (epoch 3, 0.8254), which is the condition that sentence named: an upload spent on a trunk
+    # with no measured seat is the thing it refused, and the seat now has a number behind it.
+    #
+    # THE SLUG CARRIES FAMILY AND LEAF BECAUSE `locates` DEMANDS BOTH — `family in path` and `leaf in
+    # segments`. `kneemri-resnet-timm` holds "resnet", and the payload sits under a `resnet50d-224/`
+    # directory rather than flat, which is exactly the defect the first orthofoundation upload shipped
+    # with (flat as `orthofoundation-hf`, no "dinov3" anywhere, unable to find itself). It is its OWN
+    # dataset rather than a directory added to an existing one: re-versioning a dataset that champion
+    # kernels already mount is a risk taken for no gain.
+    #
+    # REDISTRIBUTION IS LICENSED. `timm/resnet50d.ra4_e3600_r224_in1k` is Apache-2.0, read from the Hugging
+    # Face model API on 2026-09-09 (`cardData.license`, plus the `license:apache-2.0` tag) rather than from
+    # prose, and the licence text ships beside the weights as section 4(a) of that licence requires.
     RESNET_50D: Encoder(
         RESNET_50D,
         "timm/resnet50d.ra4_e3600_r224_in1k",
@@ -261,6 +273,7 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
         patch=32,
         family=RESNET,
         leaf="resnet50d-224",
+        mount="dimiturnt/kneemri-resnet-timm",
         params_m=25.6,
         normalization=HALF,
         normalization_evidence=(
