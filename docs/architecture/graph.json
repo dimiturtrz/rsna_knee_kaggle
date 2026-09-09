@@ -32857,6 +32857,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.axis",
+      "target": "kneemri.training.attention_health.AttentionHealth.uniform",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.attention_health.AttentionHealth.baseline",
       "target": "kneemri.training.attention_health.AttentionProfile",
@@ -32890,6 +32896,12 @@
       "kind": "calls",
       "source": "kneemri.training.attention_health.AttentionHealth.profile",
       "target": "kneemri.training.attention_health.AttentionHealth.maps",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.attention_health.AttentionHealth.profile",
+      "target": "kneemri.training.attention_health.AttentionHealth.patch_entropy",
       "weight": 1
     },
     {
@@ -32931,7 +32943,7 @@
     {
       "kind": "calls",
       "source": "kneemri.training.attention_health.AttentionHealth.retention",
-      "target": "kneemri.training.attention_health.AttentionHealth.uniform",
+      "target": "kneemri.training.attention_health.AttentionHealth.axis",
       "weight": 1
     },
     {
@@ -64512,6 +64524,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.axis",
+      "label": "axis",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.attention_health.AttentionHealth.baseline",
       "label": "baseline",
       "level": "method",
@@ -64546,6 +64566,14 @@
       "descendants": 0,
       "id": "kneemri.training.attention_health.AttentionHealth.maps",
       "label": "maps",
+      "level": "method",
+      "parent": "kneemri.training.attention_health.AttentionHealth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.attention_health.AttentionHealth.patch_entropy",
+      "label": "patch_entropy",
       "level": "method",
       "parent": "kneemri.training.attention_health.AttentionHealth",
       "role": null
