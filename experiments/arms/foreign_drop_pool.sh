@@ -29,6 +29,12 @@
 #
 # `intensity392_ws_s2026` (0.8459) is DELIBERATELY ABSENT: its source cache `images_448px_12sl.npy` was
 # deleted, so its native side is uncomputable and its failure would take the other ten down with it.
+#
+# `arm_check` CANNOT CHECK THIS ARM: it dry-runs an arm and captures the invocations
+# `run_train`/`run_pretrain` print, and this one calls `python -m` directly and prints none, so
+# `--only foreign_drop_pool` exits on "no arm printed an invocation named ...". The same blind spot
+# the `foreign_run` arms sit in. Flags verified against the tool's argparse
+# (kneemri/evaluation/foreign_readout.py:170-177); `bash -n` covers the syntax.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

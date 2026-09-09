@@ -16,6 +16,13 @@
 #
 # PRE-REGISTERED: if slot_cost is outside +/-0.005 on EITHER member, the full run does not start and the
 # defect is the finding. If it reads ~0, the eleven-member arm runs and `decode_cost` is a pixel number.
+#
+# `arm_check` CANNOT CHECK THIS ARM, and that is structural rather than an oversight. It works by
+# dry-running an arm and capturing the invocations `run_train`/`run_pretrain` print; this one calls
+# `python -m` directly and prints none, so `--only foreign_drop_pilot` exits on "no arm printed an
+# invocation named ...". The same blind spot the `foreign_run` arms sit in, reached from the other
+# direction. The flags were verified against the tool's own argparse instead
+# (kneemri/evaluation/foreign_readout.py:170-177), and `bash -n` covers the syntax.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
