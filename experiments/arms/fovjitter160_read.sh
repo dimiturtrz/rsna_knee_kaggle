@@ -18,7 +18,14 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
-"$REPO/.venv/Scripts/python.exe" -m kneemri.evaluation.foreign_readout \
+# THROUGH `uv`, FOR TWO REASONS. `arm_check` RUNS every arm file to read its flags, and the only thing
+# that makes that a lint is a stub shadowing `uv` alone — an arm naming `.venv/Scripts/python.exe` walks
+# past it and the lint becomes a card job (measured 2026-09-09, 32 GB of `foreign_readout` beside a live
+# training arm). And this arm is the CONTROL for `carve_adapt_read.sh`, which differs from it in the
+# single flag `--adapt`: that arm runs under `uv`, so `.venv` here would make the pair differ in the
+# interpreter as well as in the flag. Verified before the change that `kneemri.evaluation.foreign_readout`
+# imports under `.venv-arm`, which is what `experiments/lib.sh` points `uv` at.
+UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
   --checkpoints \
     "$MODELS/fovjitter160_s2026.pt" \
     "$MODELS/crop160_span_s2026.pt" \
