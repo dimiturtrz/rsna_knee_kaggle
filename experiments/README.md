@@ -11877,6 +11877,56 @@ before it ran, changing no branch after it, for ~50 minutes of a card that had `
 `logs/after_budget.log` (`=== BUDGET SWEEP DONE ===`) is therefore the marker of a truncated sweep, not a complete one. Anyone
 re-reading that log gets the same three points and this note.
 
+### `ortho_lora`: PEFT loses on the largest trunk we own, and the ADAPTATION lever closes — 2026-09-09
+
+**0.8349 at e10, against control `ortho_dense` 0.8452. Delta −0.0103, outside the 0.0062 paired floor,
+in the arm's own BELOW branch.** Twelve epochs at 660-713 s, 2.30 h of card. The curve is flat at the
+end (e10 0.8349, e11 0.8349) and `convergence_check` has nothing to say about it: this is a converged
+reading, not a floor.
+
+| row                  | adaptation                  | trunk    | auc    | vs its control |
+| `ortho_dense`        | full FT, six blocks, 4e-5   | ViT-L    | 0.8452 | control        |
+| **`ortho_lora`**     | rank-8 adapters, all 24, 5e-4 | ViT-L  | **0.8349** | **−0.0103**|
+| `base_dense`         | full FT, 4e-5               | ViT-B    | 0.8512 | control        |
+| `dinov3_base_lora`   | rank-8 adapters, 5e-4       | ViT-B    | 0.8268 | −0.0244 (CONFOUNDED, :3040) |
+
+**WHAT THE MATCHED CELL DID TO THE CONFOUNDED ONE.** The base pair differed on adaptation AND on
+224→336 plus the dense recipe, and the whole −0.0244 was charged to adaptation. This row is the same
+comparison with nothing else moved, and it reads **−0.0103**. So the confound carried roughly
+0.0141 of that delta and the adaptation term is about **43% of what the base pair was quoted at** —
+real, same sign, and smaller. Both facts are worth having: the ledger's base-pair number was
+overstated, and it was not overstated to zero.
+
+**DUTT DOES NOT TRANSFER TO THIS ENDPOINT.** D273's crossover (arXiv:2305.08252, LoRA beating full FT
+below ~50% of HAM10000 ≈ 3.8k images, the gain GROWING with trunk width) predicted the largest gain
+exactly here — ViT-L, 4.4k studies. We measured the largest LOSS we have on the axis after removing the
+confound. The prediction and the measurement point opposite ways at the capacity where the paper says
+its effect is strongest, which is the cleanest kind of non-transfer.
+
+**SO THE ADAPTATION LEVER CLOSES ON EVERY TRUNK THIS PROJECT OWNS.** Small (`lora_r8_v3small_224`),
+base (the confounded pair), large (this row) — three capacities, one direction. The four large-trunk
+rows (`ortho_dense` 0.8452, `ortho_stack` 0.8417, `v3large_dense` 0.8258, `v3large_stack` 0.8277) are
+therefore NOT readings of our schedule wearing a capacity's name; the large-trunk deficit is capacity or
+corpus, and the weight of the search goes back to the DATA and ARCHITECTURE axes. The arm's ABOVE branch
+would have owed the whole family a re-run under adapters; it did not fire, and that re-run is now
+cancelled rather than outstanding.
+
+**THE RANK QUALIFIER, STATED BEFORE THE RUN AND STILL STANDING.** Rank 8 on a 1024-wide trunk is a
+smaller relative subspace than rank 8 on base's 768, and the arm said so at line 30 rather than after
+the number came back. A flat-and-low curve is what "the rank is too small" looks like, and that is not
+what happened here: the arm climbed 0.7328 → 0.8349 and converged. It fit; it fit to a worse place.
+D276 (Dutt's own rank/alpha/injection sites) can still argue for a rank-16 re-run, and this row is that
+arm's control — but the flat-curve escape hatch the header reserved is not available, because the curve
+was not flat.
+
+**NOT A MEMBER.** 0.8349 is 0.0172 under the 0.8521 seat bar. Declined in writing in
+`comp/members.declines` with that reason; the arm's value was always the instrument, and it delivered
+the closure it was priced for.
+
+**COST OF THE PRICING ERROR, recorded because the arm carries it.** Budgeted 1.6-1.8 h, measured 2.30 h.
+The missing term was `--accumulate 3` — three times the optimiser micro-steps per effective batch, paid
+on all 24 adapted blocks. The VRAM fix that made the arm runnable bought its memory back in wall-clock.
+
 ### D272 prices the warm-start collapse, and the repeat-geometry policy FLIPS — card-free, 2026-09-09
 
 M273 asked one number: does a warm start collapse the diversity D267 measured in the 41-run cluster

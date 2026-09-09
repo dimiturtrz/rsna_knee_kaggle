@@ -63,6 +63,19 @@
 #             first. A 2e-4 whole-stack rate is 25x what every arm on this ledger used, and a trunk that
 #             diverged is a recipe defect wearing a result's clothes.
 #
+# THE CARD REFUSED BATCH 8 AND THE PARAGRAPH ABOVE IS WHY THE FIX IS SAFE HERE. At 19:24Z on 2026-09-09
+# the smoke derived **50887 MiB against 30991 free** — the 2.76 GB the BN paragraph quotes was measured at
+# batch 2, and 20 slices x through-plane at batch 8 is a different arm. Batch drops to 4, `--accumulate 2`
+# holds the effective batch at his 8, so the optimiser's noise scale is unchanged. The BN objection the
+# paragraph above raises DOES NOT BITE at this batch and the arithmetic is its own: a study is 20 slices
+# and BatchNorm sees IMAGES, so batch 8 gives it (960, ...) and batch 4 gives it **(480, ...)** — both an
+# order of magnitude past the 32-per-worker where Wu & He's curve is already flat, and nowhere near the 2
+# where it collapses. The reason `--accumulate` "cannot substitute" is that it does not change what a BN
+# layer sees per micro-batch; here the micro-batch still holds 480 images, so there is nothing to fix.
+#
+# deliberate: --batch 4 --accumulate 2 (the card derived 50887 MiB at his 8; BN still sees 480 images, and
+#             the effective batch is held at his 8 so the optimiser is not a second change)
+#
 # PRICE: ~35 min at 12 epochs (estimate; 25.6M params at 224 is the cheapest trunk here, and the smoke
 # will replace this with a measured s/epoch). No submission slot. Report the s/epoch WITH the score.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
@@ -73,5 +86,5 @@ run_train resnet_224_short \
   $RECIPE --epochs 12 --variant resnet50d --image-size 224 $THROUGHPUT \
   --through-plane --slice-pooling max --slices 20 --band-low 0.1 --band-high 0.9 \
   --whole-stack --unfreeze-last 16 --backbone-lr 2e-4 --head-lr 2e-4 --weight-decay 0.05 \
-  --batch 8 --accumulate 1 \
+  --batch 4 --accumulate 2 \
   --labels "$LABELS" --out "$MODELS/resnet_224_short_s2026.pt"

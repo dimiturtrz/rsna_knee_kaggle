@@ -985,3 +985,12 @@ fovjitter160_reflect_s2026.pt        # KILLED at epoch 6 of 12 — the record is
 smoke_fovjitter160.pt                # A SMOKE — 60 studies, 48 train / 12 holdout, written by `arm_check --smoke`
                                      # to prove the recipe builds before it was queued. It has a holdout record
                                      # because the smoke trains; it is not a model of anything.
+ortho_lora_s2026.pt         # 0.8349 best e10, 0.0172 UNDER the 0.8521 seat bar and 0.0103 under its own
+                            # control ortho_dense (0.8452). Rank-8 adapters over a frozen ViT-L against a
+                            # matched six-block full fine-tune: the arm's BELOW branch, outside the 0.0062
+                            # paired floor, converged (e10 and e11 both 0.8349 — not a truncation floor).
+                            # It was always an INSTRUMENT and it paid as one: it closed the adaptation
+                            # lever on every trunk this project owns and cancelled the large-trunk family
+                            # re-run its ABOVE branch would have owed. Re-opened only by D276 naming a rank
+                            # tied to trunk width — the flat-curve "rank too small" escape is not available
+                            # here, because the curve climbed 0.7328 -> 0.8349 and settled. Ledger 2026-09-09.
