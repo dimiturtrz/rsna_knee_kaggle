@@ -11815,6 +11815,32 @@ randomised crop extent rather than a second fixed one — because §1 says the p
 member ever saw the extent VARY, and a single wider fixed field trades one blind spot for another. The re-opening condition for the rest of this family is
 the same as it has always been — an ensemble reading, not another solo one.
 
+### `fovjitter160` reads NULL — jitter buys nothing the wide field had not already bought (2026-09-09)
+
+The deciding reading is in, taken by `experiments/arms/fovjitter160_read.sh` on the card, with both
+anchors reproducing to the fourth decimal — which is what licenses reading the third row at all:
+
+| member                  | native | kept   | foreign | slots   | **decode** | vs 2026-09-09 pool |
+| `crop160_span_s2026`    | 0.8564 | 0.8565 | 0.8300  | +0.0001 | **−0.0265** | reproduced exactly |
+| `band_dense_hold_s2026` | 0.8573 | 0.8573 | 0.8213  | +0.0000 | **−0.0360** | reproduced exactly |
+| `fovjitter160_s2026`    | 0.8544 | 0.8545 | 0.8248  | +0.0001 | **−0.0297** | new |
+
+Against the arm's own pre-registered branches (`fovjitter160.sh:47-57`), −0.0297 lands in **NULL**
+(−0.0265 to −0.0300): indistinguishable from the fixed wide field, +1.0 sd off the pool mean where the
+fixed field is +1.87 sd. So **jittering the extent is not the mechanism.** Whatever `crop160_span` has,
+randomising the width does not add to it, and per D269 (b) this was — as far as that search reaches —
+the first direct test of fixed-wide against jittered extent on a transfer endpoint. It answers.
+
+What it does NOT settle is whether the WIDTH is the mechanism. Both wide members sit above the pool and
+the only 130 mm member in this reading sits at the pool mean, but that ordering is n=1 per cell and each
+cell is a whole training run, so it stays directional and does not clear the bar on its own. The live
+discriminator is D269 (c) — the padding composition — and it needs no new training: `crop_coverage`
+records that only ~40% of series can fill a 160 mm field, so 60% of both wide members' studies are
+pad-filled. If their lower toll is concentrated in the studies that FILL the field, the extent reading
+survives; if it is flat across the two subsets, the extent story is wrong whatever the pooled number
+says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
+writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
+
 ### The mm-vs-pixel-grid axis is NOT open here — every member is already mm-normalised (2026-09-09)
 
 D266 reports that mm-resampling versus a fixed pixel grid is unpublished on a classifier endpoint
