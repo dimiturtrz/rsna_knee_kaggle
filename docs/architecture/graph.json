@@ -15283,6 +15283,18 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.evaluation.foreign_readout.PerStudyDump",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "target": "kneemri.evaluation.foreign_readout.ScoredPass",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.foreign_readout.ForeignReadout",
       "target": "kneemri.evaluation.foreign_readout.ShiftPair",
@@ -15331,6 +15343,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
+      "target": "kneemri.evaluation.foreign_readout.PerStudyDump.add",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
       "target": "kneemri.evaluation.foreign_readout.ShiftedReading",
@@ -15352,6 +15370,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
       "target": "kneemri.evaluation.foreign_readout.ForeignReadout.rebuilt",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.ForeignReadout.scored",
+      "target": "kneemri.evaluation.foreign_readout.ScoredPass",
       "weight": 1
     },
     {
@@ -15448,6 +15472,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_readout.main",
       "target": "kneemri.evaluation.foreign_readout.ForeignReadout.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.evaluation.foreign_readout.PerStudyDump",
       "weight": 1
     },
     {
@@ -40630,6 +40660,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.PerStudyDump",
+      "label": "PerStudyDump",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.ScoredPass",
+      "label": "ScoredPass",
+      "level": "class",
+      "parent": "kneemri.evaluation.foreign_readout",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_readout.ShiftPair",
       "label": "ShiftPair",
       "level": "class",
@@ -51090,6 +51136,22 @@
       "label": "scored",
       "level": "method",
       "parent": "kneemri.evaluation.foreign_readout.ForeignReadout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.PerStudyDump.add",
+      "label": "add",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.PerStudyDump",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.foreign_readout.PerStudyDump.written",
+      "label": "written",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_readout.PerStudyDump",
       "role": null
     },
     {
