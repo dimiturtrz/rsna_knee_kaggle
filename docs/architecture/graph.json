@@ -4508,6 +4508,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.geometry_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.geometry_check",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.geometry_check",
+      "target": "kneemri.runs.recorded_run",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.geometry_check",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.ledger_check",
       "target": "core.cli",
       "weight": 1
@@ -25129,6 +25153,144 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck",
+      "target": "kneemri.experiments.geometry_check.GeometryCluster",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck",
+      "target": "kneemri.experiments.geometry_check.TrainedGeometry",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck.clusters",
+      "target": "kneemri.experiments.geometry_check.GeometryCluster",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck.clusters",
+      "target": "kneemri.experiments.geometry_check.TrainedGeometry.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck.clusters",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck.clusters",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck.twins",
+      "target": "kneemri.experiments.geometry_check.GeometryCheck.clusters",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.GeometryCheck.twins",
+      "target": "kneemri.experiments.geometry_check.TrainedGeometry.of",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.geometry_check.GeometryCluster",
+      "target": "kneemri.experiments.geometry_check.TrainedGeometry",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.geometry_check.TrainedGeometry",
+      "target": "kneemri.experiments.geometry_check.TrainedGeometry",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.geometry_check.TrainedGeometry",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.TrainedGeometry.of",
+      "target": "kneemri.runs.recorded_run.RecordedRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.TrainedGeometry.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.name",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.TrainedGeometry.of",
+      "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "kneemri.experiments.geometry_check.GeometryCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "kneemri.experiments.geometry_check.GeometryCheck.clusters",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "kneemri.experiments.geometry_check.GeometryCheck.twins",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "kneemri.runs.run_metrics.RunMetrics.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.geometry_check.main",
+      "target": "kneemri.runs.run_metrics.RunMetrics.name",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.his_labels_blend.Blend.table",
       "target": "kneemri.experiments.his_labels_blend.Blend._marginal",
@@ -36589,7 +36751,7 @@
       "role": null
     },
     {
-      "descendants": 286,
+      "descendants": 287,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -37477,7 +37639,7 @@
       "role": null
     },
     {
-      "descendants": 24,
+      "descendants": 25,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -37600,6 +37762,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.foreign_run",
       "label": "foreign_run",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check",
+      "label": "geometry_check",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -41970,6 +42140,30 @@
       "label": "ForeignRun",
       "level": "class",
       "parent": "kneemri.experiments.foreign_run",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.GeometryCheck",
+      "label": "GeometryCheck",
+      "level": "class",
+      "parent": "kneemri.experiments.geometry_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.GeometryCluster",
+      "label": "GeometryCluster",
+      "level": "class",
+      "parent": "kneemri.experiments.geometry_check",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.TrainedGeometry",
+      "label": "TrainedGeometry",
+      "level": "class",
+      "parent": "kneemri.experiments.geometry_check",
       "role": "satellite"
     },
     {
@@ -57586,6 +57780,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.foreign_run",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.GeometryCheck.clusters",
+      "label": "clusters",
+      "level": "method",
+      "parent": "kneemri.experiments.geometry_check.GeometryCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.GeometryCheck.twins",
+      "label": "twins",
+      "level": "method",
+      "parent": "kneemri.experiments.geometry_check.GeometryCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.GeometryCluster.hours",
+      "label": "hours",
+      "level": "method",
+      "parent": "kneemri.experiments.geometry_check.GeometryCluster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.GeometryCluster.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.experiments.geometry_check.GeometryCluster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.GeometryCluster.repeat_hours",
+      "label": "repeat_hours",
+      "level": "method",
+      "parent": "kneemri.experiments.geometry_check.GeometryCluster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.TrainedGeometry.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.experiments.geometry_check.TrainedGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.geometry_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.geometry_check",
       "role": null
     },
     {
