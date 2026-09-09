@@ -31,6 +31,10 @@ require "$LABELS"
 # and so does `.venv`. Bare `python` on PATH is a third interpreter that is neither, and an arm sourcing
 # lib.sh only sets UV_PROJECT_ENVIRONMENT, which steers `uv run` and says nothing about a bare `python`.
 # Naming the interpreter is the only form of this that cannot be wrong somewhere else.
-"$REPO/.venv/Scripts/python.exe" -m kneemri.evaluation.foreign_readout \
+# THROUGH `uv`: `arm_check` RUNS every arm file to read its flags, and the only thing making that a
+# lint is a stub shadowing `uv` alone — a direct interpreter walks past it and the lint becomes a card
+# job (measured 2026-09-09). Verified the module imports under `.venv-arm`, which is what
+# `experiments/lib.sh` points `uv` at, before the switch.
+UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
   --checkpoints "$MODELS/aug_long_s2026.pt" "$MODELS/band_dense_hold_s2026.pt" \
   --labels "$LABELS" --foreign D:/kaggle/input/raptor-corpus --device cuda

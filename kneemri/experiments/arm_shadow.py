@@ -48,11 +48,21 @@ class ArmShadow:
 
         Read from the FILE rather than from what the arm printed, since an arm that reaches its
         interpreter directly may print nothing at all — it would have been on the card instead.
+
+        COMMENTS ARE NOT CODE, and reading them as code costs an arm its check. Three arms in this tree
+        name `.venv/Scripts/python.exe` only in prose — two of them in the very comment explaining why an
+        arm must not do that — and matching those dropped both halves of the carve pair from the lint's
+        pool while every gate stayed green. A stripped line is the whole fix: a shell comment cannot
+        launch anything.
         """
         return [
             arm
             for arm in sorted(self.arms.glob("*.sh"))
-            if INTERPRETER.search(arm.read_text(encoding="utf-8", errors="ignore"))
+            if any(
+                INTERPRETER.search(line)
+                for line in arm.read_text(encoding="utf-8", errors="ignore").splitlines()
+                if not line.lstrip().startswith("#")
+            )
         ]
 
     def reported(self) -> list[str]:

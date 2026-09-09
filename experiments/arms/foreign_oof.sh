@@ -54,7 +54,11 @@ if [ -e "$MODELS/foreign_oof_corpus.npz" ] && [ -z "$ALLOW_OVERWRITE" ]; then
   exit 1
 fi
 
-"$REPO/.venv/Scripts/python.exe" -m kneemri.inference.foreign_folds \
+# THROUGH `uv`: `arm_check` RUNS every arm file to read its flags, and the only thing making that a
+# lint is a stub shadowing `uv` alone — a direct interpreter walks past it and the lint becomes a card
+# job (measured 2026-09-09). Verified the module imports under `.venv-arm`, which is what
+# `experiments/lib.sh` points `uv` at, before the switch.
+UV_NO_SYNC=1 uv run python -m kneemri.inference.foreign_folds \
   --kernel "$FOREIGN_KERNEL" \
   --checkpoints "$FOREIGN_WEIGHTS" \
   --series-root "$RAW/train_series" \

@@ -10,7 +10,11 @@ cd "$(dirname "$0")/../.."
 MODELS="D:/models/rsna_knee_abnormality"
 
 for depth in 24 40; do
-  .venv/Scripts/python.exe -m kneemri.inference.holdout_backfill \
+# THROUGH `uv`: `arm_check` RUNS every arm file to read its flags, and the only thing making that a
+# lint is a stub shadowing `uv` alone — a direct interpreter walks past it and the lint becomes a card
+# job (measured 2026-09-09). Verified the module imports under `.venv-arm`, which is what
+# `experiments/lib.sh` points `uv` at, before the switch.
+  UV_NO_SYNC=1 uv run python -m kneemri.inference.holdout_backfill \
     --checkpoints "$MODELS/band_dense_s2026.pt" --served-slices "$depth" --served-band 0.1 0.9
   echo "QUEUE depth $depth exited $? $(date -u +%FT%TZ)"
 done

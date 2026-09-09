@@ -40,7 +40,11 @@ require "$LABELS"
 
 # THE INTERPRETER IS PINNED, not resolved — bare `python` on PATH is neither `.venv` nor `.venv-arm`,
 # and it killed this arm's first pilot on a missing `jaxtyping` that both venvs actually have.
-"$REPO/.venv/Scripts/python.exe" -m kneemri.evaluation.foreign_readout \
+# THROUGH `uv`: `arm_check` RUNS every arm file to read its flags, and the only thing making that a
+# lint is a stub shadowing `uv` alone — a direct interpreter walks past it and the lint becomes a card
+# job (measured 2026-09-09). Verified the module imports under `.venv-arm`, which is what
+# `experiments/lib.sh` points `uv` at, before the switch.
+UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
   --checkpoints \
     "$MODELS/aug_long_s2026.pt" \
     "$MODELS/mixup_dense_s2026.pt" \

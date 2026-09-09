@@ -42,14 +42,20 @@
 set -u
 
 REPO="D:/personal_projects/rsna_knee_kaggle"
-PY="$REPO/.venv/Scripts/python.exe"
+# THROUGH `uv`, AS AN ARRAY: `arm_check` RUNS every arm file to read its flags, and the only thing
+# making that a lint is a stub shadowing `uv` alone — a direct interpreter walks past it and the lint
+# becomes a card job (measured 2026-09-09). `--project` is required because this arm `cd`s to
+# /d/kaggle; it resolves the same `$REPO/.venv` this line used to name, since this arm does not source
+# `experiments/lib.sh` and so nothing points `uv` at `.venv-arm`. An array, because the invocation is
+# several words and `nohup $PY` would split it wrong.
+PY_RUN=(env UV_NO_SYNC=1 uv run --project "$REPO" python)
 SCRIPT="$REPO/external/raptor/knee-mri-training-the-twelve-finding-model.py"
 LOG="$REPO/logs/ourtrunk44.full.log"
 
 cd /d/kaggle || exit 1
 export PYTHONPATH="$REPO"
 
-"$PY" - <<'GUARD' >> "$LOG" 2>&1 || { echo "ARM REFUSED ourtrunk44 (wrong corpus resolved)" >> "$LOG"; exit 1; }
+"${PY_RUN[@]}" - <<'GUARD' >> "$LOG" 2>&1 || { echo "ARM REFUSED ourtrunk44 (wrong corpus resolved)" >> "$LOG"; exit 1; }
 import os, sys
 def find(name, root="/kaggle/input"):
     for d, _, fs in os.walk(root):
@@ -66,7 +72,7 @@ print("shape", vols.shape, flush=True)
 sys.exit(0 if vols.shape[1] == 44 else 1)
 GUARD
 
-nohup "$PY" -m kneemri.experiments.foreign_run \
+nohup "${PY_RUN[@]}" -m kneemri.experiments.foreign_run \
   --script "$SCRIPT" \
   --arch vit_small_patch14_dinov2.lvd142m \
   --res 336 --epochs 16 --bs 8 --k 12 --k_eval 24 --grad_ckpt --ckpt timm --norm imagenet \
