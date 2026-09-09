@@ -5030,6 +5030,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.inference.study_reading",
+      "target": "kneemri.inference.norm_adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.inference.teacher_readings",
       "target": "core.cli",
       "weight": 1
@@ -27193,6 +27199,48 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.affines",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.cardinality",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.on",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.on",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.affines",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
+      "target": "kneemri.inference.norm_adaptation.NotAdaptableError",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.inference.pillar_member.AtlasConfig",
       "target": "kneemri.inference.pillar_member.AtlasModel",
@@ -27427,9 +27475,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
+      "kind": "holds",
       "source": "kneemri.inference.study_reading.StudyReadings",
       "target": "kneemri.inference.study_reading.StudyReadings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.study_reading.StudyReadings.predict",
+      "target": "kneemri.inference.study_reading.StudyReadings._read",
       "weight": 1
     },
     {
@@ -36487,7 +36541,7 @@
       "role": null
     },
     {
-      "descendants": 285,
+      "descendants": 286,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -37575,7 +37629,7 @@
       "role": null
     },
     {
-      "descendants": 24,
+      "descendants": 25,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
@@ -37690,6 +37744,14 @@
       "descendants": 0,
       "id": "kneemri.inference.members",
       "label": "members",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation",
+      "label": "norm_adaptation",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -42180,6 +42242,30 @@
       "label": "Window",
       "level": "class",
       "parent": "kneemri.inference.members",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "label": "CardinalityAwareLN",
+      "level": "class",
+      "parent": "kneemri.inference.norm_adaptation",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.NoAdaptation",
+      "label": "NoAdaptation",
+      "level": "class",
+      "parent": "kneemri.inference.norm_adaptation",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.NotAdaptableError",
+      "label": "NotAdaptableError",
+      "level": "class",
+      "parent": "kneemri.inference.norm_adaptation",
       "role": "satellite"
     },
     {
@@ -59192,6 +59278,62 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
+      "label": "_descend",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.affines",
+      "label": "affines",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.cardinality",
+      "label": "cardinality",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
+      "label": "loss",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.on",
+      "label": "on",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
+      "label": "reachable",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.NoAdaptation.on",
+      "label": "on",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.NoAdaptation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.pillar_member.PillarMember.__init__",
       "label": "__init__",
       "level": "method",
@@ -59436,6 +59578,14 @@
       "label": "logits",
       "level": "method",
       "parent": "kneemri.inference.stacked.StackedLogit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.study_reading.StudyReadings._read",
+      "label": "_read",
+      "level": "method",
+      "parent": "kneemri.inference.study_reading.StudyReadings",
       "role": null
     },
     {

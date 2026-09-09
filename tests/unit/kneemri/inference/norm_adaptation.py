@@ -1,0 +1,125 @@
+"""What the LayerNorm-affine adapt pass must do, and the two things it must never do."""
+
+from typing import override
+
+import pytest
+import torch
+from torch import Tensor, nn
+
+from kneemri.inference.norm_adaptation import (
+    CARDINALITY_BOUNDS,
+    CardinalityAwareLN,
+    NoAdaptation,
+    NotAdaptableError,
+)
+
+LABELS = 12
+WINDOWS = 4
+WIDTH = 8
+NORM_BLOCKS = 6
+QUARTER = 0.25
+LOUD = 2.0
+LOUDER = 4.0
+QUIET = -8.0
+
+
+class _Member(nn.Module):
+    """A member shaped like ours: several LayerNorm blocks and a readout onto our label count."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.first = nn.LayerNorm(WIDTH)
+        self.rest = nn.ModuleList([nn.LayerNorm(WIDTH) for _ in range(NORM_BLOCKS - 1)])
+        self.head = nn.Linear(WIDTH, LABELS)
+
+    @override
+    def forward(self, batch: Tensor) -> Tensor:
+        hidden = self.first(batch)
+        for block in self.rest:
+            hidden = block(hidden)
+        return self.head(hidden)
+
+
+@pytest.fixture(name="member")
+def _member() -> _Member:
+    torch.manual_seed(2026)
+    return _Member()
+
+
+@pytest.fixture(name="batch")
+def _batch() -> Tensor:
+    torch.manual_seed(2026)
+    return torch.randn(1, WINDOWS, WIDTH)
+
+
+def test_cardinality_aware_l_n_on(member: _Member, batch: Tensor) -> None:
+    """The episodic reset is the load-bearing half: adapting study N must not reach study N+1."""
+    before = [parameter.detach().clone() for parameter in member.parameters()]
+    with CardinalityAwareLN().on(member, batch):
+        pass
+    for parameter, original in zip(member.parameters(), before, strict=True):
+        assert torch.equal(parameter, original)
+
+
+def test_on_moves_the_affines_while_it_is_open(member: _Member, batch: Tensor) -> None:
+    """Inside the block the member must actually be different, or the pass is a no-op wearing a name."""
+    original = member.first.weight.detach().clone()
+    with CardinalityAwareLN(lr=1e-1).on(member, batch):
+        assert not torch.equal(member.first.weight, original)
+
+
+def test_on_restores_even_when_the_read_raises(member: _Member, batch: Tensor) -> None:
+    """A failed read must not leave an adapted member behind for every study after it."""
+    original = member.first.weight.detach().clone()
+    with pytest.raises(ZeroDivisionError), CardinalityAwareLN(lr=1e-1).on(member, batch):
+        raise ZeroDivisionError
+    assert torch.equal(member.first.weight, original)
+
+
+def test_no_adaptation_on(member: _Member, batch: Tensor) -> None:
+    """The control every reading is against serves the trained function untouched."""
+    before = [parameter.detach().clone() for parameter in member.parameters()]
+    with NoAdaptation().on(member, batch):
+        for parameter, original in zip(member.parameters(), before, strict=True):
+            assert torch.equal(parameter, original)
+
+
+def test_affines(member: _Member) -> None:
+    """SAR freezes the last three blocks; the head is never adapted by any published recipe."""
+    adapted = CardinalityAwareLN().affines(member)
+    assert len(adapted) == 2 * (NORM_BLOCKS - 3)
+    assert all(any(parameter is one for one in adapted) is False for parameter in member.head.parameters())
+
+
+def test_affines_refuses_a_member_it_cannot_reach() -> None:
+    """Serving unadapted under an adapted name is the failure this raise exists to prevent."""
+    with pytest.raises(NotAdaptableError):
+        CardinalityAwareLN().affines(object())
+
+
+def test_cardinality() -> None:
+    """Our p5 is zero — a clean knee must be allowed to stay clean — and our p95 is eight."""
+    low, high = CARDINALITY_BOUNDS
+    recipe = CardinalityAwareLN()
+    assert recipe.cardinality(torch.zeros(LABELS)) == low
+    assert recipe.cardinality(torch.ones(LABELS)) == high
+    assert recipe.cardinality(torch.full((LABELS,), QUARTER)) == round(QUARTER * LABELS)
+
+
+def test_loss() -> None:
+    """The objective must reward a sharper version of the study's own reading, not a different one."""
+    flat = torch.zeros(WINDOWS, LABELS)
+    flat[:, :3] = LOUD
+    sharper = flat.clone()
+    sharper[:, :3] = LOUDER
+    sharper[:, 3:] = -LOUD
+    recipe = CardinalityAwareLN()
+    assert float(recipe.loss(sharper)) < float(recipe.loss(flat))
+
+
+def test_loss_suppresses_everything_when_the_study_reads_clean() -> None:
+    """At cardinality zero there is no label to sharpen, so the whole objective is suppression."""
+    quiet = torch.full((WINDOWS, LABELS), QUIET)
+    recipe = CardinalityAwareLN()
+    assert recipe.cardinality(torch.sigmoid(quiet).mean(dim=0)) == 0
+    assert float(recipe.loss(quiet)) == pytest.approx(0.0, abs=1e-3)

@@ -73,6 +73,16 @@
 # deliberate: --crop-mm     (160 -- crop160_span's, held so the control is matched; not a free choice,
 #                            a 0.20 jitter on the 130 mm cache would fabricate rather than reveal)
 # deliberate: --image-size  (420 -- carried by --crop-mm to hold mm/px, as in crop160_span)
+# THE CAP IS NOT SCIENCE AND IT IS NOT OPTIONAL (added 2026-09-09, after two deaths in one morning).
+# Uncapped, this recipe reserves 31.29 GB of a 32.6 GB card while ALLOCATING only 22.41 — 8.9 GB of
+# allocator fragmentation slack held against the driver. It leaves ~1.3 GB free, so any co-tenant growth
+# at all (a desktop window; 1197 MiB, measured) tips Windows into paging GPU memory over PCIe instead of
+# raising OOM, and the run crawls at ~210 img/s against its own peak of 944 with nvidia-smi still
+# reporting 100% utilisation. It happened twice: killed at 42-49 img/s, relaunched clean at 944, stalled
+# again at 206 inside two epochs.
+# 26 bounds RESERVATION, not allocation (`DeviceBudget.capped`), so it sits 3.6 GB above what this run
+# actually allocates and hands the driver back 6.6 GB. It cannot OOM this recipe and it is what every
+# healthy arm on this card carries.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"
@@ -80,5 +90,5 @@ require "$LABELS"
 run_train fovjitter160 \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 \
-  --crop-mm 160 --image-size 420 --scale-jitter 0.20 \
+  --crop-mm 160 --image-size 420 --scale-jitter 0.20 --vram-gb 26 \
   --labels "$LABELS" --out "$MODELS/fovjitter160_s2026.pt"
