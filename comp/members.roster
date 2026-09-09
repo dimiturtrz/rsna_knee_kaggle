@@ -732,3 +732,10 @@ labelwise_extended_s2026.pt # 0.8623 ledger (peak e8) / 0.8986 L75 over 909 rows
 extended_band_s2026.pt      # 0.8519 ledger (peak e9) / 0.8847 L75 over 909 rows. The extended crop under
                             # the 0.1-0.9 band, converged, and the second of the ten undocumented members
                             # worth shipping. Its two re-runs are declined (both died early).
+latent_register_dense_s2026.pt  # 0.8385 ledger (peak e10 of 12, n=909, midpoint), converged flat over the
+                            # last three epochs. Rostered for DIVERSITY, not for its solo: it is the only
+                            # v3small trunk in the pool carrying an on-domain latent-MIM adaptation, and
+                            # the pool is dinov2-heavy. Its solo prices against nothing until
+                            # v3small_control lands (knee-j2ovn) -- the only same-recipe v3small run on
+                            # disk, errors_v3small at 0.8280, differs in two ways at once. Seat value is
+                            # seat_value's call, and it is not blocked on that control.

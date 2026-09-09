@@ -11529,3 +11529,36 @@ own gate at launch (commit `2d440c19`): `Hpatch 0.00 3.34 4.10 1.71 2.97 3.83 4.
 5.24`, against raw `H 0.00 3.28 3.74 1.73 2.88 3.76 4.03 4.01 4.45 4.45 4.26 5.21` and span 5.21 nats.
 Stock registers already hold 0.31 of block 10's mass with cls at 0.01 — the register sink is the trunk's
 own resting state, not something adaptation introduced.
+
+### Mask 0.60 survives the corrected ruler through epoch 2 — the refusal that closed this family was the register sink — 2026-09-09
+
+`latent_adapt` was **REFUSED at the end of epoch 0** at mask ratio 0.6 (2026-09-08, above), and that
+refusal is what capped the whole masked-adaptation family at 0.30. `latent_register_deep` is the same
+ratio on the same v3small trunk, one commit later (`2d440c19`, `AttentionHealth.axis`), and it is three
+epochs in and still running. Block 11, the block that carries the disagreement:
+
+| block 11 | stock | e0 | e1 | e2 |
+|---|---|---|---|---|
+| raw `H` | 5.21 | 5.41 | **3.25** | **2.49** |
+| `Hpatch` | 5.24 | 5.50 | **5.55** | **5.53** |
+| prefix mass | 0.06 | 0.08 | 0.68 | **0.82** |
+| cls mass | 0.00 | 0.00 | 0.00 | **0.00** |
+
+Raw entropy at the top block falls by 2.72 nats — a textbook collapse on the old axis. The patch
+distribution behind it **rises** 0.29 nats above stock and holds there. The 0.82 that left the patches is
+register mass and the class token, which is the only prefix key a downstream head reads, is at 0.00 on
+every epoch. The old gate was measuring how much mass had left the patches and calling that a loss of
+discrimination; on a four-register trunk those are unrelated quantities, and this run is the separation
+made visible on the ratio where it mattered most.
+
+**What this does NOT yet say.** It is three epochs of eight and `keep` at block 11 is 0.69 / 0.64 / 0.67
+against a 0.25 floor — drifting, not settled, and a later refusal is still available. It is an attention
+reading, not a score: nothing here says the adaptation makes a better member, and the fine-tune it feeds
+still has no control until `v3small_control` (knee-j2ovn) lands behind it. What it does settle is that
+the CAP was a measurement artefact. The mask ladder on register trunks was never tested; it was refused
+by a ruler that could not see the axis it was refusing on.
+
+**Stock is already sinking into its registers before anything is adapted** — block 10 at 0.31 register
+mass, 0.01 cls. So the sink is this trunk's resting behaviour and the adaptation deepens it rather than
+introducing it, which is the second reason a gate calibrated on dinov2 (1 prefix key, cls == prefix) could
+not be carried across to it unexamined.
