@@ -5,14 +5,15 @@ a 3D volumetric one: what differs is the rank of the tensor, and neither the bat
 sigmoid depends on it. Two families reading through two copies of this is how one of them drifts and how a
 comparison between them stops meaning anything.
 
-The three contracts are declared INSIDE it because they are its parameter vocabulary and nothing else's:
-a `Member` is whatever answers for one study, a `Feed` is whatever can hand it one, and an `Adaptation`
-is whatever may tune the member to that study first and must put it back afterwards.
+Two contracts are declared INSIDE it because they are its parameter vocabulary and nothing else's: a
+`Member` is whatever answers for one study and a `Feed` is whatever can hand it one. The third,
+`Adaptation`, was declared here too until `HoldoutPredictions` gained one — a contract two loops speak
+lives beside its implementations, or the second loop has to import a reading loop it never calls.
 """
 
 import logging
-from contextlib import AbstractContextManager
 from dataclasses import dataclass, field
+from functools import partial
 from typing import Protocol, runtime_checkable
 
 import numpy as np
@@ -20,7 +21,7 @@ import torch
 from jaxtyping import Float
 from torch import Tensor
 
-from kneemri.inference.norm_adaptation import NoAdaptation
+from kneemri.inference.norm_adaptation import Adaptation, NoAdaptation
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,9 @@ class StudyReadings:
 
     device: torch.device
     precision: torch.dtype = torch.float16
-    adaptation: "StudyReadings.Adaptation" = field(default_factory=NoAdaptation)
+    adaptation: Adaptation = field(default_factory=NoAdaptation)
+    """Whatever may tune the member to a study first. This loop reads ONE study a forward, so it
+    satisfies any `episode` size by construction and never has to consult it."""
 
     @runtime_checkable
     class Member(Protocol):
@@ -49,18 +52,6 @@ class StudyReadings:
         """A cache that can hand one study to a `Member`, already on the device and already scaled."""
 
         def batch(self, row: int, device: torch.device) -> Float[Tensor, "..."]: ...
-
-    @runtime_checkable
-    class Adaptation(Protocol):
-        """Whatever may tune a member to one study before it is read, and must put it back afterwards.
-
-        A CONTEXT MANAGER RATHER THAN A CALL, because the undo is the load-bearing half. An adapt pass
-        that returns leaves the member changed for every study after it, which turns an episodic recipe
-        into an online one silently — and online is the cell CARVE measures as harmful on a multi-label
-        head. Restoring in a `finally` makes the reset unskippable rather than remembered.
-        """
-
-        def on(self, member: object, batch: Float[Tensor, "..."]) -> AbstractContextManager[None]: ...
 
     def predict(
         self, member: "StudyReadings.Member", feed: "StudyReadings.Feed", rows: list[int]
@@ -79,7 +70,7 @@ class StudyReadings:
         chunks = []
         for done, row in enumerate(rows):
             batch = feed.batch(row, self.device).unsqueeze(0)
-            with self.adaptation.on(member, batch):
+            with self.adaptation.on(member, partial(member, batch)):
                 chunks.append(self._read(member, batch))
             if done % PROGRESS == 0:
                 logger.info("%d/%d studies", done, len(rows))

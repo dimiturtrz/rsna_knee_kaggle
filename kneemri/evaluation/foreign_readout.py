@@ -74,6 +74,7 @@ from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
+from kneemri.inference.norm_adaptation import CardinalityAwareLN
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyModel
@@ -175,10 +176,17 @@ def main() -> None:
     command.parser.add_argument("--split-seed", type=int, default=2026)
     command.parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
     command.parser.add_argument("--device", default=VisibleCards().device().type, choices=("cuda", "cpu"))
+    command.parser.add_argument(
+        "--adapt",
+        action="store_true",
+        help="tune each study's LayerNorm affines to it before reading it (CARVE), then undo it",
+    )
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    predictions = HoldoutPredictions(torch.device(arguments.device))
+    predictions = HoldoutPredictions(
+        torch.device(arguments.device), adaptation=CardinalityAwareLN() if arguments.adapt else None
+    )
     scores = LabelScores()
     readout = ForeignReadout(predictions, scores)
 

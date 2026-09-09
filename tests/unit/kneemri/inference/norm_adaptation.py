@@ -1,5 +1,6 @@
 """What the LayerNorm-affine adapt pass must do, and the two things it must never do."""
 
+from functools import partial
 from typing import override
 
 import pytest
@@ -56,7 +57,7 @@ def _batch() -> Tensor:
 def test_cardinality_aware_l_n_on(member: _Member, batch: Tensor) -> None:
     """The episodic reset is the load-bearing half: adapting study N must not reach study N+1."""
     before = [parameter.detach().clone() for parameter in member.parameters()]
-    with CardinalityAwareLN().on(member, batch):
+    with CardinalityAwareLN().on(member, partial(member, batch)):
         pass
     for parameter, original in zip(member.parameters(), before, strict=True):
         assert torch.equal(parameter, original)
@@ -65,14 +66,14 @@ def test_cardinality_aware_l_n_on(member: _Member, batch: Tensor) -> None:
 def test_on_moves_the_affines_while_it_is_open(member: _Member, batch: Tensor) -> None:
     """Inside the block the member must actually be different, or the pass is a no-op wearing a name."""
     original = member.first.weight.detach().clone()
-    with CardinalityAwareLN(lr=1e-1).on(member, batch):
+    with CardinalityAwareLN(lr=1e-1).on(member, partial(member, batch)):
         assert not torch.equal(member.first.weight, original)
 
 
 def test_on_restores_even_when_the_read_raises(member: _Member, batch: Tensor) -> None:
     """A failed read must not leave an adapted member behind for every study after it."""
     original = member.first.weight.detach().clone()
-    with pytest.raises(ZeroDivisionError), CardinalityAwareLN(lr=1e-1).on(member, batch):
+    with pytest.raises(ZeroDivisionError), CardinalityAwareLN(lr=1e-1).on(member, partial(member, batch)):
         raise ZeroDivisionError
     assert torch.equal(member.first.weight, original)
 
@@ -80,7 +81,7 @@ def test_on_restores_even_when_the_read_raises(member: _Member, batch: Tensor) -
 def test_no_adaptation_on(member: _Member, batch: Tensor) -> None:
     """The control every reading is against serves the trained function untouched."""
     before = [parameter.detach().clone() for parameter in member.parameters()]
-    with NoAdaptation().on(member, batch):
+    with NoAdaptation().on(member, partial(member, batch)):
         for parameter, original in zip(member.parameters(), before, strict=True):
             assert torch.equal(parameter, original)
 

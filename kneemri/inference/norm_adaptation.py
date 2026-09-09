@@ -27,9 +27,10 @@ setting we are in.
 """
 
 import logging
-from collections.abc import Iterator
-from contextlib import contextmanager
+from collections.abc import Callable, Iterator
+from contextlib import AbstractContextManager, contextmanager
 from dataclasses import dataclass
+from typing import Protocol, runtime_checkable
 
 import torch
 from jaxtyping import Bool, Float
@@ -74,6 +75,57 @@ and not a statement, which is why it is written down here rather than assumed.
 PROBABILITY_FLOOR = 1e-6
 """Keeps the log finite when a member is fully certain, which fp16 sigmoid reaches routinely."""
 
+Forward = Callable[[], Float[Tensor, "studies labels"]]
+"""One graded read of the studies being adapted to, supplied by the caller as a closure.
+
+A CLOSURE RATHER THAN A TENSOR, because the two serving loops do not agree on a call signature.
+`StudyReadings` calls `member(batch)`; `HoldoutPredictions` calls `model(pixels, flags, size)` inside a
+walk over views and window starts. Taking pixels here would force one of them to be rewritten in the
+other's shape, and the thing they DO agree on is that a graded forward can be produced on demand.
+"""
+
+
+UNBOUNDED_EPISODE = 0
+"""What an adaptation declares when it constrains nothing about how many studies share a read."""
+
+EPISODE_STUDIES = 1
+"""Studies that may share ONE adapt pass under CARVE's episodic setting: exactly one.
+
+DECLARED BY THE STRATEGY BECAUSE ONLY THE STRATEGY KNOWS IT. `HoldoutPredictions` reads studies eight
+at a time, and eight studies sharing one gradient step is the SAME leak as a shared top-k one level up:
+study N's findings move the affines that read study N+1. The batch top-k was a bug I fixed; a batched
+gradient would have re-introduced it under a different name. The reading loop therefore takes its
+episode size from here rather than from its own batch constant.
+"""
+
+
+@runtime_checkable
+class Adaptation(Protocol):
+    """Whatever may tune a member to the studies in front of it, and must put it back afterwards.
+
+    A CONTEXT MANAGER RATHER THAN A CALL, because the undo is the load-bearing half. An adapt pass that
+    returns leaves the member changed for every study after it, which turns an episodic recipe into an
+    online one silently — and online is the cell CARVE measures as harmful on a multi-label head.
+    Restoring in a `finally` makes the reset unskippable rather than remembered.
+
+    IT LIVES BESIDE ITS IMPLEMENTATIONS RATHER THAN INSIDE A READING LOOP because there are now two
+    loops. It was `StudyReadings`'s parameter vocabulary while that was the only caller; a contract two
+    modules speak is shared vocabulary, and leaving it in one of them would have made the other import
+    a reading loop it never calls.
+    """
+
+    @property
+    def episode(self) -> int:
+        """Studies that may share one adapt pass, or 0 for no constraint.
+
+        READ-ONLY, because the implementations are frozen dataclasses and a read-write attribute here
+        would exclude every one of them: an episode size is chosen when the strategy is constructed and
+        a reading loop that could move it mid-read is the online regime this whole module refuses.
+        """
+        ...
+
+    def on(self, member: object, logits: "Forward") -> AbstractContextManager[None]: ...
+
 
 class NotAdaptableError(TypeError):
     """A member that cannot be adapted, raised rather than silently served unadapted.
@@ -90,10 +142,12 @@ class NotAdaptableError(TypeError):
 class NoAdaptation:
     """The served function is the trained one. The default, and the control every reading is against."""
 
+    episode: int = UNBOUNDED_EPISODE
+
     @contextmanager
-    def on(self, member: object, batch: Float[Tensor, "..."]) -> Iterator[None]:
+    def on(self, member: object, logits: "Forward") -> Iterator[None]:
         """Serve the member exactly as it was trained."""
-        del member, batch
+        del member, logits
         yield
 
 
@@ -114,6 +168,7 @@ class CardinalityAwareLN:
     guarding a state that cannot occur, and a check that cannot fire is worse than no check.
     """
 
+    episode: int = EPISODE_STUDIES
     steps: int = ADAPT_STEPS
     lr: float = ADAPT_LR
     negative_weight: float = NEGATIVE_WEIGHT
@@ -180,28 +235,27 @@ class CardinalityAwareLN:
         return ((sharpen + self.negative_weight * suppress) / probability.shape[1]).mean()
 
     @contextmanager
-    def on(self, member: object, batch: Float[Tensor, "..."]) -> Iterator[None]:
+    def on(self, member: object, logits: "Forward") -> Iterator[None]:
         """Adapt to this study, hand the member over to be read, then put it back as it was."""
         affines = self.affines(member)
         snapshot = [parameter.detach().clone() for parameter in affines]
         try:
-            self._descend(member, batch, affines)
+            self._descend(logits, affines)
             yield
         finally:
             with torch.no_grad():
                 for parameter, original in zip(affines, snapshot, strict=True):
                     parameter.copy_(original)
 
-    def _descend(self, member: object, batch: Float[Tensor, "..."], affines: list[nn.Parameter]) -> None:
+    def _descend(self, logits: "Forward", affines: list[nn.Parameter]) -> None:
         """Take the study's gradient steps, leaving every other parameter exactly where it was."""
-        read = self._reachable(member)
         optimiser = torch.optim.Adam(affines, lr=self.lr)
         was_grading = [(parameter, parameter.requires_grad) for parameter in affines]
         for parameter in affines:
             parameter.requires_grad = True
         for _ in range(self.steps):
             optimiser.zero_grad(set_to_none=True)
-            self.loss(read(batch)).backward()
+            self.loss(logits()).backward()
             optimiser.step()
         for parameter, grading in was_grading:
             parameter.requires_grad = grading
