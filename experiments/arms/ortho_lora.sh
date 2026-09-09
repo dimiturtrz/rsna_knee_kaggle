@@ -34,8 +34,13 @@
 # asking for Dutt's own rank, alpha and injection sites; if D276 comes back with a rank tied to corpus
 # size or to width, a rank-16 re-run is the follow-up and this row is its control rather than its verdict.
 #
-# THE PRICE. `ortho_dense` measured 409 s/epoch, 1.36 h for twelve. Adapting all 24 blocks keeps more
-# activations than fine-tuning six, so budget ~1.6-1.8 h. GAIN AS A MEMBER: the control is 0.8452 and the
+# THE PRICE, AND THE ESTIMATE BELOW WAS MEASURED WRONG. `ortho_dense` measured 409 s/epoch, 1.36 h for
+# twelve; this arm was budgeted at ~1.6-1.8 h on the reasoning that adapting all 24 blocks keeps more
+# activations than fine-tuning six. Epoch 1 measured **713 s**, 1.74x the control, so twelve epochs cost
+# **2.38 h** and not 1.8. The missing term is `--accumulate 3`: at batch 4 the arm takes three times as
+# many optimiser micro-steps per effective batch as the control does at 12, and the per-step overhead is
+# paid on all 24 adapted blocks. A memory fix bought back its VRAM in wall-clock, and the price of that
+# trade belongs in the arm that made it. GAIN AS A MEMBER: the control is 0.8452 and the
 # seat bar is 0.8521, so a member needs +0.007 over the control — inside what Dutt's effect size would
 # predict if it transfers, and nowhere near it if our base pair was right. P(clears the seat bar) ~ 0.25,
 # and it would be an OUT-OF-DISTRIBUTION architecture, which is the only kind of seat that has ever moved
