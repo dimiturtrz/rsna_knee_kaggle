@@ -107,3 +107,25 @@ resnet50d_short_s2026.pt             # LEDGER75 0.8663, epoch 6 - the n=1 resnet
 # solo band and kept anyway, because D146 section 3 restored the two-variable D35 gate and a member off
 # our own trunk is priced on correlation as well as solo.
 lean_weak_columns_s2026.pt           # LEDGER75 0.8662, epoch 11, 909 rows.
+
+resnet_224_short_s2026.pt   # 0.8527 solo (peak e8, 12 epochs, converged) — THE FIRST NON-TRANSFORMER
+                            # MEMBER THIS PROJECT OWNS, and it ties the best single member on the roster
+                            # (res392_ws 0.8523) from a family none of the other 122 belong to. Twelve of
+                            # thirteen registry encoders are transformers or hybrids; the one prior
+                            # convolutional line, radnet121, closed EMPTY at 0.6716 — a reading about
+                            # RadImageNet's weights, not about convolution. No ImageNet CNN had ever been
+                            # fitted here, so "CNNs are weak on this task" was a belief the ledger could
+                            # not support either way. It is a number now.
+                            #
+                            # SEATED ON THE FAMILY, NOT ON THE SOLO. seat_value against honest12 on
+                            # ledger75 reads +0.0007 as a thirteenth seat and +0.0020 as the best swap
+                            # (for mae_matched) — both under the +0.0040 this ruler has ever been shown to
+                            # resolve, so it CANNOT tell it from the incumbent. That is the reason it is
+                            # rostered rather than the reason it is not: the seven board flats were all
+                            # reseatings WITHIN the ViT family, and an in-distribution rank ruler is the
+                            # instrument D277 says does not survive a cohort change. Its member axes agree
+                            # it is the odd one out: nearest neighbour 0.8581 against the roster's own
+                            # 0.8956 boundary, maha 4.654 — DISTINCT, not NOISY.
+                            #
+                            # 48-epoch arm resnet_224_long is on the card behind it; this row prices the
+                            # 12-epoch budget every other seat on the ledger was fitted under.

@@ -256,10 +256,14 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
     # the 909 (epoch 3, 0.8254), which is the condition that sentence named: an upload spent on a trunk
     # with no measured seat is the thing it refused, and the seat now has a number behind it.
     #
-    # THE SLUG CARRIES FAMILY AND LEAF BECAUSE `locates` DEMANDS BOTH — `family in path` and `leaf in
-    # segments`. `kneemri-resnet-timm` holds "resnet", and the payload sits under a `resnet50d-224/`
-    # directory rather than flat, which is exactly the defect the first orthofoundation upload shipped
-    # with (flat as `orthofoundation-hf`, no "dinov3" anywhere, unable to find itself). It is its OWN
+    # THE SLUG IS THE LEAF, EXACTLY, AND THAT IS NOT A STYLE CHOICE. `locates` reads `leaf in segments`
+    # — segment EQUALITY, not a substring — so a mount whose slug merely CONTAINS the leaf does not
+    # resolve at its own root. The first upload went out as `kneemri-resnet-timm` holding a
+    # `resnet50d-224/` directory, which reads correctly to a human and fails `str.split`: exactly the
+    # swin defect this file's mount test was written for. `test_every_mount_is_locatable` caught it
+    # before a kernel did, which is the whole point of that test — `find_encoder` raises, `kernel_run`
+    # catches per member and DROPS it, and the entry scores without the member it was built for. Every
+    # other mount here obeys the same rule (`swin-base-384`, `vjepa2-hf`, `rad-dino`). It is its OWN
     # dataset rather than a directory added to an existing one: re-versioning a dataset that champion
     # kernels already mount is a risk taken for no gain.
     #
@@ -273,7 +277,7 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
         patch=32,
         family=RESNET,
         leaf="resnet50d-224",
-        mount="dimiturnt/kneemri-resnet-timm",
+        mount="dimiturnt/resnet50d-224",
         params_m=25.6,
         normalization=HALF,
         normalization_evidence=(
