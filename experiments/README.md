@@ -12183,14 +12183,23 @@ against the fixed member's +0.0120, so jitter appeared to remove the extent bene
 is measurable — rests entirely on the same +0.0120 the four-cut table just dissolved. It is quoted here
 so that nobody re-derives it and believes it. The pooled −0.0297 stands; its mechanism does not.
 
-WHAT THIS LEAVES OPEN, and it is now the interesting question rather than a caveat. `crop160_span` beats
-the 130 mm control by ~+0.009 on transfer, uniformly, on studies where its extra field is real pixels and
-on studies where it is zeros alike. The extent explanation is out. What remains are the things that
-travel with a bigger nominal crop and are NOT the anatomy in it: the effective in-plane resolution after
-resampling (a fixed 336 px over a wider field is a coarser sampling of the joint), the fraction of the
-image the joint itself occupies, and the interpolation the wider resample performs. Those are cheap to
-separate — a 130 mm member at the pixel budget of the 160 mm one is one arm — and none of them was on
-the D269 list.
+WHAT THIS LEAVES, AND THE ANSWER IS NOTHING. Having lost the extent explanation, the obvious remaining
+one is SCALE: a wider physical crop on the same pixel grid shows the joint smaller and coarser, which is
+a real transfer variable and was on nobody's list. It is also **already controlled, by the arm itself**.
+`crop160_span.sh:54` reads `--image-size 420` under a `# deliberate:` line saying "carried by the flag
+above to hold mm/px, not an independent choice". So the wide member samples at **420/160 = 2.625 px/mm**
+against the control's **336/130 = 2.585** — 1.5% apart, matched by design. A bead was filed to test this
+and closed twenty minutes later against the arm's own header. Third reading of this axis in one hour,
+third explanation excluded, and the exclusion was already written down.
+
+So the position on `crop160_span`'s +0.0087 pooled transfer advantage over `band_dense_hold` is now:
+**not extent, not padding, not scale, and not distinguishable from run-to-run scatter.** Two single runs
+differing by 0.009 on a foreign readout whose per-subset intervals are 0.02-0.03 wide is one draw each,
+and every structural explanation offered for it has now been measured out or was controlled before it was
+offered. The number should not be carried into another argument as a fact about geometry. What would
+settle it is a seed pair on either member — a second `crop160_span` at a different seed, priced on the
+same readout — which is banned here for good reasons and would be the only thing that could turn +0.009
+into a finding rather than a coincidence.
 
 ### The mm-vs-pixel-grid axis is NOT open here — every member is already mm-normalised (2026-09-09)
 
