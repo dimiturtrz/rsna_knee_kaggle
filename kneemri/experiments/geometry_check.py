@@ -18,12 +18,17 @@ those short arms carry their own schedule. But a run that moved crop, span, reso
 corpus is a real retrain: a checkpoint fitted at 130 mm is a bad initialisation at 160 mm, and warm-
 starting it would measure the first geometry's optimum wearing the second one's name.
 
-AND WHETHER THE REPEATS BOUGHT DIVERSITY IS A SEPARATE QUESTION THIS CHECK CANNOT ANSWER. The owner's
-standing position is that a member which beats nothing is still worth having if it decorrelates the
-ensemble. If those 41 head-and-loss variants are genuinely decorrelated then the 53.6 hours were the
-cheapest diversity this project ever bought, and a warm start from a shared trunk is exactly what would
-collapse them onto each other. M267 asks the researcher for that distribution. Until it returns, this
-check REPORTS and never blocks — it tells a reader what already exists, and refuses nothing.
+AND THE REPEATS DID BUY DIVERSITY, WHICH IS THE OBJECTION TO ACTING ON THIS CHECK. The owner's standing
+position is that a member which beats nothing is still worth having if it decorrelates the ensemble.
+M267 asked the researcher for the distribution and D267 (2026-09-09) answered it: within the 41-run
+cluster r is 0.8234@cluster75_pairs over 2775 pairs, median 0.883, against a seed floor of 0.9746 (n=2),
+with 8 byte-identical twins found and excluded. So those 53.6 hours bought real, measured decorrelation —
+and a warm start from a shared trunk is exactly the operation that could collapse it. Whether it does is
+NOT known: the one warm-started member on disk, `warm_calib_dense_s2026` (solo 0.8562, initialised from
+`calib_dense_hold`'s fitted encoder), has never been correlated against its own parent. M273 asks for
+that one number, and the two branches are pre-registered there. Until it returns, this check REPORTS and
+never blocks — it tells a reader what already exists, and refuses nothing. A gate that DEMANDED a warm
+start would, on the wrong branch, enforce the destruction of the cheapest diversity this project owns.
 
 WHAT IT DELIBERATELY IGNORES. Seed and fold are part of the fingerprint, so two seeds of one recipe read
 as different geometries here. That is not a mistake: a seed repeat is a legitimate noise measurement and
