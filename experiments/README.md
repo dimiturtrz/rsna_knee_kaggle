@@ -11643,3 +11643,46 @@ the row is evidence about architectural diversity in the pool, and read correctl
 clipping dose curve above. This is the second name-read-instead-of-flag defect found today; the first is
 `latent_adapt`'s absent `--variant` (retraction above, knee-q8ah2). Both were found by opening the arm
 file rather than by reasoning about the ledger entry.
+
+## The mask ratio is not an axis on the register trunk — `latent_register_deep` 0.8378 — 2026-09-09
+
+The rung the 0.30 cap was blocking, run now that the cap is known to have been inherited from a
+dinov2-small refusal (retraction above, knee-q8ah2). Pre-registered branch **2**.
+
+| run | mask | holdout | vs dense |
+| --- | --- | --- | --- |
+| `latent_register_dense_s2026` | 0.30 | **0.8385** (e10 of 12) | — |
+| `latent_register_deep_s2026` | 0.60 | 0.8378 (e9 of 12) | −0.0007 |
+
+Identical trunk, recipe, backbone rate, seed, slices and band — one flag apart. `convergence_check`
+flags neither. n=909, midpoint cut.
+
+**Both halves of the pre-registration were wrong about where the interest was, and that is the finding.**
+Branch 3 said 0.60 might refuse and that the refusal would be the first real reading of the trunk's
+limit. It did not refuse — all 8 pretrain epochs completed, and block 11 settles at prefix 0.85 with
+**cls 0.00**, so the sink is entirely register mass and the one prefix key a downstream head reads never
+moves. Branch 1 said a win would make the ratio a ladder. It is not a win.
+
+**The epoch-by-epoch track is what closes this, not the final number.** Against dense: e2 .7994/.7981,
+e4 .8219/.8206, e6 .8332/.8344, e8 .8373/.8376, e9 .8378/.8380, e11 .8376/.8384. Nine consecutive epochs
+inside ±0.002. Doubling the mask ratio does not move the fine-tune at any point on the curve, so this is
+not a converged-to-the-same-place result that a longer budget might separate — the two runs are the same
+run.
+
+**So adaptation STRENGTH is not what bounds this member, and that closure is now clean.** It could not be
+stated before today, because the gate was refusing the rungs that would have tested it and the gate was
+reading the wrong axis on a register trunk. With the ruler corrected and the cap shown to be a
+cross-family inheritance, a flat 0.30→0.60 is a fact about the objective rather than about the
+instrument. The masked-adaptation family does not have room in the mask ratio.
+
+**Not rostered.** 0.8378 solo, below the 0.8459 merit level this pool has ever added at, and Pearson
+0.9427 against `latent_register_dense` on all 10908 holdout cells — the same predictions from a
+near-identical run. `latent_register_dense` is on the roster for diversity (the only v3small trunk
+carrying an on-domain latent-MIM adaptation); a second copy of it adds nothing that argument does not
+already have. Declined in writing.
+
+**What is still open on this member, and it is the reason `v3small_control` is on the card.** Neither
+0.8385 nor 0.8378 prices the adaptation at all, because no run exists with this trunk and this recipe and
+NO `--encoder-weights` (knee-j2ovn). `v3small_control` is that run and started 01:39:55Z. At epoch 1 it
+reads 0.7833 against dense's 0.7775 and deep's 0.7762 — ahead of both, on one epoch, which is worth
+nothing yet and is written down so it cannot be discovered later as a surprise.

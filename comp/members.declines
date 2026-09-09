@@ -967,3 +967,4 @@ recal_through_s2026.pt               # LEDGER 0.7464 / L75 0.7712 at epoch 0 - t
 mae_unitfix_s2026.pt                 # LEDGER 0.6957 / L75 0.7129 at epoch 2 - the weakest of the ten, and
                                      # a masked-pretrain arm from the family the attention gate now
                                      # refuses at epoch 0 (see the 2026-09-08 ledger section).
+latent_register_deep_s2026.pt        # 0.8378 solo — below the 0.8459 merit level this pool has ever added at, AND Pearson 0.9427 against latent_register_dense_s2026 (rostered) across all 10908 holdout cells. Same trunk, same recipe, one flag apart (mask 0.60 vs 0.30), and the two fine-tunes track within +/-0.002 for nine consecutive epochs. dense is rostered for DIVERSITY, being the only v3small trunk carrying an on-domain latent-MIM adaptation; a second near-copy of it does not extend that argument. Re-open by naming what it would be an instrument FOR — not by re-quoting the solo.
