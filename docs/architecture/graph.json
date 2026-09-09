@@ -2774,6 +2774,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.padding_split",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.padding_split",
+      "target": "core.data.corpus.study_metadata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.padding_split",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.paired_floor",
       "target": "core.bootstrap",
       "weight": 1
@@ -10312,6 +10330,12 @@
       "kind": "calls",
       "source": "core.data.corpus.study.Study.metadata",
       "target": "core.data.corpus.study.Study._joined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.study.Study.metadata",
+      "target": "core.data.corpus.study.Study._narrowest",
       "weight": 1
     },
     {
@@ -17926,6 +17950,84 @@
       "kind": "calls",
       "source": "kneemri.evaluation.ordinal_signal.main",
       "target": "kneemri.evaluation.ordinal_signal.OrdinalSignal.detail",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.padding_split.Coverage",
+      "target": "kneemri.evaluation.padding_split.Coverage",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit",
+      "target": "kneemri.evaluation.padding_split.Coverage",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit",
+      "target": "kneemri.evaluation.padding_split.SubsetToll",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit.read",
+      "target": "kneemri.evaluation.padding_split.PaddingSplit.subset",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit.subset",
+      "target": "kneemri.evaluation.padding_split.SubsetToll",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit.subset",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit.subset",
+      "target": "kneemri.evaluation.scores.LabelScores.mean_interval",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.padding_split.main",
+      "target": "kneemri.evaluation.padding_split.Coverage.measured",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.padding_split.main",
+      "target": "kneemri.evaluation.padding_split.PaddingSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.padding_split.main",
+      "target": "kneemri.evaluation.padding_split.PaddingSplit.members_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.padding_split.main",
+      "target": "kneemri.evaluation.padding_split.PaddingSplit.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.padding_split.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
@@ -36811,7 +36913,7 @@
       "role": null
     },
     {
-      "descendants": 288,
+      "descendants": 289,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -36875,7 +36977,7 @@
       "role": null
     },
     {
-      "descendants": 102,
+      "descendants": 103,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -37278,6 +37380,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.ordinal_signal",
       "label": "ordinal_signal",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split",
+      "label": "padding_split",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -41132,6 +41242,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.Coverage",
+      "label": "Coverage",
+      "level": "class",
+      "parent": "kneemri.evaluation.padding_split",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.PaddingSplit",
+      "label": "PaddingSplit",
+      "level": "class",
+      "parent": "kneemri.evaluation.padding_split",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.SubsetToll",
+      "label": "SubsetToll",
+      "level": "class",
+      "parent": "kneemri.evaluation.padding_split",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.paired_floor.PairedFloor",
       "label": "PairedFloor",
       "level": "class",
@@ -44676,6 +44810,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.acquisition.SeriesHeader.field_of_view_mm",
+      "label": "field_of_view_mm",
+      "level": "method",
+      "parent": "core.data.corpus.acquisition.SeriesHeader",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.acquisition.SeriesHeader.field_strength",
       "label": "field_strength",
       "level": "method",
@@ -46614,6 +46756,14 @@
       "descendants": 0,
       "id": "core.data.corpus.study.Study._joined",
       "label": "_joined",
+      "level": "method",
+      "parent": "core.data.corpus.study.Study",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.study.Study._narrowest",
+      "label": "_narrowest",
       "level": "method",
       "parent": "core.data.corpus.study.Study",
       "role": null
@@ -52792,6 +52942,78 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.ordinal_signal",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.Coverage.measured",
+      "label": "measured",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.Coverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.Coverage.padded",
+      "label": "padded",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.Coverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.PaddingSplit.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.PaddingSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.PaddingSplit.members_of",
+      "label": "members_of",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.PaddingSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.PaddingSplit.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.PaddingSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.PaddingSplit.subset",
+      "label": "subset",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.PaddingSplit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.SubsetToll.logged",
+      "label": "logged",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.SubsetToll",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.SubsetToll.toll",
+      "label": "toll",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split.SubsetToll",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.padding_split.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.padding_split",
       "role": null
     },
     {
