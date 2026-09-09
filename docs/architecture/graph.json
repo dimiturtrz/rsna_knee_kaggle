@@ -15489,6 +15489,12 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.foreign_readout.main",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.foreign_readout.main",
       "target": "kneemri.inference.prediction_cache.PredictionCache",
       "weight": 1
     },
@@ -26827,6 +26833,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "target": "kneemri.inference.norm_adaptation.Adaptation",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions",
       "target": "kneemri.inference.prediction_cache.PredictionCache",
@@ -26853,6 +26865,12 @@
     {
       "kind": "construct",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.__init__",
+      "target": "kneemri.inference.norm_adaptation.NoAdaptation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.__init__",
       "target": "kneemri.inference.test_time.SpatialViews",
       "weight": 1
     },
@@ -26860,6 +26878,18 @@
       "kind": "construct",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.__init__",
       "target": "kneemri.inference.trainer_record.TrainerRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._average",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.fits",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._logits",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.fits",
       "weight": 1
     },
     {
@@ -26901,13 +26931,19 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
-      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.fits",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions._average",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
       "target": "kneemri.inference.holdout_slab.HoldoutSlab.batches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
+      "target": "kneemri.inference.norm_adaptation.Adaptation.on",
       "weight": 1
     },
     {
@@ -27201,12 +27237,6 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
-      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN._reachable",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
       "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
       "weight": 1
     },
@@ -27225,7 +27255,7 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
-      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.cardinality",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.wanted",
       "weight": 1
     },
     {
@@ -27238,6 +27268,12 @@
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.on",
       "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.affines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.wanted",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.cardinality",
       "weight": 1
     },
     {
@@ -27477,7 +27513,19 @@
     {
       "kind": "holds",
       "source": "kneemri.inference.study_reading.StudyReadings",
+      "target": "kneemri.inference.norm_adaptation.Adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.study_reading.StudyReadings",
       "target": "kneemri.inference.study_reading.StudyReadings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.study_reading.StudyReadings.predict",
+      "target": "kneemri.inference.norm_adaptation.Adaptation.on",
       "weight": 1
     },
     {
@@ -42243,6 +42291,14 @@
       "level": "class",
       "parent": "kneemri.inference.members",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.Adaptation",
+      "label": "Adaptation",
+      "level": "class",
+      "parent": "kneemri.inference.norm_adaptation",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -58798,6 +58854,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.HoldoutPredictions._average",
+      "label": "_average",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.HoldoutPredictions._logits",
+      "label": "_logits",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.holdout_predictions.HoldoutPredictions._uncached",
       "label": "_uncached",
       "level": "method",
@@ -59278,6 +59350,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.Adaptation.episode",
+      "label": "episode",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.Adaptation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.Adaptation.on",
+      "label": "on",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.Adaptation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
       "label": "_descend",
       "level": "method",
@@ -59320,6 +59408,14 @@
       "descendants": 0,
       "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.on",
       "label": "on",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.wanted",
+      "label": "wanted",
       "level": "method",
       "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
       "role": null
