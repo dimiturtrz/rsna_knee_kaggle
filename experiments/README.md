@@ -11686,3 +11686,43 @@ already have. Declined in writing.
 NO `--encoder-weights` (knee-j2ovn). `v3small_control` is that run and started 01:39:55Z. At epoch 1 it
 reads 0.7833 against dense's 0.7775 and deep's 0.7762 — ahead of both, on one epoch, which is worth
 nothing yet and is written down so it cannot be discovered later as a surprise.
+
+## The latent-MIM adaptation is worth +0.0014 over no adaptation at all — `v3small_control` 0.8371 — 2026-09-09
+
+The zero point this family never had. `latent_register_dense` (0.8385) and `latent_register_deep`
+(0.8378) had only ever been priced against EACH OTHER, which measures the mask ratio and nothing else.
+`v3small_control` is the same trunk, the same fine-tune recipe, the same seed, slices and band, with the
+`--encoder-weights` line removed — the published v3small, unadapted.
+
+| member                        | adaptation            | solo   | vs control |
+|-------------------------------|-----------------------|--------|------------|
+| `latent_register_dense_s2026` | latent MIM, mask 0.30 | 0.8385 | **+0.0014** |
+| `latent_register_deep_s2026`  | latent MIM, mask 0.60 | 0.8378 | **+0.0007** |
+| `v3small_control_s2026`       | none                  | 0.8371 | —          |
+
+All three converged — `convergence_check` reports none of them TRUNCATED, STOPPED or UNDERTRAINED, so
+these are the recipes' own numbers and not facts about a killed process. The whole family spans 0.0014,
+against the 0.0062 noise floor measured this morning on the seven-arm 224 px optimiser bracket. **On
+solo score, the on-domain latent adaptation buys nothing.** That closes the axis: not the mask ratio
+(closed separately today at nine epoch-matched points inside ±0.002), but the adaptation itself.
+
+### What this does NOT close, and the number that says so
+
+The seat argument for `latent_register_dense` was never its solo score — it is rostered as the only
+v3small trunk carrying an on-domain adaptation, which is a DIVERSITY claim. That claim survives, and the
+correlations are the reason to keep it rather than a hope:
+
+    Pearson dense vs control  0.9098   over 10908 holdout cells, max|diff| 0.6577
+    Pearson deep  vs control  0.9131   over 10908 holdout cells, max|diff| 0.6034
+    Pearson deep  vs dense    0.9427   over 10908 holdout cells, max|diff| 0.5814
+
+The adapted members sit FURTHER from the unadapted control (0.910, 0.913) than they do from each other
+(0.943). So the adaptation does move the model — it just moves it sideways rather than up. A member that
+scores the same and predicts differently is exactly what an ensemble seat is for, and it is exactly what
+a solo ruler cannot see. Read the other way round, this is the third measurement this week where the
+in-distribution solo number and the redundancy number disagree about the same checkpoint.
+
+What is closed is spending more CARD on this family: a third mask ratio, a longer adaptation, or another
+objective on this trunk all have to beat a ceiling that has now been measured at +0.0014 over doing
+nothing. The re-opening condition is an ENSEMBLE reading, not a solo one — if a seat study ever shows
+`dense` adding where `control` does not, that is the adaptation paying in the only currency it has.
