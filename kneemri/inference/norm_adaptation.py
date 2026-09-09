@@ -32,7 +32,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 
 import torch
-from jaxtyping import Float
+from jaxtyping import Bool, Float
 from torch import Tensor, nn
 
 logger = logging.getLogger(__name__)
@@ -140,30 +140,43 @@ class CardinalityAwareLN:
         family has. Only the affine moves.
         """
         norms = [module for _, module in self._reachable(member).named_modules() if isinstance(module, nn.LayerNorm)]
-        adapted = norms[: -FROZEN_LAST_BLOCKS or None] if len(norms) > FROZEN_LAST_BLOCKS else norms
+        frozen = self.frozen_last_blocks
+        adapted = norms[: -frozen or None] if len(norms) > frozen else norms
         return [parameter for norm in adapted for parameter in (norm.weight, norm.bias) if parameter is not None]
 
-    def cardinality(self, mean_probability: Float[Tensor, " labels"]) -> int:
-        """How many findings this study is adapted toward — its own expected count, clipped to our range."""
+    def cardinality(self, probability: Float[Tensor, "studies labels"]) -> Float[Tensor, " studies"]:
+        """How many findings each study is adapted toward — its own expected count, clipped to our range.
+
+        ONE COUNT PER STUDY, never one for the batch. Both call sites can hand this several studies at
+        once (`HoldoutPredictions.predict` reads them eight at a time), and a shared top-k across a batch
+        would adapt every study toward whatever the batch's most common findings were — a leak from a
+        study's neighbours into its own reading, which is the failure the episodic regime exists to
+        prevent and which no reset can undo.
+        """
         low, high = self.bounds
-        return int(min(max(round(float(mean_probability.detach().sum())), low), high))
+        return probability.detach().sum(dim=1).round().clamp(low, high)
 
-    def loss(self, logits: Float[Tensor, "windows labels"]) -> Float[Tensor, ""]:
-        """Sharpen the study's own top-k labels and suppress the rest, weighted by `negative_weight`.
+    def wanted(self, probability: Float[Tensor, "studies labels"]) -> Bool[Tensor, "studies labels"]:
+        """The labels each study is sharpened toward: its own top-k̂, k̂ varying study by study."""
+        order = probability.argsort(dim=1, descending=True)
+        rank = torch.empty_like(order)
+        arranged = torch.arange(probability.shape[1], device=probability.device).expand_as(order)
+        rank.scatter_(1, order, arranged)
+        return rank < self.cardinality(probability).unsqueeze(1)
 
-        The label set is chosen from the mean over the study's windows and then applied to every window,
-        so the objective asks the windows to agree with the study rather than each with itself. A
-        per-window set would let one slice's noise define its own target and call the disagreement
-        progress.
+    def loss(self, logits: Float[Tensor, "studies labels"]) -> Float[Tensor, ""]:
+        """Sharpen each study's own top-k̂ labels and suppress the rest, weighted by `negative_weight`.
+
+        THE ROWS ARE STUDIES, NOT WINDOWS, and that is a correction rather than a choice. A member pools
+        its windows INTERNALLY — `StudyReadings.Member.__call__` is typed `b n` and `StudyModel` takes the
+        window as an argument — so no per-window logit ever reaches this. An earlier draft meaned over a
+        window axis that does not exist at the member's output; in the real path it would have been handed
+        a 1-D tensor, and only a toy member with a different shape hid it.
         """
         probability = torch.sigmoid(logits.float()).clamp(PROBABILITY_FLOOR, 1.0 - PROBABILITY_FLOOR)
-        mean_probability = probability.mean(dim=0)
-        wanted = torch.zeros_like(mean_probability, dtype=torch.bool)
-        count = self.cardinality(mean_probability)
-        if count:
-            wanted[torch.topk(mean_probability, count).indices] = True
-        sharpen = -torch.log(probability[:, wanted]).sum(dim=1)
-        suppress = -torch.log(1.0 - probability[:, ~wanted]).sum(dim=1)
+        wanted = self.wanted(probability)
+        sharpen = -(torch.log(probability) * wanted).sum(dim=1)
+        suppress = -(torch.log1p(-probability) * ~wanted).sum(dim=1)
         return ((sharpen + self.negative_weight * suppress) / probability.shape[1]).mean()
 
     @contextmanager
@@ -188,7 +201,7 @@ class CardinalityAwareLN:
             parameter.requires_grad = True
         for _ in range(self.steps):
             optimiser.zero_grad(set_to_none=True)
-            self.loss(read(batch).squeeze(0)).backward()
+            self.loss(read(batch)).backward()
             optimiser.step()
         for parameter, grading in was_grading:
             parameter.requires_grad = grading

@@ -34,10 +34,11 @@ class _Member(nn.Module):
 
     @override
     def forward(self, batch: Tensor) -> Tensor:
+        """One row per study, as a real member emits: the window axis is pooled INSIDE the member."""
         hidden = self.first(batch)
         for block in self.rest:
             hidden = block(hidden)
-        return self.head(hidden)
+        return self.head(hidden.mean(dim=-2))
 
 
 @pytest.fixture(name="member")
@@ -101,14 +102,24 @@ def test_cardinality() -> None:
     """Our p5 is zero — a clean knee must be allowed to stay clean — and our p95 is eight."""
     low, high = CARDINALITY_BOUNDS
     recipe = CardinalityAwareLN()
-    assert recipe.cardinality(torch.zeros(LABELS)) == low
-    assert recipe.cardinality(torch.ones(LABELS)) == high
-    assert recipe.cardinality(torch.full((LABELS,), QUARTER)) == round(QUARTER * LABELS)
+    studies = torch.stack([torch.zeros(LABELS), torch.ones(LABELS), torch.full((LABELS,), QUARTER)])
+    counts = recipe.cardinality(studies)
+    assert [int(count) for count in counts] == [low, high, round(QUARTER * LABELS)]
+
+
+def test_wanted() -> None:
+    """Each study gets its OWN top-k̂; a batch must never share one, or a neighbour leaks into a reading."""
+    quiet = torch.full((LABELS,), 1e-3)
+    loud = quiet.clone()
+    loud[:4] = 0.9
+    chosen = CardinalityAwareLN().wanted(torch.stack([quiet, loud]))
+    assert int(chosen[0].sum()) == 0
+    assert bool(chosen[1, :4].all()) and int(chosen[1].sum()) == 4
 
 
 def test_loss() -> None:
     """The objective must reward a sharper version of the study's own reading, not a different one."""
-    flat = torch.zeros(WINDOWS, LABELS)
+    flat = torch.zeros(1, LABELS)
     flat[:, :3] = LOUD
     sharper = flat.clone()
     sharper[:, :3] = LOUDER
@@ -119,7 +130,7 @@ def test_loss() -> None:
 
 def test_loss_suppresses_everything_when_the_study_reads_clean() -> None:
     """At cardinality zero there is no label to sharpen, so the whole objective is suppression."""
-    quiet = torch.full((WINDOWS, LABELS), QUIET)
+    quiet = torch.full((1, LABELS), QUIET)
     recipe = CardinalityAwareLN()
-    assert recipe.cardinality(torch.sigmoid(quiet).mean(dim=0)) == 0
+    assert int(recipe.cardinality(torch.sigmoid(quiet))) == 0
     assert float(recipe.loss(quiet)) == pytest.approx(0.0, abs=1e-3)
