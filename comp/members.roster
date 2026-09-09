@@ -739,3 +739,11 @@ latent_register_dense_s2026.pt  # 0.8385 ledger (peak e10 of 12, n=909, midpoint
                             # v3small_control lands (knee-j2ovn) -- the only same-recipe v3small run on
                             # disk, errors_v3small at 0.8280, differs in two ways at once. Seat value is
                             # seat_value's call, and it is not blocked on that control.
+fovjitter160_s2026.pt       # 0.8545 kept — above the 0.8521 seat bar, and the pool's only member trained
+                            # with a VARYING field extent (160 mm nominal, jittered per study). Its own
+                            # question read NULL (decode -0.0297 against crop160_span's -0.0265, inside
+                            # the pre-registered null band, ledger 2026-09-09): jitter is not the transfer
+                            # mechanism. That closes the ARM, not the MEMBER — a null on the decode axis
+                            # is not an argument against a 0.8545 solo, and every other member on this
+                            # roster saw one fixed extent. Rostered on solo plus that one structural
+                            # difference; whether it earns a seat is seat_value's call, not this file's.

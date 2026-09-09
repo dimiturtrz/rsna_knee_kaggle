@@ -969,3 +969,19 @@ mae_unitfix_s2026.pt                 # LEDGER 0.6957 / L75 0.7129 at epoch 2 - t
                                      # refuses at epoch 0 (see the 2026-09-08 ledger section).
 latent_register_deep_s2026.pt        # 0.8378 solo — below the 0.8459 merit level this pool has ever added at, AND Pearson 0.9427 against latent_register_dense_s2026 (rostered) across all 10908 holdout cells. Same trunk, same recipe, one flag apart (mask 0.60 vs 0.30), and the two fine-tunes track within +/-0.002 for nine consecutive epochs. dense is rostered for DIVERSITY, being the only v3small trunk carrying an on-domain latent-MIM adaptation; a second near-copy of it does not extend that argument. Re-open by naming what it would be an instrument FOR — not by re-quoting the solo.
 v3small_control_s2026.pt             # 0.8371 solo — the unadapted zero point for the latent-MIM family, and it did its job: it priced `latent_register_dense` at +0.0014 and `latent_register_deep` at +0.0007, which closed the adaptation axis (ledger 2026-09-09). Declined as a SEAT, not as a member: it is a plain published v3small at the pool's lowest merit level, and the pool already carries v3small trunks that beat it on solo AND carry something it does not. Its value is as a CONTROL and it keeps that value on disk. Re-open by naming an ensemble reading where an unadapted v3small adds where the adapted one does not — that would make it a diversity seat, which is the only argument it could win on.
+fovjitter160_s2026_run1.pt           # NOT A MEMBER — a repeat holdout DRAW of `fovjitter160_s2026`, taken by
+fovjitter160_s2026_run2.pt           # `fovjitter160_read.sh` to price the jitter's own read-time variance
+fovjitter160_s2026_run3.pt           # (the field is randomised per study, so one record is one sample of the
+                                     # member, not the member). Three records, one checkpoint, no `.pt` of their
+                                     # own on disk. They are why the 2026-09-09 reading could quote both anchors
+                                     # reproducing to the fourth decimal. Shipping one would ship a draw.
+fovjitter160_reflect_s2026.pt        # KILLED at epoch 6 of 12 — the record is a TRUNCATED run under one_cycle,
+                                     # so its holdout number is a FLOOR and not a score (see convergence_check).
+                                     # The padding rule it was built to answer (reflect vs zero fill on the ~60%
+                                     # of studies that cannot fill a 160 mm field) is therefore UNANSWERED, ledger
+                                     # 2026-09-09. Re-open by RE-RUNNING it to its budget, never by quoting the
+                                     # partial — and note D269 (c) answers the same question off `foreign_readout
+                                     # --per-study` for ~5 min of card and no training at all.
+smoke_fovjitter160.pt                # A SMOKE — 60 studies, 48 train / 12 holdout, written by `arm_check --smoke`
+                                     # to prove the recipe builds before it was queued. It has a holdout record
+                                     # because the smoke trains; it is not a model of anything.
