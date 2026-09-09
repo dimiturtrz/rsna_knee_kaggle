@@ -25,10 +25,37 @@ cluster r is 0.8234@cluster75_pairs over 2775 pairs, median 0.883, against a see
 with 8 byte-identical twins found and excluded. So those 53.6 hours bought real, measured decorrelation —
 and a warm start from a shared trunk is exactly the operation that could collapse it. Whether it does is
 NOT known: the one warm-started member on disk, `warm_calib_dense_s2026` (solo 0.8562, initialised from
-`calib_dense_hold`'s fitted encoder), has never been correlated against its own parent. M273 asks for
-that one number, and the two branches are pre-registered there. Until it returns, this check REPORTS and
-never blocks — it tells a reader what already exists, and refuses nothing. A gate that DEMANDED a warm
-start would, on the wrong branch, enforce the destruction of the cheapest diversity this project owns.
+`calib_dense_hold`'s fitted encoder), has never been correlated against its own parent. M273 asked for
+that one number and **D272 (2026-09-09) returned it**, in the pre-registered middle branch.
+
+WHAT D272 MEASURED, same statistic and population and cut as D267's 0.8234. `warm_calib_dense` against
+its parent `calib_dense_hold` reads **r = 0.9398**, and `warm_calib_lowlr` against the same parent
+**0.9421** — the 96.6th and 97.4th percentile of the 2775 cold within-cluster pairs, whose median is
+0.883. So a warm start pulls a child much closer to its parent than recipe variation does. It stops
+**0.033-0.035 short of the 0.9746 seed floor**, so it is not a twin either. The sharper number is the
+SIBLINGS: two children warm-started from one parent and differing only in rate correlate **0.9382 with
+each other** — inside the same-recipe same-seed rerun bracket (0.958 mean, q5 0.917). That is the
+41-cluster-all-warm scenario in miniature, and the answer is PARTIAL COLLAPSE: warm siblings correlate
+like re-runs, not like recipe variation. D272 also priced four pre->fit pairs at 0.79-0.91, one of them
+BELOW the cold median, so the factor is not a constant of the operation — it tracks how much
+optimisation the child still does.
+
+THE CALL, AND IT IS A STRATEGY CHANGE. The diversity a cold refit buys over a warm one is real and this
+check will not pretend otherwise. It is also **diversity the board has said seven times it cannot see**:
+sixteen offline seat ADDs are negative, the seating family's whole ceiling is 0.0013 offline against a
+board that cannot resolve 0.0030, and the two seats that ever moved it were out-of-distribution members
+rather than in-cluster variants. So the trade is card-hours against a decoration on an axis that is
+measured out — and with the gap at 0.010 and the deadline on 2026-10-22, card-hours are the scarcer
+side by a wide margin. **A repeat fingerprint should now be warm-started unless the arm's question is
+about the trunk's own initialisation**, and the erosion above is the price, stated rather than denied.
+
+IT STILL DOES NOT BLOCK, and that is deliberate. The measured erosion is partial, not nil, so a hard
+gate would spend a real asset on a rule rather than on a judgement, and D272's own fit-pairs show cases
+where the warm child ends up FARTHER from its parent than two cold runs are from each other. The
+recommendation is strong; the refusal stays absent. If it is ever challenged, the arm that settles it is
+the one D272 named and nobody has run: warm-start two children from `calib_dense_hold` under the two
+most DIFFERENT objectives in the 41-cluster and correlate them, which prices the collision directly
+instead of inferring it from rate-siblings.
 
 WHAT IT DELIBERATELY IGNORES. Seed and fold are part of the fingerprint, so two seeds of one recipe read
 as different geometries here. That is not a mistake: a seed repeat is a legitimate noise measurement and
@@ -212,7 +239,7 @@ def main() -> None:
         sum(len(cluster.runs) - 1 for cluster in clusters),
         sum(cluster.repeat_hours for cluster in clusters),
     )
-    logger.info("a repeat is a WARM-START CANDIDATE, not a verdict - see knee-364re and M267")
+    logger.info("warm-start a repeat unless the arm asks about initialisation - D272 priced the erosion at r 0.94")
 
 
 if __name__ == "__main__":

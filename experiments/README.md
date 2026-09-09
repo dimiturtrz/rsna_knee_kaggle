@@ -11841,6 +11841,51 @@ survives; if it is flat across the two subsets, the extent story is wrong whatev
 says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
 writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
 
+### D272 prices the warm-start collapse, and the repeat-geometry policy FLIPS — card-free, 2026-09-09
+
+M273 asked one number: does a warm start collapse the diversity D267 measured in the 41-run cluster
+(within-cluster r 0.8234@cluster75_pairs, median 0.883, seed floor 0.9746)? D272 answered on the same
+statistic, population and cut.
+
+| pair                                            | r      | pct of 2775 | short of seed floor |
+|-------------------------------------------------|--------|-------------|---------------------|
+| `warm_calib_dense` -> parent `calib_dense_hold`   | 0.9398 | 96.6        | 0.0348              |
+| `warm_calib_lowlr` -> same parent                 | 0.9421 | 97.4        | 0.0325              |
+| the two warm SIBLINGS against each other          | 0.9382 | 96.0        | 0.0364              |
+| `cnx_warm_anneal` -> `cnx_own_recipe`             | 0.9091 | 75.5        | 0.0655              |
+| `swin_distill_fit` -> `swin_distill_pre`          | 0.8801 | 47.5        | 0.0945              |
+| `raptor_feat_fit` -> `raptor_feat_pre`            | 0.8556 | 33.6        | 0.1190              |
+| `small_feat_fit` -> `small_feat_pre`              | 0.7916 | 22.2        | 0.1830              |
+
+**The middle branch, which is the one that was not pre-decided.** A warm child sits at the 97th
+percentile toward its parent — far closer than recipe variation, whose median is 0.883 — and stops 0.033
+short of a seed twin. The SIBLING row is the sharper one: two children of one parent differing only in
+rate correlate 0.9382 with each other, inside the same-recipe same-seed rerun bracket (0.958 mean, q5
+0.917). That is the all-warm cluster in miniature and it reads PARTIAL COLLAPSE — warm siblings
+correlate like re-runs, not like recipe variation. The four pre->fit rows span 0.79-0.91 with one BELOW
+the cold median, so the factor is not a property of the operation; it tracks how much optimisation the
+child still does. n is 2 children and 1 parent on the headline and D272 states it: directional, not a
+constant.
+
+**THE POLICY FLIPS ANYWAY, and the reason is not the correlation — it is what the diversity is worth.**
+`geometry_check` measured 161.1 h, 52% of every card-hour this project has spent, refitting a geometry
+already fitted, roughly 100 h of it recoverable by warm starting. The objection was that those refits
+bought diversity. They did, and D272 says a warm start would erode part of it. But it is diversity **on
+the axis the board has answered seven times flat**: sixteen offline seat ADDs negative, the seating
+family's entire ceiling 0.0013 offline against a board that cannot resolve 0.0030, and both seats that
+ever moved the board out-of-distribution members rather than in-cluster variants. Trading a decoration
+on a measured-out axis for card-hours is the right side of that trade with the gap at 0.010 and the
+deadline on 2026-10-22. **A repeat fingerprint is warm-started from now on unless the arm's question is
+about the trunk's own initialisation.**
+
+**`geometry_check` still does not BLOCK.** The erosion is partial rather than nil, and D272's fit-pairs
+include a warm child FARTHER from its parent than two cold runs are from each other, so a hard gate
+would spend a real asset to save a judgement. Its closing line changed from "a repeat is a WARM-START
+CANDIDATE, not a verdict" to the recommendation plus the price. If the call is challenged, the arm that
+settles it is the one D272 named and nobody has run: two children of `calib_dense_hold` under the two
+most DIFFERENT objectives in the cluster, correlated — which prices the collision instead of inferring
+it from rate-siblings.
+
 ### PADDING BITES is refuted three of three; EXTENT is withdrawn for want of a matched control — card-free, 2026-09-09
 
 `fov_perstudy_read` wrote the per-study probabilities once, and `padding_split` cut them on whether a
