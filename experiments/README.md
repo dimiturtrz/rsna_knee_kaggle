@@ -11814,3 +11814,51 @@ That is a member-shaped lever, not a seating one. The arm it argues for is field
 randomised crop extent rather than a second fixed one — because §1 says the pool's problem is that no
 member ever saw the extent VARY, and a single wider fixed field trades one blind spot for another. The re-opening condition for the rest of this family is
 the same as it has always been — an ensemble reading, not another solo one.
+
+## 2026-09-09 — three audits, and the one number the ledger had wrong (D262, D263, D264)
+
+None of these cost a card. Two are audits of what is already on disk and one is a lever this project has
+never measured; they are recorded here because a finding that lives only in a letter is a finding that
+will be re-derived.
+
+### D264 — the frozen set is 19, not 9, and every one of them is recoverable
+
+The prose above says nine caches were reclaimed. Over 359 checkpoints against 340 live caches, **19 are
+gone**: the nine already named plus `adjacent224`, `cover_labelwise`, `stack224`, `band_full`,
+`band_wide`, `crop80_tissue` (x2), `crop80_span`, `extended_ws`, `band140`. The correction that matters
+is not the count. **In all 19 cases only the pixel array was reclaimed** — `mask_<key>.npy` and
+`index_<key>.json` survive in every case, so a re-decode restores the cache exactly and none of these
+members is frozen in the sense the ledger meant. "Frozen" was a statement about a missing file, read as
+a statement about an unreachable experiment.
+
+### D263 — the cross-trunk audit is clean, with exactly one defect
+
+26 rows flagged, 74 examined, 8 unresolved. Twenty-four of the twenty-six are declared by the ledger row
+itself — the trunk change is stated where it happens — so they are not confounds, they are labels. There
+is **one undeclared-trunk defect**, the `latent_adapt` instance already found and retracted, and one
+cross-corner comparison (`merged_dense_cf` vs `merged_blend_cf`, README.md:4642, −0.0028) whose two arms
+differ on slices AND band (12sl/0.2-0.8 against 20sl/0.1-0.9) and therefore prices two things as one.
+The default-resolution table this rests on: `--variant` resolves to `SMALL`/`dinov2-small`
+(`pretrain.py:262`); `--slices` 12, `--image-size` 336, band 0.20/0.80 (`core/data/corpus/cache_flags.py`).
+
+### D262 — norm CHOICE is closed; LN-affine test-time adaptation is the open lever
+
+The M&Ms BN-over-IN result that has been quoted at this project is **one borrowed sentence citing Bjorck
+2018**; the 2x2 exists in that paper but the interaction is never tested — the evidence is a visual
+ordering of four cells. The adjacent number in the same work is the one worth carrying: no-DA B→A 0.1637
+against default-DA B→A 0.6126, so **augmentation alone was worth about +0.45 dice before BN entered the
+comparison at all.** BN is the tiebreaker, not the mechanism.
+
+Norm choice inside a ViT is structurally closed — LN keeps no running statistics, so there is nothing to
+recalibrate. What is open is adapting the LN **affine** parameters at test time: TENT (Wang et al., ICLR
+2021, arXiv:2006.10726) by entropy minimisation, with the ViT substitution stated verbatim by the OTTA
+survey (Niu et al., IJCV 2024) — *"we replace its BatchNorm updates with a LayerNorm update"*. The line is
+crowded (AdMiT CVPR 2025, CELA, MoETTA arXiv:2511.13760, On-the-Fly TTA PMLR v227 2024, InTEnt
+arXiv:2402.09604) and **this project has never measured any of it.** It needs no architecture change and
+no new cache, it applies to every member on disk, and it attacks the flat −0.0336 decode toll that is a
+blind spot every member SHARES rather than a seat. It also changes the SERVED function, so it is gated
+on `witness_check` and on whether the adapted forward pass depends on test-batch composition. The recipe
+question is out as M264.
+
+Closed by the same letter: decode-time intensity normalisation. With per-volume z-score already at the
+flat optimum it is ~0.5% of transfer variance — not a lever, and not worth a slot.

@@ -53,13 +53,24 @@ class CardMemory:
         smi = shutil.which("nvidia-smi")
         if smi is None:
             return None
-        probe = subprocess.run(  # noqa: S603 - fixed argv, no shell, binary resolved by shutil.which
-            [smi, "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=SMI_TIMEOUT_SECONDS,
-        )
+        try:
+            probe = subprocess.run(  # noqa: S603 - fixed argv, no shell, binary resolved by shutil.which
+                [smi, "--query-gpu=memory.free", "--format=csv,noheader,nounits"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=SMI_TIMEOUT_SECONDS,
+            )
+        except (subprocess.TimeoutExpired, OSError):
+            # A LOADED MACHINE IS THE CASE THIS RUNS IN, which is what made the timeout escape a bug
+            # rather than a corner. The docstring above says no caller may turn a missing tool into a
+            # failed run; `timeout=` breaks that promise by raising instead of returning, and the driver
+            # is exactly the thing that stops answering when the box is saturated. Measured 2026-09-09:
+            # a 16-way subprocess fan-out elsewhere in this repo starved nvidia-smi past ten seconds and
+            # killed `fovjitter160` at epoch 7 of 12 - a two-hour arm lost inside a diagnostic that is
+            # allowed to say nothing. Same silence as a missing binary, for the same reason.
+            logger.warning("nvidia-smi did not answer within %ss, so free VRAM is unknown", SMI_TIMEOUT_SECONDS)
+            return None
         answered = probe.stdout.strip().splitlines()
         readable = probe.returncode == 0 and bool(answered) and answered[0].strip().isdigit()
         return int(answered[0]) if readable else None

@@ -26,6 +26,7 @@ import shlex
 import subprocess
 import sys
 from collections.abc import Mapping
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -60,6 +61,17 @@ but every arm sources.
 PATHS = Path("paths.yaml")
 TIMEOUT_SECONDS = 30
 """An arm that has not printed its invocation by now is doing something a lint must not wait for."""
+
+SPAWN_WORKERS = 4
+"""How many arm declarations are read at once — spawn latency rather than compute, kept LOW on
+purpose. The card is untouched: an arm sourced against the stub prints its
+flags and exits without importing torch. Serially the 300-odd arms plus the handful that sit out the
+full `TIMEOUT_SECONDS` put this lint past five minutes, which is long enough to be read as a hang and
+skipped before arming — and a pre-queue check nobody runs is the queue slot it was built to save.
+FOUR, not sixteen: at sixteen this fan-out saturated the box badly enough that `nvidia-smi` stopped
+answering within ten seconds, and the live arm's own VRAM heartbeat raised on that timeout and died
+at epoch 7 of 12. The heartbeat is now tolerant (`card_memory.free_mib`), but a lint that can stall
+the machine it lints is wrong at both ends, and four is already most of the speed-up."""
 
 SMOKE_DECODE_WORKERS = 8
 """Fewer than a corpus build takes, because a smoke decode may share the machine with a live arm."""
@@ -212,26 +224,42 @@ class ArmCheck:
         """
         return self._printed([[str(arm)] for arm in sorted(self.arms.glob("*.sh"))])
 
+    def _spawned(self, command: list[str]) -> str:
+        """One arm's stdout, or empty when it hung past `TIMEOUT_SECONDS`."""
+        try:
+            # fixed argv, our own files, no shell
+            done = Spawn().ran(
+                [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
+                capture_output=True,
+                text=True,
+                timeout=TIMEOUT_SECONDS,
+                # The INHERITED environment plus ARM_LIB. Replacing it outright leaves Git Bash
+                # without the PATH it needs to find its own coreutils, and every arm then produces
+                # nothing - which this lint reports as "0 arms checked", a clean pass over nothing.
+                env=self._environment(),
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return ""
+        return done.stdout
+
     def _printed(self, commands: list[list[str]]) -> dict[str, str]:
-        """Run each arm command against the stub lib and collect the `name<TAB>flags` lines it prints."""
+        """Run each arm command against the stub lib and collect the `name<TAB>flags` lines it prints.
+
+        CONCURRENTLY, because the wall-clock is the whole usability question. Every invocation is an
+        independent Git Bash reading declarations against the stub, so the work is spawn latency rather
+        than compute; serially, 300-odd arms plus the few that sit out the full `TIMEOUT_SECONDS` put
+        this past five minutes, which is how a pre-queue lint came to be read as a HANG and skipped
+        before arming (knee, 2026-09-09 — a faulthandler dump showed it inside `subprocess.communicate`
+        on arm N of 305, not stuck). The results are collected into an ordered dict AFTER the pool
+        drains, in the commands' own order, so the duplicate-flag verdict sees the same sequence it saw
+        when this ran one at a time.
+        """
         found: dict[str, str] = {}
-        for command in commands:
-            try:
-                # fixed argv, our own files, no shell
-                done = Spawn().ran(
-                    [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
-                    capture_output=True,
-                    text=True,
-                    timeout=TIMEOUT_SECONDS,
-                    # The INHERITED environment plus ARM_LIB. Replacing it outright leaves Git Bash
-                    # without the PATH it needs to find its own coreutils, and every arm then produces
-                    # nothing - which this lint reports as "0 arms checked", a clean pass over nothing.
-                    env=self._environment(),
-                    check=False,
-                )
-            except subprocess.TimeoutExpired:
-                continue
-            for line in done.stdout.splitlines():
+        with ThreadPoolExecutor(max_workers=SPAWN_WORKERS) as pool:
+            outputs = list(pool.map(self._spawned, commands))
+        for command, output in zip(commands, outputs, strict=True):
+            for line in output.splitlines():
                 name, tab, flags = line.partition("\t")
                 # The stub SHELL-QUOTES what it prints, so a flag value containing a space keeps its
                 # argument boundary; the "is this an invocation" test therefore has to look at the
