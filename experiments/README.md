@@ -12127,6 +12127,48 @@ number does not reproduce may not be split at all — and it carries TWO masks r
 `nan >= 160` is False and a single-mask spelling files every unmeasured study under PADDED. That is this
 project's denominator error in the shape a boolean makes easiest to make; here it is pinned by a test.
 
+### D269 (c): the pad does NOT bite, and the extent advantage sits where the extent is real — 2026-09-09
+
+The split ran, and it ran on a file the ledger above says does not exist. `fov_perstudy_read.sh` was
+recorded as having died on the withdrawn fourth member before reading a single study; it did not —
+`fov_perstudy.npz` is on disk and holds all three surviving members. So the deciding reading for the
+padding composition cost **no card and no slot**, taken while `ortho_lora` held the GPU.
+
+Every pooled toll reproduces its recorded value to the fourth decimal (−0.0297 / −0.0265 / −0.0360),
+which is the precondition `padding_split` prints first and the only thing that licenses splitting at all.
+
+| member                  | fills n=430          | padded n=479         | pooled n=909 |
+| `crop160_span_s2026`    | 0.8402, toll −0.0264 | 0.8211, toll −0.0272 | 0.8300, **−0.0265** |
+| `fovjitter160_s2026`    | 0.8320, toll −0.0320 | 0.8192, toll −0.0277 | 0.8248, **−0.0297** |
+| `band_dense_hold_s2026` | 0.8282, toll −0.0408 | 0.8162, toll −0.0315 | 0.8213, **−0.0360** |
+
+**PADDING BITES is refuted, and it is refuted in the direction nobody predicted.** The branch asked
+whether the wide members' padded studies carry a WORSE toll than the 130 mm member's on those same
+studies. They carry a BETTER one: `crop160_span` tolls −0.0272 where it pads against the control's
+−0.0315. The composition the arm was bought to price — wide field → pad-filled border → pad learned as a
+site cue → transfer toll — does not fire on this endpoint. The control's own spread across the two
+subsets (−0.0408 vs −0.0315, 0.0093) is LARGER than either wide member's (0.0008 and 0.0043), which says
+the fills/padded cut carries a study-difficulty signal of its own that has nothing to do with padding.
+Any future split on this cut has to price that baseline before charging a difference to the pad.
+
+**EXTENT SURVIVES, directionally.** Read as the wide member's ADVANTAGE over the 130 mm control rather
+than as its toll: **+0.0120 foreign AUC on the studies that fill the 160 mm field, +0.0049 on the studies
+that do not**, against +0.0087 pooled. The advantage is 2.4x concentrated where the extra extent is
+physically present, which is the EXTENT SURVIVES branch. It is DIRECTIONAL and not a result: the
+subsets are n=430 and n=479 with confidence intervals about 0.03 wide, so the two advantages overlap
+heavily and the ordering is what is being reported, not the size.
+
+**And it prices `fovjitter160`'s null mechanistically.** On the fills subset the jittered member's
+advantage over the control is +0.0038 against the fixed member's +0.0120. Jitter does not merely fail to
+add — it removes the extent benefit exactly on the studies where extent is measurable, while leaving the
+padded subset alone (+0.0030 vs +0.0049). That is a mechanism for the pooled −0.0297, where the ledger
+section above could only record that the number landed in the null band.
+
+WHAT THIS DOES NOT SAY. Nothing about WHY the wide field helps where it fills — extent and the
+acquisition that permits a wide extent are confounded in this cut, since a series wide enough to fill
+160 mm is a different acquisition from one that is not. The control makes that a fair comparison across
+MEMBERS on the same studies; it does not make the two subsets comparable to each other.
+
 ### The mm-vs-pixel-grid axis is NOT open here — every member is already mm-normalised (2026-09-09)
 
 D266 reports that mm-resampling versus a fixed pixel grid is unpublished on a classifier endpoint
