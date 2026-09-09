@@ -1,32 +1,53 @@
 #!/usr/bin/env bash
-# after_ortholora.sh — smoke and then run `ortho_lora` the moment the CARVE budget sweep releases the card.
+# after_ortholora.sh — TRUNCATE the CARVE budget sweep at its third point, then smoke and run `ortho_lora`.
 #
-# THE GATE IS AN OR OF THREE, and each leg covers a way the other two hang.
-#   * the sweep's own marker in its log — the clean finish.
-#   * the LAST point's artefact on disk — the marker is echoed by the arm script, so a death between the
-#     last read and the echo would strand a completed sweep.
-#   * an EMPTY compute-app list on the card — the silent exit-0 death, which is exactly how the perstudy
-#     read failed earlier today. Without this leg a crashed sweep holds the card idle indefinitely while
-#     `queue_check` reads OK, because a live watcher gating an owed arm is all it can see.
-# `nvidia-smi` is asked rather than the process table because the question is about the DEVICE (knee-j99t),
-# and the other project shares this card by arrangement — so the leg fires only on OUR absence being
-# consistent with the other two legs, which is why it is an OR and not a sole trigger.
+# WHY IT TRUNCATES, decided 2026-09-09 at 14:23Z with the third point 36 minutes in. The sweep's question
+# was existential -- does ANY adapt budget move the decode cost -- and its first three points answer it:
+# |dtheta| 2e-5 -> -0.0307, 2e-3 -> -0.0309, 2e-2 -> -0.0360, with the KEPT auc collapsing 0.8504 -> 0.7570
+# at the third. That is monotone damage and it is the BUDGET DAMAGES branch. The fourth point sits at
+# |dtheta| ~ 1e-1, which the arm's own header calls "the trunk is being broken, not adapted" -- a
+# catastrophe that is guaranteed before it runs and changes no branch after it. It costs ~50 minutes of a
+# card that has a MODEL waiting, so it is not run. A truncation is not a promotion: the sweep's reading is
+# whatever its first three points say, and the ledger records it as truncated-by-decision.
+#
+# THE GATE IS AN OR OF THREE, and the previous version's third leg WAS DEAD. It tested
+# `nvidia-smi --query-compute-apps` for an empty list, which on this WDDM desktop returns 32 pids whatever
+# is running, so the silent-exit-0 death it was written for could never have fired it. The replacement asks
+# for OUR process by its command line, which `Get-CimInstance Win32_Process` does expose for bash and
+# python even though MSYS `ps -W` does not.
+#   * the third point's artefact on disk — the intended finish.
+#   * the sweep's own DONE marker — in case it gets past point four before this fires.
+#   * no live `foreign_readout` process — the silent death, now actually detectable.
 source "$(dirname "$0")/lib.sh"
 
 LOG="logs/after_budget.log"
-LAST="$MODELS/carve_budget_lr2s10.npz"
+THIRD="$MODELS/carve_budget_lr3s10.npz"
+
+sweep_alive() {
+  powershell -NoProfile -Command \
+    "@(Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Where-Object { \$_.CommandLine -like '*foreign_readout*' }).Count" \
+    2>/dev/null | tr -d '\r' | grep -qv '^0$'
+}
 
 while true; do
+  [ -f "$THIRD" ] && break
   grep -aq "BUDGET SWEEP DONE" "$LOG" && break
-  [ -f "$LAST" ] && break
-  [ -z "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null)" ] && break
+  sweep_alive || break
   sleep 30
 done
-echo "=== SWEEP GATE OPEN ==="
+echo "=== SWEEP GATE OPEN at $(date -u +%H:%MZ) ==="
+
+# The fourth point is refused rather than waited out. Killing the reader releases the card; the sweep's
+# shell then runs its own echo and exits, which is why the marker may appear after this line.
+powershell -NoProfile -Command \
+  "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | Where-Object { \$_.CommandLine -like '*foreign_readout*' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" \
+  2>/dev/null
+echo "=== FOURTH POINT REFUSED - see this script's header ==="
+sleep 20
 
 # A recipe is smoked before it is queued for an hour and a half. Sixty studies, 48 train / 12 holdout.
-# ortholarge has never been run under adapters, so the failure this catches is a variant that LoRALinear
-# cannot wrap, and it costs two minutes rather than the arm's first epoch.
+# ortholarge has never been run under adapters, so the failure this catches is a variant LoRALinear cannot
+# wrap, and it costs two minutes rather than the arm's first epoch.
 UV_NO_SYNC=1 uv run python -m kneemri.experiments.arm_check \
   --only ortho_lora --smoke "$MODELS/smoke_ortho_lora" --smoke-studies 60 || {
   echo "=== SMOKE FAILED - ortho_lora NOT launched ==="
