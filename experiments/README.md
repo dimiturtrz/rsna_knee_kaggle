@@ -11834,6 +11834,17 @@ the physical resampling OFF, and no such member exists — the flag is an extent
 nothing in `Crop` turns the normalisation off. So the D266 axis costs a code change plus a cache build
 plus a twelve-epoch arm, not a readout of records on disk. Recorded so it is not planned again as free.
 
+**And the −0.0336 is a POST-normalisation residual, which is why no published toll is comparable to it**
+(D268, retracting D266's framing). Every external number D266 offered is one of three other things:
+Xie et al. 2025 (eClinicalMedicine 89:103534, [CLF], 13,419 patients / 5 centres, −0.05…−0.07 external)
+crops a **256×256 PIXEL** region around a meniscus segmentation, so it is a PRE-normalisation penalty;
+Consispace (arXiv:2606.31839) and PVS (arXiv:2411.19564) are [SEG] Dice; CARVE's −0.125 is a CT
+protocol/depth shift. What a corpus crossing still costs a model that ALREADY sees a fixed 130 mm
+physical field is unmeasured in the literature. Our figure being smaller than Xie's pixel-grid penalty
+is directionally consistent with physical normalisation having already removed part of the gap — and
+that is exactly the not-comparable comparison, so it is a hypothesis the extent arm can test, never
+evidence. Do not quote Xie against our toll without this paragraph attached.
+
 ## 2026-09-09 — three audits, and the one number the ledger had wrong (D262, D263, D264)
 
 None of these cost a card. Two are audits of what is already on disk and one is a lever this project has
