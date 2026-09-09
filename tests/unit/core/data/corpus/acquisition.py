@@ -54,6 +54,25 @@ def test_pixel_spacing(tmp_path: Path):
     assert _header(write_series(tmp_path / "s")).pixel_spacing == 0.3
 
 
+def test_field_of_view_mm(tmp_path: Path):
+    """The NARROWEST side in mm, so a frame wide one way and short the other reads as the short one.
+
+    That is the quantity the padding split needs: a crop wider than this side is pad on that side
+    whatever the other measures. A header missing either geometry tag answers absent rather than a
+    pixel count pretending to be a distance.
+    """
+    square = _header(write_series(tmp_path / "sq", spacing=0.3, size=64))
+    assert square.field_of_view_mm == 19.2
+
+    oblong = _header(write_series(tmp_path / "ob", spacing=0.3, size=64))
+    oblong.header.Columns = 32
+    assert oblong.field_of_view_mm == 9.6, "the short side wins, not the row axis"
+
+    blank = _header(write_series(tmp_path / "no", spacing=0.3, size=64))
+    del blank.header.Columns
+    assert blank.field_of_view_mm is None
+
+
 def test_slice_spacing(tmp_path: Path):
     """`SpacingBetweenSlices` wins over `SliceThickness`, and a series carrying neither says None.
 

@@ -69,6 +69,9 @@ _ORIENTATION_VALUES = 6
 _POSITION_VALUES = 3
 """ImagePositionPatient is one 3-vector in patient coordinates."""
 
+_SPACING_VALUES = 2
+"""PixelSpacing is row pitch then column pitch — an extent in mm needs BOTH, unlike a resolution."""
+
 
 @dataclass(frozen=True)
 class SeriesHeader:
@@ -171,6 +174,24 @@ class SeriesHeader:
         return None
 
     @property
+    def field_of_view_mm(self) -> float | None:
+        """The NARROWEST in-plane physical extent of the frame: `min(rows * spacing_y, columns * spacing_x)`.
+
+        The minimum rather than either axis alone because a square mm crop is bounded by whichever side
+        runs out first: a 320x160 px frame at 0.5 mm covers 160 mm one way and 80 mm the other, and a
+        130 mm crop of it is pad on two sides however wide the other axis reads. This is the quantity
+        that decides whether a study can FILL a requested extent or is padded up to it, which is the
+        subset the padding hypothesis splits on.
+
+        Both spacings are read rather than reusing `pixel_spacing`, which reports the row pitch alone.
+        """
+        spacing = getattr(self.header, "PixelSpacing", None)
+        rows, columns = getattr(self.header, "Rows", None), getattr(self.header, "Columns", None)
+        if spacing is None or len(spacing) < _SPACING_VALUES or not rows or not columns:
+            return None
+        return min(float(spacing[0]) * float(rows), float(spacing[1]) * float(columns))
+
+    @property
     def scanner(self) -> str | None:
         """The VENDOR this series was acquired on, canonicalised — not the model.
 
@@ -260,6 +281,7 @@ class Acquisition:
     laterality_tag: str | None
     centre_x: float | None
     slice_spacing: float | None = None
+    field_of_view_mm: float | None = None
     column_axis_x: float | None = None
     scanner: str | None = None
     field_strength: float | None = None
@@ -306,6 +328,7 @@ class Acquisition:
             laterality_tag=header.laterality_tag,
             centre_x=header.centre_x,
             slice_spacing=header.slice_spacing,
+            field_of_view_mm=header.field_of_view_mm,
             column_axis_x=header.column_axis_x,
             scanner=header.scanner,
             field_strength=header.field_strength,

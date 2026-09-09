@@ -125,6 +125,7 @@ class Study:
             fluid_sensitive=self._agreed(acquisition.fluid_sensitive for acquisition in self.acquisitions),
             pixel_spacing_mm=self._agreed(acquisition.pixel_spacing for acquisition in self.acquisitions),
             slice_spacing_mm=self._agreed(acquisition.slice_spacing for acquisition in self.acquisitions),
+            field_of_view_mm=self._narrowest(acquisition.field_of_view_mm for acquisition in self.acquisitions),
             scanner=self._agreed(acquisition.scanner for acquisition in self.acquisitions),
             field_strength_t=self._agreed(acquisition.field_strength for acquisition in self.acquisitions),
         )
@@ -134,6 +135,20 @@ class Study:
         """The distinct answers as one flat cell, or absence where no series answered."""
         distinct = sorted({value for value in values if value})
         return SET_JOIN.join(distinct) if distinct else None
+
+    @staticmethod
+    def _narrowest(values: "Iterable[float | None]") -> float | None:
+        """The smallest extent any series answered with, or absence where none did.
+
+        THE ONE AXIS THAT IS NOT UNANIMITY-GATED, and deliberately. Every other value here is a
+        property whose disagreement makes the study-level answer meaningless — a study acquired on two
+        scanners has no vendor. A field of view is not like that: the study is fed to a member through
+        several series, and whether the requested crop is FILLED or padded up to is decided by the
+        narrowest of them. So disagreement is not an absence of an answer, it is the answer being the
+        minimum, and gating it would blank exactly the multi-plane studies the padding split needs.
+        """
+        answered = [value for value in values if value is not None]
+        return min(answered) if answered else None
 
     @staticmethod
     def _agreed[T](values: "Iterable[T | None]") -> T | None:
