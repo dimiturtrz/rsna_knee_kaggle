@@ -21,10 +21,15 @@
 #   PADDING BITES    — the padded studies carry a WORSE toll than the 130 mm member's on the same studies.
 #                      That is the composed failure mode, measured, and it is a training-side lever.
 #
-# FOUR MEMBERS, and the fourth is why this waits for the reflect arm: `fovjitter160_reflect` differs from
-# `fovjitter160` in the pad RULE alone, so the same file answers the pad question twice — once by subset
-# within a member, once by rule across two members. The two 2026-09-09 anchors ride along again; if either
-# moves off its recorded cost the ruler moved and none of it reads.
+# THREE MEMBERS, AND IT WAS FOUR UNTIL 2026-09-09. The fourth was `fovjitter160_reflect`, which differs
+# from `fovjitter160` in the pad RULE alone, so one file would have answered the pad question twice —
+# once by subset within a member, once by rule across two members. That arm was killed at epoch 6 of 12
+# and its checkpoint does not exist, so this arm asked `torch.load` for a file that was never written and
+# died before it read a single study, leaving `PERSTUDY DONE` in its watcher's log and no `.npz` on disk.
+# The BY-RULE half is therefore withdrawn, not answered: it returns if and only if the reflect arm is
+# re-run to completion. The BY-SUBSET half — the one D269 (c) actually turns on — needs only the members
+# below and is unaffected. The two 2026-09-09 anchors ride along again; if either moves off its recorded
+# cost the ruler moved and none of it reads.
 #
 # THE DEVICE IS THE CARD, never cpu: knee-j99t.
 #
@@ -36,7 +41,6 @@ require "$LABELS"
 UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
   --checkpoints \
     "$MODELS/fovjitter160_s2026.pt" \
-    "$MODELS/fovjitter160_reflect_s2026.pt" \
     "$MODELS/crop160_span_s2026.pt" \
     "$MODELS/band_dense_hold_s2026.pt" \
   --labels "$LABELS" --foreign D:/kaggle/input/raptor-corpus --device cuda \

@@ -74,7 +74,7 @@ from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
-from kneemri.inference.norm_adaptation import CardinalityAwareLN
+from kneemri.inference.norm_adaptation import ADAPT_LR, ADAPT_STEPS, CardinalityAwareLN
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyModel
@@ -249,12 +249,31 @@ def main() -> None:
         action="store_true",
         help="tune each study's LayerNorm affines to it before reading it (CARVE), then undo it",
     )
+    # THE BUDGET IS A FLAG BECAUSE THE DEFAULT ONE CANNOT MOVE A READING. Adam displaces a parameter by
+    # about the learning rate per step whatever the gradient, so the shipped 2 steps at 1e-5 move
+    # LayerNorm affines of order 1.0 by ~2e-5 — a 0.002% perturbation. Measured 2026-09-09: against a
+    # same-hour control the mean decode cost moved by 0.000033, three orders inside the arm's own NULL
+    # band. That is not a reading of CARVE, it is a reading of the budget, and a constant cannot be
+    # swept. M274 asks the researcher what the paper's optimiser and step count actually are; until it
+    # answers, these two flags are how the question gets asked of the card instead.
+    command.parser.add_argument(
+        "--adapt-lr", type=float, default=ADAPT_LR, help="learning rate for the per-study adapt steps"
+    )
+    command.parser.add_argument(
+        "--adapt-steps", type=int, default=ADAPT_STEPS, help="gradient steps taken per study before reading it"
+    )
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    predictions = HoldoutPredictions(
-        torch.device(arguments.device), adaptation=CardinalityAwareLN() if arguments.adapt else None
-    )
+    adaptation = CardinalityAwareLN(lr=arguments.adapt_lr, steps=arguments.adapt_steps) if arguments.adapt else None
+    if adaptation is not None:
+        logger.info(
+            "adapting: %d step(s) at lr %g, so |dtheta| ~ %g",
+            adaptation.steps,
+            adaptation.lr,
+            adaptation.steps * adaptation.lr,
+        )
+    predictions = HoldoutPredictions(torch.device(arguments.device), adaptation=adaptation)
     scores = LabelScores()
 
     readings = MemberReadings(Member.held_out_from(arguments.fold, arguments.checkpoints), root.processed())

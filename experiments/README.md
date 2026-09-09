@@ -11841,6 +11841,45 @@ survives; if it is flat across the two subsets, the extent story is wrong whatev
 says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
 writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
 
+### `carve_adapt_read` reads a null on a 2e-5 perturbation — NOT a null on CARVE (2026-09-09)
+
+The arm ran at 12:38Z against a control taken in the same hour on the same card, differing in the single
+flag `--adapt`. The control reproduced the recorded table to the fourth decimal, which is what licenses
+reading the adapt column at all:
+
+| member                  | control decode | adapt decode | delta   |
+| `fovjitter160_s2026`    | −0.0297        | −0.0298      | −0.0001 |
+| `crop160_span_s2026`    | −0.0265        | −0.0266      | −0.0001 |
+| `band_dense_hold_s2026` | −0.0360        | −0.0359      | +0.0001 |
+
+Mean control **−0.030733**, mean adapt **−0.030767**, delta **−0.000033**.
+
+**This may not be cited as a NULL on CARVE, and the arm's pre-registered NULL branch does not fire.**
+The branch says the toll is representation-bound and the model-side lever closes. That conclusion needs
+a mechanism that FIRED, and the arithmetic says this one could not have mattered whether it fired or not.
+
+The mechanism did run — `test_on_moves_the_affines_while_it_is_open` asserts the affines move inside the
+context manager, and the path is plumbed (`foreign_readout.py:256` → `holdout_predictions.py:123` →
+`CardinalityAwareLN.on`). The defect is the SIZE of the step. Adam displaces a parameter by approximately
+the learning rate per step regardless of the gradient, so `steps = 2` at `lr = 1e-5` moves LayerNorm
+affines of order 1.0 by about **2e-5** — a perturbation of 0.002%. A reading cannot move by 0.036 under
+that, and ours moved by 0.00003, which is the size the arithmetic predicts. A delta three orders inside
+the NULL band, landing on the control to the fourth decimal on all three members, is the signature of a
+budget that cannot act, not of a mechanism that acted and failed.
+
+So the two numbers `2` and `1e-5` are now the suspects. They arrived here from prose. M274 asks the
+researcher for CARVE's optimiser, learning rate and step count as the paper states them, what parameters
+it actually adapts, and — the cheapest way the published number and this null are both true — whether the
+optimiser is SGD rather than Adam, since under SGD the step is lr × gradient and 1e-5 means something
+entirely different.
+
+Meanwhile the budget stopped being a constant: `foreign_readout` now takes `--adapt-lr` and
+`--adapt-steps`, and logs `|dtheta| ~ steps × lr` on every adapted run so a future reading states its own
+perturbation size in its own log. The sweep is minutes of card per point. If a larger budget moves the
+decode cost, the mechanism is live and the only open question is which setting is CARVE's. If NO budget
+moves it, THAT is the representation-bound finding — and it will be a much stronger one than this,
+because it will have been measured over a range where the perturbation was large enough to be felt.
+
 ### `fovjitter160_reflect` was KILLED at epoch 6/12 — the padding rule is UNANSWERED (2026-09-09)
 
 The arm asked one thing: does a REFLECTED margin beat the border-replicate one when the jitter window
