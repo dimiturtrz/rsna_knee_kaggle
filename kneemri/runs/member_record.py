@@ -109,6 +109,9 @@ NOT_IN_CONFIG = {
     "scale_jitter": "an input augmentation applied while fitting, never while serving — it widens the "
     "field-of-view jitter each training study is resampled under, and a rebuild serves the cache's own "
     "crop, so the function is byte-identical for the same reason `intensity_aug` is",
+    "padding_mode": "the out-of-frame rule of that same fitting-time resample — it only has an effect "
+    "where the sampling grid leaves the cached crop, which never happens while serving, so a rebuild "
+    "serves a byte-identical function for the same reason `scale_jitter` does",
     "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
     "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
     "is byte-identical for the same reason `intensity_aug` is",

@@ -191,6 +191,7 @@ class RunSetup:
             target_corpus=options.target_corpus,
             slot_dropout=options.slot_dropout,
             scale_jitter=options.scale_jitter,
+            padding_mode=options.padding_mode,
         )
 
     def drawing(self, identifiers: list[str], corpus: NDArray[np.str_] | None = None) -> Sampling:
@@ -633,6 +634,7 @@ class RunSetup:
                 AugmentConfig() if options.intensity_aug else AugmentConfig.geometric_only(),
                 slot_dropout=options.slot_dropout,
                 scale_jitter=options.scale_jitter,
+                padding_mode=options.padding_mode,
             ),
             adaptation=self.adaptation(),
             objective=self.objective(None if features is None else Widths(model.context_width(), features.width())),

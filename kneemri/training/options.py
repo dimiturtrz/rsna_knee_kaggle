@@ -89,6 +89,11 @@ class TrainingOptions:
     knob this project has: mixup perturbs the label, the intensity block perturbs appearance, slot
     dropout perturbs which acquisitions are present, and none of them changes how much of the knee is
     in frame. See `kneemri.training.augmentation.AugmentConfig.scale_jitter`."""
+    padding_mode: str = "border"
+    """What the augmentation resample reads outside the frame; "border" was hardcoded until knee-10f10
+    and is what every ledger number was measured under. The companion of `scale_jitter` rather than an
+    axis of its own — the rule only bites where the sampling grid leaves the cached crop, which is where
+    a widened jitter spends its draws. See `kneemri.training.augmentation.AugmentConfig.padding_mode`."""
     slices: int = 12
     image_size: int = IMAGE_SIZE
     train_size: int = 0

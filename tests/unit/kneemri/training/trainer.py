@@ -13,7 +13,7 @@ from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
-from kneemri.training.augmentation import INTENSITY_AUGMENT, SCALE_JITTER, SLOT_DROPOUT
+from kneemri.training.augmentation import INTENSITY_AUGMENT, PADDING_MODE, SCALE_JITTER, SLOT_DROPOUT
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.gradient_clip import UNCLIPPED
@@ -427,6 +427,7 @@ def test_policies():
         INTENSITY_AUGMENT: False,
         SLOT_DROPOUT: 0.0,
         SCALE_JITTER: 0.08,
+        PADDING_MODE: "border",
         # The three optimiser-path knobs, in `constructed` because they are the same on both sides of
         # the attachments below: nothing `one_cycle`/`whole_stack`/`exponential_average` does may move
         # them, and a warmup that changed when the schedule was attached would be the drift the landed

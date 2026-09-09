@@ -36,6 +36,16 @@ dropped it would train the historical recipe under the arm's name and report a n
 that never ran.
 """
 
+PADDING_MODE = "padding_mode"
+"""The key the resample's out-of-frame rule answers under when a run checks its switches landed.
+
+A NAME RATHER THAN A FLAG, and its identity is "border" — what `_warp` hardcoded until knee-10f10, so it
+is the rule every member in the pool was fitted under. Worth reporting for the same reason
+`SCALE_JITTER` is: the rule only has an effect where the sampling grid leaves the cached crop, which is
+exactly the region a widened jitter spends its draws in, so an extent arm and a padding arm are
+indistinguishable by anything except these two numbers.
+"""
+
 INTENSITY_AUGMENT = "intensity_aug"
 """The key an augmentation answers under when a run checks its switches landed (`kneemri.training.landed`).
 
@@ -79,6 +89,27 @@ class AugmentConfig:
     of 2026-09-09 found the generalisation toll FLAT across the pool (-0.0336 +/- 0.0038) with the one
     widened-field member paying least. A blind spot every member shares cannot show up as variance
     between them, so it is the cheapest thing here that a solo offline ruler cannot see.
+    """
+
+    padding_mode: str = "border"
+    """What `_warp`'s resample reads where its sampling grid leaves the image — `grid_sample`'s own
+    vocabulary, so "zeros", "border" or "reflection".
+
+    "border" was hardcoded until knee-10f10 and is therefore the rule every member on disk was fitted
+    under. Its stated reason was rotation: a rotated knee should run out into tissue-like values rather
+    than into a black wedge the encoder can use to infer how far the image was turned. That argument is
+    sound for an 8-degree rotation, which leaves only a thin corner out of frame. It was never an
+    argument about EXTENT, and above scale 1 the whole margin is out of frame, so a zoom-OUT fabricates
+    tissue by replicating one edge row across it.
+
+    The literature declines to make this choice at all (D258, 2026-09-09): RandomResizedCrop crops
+    inside the image so no border ever appears (MAE, DINO), nnU-Net oversamples its patch by the scale
+    envelope so a zoomed-out sample comes from real tissue, and Chen 2020 states "random cropping after
+    all other image augmentations, without black borders". torchvision and MONAI pad with constant or
+    zeros, TorchIO with an Otsu background estimate. Reflection is offered everywhere and NO
+    medical-imaging paper reports it beating crop-inside. So there is no published number to
+    pre-register against here — the ordering reflection > border on a zoom-out past the cached field is
+    inference from general practice, and measuring it is a first read rather than a replication.
     """
 
     shift_jitter: float = 0.05
@@ -165,9 +196,7 @@ class Augmentation:
         theta[:, 0, 0], theta[:, 0, 1], theta[:, 0, 2] = cosine, -sine, shifts[:, 0]
         theta[:, 1, 0], theta[:, 1, 1], theta[:, 1, 2] = sine, cosine, shifts[:, 1]
         grid = nn.functional.affine_grid(theta, list(images.shape), align_corners=False)
-        # `border` rather than `zeros`: a rotated knee should run out into tissue-like values, not into a
-        # black wedge the encoder can use to infer how far the image was rotated.
-        return nn.functional.grid_sample(images, grid, align_corners=False, padding_mode="border")
+        return nn.functional.grid_sample(images, grid, align_corners=False, padding_mode=config.padding_mode)
 
     def _intensity(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
         """Gain, gamma, blur, contrast and noise — the scanner-variation axis, on [0, 1] inputs.

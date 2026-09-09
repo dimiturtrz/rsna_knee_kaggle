@@ -38,6 +38,7 @@ from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
 from kneemri.training.augmentation import (
     INTENSITY_AUGMENT,
+    PADDING_MODE,
     SCALE_JITTER,
     SLOT_DROPOUT,
     Augmentation,
@@ -258,6 +259,7 @@ class Trainer:
             INTENSITY_AUGMENT: self.augmentation.intensity(),
             SLOT_DROPOUT: self.augmentation.config.slot_dropout,
             SCALE_JITTER: self.augmentation.config.scale_jitter,
+            PADDING_MODE: self.augmentation.config.padding_mode,
             AUTOCAST: self.autocast_dtype,
             WINDOW: self.window,
             READ_SIZE: self.read_size,

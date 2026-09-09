@@ -57,6 +57,7 @@ COVERAGE = {
     "side_weight": "--side-weight 0.5",
     "certainty_ramp": "--certainty-ramp 6",
     "corpus_oversample": "--corpus-oversample 3.0 --target-corpus canonical",
+    "padding_mode": "--padding-mode reflection",
 }
 """One smoke recipe per switch no arm selects, holding every other flag at its default.
 

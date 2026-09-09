@@ -87,32 +87,7 @@ class FlagVocabulary:
             "it fired and the overfitting did not care - band_dense_long peaked at epoch 6 and lost "
             "0.0182 over eighteen more while its train loss halved.",
         )
-        parser.add_argument(
-            "--slot-dropout",
-            type=float,
-            default=0.0,
-            help="withhold each PRESENT slot from a training study with this probability, pixels and "
-            "presence mask together. 0, the default, is off and is what every ledger number was "
-            "measured under. The first SUPERVISION-space regulariser here: --mixup perturbs the label "
-            "and --intensity-aug perturbs the appearance, and neither changes which acquisitions a "
-            "study is made of. This corpus varies on exactly that axis - the axial fluid slot fills "
-            "100%% of studies while both T1 slots fill 55-60%% - so nearly half of all studies reach "
-            "inference with slots the model has only ever seen filled. A study is never emptied.",
-        )
-        parser.add_argument(
-            "--scale-jitter",
-            type=float,
-            default=0.08,
-            help="half-width of the uniform FIELD-OF-VIEW jitter: each training study is resampled at a "
-            "scale drawn from 1 +/- this. 0.08, the default, is the public baseline's and is what every "
-            "ledger number was measured under - it was hardcoded until knee-su2sw, so no member on disk "
-            "has ever seen the extent vary by more. The foreign corpus's span runs 20-50%% wider "
-            "(D206), and the 11-member readout of 2026-09-09 measured the generalisation toll FLAT "
-            "across the pool at -0.0336 +/- 0.0038 with the single widened-field member paying least - "
-            "a blind spot every member shares cannot appear as variance between them. Above 1 the grid "
-            "runs past the cached crop and border pixels are replicated, so a wide jitter wants a wide "
-            "--crop-mm under it or half its draws fabricate margin instead of revealing tissue.",
-        )
+        cls._augmentation_arguments(parser)
         # EVERY FLAG THAT NAMES A CACHE, from the one place that knows the set. These were eight
         # blocks here and eight more in `build_cache`, and the two had already diverged on the band.
         CacheFlags.add_to(parser)
@@ -377,6 +352,54 @@ class FlagVocabulary:
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
         return parser
+
+    @staticmethod
+    def _augmentation_arguments(parser: argparse.ArgumentParser) -> None:
+        """The fitting-time input perturbations: what a training study looks like, and what the
+        resample reads where its grid leaves the frame. None of them is served, so each is written
+        off in `member_record`; they are grouped here because they are one axis, and because the
+        vocabulary is the only place a new one can be declared."""
+        parser.add_argument(
+            "--slot-dropout",
+            type=float,
+            default=0.0,
+            help="withhold each PRESENT slot from a training study with this probability, pixels and "
+            "presence mask together. 0, the default, is off and is what every ledger number was "
+            "measured under. The first SUPERVISION-space regulariser here: --mixup perturbs the label "
+            "and --intensity-aug perturbs the appearance, and neither changes which acquisitions a "
+            "study is made of. This corpus varies on exactly that axis - the axial fluid slot fills "
+            "100%% of studies while both T1 slots fill 55-60%% - so nearly half of all studies reach "
+            "inference with slots the model has only ever seen filled. A study is never emptied.",
+        )
+        parser.add_argument(
+            "--scale-jitter",
+            type=float,
+            default=0.08,
+            help="half-width of the uniform FIELD-OF-VIEW jitter: each training study is resampled at a "
+            "scale drawn from 1 +/- this. 0.08, the default, is the public baseline's and is what every "
+            "ledger number was measured under - it was hardcoded until knee-su2sw, so no member on disk "
+            "has ever seen the extent vary by more. The foreign corpus's span runs 20-50%% wider "
+            "(D206), and the 11-member readout of 2026-09-09 measured the generalisation toll FLAT "
+            "across the pool at -0.0336 +/- 0.0038 with the single widened-field member paying least - "
+            "a blind spot every member shares cannot appear as variance between them. Above 1 the grid "
+            "runs past the cached crop and border pixels are replicated, so a wide jitter wants a wide "
+            "--crop-mm under it or half its draws fabricate margin instead of revealing tissue.",
+        )
+        parser.add_argument(
+            "--padding-mode",
+            choices=("zeros", "border", "reflection"),
+            default="border",
+            help="what the augmentation resample reads where its grid leaves the image. 'border', the "
+            "default, replicates the edge row and is what every ledger number was measured under - it "
+            "was hardcoded until knee-10f10. Its reason was ROTATION (a turned knee should run out into "
+            "tissue-like values, not a black wedge that says how far it was turned), which is sound for "
+            "8 degrees and was never an argument about EXTENT: above scale 1 the entire margin is out "
+            "of frame, so a zoom-out fabricates tissue from one replicated row. The literature declines "
+            "the choice instead of making it - MAE and DINO crop INSIDE the image, nnU-Net oversamples "
+            "its patch by the scale envelope so a zoomed-out sample is real tissue - and no "
+            "medical-imaging paper reports reflection beating crop-inside, so this is a first read "
+            "rather than a replication (D258).",
+        )
 
     @staticmethod
     def _label_quality_arguments(parser: argparse.ArgumentParser) -> None:

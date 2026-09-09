@@ -46,7 +46,7 @@ from kneemri.models.model import (
     RECOMPUTING,
     StudyModel,
 )
-from kneemri.training.augmentation import INTENSITY_AUGMENT, SCALE_JITTER, SLOT_DROPOUT
+from kneemri.training.augmentation import INTENSITY_AUGMENT, PADDING_MODE, SCALE_JITTER, SLOT_DROPOUT
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS, UNFOCUSED
 from kneemri.training.objective import (
@@ -292,6 +292,7 @@ class Request:
     target_corpus: str = ""
     slot_dropout: float = 0.0
     scale_jitter: float = 0.08
+    padding_mode: str = "border"
 
     def wanted(self) -> dict[str, object]:
         """The request in the vocabulary the effects are reported in.
@@ -381,6 +382,7 @@ class Request:
             MIXUP: self.mixup,
             SLOT_DROPOUT: self.slot_dropout,
             SCALE_JITTER: self.scale_jitter,
+            PADDING_MODE: self.padding_mode,
             # THE FOUR OPTIMISER-PATH POLICIES, and each is read back off the object that applies it
             # rather than off the value that was passed in: the decay from the optimiser's first
             # parameter group, the warmup from the field `one_cycle` hands to `pct_start`, the ceiling
