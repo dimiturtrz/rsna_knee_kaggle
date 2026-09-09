@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# fovjitter160.sh — crop160_span with the field of view JITTERED rather than fixed. One flag moved.
+#
+# WHY THIS ARM EXISTS. The 11-member generalisation readout of 2026-09-09 (experiments/README.md) is the
+# first honest one this project has — the six before it were void on knee-kcvma, which scored members on
+# eight slices of twenty. It measured three things and the third is what this arm is:
+#   1. The decode toll is FLAT: -0.0336 mean, sd 0.0038, range 0.0131 — half the spread of the native
+#      scores it is drawn from. No robust member exists in the pool.
+#   2. The offline ruler TRANSFERS: Spearman native vs foreign 0.8818, p 0.0003. Four members move rank
+#      at all, none by more than three places.
+#   3. A better member does NOT pay less: rho(native, decode_cost) 0.1727, p 0.61.
+# A flat toll with no correlate is a blind spot every member SHARES, and a blind spot every member shares
+# cannot show up as variance between them — which is exactly what a solo offline ruler measures. So the
+# lever is not a better member. It is an axis none of them has ever varied on.
+#
+# THE AXIS. `AugmentConfig.scale_jitter = 0.08` was hardcoded until knee-su2sw. Every member on disk saw
+# the extent vary by +/-8% about a 130 mm crop and none of them ever saw it vary more. D206 section 5
+# measured the foreign corpus's span 20-50% WIDER than ours. `crop_coverage` measured our own 130 mm crop
+# discarding a median 15% of imaged tissue (p10 0.7299, worst 0.4537). The pool has never been shown a
+# knee at an extent it will be asked to read one at.
+#
+# WHY IT IS JITTER AND NOT A SECOND FIXED FIELD. `crop160_span` already moved the field once, to a FIXED
+# 160 mm, and it is the member that pays least on decode: -0.0265 against the pool's -0.0336, the best of
+# eleven. On our own ruler it read 0.8564 against its control `band_span` 0.8565 — a NULL. That pair is
+# the whole argument: the arm that reads flat offline is the arm that generalises best, and the only thing
+# it did was widen the frame. A second fixed field would trade one blind spot for another; the finding
+# says the pool's problem is that the extent never VARIES.
+#
+# WHY THIS CACHE. Above scale 1 the sampling grid runs past the cached crop and `padding_mode="border"`
+# replicates edge pixels, so a zoom-OUT fabricates margin rather than revealing tissue. On the 130 mm
+# cache every member's upper 8% was already fabricated. At --crop-mm 160 --image-size 420 (0.381 mm/px,
+# holding 130/336 = 0.387) a jitter of 0.20 gives an effective field of 128-192 mm: the LOWER half is real
+# wide tissue rather than replicated border, and the range CONTAINS both our historical 130 mm operating
+# point and his wider span. That is the mechanism — the cache decides how much of the range is real, so a
+# wide jitter belongs on a wide cache and nowhere else.
+#
+# control  crop160_span_s2026 — native 0.8564, decode_cost -0.0265. A MATCHED control already on disk:
+#          same cache, same recipe, same seed, one flag moved. No control arm of its own, and no card.
+# cost     12 epochs at 420 px, ~620 s an epoch = ~2 h, the measured crop160_span figure.
+# price    ~2 h for a mechanism that could plausibly move the foreign number by the 0.007 the fixed field
+#          already bought, and more if variance carries more than extent. Against a 1.5% bar that is a
+#          coin-flip on the strongest un-tried axis in the pool, at the cheapest arm length here.
+#
+# PRE-REGISTERED ON THE FOREIGN NUMBER, which is the point — the pool has no variance on that axis, and
+# a native-only registration would make this the twelfth sample of the same toll. Read decode_cost with
+# `foreign_readout` against the same eleven-member pool, on the card (knee-j99t: cpu is not the ruler).
+#   CARRIES   — decode_cost at or above -0.0200. Better than every member ever measured, including the
+#               fixed wide field, and by more than the 0.0038 sd of the pool it is drawn from. Extent
+#               VARIANCE is then a real generalisation lever, 160/420 with jitter becomes the operating
+#               point, and the next question is how wide before it costs.
+#   PARTIAL   — -0.0201 to -0.0264. Beats crop160_span but inside the pool's own spread. Directional:
+#               keep the member, do not re-cut the operating point on it, and the follow-up is a second
+#               seed rather than a wider jitter.
+#   NULL      — -0.0265 to -0.0300. Indistinguishable from the fixed wide field. The gain crop160_span
+#               showed is the FIELD, not its variance, and this knob is closed — the wide cache stays,
+#               the jitter goes back to 0.08.
+#   REGRESSION— below -0.0336, the pool mean. Jitter is actively costing generalisation, which would say
+#               the fabricated upper half of the range is teaching border texture. The suspect is then
+#               `padding_mode`, not the axis, and the re-test is an asymmetric zoom-IN-only jitter.
+# NATIVE IS NOT THE GATE. Expected within +/-0.0050 of crop160_span 0.8564; a native regression below
+# 0.8500 with decode carrying is still a KEEP, because finding 3 says the two numbers are uncorrelated
+# and this arm is the first thing built to exploit that.
+#
+# WHAT THIS ARM CANNOT SETTLE. `crop_coverage`'s image@160 is read over 733 of 1822 series — only 40% have
+# a field that wide, so 60% are padded to fill the frame before any jitter runs. That padding is
+# crop160_span's confound and it is this arm's too, unchanged. A NULL here does not separate "extent
+# variance does not help" from "our own corpus cannot supply the extent to vary".
+#
+# bead: knee-su2sw
+# reading: fovjitter160_s2026.holdout.npz
+#
+# deliberate: --scale-jitter (0.20 -- THE MOVED FLAG, against the 0.08 every member on disk carries)
+# deliberate: --crop-mm     (160 -- crop160_span's, held so the control is matched; not a free choice,
+#                            a 0.20 jitter on the 130 mm cache would fabricate rather than reveal)
+# deliberate: --image-size  (420 -- carried by --crop-mm to hold mm/px, as in crop160_span)
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+run_train fovjitter160 \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 \
+  --crop-mm 160 --image-size 420 --scale-jitter 0.20 \
+  --labels "$LABELS" --out "$MODELS/fovjitter160_s2026.pt"

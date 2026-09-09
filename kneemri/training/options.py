@@ -83,6 +83,12 @@ class TrainingOptions:
     on disk was fitted under. The first SUPERVISION-axis regulariser this project has — mixup perturbs
     labels and the intensity block perturbs appearance, and neither changes which acquisitions a study
     is made of. See `kneemri.training.augmentation.AugmentConfig.slot_dropout`."""
+    scale_jitter: float = 0.08
+    """Half-width of the uniform field-of-view jitter; 0.08 is the public baseline's and was hardcoded
+    until knee-su2sw, so it is what every member in the pool was fitted under. The first EXTENT-axis
+    knob this project has: mixup perturbs the label, the intensity block perturbs appearance, slot
+    dropout perturbs which acquisitions are present, and none of them changes how much of the knee is
+    in frame. See `kneemri.training.augmentation.AugmentConfig.scale_jitter`."""
     slices: int = 12
     image_size: int = IMAGE_SIZE
     train_size: int = 0

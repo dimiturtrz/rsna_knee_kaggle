@@ -106,6 +106,9 @@ NOT_IN_CONFIG = {
     "corpus tag it weights is a fact about how these weights were REACHED, not part of the function",
     "target_corpus": "the companion axis of that same draw policy: which tag is treated as the target "
     "domain changes the epoch order and nothing else, so it is written off with `corpus_oversample`",
+    "scale_jitter": "an input augmentation applied while fitting, never while serving — it widens the "
+    "field-of-view jitter each training study is resampled under, and a rebuild serves the cache's own "
+    "crop, so the function is byte-identical for the same reason `intensity_aug` is",
     "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
     "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
     "is byte-identical for the same reason `intensity_aug` is",

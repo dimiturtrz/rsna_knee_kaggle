@@ -26,6 +26,16 @@ built by one of two branches, so a branch that forgets it trains the geometric r
 name and reports a number about a run nobody asked for.
 """
 
+SCALE_JITTER = "scale_jitter"
+"""The key field-of-view jitter answers under when a run checks its switches landed.
+
+A WIDTH RATHER THAN A FLAG, and its identity is 0.08 rather than zero — the value every member on disk
+was fitted under, hardcoded until knee-su2sw. That is what makes it worth reporting: an arm asking for a
+wider field can only be told apart from the whole pool by the number, and a branch in `run_setup` that
+dropped it would train the historical recipe under the arm's name and report a null about a mechanism
+that never ran.
+"""
+
 INTENSITY_AUGMENT = "intensity_aug"
 """The key an augmentation answers under when a run checks its switches landed (`kneemri.training.landed`).
 
@@ -57,6 +67,20 @@ class AugmentConfig:
 
     rotation_degrees: float = 8.0
     scale_jitter: float = 0.08
+    """Half-width of the uniform FIELD-OF-VIEW jitter: `_warp` samples a scale in `1 +/- this`.
+
+    Above 1 the sampling grid runs past the cached crop and `padding_mode="border"` replicates edge
+    pixels, so a zoom-OUT fabricates margin rather than revealing tissue. The cache's own `--crop-mm` is
+    therefore what decides how much of this range is real, and a wide jitter belongs on a wide cache.
+
+    0.08 is the public baseline's and was hardcoded until knee-su2sw, which is to say every member in
+    the pool saw the extent vary by +/-8% about a 130 mm crop and none of them ever saw it vary more.
+    D206 section 5 measured the foreign corpus's span 20-50% wider than ours, and the 11-member readout
+    of 2026-09-09 found the generalisation toll FLAT across the pool (-0.0336 +/- 0.0038) with the one
+    widened-field member paying least. A blind spot every member shares cannot show up as variance
+    between them, so it is the cheapest thing here that a solo offline ruler cannot see.
+    """
+
     shift_jitter: float = 0.05
     gain_jitter: float = 0.10
     gamma: tuple[float, float] = (0.7, 1.5)

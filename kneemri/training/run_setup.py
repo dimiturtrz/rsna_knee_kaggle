@@ -190,6 +190,7 @@ class RunSetup:
             corpus_oversample=options.corpus_oversample,
             target_corpus=options.target_corpus,
             slot_dropout=options.slot_dropout,
+            scale_jitter=options.scale_jitter,
         )
 
     def drawing(self, identifiers: list[str], corpus: NDArray[np.str_] | None = None) -> Sampling:
@@ -624,11 +625,14 @@ class RunSetup:
         trainer = Trainer(
             model,
             device,
-            # `replace` rather than a keyword on each branch: slot dropout is orthogonal to the intensity
-            # block, so spelling it twice would let the two recipes drift by one edit.
+            # `replace` rather than a keyword on each branch: slot dropout and field-of-view jitter are
+            # both orthogonal to the intensity block, so spelling either twice would let the two recipes
+            # drift by one edit. `geometric_only` carries the same 0.08 scale as the full config, so the
+            # override is the identity at the default and every ledger number keeps its meaning.
             augment_config=replace(
                 AugmentConfig() if options.intensity_aug else AugmentConfig.geometric_only(),
                 slot_dropout=options.slot_dropout,
+                scale_jitter=options.scale_jitter,
             ),
             adaptation=self.adaptation(),
             objective=self.objective(None if features is None else Widths(model.context_width(), features.width())),

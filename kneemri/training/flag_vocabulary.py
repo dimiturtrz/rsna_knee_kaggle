@@ -99,6 +99,20 @@ class FlagVocabulary:
             "100%% of studies while both T1 slots fill 55-60%% - so nearly half of all studies reach "
             "inference with slots the model has only ever seen filled. A study is never emptied.",
         )
+        parser.add_argument(
+            "--scale-jitter",
+            type=float,
+            default=0.08,
+            help="half-width of the uniform FIELD-OF-VIEW jitter: each training study is resampled at a "
+            "scale drawn from 1 +/- this. 0.08, the default, is the public baseline's and is what every "
+            "ledger number was measured under - it was hardcoded until knee-su2sw, so no member on disk "
+            "has ever seen the extent vary by more. The foreign corpus's span runs 20-50%% wider "
+            "(D206), and the 11-member readout of 2026-09-09 measured the generalisation toll FLAT "
+            "across the pool at -0.0336 +/- 0.0038 with the single widened-field member paying least - "
+            "a blind spot every member shares cannot appear as variance between them. Above 1 the grid "
+            "runs past the cached crop and border pixels are replicated, so a wide jitter wants a wide "
+            "--crop-mm under it or half its draws fabricate margin instead of revealing tissue.",
+        )
         # EVERY FLAG THAT NAMES A CACHE, from the one place that knows the set. These were eight
         # blocks here and eight more in `build_cache`, and the two had already diverged on the band.
         CacheFlags.add_to(parser)
