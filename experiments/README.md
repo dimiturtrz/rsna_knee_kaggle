@@ -11815,6 +11815,25 @@ randomised crop extent rather than a second fixed one — because §1 says the p
 member ever saw the extent VARY, and a single wider fixed field trades one blind spot for another. The re-opening condition for the rest of this family is
 the same as it has always been — an ensemble reading, not another solo one.
 
+### The mm-vs-pixel-grid axis is NOT open here — every member is already mm-normalised (2026-09-09)
+
+D266 reports that mm-resampling versus a fixed pixel grid is unpublished on a classifier endpoint
+between two real corpora (the spacing literature scores Dice and volume), and called our arm on it a
+genuine contribution in both directions. Checked against the eleven arms in the toll table above, **we
+do not have that arm and cannot build it out of this pool.**
+
+`crop160_span` is the only one of the eleven that WRITES `--crop-mm`, which reads at a glance like ten
+pixel-grid members and one physical one. It is not: `kneemri/training/options.py:102` declares
+`crop_mm: float = CROP_MM` and `core/data/corpus/crop_centre.py:25` sets `CROP_MM = 130.0`, so a member
+that names no extent is cropped at **130 mm — physically, by default**. The ten silent members are
+mm-normalised too. The only axis separating them from `crop160_span` is the EXTENT, 130 vs 160 mm, which
+is exactly what the span paragraph above already charges it to. There is no second reading of that cell.
+
+**Consequence for the plan.** Pricing mm-normalisation against a pixel grid needs a member trained with
+the physical resampling OFF, and no such member exists — the flag is an extent, not a switch, and
+nothing in `Crop` turns the normalisation off. So the D266 axis costs a code change plus a cache build
+plus a twelve-epoch arm, not a readout of records on disk. Recorded so it is not planned again as free.
+
 ## 2026-09-09 — three audits, and the one number the ledger had wrong (D262, D263, D264)
 
 None of these cost a card. Two are audits of what is already on disk and one is a lever this project has
