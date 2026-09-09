@@ -12151,23 +12151,46 @@ subsets (−0.0408 vs −0.0315, 0.0093) is LARGER than either wide member's (0.
 the fills/padded cut carries a study-difficulty signal of its own that has nothing to do with padding.
 Any future split on this cut has to price that baseline before charging a difference to the pad.
 
-**EXTENT SURVIVES, directionally.** Read as the wide member's ADVANTAGE over the 130 mm control rather
-than as its toll: **+0.0120 foreign AUC on the studies that fill the 160 mm field, +0.0049 on the studies
-that do not**, against +0.0087 pooled. The advantage is 2.4x concentrated where the extra extent is
-physically present, which is the EXTENT SURVIVES branch. It is DIRECTIONAL and not a result: the
-subsets are n=430 and n=479 with confidence intervals about 0.03 wide, so the two advantages overlap
-heavily and the ordering is what is being reported, not the size.
+**EXTENT SURVIVES was written here for twenty minutes and then REFUTED by the same file.** On the
+pre-registered 160 mm cut the wide member's ADVANTAGE over the 130 mm control is +0.0120 foreign AUC
+where the field fills and +0.0049 where it does not, against +0.0087 pooled — 2.4x concentrated where
+the extra extent is physically present, which is the branch's own text. That reading did not survive
+asking the same question at the cuts either side of it. `padding_split --extent` is free once the npz
+exists, so all four were taken:
 
-**And it prices `fovjitter160`'s null mechanistically.** On the fills subset the jittered member's
-advantage over the control is +0.0038 against the fixed member's +0.0120. Jitter does not merely fail to
-add — it removes the extent benefit exactly on the studies where extent is measurable, while leaving the
-padded subset alone (+0.0030 vs +0.0049). That is a mechanism for the pooled −0.0297, where the ledger
-section above could only record that the number landed in the null band.
+| cut    | fills                | padded               |
+| 130 mm | +0.0088 (n=874)      | **−0.0067** (n=35)   |
+| 140 mm | +0.0082 (n=762)      | **+0.0163** (n=147)  |
+| 150 mm | +0.0088 (n=616)      | +0.0083 (n=293)      |
+| 160 mm | **+0.0120** (n=430)  | +0.0049 (n=479)      |
 
-WHAT THIS DOES NOT SAY. Nothing about WHY the wide field helps where it fills — extent and the
-acquisition that permits a wide extent are confounded in this cut, since a series wide enough to fill
-160 mm is a different acquisition from one that is not. The control makes that a fair comparison across
-MEMBERS on the same studies; it does not make the two subsets comparable to each other.
+The advantage is **flat at about +0.009 across every cut and both subsets**, and at 140 mm the ordering
+REVERSES — the padded studies show twice the advantage of the filled ones. One separation in four cuts
+with a sign flip in the neighbouring one is scatter, not structure, and the pre-registered cut being the
+one that separated is exactly the coincidence a single pre-registration cannot protect against. So the
++0.0087 pooled advantage of the 160 mm member is **NOT explained by the extra anatomy being present**.
+Whatever `crop160_span` has over `band_dense_hold`, it is carried equally by the studies where its extra
+field is real pixels and by those where it is zeros — which is the same direction as the padding
+refutation above, read from the other side.
+
+The cost of the correction was four minutes of arithmetic and it saves an arm: a 150 mm member (66.6%
+fill, the interpolation point between 130 and 160) was queued on the strength of the +0.0120 and would
+have spent ~1.4 h of card testing a coverage/extent split that this table says is not there.
+
+**`fovjitter160`'s null is still unexplained, and the retraction above is why.** The reading that looked
+like a mechanism — on the 160 mm fills subset the jittered member's advantage over the control is +0.0038
+against the fixed member's +0.0120, so jitter appeared to remove the extent benefit exactly where extent
+is measurable — rests entirely on the same +0.0120 the four-cut table just dissolved. It is quoted here
+so that nobody re-derives it and believes it. The pooled −0.0297 stands; its mechanism does not.
+
+WHAT THIS LEAVES OPEN, and it is now the interesting question rather than a caveat. `crop160_span` beats
+the 130 mm control by ~+0.009 on transfer, uniformly, on studies where its extra field is real pixels and
+on studies where it is zeros alike. The extent explanation is out. What remains are the things that
+travel with a bigger nominal crop and are NOT the anatomy in it: the effective in-plane resolution after
+resampling (a fixed 336 px over a wider field is a coarser sampling of the joint), the fraction of the
+image the joint itself occupies, and the interpolation the wider resample performs. Those are cheap to
+separate — a 130 mm member at the pixel budget of the 160 mm one is one arm — and none of them was on
+the D269 list.
 
 ### The mm-vs-pixel-grid axis is NOT open here — every member is already mm-normalised (2026-09-09)
 
