@@ -11492,3 +11492,40 @@ collapses *toward* uniform at the top blocks. Two failure modes at two rates is 
 is for, and it is armed behind this one: 3e-5 then 1e-5 at mask 0.30, everything else fixed. Drift at block
 10 that scales with the rate means gradient magnitude and the fix is rate plus a longer schedule; drift flat
 across a 10x rate change means rate is out and the suspect is the trunk/objective interaction itself.
+
+### `latent_register_dense` reads 0.8385 against nothing — the v3small zero point does not exist — 2026-09-09
+
+`latent_register_dense_s2026` (v3small trunk continued with latent-MIM at mask 0.30, then the 12-epoch
+dense supervised recipe: `--slice-pooling max --whole-stack --backbone-lr 4e-5 --slices 20 --band-low 0.1
+--band-high 0.9`) finished at **0.8385** — epoch 10 of 12, n=909, midpoint cut. `convergence_check` names
+it neither TRUNCATED nor STOPPED: the AUC trace runs 0.7221 / 0.7775 / 0.7981 / 0.8097 / 0.8206 / 0.8278 /
+0.8344 / 0.8352 / 0.8376 / 0.8380 / **0.8385** / 0.8384, a clean plateau over the last three epochs. The
+number is a real converged reading. What it is a reading OF is the problem.
+
+**Its own arm header pre-registered the hole and the hole is real.** `band_dense`'s 0.8578 is a dinov2-small
+number and cannot price a v3small encoder. Sweeping every arm carrying `--variant v3small` returns exactly
+four scripts, and only one of them is at this supervised recipe: `errors_v3small_s2026`, **0.8280** — which
+differs from `latent_register_dense` in TWO ways at once, since it carries `--label-errors` and no
+adaptation. So the comparison the arm owed does not exist on disk.
+
+**The transfer that would close the gap is not admissible as a control.** On dinov2 the same flag reads
+`errors_dense` 0.8420 against `band_dense` 0.8578, i.e. `--label-errors` costs **−0.0158** there. Carry
+that across trunks and a plain v3small lands near 0.844, which puts 0.8385 **inside [0.828, 0.844]**: the
+latent adaptation at mask 0.30 is neither shown to help nor shown to hurt. That estimate is a knob-sized
+delta measured on one trunk and substituted into a claim about another — the exact move this repo has
+already priced wrong twice on the pool-label axis. It brackets; it does not price.
+
+**Two arms have now been spent on an axis whose zero point was never measured, and a third is on the card.**
+`latent_register_deep` (mask 0.60) started at 00:16Z. `v3small_control` (knee-j2ovn) is armed behind it —
+the same 12-epoch dense recipe, v3small, no `--encoder-weights` and no `--label-errors`, ~2.0 h, no
+pretrain stage. It is an INSTRUMENT and its own score is not the deliverable: it makes three holdout
+numbers readable at once, one of them still being written. Its branches are in its header — ~0.844 closes
+the mask axis on a measured zero, ~0.828 makes the adaptation +0.010 directional and the ladder live, and
+anything outside [0.820, 0.850] impeaches every v3small number in this file that was read against a dinov2
+control.
+
+**The stock v3small attention line now carries the corrected axis**, printed by `latent_register_deep`'s
+own gate at launch (commit `2d440c19`): `Hpatch 0.00 3.34 4.10 1.71 2.97 3.83 4.16 4.37 4.69 4.86 4.97
+5.24`, against raw `H 0.00 3.28 3.74 1.73 2.88 3.76 4.03 4.01 4.45 4.45 4.26 5.21` and span 5.21 nats.
+Stock registers already hold 0.31 of block 10's mass with cls at 0.01 — the register sink is the trunk's
+own resting state, not something adaptation introduced.
