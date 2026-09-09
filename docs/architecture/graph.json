@@ -27201,19 +27201,25 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
-      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN._reachable",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN._descend",
-      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.loss",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN._reachable",
+      "target": "kneemri.inference.norm_adaptation.NotAdaptableError",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.affines",
-      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
+      "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN._reachable",
       "weight": 1
     },
     {
@@ -27232,12 +27238,6 @@
       "kind": "calls",
       "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.on",
       "target": "kneemri.inference.norm_adaptation.CardinalityAwareLN.affines",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
-      "target": "kneemri.inference.norm_adaptation.NotAdaptableError",
       "weight": 1
     },
     {
@@ -59286,6 +59286,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN._reachable",
+      "label": "_reachable",
+      "level": "method",
+      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.affines",
       "label": "affines",
       "level": "method",
@@ -59312,14 +59320,6 @@
       "descendants": 0,
       "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.on",
       "label": "on",
-      "level": "method",
-      "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.norm_adaptation.CardinalityAwareLN.reachable",
-      "label": "reachable",
       "level": "method",
       "parent": "kneemri.inference.norm_adaptation.CardinalityAwareLN",
       "role": null
