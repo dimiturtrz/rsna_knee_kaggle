@@ -5,7 +5,8 @@ methods require a download, and a method that cannot be constructed in a test is
 nothing checks.
 """
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import override
 
@@ -144,6 +145,70 @@ def test_predict():
     assert scored.shape == (5, len(TARGETS))
     assert scored.min() >= 0.0
     assert scored.max() <= 1.0
+
+
+class _SpyAdaptation:
+    """Records what the reading loop hands an adaptation, and adapts nothing."""
+
+    def __init__(self, episode: int) -> None:
+        self._episode = episode
+        self.studies: list[int] = []
+        self.graded: list[torch.Tensor] = []
+
+    @property
+    def episode(self) -> int:
+        return self._episode
+
+    @contextmanager
+    def on(self, member: object, logits: Callable[[], torch.Tensor]) -> Iterator[None]:
+        del member
+        graded = logits()
+        self.studies.append(graded.shape[0])
+        self.graded.append(graded)
+        yield
+
+
+def test_predict_takes_its_batch_size_from_the_adaptations_episode():
+    """An episodic recipe must not adapt eight studies at once, and BATCH is this loop's, not its.
+
+    Eight studies sharing one gradient step moves the affines that read study N+1 by study N's
+    findings — the same neighbour leak the per-study top-k already had to fix, one level up. The
+    default declares no episode and must leave the batching exactly as every board figure took it.
+    """
+    generator = torch.Generator().manual_seed(SEED)
+    images = torch.randint(0, 256, (5, SLOTS, SLICES, SIZE, SIZE), generator=generator, dtype=torch.uint8).numpy()
+    mask = torch.ones(5, SLOTS).numpy()
+    window = Window(starts=[0], width=GROUP, size=SIZE)
+
+    episodic, unbounded = _SpyAdaptation(1), _SpyAdaptation(0)
+    for spy in (episodic, unbounded):
+        HoldoutPredictions(torch.device("cpu"), adaptation=spy).predict(
+            _member().eval(), HoldoutSlab.of(images, mask), window
+        )
+
+    assert episodic.studies == [1, 1, 1, 1, 1]
+    assert unbounded.studies == [5]
+
+
+def test_predict_hands_the_adaptation_a_graded_read_of_the_right_shape():
+    """The closure must carry a gradient and one row per study, or the adapt pass is a silent no-op.
+
+    Every serving loop here is `no_grad`-wrapped and this one used to wrap the whole study walk. If
+    that wrapper still enclosed the adapt pass, `logits()` would come back detached, the backward
+    would raise or do nothing, and the reading would carry an adapted name with unadapted values.
+    """
+    generator = torch.Generator().manual_seed(SEED)
+    images = torch.randint(0, 256, (3, SLOTS, SLICES, SIZE, SIZE), generator=generator, dtype=torch.uint8).numpy()
+    spy = _SpyAdaptation(0)
+
+    HoldoutPredictions(torch.device("cpu"), adaptation=spy).predict(
+        _member().eval(),
+        HoldoutSlab.of(images, torch.ones(3, SLOTS).numpy()),
+        Window(starts=[0], width=GROUP, size=SIZE),
+    )
+
+    assert spy.graded[0].shape == (3, len(TARGETS))
+    assert spy.graded[0].requires_grad
 
 
 def test_predict_over_one_window_matches_a_single_forward():
