@@ -302,6 +302,30 @@ def test_invocations(tmp_path: Path):
     )
 
 
+def test_invocations_never_spawns_an_arm_the_stub_cannot_shadow(tmp_path: Path):
+    """An arm naming an interpreter is NEVER SPAWNED — the stub shadows `uv` and nothing else.
+
+    The file below would put a CUDA job on the card if this check ran it, which is exactly what happened
+    on 2026-09-09: three `foreign_readout` processes, 19.4 and 12.3 GB resident, sixteen seconds after
+    `arm_check --only` started, beside a live training arm. It is written to write a MARKER rather than
+    to touch the device, so the assertion is that the marker is absent — proof the file was not executed,
+    not merely that nothing was reported from it.
+    """
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    ran = tmp_path / "it_ran"
+    (arms / "direct.sh").write_text(
+        f'source "${{ARM_LIB}}"\ntouch "{ran.as_posix()}"\n"$REPO/.venv/Scripts/python.exe" -m whatever\n'
+        'run_train "direct" --fold 0 --epochs 8\n',
+        encoding="utf-8",
+    )
+    (arms / "safe.sh").write_text('source "${ARM_LIB}"\nrun_train "safe" --fold 0 --epochs 8\n', encoding="utf-8")
+    check = ArmCheck(arms, Path("experiments/stub_lib.sh"))
+
+    assert check.invocations() == {"safe": "'--fold' '0' '--epochs' '8'"}
+    assert not ran.exists(), "the guard has to stop the SPAWN, not merely drop what the spawn printed"
+
+
 def test_queued(tmp_path: Path):
     """An arm carrying ARGUMENTS is checked on the flags those arguments produce, not on its defaults.
 

@@ -37,6 +37,7 @@ from core.denominator import Denominator
 from core.paths import DataRoot
 from kneemri.experiments.arm_diff import ArmDiff
 from kneemri.experiments.arm_header import ARMS, ArmHeader
+from kneemri.experiments.arm_shadow import ArmShadow
 from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.arm_verdict import ArmVerdict
 from kneemri.experiments.switch_coverage import SwitchCoverage
@@ -255,6 +256,10 @@ class ArmCheck:
         drains, in the commands' own order, so the duplicate-flag verdict sees the same sequence it saw
         when this ran one at a time.
         """
+        # BEFORE THE POOL, because the pool is what RUNS them: checking such an arm means running it,
+        # and running it is the incident `arm_shadow` exists to prevent. `reported` names them in `main`.
+        unsafe = {str(arm) for arm in ArmShadow(self.arms).unshadowed()}
+        commands = [command for command in commands if command[0] not in unsafe]
         found: dict[str, str] = {}
         with ThreadPoolExecutor(max_workers=SPAWN_WORKERS) as pool:
             outputs = list(pool.map(self._spawned, commands))
@@ -731,6 +736,8 @@ def main() -> None:
         # the smoke exists to find, reported as though the recipe were at fault.
         check.decode_smoke_caches(invocations, refused, arguments.smoke_studies)
         broken = ArmSmoke(arguments.smoke_studies).reported(invocations, refused, arguments.smoke)
+    for line in ArmShadow(check.arms).reported():
+        logger.info("%s", line)
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
     Denominator(len(invocations), "no arm printed an invocation — the shell, not the arms, failed").refuse_empty()
     if any(refusing) or broken:
