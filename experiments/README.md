@@ -11841,6 +11841,49 @@ survives; if it is flat across the two subsets, the extent story is wrong whatev
 says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
 writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
 
+### PADDING BITES is refuted three of three; EXTENT is withdrawn for want of a matched control — card-free, 2026-09-09
+
+`fov_perstudy_read` wrote the per-study probabilities once, and `padding_split` cut them on whether a
+study fills the 160 mm field. **430 fill, 479 are padded up to it** — close to `crop_coverage`'s 40/60.
+
+| member                  | crop / px / slices | subset          | kept   | foreign | toll        |
+|-------------------------|--------------------|-----------------|--------|---------|-------------|
+| `fovjitter160_s2026`    | 160 / 420 / 12     | pooled n=909    | 0.8545 | 0.8248  | **-0.0297** |
+|                         |                    | fills  n=430    | 0.8640 | 0.8320  | **-0.0320** |
+|                         |                    | padded n=479    | 0.8469 | 0.8192  | **-0.0277** |
+| `crop160_span_s2026`    | 160 / 420 / 12     | pooled n=909    | 0.8565 | 0.8300  | **-0.0265** |
+|                         |                    | fills  n=430    | 0.8666 | 0.8402  | **-0.0264** |
+|                         |                    | padded n=479    | 0.8484 | 0.8211  | **-0.0272** |
+| `band_dense_hold_s2026` | 130 / 336 / 20     | pooled n=909    | 0.8573 | 0.8213  | **-0.0360** |
+|                         |                    | fills  n=430    | 0.8690 | 0.8282  | **-0.0408** |
+|                         |                    | padded n=479    | 0.8477 | 0.8162  | **-0.0315** |
+
+**PADDING BITES is REFUTED, and it is the one branch this file settles.** It predicted that padded
+studies carry a WORSE transfer toll — the composed failure mode, pad learned as a site cue. They carry a
+BETTER one, or the same, in every member: -0.0277 against -0.0320, -0.0272 against -0.0264, -0.0315
+against -0.0408. Three of three, and the two that separate do so in the direction opposite to the
+prediction. Each individual gap is inside the bootstrap intervals, so the SIZE is not a reading; the
+uniform SIGN across three members with different crops, resolutions and slice counts is, and it points
+away from the mechanism rather than at it.
+
+**A floor effect is the reason to believe it rather than a confound against it.** Padded studies are
+simply harder — kept AUC is lower on them for all three members, the 130 mm one INCLUDED, which is a
+member that pads nothing at 160 mm. So "fills" is a difficulty label as much as a geometry label, and a
+harder subset has less headroom to lose in transfer. That biases toward finding a smaller toll on padded
+studies, which is what we found — so the refutation is if anything under-stated, not manufactured.
+
+**EXTENT SURVIVES and EXTENT FAILS are WITHDRAWN, not answered.** Both are statements about the wide
+members' ADVANTAGE by subset, so both need a narrow control that differs in crop ALONE.
+`band_dense_hold` is not one: it moves crop 160->130, resolution 420->336 and slice count 12->20 in the
+same step. Reading a wide-minus-narrow difference off this table would charge to extent whatever those
+other two flags did, and the differences in question (-0.0024 on fills, +0.0007 on padded) are an order
+inside the intervals anyway. This is the SECOND half of this arm withdrawn for a missing control — the
+by-rule half went with `fovjitter160_reflect`'s killed checkpoint. The arm bought one clean refutation
+and two withdrawals, and the refutation is the composed failure mode D269 (c) was actually built for.
+
+**Cost: zero card.** The per-study file was already on disk; every cut above is arithmetic on it. That is
+the whole case for `--per-study` and it paid on its first use.
+
 ### `carve_adapt_read` reads a null on a 2e-5 perturbation — NOT a null on CARVE (2026-09-09)
 
 The arm ran at 12:38Z against a control taken in the same hour on the same card, differing in the single
