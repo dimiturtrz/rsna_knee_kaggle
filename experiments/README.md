@@ -11841,6 +11841,42 @@ survives; if it is flat across the two subsets, the extent story is wrong whatev
 says. That split is a subset AUC over per-study probabilities, which `foreign_readout --per-study` now
 writes (commit `1e9f02ad`), so it costs one ~5 min readout and then nothing ever again.
 
+### The CARVE budget sweep: adapting the norm affines per study CANNOT buy decode, at any budget — 2026-09-09
+
+`carve_budget_sweep` ran three of its four pre-registered points against member `fovjitter160_s2026`
+(native 0.8544) and the fourth was refused before it started. Ordered by how far the adapted parameters
+actually travel — Adam displaces a parameter by roughly the learning rate per step whatever the gradient
+is, so `lr x steps` IS the displacement, against LayerNorm affines of order 1.0:
+
+| point    | lr    | steps | \|dθ\| | kept   | foreign | slots   | **decode** | total   |
+|----------|-------|-------|--------|--------|---------|---------|------------|---------|
+| control  | —     | 0     | 0      | 0.8544 | —       | —       | **-0.0297**| —       |
+| `lr3s2`  | 1e-3  | 2     | ~2e-3  | 0.8504 | 0.8196  | -0.0040 | **-0.0309**| -0.0348 |
+| `lr3s10` | 1e-3  | 10    | ~1e-2  | 0.8091 | 0.7736  | -0.0453 | **-0.0355**| -0.0808 |
+| `lr2s2`  | 1e-2  | 2     | ~2e-2  | 0.7570 | 0.7210  | -0.0974 | **-0.0360**| -0.1334 |
+| `lr2s10` | 1e-2  | 10    | ~1e-1  | REFUSED — see below                              |
+
+**THE READING IS NOT "MONOTONE DAMAGE", IT IS SHARPER THAN THAT, AND THE TWO COLUMNS SAY DIFFERENT
+THINGS.** Both are monotone in |dθ|, but by wildly different amounts. Across a **ten-thousand-fold**
+range of displacement the decode cost moves **0.0063** — from -0.0297 to -0.0360, and it moves in the
+WRONG direction the whole way. Over the same range `kept` falls **0.0974**, from 0.8504 to 0.7570. So
+per-study adaptation of the norm affines does not trade member quality for decode: it spends the member
+and buys nothing. There is no budget at which the decode cost turns, and the first point — a 0.002%
+perturbation, small enough that a null there could have been dismissed as no-op — already carries the
+sign that every larger one confirms.
+
+That kills the ONE reading that would have licensed more card on this axis. BUDGET DAMAGES was the
+branch that says "the felt sizes are destructive, try smaller"; the flat decode column says smaller does
+not help either, because the decode cost is not budget-limited at all. It is REPRESENTATION-BOUND with
+the model-side lever removed rather than untested: the affines are not where the missing information is.
+
+**THE FOURTH POINT WAS REFUSED BY DECISION, and this row is not a measurement.** |dθ| ~ 1e-1 is past the
+line the arm's own header drew — "the trunk is being broken, not adapted" — a catastrophe guaranteed
+before it ran, changing no branch after it, for ~50 minutes of a card that had `ortho_lora` waiting.
+`after_ortholora.sh` killed the reader at the gate; the sweep's own `SWEEP SWEEP DONE` marker in
+`logs/after_budget.log` (`=== BUDGET SWEEP DONE ===`) is therefore the marker of a truncated sweep, not a complete one. Anyone
+re-reading that log gets the same three points and this note.
+
 ### D272 prices the warm-start collapse, and the repeat-geometry policy FLIPS — card-free, 2026-09-09
 
 M273 asked one number: does a warm start collapse the diversity D267 measured in the 41-run cluster

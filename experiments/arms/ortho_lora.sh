@@ -62,6 +62,23 @@
 # at 12 epochs on purpose so that the adaptation is the only thing that moved, and the control carries
 # whatever budget qualifier it carries into both sides of the delta, where it cancels.
 #
+# THE CARD REFUSED THE FIRST VERSION OF THIS ARM, and the refusal is a fact about LoRA on a large trunk
+# rather than a nuisance. `encoder_surgery.backbone_groups` puts an adapter on EVERY block and freezes
+# every base weight -- there is no depth flag under LoRA, by design -- so where the control opens six of
+# twenty-four blocks this arm opens all twenty-four, and `retained_units` prices the activations of all
+# of them. At the control's batch of 12 the cost model derives **45838 MiB against a 32 GB card**, and
+# the smoke refused it at 14:38Z with 30991 free. Measured on the ladder: batch 12 -> 45838, 6 -> 25335,
+# 4 -> 18500, 2 -> 11666.
+#
+# SO THE MICRO-BATCH DROPS TO 4 AND `--accumulate 3` HOLDS THE EFFECTIVE BATCH AT THE CONTROL'S 12.
+# Dropping the batch alone would have been the cheap fix and it would have confounded the arm: batch is
+# in the optimiser's noise scale, and a LoRA row read against a full-FT control at a third of its batch
+# is a reading of two changes. Four rather than six because the card is shared by arrangement with the
+# other project -- 18.5 GB leaves it room where 25.3 GB does not, and the difference between the two is
+# a few minutes of step overhead on an arm already priced at over an hour.
+#
+# deliberate: --batch 4 (the card cannot hold the control's 12 under adapters on all 24 blocks — 45838 MiB derived)
+# deliberate: --accumulate 3 (holds the effective batch at the control's 12, so batch is not a second change)
 # deliberate: --lora-rank 8 (held from every LoRA arm this project owns, so the row is comparable)
 # deliberate: --backbone-lr 5e-4 (the LoRA peak; an irremovable confound, argued in lora.sh)
 # deliberate: --variant ortholarge --slices 12 --image-size 224 --band-low 0.2 --band-high 0.8 (ortho_dense's read exactly — this is the matched control)
@@ -82,7 +99,7 @@ export HF_TOKEN
 require "$LABELS"
 
 run_train ortho_lora \
-  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 12 --batch 4 --accumulate 3 --slice-pooling max --whole-stack $THROUGHPUT \
   --variant ortholarge --lora-rank 8 --backbone-lr 5e-4 --slices 12 --image-size 224 \
   --band-low 0.2 --band-high 0.8 \
   --labels "$LABELS" --out "$MODELS/ortho_lora_s2026.pt"

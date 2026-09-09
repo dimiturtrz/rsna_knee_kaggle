@@ -48,11 +48,18 @@ sleep 20
 # A recipe is smoked before it is queued for an hour and a half. Sixty studies, 48 train / 12 holdout.
 # ortholarge has never been run under adapters, so the failure this catches is a variant LoRALinear cannot
 # wrap, and it costs two minutes rather than the arm's first epoch.
+# THE VERDICT IS THE ARM'S OWN LINE, NOT THE EXIT CODE, and that distinction cost 31 minutes of idle
+# card on 2026-09-09. `arm_check` exits non-zero for any finding in the WHOLE arms directory -- here, six
+# other arms carrying CRLF (knee-rlg5) -- so `|| exit` read a repo-wide hygiene finding as this recipe
+# failing on the card and refused to launch a smoke that had printed `ok ortho_lora`, twice. The gate
+# that matters is what the smoke said about THIS arm: `BROKEN <name>` or `NO ROOM <name>`.
+SMOKE_LOG="$MODELS/smoke_ortho_lora.check.log"
 UV_NO_SYNC=1 uv run python -m kneemri.experiments.arm_check \
-  --only ortho_lora --smoke "$MODELS/smoke_ortho_lora" --smoke-studies 60 || {
+  --only ortho_lora --smoke "$MODELS/smoke_ortho_lora" --smoke-studies 60 2>&1 | tee "$SMOKE_LOG"
+if grep -qaE "^(BROKEN|NO ROOM) ortho_lora" "$SMOKE_LOG" || ! grep -qa "^ok ortho_lora" "$SMOKE_LOG"; then
   echo "=== SMOKE FAILED - ortho_lora NOT launched ==="
   exit 1
-}
+fi
 echo "=== SMOKE PASSED ==="
 
 bash "$(dirname "$0")/arms/ortho_lora.sh"
