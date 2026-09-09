@@ -26,6 +26,11 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
-python -m kneemri.evaluation.foreign_readout \
+# THE INTERPRETER IS PINNED, not resolved. The first run of this arm died on `ModuleNotFoundError: No
+# module named 'jaxtyping'` — and NOT because an environment was missing it: `.venv-arm` imports it fine
+# and so does `.venv`. Bare `python` on PATH is a third interpreter that is neither, and an arm sourcing
+# lib.sh only sets UV_PROJECT_ENVIRONMENT, which steers `uv run` and says nothing about a bare `python`.
+# Naming the interpreter is the only form of this that cannot be wrong somewhere else.
+"$REPO/.venv/Scripts/python.exe" -m kneemri.evaluation.foreign_readout \
   --checkpoints "$MODELS/aug_long_s2026.pt" "$MODELS/band_dense_hold_s2026.pt" \
   --labels "$LABELS" --foreign D:/kaggle/input/raptor-corpus --device cuda

@@ -51,6 +51,22 @@ def test_blocks() -> None:
     assert all(not hasattr(block, "reversed_") for block in BLOCKS)
 
 
+def test_depth() -> None:
+    """The slab declares OUR slice count, never his — the number a caller sizes its window against.
+
+    This is the whole defect knee-kcvma was: the window was sized against `corpus.slices` (his 44) while
+    `batch` serves `slices` (ours), so it indexed a stack nobody handed over. Asserting the two DIFFER
+    is the point — an assertion that only checked the value would pass on a slab that had never been
+    reshaped at all.
+    """
+    slab = MappedSlab(_ramp(), np.arange(2, dtype=np.int64), slots=SLOTS, slices=SLICES, blocks=BLOCKS[:1])
+
+    assert slab.depth == SLICES
+    assert slab.corpus.slices == HIS_SLICES
+    assert slab.depth != slab.corpus.slices, "the served depth is not the source depth"
+    assert slab.batch(0, 2)[0].shape[2] == slab.depth, "and what it serves is what it declares"
+
+
 def test_batch() -> None:
     """His blocks land in the slot each corresponds to, and a slot no block maps to stays absent."""
     holdout = np.arange(2, dtype=np.int64)

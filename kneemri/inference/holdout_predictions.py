@@ -65,6 +65,27 @@ class HoldoutPredictions:
         model.load_trained(saved["model"])
         return model.to(self.device).eval()
 
+    @staticmethod
+    def fits(window: "Window", depth: int) -> None:
+        """Refuse a window the served stack cannot carry, instead of scoring whatever it overlaps.
+
+        The window is sized by the CALLER against the depth it believes the slab serves, and a slab is
+        allowed to serve a different one — so a caller that asks the wrong source produces a read that
+        is short rather than wrong-looking. Off the end it raises deep inside the encoder as a reshape
+        of zero elements, which names neither the window nor the slab; short of the end it raises
+        nothing at all and returns a number. The second is the dangerous one and it is why this checks
+        every start rather than only the last: six members were scored on eight slices of twenty and
+        the only symptom was a plausible drop.
+        """
+        over = [start for start in window.starts if start + window.width > depth]
+        if window.width <= 0 or over:
+            message = (
+                f"a window of width {window.width} at starts {window.starts} does not fit a stack "
+                f"{depth} slices deep ({len(over)} start(s) run past the end) - the window was sized "
+                f"against a different depth than the slab serves"
+            )
+            raise ValueError(message)
+
     def predict(
         self,
         model: StudyModel,
@@ -97,6 +118,7 @@ class HoldoutPredictions:
                 total = torch.zeros(pixels.shape[0], len(TARGETS), device=self.device)
                 passes = 0
                 for view in self.views.apply(pixels):
+                    self.fits(window, view.shape[2])
                     for start in window.starts:
                         total = total + torch.sigmoid(
                             model(view[:, :, start : start + window.width], flags, window.size).float()

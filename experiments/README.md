@@ -11675,8 +11675,8 @@ reading the wrong axis on a register trunk. With the ruler corrected and the cap
 cross-family inheritance, a flat 0.30→0.60 is a fact about the objective rather than about the
 instrument. The masked-adaptation family does not have room in the mask ratio.
 
-**Not rostered.** 0.8378 solo, below the 0.8459 merit level this pool has ever added at, and Pearson
-0.9427 against `latent_register_dense` on all 10908 holdout cells — the same predictions from a
+**Not rostered.** 0.8378 solo, below the 0.8459 merit level this pool has ever added at, and
+Pearson 0.9427 against `latent_register_dense` on all 10908 holdout cells — the same predictions from a
 near-identical run. `latent_register_dense` is on the roster for diversity (the only v3small trunk
 carrying an on-domain latent-MIM adaptation); a second copy of it adds nothing that argument does not
 already have. Declined in writing.
@@ -11726,3 +11726,91 @@ What is closed is spending more CARD on this family: a third mask ratio, a longe
 objective on this trunk all have to beat a ceiling that has now been measured at +0.0014 over doing
 nothing. The re-opening condition is an ENSEMBLE reading, not a solo one — if a seat study ever shows
 `dense` adding where `control` does not, that is the adaptation paying in the only currency it has.
+
+## The generalisation gap is a FLAT TOLL, not a re-ranking — eleven members, decode −0.0336 ± 0.0038 — 2026-09-09
+
+The first measurement this project has ever made of what a member loses under a real distribution shift.
+`foreign_readout` scores every member three ways on the SAME 909-study holdout under the SAME labels:
+`native` as the ledger has it, `kept` on our own pixels routed through the shifted code path, and
+`foreign` on his independent decode of the same studies. `kept − native` is a plumbing self-check that
+must read ~0; `foreign − kept` is the only pixel number.
+
+**Read the void notice first.** An earlier run of this same tool reported these members dropping about
+−0.08, and that number is WRONG and must not be quoted. `foreign_readout` sized its read window against
+`slab.corpus.slices` — his raw 44 — while `MappedSlab` SERVES the member's own slice count. Six 20-slice
+members were scored on `view[:, :, 12:32]` of a 20-deep stack: **eight slices of twenty, silently**, with
+a plausible number logged. Five 12-slice members took the same defect's loud face, an empty view that
+raised inside dinov2 as a reshape of zero elements. Fixed under knee-kcvma by declaring `HoldoutSlab.depth`
+as the SERVED depth, overriding it in `MappedSlab`, and adding `HoldoutPredictions.fits`, which now refuses
+a window the served stack cannot carry rather than scoring whatever it overlaps. The table below is the
+re-run, eleven of eleven, and its `slot_cost` column is what licenses reading it at all.
+
+| member                          | native | kept   | foreign | slots   | **decode** |
+|---------------------------------|--------|--------|---------|---------|------------|
+| `stackfit_s2026`                | 0.8631 | 0.8631 | 0.8326  | −0.0000 | **−0.0305** |
+| `band_dense_hold_s2026`         | 0.8573 | 0.8573 | 0.8213  | +0.0000 | −0.0360 |
+| `small_feat_fit_s2026`          | 0.8571 | 0.8571 | 0.8217  | −0.0001 | −0.0354 |
+| `crop160_span_s2026`            | 0.8564 | 0.8565 | 0.8300  | +0.0001 | **−0.0265** |
+| `mixup_dense_s2026`             | 0.8552 | 0.8552 | 0.8254  | +0.0000 | −0.0298 |
+| `mixup224_strong_s2026`         | 0.8516 | 0.8515 | 0.8174  | −0.0001 | −0.0341 |
+| `warm224_long_s2026`            | 0.8512 | 0.8512 | 0.8173  | +0.0001 | −0.0339 |
+| `aug_long_s2026`                | 0.8511 | 0.8511 | 0.8115  | −0.0000 | **−0.0396** |
+| `native224_s2026`               | 0.8502 | 0.8502 | 0.8119  | −0.0000 | −0.0383 |
+| `tissue224_s2026`               | 0.8491 | 0.8491 | 0.8165  | −0.0000 | −0.0326 |
+| `latent_register_dense_s2026`   | 0.8385 | 0.8386 | 0.8061  | +0.0001 | −0.0325 |
+
+Every `slot_cost` lands inside ±0.0001, so the shifted path serves our own pixels back at our own score
+and the third column is about HIS PIXELS and nothing else. Denominator: 11 of 11 members in the pool,
+all scored, none dropped.
+
+### 1. The toll is flat — nobody is robust and nobody is fragile
+
+`decode_cost` is **−0.0336 mean, sd 0.0038, spanning 0.0131 end to end.** The spread of the drop is
+half the spread of the native scores it is drawn from (sd 0.0063), and the foreign column's spread
+(0.0080) is barely wider than the native one. Eleven members across mixup, span cropping, tissue
+normalisation, band selection, latent-MIM adaptation, two image sizes and two slice counts all pay
+within a third of a point of each other. **There is no robust member in this pool.** Whatever this shift
+costs, it is charged to the architecture family, not to the recipe — which is precisely why no amount of
+reseating inside this pool has ever moved the board.
+
+### 2. The offline ruler DOES transfer — Spearman ρ = 0.8818, p = 0.0003
+
+Native rank against foreign rank over the eleven: **ρ 0.8818 (p 0.0003)**. The best native member is the
+best foreign member; the worst is the worst. Four members move at all and none moves more than three
+places. This settles a question that has been open in prose for a week: *the offline number is not lying
+about which member is better under a shifted decode.* It ranks them the same.
+
+### 3. A better member does NOT pay more for it — ρ(native, decode) = 0.1727, p = 0.61
+
+The standing worry was that our small offline gains are bought with fragility — that a member half a
+point better on our decode has overfitted our decode and will give it back. **Measured, it is not
+happening.** The correlation between a member's native score and what it loses is 0.1727 with p = 0.61,
+which over eleven points is nothing at all. And the two members that drop LEAST (`crop160_span` −0.0265,
+`stackfit` −0.0305) are the 4th and 1st best natively. Fragility is not the price of the offline gain.
+
+Also refuted, on the same numbers: the claim that **augmentation** members drop most. They occupy both
+ends — `aug_long` is the worst in the pool at −0.0396 and `mixup_dense` is third-best at −0.0298.
+Augmentation as a CLASS predicts nothing here.
+
+### What it does point at, and it is the lever
+
+The one member that separates from the pack is `crop160_span` at **−0.0265, a third less than the pool
+mean and 0.0131 better than the worst.** That is mechanism-consistent rather than a coincidence of
+ranking: D206 §5 measured his span running **20–50% wider than ours at the median**, three to four times
+wider on the coronal-side blocks for a tenth of studies, and D205's control put resampling at ~0 of the
+difference — so SPAN is most of what this instrument prices, and the
+member trained at the WIDEST FIELD is the member that pays least for it. `crop160_span` is a fixed
+160 mm crop at 420 px, not a jittered one — it is the only member in the pool whose field of view was
+moved out toward his, and it is the one that pays least. Read together with §1, the pool has no
+robustness axis *because every other member was fitted at one fixed 130 mm field*.
+
+Note what that costs and does not cost: `crop160_span` reads 0.8564 against its own control
+`band_span` 0.8565 — **NULL on our decode, best in the pool on his.** A member that is free
+in-distribution and 0.0071 cheaper out of it is exactly the shape an offline solo ruler cannot see, and
+it is the third measurement this week where the solo number and the out-of-sample number disagree about
+one checkpoint.
+
+That is a member-shaped lever, not a seating one. The arm it argues for is field-of-view JITTER — a
+randomised crop extent rather than a second fixed one — because §1 says the pool's problem is that no
+member ever saw the extent VARY, and a single wider fixed field trades one blind spot for another. The re-opening condition for the rest of this family is
+the same as it has always been — an ensemble reading, not another solo one.

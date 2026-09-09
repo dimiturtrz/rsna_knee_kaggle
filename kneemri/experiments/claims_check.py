@@ -134,6 +134,8 @@ NOT_A_MEMBER_SCORE = (
     "members",
     "board",
     "correlation",
+    "pearson",
+    "spearman",
     "neighbour",
     "nearest",
     "agreement",
@@ -165,9 +167,15 @@ claim this check can adjudicate, and both are frequent enough to bury the ones i
 
 THE LARGEST CLASS IS PAIRWISE AGREEMENT, and it is the one that most looks like a score: this project
 measures how alike two members are on the same 0-1 scale it measures accuracy on, and the seating
-arguments are written in it — `ema_dense`'s nearest seated neighbour is 0.9306, `through_dense` sits at
-0.9143 from its closest twin. Every one of those is a claim about a PAIR. Read as a holdout score they
-are all wrong by a mile, which is exactly how they crowded out the six real findings on the first pass.
+arguments are written in it. `pearson` and `spearman` join `correlation` here because the record names
+the STATISTIC far more often than the category — the line that finally fired this gate read "Pearson
+0.9427 against `latent_register_dense`", a pair number wearing a member's name, and no word on it was in
+this tuple. A coefficient is never one member's holdout whichever of its three names the prose uses, and
+the marker has to sit on the SAME LINE as its number — that one wrapped between the word and the value,
+which is the per-line blind spot above wearing a third face. `ema_dense`'s nearest seated neighbour is
+0.9306, `through_dense` sits at 0.9143 from its closest twin. Every one of those is a claim about a
+PAIR. Read as a holdout score they are all wrong by a mile, which is exactly how they crowded out the
+six real findings on the first pass.
 
 THE SECOND HALF OF THIS TUPLE WAS MEASURED on the 2026-09-01 sweep, by reading all 29 findings by hand:
 twenty-two of them were a number whose subject the line NAMES, in a word this tuple did not yet carry.

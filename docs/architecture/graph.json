@@ -26895,6 +26895,12 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.fits",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
       "target": "kneemri.inference.holdout_slab.HoldoutSlab.batches",
       "weight": 1
     },
@@ -50450,6 +50456,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.foreign_blocks.MappedSlab.depth",
+      "label": "depth",
+      "level": "method",
+      "parent": "kneemri.evaluation.foreign_blocks.MappedSlab",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.foreign_blocks.SlotBlock.taken",
       "label": "taken",
       "level": "method",
@@ -58706,6 +58720,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.HoldoutPredictions.fits",
+      "label": "fits",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.holdout_predictions.HoldoutPredictions.load",
       "label": "load",
       "level": "method",
@@ -58748,6 +58770,14 @@
       "descendants": 0,
       "id": "kneemri.inference.holdout_slab.HoldoutSlab.count",
       "label": "count",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_slab.HoldoutSlab.depth",
+      "label": "depth",
       "level": "method",
       "parent": "kneemri.inference.holdout_slab.HoldoutSlab",
       "role": null

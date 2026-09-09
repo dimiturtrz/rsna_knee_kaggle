@@ -44,6 +44,20 @@ class HoldoutSlab:
         """How many studies the slab covers, without reading any of them."""
         return len(self.holdout)
 
+    @property
+    def depth(self) -> int:
+        """How many slices per slot this slab SERVES — which is not always what its corpus holds.
+
+        A caller sizes its read window against this, never against `corpus.slices`, because a subclass
+        is free to reshape the depth on the way out and one of them does: `MappedSlab` reads his
+        44-slice frame and serves a member's own slice count. Deriving the window from the SOURCE depth
+        then indexes a stack that was never handed over — `view[:, :, 16:28]` of a 12-deep tensor is
+        empty, and `view[:, :, 12:32]` of a 20-deep one is eight slices of twenty with nothing said.
+        Both happened: the first crashed inside the encoder on a reshape of zero elements, and the
+        second scored six members on a third of their stack and logged a plausible number for it.
+        """
+        return self.corpus.slices
+
     def batch(self, begin: int, size: int) -> tuple[NDArray[np.uint8], NDArray[np.float32]]:
         """`size` studies from `begin`: every slot and every slice, read through the corpus.
 

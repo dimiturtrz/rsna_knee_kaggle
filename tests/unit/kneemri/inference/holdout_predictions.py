@@ -108,6 +108,28 @@ def test_load_rebuilds_a_focally_pooled_member(tmp_path: Path):
         assert torch.allclose(loaded.forward(images, mask, SIZE), saved.eval().forward(images, mask, SIZE))
 
 
+def test_fits():
+    """A window that runs past the served stack is refused; one that fits passes silently.
+
+    Both faces of knee-kcvma are exercised, because only one of them ever announced itself. A window
+    starting BEYOND the depth yields an empty view and raised deep inside the encoder as a reshape of
+    zero elements, naming neither the window nor the slab. A window that merely OVERHANGS the end
+    raised nothing at all and scored six members on eight slices of twenty. The second is why this is a
+    check rather than a comment.
+    """
+    HoldoutPredictions.fits(Window(starts=[0], width=SLICES, size=SIZE), SLICES)
+    HoldoutPredictions.fits(Window(starts=[0, 2], width=GROUP, size=SIZE), SLICES)
+
+    with pytest.raises(ValueError, match="does not fit a stack"):
+        HoldoutPredictions.fits(Window(starts=[SLICES + 4], width=SLICES, size=SIZE), SLICES)
+
+    with pytest.raises(ValueError, match="does not fit a stack"):
+        HoldoutPredictions.fits(Window(starts=[SLICES - 2], width=SLICES, size=SIZE), SLICES)
+
+    with pytest.raises(ValueError, match="does not fit a stack"):
+        HoldoutPredictions.fits(Window(starts=[0], width=0, size=SIZE), SLICES)
+
+
 def test_predict():
     """Probabilities for every study, in [0, 1], one row per study and one column per target."""
     predictions = HoldoutPredictions(torch.device("cpu"))

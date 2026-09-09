@@ -47,6 +47,17 @@ def test_batches():
     assert seen.tolist() == [0, 3, 6, 9], "every study, once, in holdout order"
 
 
+def test_depth():
+    """The base slab serves exactly what its corpus holds, so a caller sizes a window against it.
+
+    Asserted against the corpus rather than a literal because the point of the property is that the two
+    agree HERE and are allowed to diverge in a subclass — `MappedSlab` is the one that reshapes depth.
+    """
+    corpus = _corpus()
+
+    assert HoldoutSlab(corpus, np.array([1, 3])).depth == corpus.slices == 1
+
+
 def test_of():
     """Pixels a caller already holds — occlusion builds its own — reach the same batching path."""
     images = np.arange(2 * SLOTS).reshape(2, SLOTS, 1, 1, 1).astype(np.uint8)

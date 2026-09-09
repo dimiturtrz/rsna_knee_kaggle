@@ -141,7 +141,7 @@ class ForeignReadout:
         Goes straight to `predict`: `cached` keys on the checkpoint and the studies and NOT on the
         pixels, so it would answer a shifted pass with the native probabilities and report exactly zero.
         """
-        window = member.window(slab.corpus.slices, overlap=overlap)
+        window = member.window(slab.depth, overlap=overlap)
         return self.scores.mean(self.predictions.predict(self.rebuilt(member), slab, window, member.precision), truth)
 
     def read(

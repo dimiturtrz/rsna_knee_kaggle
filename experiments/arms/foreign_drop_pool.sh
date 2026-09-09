@@ -38,7 +38,9 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
-python -m kneemri.evaluation.foreign_readout \
+# THE INTERPRETER IS PINNED, not resolved — bare `python` on PATH is neither `.venv` nor `.venv-arm`,
+# and it killed this arm's first pilot on a missing `jaxtyping` that both venvs actually have.
+"$REPO/.venv/Scripts/python.exe" -m kneemri.evaluation.foreign_readout \
   --checkpoints \
     "$MODELS/aug_long_s2026.pt" \
     "$MODELS/mixup_dense_s2026.pt" \

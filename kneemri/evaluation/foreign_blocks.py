@@ -90,6 +90,12 @@ class MappedSlab(HoldoutSlab):
         self.slices = slices
         self.blocks = blocks
 
+    @property
+    @override
+    def depth(self) -> int:
+        """The member's own slice count, not his 44 — `batch` resamples every block down to it."""
+        return self.slices
+
     @override
     def batch(self, begin: int, size: int) -> tuple[NDArray[np.uint8], NDArray[np.float32]]:
         """His volume for these studies, block by block, in the slot each block corresponds to."""
