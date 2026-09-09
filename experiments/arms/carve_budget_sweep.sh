@@ -39,7 +39,7 @@
 # THE DEVICE IS THE CARD, never cpu: knee-j99t.
 #
 # deliberate: one member and no seed -- an existential question, not a measurement of a member
-# bead: knee-10f10
+# bead: knee-2sqyb
 # reading: carve_budget_*.npz
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
