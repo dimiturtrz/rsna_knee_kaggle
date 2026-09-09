@@ -5,6 +5,23 @@
 # deliberate: --unfreeze-last 12 --layer-decay 0.7 --backbone-lr 9.8e-5 — the ladder from band_deep_matched, carried across to a foreign trunk with every other flag held at the control.
 # mricore_deep.sh — the SAME ladder as band_deep_matched, on the best foreign trunk we own.
 #
+# ITS LICENCE WAS ANSWERED **NO** ON 2026-09-05, AND THIS ARM MAY NOT RUN. `band_deep_matched` read
+# **0.8487 at e11** against control `band_dense` 0.8578 — the third of its four bands, the one whose
+# text is "closes the depth axis", -0.0091 and outside the 0.0062 paired floor. The ABOVE branch did
+# not fire, so the condition below is MET IN THE NEGATIVE: the ladder does not pay on our own trunk,
+# the four foreign-trunk rows close on their own merits, and the schedule suspicion that hung over all
+# of them is RETIRED rather than outstanding.
+#
+# READ THE NEXT SENTENCE BEFORE RE-OPENING THIS. On 2026-09-09 this arm was nearly launched on a
+# reading of **0.8781**, which is `band_deep_matched`'s `solo@ledger75` from the D203 table — a
+# different STATISTIC on a different POPULATION at a different CUT from the 0.8487 the branch was
+# written against. Both numbers are correct and they are not comparable, and substituting one for the
+# other clears a bar that the real reading misses by 0.0153. That would have bought roughly four hours
+# of card on an arm its own header forbids. A licence is checked against the number its branch names,
+# in the units that branch names.
+#
+# It re-opens only if some LATER arm clears 0.8640 on `band_dense`'s own holdout ruler. Nothing has.
+#
 # THIS ARM IS ONLY LICENSED IF band_deep_matched CLEARS 0.8640. That is its ABOVE branch, and the
 # branch text says what it licenses: "re-running the trunk family". This is that re-run. If
 # band_deep_matched lands anywhere else, do not launch this — a null on our own trunk says the ladder
