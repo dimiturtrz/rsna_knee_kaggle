@@ -55,6 +55,44 @@
 #                                          silence-filling mechanism above and point the next reader at
 #                                          Synovitis and Effusion, which carry -27 of the -30 net.
 #
+# ---------------------------------------------------------------------------------------------
+# PRE-REGISTRATION CORRECTED 2026-09-10T11:10Z, MID-RUN, BEFORE ANY NUMBER LANDED. D295 measured the
+# gold ruler's own resolution and the branches above are written below it. They are WRONG AS STATED
+# and are replaced here rather than edited away, so the record shows what was claimed and when.
+#
+#   study bootstrap of a macro gold AUC, n=58:            sd 0.0178
+#   jackknife SE:                                         0.0183
+#   PAIRED difference sd at the measured arm-to-arm corr 0.84:  0.0101
+#
+# So a +/-0.005 gold branch is HALF a standard deviation of the instrument reading it. The 0.0062
+# floor quoted for gold in knee-8wa0 is this project's THREE-SEED PAIRED 909-STUDY floor, borrowed
+# onto a 58-study ruler — 15.7x fewer studies. Same denominator error the project rule names.
+#
+# AND THE GOLD SET IS 78% IN-SAMPLE. `--hold-annotations` does NOT hold the annotated studies out:
+# `options.py:314` -> `targets.py:453` skips only the block that OVERWRITES those cells with the
+# radiologist value at ANNOTATED_WEIGHT. The rows stay in the training table at their report-derived
+# values. 45 of the 58 gold studies sit in the training fold and 13 in the 909 holdout. This arm
+# never passed the flag and its supervision table is reader-derived, not fitted on gold, so the
+# knee-8wa0 circularity channel does not reach it — but the IMAGES are seen either way, for the arm
+# and its control alike.
+#
+# THE BRANCHES THAT ACTUALLY READ:
+#   proxy (909 studies, own holdout, L75mid, floor 0.0062) is the only reading with the resolution to
+#   decide anything, and it is the one biased AGAINST this arm. So:
+#     holdout >= +0.0062   THE TABLE IS BETTER AND THE ASYMMETRY DID NOT EVEN COST IT. Strongest
+#                          available outcome; v5reader becomes the supervision table.
+#     holdout within the floor   the table is not worse under a ruler built to punish it. KEEP THE
+#                          MEMBER for the ensemble (a genuinely different supervision table is a
+#                          diversity axis the pool does not have) and treat the table as OPEN.
+#     holdout <= -0.0062   the 74 misses cost real signal; point the next reader at Synovitis and
+#                          Effusion and stop paying card for reader tables.
+#   gold (n=58) is reported as a LEVEL, never as a selector, and only outside +/-0.020 (2 paired sd)
+#   may it be read as a direction.
+#   gold-on-the-honest-13 (the gold studies inside the 909 holdout) is the only CLEAN gold read this
+#   project can take. It costs no card — both records are on disk. Its sd is ~0.018 on 13 studies, so
+#   it is recorded as an observation and is not allowed to decide anything either.
+# ---------------------------------------------------------------------------------------------
+#
 # deliberate: --labels (the single moving token vs through_dense / recal_through)
 # deliberate: --eval-labels (the ruler must not move with the arm; recal_holdannot is the incident)
 # bead: knee-07gvn
