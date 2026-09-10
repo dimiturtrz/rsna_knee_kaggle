@@ -12386,3 +12386,35 @@ is the source array (native 224 decode vs the 336 merged3 cache downsized by `Me
 resample difference. Related trap: `teacher_readings.py:82` logs `reading N training studies at %d px`
 from `member.read_size`, the member's OWN trained size, NOT from `--cache-size` — so `224 px` in that
 line is correct behaviour, and reading it as a flag that failed to land would kill a healthy run.
+
+## The first ImageNet CNN this project ever fitted reads 0.8527, and the 48-epoch budget question is still open — 2026-09-10
+
+Two owed rows, written together because the second is only readable against the first.
+
+`resnet_224_short_s2026` — resnet50d at 224 px, 2.5D through-plane RGB, max over 20 slices, full-trunk
+finetune at 2e-4, twelve epochs — peaked **0.8527 @e8/12** and settled (0.8496, 0.8494, 0.8481). Converged,
+not truncated. It is the number that replaces a belief: thirteen encoders are on the registry, twelve of
+them transformers or hybrids, and the one convolutional line on the ledger (`radnet121`, 0.6716) was a
+reading about RadImageNet's *corpus*, not about convolution. No ImageNet CNN had ever been trained here.
+
+**It is `resnet50d_short_s2026` 0.8393 repaired, not a new lane.** The two arms differ in one flag:
+`--unfreeze-last 16`. `--whole-stack` selects the SLICE WINDOW (`run_setup.py:638`) and says nothing about
+which blocks carry a gradient, so the earlier arm fitted a CNN inside our usual six-block frozen trunk and
+its log read `train mode pins 36 frozen norm layer(s)`. Sixteen is resnet50d's own block count (3+4+6+3) and
+`BlockWindow.of` clamps, so it opens every block. **+0.0134 of the gap between those two rows is a flag, not
+an architecture** — which is this project's most expensive recurring failure appearing once more, and the
+reason the arm's harness check demanded that line read 3 rather than 36.
+
+`resnet_224_long_s2026` — the same recipe at his 48 epochs — was **killed at epoch 9** and has no checkpoint,
+only a `.partial`. Best 0.8404 @e6, then 0.8298 and 0.8281. **That is a FLOOR and it must not be read as a
+budget result.** Under `one_cycle` at epoch 8 of 48 the rate is still near its peak and the anneal has not
+begun; the two arms are different schedules compared at a point only the short one had finished. The
+declining tail is what a mid-schedule one_cycle looks like, not evidence that longer overfits. The
+48-epoch CNN budget is UNMEASURED, costs ~3.5 h at ~265 s/epoch to measure, and is declined for now on
+ratio rather than on a result — the short arm already delivers the thing the long one was gating, which is
+an ARCHITECTURE FAMILY the ensemble has no member of.
+
+**What the short arm buys is distance, not quality.** 0.8527 sits inside our own 336/12 family band
+(~0.852-0.862), so as a solo it is unremarkable and nothing here claims otherwise. The argument for it was
+never quality — the seven board flats were all reseatings WITHIN the ViT family, and this is the first seat
+from outside it. That is a claim about the ENSEMBLE and it is priced on the board, not here.

@@ -994,3 +994,17 @@ ortho_lora_s2026.pt         # 0.8349 best e10, 0.0172 UNDER the 0.8521 seat bar 
                             # re-run its ABOVE branch would have owed. Re-opened only by D276 naming a rank
                             # tied to trunk width — the flat-curve "rank too small" escape is not available
                             # here, because the curve climbed 0.7328 -> 0.8349 and settled. Ledger 2026-09-09.
+
+resnet_224_long_s2026.pt    # NO CHECKPOINT EXISTS — the run was killed at epoch 9 of 48 (the owner stopped
+                            # processes that were freezing the machine on 2026-09-09) and only
+                            # `resnet_224_long_s2026.partial` was ever written. The holdout record is real,
+                            # which is why roster_check can see it, but there is nothing to package.
+                            # ITS NUMBER IS A FLOOR, NOT A READING. Best 0.8404 @e6 of 48 asked, and the
+                            # last two epochs it lived to see went DOWN (0.8298, 0.8281) — which is what a
+                            # `one_cycle` schedule does mid-run, at a learning rate still near its peak with
+                            # the anneal never reached. Do NOT read 0.8404 against `resnet_224_short`'s
+                            # 0.8527 @e8/12 and conclude the longer budget does not pay: those are two
+                            # different LR schedules compared at a point only one of them had finished.
+                            # The 48-epoch CNN budget question is OPEN and unmeasured.
+                            # Re-opened by: re-running the arm to completion (~3.5 h at ~265 s/epoch).
+                            # Ledger 2026-09-10.
