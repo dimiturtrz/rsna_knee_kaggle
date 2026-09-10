@@ -23619,12 +23619,6 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.unk_surface.UnkSurface.of",
-      "target": "kneemri.evaluation.unk_surface.UnkSurface.is_uncertain",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.unk_surface.UnkSurface.of",
       "target": "kneemri.evaluation.unk_surface.UnkSurface.reading",
       "weight": 1
     },
