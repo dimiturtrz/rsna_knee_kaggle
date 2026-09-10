@@ -13197,3 +13197,54 @@ what a member IS rather than how the six are seated or served.
 
 Caution on foreign checkpoints, priced: `aprime_solo_v1`, a raptor fine-tune, scored **0.506**. A borrowed
 trunk's quality is unmeasurable here until it has been honestly held out.
+
+## D309 §1's pooling claim, answered on arrays already on disk — the sign FLIPS across the frozen/fine-tuned boundary — 2026-09-10
+
+The researcher's D309 §1 cites arXiv 2606.11606 [CLF]: frozen probes of RAD-DINO / DINOv2 / DINOv3-7B /
+MedSigLIP where **global (CLS) pooling sits at chance (AUC 0.500–0.524) on small-footprint signal while
+patch-local pooling from the same forward pass recovers ≈1.0**, a small-vs-large stratum gap up to +0.243
+recovered by region-restricted pooling. Our members pool `cls_mean` and our deficit sits on focal findings,
+so the lead read as directly ours. It cost no card to answer, because both halves were already measured.
+
+**THE FINE-TUNED HALF WAS ALREADY CLOSED, and I called this "the strongest lead of the day" before reading
+that.** `focal_dense` (`--pool cls_mean_focal`, one flag off `band_dense`, flag verified in the CHECKPOINT
+config) read **0.8534, −0.0044**; by structure scale, focal +0.0001 / regional −0.0114. `sided_pool`
+(`--pool sided`) read +0.0007 seat value under the ledger's own title, *"the head was given a medial/lateral
+axis, and did not use it"*. The family was written closed on all its axes. This is the failure CLAUDE.md
+names in as many words, and it is the second time this week that a finding was filed against a number the
+ledger already held.
+
+**THE FROZEN HALF IS THE NEW READING, and it is in the ten-trunk probe table above.** `feature_probe.py:58`
+maps `@mean` to `..._mean_max` — patch **mean alone, the global vector DROPPED**, which is 2606.11606's own
+operation — and `:81` maps `@focal-max` to `..._cls_mean_focal_max`. Slice pooling is `max` in both, the
+studies are the same 909, each trunk gets its own ridge penalty. So the pair isolates PATCH pooling:
+
+| trunk (frozen ridge probe) | `mean` (global dropped) | `cls_mean_focal` | delta |
+| --- | --- | --- | --- |
+| `ortholarge` | 0.8170 | 0.8249 | **+0.0079** |
+| `v3large` | 0.7968 | 0.8046 | **+0.0078** |
+| `dinov2-large` | 0.7996 | 0.8048 | **+0.0052** |
+
+Three trunks, same sign, +0.0052 to +0.0079, mean +0.0070 — and `focal_dense` reads **−0.0044** for the
+same substitution on a FINE-TUNED trunk. **The sign flips across the frozen/fine-tuned boundary**, which is
+the mechanism M307 proposed to the researcher before this table was found: a fine-tuned trunk can move
+focal signal INTO the global vector and a frozen one cannot, so local pooling is worth something to a probe
+and nothing to a member. Our nulls are correct for our regime and 2606.11606 is correct for its own.
+
+**AND THE PAPER'S DIRECTIONAL CLAIM IS REFUTED ON OUR TRUNKS IN ITS OWN SETTING.** `mean` DROPS the global
+vector — the operation 2606.11606 says recovers ≈1.0 from a chance-level global — and on all three large
+trunks it is the WORST row, by 0.005 to 0.008. Whatever is at chance in their CXR trunks is not at chance
+in ours.
+
+**WHAT THIS DOES NOT SAY, and it is the one honest hole.** `cls_mean_focal` both restores the class token
+AND appends a focal tail, so the +0.0070 cannot be split between the two. `dinov2-small` is the only trunk
+cached at `cls_mean_max` and it is the wrong size to compare against. Splitting it costs one encoder pass
+per large trunk to write `..._cls_mean_max` caches — no training, no fit, minutes on the card — and that
+arm would ALSO settle whether the frozen gain is the CLS token's or the tail's. It is an instrument and is
+worth queuing behind current work; it is not worth a fitted arm, because the fitted half already answered.
+
+Seat value is the check that kills any temptation to serve this: `ortholarge@mean` and `ortholarge@focal-max`
+seat into `honest12` at **+0.0014 both**, identical to three decimals. The solo gain does not survive into
+an ensemble at all — which is the ledger's standing reading that pooling shifts budget and does not create
+it, now measured on the frozen side too.
+
