@@ -8,6 +8,9 @@ import pytest
 from core.findings import TARGETS
 from kneemri.evaluation.unk_surface import MINIMUM_STUDIES, UNCERTAIN, UnkReading, UnkSurface
 
+UNCERTAIN_EVERY = 4
+"""One cell in four, so a fixture record's uncertain share clears `MINIMUM_UNCERTAIN` as v2 does."""
+
 STUDIES = 400
 """Above `MINIMUM_STUDIES`, so a fixture record is read rather than refused for being a smoke run."""
 
@@ -28,10 +31,12 @@ def _predictions(truth: np.ndarray) -> np.ndarray:
     return np.where(np.isclose(truth, UNCERTAIN), 1.0, truth)
 
 
-def _record(tmp_path: Path, member: str, uncertain_every: int = 0) -> Path:
-    truth = _truth(uncertain_every)
+def _record(tmp_path: Path, member: str, *, inverted: bool = False) -> Path:
+    """A member record on the v2 ruler; `inverted` reads every cell backwards, so it ranks last."""
+    truth = _truth(UNCERTAIN_EVERY)
+    predictions = _predictions(truth)
     path = tmp_path / f"{member}.holdout.npz"
-    np.savez(path, predictions=_predictions(truth), truth=truth)
+    np.savez(path, predictions=1.0 - predictions if inverted else predictions, truth=truth)
     return path
 
 
@@ -69,31 +74,43 @@ def test_reading_single_class() -> None:
 
 
 def test_of(tmp_path: Path) -> None:
-    reading = UnkSurface().of(_record(tmp_path, "member_a", uncertain_every=4))
+    reading = UnkSurface().of(_record(tmp_path, "member_a"))
     assert reading is not None
     assert reading.member == "member_a"
 
 
 def test_of_refuses_short(tmp_path: Path) -> None:
     """A frame below the smoke-run floor is not a member reading and is refused rather than scored."""
-    truth = _truth()[: MINIMUM_STUDIES - 1]
+    truth = _truth(UNCERTAIN_EVERY)[: MINIMUM_STUDIES - 1]
     path = tmp_path / "smoke.holdout.npz"
     np.savez(path, predictions=_predictions(truth), truth=truth)
     assert UnkSurface().of(path) is None
 
 
 def test_of_refuses_mismatched_shape(tmp_path: Path) -> None:
-    truth = _truth()
+    truth = _truth(UNCERTAIN_EVERY)
     path = tmp_path / "ragged.holdout.npz"
     np.savez(path, predictions=_predictions(truth)[:, :3], truth=truth)
     assert UnkSurface().of(path) is None
 
 
+def test_of_refuses_moved_ruler(tmp_path: Path) -> None:
+    """A truth block with no uncertain cells was scored by a re-mapped table, not by v2.
+
+    Its area is on a different ruler, so ranking it beside the ledger's members is the defect that
+    printed `recal_holdannot_s2026`'s forbidden number.
+    """
+    truth = _truth()
+    path = tmp_path / "remapped.holdout.npz"
+    np.savez(path, predictions=_predictions(truth), truth=truth)
+    assert UnkSurface().of(path) is None
+
+
 def test_sweep(tmp_path: Path) -> None:
-    _record(tmp_path, "clean", uncertain_every=0)
-    _record(tmp_path, "muddy", uncertain_every=4)
+    _record(tmp_path, "reads")
+    _record(tmp_path, "backwards", inverted=True)
     readings = UnkSurface().sweep(tmp_path)
-    assert [row.member for row in readings] == ["clean", "muddy"]
+    assert [row.member for row in readings] == ["reads", "backwards"]
 
 
 def test_inversions() -> None:
@@ -109,8 +126,8 @@ def test_inversions() -> None:
 def test_report(tmp_path: Path) -> None:
     lines = UnkSurface().report(UnkSurface().sweep(tmp_path))
     assert lines == ["no holdout record carried both a predictions and a truth block"]
-    _record(tmp_path, "clean", uncertain_every=0)
-    _record(tmp_path, "muddy", uncertain_every=4)
+    _record(tmp_path, "reads")
+    _record(tmp_path, "backwards", inverted=True)
     body = "\n".join(UnkSurface().report(UnkSurface().sweep(tmp_path)))
     assert "2 members" in body
     assert "re-ranking" in body

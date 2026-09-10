@@ -12951,3 +12951,69 @@ A correction worth recording because it nearly cost the researcher a wasted line
 report row is Spanish and sectioned `Técnica:/Resultados:/Impresión:`, and M295 generalised the whole
 corpus from it. M296 retracts that. The sectioning is one language's convention, which demotes the
 Impression-vs-Findings idea from cheap to needing a per-language section grammar.
+
+### 2026-09-10 — the reader itself, measured against radiologists: 121 net wrong vs v2's 140
+
+**Three of the paragraphs above are now wrong and are corrected here rather than edited away.**
+
+**(1) The language stratification was a guess and it does not hold.** "The label noise is likely
+stratified by language" was never measured when it was written. It has been: per-language binarised
+agreement against the 58 radiologist-annotated studies, eight languages (bg/de/el/en/es/hr/nl/tr),
+English 80.0% vs non-English 76.3% — **+0.037, 95% CI [−0.079, +0.145]**. The interval contains zero
+and is wider than the effect. Per-language error is not an axis at this sample size, and the analogy
+to D292 §1's age-stratified labeler error is withdrawn.
+
+**(2) The 0.28 constant is not the CheXpert knob, because our uncertain bucket is not near even.**
+knee-7oep had already priced the six reader levels against the radiologist rows, 696 cells over 58
+studies, and the bead was not read before the axis was filed:
+
+```
+0.08 -> 0.041 (n=196)    0.28 -> 0.136 (n=177)    0.50 -> 0.417 (n=12)
+0.68 -> 0.378 (n=98)     0.82 -> 0.688 (n=141)    0.94 -> 0.958 (n=72)
+```
+
+The 0.28 bucket is **13.6% positive**, so binarising it to a negative at the midpoint is right about
+86% of the time and D292's +0.040/+0.070 price does not transfer — CheXpert's uncertain bucket sits
+near even and ours does not. **What survives is better than what was claimed:** the reader's ENDS are
+nearly right and its MIDDLE is broken. The 0.68 level is 98 cells that are 62% NEGATIVE, trained today
+as 0.68 positive — a target wrong by ~0.30 on 14% of all cells, always in the direction of inventing a
+positive. Mean per-finding rank AUC 0.866 against binarised agreement 0.789 says the same thing from
+the other side: the ORDERING is good and the VALUE is broken.
+
+**(3) A card IS now queued, because a better reader arrived and sat four days unscored.** The rebuilt
+corpus reader finished 2026-09-06T14:53Z (4407 studies, both census sidecars, `finish_reasons` all
+`stop`) and `reader_end_chain.sh` had been written and never run against it. Run 2026-09-10:
+
+```
+v2   140 net wrong of 696 cells   108 confident false positives + 32 misses
+new  121 net wrong of 696 cells    47 false positives          + 74 misses
+```
+
+It passes v2's gate by 19 cells and **the failure mode inverts**: v2 invents positives, the new reader
+withholds them (45 of its 74 misses are UNK, 29 an explicit NO) and its silent share rises 27.3% →
+32.1%. Synovitis (−13) and Effusion (−14) carry −27 of the −30 net under-call. Installed as
+`report_labels_v5reader.csv` — NOT a third file spelled `v3`, which is knee-ibfrw.
+
+**This settles the design the paragraph above left open.** Of its three candidates: scoring on the
+UNK-free subcorpus is dead — dropping those cells moves 318 members by mean +0.0229 (sd 0.0063) and
+re-ranks 8.8% of member pairs, so it is not a neutral lens but an easier corpus
+(`kneemri.evaluation.unk_surface`). The gold reading is the one that works and it **exists**, contrary
+to M296: `foreign_gate --gold-auc`, n=58, and it has already carried a decision — the gold-vs-proxy
+pair that declined a member is written out in `comp/members.declines`, and is deliberately not
+re-quoted here, because that member's own holdout record sits on a ruler that moved with it and the
+same file says its number must not be quoted. Read it there with its population attached. So
+`reader_through` holds the ruler PINNED at v2 and moves only `--labels`, and
+reads gold first. **The asymmetry is pre-registered in the wrong direction**: an arm taught to withhold
+positives is scored by a ruler that rewards inventing them, so the proxy should read flat-to-negative
+even if the table is better, and a holdout regression inside 0.0062 is not a refutation here.
+
+**A ruler swap on the candidate table is not a gain either.** 116 members, 909 shared studies, 8 seats
+deep: all 8 seats moved, churn 0.375, 0.8770 on the recorded ruler against 0.9025 on the candidate.
+Same trap as the UNK-free subcorpus — a different ruler reading higher is a different question, not a
+better answer.
+
+**Why this is the supervision change worth the card.** D283 measured the board−offline gap at +0.0608:
+the board reads our members HIGHER than our own ruler does, which is exactly what a ruler that
+over-calls positives produces. The board is scored against real readings; our proxy is scored against a
+reader that invents 108 of them in 696 cells. This is the one label-side change with a mechanism
+pointed at the board rather than at the proxy.

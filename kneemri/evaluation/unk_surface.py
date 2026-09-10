@@ -21,12 +21,20 @@ cells changes the population, and it removes the cases a report was equivocal ab
 a model is likeliest to be wrong on. The move bounds how much of a member's measured number is an
 artefact of the convention, and nothing more.
 
-THE PART THAT BEARS ON DECISIONS IS THE SPREAD, NOT THE OFFSET. Measured over 323 members on 2026-09-10:
-mean +0.0226, sd 0.0069, range -0.0158 to +0.0360. An offset that were flat would be harmless — it would
-cancel in every comparison this project makes. It is not flat: its sd sits above the 0.0062 paired noise
-floor, it re-ranks 8.6% of all member pairs, and it changes the top ten. `stackfit_s2026` 0.8631 over
-`band_dense_s2026` 0.8578 becomes 0.8833 UNDER 0.8839. Every seat this project has chosen was chosen on
-a ruler carrying an unstated convention that moves members unequally.
+THE PART THAT BEARS ON DECISIONS IS THE SPREAD, NOT THE OFFSET. Measured over the 318 members that are
+actually on the v2 ruler, 2026-09-10: mean +0.0229, sd 0.0063, range -0.0158 to +0.0360. An offset that
+were flat would be harmless — it would cancel in every comparison this project makes. It is not flat: its
+sd sits AT the 0.0062 paired noise floor rather than under it, it re-ranks 8.8% of all member pairs, and
+it changes three of the top ten. Every seat this project has chosen was chosen on a ruler carrying an
+unstated convention that moves members unequally — but a spread this close to the floor prices that as a
+RISK to seat ordering, not as a measured harm to any particular seat.
+
+WHAT IT REFUSES. A record whose truth block carries almost no uncertain cells was not scored against
+v2 at all — its arm passed a re-mapped table and the ruler moved with it. Five such records sit on
+disk, and this module's first run ranked one of them in its top ten: `recal_holdannot_s2026` at
+0.8964, the number `comp/members.declines` says in writing must never be quoted. The share is the
+signature, `MINIMUM_UNCERTAIN` is the floor, and such a record is dropped from the sweep entirely
+rather than shown with a caveat.
 
 WHAT IT CANNOT SETTLE. Not whether a different convention would SCORE better — supervision and ruler are
 the same file, so changing 0.28 moves the target and the scorer together, and there is no
@@ -62,6 +70,16 @@ STUDIES = "studies"
 
 MINIMUM_STUDIES = 200
 """Below this a record is a smoke run or a truncated frame, not a member reading."""
+
+MINIMUM_UNCERTAIN = 0.10
+"""The floor a truth block's uncertain share must clear to be `report_labels_v2.csv` at all.
+
+v2 carries 27.3% uncertain cells; a table that re-maps them carries ~0. A record scored against a
+re-mapped table was scored by a DIFFERENT RULER, so its area is not comparable to the ledger's and
+the move this module measures is not defined for it — there is no convention left to price. Five
+records on disk are in that state, and one of them is `recal_holdannot_s2026`, whose 0.8964
+`comp/members.declines` says in writing must not be quoted. This module printed it in a top ten.
+The share is the signature because the truth block does not record which table produced it."""
 
 TOP = 10
 """How many members each ordering prints, since the question is whether the two orderings agree."""
@@ -155,12 +173,15 @@ class UnkSurface:
 
         Refuses rather than guesses on a shape mismatch: a predictions block that does not match its
         truth block can only be joined by position, and a positional join produces a plausible number.
+        Refuses a truth block below `MINIMUM_UNCERTAIN` for the same reason — it is a different ruler.
         """
         with np.load(record, allow_pickle=True) as held:
             if PREDICTIONS not in held or TRUTH not in held:
                 return None
             predictions, truth = held[PREDICTIONS], held[TRUTH]
         if predictions.shape != truth.shape or truth.shape[0] < MINIMUM_STUDIES:
+            return None
+        if float(self.is_uncertain(truth.astype(np.float64)).mean()) < MINIMUM_UNCERTAIN:
             return None
         member = record.name.removesuffix(".holdout.npz")
         return self.reading(member, predictions.astype(np.float64), truth.astype(np.float64))
