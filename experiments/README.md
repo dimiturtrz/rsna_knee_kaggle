@@ -13494,3 +13494,36 @@ better MEMBER can, which is the arithmetic that has been quoted as "one member a
 honest ~0.866" and is now the only lever measured above its own instrument's noise.
 
 This is a reading of the board record, not an experiment; it cost no card and no slot.
+
+### Correction to `base_honest_batch`'s stated axis: it is effective-batch MATCHED to `base_dense` — 2026-09-10
+
+The arm header reads `base_dense` as "batch 2 / accumulate 3" and treats `base_honest_batch`'s batch 5 as
+buying a larger optimizer batch. It does not. `accumulate 3` means `base_dense`'s optimizer saw an
+**effective batch of 6**, against this arm's **5**. The two runs are matched on the axis the header
+claimed to be moving.
+
+What actually differs is the RANKING LOSS's within-batch pair count, which is drawn inside the physical
+batch and not across accumulation steps: **1 pair at batch 2, 10 at batch 5, 66 at batch 12.** So the
+comparison this arm lands is cleaner than it was designed to be — a near-pure read on ranking-pair
+density at fixed trunk, fixed geometry and fixed effective batch, which nothing in the ledger owns.
+
+It also re-points the branches. `base_honest_batch` − `base_dense` is no longer "what batch buys the base
+trunk"; it is "what ranking-pair density buys it", and `band_pairmem`'s −0.0092 (measured on the SMALL
+trunk at 336/20) is the only prior we have for that quantity.
+
+Epoch-3 anchors, all three on fold 0 under the same 12-epoch `one_cycle` budget:
+
+| run | trunk | physical batch | effective batch | within-batch pairs | epoch 3 | final |
+|---|---|---|---|---|---|---|
+| `band_dense` | small | 12 | 12 | 66 | 0.8330 | 0.8578 |
+| `base_dense` | base | 2 / acc 3 | 6 | 1 | 0.8232 | 0.8512 |
+| `base_honest_batch` | base | 5 | 5 | 10 | **0.8112** | running |
+
+At epoch 3 the arm sits 0.0120 under `base_dense` and 0.0218 under `band_dense`. `trajectory_check`
+declines to truncate it (generous ceiling 0.8641 against a 0.8578 target, so the branch is not yet
+unreachable), but the median e3→peak gain over 201 matched runs is +0.0205 and p90 is +0.0325, which
+project to 0.8317 and 0.8437 — both under `base_dense`'s own 0.8512. The bottom branch is the live one:
+the wider trunk under-performing its own handicapped run would say the batch was never what held it
+back, and would retire capacity as the last open suspect at n=4,407.
+
+Read the final number against `base_dense` FIRST, and read it as a ranking-pair result, not a batch one.
