@@ -13017,3 +13017,41 @@ the board reads our members HIGHER than our own ruler does, which is exactly wha
 over-calls positives produces. The board is scored against real readings; our proxy is scored against a
 reader that invents 108 of them in 696 cells. This is the one label-side change with a mechanism
 pointed at the board rather than at the proxy.
+
+### `oof_reader_fold[0-4]_s2026` — v5reader does not replace v2. THE ARM ABOVE READ, AND IT READ NEGATIVE.
+
+Five folds, 224/8, seed 2026, `--labels report_labels_v5reader.csv`, against `oof_fold[0-4]_s2026` on
+the same folds. So this is a PAIRED gold@58 read, all 58 studies honest by construction, and it is the
+first supervision change this project has ever decided on a full out-of-fold stitch rather than on
+thirteen studies.
+
+```
+PAIRED against oof_fold[0-4]_s2026 — the difference and ITS sd, which is the ruler:
+  rankpooled  -0.0112   sd 0.0122      <- the registered internal ruler
+  paircount   -0.0120   sd 0.0128
+  macro       -0.0170   sd 0.0135      <- the board-comparable row (D298)
+```
+
+**Read it as a kill, and say why it is not a refutation.** The pre-registration was ±0.020 on the paired
+rankpooled, so −0.0112 lands INSIDE the null band and the honest word for the arm's own gate is null.
+But three estimators point the same way at roughly 1σ each, and the board-comparable macro is the one
+nearest the "cost real signal" branch — the direction is consistent and the size is not zero. Nothing
+here licenses `v5reader` over `v2`, and the 74 reader-miss repairs bought no signal on 58 honest studies.
+
+**The asymmetry pre-registered above did not save it.** The argument was that an arm taught to withhold
+positives is scored by a proxy that rewards inventing them, so a flat-to-negative proxy read would be
+expected even if the table were better. That argument was about the PROXY. This reading is on gold — 58
+radiologist-annotated studies, the only truth in this project not produced by a reader — and gold does
+not have the asymmetry the argument invokes. So the escape hatch the arm was given does not apply to the
+ruler it was actually read on.
+
+**What it closes and what it does not.** It closes REPAIRING what the reader got wrong: this is the
+second label-side route to fail on a measured control, after the UNK-free subcorpus lens. It does not
+close the label side. Re-spreading what the reader DECLINED TO ASSERT is a different mechanism on
+different cells — the middle rung, 12.22% of the table, which v5reader never touched — and it is on the
+card as `oof_band_folds` (knee-27kuj). A route that repairs assertions and a route that resolves
+non-assertions are not two attempts at one idea.
+
+**Price paid: 2.1 h of card for a kill.** That is a real result and it is cheaper than the arm would have
+been worth had it passed, because a table that reads −0.0112 on gold would otherwise have gone on
+supervising members for weeks on the strength of its 19-cell gate margin.
