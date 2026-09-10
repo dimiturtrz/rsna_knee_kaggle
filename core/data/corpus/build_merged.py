@@ -83,12 +83,17 @@ def main() -> None:
     StudyMetadata.merge_written(
         root.processed() / METADATA, (arguments.scheme, arguments.extra_scheme), arguments.merged_scheme
     )
+    destination = arguments.labels_out or root.processed() / "labels" / f"{arguments.merged_scheme}_labels.csv"
     if arguments.labels_only:
+        # The exclusion applies here too, or a labels-only rebuild onto an existing cache silently puts
+        # every black study back into a table the previous build had cleaned.
+        merger.drop_unslotted(destination)
         logger.info("LABELS ONLY — the images were left alone")
         return
     # An hour of sequential copy with no keyboard input, and the idle timer counts INPUT rather than load.
     with Wakelock():
         merger.build()
+    merger.drop_unslotted(destination)
     logger.info("MERGE COMPLETE")
 
 

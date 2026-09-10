@@ -129,3 +129,9 @@ resnet_224_short_s2026.pt   # 0.8527 solo (peak e8, 12 epochs, converged) — TH
                             #
                             # 48-epoch arm resnet_224_long is on the card behind it; this row prices the
                             # 12-epoch budget every other seat on the ledger was fitted under.
+clean_calib_s2026.pt          # 0.8649 midpoint, the strongest plain-recipe fold-0 member with no full-data twin; the P1 refit candidate, unshippable until now
+labelwise_extended_s2026.pt   # ledger75 0.9060 SOLO — above greedyseat_v1's whole seven-member 0.9040, the best ledger75 solo the project owns
+extended_band_s2026.pt        # rostered with a checkpoint and never packaged; joins on the same sweep
+latent_register_dense_s2026.pt # rostered with a checkpoint and never packaged; joins on the same sweep
+fovjitter160_s2026.pt         # rostered with a checkpoint and never packaged; its cache is gone so it can be SERVED but not re-scored
+resnet_224_long_s2026.pt      # the 48-epoch CNN; the greedy seats it 7th on the roster-wide ledger75 pool, and it is a family the packaged pool is thin in

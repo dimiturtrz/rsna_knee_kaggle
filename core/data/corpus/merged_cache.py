@@ -57,14 +57,25 @@ class MergedCache:
         self.extra = extra
         self.merged = merged
 
-    def positions(self) -> list[int]:
-        """Where each of `extra`'s slots lands in the merged slot axis, matched by slot NAME.
+    def positions(self) -> tuple[list[int], list[int]]:
+        """Which of `extra`'s slots the merged axis carries, and where each lands — matched by slot NAME.
 
         By name and not by index: a foreign corpus's slot list is a SUBSET of the canonical one, and
         matching positionally would be correct only for a prefix and silently wrong for anything else.
+
+        A slot the destination axis does not name is DROPPED, not refused. `slots.FASTMRI_SLOTS` prices
+        that drop in writing before any merge runs — `COR_FLUID_NOFS` is not among the canonical six, so
+        a canonical merge carries the fat-suppressed half of that corpus and leaves the other behind.
+        This method used to raise instead, which made the merge that docstring describes impossible to
+        run: `ValueError: 'COR_FLUID_NOFS' is not in list`, on first invocation, 2026-09-10. A cost
+        stated in one module and refused by another is the same defect either way, and the module that
+        argued the cost is the one that was right.
         """
         axis = self.merged.scheme_slots
-        return [axis.index(name) for name in self.extra.scheme_slots]
+        carried = [(source, axis.index(slot)) for source, slot in enumerate(self.extra.scheme_slots) if slot in axis]
+        if not carried:
+            raise ValueError(f"{self.merged.key} names none of {self.extra.key}'s slots, so the merge carries nothing")
+        return [source for source, _ in carried], [destination for _, destination in carried]
 
     def check(self) -> None:
         """Refuse a merge that would write onto a source, or concatenate arrays of different geometry."""
@@ -91,8 +102,12 @@ class MergedCache:
         images = np.lib.format.open_memmap(
             self.merged.images_path, mode="w+", dtype=np.uint8, shape=self.merged.shape(total)
         )
-        self._copy(images, 0, np.load(self.base.images_path, mmap_mode="r"), slots=list(range(self.merged.slots)))
-        self._copy(images, len(base_studies), np.load(self.extra.images_path, mmap_mode="r"), slots=self.positions())
+        whole = list(range(self.merged.slots))
+        self._copy(images, 0, np.load(self.base.images_path, mmap_mode="r"), sources=whole, slots=whole)
+        sources, slots = self.positions()
+        self._copy(
+            images, len(base_studies), np.load(self.extra.images_path, mmap_mode="r"), sources=sources, slots=slots
+        )
         images.flush()
         self.merged.record(base_studies + extra_studies)
         mask = self._mask(len(base_studies), len(extra_studies))
@@ -132,6 +147,41 @@ class MergedCache:
         merged.to_csv(destination, index=False)
         logger.info(f"{len(merged)} rows, {len(merged.columns)} columns -> {destination}")
 
+    def drop_unslotted(self, destination: Path, *, identifier: str = "StudyInstanceUID") -> int:
+        """Remove label rows for merged studies whose mask is entirely empty. Returns how many went.
+
+        A slot the merged axis does not name is dropped by `positions`, and a foreign study that filled
+        ONLY such a slot therefore arrives as a black volume — every pixel zero, every mask flag zero —
+        carrying its full label row. `slots.FASTMRI_SLOTS` prices the dropped slot; it does not price
+        this, and this is the part that would corrupt a run rather than merely shrink it. Half of
+        fastMRI is acquired without fat suppression, so the first `mergedf` build put **584 black
+        studies** into 5,579, each supervised negative on nine of our twelve findings. Nothing
+        downstream excludes them: the trainer joins labels to the cache index by identifier and reads
+        whatever row it finds, so the lesson available from those rows is that an empty image means
+        absent — on exactly the findings this corpus was brought in to supervise.
+
+        Dropping the LABEL row and not the cache row is deliberate. The array stays as decoded, so the
+        merge remains reproducible and a later extended-scheme build can carry those studies properly;
+        what changes is only that nothing is asked to learn from them.
+
+        An UNBUILT destination drops nothing rather than refusing: a labels-only run over a cache that
+        does not exist yet has no mask to read, and there is nothing black in a table whose arrays have
+        not been written.
+        """
+        mask_path = self.merged.mask_path
+        if not mask_path.exists():
+            logger.info(f"{self.merged.key} has no mask yet, so no study can be known black — nothing dropped")
+            return 0
+        mask = np.load(mask_path)
+        studies = self._index(self.merged)
+        empty = {study for study, flags in zip(studies, mask, strict=True) if not flags.any()}
+        table = pd.read_csv(destination)
+        kept = table[~table[identifier].astype(str).isin(empty)]
+        dropped = len(table) - len(kept)
+        kept.to_csv(destination, index=False)
+        logger.info(f"dropped {dropped} label rows for studies with no slot at all -> {len(kept)} rows")
+        return dropped
+
     @staticmethod
     def _tagged(table: pd.DataFrame, name: str) -> pd.DataFrame:
         """One source's table with a `corpus` column, filled with `name` only where it has none."""
@@ -145,7 +195,8 @@ class MergedCache:
         """The merged presence mask: base's own rows, then extra's flags at their matched positions."""
         mask = np.zeros((base_studies + extra_studies, self.merged.slots), dtype=np.float32)
         mask[:base_studies] = np.load(self.base.mask_path)
-        mask[base_studies:, self.positions()] = np.load(self.extra.mask_path)
+        sources, slots = self.positions()
+        mask[base_studies:, slots] = np.load(self.extra.mask_path)[:, sources]
         return mask
 
     def _copy(
@@ -153,16 +204,20 @@ class MergedCache:
         images: UInt8[np.ndarray, "studies slots slices height width"],
         start: int,
         source: UInt8[np.ndarray, "source slots slices height width"],
+        sources: list[int],
         slots: list[int],
     ) -> None:
         """Block-copy one source's studies into the merged array at `start`, slot by matched slot.
+
+        `sources` and `slots` are the same length and pair up: a source slot the merged axis does not
+        name appears in neither, so it is read from nowhere and written nowhere.
 
         Blocked because the base corpus is 35.8 GB: a whole-array assignment between two memory maps
         materialises it, and the machine has less RAM than that to spare beside a running trainer.
         """
         for first in range(0, len(source), COPY_STUDIES):
             block = source[first : first + COPY_STUDIES]
-            images[start + first : start + first + len(block), slots] = block
+            images[start + first : start + first + len(block), slots] = block[:, sources]
             logger.info(f"copied {first + len(block)}/{len(source)} into offset {start}")
 
     @staticmethod

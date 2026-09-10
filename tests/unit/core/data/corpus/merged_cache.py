@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 from core.data.corpus.merged_cache import MergedCache
-from core.data.corpus.slots import MERGED_SCHEME, RIJEKA_SCHEME
+from core.data.corpus.slots import FASTMRI_SCHEME, MERGED_SCHEME, RIJEKA_SCHEME
 from core.data.corpus.study_cache import StudyCache
 
 SLICES = 2
@@ -36,7 +36,38 @@ def test_positions(tmp_path: Path):
     """A foreign corpus's single slot lands at the canonical slot of the same NAME, not at index 0 by luck."""
     merged = merger(tmp_path, ["a"], ["b"])
 
-    assert merged.positions() == [merged.merged.scheme_slots.index(merged.extra.scheme_slots[0])]
+    assert merged.positions() == ([0], [merged.merged.scheme_slots.index(merged.extra.scheme_slots[0])])
+
+
+def test_positions_drops_a_slot_the_destination_does_not_name(tmp_path: Path):
+    """The half of fastMRI acquired without fat suppression: carried by no canonical slot, so dropped.
+
+    It used to raise, which made every fastMRI merge unrunnable while `slots.FASTMRI_SLOTS` documented
+    the drop as a cost it had already accepted.
+    """
+    merged = merger(tmp_path, ["a"], ["b"])
+    merged.extra = merged.extra.under(FASTMRI_SCHEME)
+
+    sources, slots = merged.positions()
+
+    assert len(sources) == len(slots) == 1
+    assert merged.extra.scheme_slots[sources[0]] == merged.merged.scheme_slots[slots[0]]
+
+
+def test_drop_unslotted(tmp_path: Path):
+    """A study whose every mask flag is zero loses its LABEL row, so nothing learns absence from black."""
+    merged = merger(tmp_path, ["a"], ["x"])
+    merged.build()
+    mask = np.load(merged.merged.mask_path)
+    mask[-1] = 0.0
+    np.save(merged.merged.mask_path, mask)
+    destination = tmp_path / "labels.csv"
+    pd.DataFrame({"StudyInstanceUID": ["a", "x"], "ACL": [1.0, 0.0]}).to_csv(destination, index=False)
+
+    dropped = merged.drop_unslotted(destination)
+
+    assert dropped == 1
+    assert pd.read_csv(destination)["StudyInstanceUID"].tolist() == ["a"]
 
 
 def test_check(tmp_path: Path):
@@ -55,7 +86,7 @@ def test_build(tmp_path: Path):
 
     images = np.load(merged.merged.images_path)
     mask = np.load(merged.merged.mask_path)
-    slot = merged.positions()[0]
+    slot = merged.positions()[1][0]
     assert json.loads(merged.merged.index_path.read_text(encoding="utf-8")) == ["a", "b", "x"]
     assert (images[:2] == 1).all()
     assert (images[2, slot] == 2).all()
