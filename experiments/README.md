@@ -12418,3 +12418,58 @@ an ARCHITECTURE FAMILY the ensemble has no member of.
 (~0.852-0.862), so as a solo it is unremarkable and nothing here claims otherwise. The argument for it was
 never quality — the seven board flats were all reseatings WITHIN the ViT family, and this is the first seat
 from outside it. That is a claim about the ENSEMBLE and it is priced on the board, not here.
+
+## The external-data axis closes on its own measurement: matched supervision did not stop the foreign block displacing us — `noisy_student` 0.8548 — 2026-09-10
+
+`noisy_student_s2026` = **0.8548 @e10 of 12**, converged (e11 0.8545, not truncated, not undertrained).
+Against its pre-registered control `merged3_corpus_s2026` = 0.8521 at the identical geometry: **+0.0027**,
+which is the arm's own **0.852-0.856 FLAT branch**, written before the run.
+
+**What was tested.** The third site again, with its SUPERVISION replaced rather than its pixels. One
+variable against `merged3_corpus`: `--distill-weight 0.7 --teacher-targets teacher_merged3.npz`, the
+teacher being the four `oof_clean_fold[1-4]_s2026` twins that no fold-0 study ever reached. This was the
+one untested cell of the corpus x supervision 2x2 — foreign pixels WITH supervision that speaks all twelve
+columns — and the cell the whole "the label mismatch is the blocker" argument rested on.
+
+**THE DE-CONFOUNDING READ, which is the reason this arm was worth running.** `merged3_corpus`'s failure
+had a shape: a ROTATION, not an addition, with Lateral Meniscus worst of twelve at -0.0217. If matched
+supervision were the blocker, that column is where the repair had to show. Per-column, `noisy_student`
+against `merged3_corpus`:
+
+| column | merged3_corpus | noisy_student | delta |
+|---|---|---|---|
+| **Lateral Meniscus** | 0.848 | 0.842 | **-0.006** |
+| Fracture | 0.818 | 0.807 | -0.011 |
+| Medial Meniscus | 0.898 | 0.895 | -0.003 |
+| PF OA | 0.824 | 0.840 | +0.016 |
+| Contusion | 0.855 | 0.871 | +0.016 |
+| Lateral OA | 0.807 | 0.818 | +0.011 |
+| Medial OA | 0.872 | 0.882 | +0.010 |
+| Synovitis | 0.854 | 0.860 | +0.006 |
+| ACL | 0.886 | 0.891 | +0.005 |
+
+**Lateral Meniscus is still negative.** Matched supervision did not recover the column the corpus argument
+was built on, and the gains sit in the OA/Contusion/PF group — the same rotation, not a repair of it.
+
+**The two-delta caveat, and it bites the wrong way.** The arm stated before running that the distill term
+alone is worth ~+0.0056 on OUR rows (`seat_clean_distill` 0.8634 vs `band_dense` 0.8578), so a result in
++0.004..+0.013 would be consistent with "the distill term worked and the foreign rows contributed nothing".
++0.0027 is BELOW that. The honest reading is not "the foreign rows did nothing" but "the distill term paid
+part of what it normally pays and the foreign block ate the rest".
+
+**CONSEQUENCE — the corpus axis is closed, and it is closed on a measurement rather than on a confound.**
+That was the stated value of this branch and it is the whole return on the run. The site-count corner was
+already negative (README:332 — second site +0.0043, third site -0.0024; `merged3_corpus` 0.8521 under
+`merged_corpus` 0.8545), but every one of those readings carried the same live objection: the foreign rows
+supervise one column of twelve, so the corpus was never fairly tested. That objection is now answered. It
+also pre-prices fastMRI-as-a-fourth-site, which needs no run: adding sites is not the lever, and neither is
+supervising them properly. **Do not re-propose a corpus arm without a mechanism that is neither of these
+two.** The corner that still pays is supervision at a FIXED two-site cache (`merged_blend_cf` 0.8597,
+`merged_span_cf` 0.8618) and that is untouched by this result.
+
+Four further noisy-student knobs — student noise, confidence filtering, a ramped weight, round two — were
+closed by literature before any of them cost a card (D279, section above). None is re-opened by this row.
+
+Recipe confirmed by the arm's own harness check before the number was read: `scheme merged3`,
+`merged3_labels.csv`, `eval_labels report_labels_v2.csv`, `image_size 336`, `distill_weight 0.7`,
+`teacher_targets teacher_merged3.npz`, 6393 studies / 5484 train / 909 holdout, `init: None`. 223 s/epoch.
