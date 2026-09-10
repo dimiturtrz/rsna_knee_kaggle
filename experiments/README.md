@@ -12650,3 +12650,51 @@ none of this is a reason to reseat.
 merely below the noise floor of the holdout's own resampling — it is below the floor of WHICH HALF of the
 holdout you happened to look at. Stop pricing arms against each other inside that band; price them against
 the band's edge, or on a subgroup where the difference is mechanism-predicted.
+
+## Neither the ordering NOR the ensemble margin is resolvable on 909 studies — control_spread, 2026-09-10, no card, no slot
+
+The subgroup reading above left one thing unpriced: a SINGLE random split. Its two halves agreed on the
+ensemble margin to four decimals (+0.0066 / +0.0067), which looked like the margin being a far more stable
+statistic than the ranking — and would have licensed switching every keep/kill from "which arm ranks
+higher" to "what does this arm contribute to the mix". Twenty splits say that was luck.
+
+**13 arms, 20 random halves, the two statistics over the identical splits:**
+
+```
+                        min       median      max      spread
+midpoint  ordering tau  +0.1282   +0.3205   +0.5641
+midpoint  margin        +0.0039   +0.0066   +0.0086   0.0047
+ledger75  ordering tau  +0.0000   +0.2436   +0.5385
+ledger75  margin        +0.0053   +0.0071   +0.0089   0.0036
+```
+
+**Reading. Both statistics are noise at this n, and the margin is the more damning of the two.** The
+ordering was already known to be unresolvable — median tau +0.32, and one split in twenty put it at
+EXACTLY zero, meaning two halves of our own holdout ranked thirteen arms with no relationship at all.
+The new number is the margin: **the whole ensemble buys +0.0066 over its best single member, less than
+half our 1.5% significance bar, and known only to within a half-split range of 0.0039-0.0086.** A
+statistic whose spread is 70% of its own value is not a lever, it is a reading we cannot take.
+
+**What this retracts.** The per-subgroup margins from the section above — +0.0080 on the low-series half
+against +0.0032 on the high-series half, a 2.5x spread that looked like a real acquisition effect — sit
+entirely inside the 0.0039-0.0086 random range. Not a finding. **And Klontzas et al. 2024 does not
+reproduce locally**: their cross-architecture ensemble margin GREW 2.75x out of distribution (+0.024
+internal, +0.066 external), so the local proxy predicted a bigger margin on our harder subgroup. We
+measured +0.0069 hard against +0.0054 easy — the right direction, one fifth of the random spread, worth
+nothing. That does NOT refute Klontzas; their margins are 4-10x ours to begin with, on n=104/49 with three
+architectures that differ far more than thirteen variations of one recipe. It refutes the local PROXY, and
+it says our members are nowhere near diverse enough for the mechanism to have anything to work with.
+
+**And the CNN addition, priced honestly.** Adding `resnet_224_short` to the twelve moves the margin by
++0.0009 to +0.0011, uniformly across every subgroup. Inside the noise by a factor of four. `kneemri-cnnseat`
+therefore ships as an INSTRUMENT and must be written down as one: it asks whether a family the board has
+never held moves the BOARD, which is the only ruler left with the resolving power to answer it. Its
+pre-registration is a null offline and it has one.
+
+**The consequence, stated plainly.** This project has spent weeks choosing between arms separated by
+0.001-0.010 using a holdout that cannot resolve 0.005. Every one of those decisions was a coin flip
+dressed as a measurement, and the seven consecutive board flats are exactly what a correct ruler with no
+resolving power produces. **Nothing inside the 0.851-0.863 band is worth another hour of card.** What is
+worth it is anything whose mechanism could plausibly deliver 1.5% — a genuinely different architecture
+family, more supervised data, or a change to the truth definition — and the ONLY instrument that can
+price those is the board itself, five reads a day.

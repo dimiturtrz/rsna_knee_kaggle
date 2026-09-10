@@ -66,6 +66,10 @@ logger = logging.getLogger(__name__)
 TARGET_COLUMNS = 12
 """What the competition averages over. Our `nanmean` may average over fewer; that gap is the reading."""
 
+CONTROL_SPLITS = 20
+"""How many random halves price a statistic's spread. Twenty because each is two full passes over the
+pool and the reading is a min/median/max, not an interval that would want hundreds."""
+
 CONTROL_SEED = 2026
 """The project seed, so the random-split floor a reading is compared against is the same one twice."""
 
@@ -258,6 +262,62 @@ class RankStability:
             lines.append(f"tau {first} vs {second}: {tau:+.4f}")
         return lines
 
+    def subgroup_margin(self, scores: LabelScores, groups: dict[str, NDArray[np.bool_]]) -> list[str]:
+        """What the ENSEMBLE buys over its best single member, per subgroup — the diversity bet, priced.
+
+        Klontzas et al. 2024 (Eur Radiol, hip AVN MRI) is the only published number that prices the
+        argument this project has been making for weeks: their cross-architecture ensemble beat the best
+        single model by +0.024 internally and by **+0.066 externally** — the margin GREW 2.75x out of
+        distribution. If that mechanism is real it is worth far more than any keep/kill inside our
+        0.012 band, because it is the one lever sized above the ruler's own noise floor.
+
+        Their axis is internal-vs-external and we cannot run it. The honest local proxy is the same one
+        §3(3) uses: our own HARD subgroup versus our own EASY one. A margin that grows where the single
+        model degrades is the mechanism firing on us; a flat margin says the Klontzas number is about
+        their two hospitals and does not transfer, and the diversity bet has to be argued some other way.
+        """
+        lines = [f"ensemble margin over best single, {len(self.pool)} members, ruler {scores.name()}"]
+        for name, keep in groups.items():
+            restricted = self.pool.restricted(keep)
+            singles = [scores.mean(member, restricted.truth) for member in restricted.predictions]
+            together = scores.mean(restricted.combined(tuple(range(len(restricted)))), restricted.truth)
+            best = float(np.nanmax(singles))
+            lines.append(
+                f"{name:28s} n={int(keep.sum()):5d}  best single {best:.4f}  "
+                f"ensemble {together:.4f}  margin {together - best:+.4f}"
+            )
+        return lines
+
+    def control_spread(self, scores: LabelScores, count: int = CONTROL_SPLITS) -> list[str]:
+        """The same two statistics over MANY random halves — which of them 909 studies can actually carry.
+
+        One random split gives a floor; several give its spread, and the spread is what says whether a
+        statistic is worth reading at this n at all. Two statistics are compared over the identical
+        splits: the ORDERING (Kendall tau between the halves) and the ENSEMBLE MARGIN over the best
+        single member. If the margin's spread is small where the tau's is large, then the quantity this
+        project has been reading — which arm outranks which — is the one thing our holdout cannot
+        resolve, while what an arm CONTRIBUTES to a mix is resolvable on the same studies. That would be
+        a reason to change the statistic every keep/kill is taken on, which is a bigger lever than any
+        arm inside the band.
+        """
+        taus: list[float] = []
+        margins: list[float] = []
+        for offset in range(count):
+            halves = self.control(CONTROL_SEED + offset)
+            vectors = [self.within(scores, keep) for keep in halves.values()]
+            taus.append(float(stats.kendalltau(vectors[0], vectors[1]).statistic))
+            for keep in halves.values():
+                restricted = self.pool.restricted(keep)
+                singles = [scores.mean(member, restricted.truth) for member in restricted.predictions]
+                together = scores.mean(restricted.combined(tuple(range(len(restricted)))), restricted.truth)
+                margins.append(together - float(np.nanmax(singles)))
+        return [
+            f"{count} random splits, ruler {scores.name()} — what this holdout can carry",
+            f"ordering    tau      min {min(taus):+.4f}  median {float(np.median(taus)):+.4f}  max {max(taus):+.4f}",
+            f"ensemble    margin   min {min(margins):+.4f}  median {float(np.median(margins)):+.4f}  "
+            f"max {max(margins):+.4f}  spread {max(margins) - min(margins):.4f}",
+        ]
+
     def report(self, scores: LabelScores) -> list[str]:
         """The table, the cut agreement, and the verdict the first-rank share licenses."""
         rows = sorted(self.table(scores), key=lambda arm: arm.rank)
@@ -316,8 +376,12 @@ def main() -> None:
     ruler = stability.ruler(recut=arguments.ruler == "ledger75")
     lines = stability.report(ruler)
     if arguments.series is not None:
-        lines += stability.subgroup_agreement(ruler, SeriesAxes.read(arguments.series).groups(pool.studies))
+        groups = SeriesAxes.read(arguments.series).groups(pool.studies)
+        lines += stability.subgroup_agreement(ruler, groups)
         lines += stability.subgroup_agreement(ruler, stability.control())
+        lines += stability.subgroup_margin(ruler, groups)
+        lines += stability.subgroup_margin(ruler, stability.control())
+        lines += stability.control_spread(ruler)
     command.report(lines)
 
 

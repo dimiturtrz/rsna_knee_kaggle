@@ -113,6 +113,16 @@ def test_subgroup_agreement() -> None:
     assert any(line.startswith("tau even vs odd: +1.0000") for line in lines)
 
 
+def test_subgroup_margin() -> None:
+    """The margin is reported against the best SINGLE member on that subgroup's own studies."""
+    stability = RankStability(_pool(), RESAMPLES)
+    odd = np.arange(STUDIES) % 2 == 1
+    lines = stability.subgroup_margin(stability.ruler(), {"odd": odd})
+    assert lines[0].startswith("ensemble margin over best single, 3 members")
+    assert "n=  100" in lines[1]
+    assert "margin " in lines[1]
+
+
 def test_control() -> None:
     """The floor is two disjoint halves that together cover every study exactly once."""
     halves = RankStability(_pool(), RESAMPLES).control()
@@ -120,6 +130,14 @@ def test_control() -> None:
     assert int(first.sum()) == STUDIES // 2
     assert not (first & second).any()
     assert (first | second).all()
+
+
+def test_control_spread() -> None:
+    """Both statistics are priced over the same splits, and the margin's spread is the readable one."""
+    lines = RankStability(_pool(), RESAMPLES).control_spread(RankStability(_pool(), RESAMPLES).ruler(), 3)
+    assert lines[0].startswith("3 random splits")
+    assert "ordering" in lines[1]
+    assert "spread" in lines[2]
 
 
 def test_read(tmp_path: Path) -> None:
