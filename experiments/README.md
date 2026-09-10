@@ -13448,3 +13448,49 @@ Every one of these is a REBUILD, not a re-train — the checkpoints all survived
 and decode time, and `arm_check --smoke` writes a truncated `_first60` array for cheap, so the
 recipes are all still reachable. What was actually lost is the ABILITY TO PRICE these members
 until somebody spends that time.
+
+### The offline ruler has a measured resolution limit, and every lever of the last week sits under it — 2026-09-10
+
+Fitted on `comp/board.jsonl`, entries from 2026-08-20 on, `scope: excluded` dropped (so `raptor_solo`'s
+98.6% in-sample row and `aprime_solo_v1`'s 0.506 are out). Two populations, and they do not share a
+constant:
+
+| population | n | mean board − offline | sd | range |
+|---|---|---|---|---|
+| solo (1 member) | 5 | **+0.0650** | 0.0029 | +0.0618 … +0.0696 |
+| ensemble (>1) | 23 | **+0.0614** | 0.0026 | +0.0518 … +0.0649 |
+
+**A solo transfers +0.0036 BETTER than an ensemble.** Part of the ensemble bonus is paid back at the
+board, which is a fact the target arithmetic has been quoting a single blended `+0.063` over.
+
+**THE RESOLUTION LIMIT.** Over all 230 ordered pairs of the 23 ensemble anchors, how often does the board
+order the pair the opposite way from offline:
+
+| Δ offline | pairs | board order inverted |
+|---|---|---|
+| 0.000 – 0.002 | 86 | 15 = **17%** |
+| 0.002 – 0.005 | 73 | 4 = 5% |
+| 0.005 – 0.010 | 49 | **0** |
+| ≥ 0.010 | 22 | **0** |
+
+So the ruler is not broken — it is strictly monotone on the board above Δ0.005 offline, zero inversions
+in 71 pairs. It is simply BLIND below Δ0.002. The worked case is on the board already: `foldfour_v1`
+(offline 0.8711) scored **0.936** while `peak8_v1` (offline 0.8731, the better offline number) scored
+**0.932** — 0.002 of offline producing 0.004 of board in the wrong direction.
+
+**WHY THIS IS THE ANSWER TO "WHY ARE WE STUCK AT 0.944".** Every operation this project has priced in the
+last week lies under the floor: the marginal seat on the diversity curve **+0.0004**, `sided_pool`
+**+0.0007**, LogitAverage over RankAverage **+0.0014**, the seat-oracle headroom **+0.0039**, the
+split-half per-label top-4 **+0.0043**. Not one of them is resolvable on the board, which is why they
+keep reading as flat there no matter how carefully they are measured offline — `cnnseat_v1` landing on
+0.944, the champion's exact number, is the same sentence in board units. The house bar of ~1.5% and this
+0.005 floor are the same instruction arriving from two directions.
+
+**AND IT PRICES THE ONE AXIS THAT IS STILL ABOVE THE FLOOR.** Using the ensemble constant rather than the
+blended one: 0.955 needs an ensemble at **0.8936** offline; `cnnseat_v1`'s 0.944 implies **0.8826**; so
+the ensemble owes **+0.0110** offline. That sits in the ≥0.010 band, 0 of 22 pairs inverted — the board
+can see it. Nothing in the seating family can deliver it (the whole oracle headroom is +0.0039). Only a
+better MEMBER can, which is the arithmetic that has been quoted as "one member at ~0.874 against our best
+honest ~0.866" and is now the only lever measured above its own instrument's noise.
+
+This is a reading of the board record, not an experiment; it cost no card and no slot.
