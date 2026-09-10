@@ -1,24 +1,26 @@
 {
-  "id": "dimiturnt/kneemri-trained",
-  "title": "kneemri-trained",
-  "code_file": "kneemri-trained.py",
-  "language": "python",
-  "kernel_type": "script",
-  "is_private": true,
-  "enable_gpu": true,
-  "enable_internet": false,
-  "machine_shape": "NvidiaTeslaT4",
-  "dataset_sources": [
-    "dimiturnt/kneemri-kit",
-    "dimiturnt/kneemri-members",
-    "dimiturnt/dinov3-hf", "dimiturnt/vjepa2-hf"
-  ],
-  "competition_sources": [
-    "rsna-knee-abnormality-detection"
-  ],
-  "kernel_sources": [],
-  "model_sources": [
-    "metaresearch/dinov2/PyTorch/small/1",
-    "metaresearch/dinov2/PyTorch/base/1"
-  ]
+ "id": "dimiturnt/kneemri-trained",
+ "title": "kneemri-trained",
+ "code_file": "kneemri-trained.py",
+ "language": "python",
+ "kernel_type": "script",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": false,
+ "machine_shape": "NvidiaTeslaT4",
+ "dataset_sources": [
+  "dimiturnt/kneemri-kit",
+  "dimiturnt/kneemri-members",
+  "dimiturnt/dinov3-hf",
+  "dimiturnt/vjepa2-hf",
+  "dimiturnt/resnet50d-224"
+ ],
+ "competition_sources": [
+  "rsna-knee-abnormality-detection"
+ ],
+ "kernel_sources": [],
+ "model_sources": [
+  "metaresearch/dinov2/PyTorch/small/1",
+  "metaresearch/dinov2/PyTorch/base/1"
+ ]
 }
