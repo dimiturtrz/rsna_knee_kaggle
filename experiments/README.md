@@ -12892,3 +12892,62 @@ the range (CI95 [0.903, 1.350], n=26), which EXCLUDES the +1.55 this project has
 Every plan priced through `board_transfer` is over-priced by roughly 40%: the 0.010 board gap wants
 about **+0.009 offline**, not the +0.006 that 1.55 implied. In our working band the gap is a flat
 offset, mean +0.0608, sd 0.0035 — below the paired arm-to-arm noise floor.
+
+## The ruler's uncertain-mention bucket is one hardcoded constant covering 27.3% of every cell, and the corpus is multilingual — 2026-09-10
+
+Two facts about `report_labels_v2.csv`, the file `column_surface.py:50` resolves as `CORPUS_LABELS`
+and against which every holdout number in this ledger is computed. Neither was written down anywhere.
+
+**The label ladder has five rungs, not a continuum.** Across the 12 finding columns and 4,406 studies:
+
+```
+0.08   22298   42.17%
+0.28   14445   27.32%     joins 1:1 to __conf 0.05 and __verdict UNK
+0.68    6461   12.22%
+0.82    6427   12.16%
+0.94    3241    6.13%
+__conf  takes exactly three values: 0.05 (14445), 0.85 (22298), 0.95 (16129)
+__verdict takes exactly three: UNK, NO, YES
+```
+
+The 14,445 is exact on both rows, so every UNK cell carries label 0.28. **The convention for mapping
+an uncertain mention is therefore a single undocumented constant applied to more than a quarter of
+both the supervision and the ruler.** D292 prices that axis from the literature: on CheXpert, holding
+images, architecture, split and labeler fixed and changing only the uncertain-mention mapping moves
+weighted AUROC by 0.070 (U-Zeros vs U-Ones) and 0.040 for CheXbert — a larger swing than the choice of
+labeler. Our knob is set to 0.28 by nobody's stated argument.
+
+**This is the first mechanism-backed candidate for the five-axis flatness recorded above.** Twelve
+members across capacity, trunk LR, per-depth schedule, loss and sampler all landing 0.8235-0.8578 is
+what a shared wrong target produces: no rearrangement of the model can move a study whose label is
+wrong, and 27.3% of cells carry a label that is not a reading of anything.
+
+**The comparison is not straightforward and that is the open part.** Supervision and ruler are the
+same file, so moving 0.28 moves the target and the scorer together. CheXpert could A/B this because
+they scored against a radiologist-annotated test set; we have none at scale. Three candidate designs
+(hold the ruler at v2 and vary only supervision — conservative, the ruler penalises the arm under
+test; score on the UNK-free subcorpus — honest but discards the studies the question is about; score
+against a gold reading — `processed/rsna_knee_gold58/` is 58 studies and holds images and a mask, not
+an established label table). **No card is queued against this until the design is settled.**
+
+**And the corpus is MULTILINGUAL, which nothing in this repo says.** `raw/train.csv` ships a `Report`
+column of free text, mean 1,097 chars, zero nulls, and the finding columns beside it are EMPTY — so
+every label file this project owns is somebody's extraction and there is no official table to be
+approximated. Marker-token census, crude, denominators given rather than dressed up:
+
+```
+en   2019  45.8%      ??   1205  27.3%      es    683  15.5%
+de    250   5.7%      nl    169   3.8%      fr     81   1.8%      total 4407
+```
+
+Only the total is exact; the `??` bucket is a quarter of the corpus and the classified counts are
+biased by which markers were written. What survives: English is the plurality and Spanish is a
+minority. One extraction ran over all of it, so the label noise is likely **stratified by language** —
+the same shape as the age-stratified labeler error D292 §1 reports, and a reason its symmetric
+40%-synthetic-noise evidence does not transfer. Per-language member error rates have never been
+measured and would cost no card.
+
+A correction worth recording because it nearly cost the researcher a wasted line of work: the first
+report row is Spanish and sectioned `Técnica:/Resultados:/Impresión:`, and M295 generalised the whole
+corpus from it. M296 retracts that. The sectioning is one language's convention, which demotes the
+Impression-vs-Findings idea from cheap to needing a per-language section grammar.
