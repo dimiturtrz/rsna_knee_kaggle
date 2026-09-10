@@ -13419,3 +13419,32 @@ by an order of magnitude rather than removing it, and it lands the first pure BA
 trunk at fixed geometry (batch 5 against `base_dense`'s batch 2), which nothing here owns yet.
 6 fits too, at 29,992, and was refused: `mae_unitfix_s2026_run1` held 32,024 MiB, reported 51 MiB free
 at its first step, and collapsed 510 → 57 img/s the moment epoch 0's holdout eval allocated on top.
+
+### The cache sweep's real radius, enumerated — 2026-09-10
+
+The earlier section said `roster_check`'s gone-cache list is a FLOOR on the sweep's radius rather
+than the radius. Re-read after the roster was closed, it now names NINE members against arrays that
+no longer exist, and the list includes one nobody had counted:
+
+| member | array gone |
+|---|---|
+| **`band_wide_s2026`** | `mask_336px_16sl_0.1-0.9band` |
+| `crop160_span_s2026` | `images_` + `mask_420px_12sl_160mm_0.1-0.9band` |
+| `crop80_span_s2026` | `images_336px_12sl_80mm_tissue_0.1-0.9band` |
+| `crop80_tissue_s2026` | `images_336px_12sl_80mm_tissue` |
+| `extended_ws_s2026` | `images_336px_12sl_extended` |
+| `fovjitter160_s2026` | `images_` + `mask_420px_12sl_160mm_0.1-0.9band` |
+| `intensity392_ws_s2026` | `images_448px_12sl` |
+| `res392_ws_s2026` | `images_448px_12sl` |
+| `tissue224_s2026` | `images_` + `mask_224px_12sl_tissue` |
+
+`band_wide_s2026` is the one that matters. It is HALF of the best pair this project owns —
+`band_dense` + `band_wide` read 0.8633 paired, +0.0055 over the better of them, and the greedy
+sweep over 23 same-split members picks those two first and second. Its checkpoint is on disk and
+it can still be SERVED; what it cannot be is re-scored, re-derived or witnessed offline, which is
+exactly what a witness check and every future seat price need.
+
+Every one of these is a REBUILD, not a re-train — the checkpoints all survived. The cost is card
+and decode time, and `arm_check --smoke` writes a truncated `_first60` array for cheap, so the
+recipes are all still reachable. What was actually lost is the ABILITY TO PRICE these members
+until somebody spends that time.
