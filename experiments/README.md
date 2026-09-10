@@ -13145,3 +13145,55 @@ maximum diversity — still only reached 0.937: its diversity was knob-diversity
 family. The untested axis is FAMILY count, not seat count. We own two families (the DINOv2/v3
 line, and borrowed raptor whose quality is unmeasurable at `--fold -1`) plus exactly one
 all-ours convolutional member, `resnet_224_short_s2026`, trained 2026-09-10.
+
+### The plateau is a property of the POOL, and the board's noise floor on identical members is ±0.001
+
+Computed 2026-09-10 from `comp/board.jsonl`, over every entry at or above 0.943 (n=16). Two facts fall
+out, and the second is the one that matters.
+
+**FIRST, THE NOISE FLOOR, MEASURED RATHER THAN ASSUMED.** Five of those sixteen entries have
+**byte-identical member sets** — all six of `final_ws_cf`, `calib_span_ff`, `grade_ladder_cf`,
+`merged_blend_cf`, `lr4e-5_ws_cf`, `through_dense_cf`:
+
+| entry | date | board | what differs |
+|---|---|---|---|
+| `champviews_v1` | 2026-08-31 | 0.943 | views |
+| `rootmove_v1` | 2026-09-02 | 0.944 | root transform |
+| `aucvote_v1` | 2026-09-02 | 0.943 | vote rule |
+| `stackvote_v1` | 2026-09-02 | 0.943 | stacked vote |
+| `monotone_v1` | 2026-09-02 | 0.944 | monotone calibration |
+
+Same members, four different serving knobs, spread **0.001**. So **±0.001 is what this board returns on
+an unchanged entry**, and every 0.943-vs-0.944 comparison written anywhere in this project is noise. It
+also measures the SERVING axis dead across four knobs at once, which is four instruments' worth of
+answer that nobody has to spend a slot on again.
+
+**SECOND, AND IT IS THE PLATEAU'S ACTUAL DIAGNOSIS: `corpusdose_v1` is the control we did not know we
+had.** It scored 0.943 on 2026-09-01 with six seats sharing only **three of six** with the champion —
+`merged_span_cf`, `merged_span_ff` and `merged_dense_cf` standing in for `final_ws_cf`, `calib_span_ff`
+and `lr4e-5_ws_cf`. A **half-different six lands on the same number.** Taken with the five identical-set
+entries above, that says 0.943–0.944 is a property of the POOL and not of any seating of it — which is
+exactly what 273 members that are dinov2/dinov3 variants of one another predict, and it is the same
+reading the seat-count curve reaches from the other direction.
+
+Member frequency across the sixteen makes the shape explicit. `grade_ladder_cf` 16/16 · `through_dense_cf`
+16/16 · `final_ws_cf` 15/16 · `calib_span_ff` 15/16 · `merged_blend_cf` 14/16 · `lr4e-5_ws_cf` 12/16 ·
+`raptor_v4_swa` 8/16 · `merged_span_ff` 2/16 — and then **eleven members appearing exactly once**
+(`vjepa_warm_s2026`, `calib_dense_hold_ff`, `stack_increments_ff`, `labelwise_dense_s2026`,
+`merged_span_cf`, `merged_dense_cf`, `oof_teacher_s2026`, `labelwise_dense_ff`, `warm_calib_dense_s2026`,
+`warm_calib_lowlr_s2026`). **Those eleven singletons ARE the member-axis experiment**: one slot each, each
+added to the same fixed six, all flat. Pairwise Jaccard over the sixteen: n_pairs 120, mean 0.676, min
+0.167, max 1.000.
+
+**AND THE ENSEMBLE BONUS THAT SIZES THE REMAINING PROBLEM.** Best solo on the board is `holdsolo_v1`
+0.928 (offline 0.8634); the plateau is 0.944; so the bonus the mixture buys is **+0.016**. Confirmed
+independently: `calibsolo` served seat 1 of the champion alone for 0.923 against that seating's 0.941 —
+**+0.018**. Two reads, same answer. Running 0.955 off a +0.016–0.018 bonus therefore needs a solo at
+**~0.938–0.939**, and board ≈ offline + 0.063 on this board (`cnnsolo` +0.0623, `holdsolo` +0.0646,
+`spansolo` +0.0665, `v4solo` +0.0696, `ortho_solo` +0.0618) puts that at **~0.874 offline clean**, against
+our best honest member ~0.866. **The whole remaining problem is ~+0.007 offline on ONE member** — below
+the house bar, which is why no knob has moved it and why the levers worth arming are the ones that change
+what a member IS rather than how the six are seated or served.
+
+Caution on foreign checkpoints, priced: `aprime_solo_v1`, a raptor fine-tune, scored **0.506**. A borrowed
+trunk's quality is unmeasurable here until it has been honestly held out.
