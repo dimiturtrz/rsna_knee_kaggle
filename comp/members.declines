@@ -1029,3 +1029,10 @@ ortho_fresh_lowlr_s2026  # an INSTRUMENT and never a seat candidate. It is the i
     # firing its own pre-registered s <= ortho_dense - 0.006 branch. Its rate is deliberately one
     # its own row now shows undertrains this trunk in twelve epochs, so the score measures the
     # schedule and not the member. Ledger 2026-09-10.
+reader_through_s2026  # the run never finished and left no checkpoint. On disk it has a .partial, a holdout record
+    # and a metrics.jsonl of exactly two lines - the recipe and one epoch - so it died at epoch 0
+    # and its holdout record describes an untrained network. There is no .pt to load, so it can
+    # never be seated, re-scored or witnessed; it appears scoreable only because the holdout
+    # writer ran before the trainer died. Re-open by RE-RUNNING the recipe (336 px / 20 sl, batch
+    # 12, 12 epochs, ruler pinned at v2 with --labels the only moving part), never by quoting
+    # anything read from that npz.

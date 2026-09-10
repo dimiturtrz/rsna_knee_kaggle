@@ -13344,3 +13344,78 @@ All ten are now declined in writing. The three genuinely open ones are `oof_band
 siblings it is legitimately readable (`wsfold0_e6` is rostered at 0.8457) — and they are owed a score,
 not a decline.
 
+
+## The marginal seat is worth +0.0004, and the board wrote the same sentence the same day — 2026-09-10
+
+`diversity_curve` finished on seven surviving members, offline on the fold-0 holdout, RankAverage.
+Every member is a distinct MECHANISM — no fold twins, no seeds — which is the cut that makes this
+different from the fold-ensembling curve the project fitted early and has been quoting ever since.
+
+| seats | mean | interval | marginal |
+|---|---|---|---|
+| 1 | 0.8398 | [0.8057, 0.8475] | — |
+| 2 | 0.8474 | [0.8330, 0.8552] | **+0.0075** |
+| 3 | 0.8501 | [0.8408, 0.8564] | +0.0028 |
+| 4 | 0.8516 | [0.8455, 0.8576] | +0.0014 |
+| 5 | 0.8524 | [0.8481, 0.8573] | +0.0009 |
+| 6 | 0.8530 | [0.8515, 0.8567] | +0.0006 |
+| 7 | 0.8534 | [0.8534, 0.8534] | **+0.0004** |
+
+Best subsets: best 1 0.8475 (`lr5x_d6`), best 2 0.8552, best 3 0.8564, **best 4 0.8576**
+(`sliceattn` + `wsfold0_e6` + `lr5x_d6` + `large_deep_rank24`), best 5 0.8573, best 6 0.8567,
+best 7 0.8534. Oracle 0.8573 against plain average 0.8534 against best single 0.8475 — headroom
+**+0.0039**, which is the whole prize for getting selection perfectly right and is under one
+paired floor.
+
+**Mechanism-ensembling does NOT buy what fold-ensembling bought.** The marginal seat past the
+second is inside the floor at every step, and the seventh is +0.0004. On the SAME DAY the board
+said it independently: `cnnseat_v1` added the first honestly held-out convolutional member — a
+family with no board history, solo 0.915 — to the champion six and read **0.944**, the champion's
+exact number. Two rulers, one live and one offline, one within a family and one across families.
+
+Serving rules, split-half: `RankAverage 0.8534` (shipped), `LogitAverage 0.8548`,
+`QualityWeightedRank 0.8539`. Per-label top-k in-sample / **split-half**: top-1 0.8573/0.8525,
+top-2 0.8610/**0.8553**, top-3 0.8611/**0.8563**, top-4 0.8599/**0.8578**, top-5 0.8586/0.8575,
+top-6 0.8568/0.8561, top-7 0.8534/0.8535. The split-half column is the honest one and its best is
+top-4 at 0.8578 against the flat 0.8535 — +0.0043, a SELECTION operation, and the board has closed
+selection five times. It is written down; it is not a submission.
+
+**THE INPUT-DIVERSITY HALF IS WITHDRAWN, NOT ANSWERED.** Four of the eleven members the arm was
+written for are unreadable: the approved regeneratable-cache sweep took `images_336px_12sl_extended`
+and `images_336px_16sl` with it, and `extended_ws_s2026`, `res392_ws_s2026`, `intensity392_ws_s2026`
+and `slices16_ws_s2026` cannot be scored without a card rebuild. `extended_ws` was the arm's ONLY
+member whose INPUTS differ, so the question of whether input diversity behaves differently from
+mechanism diversity was not asked. All four checkpoints are on disk — this is a cache rebuild, not
+a re-train.
+
+### The capacity ladder has one rung at the winning geometry, and `band_dense` is standing on it
+
+Priced 2026-09-10 with `vram_need` at the shipped operating point — 336 px / 20 slices / batch 12 /
+recompute on, so gradient checkpointing (`encoder_surgery.py:443`) is already IN these numbers —
+against a 32,607 MiB card:
+
+| variant | MiB at 336/20/batch 12 |
+|---|---|
+| small | **28,934** |
+| base | 58,700 |
+| large | 81,400 |
+
+`band_dense`, the best single member this project owns at **0.8578**, is a `small` trunk (read out of
+its own checkpoint config, not out of prose). It holds 28,934 MiB and leaves 3.7 GB, and that is all
+the headroom there is. A wider trunk at this geometry needs 1.8x to 2.5x the card.
+
+**So "capacity is the last open suspect" was the wrong sentence.** Capacity at the geometry that wins
+is not untested — it is structurally unreachable on this card at an honest batch, and every wider-trunk
+number in this ledger is therefore measured through a batch substitution: `base_dense` at batch 2,
+`ortho_stack` at batch 1 with a 66-pair memory. `band_pairmem` prices the batch-1 substitution at
+**−0.0092** on the small trunk at this same geometry — the same order as the differences being read
+from it. `ortho_stack` − `band_dense` = −0.0161 and `base_dense` − `band_dense` = −0.0066 are both
+confounded by an effect of their own size.
+
+The one cell that fits and is not the batch-1 corner is `base_honest_batch` (knee-omnzl): base trunk,
+`band_dense`'s exact geometry and cache, **batch 5 at 25,207 MiB** with 7.4 GB of headroom, no
+accumulation and no pair memory. 66 within-batch pairs at 12, 10 at 5, 1 at 2 — it shrinks the confound
+by an order of magnitude rather than removing it, and it lands the first pure BATCH read on the base
+trunk at fixed geometry (batch 5 against `base_dense`'s batch 2), which nothing here owns yet.
+6 fits too, at 29,992, and was refused: `mae_unitfix_s2026_run1` held 32,024 MiB, reported 51 MiB free
+at its first step, and collapsed 510 → 57 img/s the moment epoch 0's holdout eval allocated on top.
