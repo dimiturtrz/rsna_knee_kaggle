@@ -3711,3 +3711,28 @@ board ≈ offline + 0.063 across five fitted anchors, ensemble bonus +0.016–0.
 member at ~0.874 offline against our best honest ~0.866**. Seating cannot produce it, adding members
 cannot produce it, and this entry spent a slot proving the strongest remaining version of the second.
 
+
+## `matchpair_v1` — 0.933, ref 56150916, 2026-09-10 — the instrument that impeached the ruler
+
+Shipped to measure the board's resolution floor at a matched-offline point. It measured the ruler.
+
+`stackfit_s2026` against `holdsolo_v1`'s `calib_dense_hold_s2026`: identical on every recorded recipe
+key, **0.0003 apart at midpoint** (0.8631 vs 0.8634). Pre-registered ~0.928 with the floor as the
+first branch. It read **0.933** — the second branch, "offline does not predict the board at fixed
+recipe". The reason is not unstable transfer. At **ledger75 the two members are 0.0090 apart**
+(0.9039 vs 0.8949), and the board separated them by 0.005 in ledger75's direction.
+
+Over the whole record (dropping `aprime_solo_v1`, board 0.506, a broken entry): midpoint resid sd
+**0.0036**, corr 0.901; ledger75 resid sd **0.0015**, corr 0.982. Leave-one-out on ensembles n=34:
+rmse 0.0029 vs 0.0017, ledger75 closer on **29 of 34**. See `experiments/README.md` and knee-f9aao.
+
+**THE TARGET ARITHMETIC ABOVE IS MIDPOINT-FITTED AND IS SUPERSEDED.** "board ≈ offline + 0.063, so
+0.955 needs one member at ~0.874 against our best honest ~0.866" was read through a ruler with twice
+the blur. Refit on ledger75, n=41:
+
+> **board = 1.1122 × ledger75 − 0.0673**, residual sd **0.0017**
+> **0.955 needs an entry at ledger75 0.9192.** Best on record: `greedyseat_v1` 0.9040 (board 0.936),
+> `honest12` 0.9012 (board 0.937). **The gap is +0.018 in ledger75 terms.**
+
+That gap is ten times the ruler's own residual, which is the first time the target has been stated
+with an instrument sharp enough to see it. It does not make the gap smaller — it makes it real.

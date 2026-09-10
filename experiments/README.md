@@ -13585,3 +13585,53 @@ doubling, and 79%→100% is ~0.34 doublings ≈ **+0.003** — under the 0.005 f
 does NOT explain 0.937→0.944, and the argument for the refit queue rests on **member quality** (the
 +0.011 offline gap), not on the extra studies. A refit queue justified on the data bonus would be a
 sub-floor operation wearing a mechanism's clothes.
+
+### The default ruler is the WRONG one: `ledger75` more than halves the board resolution — 2026-09-10
+
+`matchpair_v1` was shipped to measure the board's resolution floor at a matched-offline point. It
+measured something better: **the ruler.**
+
+The pair, identical on every recorded recipe key (variant small, 336 px, 20 slices, band 0.1-0.9,
+`cls_mean`/attend/max, batch 12, 12 epochs, seed 2026, fold 0, lr 4e-5):
+
+| entry | member | midpoint | **ledger75** | board |
+|---|---|---|---|---|
+| `holdsolo_v1` | `calib_dense_hold_s2026` | 0.8634 | 0.8949 | 0.928 |
+| `matchpair_v1` | `stackfit_s2026` | 0.8631 | **0.9039** | **0.933** |
+
+Matched to 0.0003 at midpoint and separated by **+0.0090** at ledger75 — and the board moved +0.005,
+in ledger75's direction. So the 0.005 was never floor noise. It was a real difference the midpoint
+ruler cannot see.
+
+**Tested against the whole record, not just the pair.** Fitting board from each ruler over every entry
+carrying both numbers, dropping `aprime_solo_v1` (board 0.506 — a broken entry, not a ruler failure;
+it is the ONLY reason a pooled fit ever favoured midpoint, and pooling solos with ensembles was
+Simpson's paradox on top of it):
+
+| ruler | n | resid sd | corr | **2sd board resolution** |
+|---|---|---|---|---|
+| midpoint | 40 | 0.0036 | +0.901 | **0.0071** |
+| ledger75 | 40 | **0.0015** | **+0.982** | **0.0031** |
+
+Leave-one-out, so this is out-of-sample rather than a leverage artefact — ensembles only, n=34:
+midpoint rmse **0.0029**, ledger75 rmse **0.0017**, and ledger75 is closer on **29 of 34** rows. It
+wins on solos too once the broken row is out (0.0014 vs 0.0043).
+
+**WHAT THIS COSTS US, stated plainly.** Every offline number in this repo is midpoint unless it says
+otherwise — 47 call sites in 41 files take `MIDPOINT = 0.5` by default and exactly three paths can
+produce a recut number. So the ruler behind every seating verdict, every "flat" result and every
+member ranking this project has written down has **twice the blur of the one we already had on
+disk**. The resolution floor that closed the seating axis five times, that made three different
+member sets read as an identical 0.944, and that was used this very session to declare operations
+"under the floor" — that floor is 0.0071 on the ruler we used and 0.0031 on the ruler we should have
+used. Operations previously dismissed as sub-floor at 0.004-0.007 are NOT sub-floor on ledger75.
+
+**WHAT IT DOES NOT SAY.** It does not say those operations WORK — it says they were dismissed with an
+instrument that could not see them, which is a different sentence and the reason none of them may be
+re-run on this basis alone. Nor does it make the board's own three-decimal granularity go away: 0.001
+is still the smallest difference the board can express, so 0.0031 is a floor on the RULER, not a
+licence to read thousandths. And this is a predictive claim about board transfer, not an argument
+that ledger75 is a better clinical metric.
+
+Closes knee-f9aao with a measurement rather than a preference. The default should move to ledger75,
+and until it does, a bare number in this repo is the blurry one.
