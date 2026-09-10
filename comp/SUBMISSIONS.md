@@ -3678,3 +3678,36 @@ family is not a term in the model.
 **What it does not license.** 0.915 solo is above eight of the eleven solo rows in this file, so the
 CNN is a real member and worth a seat test. Nothing here licenses spending card on a CNN FAMILY ahead
 of the transformer pool: the branch that would have (>=0.918) did not fire.
+
+## `cnnseat_v1` — 0.944 — family diversity was delivered and the board did not move — 2026-09-10
+
+Ref 56147841, `kneemri-cnnseat`, seven members: the champion six plus `resnet_224_short_s2026`.
+Mechanism-backed, not an instrument. `run_check` read 7 of 7 loaded; witness 0.00291 of a 0.0312 bound.
+
+**Pre-registered, with the honest prior stated first** — the 7-seat mean on this board is 0.9365,
+BELOW the 6-seat mean of 0.9378, and six prior seating entries had read flat. Branches: **≥0.947**
+licenses a fast-CNN family programme · **0.944–0.946** is the ninth seating flat, closing the
+single-CNN-seat question and NOT the CNN family · **<0.944** says a 0.915 solo does not survive
+dilution at 1/7.
+
+**It landed 0.944** — the middle branch, at the champion six's own board number to three decimals.
+
+**Why this flat is worth more than the eight before it.** Every previous seating flat added a member
+from the family the pool is already 273 deep in, so the standing explanation was correlation: the
+binding constraint is diversity, not member quality, and the member-quality curve is flat anyway
+(#4 0.8695 to #24 0.8610). This entry supplied exactly the missing thing — the first convolutional
+member this project has honestly held out, from a family with no board history, at a solo 0.915 that
+sits above eight of the eleven solo rows in `board.jsonl`. The mechanism was named in advance, it was
+delivered, and the number did not move by one thousandth. **The seating axis is therefore closed
+ACROSS families and not merely within one, and "the ensemble is correlation-bound" is no longer an
+available explanation for the plateau.**
+
+**What it does not say.** It does not refute the CNN family as a source of BETTER MEMBERS. It refutes
+adding one to a fixed six at 1/7 weight — the eleventh distinct singleton to read flat that way. The
+only seat-shaped question left is a SWAP rather than an addition, and it is a small one.
+
+**Where it leaves the target.** The plateau arithmetic is unchanged and now more sharply pointed:
+board ≈ offline + 0.063 across five fitted anchors, ensemble bonus +0.016–0.018, so **0.955 needs ONE
+member at ~0.874 offline against our best honest ~0.866**. Seating cannot produce it, adding members
+cannot produce it, and this entry spent a slot proving the strongest remaining version of the second.
+
