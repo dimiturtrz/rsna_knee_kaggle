@@ -43,11 +43,17 @@
 # cache holds, which is this arm. Fixed by `Member.on_scheme`, composed with the existing
 # `SharedRead.regrouped` for the depth and band.
 #
-# THE WITNESS, run before the card and printed in this file's log. The twins were fitted at 336/20 over
-# the 0.1-0.9 band and teach here at 336/12 over 0.2-0.8. Whole-stack plus max pooling makes the depth
-# flexible, but that is an argument, not a measurement, so their fold-0 vote is scored at the serving
-# geometry first. Above ~0.86 the teacher is what we think it is; well below the members' own numbers
-# and the pseudo-labels are degraded by the read, and the arm would fail the mechanism for the geometry.
+# THE WITNESS, and the geometry claim it was built on WAS WRONG IN THE SAFE DIRECTION (corrected
+# 2026-09-10, off the run). This paragraph used to read "the twins were fitted at 336/20 over the
+# 0.1-0.9 band and teach here at 336/12 over 0.2-0.8", and worried that whole-stack plus max pooling
+# making the depth flexible was an argument rather than a measurement. `teacher_clean.sh` actually
+# fits them at `--slices 12 --band-low 0.2 --band-high 0.8 --image-size 224`. So SLICES AND BAND MATCH
+# THE TEACHER PASS EXACTLY and the depth mismatch this witness existed to catch does not exist. The one
+# axis that does differ is the source array — the twins were fitted on a native 224 decode and teach off
+# the 336 merged3 cache downsized to 224 by `Member.read_size`, which is a resample difference, not a
+# geometry mismatch. `teacher_readings` logs `reading N training studies at %d px` from `member.read_size`,
+# the member's OWN trained size, NOT from `--cache-size`: the 224 in that line is correct behaviour and
+# reading it as a defect costs a kill on a healthy run.
 #
 # COST. merged3_corpus measured ~328 s/epoch at this geometry; twelve epochs is ~1.1 h. The teacher pass
 # is a separate ~10 min over a predecoded array (no pydicom), not part of that.

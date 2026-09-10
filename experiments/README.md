@@ -12328,3 +12328,61 @@ question is out as M264.
 
 Closed by the same letter: decode-time intensity normalisation. With per-volume z-score already at the
 flat optimum it is ~0.5% of transfer variance — not a lever, and not worth a slot.
+
+## 2026-09-10 — four noisy-student knobs closed by literature before any of them cost a card (D279)
+
+`noisy_student` had sat written, pre-registered and beaded P1 since 2026-09-07 without running. Nothing
+about it was stale: the merged3 cache, `merged3_labels.csv` and the four fold-0-clean twins were all on
+disk, and the ONLY missing artefact was `teacher_merged3.npz`. It was step three of
+`after_seats_done.sh`, whose watcher gated on a marker in `lr4e-5_ws_df.full.log` and died with the
+session that launched it — so the chain never reached the teacher pass that gates the arm. Re-armed
+directly by `experiments/run_noisy_student.sh` (`5c26788e`). **This is the failure mode `queue_check`
+cannot see** and the third instance of it: a stranded arm looks identical to an arm nobody wanted.
+
+**The recipe we were already running is the one the medical replication measures as BEST, and the four
+things we might have added are each measured negative or null.** M284 asked whether we were even running
+the method we named — our student trains under the standard `$RECIPE` augmentation while the teacher
+infers clean off a predecoded cache, which is NOT Xie et al.'s teacher/student noise asymmetry. D279
+answers with primary tables:
+
+| knob | what the medical source measures | decision |
+|---|---|---|
+| student noise asymmetry | Shak et al. arXiv:2012.09472 Table B.4 (the only medical paper running Xie's full noise ablation): full Xie noise **0.78** vs its own supervised teacher **0.82**; strip augmentation **0.83**; strip stochastic depth too **0.86**; noised teacher **0.78** vs clean **0.86** | **DO NOT ADD.** The inversion of Xie. Adding it is a measured −0.08 there |
+| confidence filtering | ACPL arXiv:2111.12918 Table 4, CXR14 @2%: low-information (= what a confidence threshold keeps) **67.76** vs high-information **74.44**. PMC10498222 Table 7: confidence-only 0.707 → uncertainty-gated 0.712 for a THIRD of the pseudo-labels discarded | **DO NOT ADD.** Keeping the confident end is the worst of three measured choices; the refinement is +0.005, knob-sized |
+| ramped distill weight | no medical paper ablates flat-vs-ramp on a DISTILL weight. The ramps that exist (UA-MT arXiv:1907.07034, `λ(t)=0.1·e^(−5(1−t/t_max)²)`) belong to a consistency term and top out at **0.1**; the distillation-style medical arm (arXiv:2005.02231) uses a FLAT **0.8** | **KEEP 0.7 FLAT.** Reading a 0.1 consistency ramp across to a 0.7 distill weight is a category error |
+| round two self-training | Zhou et al. arXiv:2005.11746 Table 2, per-round on n=490: +0.0052, **+0.0024**, +0.0004, −0.0017, −0.0062 | **DO NOT PRE-REGISTER.** Round two is 46% of round one and inside its own noise; by round five it is back at the teacher |
+
+**Two configuration choices CONFIRMED rather than changed**, from the same appendix: soft pseudo-labels
+(Table B.2, soft **0.86** vs hard 0.82; Xie Fig 5 says hard can hurt on out-of-domain unlabeled, and our
+merged3 is 1,986/6,393 = **31% foreign**), and no warm-start (Table B.3, warm-started **0.81** vs cold
+**0.86** — "the student initialized with the teacher can get stuck in a local optimum"). The live log
+reads `"init": "None"`, `"init_scope": "all"`, `"encoder_weights": "None"`, so the student starts from the
+stock trunk and the −0.05 configuration is not in play.
+
+**THE CAVEAT THE RESEARCHER RAISED AGAINST THEIR OWN §1, AND IT IS THE SAME DEFECT WE HAVE ALREADY VOIDED
+A NUMBER FOR.** Shak's unlabeled pool IS their test set — §4.1.2 draws 2,005 NLST scans as the unannotated
+set and §5.1 scores on "2,005 completely independent testing scans", the same 2,005. That is the
+`raptor_solo` defect class (98.6% in-sample, 0.8938, voided 2026-08-29). The within-paper ORDERING is
+still a fair comparison, but a transductive pool has a mechanism that could manufacture the inversion:
+student noise stops the student reproducing the teacher's function on the very scans it is scored on, so
+"removing noise helps" may be "memorising the pool helps". **We are the disjoint case** — our
+pseudo-labels are inferred on the 5,484 TRAIN studies and the 909 holdout is excluded from the twins'
+training — so if the inversion is transductive it does not transfer to us. Out as M285; until it comes
+back, §1's recommendation is FOLLOWED but not treated as settled.
+
+**Harness check, passed off the live log** (the arm demanded it in writing): `scheme merged3`,
+`labels merged3_labels.csv`, `eval_labels report_labels_v2.csv`, `image_size 336`, `distill_weight 0.7`,
+`teacher_targets teacher_merged3.npz`, 6393 studies / 5484 train / 909 holdout. Target coverage prints
+`ACL: 1.0` and every other column `0.689` — and 0.689 = 4407/6393 exactly, which is the arm's "no labels
+rewrite" argument showing up as a number: the foreign rows carry a REAL ACL label and ZERO label gradient
+on the eleven columns they do not supervise.
+
+**A DEFECT IN THE ARM'S OWN WITNESS PARAGRAPH, corrected off the run.** It claimed the twins were fitted
+at 336/20 over the 0.1-0.9 band and worried that teaching at 336/12 over 0.2-0.8 made the depth an
+argument rather than a measurement. `teacher_clean.sh` fits them at `--slices 12 --band-low 0.2
+--band-high 0.8 --image-size 224`: **slices and band match the teacher pass exactly** and the mismatch
+the witness existed to catch does not exist. Wrong in the safe direction. The one axis that does differ
+is the source array (native 224 decode vs the 336 merged3 cache downsized by `Member.read_size`), a
+resample difference. Related trap: `teacher_readings.py:82` logs `reading N training studies at %d px`
+from `member.read_size`, the member's OWN trained size, NOT from `--cache-size` — so `224 px` in that
+line is correct behaviour, and reading it as a flag that failed to land would kill a healthy run.
