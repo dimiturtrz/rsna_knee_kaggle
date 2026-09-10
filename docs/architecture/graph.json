@@ -2264,6 +2264,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.gold_estimators",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.gold_rows",
       "target": "core.cli",
       "weight": 1
@@ -2710,6 +2716,42 @@
       "kind": "import",
       "source": "kneemri.evaluation.noise_binding",
       "target": "kneemri.evaluation.supervision_gap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_gold",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_gold",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_gold",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_gold",
+      "target": "kneemri.evaluation.gold_estimators",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_gold",
+      "target": "kneemri.evaluation.gold_rows",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_gold",
+      "target": "kneemri.evaluation.oof_teacher",
       "weight": 1
     },
     {
@@ -15931,6 +15973,120 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.gold_estimators.Cells",
+      "target": "kneemri.evaluation.gold_estimators.Cells",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "target": "kneemri.evaluation.gold_estimators.Cells",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.__init__",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.columns",
+      "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.difference",
+      "target": "kneemri.evaluation.gold_estimators.Cells.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.difference",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator._deviation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.difference",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.spread",
+      "target": "kneemri.evaluation.gold_estimators.Cells.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.spread",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator._deviation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.GoldEstimator.spread",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator.of",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.gold_estimators.MacroGold",
+      "target": "kneemri.evaluation.gold_estimators.Cells",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.gold_estimators.MacroGold",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.MacroGold.of",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator.columns",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.gold_estimators.PairCountGold",
+      "target": "kneemri.evaluation.gold_estimators.Cells",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.gold_estimators.PairCountGold",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.gold_estimators.PairCountGold.of",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator.columns",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.gold_estimators.RankPooledGold",
+      "target": "kneemri.evaluation.gold_estimators.Cells",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.evaluation.gold_estimators.RankPooledGold",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.gold_rows.main",
       "target": "kneemri.evaluation.gold_rows.GoldRows",
@@ -17848,6 +18004,138 @@
       "kind": "calls",
       "source": "kneemri.evaluation.noise_binding.main",
       "target": "kneemri.evaluation.supervision_gap.SupervisionGap.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler",
+      "target": "kneemri.evaluation.oof_gold.Stitch",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.__init__",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.__init__",
+      "target": "kneemri.evaluation.gold_rows.GoldRows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.paired",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator.difference",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.paired",
+      "target": "kneemri.evaluation.oof_gold.GoldRuler.draws",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.report",
+      "target": "kneemri.evaluation.oof_gold.GoldRuler.paired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.report",
+      "target": "kneemri.evaluation.oof_gold.GoldRuler.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.report",
+      "target": "kneemri.evaluation.oof_gold.Stitch.positives",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.spread",
+      "target": "kneemri.evaluation.gold_estimators.GoldEstimator.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.spread",
+      "target": "kneemri.evaluation.oof_gold.GoldRuler.draws",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.stitch",
+      "target": "kneemri.evaluation.gold_estimators.Cells.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.stitch",
+      "target": "kneemri.evaluation.gold_rows.GoldRows.annotated",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.stitch",
+      "target": "kneemri.evaluation.oof_gold.Stitch",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.stitch",
+      "target": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.GoldRuler.stitch",
+      "target": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher.readings",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.oof_gold.Stitch",
+      "target": "kneemri.evaluation.gold_estimators.Cells",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_gold.main",
+      "target": "kneemri.evaluation.oof_gold.GoldRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.main",
+      "target": "kneemri.evaluation.oof_gold.GoldRuler.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_gold.main",
+      "target": "kneemri.evaluation.oof_gold.GoldRuler.stitch",
       "weight": 1
     },
     {
@@ -37507,7 +37795,7 @@
       "role": null
     },
     {
-      "descendants": 292,
+      "descendants": 294,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -37571,7 +37859,7 @@
       "role": null
     },
     {
-      "descendants": 106,
+      "descendants": 108,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -37812,6 +38100,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators",
+      "label": "gold_estimators",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.gold_rows",
       "label": "gold_rows",
       "level": "module",
@@ -37958,6 +38254,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.noise_binding",
       "label": "noise_binding",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold",
+      "label": "oof_gold",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -41484,6 +41788,46 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.Cells",
+      "label": "Cells",
+      "level": "class",
+      "parent": "kneemri.evaluation.gold_estimators",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "label": "GoldEstimator",
+      "level": "class",
+      "parent": "kneemri.evaluation.gold_estimators",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.MacroGold",
+      "label": "MacroGold",
+      "level": "class",
+      "parent": "kneemri.evaluation.gold_estimators",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.PairCountGold",
+      "label": "PairCountGold",
+      "level": "class",
+      "parent": "kneemri.evaluation.gold_estimators",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.RankPooledGold",
+      "label": "RankPooledGold",
+      "level": "class",
+      "parent": "kneemri.evaluation.gold_estimators",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.gold_rows.GoldRows",
       "label": "GoldRows",
       "level": "class",
@@ -41784,6 +42128,22 @@
       "label": "UndiscriminatingMemberError",
       "level": "class",
       "parent": "kneemri.evaluation.noise_binding",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.GoldRuler",
+      "label": "GoldRuler",
+      "level": "class",
+      "parent": "kneemri.evaluation.oof_gold",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.Stitch",
+      "label": "Stitch",
+      "level": "class",
+      "parent": "kneemri.evaluation.oof_gold",
       "role": "satellite"
     },
     {
@@ -52228,6 +52588,126 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.Cells.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.Cells",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.Cells.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.Cells",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator._deviation",
+      "label": "_deviation",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator.columns",
+      "label": "columns",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator.difference",
+      "label": "difference",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator.name",
+      "label": "name",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.GoldEstimator.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.GoldEstimator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.MacroGold.name",
+      "label": "name",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.MacroGold",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.MacroGold.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.MacroGold",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.PairCountGold.name",
+      "label": "name",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.PairCountGold",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.PairCountGold.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.PairCountGold",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.RankPooledGold.name",
+      "label": "name",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.RankPooledGold",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.gold_estimators.RankPooledGold.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.gold_estimators.RankPooledGold",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.gold_rows.GoldRows.annotated",
       "label": "annotated",
       "level": "method",
@@ -53480,6 +53960,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.noise_binding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.GoldRuler.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold.GoldRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.GoldRuler.draws",
+      "label": "draws",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold.GoldRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.GoldRuler.paired",
+      "label": "paired",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold.GoldRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.GoldRuler.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold.GoldRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.GoldRuler.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold.GoldRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.GoldRuler.stitch",
+      "label": "stitch",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold.GoldRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.Stitch.positives",
+      "label": "positives",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold.Stitch",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.oof_gold.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.oof_gold",
       "role": null
     },
     {
