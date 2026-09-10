@@ -799,3 +799,22 @@ resnet_224_long_s2026.pt    # The 48-epoch CNN, completed 2026-09-10 after the f
                             # two near-identical CNNs are not two units of diversity. Read it against the
                             # pool with a divergence measurement, never against its solo.
                             # Ledger 2026-09-10.
+oof_band_fold0_s2026.pt     # 0.8522 midpoint on the 909, best of 8 epochs at 68 s/epoch — the CHEAPEST
+                            # member on this roster by an order of magnitude, and it lands within 0.0001
+                            # of `res392_ws_s2026` 0.8523 and above `extended_ws_s2026` 0.8459. Sat
+                            # undocumented from 2026-09-10 15:49Z: it is one of the `oof_{band,reader}`
+                            # teacher family, whose fold[1-4] siblings are unseatable BY CONSTRUCTION
+                            # because their holdout is our holdout — but fold0 holds out fold 0, which
+                            # is the fold everything here is read on, so this one is legitimately
+                            # readable. The ledger said as much on 2026-09-08 and called it "owed a
+                            # score, not a decline"; the score is above, and this is the line.
+                            # Ledger 2026-09-10.
+oof_reader_fold0_s2026.pt   # 0.7998 midpoint on the 909 — 0.052 under the pool's best and rostered
+                            # anyway, on the owner's standing rule that a member which does not beat our
+                            # previous models is still worth HAVING, because an ensemble with it may.
+                            # Same family and same legitimacy argument as the line above; the difference
+                            # is the supervision, and that is the only reason a member this far down is
+                            # worth a line at all. Rostered so it is SHIPPABLE, not to be put in an
+                            # entry — read it against the pool with a divergence measurement, never
+                            # against its solo, and expect the divergence to be where its value is if
+                            # it has any. Ledger 2026-09-10.

@@ -1036,3 +1036,20 @@ reader_through_s2026  # the run never finished and left no checkpoint. On disk i
     # writer ran before the trainer died. Re-open by RE-RUNNING the recipe (336 px / 20 sl, batch
     # 12, 12 epochs, ruler pinned at v2 with --labels the only moving part), never by quoting
     # anything read from that npz.
+base_honest_batch_s2026  # the capacity ladder's arm, and an INSTRUMENT rather than a seat candidate. Read
+    # 0.8502 against `base_dense`'s 0.8512, so -0.0010 - inside the 0.0062 holdout floor and
+    # therefore a tie, read pessimistically because the sign is the losing one. Nothing about
+    # it is distinct from its own control except the knob that did not pay, so it adds no
+    # mechanism the pool does not already hold. Ledger 2026-09-10.
+ortho_fastmri_s2026  # DECLINED ON LICENCE, not on score, and it may never be re-opened by a number.
+    # Fitted on the `mergedf` cache - our corpus concatenated with NYU fastMRI - and the
+    # fastMRI DUA licenses use "for internal research or educational purposes only" while
+    # forbidding the distribution of "any subsequent variables or data files derived from
+    # the fastMRI Dataset to any person or entity" outside academic publication. Training it
+    # was internal research and legal; uploading its weights to a Kaggle dataset and running
+    # them in a competition kernel is distribution of a derivative and is not. Every foreign
+    # corpus this project holds says the same in its own words (Rijeka CC BY-NC-ND, MRNet's
+    # Stanford agreement), so NO merged member of any scheme is shippable. `slots.py` claimed
+    # fastMRI was the exemption until 2026-09-10 and licensed an entry on it; the primary text
+    # says otherwise. Its offline number is a reading about what more data does, and only that.
+    # Ledger 2026-09-10.
