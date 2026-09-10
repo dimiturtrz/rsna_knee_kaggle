@@ -80,7 +80,11 @@ deep24_s2026.pt             # 0.8213 — the WEAKEST member here, and the only o
 band_span_s2026.pt          # 0.8565 — the 0.10-0.90 band at 12 slices; the span WITHOUT the density
 depth_regions_narrow_s2026.pt # 0.8554 — three depth regions pooled separately inside the narrow band
 band_full_s2026.pt          # 0.8427 — the span taken to its limit; the fourth point on the band axis
-calib_span_s2026.pt         # 0.8545 — band_span + calibrated targets, NEGATIVE at this operating point
+calib_span_s2026.pt         # 0.8545@midpoint — band_span + calibrated targets. "NEGATIVE at this operating
+#                             point" was the MIDPOINT ruler's verdict, not the member's: under ledger75 it
+#                             is rank 2, takes first place in 38.6% of resamples against the champion's
+#                             38.4%, and is best in three of the four 2026-09-10 subgroups. Re-open it by
+#                             answering the ruler question (knee-f9aao), not by re-quoting either number.
 # Added 2026-08-19 in ONE push, because mounting is reversible and a slot is not. The first two are
 # what the 36-record re-search names in the best four (band_dense + band_span + depth_regions_narrow +
 # calibrated_targets, 0.8666 against the shipped roster's 0.8648 under the same tool and vote); the
