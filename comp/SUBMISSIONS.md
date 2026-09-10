@@ -3768,3 +3768,39 @@ back in force.
 **And it is the TENTH seating entry to fail to beat 0.944** — seven seats, eight seats, cross-family,
 greedy at two different objectives. The pool is the constraint, not the arrangement. Nothing about
 seating, selection, weighting or re-lensing is worth another slot until a BETTER MEMBER exists.
+
+## `resnetlong_v1` — 0.907, ref 56152701, 2026-09-10 — the board resolved a delta a third the size of our noise bar
+
+**One member, `resnet_224_long_s2026`, offline 0.8460 midpoint on the 909.** It is the matched long
+sibling of `resnet_224_short_s2026` (offline 0.8527, board 0.915, and a seat in `cnnseat_v1` 0.944):
+the same resnet50d recipe at **48 epochs instead of 12**, with architecture, family, corpus, reading,
+seed and holdout all held. One variable moved.
+
+**The pre-registered branch `<= 0.908` fired.** Point estimate was 0.905.
+
+| | offline (midpoint, 909) | board |
+|---|---|---|
+| `resnet_224_short_s2026` | 0.8527 | 0.915 |
+| `resnet_224_long_s2026` | 0.8460 | **0.907** |
+| delta | **-0.0067** | **-0.008** |
+
+Slope **~1.19** against the fitted `board_transfer` **+1.55** — same sign, same order, and inside what
+a two-point read can separate.
+
+**What that costs us, and it is the point of the entry.** Our 0.0062 holdout "noise floor" is a
+statement about **the 909-study holdout's RESOLUTION**, not about what is real. The board resolved an
+offline delta roughly **one third the size of that bar** and put it where the ruler predicted. So a
+half-percent arm is not a null by construction — it is a reading our holdout cannot take and the board
+can. Two consequences, both immediate: sub-bar arms become worth running **and worth ranking**, and the
+CLAUDE.md rule that *increments below the bar still compose* now has board evidence behind it instead
+of an argument. What this does NOT do is re-open any arm dismissed on a **mechanism**; it re-opens the
+ones dismissed on "inside the floor, therefore nothing".
+
+**On the arm itself, the schedule question is closed.** 48 epochs LOSES to 12 on this recipe, on both
+rulers, in the same direction and at the same size. That is a measurement, not a flat. It closes the
+long-schedule question for the CNN family and says nothing whatever about the family's value —
+`resnet_224_short_s2026` is a seat in the 0.944 champion-equalling entry, and this row says only that
+its schedule was already right.
+
+**Slot accounting.** Fifth of five for 2026-09-10, spent 22:40Z against a 23:30Z mark. The owner's
+"land the last submission by midnight" was met with 3h20m to spare.
