@@ -70,6 +70,49 @@ def test_drop_unslotted(tmp_path: Path):
     assert pd.read_csv(destination)["StudyInstanceUID"].tolist() == ["a"]
 
 
+def test_narrow(tmp_path: Path):
+    """A corpus keeps the findings its readers graded; the rest go NaN, which is weight 0.0 downstream."""
+    source, destination = tmp_path / "merged.csv", tmp_path / "narrow.csv"
+    table = pd.DataFrame(
+        {
+            "StudyInstanceUID": ["a", "x"],
+            "corpus": ["canonical", "fastmri"],
+            "ACL": [0.9, 0.8],
+            "ACL__conf": [1.0, 0.28],
+            "Medial Meniscus": [0.3, 0.0],
+        }
+    )
+    table.to_csv(source, index=False)
+
+    blanked = MergedCache.narrow(source, destination, "fastmri", ("ACL",))
+
+    written = pd.read_csv(destination)
+    assert blanked == 1
+    assert written["Medial Meniscus"].isna().tolist() == [False, True]
+    assert written["ACL"].tolist() == [0.9, 0.8]
+    assert written["ACL__conf"].tolist() == [1.0, 0.28]
+
+
+def test_narrowed(tmp_path: Path):
+    """Named corpus writes the second table beside the first; an unnamed one writes nothing at all."""
+    destination = tmp_path / "mergedf_labels.csv"
+    pd.DataFrame({"StudyInstanceUID": ["x"], "corpus": ["fastmri"], "ACL": [0.8], "Fracture": [0.0]}).to_csv(
+        destination, index=False
+    )
+
+    written = MergedCache.narrowed(destination, "fastmri", "ACL", None)
+
+    assert MergedCache.narrowed(destination, None, "", None) is None
+    assert written == tmp_path / "mergedf_labels_fastmrionly.csv"
+    assert pd.read_csv(tmp_path / "mergedf_labels_fastmrionly.csv")["Fracture"].isna().tolist() == [True]
+
+
+def test_narrowed_refuses_a_corpus_that_grades_nothing(tmp_path: Path):
+    """Blanking every column leaves a row with images and no supervision — a different experiment."""
+    with pytest.raises(ValueError, match="grades nothing"):
+        MergedCache.narrowed(tmp_path / "labels.csv", "fastmri", "  ,  ", None)
+
+
 def test_check(tmp_path: Path):
     """A destination that is one of its own sources is refused before anything is written."""
     base = written(tmp_path, None, ["a"], fill=1)

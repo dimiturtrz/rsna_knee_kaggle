@@ -39,6 +39,10 @@ CORPUS = "corpus"
 under a different one is not a broken read — it is a silently absent axis, which is how the column came
 to be consumed and never written."""
 
+SIBLING = "__"
+"""What separates a finding from its own auxiliary column (`ACL__conf`, `ACL__verdict`). One finding's
+columns are a family, and `narrow` keeps or blanks the whole family together."""
+
 COPY_STUDIES = 32
 """Studies copied per block. At six slots, twelve slices and 336 px a study is 8.1 MB, so a block is
 260 MB — large enough that the copy is sequential I/O and small enough to hold twice over in RAM."""
@@ -181,6 +185,62 @@ class MergedCache:
         kept.to_csv(destination, index=False)
         logger.info(f"dropped {dropped} label rows for studies with no slot at all -> {len(kept)} rows")
         return dropped
+
+    @staticmethod
+    def narrow(source: Path, destination: Path, corpus: str, graded: tuple[str, ...]) -> int:
+        """Blank one corpus's cells outside the findings it actually GRADES. Returns cells blanked.
+
+        A foreign corpus does not read our vocabulary; it reads its own and is mapped onto ours. fastMRI
+        grades ACL, MCL and effusion one-to-one, and for the other nine of our findings it supplies
+        NEGATIVES ONLY — its meniscus and cartilage findings are unsided while ours are per-compartment,
+        so an absent tear there becomes twelve confident zeros here. Merging it therefore shifts the
+        prior toward absence on exactly the findings it cannot locate, which `fastmri_corpus` names as
+        the hazard of the whole corpus before any arm ran.
+
+        NaN and not a small weight, because NaN is the mechanism the trainer already has:
+        `Targets.load` reads `said = ~np.isnan(value)` and leaves an unsaid cell at weight 0.0. So this
+        needs no flag, no new loss term and no trainer change — the control and the masked arm differ by
+        one `--labels` path, which is what keeps the comparison a one-variable A/B.
+
+        It blanks CELLS and never drops the ROW: those studies still supervise the three findings their
+        readers actually looked at, and still contribute their images to every shared trunk parameter.
+        """
+        table = pd.read_csv(source)
+        named = table[CORPUS].astype(str) if CORPUS in table.columns else pd.Series("", index=table.index)
+        rows = named == corpus
+        # A finding owns a family of columns — `ACL`, `ACL__conf`, `ACL__verdict` — and they are kept or
+        # blanked together: a confidence left behind for a score that is now NaN is a weight for a cell
+        # nobody scores, which is the shape of the bug this whole method exists to avoid.
+        columns = [
+            name for name in table.columns if name.split(SIBLING)[0] not in graded and table[name].dtype.kind == "f"
+        ]
+        blanked = int(table.loc[rows, columns].notna().to_numpy().sum())
+        table.loc[rows, columns] = np.nan
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        table.to_csv(destination, index=False)
+        logger.info(f"blanked {blanked} cells over {int(rows.sum())} {corpus} rows, keeping {graded} -> {destination}")
+        return blanked
+
+    @classmethod
+    def narrowed(cls, destination: Path, corpus: str | None, graded_text: str, out: Path | None) -> Path | None:
+        """The optional second table, written from a FINISHED first one so both name the same studies.
+
+        A no-op when no corpus was named, which is what lets both of `build_merged`'s exits call it
+        unconditionally — the labels-only path and the full path must not diverge on which tables a run
+        produces, and a caller-side `if` in two places is how they would.
+        """
+        if corpus is None:
+            return None
+        graded = tuple(name.strip() for name in graded_text.split(",") if name.strip())
+        if not graded:
+            # Blanking every column would leave rows carrying images and no supervision at all, which is
+            # a different experiment from the one this flag exists for, and not one to run silently.
+            raise ValueError(
+                "a narrowed corpus needs its graded findings: one that grades nothing is a row with no lesson"
+            )
+        written = out or destination.with_name(f"{destination.stem}_{corpus}only.csv")
+        cls.narrow(destination, written, corpus, graded)
+        return written
 
     @staticmethod
     def _tagged(table: pd.DataFrame, name: str) -> pd.DataFrame:

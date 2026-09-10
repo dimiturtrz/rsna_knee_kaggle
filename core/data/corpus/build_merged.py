@@ -61,6 +61,22 @@ def main() -> None:
             "without paying for the first — the arrays a label table indexes are the same arrays."
         ),
     )
+    command.parser.add_argument(
+        "--narrow-corpus",
+        default=None,
+        help=(
+            "after merging, write a SECOND table in which this corpus's rows are blanked outside "
+            "--narrow-graded. A corpus that grades three of our twelve findings supplies negatives on "
+            "the other nine, and merging it shifts the prior toward absence on findings it cannot "
+            "locate; blanking is how that hazard is measured against the same merge rather than argued."
+        ),
+    )
+    command.parser.add_argument(
+        "--narrow-graded",
+        default="",
+        help="comma-separated findings that corpus reads one-to-one, kept as scored; everything else NaN",
+    )
+    command.parser.add_argument("--narrow-out", type=Path, default=None, help="where that second table is written")
     arguments = command.parsed()
 
     if arguments.merged_scheme in (arguments.scheme, arguments.extra_scheme):
@@ -88,12 +104,14 @@ def main() -> None:
         # The exclusion applies here too, or a labels-only rebuild onto an existing cache silently puts
         # every black study back into a table the previous build had cleaned.
         merger.drop_unslotted(destination)
+        merger.narrowed(destination, arguments.narrow_corpus, arguments.narrow_graded, arguments.narrow_out)
         logger.info("LABELS ONLY — the images were left alone")
         return
     # An hour of sequential copy with no keyboard input, and the idle timer counts INPUT rather than load.
     with Wakelock():
         merger.build()
     merger.drop_unslotted(destination)
+    merger.narrowed(destination, arguments.narrow_corpus, arguments.narrow_graded, arguments.narrow_out)
     logger.info("MERGE COMPLETE")
 
 
