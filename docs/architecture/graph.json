@@ -8175,12 +8175,6 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.build_merged.main",
-      "target": "core.data.corpus.merged_cache.MergedCache.narrowed",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.build_merged.main",
       "target": "core.data.corpus.study_metadata.StudyMetadata.merge_written",
       "weight": 1
     },
@@ -47038,22 +47032,6 @@
       "descendants": 0,
       "id": "core.data.corpus.merged_cache.MergedCache.labels",
       "label": "labels",
-      "level": "method",
-      "parent": "core.data.corpus.merged_cache.MergedCache",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.merged_cache.MergedCache.narrow",
-      "label": "narrow",
-      "level": "method",
-      "parent": "core.data.corpus.merged_cache.MergedCache",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.merged_cache.MergedCache.narrowed",
-      "label": "narrowed",
       "level": "method",
       "parent": "core.data.corpus.merged_cache.MergedCache",
       "role": null
