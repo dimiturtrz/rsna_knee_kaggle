@@ -13635,3 +13635,70 @@ that ledger75 is a better clinical metric.
 
 Closes knee-f9aao with a measurement rather than a preference. The default should move to ledger75,
 and until it does, a bare number in this repo is the blurry one.
+
+---
+
+### RETRACTED THE FOLLOWING EVENING: ledger75 lost its only out-of-sample test — 2026-09-10
+
+Everything above this line about ledger75's superiority is an IN-SAMPLE fit and none of it survived
+contact with a point it had not been fitted on.
+
+`l75seat_v1` (ref 56151868) was built as that test and it was a clean one: the same greedy over the
+same 226-member pool as `greedyseat_v1` (board 0.936), with ONE variable moved — the cut the greedy
+maximises. The two rulers made DIFFERENT predictions about an entry neither had seen. Midpoint said
++0.0007, dead flat, **~0.936**. Ledger75 said +0.0098, **0.949**.
+
+**The board read 0.939.** Midpoint missed by 0.003; ledger75 missed by 0.010, three times as much,
+having looked four times sharper on the record.
+
+**The mechanism of the error, which is the part worth keeping.** Ledger75 was fitted board-from-offline
+OVER THIS RECORD, and the residual sd above was measured against the same rows. A recut that reorders
+the same members and is then SELECTED BY that recut is not a second observation — it is the fit reading
+itself back. The leave-one-out above does not rescue it: LOO resamples rows inside one fitted frame and
+cannot see a frame chosen to suit them.
+
+**What now holds.** The repo default cut stays **midpoint**, and the P0 migration bead closes UNBUILT.
+knee-f9aao's labelling rule — a scalar carries STATISTIC, POPULATION and CUT, `nn_corr@pool251`,
+`solo@ledger75` — stands entirely on its own merits and never licensed a ruler swap; it was, and is,
+about ambiguity rather than accuracy. The midpoint target arithmetic that the section above declared
+superseded is back in force: **board ≈ offline + 0.063, so 0.955 needs ONE member at ~0.874 offline
+against our best honest ~0.866.**
+
+**What it does NOT say.** It does not restore any operation dismissed as sub-floor. The floor is
+midpoint's 0.0071 again, which is the wider one, so the dismissals stand and this retraction removes
+the licence to re-run them rather than granting one.
+
+
+### Three knob results the ledger owes, all of them flat or worse — 2026-09-08, written up 2026-09-10
+
+None of these was written down when it landed, which is how a repeated experiment gets ordered. All
+three are single-arm reads against an existing control, per the quick-over-matched rule; all three are
+recorded to CLOSE their knob rather than to price it.
+
+| arm | control | delta | reading |
+|---|---|---|---|
+| `base_honest_batch` 0.8502 | `base_dense` 0.8512 | **−0.0010** | the capacity ladder does not pay |
+| `band_lpft` 0.8513 | `band_dense` 0.8578 | **−0.0065** | LP-FT costs more than it protects |
+| `ortho_fresh_lowlr` 0.8248 | `ortho_dense` 0.8452 | **−0.0204** | 1e-5 does not converge in 12 epochs |
+
+**The capacity ladder (−0.0010).** Under the 0.0062 holdout floor in the losing direction, so it is a
+tie read pessimistically and the knob is closed at this budget. It does not say capacity is worthless —
+it says the ladder as specified buys nothing a 12-epoch budget can spend.
+
+**LP-FT (−0.0065).** Linear-probe-then-fine-tune is a published defence of pretrained features against
+fine-tuning distortion, and here it lands just past the floor on the LOSING side. The mechanism it
+protects against is one our recipe does not suffer: at `backbone_lr` 4e-5 for 12 epochs the trunk is
+barely moved, so the probe stage spends budget defending against a distortion that was not going to
+happen, and the arm is a shorter fine-tune wearing a longer one's schedule. That is a statement about
+OUR budget, not about LP-FT, and it would want re-testing at a rate where the trunk actually moves.
+
+**1e-5 undertrains (−0.0204).** By far the largest of the three and the only one clear of every floor.
+**REPLICATED**: `ortho_slow_trunk` read 0.8265, within 0.0017 of `ortho_fresh_lowlr`'s 0.8248, from a
+different arm on the same axis. Two arms agree that at 12 epochs a 1e-5 trunk rate is not slow-and-safe,
+it is unfinished — the run is still climbing when the budget ends. This is a BUDGET × RATE interaction
+and not a rate result: it says nothing about 1e-5 at 48 epochs, and `convergence_check` would call both
+of these UNDERTRAINED rather than converged. The practical rule it earns: do not read a low-rate arm at
+12 epochs as a verdict on the rate.
+
+**What the three say together.** Every knob on this list is flat or negative, and that is now the third
+consecutive sweep to end that way. The pool is not short of recipes; it is short of a DIFFERENT member.
