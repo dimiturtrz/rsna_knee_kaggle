@@ -13,6 +13,18 @@
 #
 # A name here is a glob under the processed root, so a member is added by NAMING it. Nothing is
 # packaged that is not written down.
+#
+# A MEMBER FITTED ON ANY FOREIGN CORPUS CARRIES `# licence: <corpus>` ON ITS OWN LINE. `submit_check`
+# refuses an entry naming any tagged member, and it refuses on the TAG's PRESENCE, not on a list of
+# corpus names — so the tag is the whole gate, and an untagged foreign member ships silently.
+# EVERY foreign corpus this project holds bars derivative distribution and none is an exception:
+# Rijeka is CC BY-NC-ND, MRNet's Stanford agreement bars creating an adaptation, and the NYU fastMRI
+# agreement licenses use "for internal research or educational purposes only" while forbidding the
+# distribution of "any subsequent variables or data files derived from the fastMRI Dataset to any
+# person or entity". `slots.FASTMRI_MERGED_SCHEME` claimed fastMRI was the exemption and licensed
+# shipping on it until 2026-09-10; it was wrong on both halves of the claim. So a merged member of
+# ANY scheme — merged, merged3, mergedf — is an OFFLINE result about what more data does, and gets
+# `# licence: <corpus>` the moment it is written down here. See knee (P0, 2026-09-10).
 
 res392_ws_s2026.pt          # 0.8523 solo — our best single member
 calibrated_targets_s2026.pt # 0.8493
