@@ -132,6 +132,14 @@ def test_control() -> None:
     assert (first | second).all()
 
 
+def test_margin_interval() -> None:
+    """The paired interval brackets the value it prices, and is tighter than the split-half spread."""
+    stability = RankStability(_pool(), RESAMPLES)
+    value, low, high = stability.margin_interval(stability.ruler())
+    assert low <= value <= high
+    assert high - low < 1.0
+
+
 def test_control_spread() -> None:
     """Both statistics are priced over the same splits, and the margin's spread is the readable one."""
     lines = RankStability(_pool(), RESAMPLES).control_spread(RankStability(_pool(), RESAMPLES).ruler(), 3)

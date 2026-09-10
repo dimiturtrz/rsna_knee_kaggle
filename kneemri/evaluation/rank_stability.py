@@ -70,6 +70,12 @@ CONTROL_SPLITS = 20
 """How many random halves price a statistic's spread. Twenty because each is two full passes over the
 pool and the reading is a min/median/max, not an interval that would want hundreds."""
 
+PERCENTILE_LOW = 2.5
+"""The lower end of a 95% percentile interval — the same two ends every other interval here reports."""
+
+PERCENTILE_HIGH = 97.5
+"""The upper end. Named because a bare 2.5/97.5 at a call site says nothing about which interval it is."""
+
 CONTROL_SEED = 2026
 """The project seed, so the random-split floor a reading is compared against is the same one twice."""
 
@@ -288,6 +294,29 @@ class RankStability:
             )
         return lines
 
+    def margin_interval(self, scores: LabelScores) -> tuple[float, float, float]:
+        """The ensemble's gain over its best single member, PAIRED — value and percentile interval.
+
+        The split-half control answers a harsher question than this one and must not be substituted for
+        it: disjoint halves cost half the studies AND throw away the pairing, so their spread is an upper
+        bound on a quantity nobody reads. What a decision actually consumes is the DIFFERENCE between two
+        numbers taken on the SAME studies, and resampling those studies once for both terms is what
+        prices it. Same reason `table` draws one index set for all thirteen arms.
+
+        The best single member is re-chosen inside every resample. Fixing it to the full-pool winner
+        would price a different quantity — the gain over ONE named member — and would read optimistically
+        whenever that member is not the best on the drawn studies.
+        """
+        together = self.pool.combined(tuple(range(len(self.pool))))
+        drawn_margins: list[float] = []
+        for drawn in StudyBootstrap(self.resamples).draws(self.pool.truth.shape[0]):
+            singles = self.scored(scores, drawn)
+            mixed = scores.mean(together[drawn], self.pool.truth[drawn])
+            drawn_margins.append(mixed - float(np.nanmax(singles)))
+        full = scores.mean(together, self.pool.truth) - float(np.nanmax(self.scored(scores)))
+        low, high = np.percentile(drawn_margins, [PERCENTILE_LOW, PERCENTILE_HIGH])
+        return full, float(low), float(high)
+
     def control_spread(self, scores: LabelScores, count: int = CONTROL_SPLITS) -> list[str]:
         """The same two statistics over MANY random halves — which of them 909 studies can actually carry.
 
@@ -382,6 +411,10 @@ def main() -> None:
         lines += stability.subgroup_margin(ruler, groups)
         lines += stability.subgroup_margin(ruler, stability.control())
         lines += stability.control_spread(ruler)
+    value, low, high = stability.margin_interval(ruler)
+    lines.append(
+        f"ensemble margin over best single, PAIRED: {value:+.4f}  95% [{low:+.4f}, {high:+.4f}]  width {high - low:.4f}"
+    )
     command.report(lines)
 
 
