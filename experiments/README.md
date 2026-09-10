@@ -12805,3 +12805,90 @@ Grepping the board for the operation is what stopped it: `fleettwo_v1` (2026-08-
 operation, different CNN, already answered, and the paired offline interval prices this member's addition
 at +0.0009. A seat asks about the MIXTURE; the mixture cannot be read until the family's own quality is on
 the board. Solo first.
+
+## `resnet_224_long` reads 0.8460 and peaked at epoch 12 OF 48 — the budget was never the binding constraint — 2026-09-10
+
+The 48-epoch CNN arm finished. Read against its own pre-registration on both rulers, all 909 studies,
+same split as the short arm:
+
+```
+resnet_224_short_s2026   0.8527 midpoint   0.8842 ledger75   best epoch  8 of 12
+resnet_224_long_s2026    0.8460 midpoint   0.8764 ledger75   best epoch 12 of 48
+```
+
+**The branch it was given was `long - short >= 0.015` says longer is real. It is -0.0067 on the
+midpoint and -0.0078 on ledger75.** Both rulers agree in sign and to within a thousandth in size, so
+this is not a cut artefact. Longer is not real for this recipe.
+
+**And the shape is the more useful half.** `convergence_check` calls it neither TRUNCATED nor
+UNDERTRAINED: the curve turned over and stayed over (e44 0.8321, e45 0.8316, e46 0.8319, e47 0.8309)
+against a peak at epoch 12. The arm spent **36 epochs, about 1.9 h of card, after its own best epoch**.
+Twelve epochs was already the right budget for this recipe, and quadrupling it bought a slightly worse
+number. That is a fact about the BUDGET and it generalises no further than a fixed learning rate — an
+arm whose curve is still climbing at its last epoch (`ortho_slow_trunk`) is a different shape and this
+does not price it.
+
+The CNN lane's best member therefore remains `resnet_224_short_s2026`, which is the member
+`kneemri-cnnsolo` already ships. The entry does not change.
+
+## Five axes read closed in one sitting, on records already on disk, and the flatness IS the finding — 2026-09-10
+
+Chasing the large-trunk question above, five separate axes were checked against their own controls.
+Every one had already been run. No card was spent on any of this; all of it is `ledger75` over the
+909-study holdout that every row below shares.
+
+```
+CONTROL band_dense_s2026            0.8578 midpoint   0.8877 ledger75
+
+LAYER-WISE LR DECAY  (7 arms, 2 factors, 3 rates, 3 trunks)
+  decay224_high_s2026               0.8487            0.8820
+  band_deep_matched_s2026           0.8487            0.8781
+  band_dense_llrd_s2026             0.8483            0.8765
+  decay224_low_s2026                0.8454            0.8714
+  llrd224_s2026                     0.8453            0.8737
+  band_deep224_s2026                0.8446            0.8718
+  llrd224_flat_s2026                0.8440            0.8694
+
+OBJECTIVE (AUC-margin surrogate REPLACING cross-entropy)
+  margin_seat_s2026                 0.8525            0.8702
+  margin_calib_s2026                0.8235            0.8678
+
+SAMPLING (disagreement tilt, against its OWN alpha-zero control)
+  disagreed_ramp_s2026              0.8574            0.8827
+  disagreed_uniform_s2026  CONTROL  0.8507            0.8819
+  disagreed_full_s2026              0.8471            0.8770
+
+CAPACITY (large trunk, and the low-rate leg)
+  ortho_solo_v1  board              0.8452 -> board 0.907, worst of five solo anchors
+  ortho_slow_trunk_s2026            0.8265            (peaked on its LAST epoch; undertrained)
+```
+
+**Not one of the twelve beats the flat control, and the whole population sits in 0.8235-0.8578.** The
+best of them, `disagreed_ramp`, is +0.0067 on the midpoint and **+0.0008 on ledger75** — the cut
+consumes the entire apparent gain, which is what a noise reading looks like when it is written down
+honestly.
+
+**The flatness across the axes is worth more than any single row.** These are not variations of one
+knob: they are the trunk's capacity, the trunk's learning rate, its per-depth rate schedule, the LOSS
+FUNCTION the network descends, and the SAMPLER that chooses what it sees. Five structurally different
+interventions, and the answer is the same number to within the noise floor every time. A search that
+returns the same value regardless of which axis it moves along is not under-searched — it is measuring
+something that does not depend on those axes.
+
+**What that licenses.** It stops the recipe/capacity/objective/sampling family from taking further card
+on momentum: each of those cells now has an occupant and a control, and re-running any of them is a
+repeat. It also removes the harness suspects one at a time — a faulty-TRAINING or faulty-PLUMBING
+explanation would have to be wrong identically across five independent implementations, which is not
+the shape of a plumbing bug.
+
+**What it points at.** Every member above is fitted against the SAME supervision: labels derived from
+radiology report text. That is the one term held constant across all five axes, and it is therefore the
+only one the flatness cannot rule out. `M294` puts that question to the researcher — how much of the
+residual is label noise rather than model capacity, and what has measurably moved a model past its own
+label quality at our scale. Pending that, no arm in this family is queued.
+
+**Pricing note, from `D283`.** The board/offline relationship refits at slope **1.098** at the top of
+the range (CI95 [0.903, 1.350], n=26), which EXCLUDES the +1.55 this project has been multiplying by.
+Every plan priced through `board_transfer` is over-priced by roughly 40%: the 0.010 board gap wants
+about **+0.009 offline**, not the +0.006 that 1.55 implied. In our working band the gap is a flat
+offset, mean +0.0608, sd 0.0035 — below the paired arm-to-arm noise floor.

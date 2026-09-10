@@ -771,3 +771,19 @@ noisy_student_s2026.pt      # 0.8548 kept — above the 0.8521 seat bar, and the
                             # per-column profile above is real and still did not buy distance from the
                             # pool. Kept on the roster because it is scoreable and shippable, NOT to be
                             # put in an entry. Re-opened only by a divergence reading, never by its solo.
+
+resnet_224_long_s2026.pt    # The 48-epoch CNN, completed 2026-09-10 after the first attempt was killed at
+                            # epoch 9. Reads 0.8460 midpoint / 0.8764 ledger75 on the 909, best epoch 12.
+                            # IT LOST ITS OWN BRANCH and is rostered anyway. The pre-registration asked for
+                            # `long - short >= 0.015`; it came back -0.0067 midpoint and -0.0078 ledger75,
+                            # so the longer budget does not pay for this recipe and the CNN lane's best
+                            # solo remains `resnet_224_short_s2026`. What earns the line is the owner's
+                            # standing rule that a member which does not beat our previous models is still
+                            # worth having available, because an ensemble with it may: this is a resnet50d
+                            # against a pool that is almost entirely DINOv2/DINOv3, and `diversity_slope`
+                            # (2026-09-10) prices decorrelation at +0.1328 per unit once member quality is
+                            # controlled on both ends. Rostered so it is SHIPPABLE, not to be put in an
+                            # entry — it is 0.0067 under its own sibling, which is already packaged, and
+                            # two near-identical CNNs are not two units of diversity. Read it against the
+                            # pool with a divergence measurement, never against its solo.
+                            # Ledger 2026-09-10.
