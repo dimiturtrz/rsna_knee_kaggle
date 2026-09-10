@@ -285,7 +285,14 @@ def main() -> None:
     command.parser.add_argument("--members", nargs="+", default=None, help="check only these identifiers")
     arguments = command.parsed()
 
-    package = MemberPackage.at(arguments.root, arguments.paths)
+    # BOTH SHELVES, because a kernel mounts both. `MemberPackage.at` answers "the one package a CLI was
+    # pointed at", and this is a pre-flight for an entry — so built on `at` it checks a package no kernel
+    # runs, and refuses a correct entry whose member happens to sit on the second shelf. That failure is
+    # already recorded against `oof_teacher_s2026` in `MemberPackage.shipped`'s own docstring; this CLI is
+    # the one that was never converted, and it bit `resnet_224_short_s2026` on 2026-09-10 with
+    # `not in the package` minutes before that member's slot. An explicit `--root` still names exactly one
+    # shelf: `shipped` spans only when it was pointed nowhere, which is the invocation the conventions use.
+    package = MemberPackage.shipped(arguments.root, arguments.paths)
     # THE ROOT ITSELF, not its processed branch: a member whose decode was reclaimed is witnessed from
     # the DICOMs instead, so the check needs both branches and picks between them per member.
     data = command.rooted(arguments)
