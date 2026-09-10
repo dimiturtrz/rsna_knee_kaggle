@@ -67,6 +67,23 @@
 # axis on a mechanism for the first time rather than on a bug.
 #
 # control  band_dense = 0.8578 (best epoch 8), byte-identical recipe with the flag off.
+#
+# deliberate: --encoder-weights adapt_small_e8_unitfix.pt (the ONE variable; the control has it absent)
+#
+# PRICE, written 2026-09-10 before the re-arm. 12 epochs at 336/20 measured 1690/2114/1341 s on the first
+# attempt, so ~1.7 ks an epoch and ~5.7 h of card. GAIN: this is the only lever on the board whose
+# mechanism could carry more than the 1.5% house bar — the corpus doubling is priced at +0.009 and the
+# site axis reads negative, while an encoder that has actually fitted 402,600 in-domain slices is the one
+# thing no arm here has ever had. P(clears 1.5%) ~ 0.25, so expected ~+0.005 for 5.7 h. That ratio is
+# worse than a cheap instrument's and it is still the best on the board, because every cheap instrument
+# left is priced at zero by its own pre-registration.
+#
+# WHY IT IS BEING RE-ARMED RATHER THAN RE-DESIGNED. The first attempt died at `ARM FAILED mae_unitfix
+# (trainer exit 127)` in epoch 3 — the `uv sync` venv rewrite under a live arm, not a result. Its three
+# epochs read 0.6637 -> 0.6898 -> 0.6957, rising, against `mae_matched`'s 0.6735 at epoch 3 on the broken
+# pretrain. Three epochs is not evidence the axis re-opens; it is evidence the run was killed, and the
+# gate that matters already passed upstream: pixel 0.9682 -> 0.5570, 3.2% of hidden-patch variance
+# explained -> 44%.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 ADAPTED="$MODELS/adapt_small_e8_unitfix.pt"
