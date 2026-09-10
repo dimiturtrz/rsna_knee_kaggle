@@ -13055,3 +13055,38 @@ non-assertions are not two attempts at one idea.
 **Price paid: 2.1 h of card for a kill.** That is a real result and it is cheaper than the arm would have
 been worth had it passed, because a table that reads −0.0112 on gold would otherwise have gone on
 supervising members for weeks on the strength of its 19-cell gate margin.
+
+## The middle rung reads NULL, and the honest word is null — `oof_band_folds`, 2026-09-10, 2.1 h of card
+
+Self-training with the reader's bracket kept: `report_labels_v6band50.csv` re-spreads the 6461 cells
+sitting on the reader's middle rung (raw 0.68) by their own out-of-fold order, share 0.5, symmetric about
+the rung so the band's mean does not move. Five folds at 224/8, one token different from `oof_folds`.
+
+PAIRED gold@58, against `oof_fold[0-4]_s2026`:
+
+| estimator | difference | sd of the difference | resolves at two sd |
+|---|---|---|---|
+| `rankpooled` (registered) | **−0.0066** | 0.0062 | 0.0122 |
+| `paircount` | −0.0071 | 0.0070 | 0.0137 |
+| `macro` (board-comparable, D298 §3a) | −0.0076 | 0.0075 | 0.0147 |
+
+Levels for the record: band `rankpooled` 0.8579 / `macro` 0.8852; the two read 0.027 apart on one system,
+which is why neither is quoted alone.
+
+**Third branch of the pre-registration, verbatim: "between — NULL AT THIS RESOLUTION, and that is the
+honest word."** −0.0066 is 1.06 paired sd. The sign is not readable and must not be reported as a small
+harm: at this n the estimator cannot tell −0.0066 from 0. What the arm buys is the CHEAP branch closing.
+The mechanism is not refuted — it is priced, and the price is that a 2.1 h instrument on 58 gold studies
+is the wrong instrument for an effect this size.
+
+**The 0.6879 rung is not attempted.** The arm reserved that closure for the ≤ −0.020 branch and this is
+not that branch, so the reason is different and worth writing down: D301 §4 measured the upper rung as
+better TILTED (43.5% of its band mass on our six weakest columns against the middle rung's 35.0%) but
+D300 measured the model ordering it WORSE (within-band 0.7002 against 0.7490). Two effects pointing
+opposite ways, with a ruler that has just demonstrated it cannot resolve either. `--rung` and
+`report_labels_v7upper50.csv` are built and stay on the shelf; arming the second arm of a mechanism whose
+first arm read null is the thing this ledger keeps recording as a mistake.
+
+**What this does NOT close.** The band mechanism at FULL recipe strength, and the band mechanism read on
+a ruler with more than 58 studies. D301 §6 and D297 §4 arrive at the same sentence from two directions:
+the cheapest thing that would settle it is more gold, not a cleverer statistic.
