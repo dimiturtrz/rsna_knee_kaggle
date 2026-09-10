@@ -129,9 +129,16 @@ resnet_224_short_s2026.pt   # 0.8527 solo (peak e8, 12 epochs, converged) — TH
                             #
                             # 48-epoch arm resnet_224_long is on the card behind it; this row prices the
                             # 12-epoch budget every other seat on the ledger was fitted under.
-clean_calib_s2026.pt          # 0.8649 midpoint, the strongest plain-recipe fold-0 member with no full-data twin; the P1 refit candidate, unshippable until now
-labelwise_extended_s2026.pt   # ledger75 0.9060 SOLO — above greedyseat_v1's whole seven-member 0.9040, the best ledger75 solo the project owns
-extended_band_s2026.pt        # rostered with a checkpoint and never packaged; joins on the same sweep
-latent_register_dense_s2026.pt # rostered with a checkpoint and never packaged; joins on the same sweep
-fovjitter160_s2026.pt         # rostered with a checkpoint and never packaged; its cache is gone so it can be SERVED but not re-scored
-resnet_224_long_s2026.pt      # the 48-epoch CNN; the greedy seats it 7th on the roster-wide ledger75 pool, and it is a family the packaged pool is thin in
+
+# THE SIX MEMBERS THAT WERE HERE FROM 2026-09-10 21:59Z TO 23:30Z ARE GONE, and the header's own rule is
+# why: `clean_calib_s2026`, `labelwise_extended_s2026`, `extended_band_s2026`,
+# `latent_register_dense_s2026`, `fovjitter160_s2026` and `resnet_224_long_s2026` were ALREADY named in
+# `comp/members.roster`. A member on both shelves is not a merge conflict, it is a vote loading weights
+# nobody chose, and `MemberPackage.spanning` refuses an identifier two roots both hold — so
+# `mount_check` failed outright with all six named, which is how this was found rather than by reading.
+# They were put here on the premise that shelf 1 is a 10 GB re-push nobody does per member. That premise
+# stopped holding at 23:26Z on 2026-09-10, when shelf 1 WAS re-pushed in full for the two fold-0
+# teachers; the live `kneemri-members` now carries all six (verified by `kaggle datasets files`), so
+# shelf 1 is where they are and this file may not name them. The rule to take forward: check
+# `comp/members.roster` for the name BEFORE adding a line here — the shelf split is about what has not
+# been pushed yet, never about what is convenient to mount.

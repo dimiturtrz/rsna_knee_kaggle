@@ -1053,3 +1053,16 @@ ortho_fastmri_s2026  # DECLINED ON LICENCE, not on score, and it may never be re
     # fastMRI was the exemption until 2026-09-10 and licensed an entry on it; the primary text
     # says otherwise. Its offline number is a reading about what more data does, and only that.
     # Ledger 2026-09-10.
+
+# DECLINED ON LICENCE, not on score, and its number may never re-open it. Fitted on `--scheme mergedf`
+# — our corpus concatenated with NYU fastMRI — so shipping its weights in a competition kernel would
+# distribute "subsequent variables or data files derived from the fastMRI Dataset to a person or
+# entity", which the NYU agreement permits only "for uses in academic publications and presentations
+# with citations". Fitting it is internal research and stays legal; shipping it does not. Declined
+# BEFORE its score was read, deliberately, so that no number can be used to argue the licence away.
+# It is still worth finishing as an OFFLINE close on the corpus: its control `ortho_fastmri` read
+# 0.8475 against `ortho_dense` 0.8452 with a per-finding shape that is the INVERSE of the one masking
+# fixes (the three columns fastMRI grades average -0.0025; the nine it supplies negatives-only for
+# average +0.0040), so the premise this arm was queued on is already falsified and its result closes
+# the site axis rather than optimising it. See experiments/README.md 2026-09-10 and knee-i3ahx.
+ortho_fastmri_masked_s2026  # DECLINED ON LICENCE, not on score; fitted on mergedf, see the block above.
