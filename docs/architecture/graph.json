@@ -824,6 +824,24 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.band_resolution",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.band_resolution",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.band_resolution",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.confident_labels",
       "target": "core.cli",
       "weight": 1
@@ -10732,6 +10750,60 @@
       "kind": "calls",
       "source": "core.data.corpus.window_reader.FileReader.read",
       "target": "core.data.corpus.window_reader.FileReader._fill",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.BandResolution.census",
+      "target": "core.data.labels.band_resolution.BandResolution.banded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.BandResolution.census",
+      "target": "core.data.labels.band_resolution.BandResolution.resolved",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.BandResolution.resolved",
+      "target": "core.data.labels.band_resolution.BandResolution.banded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.BandResolution.resolved",
+      "target": "core.data.labels.band_resolution.BandResolution.percentiles",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.BandResolution.resolved",
+      "target": "core.data.labels.band_resolution.BandResolution.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.BandResolution.spread",
+      "target": "core.data.labels.band_resolution.BandResolution.reach",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.band_resolution.main",
+      "target": "core.data.labels.band_resolution.BandResolution",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.main",
+      "target": "core.data.labels.band_resolution.BandResolution.census",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.band_resolution.main",
+      "target": "core.data.labels.band_resolution.BandResolution.resolved",
       "weight": 1
     },
     {
@@ -37179,7 +37251,7 @@
   ],
   "nodes": [
     {
-      "descendants": 76,
+      "descendants": 77,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -37203,7 +37275,7 @@
       "role": null
     },
     {
-      "descendants": 66,
+      "descendants": 67,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -37539,11 +37611,19 @@
       "role": null
     },
     {
-      "descendants": 24,
+      "descendants": 25,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
       "parent": "core.data",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution",
+      "label": "band_resolution",
+      "level": "module",
+      "parent": "core.data.labels",
       "role": null
     },
     {
@@ -40824,6 +40904,14 @@
       "label": "WindowReader",
       "level": "class",
       "parent": "core.data.corpus.window_reader",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution",
+      "label": "BandResolution",
+      "level": "class",
+      "parent": "core.data.labels.band_resolution",
       "role": "primary"
     },
     {
@@ -48312,6 +48400,70 @@
       "label": "read",
       "level": "method",
       "parent": "core.data.corpus.window_reader.WindowReader",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution.BandResolution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution.banded",
+      "label": "banded",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution.BandResolution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution.census",
+      "label": "census",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution.BandResolution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution.percentiles",
+      "label": "percentiles",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution.BandResolution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution.reach",
+      "label": "reach",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution.BandResolution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution.BandResolution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.BandResolution.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution.BandResolution",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.band_resolution.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.labels.band_resolution",
       "role": null
     },
     {

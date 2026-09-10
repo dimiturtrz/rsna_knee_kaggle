@@ -19,12 +19,29 @@ gold read over that stitch is fifty-eight HONEST studies rather than thirteen. T
 instead of one; there is no cheaper route, and no amount of record-mining substitutes for it, because a
 holdout record contains only the studies its member held OUT.
 
-WHICH ESTIMATOR DECIDES. `gold_estimators.py` carries the family and the argument for it: the registered
-ruler is the per-finding RANK-NORMALISED pooled cell AUC at paired sd 0.0096, the raw pooled reading is
-disqualified for being movable 0.0288 by a recalibration that changes no ranking, and Hanley weighting is
-rejected for breaking the pairing. Every line printed here names its estimator, because the same records
-read 0.8927 flat-macro and 0.8645 rank-norm-pooled — 0.028 apart on ONE system, wider than any decision
-band they would be quoted into (knee-f9aao).
+WHICH ESTIMATOR DECIDES, AND WHICH ONE THE BOARD USES — THEY ARE NOT THE SAME ONE. `gold_estimators.py`
+carries the family and the argument for it: the registered internal ruler is the per-finding
+RANK-NORMALISED pooled cell AUC at paired sd 0.0096, the raw pooled reading is disqualified for being
+movable 0.0288 by a recalibration that changes no ranking, and Hanley weighting is rejected for breaking
+the pairing.
+
+D298 then read the competition's own evaluation page — text, verbatim, `Final Score = (1/12) Σ AUC_i`,
+"the macro-averaged AUC ROC" — so the BOARD'S statistic is the flat macro over twelve at equal weight.
+Every other estimator here is an INTERNAL INSTRUMENT: sharper on our 58 studies and a different quantity
+from the one the competition scores. So the ledger's board-comparable row stays `macro` or it stops being
+comparable, and `rankpooled` decides only internal questions — which label table supervises better, which
+of two arms to keep — where resolution is what is scarce. That also makes pair-count weighting point AWAY
+from the board rather than merely being less sharp: Fracture at three positives is worth exactly what
+Effusion is worth to the scorer, and any pair-count weight up-weights the populated columns the board
+weights identically.
+
+The same reading also promotes the raw-pooling disqualification from a semantic argument to the scorer's
+definition: AUC is rank-only per column and the columns never meet, so the entire between-finding
+calibration axis is worth exactly zero on the board.
+
+Every line printed here names its estimator, because the same records read 0.8927 flat-macro and 0.8645
+rank-norm-pooled — 0.028 apart on ONE system, wider than any decision band they would be quoted into
+(knee-f9aao).
 
 WHAT IT REFUSES. A stitch that does not cover the corpus. Folds that overlap are refused upstream by
 `OutOfFoldTeacher.readings`; a stitch that covers too FEW studies is refused here, because a four-fold

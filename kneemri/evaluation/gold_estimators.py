@@ -28,6 +28,16 @@ pairing breaks: correlation falls 0.878 -> 0.605 and the sd doubles. Any varianc
 to be fixed across the arms — computed from n+ and n-, never from the areas — and once it is, it IS
 pair-count weighting, which is here.
 
+THE BOARD SCORES THE FLAT MACRO, SO EXACTLY ONE OF THESE IS BOARD-COMPARABLE. D298 read the competition's
+own evaluation page — verbatim `Final Score = (1/12) Σ AUC_i`, "the macro-averaged AUC ROC". Equal weight,
+twelve columns, per-column rank only. `MacroGold` is therefore the ledger's board-comparable row and the
+other two are INTERNAL INSTRUMENTS: sharper on 58 studies, a different quantity from the one that decides
+the competition. Use `rankpooled` to choose between two arms, never to predict a board number. And note
+that pair-count weighting does not merely cost sharpness against the board — it points away from it, by
+up-weighting exactly the populated columns the scorer weights identically (Fracture at three positives is
+worth what Effusion is worth). The raw-pooling disqualification below now rests on that same definition
+rather than on an argument: the columns never meet, so between-finding calibration is worth zero there.
+
 A LEVEL IS NOT COMPARABLE ACROSS ESTIMATORS. The same records read 0.8927 flat-macro and 0.8645
 rank-norm-pooled: 0.028 apart on ONE system, larger than the decision band it would be quoted into.
 Every estimator carries a `name` for that reason, and no caller may print a level without it
