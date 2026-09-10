@@ -13702,3 +13702,55 @@ of these UNDERTRAINED rather than converged. The practical rule it earns: do not
 
 **What the three say together.** Every knob on this list is flat or negative, and that is now the third
 consecutive sweep to end that way. The pool is not short of recipes; it is short of a DIFFERENT member.
+
+## `ortho_fastmri` reads 0.8475 and the per-finding shape is the INVERSE of the one masking would fix — 2026-09-10, 1.6 h of card
+
+Control `ortho_dense` **0.8452** (peak e8), arm `ortho_fastmri` **0.8475** (peak e5). Delta **+0.0023**,
+inside the 0.0062 resolution of this holdout and inside the house bar by a factor of six. The middle
+branch fired, and the arm's own pre-registration says the breakdown — not the scalar — decides what it
+means. Here it is, best epoch against best epoch:
+
+| finding | fastMRI grades it | `ortho_dense` | `ortho_fastmri` | delta |
+|---|---|---|---|---|
+| ACL | **yes** (101 pos) | 0.8879 | 0.8878 | -0.0001 |
+| MCL | **yes** (4 pos) | 0.7961 | 0.7867 | **-0.0093** |
+| Effusion | **yes** (142 pos) | 0.8425 | 0.8444 | +0.0019 |
+| Medial Meniscus | negatives only | 0.8875 | 0.8905 | +0.0030 |
+| Lateral Meniscus | negatives only | 0.8099 | 0.8155 | +0.0056 |
+| Medial OA | negatives only | 0.8718 | 0.8690 | -0.0028 |
+| Lateral OA | negatives only | 0.7980 | 0.8115 | **+0.0135** |
+| PF OA | negatives only | 0.8294 | 0.8294 | -0.0000 |
+| Synovitis | negatives only | 0.8648 | 0.8488 | **-0.0159** |
+| Baker's | negatives only | 0.8876 | 0.9064 | **+0.0187** |
+| Contusion | negatives only | 0.8599 | 0.8726 | **+0.0128** |
+| Fracture | negatives only | 0.8066 | 0.8074 | +0.0008 |
+
+**The three graded columns average -0.0025. The nine absence-only columns average +0.0040.** That is
+the exact inverse of the shape the arm pre-registered as evidence for masking: *"if ACL / MCL / Effusion
+rise while the nine absence-only columns fall, the corpus transfers and the ABSENCE PRIOR is eating the
+gain"*. Nothing rose where the corpus actually supervises, and what moved moved on columns fastMRI
+cannot even locate — in both directions, at magnitudes (+0.0187 Baker's, -0.0159 Synovitis) that no
+mechanism in this arm reaches. **So there is no transfer for an absence prior to eat**, and masking the
+nine to weight 0.0 would delete exactly the columns that moved up while keeping the three that did not
+move — including MCL, which the corpus grades with **four** positives.
+
+**What this closes.** The site axis now has three independent readings and all three are inside noise:
+`merged3_corpus` +0.0043 for a second site and -0.0024 for a third, and this arm +0.0023 for a second
+site on a trunk that had never seen a merge. The honest statement is that **a second institution is
+worth about nothing to this stack at 224/12**, and that is the third time it has been measured. It is
+also the branch `slots.FASTMRI_MERGED_SCHEME` names in advance: one filled slot of six is too little
+input — and masking does not fix too-little-input, it fixes a supervision prior.
+
+**What this does NOT close.** The corpus was decoded at 224/12 into ONE of six canonical slots; 588 of
+its 1,173 studies were dropped at the door for filling only `COR_FLUID_NOFS`. A reading of fastMRI at
+336/20 with an extended slot axis is a different experiment and this arm says nothing about it. It is
+just no longer worth a card ahead of anything else, because — see the licence finding of the same day —
+**no member fitted on any merge of ours can be shipped**, so the whole axis can now only ever pay
+offline.
+
+**`ortho_fastmri_masked` is running behind this on the watcher and its premise is falsified by the table
+above.** It is left to finish rather than killed for one reason only: it is the arm that separates
+"the corpus cannot help" from "the prior was in the way", and with the card otherwise idle overnight
+the alternative was not a better arm, it was no arm. Its result is pre-declared here as an **offline
+close on fastMRI either way** — a win does not re-open a shippable path, because there is no shippable
+path.
