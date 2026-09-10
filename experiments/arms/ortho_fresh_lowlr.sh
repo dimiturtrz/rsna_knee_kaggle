@@ -45,6 +45,31 @@
 #
 # bead: knee-6hfi
 #
+# PRICE, written 2026-09-10 before the re-arm. COST: `ortho_lpft_s2026` measured 432 s/epoch at this
+# exact shape (ledger, variant ORTHOLARGE / 224 px / 12 sl / recompute True), so 12 epochs is ~1.44 h of
+# card. GAIN: this is an INSTRUMENT and is justified as one — it retires no suspicion about its own score
+# and predicts nothing above the control. What it buys is that the ortho triple becomes READABLE: with
+# `ortho_dense` 0.8452 and `ortho_lpft` on disk, this third point is the only thing that separates the
+# rate from the initialisation, and the in-domain trunk lane (`ortho_dense` +0.0194 over `v3large_dense`
+# at the same shape) is the largest measured effect this project owns that has never been converted into
+# a served member. One of its three branches is above the house bar on its own: s >= ortho_dense + 0.015
+# says 4e-5 is too hot for a trunk this size on 4,400 studies, which re-opens `radnet121`'s written
+# decline (0.6716 at 4e-4 vs 0.8197 frozen) and every other external trunk we declined on a fine-tune.
+# P(that branch fires) ~ 0.3. At 1.44 h it is the best hours-per-readable-answer on the board, and it is
+# a THIRD of the footprint of the arm it replaces.
+#
+# WHY IT IS BEING RE-ARMED RATHER THAN RE-DESIGNED. The previous attempt died at `exit 127` — the `uv
+# sync` venv rewrite under a live arm (see the ledger, which records that this was carried as a possible
+# method failure and was not one). No result was produced, so this is not a repeated experiment.
+#
+# FOOTPRINT, and it is the reason this arm is on the card rather than `mae_unitfix`. That arm is 336 px /
+# 20 slices; measured 2026-09-10 it held 32,024 MiB of a 32,607 MiB card and reported 51 MiB free from
+# its FIRST step. It survived epoch 0 at 510 img/s and collapsed to 57 img/s the moment epoch 0's holdout
+# eval allocated on top — WDDM pages GPU memory over PCIe rather than failing, and it never recovered.
+# `--vram-gb` is NOT the fix (see `wait_for_free_card`: it caps our allocator, not the device, and set
+# above what the card can spare it PERMITS the paging). The recipe is what had to shrink, and 224/12 is a
+# recipe that already fits with headroom.
+#
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"

@@ -13527,3 +13527,61 @@ the wider trunk under-performing its own handicapped run would say the batch was
 back, and would retire capacity as the last open suspect at n=4,407.
 
 Read the final number against `base_dense` FIRST, and read it as a ranking-pair result, not a batch one.
+
+### The board holds TWO populations and the champion is in the one that cannot be priced — 2026-09-10
+
+`python -m kneemri.kaggle.entry_offline` returns **0 fillable, 48 declined, of 48 entries missing
+offline**. Not a backlog — a structural fact, and it retires the whole "fill the missing offline
+numbers" thread.
+
+Split the board on whether a row HAS an honest offline number:
+
+| population | n | best board | offline available |
+|---|---|---|---|
+| priceable (fold-0 members, real holdout) | 52 | **0.937** (`honest12` 0.8751, `distinct14` 0.8749) | yes |
+| unpriceable (a full-data or foreign in-sample member) | 48 | **0.944** | never |
+
+Every entry at 0.936 and above carries either a member fitted at `--fold -1` (so it has seen every
+holdout study) or a foreign in-sample one. `stackseat_v1`, the pinned champion, declines in-sample on
+`calib_span_ff` and `stack_increments_ff`; `cnnseat_v1` declines foreign-in-sample on `raptor_v4_swa`;
+`dark6`/`dark7`/`votefit`/`jitterfit` on `final_ws_e12`, `calib_span_ff`, `grade_ladder_ff`,
+`base_dense_ff`, `lr4e-5_ws_ff`, `through_dense_ff`.
+
+**Three consequences, and the third is the lever.**
+
+1. **The +0.0614 ensemble transfer constant may not be applied to an unpriceable entry.** It was fitted
+   on fold-0 rows, whose members trained on 79% of the studies (3,498 of 4,407); an `_ff` member trained
+   on 100%. An "ensemble debt of +0.0110" computed for `cnnseat_v1` that way earlier in this session is
+   **invalid and is retracted here**. `entry_offline`'s own docstring is the rule: *a wrongly filled row
+   is worse than a null.*
+
+2. **The two populations answer "why are we stuck at 0.944".** Honest seating tops out at 0.937 and the
+   0.005 board resolution floor swallows every operation under it, which is why three DIFFERENT member
+   sets — ref 56084691 (8 members), `cnnseat_v1` (7), `stackseat_v1` (6) — all returned exactly 0.944.
+   That is not three coincidences, it is one ruler that cannot separate them.
+
+3. **The champion is seated from full-data refits of members that were our best MONTHS ago.** The
+   full-data census, taken off the recorded `fold` field rather than off the `_ff` filename (a name glob
+   misses `_cf`, `_df` and `_ff_s2026` — it undercounted 28 as 12), is **28 checkpoints**. Against the
+   top of the current fold-0 pool, almost none of the good members have a full-data twin:
+
+   | fold-0 member | offline | full-data twin |
+   |---|---|---|
+   | `foreign_distill_mix07_s2026` | 0.8657 | **none** |
+   | `clean_calib_s2026` | 0.8649 | **none** |
+   | `chainfour_s2026` | 0.8648 | `chainfour_ff_s2026` |
+   | `foreign_distill_calib_s2026` | 0.8641 | **none** |
+   | `chaindense_s2026` | 0.8628 | **none** |
+   | `labelwise_extended_s2026` | 0.8623 | **none** |
+   | `foreign_distill_s2026` | 0.8595 | **none** |
+
+   The champion's own seats `calib_span` (0.8545) and `base_dense` (0.8512) are **+0.011 to +0.014
+   offline weaker** than members already on disk. That gap sits in the Δ≥0.010 band where **0 of 22**
+   board pairs inverted — the one band the ruler can actually see. Refitting current top members at
+   `--fold -1` is MEMBER work, not a seating, so it is not on the closed axis.
+
+**The honest caveat, computed before the queue is priced.** The data slope is concave at +0.009 per
+doubling, and 79%→100% is ~0.34 doublings ≈ **+0.003** — under the 0.005 floor. So the extra data alone
+does NOT explain 0.937→0.944, and the argument for the refit queue rests on **member quality** (the
++0.011 offline gap), not on the extra studies. A refit queue justified on the data bonus would be a
+sub-floor operation wearing a mechanism's clothes.
