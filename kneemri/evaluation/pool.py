@@ -43,6 +43,29 @@ class Pool:
     `LogitAverage` since `kneemri-vote`. The ruler and the entry disagreeing on the rule is a harness
     gap, not a finding, and this field is what closes it."""
 
+    studies: list[str] = field(default_factory=list)
+    """WHICH studies these rows are, in row order — empty when the producer did not carry them through.
+    Every reading before 2026-09-10 asked a question about the whole holdout at once and needed only the
+    arrays; a question about a SUBSET of the studies (does the ordering survive a case-mix change?) needs
+    to know which row is which study, and the identifiers were being dropped at `RecordMix.per_member`
+    while sitting right there in `shared()`. Optional because a synthetic pool has no study names and
+    must stay constructible from three arrays."""
+
+    def restricted(self, keep: NDArray[np.bool_]) -> "Pool":
+        """The same members over a SUBSET of the studies — the pool a subgroup reading is taken over.
+
+        Every array is masked together, which is the whole reason this lives on the type rather than at
+        the call site: masking predictions while forgetting truth scores the right members against the
+        wrong rows and raises nothing.
+        """
+        return Pool(
+            self.names,
+            [member[keep] for member in self.predictions],
+            self.truth[keep],
+            self.vote,
+            [study for study, taken in zip(self.studies, keep, strict=False) if taken],
+        )
+
     def __len__(self) -> int:
         """How many members — the range every subset enumeration runs over."""
         return len(self.predictions)

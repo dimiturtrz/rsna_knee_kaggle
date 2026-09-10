@@ -43,6 +43,8 @@ cannot resolve our own arms on our own studies is a defect independent of any sh
 one runs first.
 """
 
+import csv
+import itertools
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -64,10 +66,65 @@ logger = logging.getLogger(__name__)
 TARGET_COLUMNS = 12
 """What the competition averages over. Our `nanmean` may average over fewer; that gap is the reading."""
 
+CONTROL_SEED = 2026
+"""The project seed, so the random-split floor a reading is compared against is the same one twice."""
+
 RESOLVED_SHARE = 0.90
 """Where a first-rank share stops being a coin flip and starts being an ordering. Legislated, not fitted:
 below it the arm that ranks first on the full holdout loses that rank to a resample more than one time in
 ten, which is more often than this project has ever been willing to be wrong about a seat."""
+
+
+@dataclass(frozen=True)
+class SeriesAxes:
+    """What was ACQUIRED for each study — the only case-mix axes this dataset carries for free.
+
+    `train_series.csv` names four candidate axes and two of them are not axes at all: `Fat_Suppression`
+    and `Fluid_Sensitive` are byte-identical across all 24,371 series (one variable wearing two column
+    names, so treating them as two would double-count), and every one of the 4,407 studies carries
+    Axial+Coronal+Sagittal, so plane-set is constant. That leaves how MANY series a study has (3-14,
+    mode 5) and what SHARE of them are fat-suppressed (0.23-0.45+), which is what this carries.
+
+    Neither is a label, which is the point: partitioning the holdout on an acquisition fact and
+    re-deriving the ordering inside each part asks whether our ranking is case-mix dependent without
+    consuming a single test label.
+    """
+
+    counts: dict[str, int]
+    suppressed: dict[str, float]
+
+    @classmethod
+    def read(cls, table: Path) -> "SeriesAxes":
+        """Both axes off the series table, one pass, keyed by study."""
+        counts: dict[str, int] = {}
+        suppressed: dict[str, float] = {}
+        with table.open(newline="") as handle:
+            for row in csv.DictReader(handle):
+                study = row["StudyInstanceUID"]
+                counts[study] = counts.get(study, 0) + 1
+                suppressed[study] = suppressed.get(study, 0.0) + float(row["Fat_Suppression"])
+        return cls(counts, {study: total / counts[study] for study, total in suppressed.items()})
+
+    def groups(self, studies: list[str]) -> dict[str, NDArray[np.bool_]]:
+        """Four masks over these studies in row order — each axis split at its own median.
+
+        A median split rather than terciles because the ordering is re-derived INSIDE each part and a
+        thin part re-prices thirteen arms on too few studies to say anything; halves are the largest
+        parts an axis can give. A study missing from the table would silently join the low side of both,
+        so it is refused instead — the join is the thing most likely to be wrong here.
+        """
+        missing = [study for study in studies if study not in self.counts]
+        if missing:
+            message = f"{len(missing)} holdout studies absent from the series table, e.g. {missing[0]}"
+            raise ValueError(message)
+        count = np.asarray([self.counts[study] for study in studies], dtype=np.float64)
+        share = np.asarray([self.suppressed[study] for study in studies], dtype=np.float64)
+        return {
+            "series<=median": count <= np.median(count),
+            "series>median": count > np.median(count),
+            "suppression<=median": share <= np.median(share),
+            "suppression>median": share > np.median(share),
+        }
 
 
 @dataclass(frozen=True)
@@ -162,6 +219,45 @@ class RankStability:
         recut = self.scored(self.ruler(recut=True))
         return float(stats.kendalltau(midpoint, recut).statistic)
 
+    def within(self, scores: LabelScores, keep: NDArray[np.bool_]) -> list[float]:
+        """Every arm's macro over a SUBSET of the studies, in pool order — one subgroup's score vector."""
+        return RankStability(self.pool.restricted(keep), self.resamples).scored(scores)
+
+    def control(self, seed: int = CONTROL_SEED) -> dict[str, NDArray[np.bool_]]:
+        """Two RANDOM halves of the same studies — what a subgroup tau reads when nothing is different.
+
+        Without this the subgroup tau is uninterpretable. Thirteen arms spanning 0.012 re-ranked on
+        half the studies will disagree a great deal from sampling alone, so a low tau across an
+        acquisition axis is only evidence of case-mix dependence if it is LOWER than the tau two
+        meaningless halves produce. This is that floor, and it costs one more pass over the same pool.
+        """
+        drawn = np.random.default_rng(seed).permutation(self.pool.truth.shape[0])
+        first = np.zeros(self.pool.truth.shape[0], dtype=np.bool_)
+        first[drawn[: self.pool.truth.shape[0] // 2]] = True
+        return {"random half A": first, "random half B": ~first}
+
+    def subgroup_agreement(self, scores: LabelScores, groups: dict[str, NDArray[np.bool_]]) -> list[str]:
+        """Does the arm ordering survive a case-mix change INSIDE our own holdout — D281 §3(3).
+
+        The spectrum effect (Mulherin & Miller 2002) is a shift in the difficulty distribution WITHIN
+        each class, and D281 §2.2's rule makes it an INVERSION route precisely when it is
+        model-dependent. That is measurable here without a single test label: partition the 909 on an
+        axis that is not the label, re-derive the ordering inside each part, and read the pairwise
+        Kendall tau. Agreement means a case-mix shift on the competition's test set is unlikely to
+        re-draw our ordering; disagreement is the inversion mechanism firing inside our own data, which
+        is much stronger evidence than any borrowed table.
+        """
+        vectors = {name: self.within(scores, keep) for name, keep in groups.items()}
+        lines = [f"{len(groups)} subgroup(s) over {self.pool.truth.shape[0]} studies, ruler {scores.name()}"]
+        for name, keep in groups.items():
+            best = self.pool.names[int(np.nanargmax(vectors[name]))]
+            lines.append(f"{name:28s} n={int(keep.sum()):5d}  best {best[:36]:36s} {np.nanmax(vectors[name]):.4f}")
+        names = list(groups)
+        for first, second in itertools.combinations(names, 2):
+            tau = float(stats.kendalltau(vectors[first], vectors[second]).statistic)
+            lines.append(f"tau {first} vs {second}: {tau:+.4f}")
+        return lines
+
     def report(self, scores: LabelScores) -> list[str]:
         """The table, the cut agreement, and the verdict the first-rank share licenses."""
         rows = sorted(self.table(scores), key=lambda arm: arm.rank)
@@ -210,11 +306,19 @@ def main() -> None:
     command.parser.add_argument("--arms", nargs="+", required=True, help="member stems to rank against each other")
     command.parser.add_argument("--resamples", type=int, default=STUDY_RESAMPLES)
     command.parser.add_argument("--ruler", choices=["midpoint", "ledger75"], default="midpoint")
+    command.parser.add_argument(
+        "--series", type=Path, help="train_series.csv — adds the D281 3(3) subgroup reading over acquisition axes"
+    )
     arguments = command.parsed()
 
     pool = RecordMix([arguments.holdouts / f"{name}{SUFFIX}" for name in arguments.arms]).per_member()
     stability = RankStability(pool, arguments.resamples)
-    command.report(stability.report(stability.ruler(recut=arguments.ruler == "ledger75")))
+    ruler = stability.ruler(recut=arguments.ruler == "ledger75")
+    lines = stability.report(ruler)
+    if arguments.series is not None:
+        lines += stability.subgroup_agreement(ruler, SeriesAxes.read(arguments.series).groups(pool.studies))
+        lines += stability.subgroup_agreement(ruler, stability.control())
+    command.report(lines)
 
 
 if __name__ == "__main__":

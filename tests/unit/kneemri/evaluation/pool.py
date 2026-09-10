@@ -88,6 +88,22 @@ def test_split_refuses_a_roster_member_with_no_record(tmp_path: Path):
         pool.split([tmp_path / "shipped.pt", tmp_path / "absent.pt"])
 
 
+def test_restricted():
+    """A boolean subgroup mask cuts members, truth AND the study names on the same rows."""
+    members = [_member(1.0, seed) for seed in (1, 2)]
+    studies = [f"s{index}" for index in range(STUDIES)]
+    pool = Pool(_names(members), members, _truth(), RankAverage(), studies)
+    keep = np.zeros(STUDIES, dtype=np.bool_)
+    keep[:3] = True
+
+    subgroup = pool.restricted(keep)
+
+    assert len(subgroup) == len(pool), "a subgroup drops no member"
+    assert subgroup.truth.shape[0] == 3
+    assert subgroup.studies == ["s0", "s1", "s2"], "the identifiers are cut on the same rows as the arrays"
+    assert np.array_equal(subgroup.predictions[1], members[1][keep])
+
+
 def test_rows():
     """A subset of the studies restricts members and truth TOGETHER, which is what keeps a split honest."""
     members = [_member(1.0, seed) for seed in (1, 2)]

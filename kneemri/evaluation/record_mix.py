@@ -333,7 +333,7 @@ class RecordMix:
                 raise ValueError(message)
             names.append(name)
             predictions.append(mine)
-        return Pool(names, predictions, truth, vote or RankAverage())
+        return Pool(names, predictions, truth, vote or RankAverage(), studies)
 
     @staticmethod
     def _rows(

@@ -12590,3 +12590,63 @@ supervised on ONE of twelve columns. That is a SUPERVISION imbalance rather than
 readable from the source, and it is still model-dependent — so it remains an inversion route. It happens
 to have a corroborating hint: in the rank_stability table above, `noisy_student`, the merged3 arm, is the
 single biggest FALLER under the cleaner `ledger75` truth (rank 8 -> 11). One hint is not a finding.
+
+## Case mix moves the LEVEL by 0.030 on one model, and 909 studies cannot resolve ranks 2-13 at all — rank_stability --series, 2026-09-10, no card, no slot
+
+D281 §3(3), the last free diagnostic. The spectrum effect asks whether our ARM ORDERING is case-mix
+dependent, which is the inversion mechanism stated in D281 §2.2. It is answerable without a single test
+label: partition our own 909 holdout studies on an axis that is NOT the label, re-derive the ordering
+inside each part, read the pairwise Kendall tau. `--series` on `rank_stability` is that, plus the control
+that makes it readable.
+
+**The axes, after two of the four candidates turned out not to be axes.** `train_series.csv` names
+`Fluid_Sensitive`, `Fat_Suppression` and `Anatomical_Plane`. `Fluid_Sensitive` and `Fat_Suppression` are
+**byte-identical across all 24,371 series** — one variable wearing two column names, and anybody treating
+them as two acquisition axes is double-counting. **All 4,407 studies carry Axial+Coronal+Sagittal**, so
+plane-set is constant and not a subgroup axis at all. What is left: series COUNT (3-14, mode 5 at n=2299)
+and fat-suppression SHARE (0.23-0.45+). Both split at their own median.
+
+**13 arms, 200 resamples, rank-average vote. Midpoint ruler:**
+
+```
+series<=median       n=629  best seat_clean_distill 0.8630
+series>median        n=280  best seat_clean_distill 0.8620
+suppression<=median  n=669  best seat_clean_distill 0.8537
+suppression>median   n=240  best seat_clean_distill 0.8835
+tau series<= vs series>            +0.2308
+tau suppression<= vs suppression>  +0.0256
+tau RANDOM half A vs half B        +0.3590   <- the control
+```
+
+**Under `ledger75`:** the same shape with the level lifted — suppression halves 0.8823 / **0.9095**, taus
++0.3077 (series), +0.2308 (suppression), control **+0.4872**. And the cut re-draws the top here too:
+`calib_span` is best in three of the four subgroups and in one of the two random halves.
+
+**Reading 1 — the sharp one. The same model reads 0.8537 on the low-suppression half and 0.8835 on the
+high-suppression half: +0.030 from ACQUISITION MIX ALONE, no model change, twice the 1.5% bar.** Under
+`ledger75` it is +0.027. This is the first LOCAL, mechanism-backed evidence for the branch that says our
+board number sits 0.09 above our holdout because the test POPULATION is different, rather than because our
+models fail to generalise — and it is measured on us, not borrowed from a table. It does not close the
+gap: 0.030 is a third of 0.09, and it only shows that a mix change of the size our own data contains moves
+the level by that much. It licenses nothing about the direction of the competition's mix, which is hidden.
+
+**Reading 2 — the control eats most of the ordering claim.** Two RANDOM halves of the same 909 studies,
+same distribution, nothing different about them, agree at tau +0.359 (midpoint) / +0.487 (`ledger75`).
+So most of the disagreement across the acquisition axes is SAMPLING, not case mix. The acquisition taus
+sit at or below that floor (+0.026 and +0.231 against +0.359; +0.231 and +0.308 against +0.487), so case
+mix subtracts a little more on top — directional, not a finding. **What IS a finding is the floor itself:
+909 studies do not resolve ranks 2-13 even against themselves.** Halve the holdout and the ordering of the
+twelve arms below the champion is roughly re-drawn. That is the same verdict the first-rank shares gave
+from the other side (rank 1 at 96.8%, ranks 4-9 spanning 0.0020), now with a second independent handle on
+it.
+
+**What this does NOT license.** It is not a measurement of the competition's case mix — that needs the
+test images and is D281 §3(4), adversarial validation, which costs a kernel run. It does not say the
+suppression axis is CAUSAL for difficulty; suppression share correlates with site and with protocol, and
+this reading cannot separate them. And the champion is stable in every subgroup on the midpoint ruler, so
+none of this is a reason to reseat.
+
+**The consequence for how arms are read.** A keep/kill between two arms inside the 0.851-0.863 band is not
+merely below the noise floor of the holdout's own resampling — it is below the floor of WHICH HALF of the
+holdout you happened to look at. Stop pricing arms against each other inside that band; price them against
+the band's edge, or on a subgroup where the difference is mechanism-predicted.

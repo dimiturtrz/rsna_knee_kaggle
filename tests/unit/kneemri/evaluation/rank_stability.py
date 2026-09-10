@@ -5,11 +5,19 @@ one arm constructed to dominate every study, the first-rank share MUST be 1.0, a
 identical predictions the tau between their rulers MUST be 1.0. A real holdout could assert neither.
 """
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
 from kneemri.evaluation.pool import Pool
-from kneemri.evaluation.rank_stability import RESOLVED_SHARE, TARGET_COLUMNS, ArmStability, RankStability
+from kneemri.evaluation.rank_stability import (
+    RESOLVED_SHARE,
+    TARGET_COLUMNS,
+    ArmStability,
+    RankStability,
+    SeriesAxes,
+)
 from kneemri.evaluation.scores import MIDPOINT
 
 LABELS = 12
@@ -83,6 +91,57 @@ def test_report() -> None:
     assert f"3 arm(s) over {STUDIES} shared studies" in lines[0]
     assert any("perfect" in line for line in lines)
     assert any("RESOLVED by this holdout" in line for line in lines)
+
+
+def test_within() -> None:
+    """A subgroup scores every arm over its own studies only, and the constructed ordering survives."""
+    stability = RankStability(_pool(), RESAMPLES)
+    keep = np.zeros(STUDIES, dtype=np.bool_)
+    keep[: STUDIES // 4] = True
+    keep[STUDIES // 2 : STUDIES // 2 + STUDIES // 4] = True
+    values = stability.within(stability.ruler(), keep)
+    assert len(values) == 3
+    assert values[0] > values[2]
+
+
+def test_subgroup_agreement() -> None:
+    """Two halves of a pool this separable agree completely, and both the n and the tau are reported."""
+    stability = RankStability(_pool(), RESAMPLES)
+    odd = np.arange(STUDIES) % 2 == 1
+    lines = stability.subgroup_agreement(stability.ruler(), {"even": ~odd, "odd": odd})
+    assert any("n=  100" in line for line in lines)
+    assert any(line.startswith("tau even vs odd: +1.0000") for line in lines)
+
+
+def test_control() -> None:
+    """The floor is two disjoint halves that together cover every study exactly once."""
+    halves = RankStability(_pool(), RESAMPLES).control()
+    first, second = halves["random half A"], halves["random half B"]
+    assert int(first.sum()) == STUDIES // 2
+    assert not (first & second).any()
+    assert (first | second).all()
+
+
+def test_read(tmp_path: Path) -> None:
+    """Both axes come off one pass of the series table, keyed by study."""
+    table = tmp_path / "train_series.csv"
+    table.write_text(
+        "StudyInstanceUID,SeriesInstanceUID,Fluid_Sensitive,Fat_Suppression,Anatomical_Plane\n"
+        "a,a1,1,1,Sagittal\na,a2,1,0,Axial\nb,b1,1,1,Coronal\n"
+    )
+    axes = SeriesAxes.read(table)
+    assert axes.counts == {"a": 2, "b": 1}
+    assert axes.suppressed == pytest.approx({"a": 0.5, "b": 1.0})
+
+
+def test_groups() -> None:
+    """Each axis splits at its own median, in the row order it was handed, and a missing study refuses."""
+    axes = SeriesAxes({"a": 3, "b": 9}, {"a": 1.0, "b": 0.0})
+    groups = axes.groups(["a", "b"])
+    assert list(groups["series<=median"]) == [True, False]
+    assert list(groups["suppression>median"]) == [True, False]
+    with pytest.raises(ValueError, match="absent from the series table"):
+        axes.groups(["a", "c"])
 
 
 def test_resolved() -> None:
