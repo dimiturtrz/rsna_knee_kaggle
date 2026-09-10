@@ -12560,3 +12560,33 @@ resolving power at once. The next question is whether a decision procedure that 
 both rulers keeps anything at all.
 
 `cols` reads 12 everywhere under both rulers.
+
+### The Zech precondition, measured on merged3 — WEAK. 2026-09-10, no card, no slot
+
+D282 corrected D281 §2.2: prevalence differing ACROSS TRAINING SOURCES is an inversion route, not
+"neither" — Zech 2018 introduced a 10x prevalence imbalance between training sites, gained internal AUC
+at p<0.001, and that gain transferred at zero externally, with the site readable from the image at
+99.95%. `merged3` is three sources, so the mechanism is available to us by construction. It was worth one
+`groupby` before anything was built on it.
+
+Sources parse cleanly off the study id: ours `1.2.826.*` n=4,406, MRNet n=1,248, Rijeka `<digits>-<digits>`
+n=736 (6,390 rows; the arm header's "1,987 foreign" and "6,393" are both slightly off).
+
+**ACL is the only column all three sources supervise, and its prevalence at the midpoint reads
+ours 0.278 / MRNet 0.210 / Rijeka 0.257.** A 1.4x spread between the extremes, against the 10x Zech
+engineered. Our own column additionally carries 8.1% UNK, which the foreign ones do not have at all. So
+the specific Zech lever is present and small here, and no result of ours should be attributed to it
+without a much larger measured gap. Do not plan a de-confounding ablation on this axis.
+
+**The related defect it rules OUT, checked in the same pass.** The eleven non-ACL columns on foreign rows
+are `NaN`, not zeros — value, conf and verdict all NaN — so `Targets.pair` weights them at 0 and the
+foreign rows carry no label gradient on the columns they cannot speak to. The `noisy_student` header's
+claim is correct as written. A first pass that read `>0.5` and `== "UNK"` over NaN reported 0.000 for both
+and looked exactly like eleven hard negatives per foreign row; it is not. Anyone re-running this must
+count NaN explicitly.
+
+**What is NOT ruled out, and is a different mechanism from Zech's.** 31% of the training rows are
+supervised on ONE of twelve columns. That is a SUPERVISION imbalance rather than a prevalence one, it is
+readable from the source, and it is still model-dependent — so it remains an inversion route. It happens
+to have a corroborating hint: in the rank_stability table above, `noisy_student`, the merged3 arm, is the
+single biggest FALLER under the cleaner `ledger75` truth (rank 8 -> 11). One hint is not a finding.
