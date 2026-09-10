@@ -262,12 +262,28 @@ was ALSO its base would grow the same file on every invocation, and that is what
 """
 
 FASTMRI_MERGED_SCHEME = "mergedf"
-"""Our corpus and fastMRI in one array — the canonical six slots, and the only licence-clean merge.
+"""Our corpus and fastMRI in one array — the canonical six slots. TRAINING ONLY; NOT SHIPPABLE.
 
-WHY A THIRD MERGED NAME. `merged` is canonical+Rijeka and `merged3` adds MRNet, and both foreign corpora
-carry a no-derivatives clause: CC BY-NC-ND on Rijeka bars sharing an adaptation, the Stanford research-use
-agreement bars creating one. The NYU fastMRI agreement has no such clause and writes algorithm development
-in by name, so a member fitted here is the first merged member this project can ship. It cannot be built
+**A MEMBER FITTED HERE MAY NOT BE SUBMITTED.** This docstring said the opposite until 2026-09-10 and it
+was wrong on both halves of its claim, which was written from prose and never checked against the
+agreement. The primary text was read that evening, an hour before a slot would have been spent on an
+entry it licensed. It says `"non-exclusive, royalty-free license to use the fastMRI Dataset for internal
+research or educational purposes only"` and, explicitly, not to `"DISTRIBUTE ... any subsequent variables
+or data files derived from the fastMRI Dataset to any person or entity"` — distribution is permitted only
+`"for uses in academic publications and presentations with citations"`. So there IS a no-derivative-
+distribution clause, and algorithm development is NOT written in by name; it is covered only inasmuch as
+it is internal research. Fitting a member here is internal research and stays legal. Uploading that
+member's weights to a Kaggle dataset and running them in a competition kernel is distributing a
+derivative to a person or entity, and it is not an academic publication.
+
+WHAT THAT COSTS, STATED PLAINLY: NO merged member of any name can be shipped. Rijeka is CC BY-NC-ND and
+MRNet's Stanford agreement bars creating an adaptation, so `merged` and `merged3` were already blocked;
+this name was the exemption, and the exemption does not exist. `merged_span_cf` 0.8618 and every other
+`merged_*` number in this repo is an OFFLINE result about what more data does, and only that. The merge
+remains worth building for exactly that reason — the site axis is the largest measured lever the project
+has — but the board is not where its answer is read.
+
+WHY A THIRD MERGED NAME. `merged` is canonical+Rijeka and `merged3` adds MRNet. It cannot be built
 into either existing name for the reason `TRIPLE_SCHEME` already records — every `merged_*` member on disk
 was fitted on the 5,143-study cache, and growing it in place makes those runs unreproducible with every
 gate still green.

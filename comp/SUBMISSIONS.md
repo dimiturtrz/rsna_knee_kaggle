@@ -3736,3 +3736,35 @@ the blur. Refit on ledger75, n=41:
 
 That gap is ten times the ruler's own residual, which is the first time the target has been stated
 with an instrument sharp enough to see it. It does not make the gap smaller — it makes it real.
+
+**RETRACTED THE SAME EVENING BY `l75seat_v1`, below. Every ledger75-fitted number in this entry is an
+in-sample fit and none of it survived its first out-of-sample test.**
+
+
+## `l75seat_v1` — 0.939, ref 56151868, 2026-09-10 — the ruler lost its only out-of-sample test
+
+Built as the clean test of the entry above. `greedyseat_v1` (board 0.936) was the same greedy over the
+same 226-member pool with ONE variable moved: the cut the greedy maximises. Midpoint scored the new
+eight at +0.0007 over the old — dead flat, ~0.936. Ledger75 scored it at +0.0098 — **0.949**. So for
+once the two rulers made DIFFERENT predictions about a point neither had seen, and the slot bought a
+decision instead of a number.
+
+**It read 0.939.** The pre-registered 0.934–0.939 branch is the one that fired: *midpoint was right*.
+The ruler with a quarter of the in-sample residual (sd 0.0015 vs 0.0036, LOO rmse 0.0017 vs 0.0029,
+closer on 29 of 34 ensembles) missed by **three times as much** — 0.010 against midpoint's 0.003 —
+the first time it was asked about a point it had not been fitted on.
+
+**The mechanism of the error.** Ledger75 was fitted board-from-offline OVER THE RECORD, and the record
+is what its residual was measured against. A recut that reorders the same members and is then chosen
+BY that recut is not a second observation; it is the fit reading itself back. The sd 0.0015 was an
+artefact of the fit, not a property of the ruler.
+
+**What is now settled.** The repo default cut stays **midpoint**. knee-f9aao's labelling rule — a
+scalar carries statistic, population and cut, `nn_corr@pool251`, `solo@ledger75` — stands on its own
+merits and never licensed a ruler swap. The **P0 ledger75 migration bead closes UNBUILT**, and every
+target arithmetic quoted in ledger75 terms above is void; the midpoint arithmetic it superseded is
+back in force.
+
+**And it is the TENTH seating entry to fail to beat 0.944** — seven seats, eight seats, cross-family,
+greedy at two different objectives. The pool is the constraint, not the arrangement. Nothing about
+seating, selection, weighting or re-lensing is worth another slot until a BETTER MEMBER exists.
