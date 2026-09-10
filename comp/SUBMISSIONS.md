@@ -3650,3 +3650,31 @@ gold-58 census delta licenses a seat again without a board control beside it.
 **What it does not touch.** The Lateral Meniscus cell (0.8273 → 0.9093, +0.0820, 2.7× the control
 column's own excursion) is a claim about the TABLE, not about re-grading every column, and a per-label
 repair of v2 is a different lever that this row prices nothing about.
+
+## `cnnsolo_v1` — 0.915 — the gap is a constant of our ruler, not of a family — 2026-09-10
+
+Ref 56142195, `kneemri-cnnsolo`, one member (`resnet_224_short_s2026`), instrument not a seating. The
+first CNN this project has put on the board alone: offline **0.8527** midpoint / 0.8842 @ledger75.
+
+**Two predictors were pre-registered against each other, before the slot.** Anchor-neighbour said
+**0.920–0.923** — `labels_v4hybrid_s2026` sits at offline 0.8524, within 0.0003, and scored 0.922.
+D283's flat-offset refit said **0.9135** (+0.0608 on the offline midpoint, sd 0.0035).
+
+**It landed 0.915.** The realised gap is **+0.0623**, 0.4 sd from D283's constant and 0.0073 below the
+neighbour. The DIRECTIONAL branch fired (0.900–0.918 was written as "the CNN seat stays a coin flip").
+
+**What it settles.** The board-minus-offline gap survived transfer to an architecture family with no
+board history at all — the strongest out-of-sample test the constant has had, since every earlier fit
+was inside the transformer pool. The gap is a property of OUR RULER (a reader that invents 108
+confident false positives in 696 cells against radiologists), not of any family's capacity.
+
+**And it kills the anchor-neighbour method as a predictor.** Two members whose offline numbers agree to
+four decimals landed 0.0073 apart on the board. The offline ruler cannot RANK across families even
+where it agrees exactly; only the flat offset transfers. Three solo rows now price the same constant
+from different families — `v4solo_v1` +0.0696, `holdsolo_v1` +0.0646, this one +0.0623 — a 0.0073
+spread around D283's +0.0608, which is what the residual looks like when the level is right and the
+family is not a term in the model.
+
+**What it does not license.** 0.915 solo is above eight of the eleven solo rows in this file, so the
+CNN is a real member and worth a seat test. Nothing here licenses spending card on a CNN FAMILY ahead
+of the transformer pool: the branch that would have (>=0.918) did not fire.
