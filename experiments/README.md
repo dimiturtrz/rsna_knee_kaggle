@@ -13090,3 +13090,58 @@ first arm read null is the thing this ledger keeps recording as a mistake.
 **What this does NOT close.** The band mechanism at FULL recipe strength, and the band mechanism read on
 a ruler with more than 58 studies. D301 §6 and D297 §4 arrive at the same sentence from two directions:
 the cheapest thing that would settle it is more gold, not a cleverer statistic.
+
+## The seat-count curve, with the era control (2026-09-10)
+
+Computed off every `scope: ensemble` row in `comp/board.jsonl`. It is written here so no later
+slot is spent rediscovering it, and it is written WITH the era control because the naive
+version of this table is misleading and was quoted that way once.
+
+| seats | n | best | mean | worst |
+|---|---|---|---|---|
+| 1 | 10 | 0.928 `holdsolo_v1` | 0.9146 | 0.868 `solo_v1` |
+| 2 | 4 | 0.936 `onepair_v1` | 0.9238 | 0.919 |
+| 3 | 4 | 0.939 `fasttrio_v1` | 0.9235 | 0.904 |
+| 4 | 13 | 0.937 `fourseat_v1` | 0.9280 | 0.918 |
+| 5 | 7 | 0.941 `fiveship_v1` | 0.9310 | 0.911 |
+| **6** | 17 | **0.944 `monotone_v1`** | **0.9378** | 0.925 `maxdiv_v1` |
+| 7 | 20 | 0.944 `stackseat_v1` | 0.9365 | 0.908 `weakseven_v1` |
+| 8 | 5 | 0.943 `vjepaseat_v1` | 0.9378 | 0.932 `peak8` |
+| 9 | 1 | 0.936 `nine_v1` | — | — |
+| 11 | 1 | 0.941 `calibmix_v1` | — | — |
+| 12 | 1 | 0.937 `honest12` | — | — |
+| 14 | 1 | 0.937 `distinct14` | — | — |
+| 25 | 1 | 0.894 `fusion25_v2` | — | — |
+
+**THE ERA CONTROL, and it is the whole reason this table needs a caveat.** `fusion25_v2` at
+0.894 is dated **2026-08-17** — the oldest row in the file, a pre-improvement generation. Read
+without its date it looks like proof that seat count goes negative, and that is an era effect
+quoted as a mechanism. The other big-N entries are modern and do not collapse: `calibmix_v1`
+11 seats 0.941 (08-27), `honest12` 12 seats 0.937 (08-27), `distinct14` 14 seats 0.937
+(09-01), `nine_v1` 9 seats 0.936 (09-08). Restricted to the last 21 days: 6 seats n=17 mean
+0.9378 best 0.944; 7 seats n=20 mean 0.9365 best 0.944; 8 seats n=5 mean 0.9378 best 0.943.
+
+**What the record therefore DOES say:** within one era, 6-8 seats reach 0.944 and 9-14 top out
+at 0.941. That plateau is not era.
+
+**What it does NOT say, and this is the part that keeps getting lost:** those four modern
+big-N entries are all the champion six PLUS progressively worse members drawn from the same
+pool, selected by a rule (`honest12` by licence-cleanliness, `distinct14` by max diversity,
+`calibmix_v1` by calibration). They test the DILUTION of a good six under unweighted
+LogitAverage, where seat 12 carries the same 1/12 as seat 1. They do not test "assemble
+twenty-four independently good models", which has never been built here.
+
+**The member-quality curve says the pool is not the constraint.** 273 members with a valid
+holdout peak: #2 0.8747, #6 0.8657, #12 0.8635, #24 0.8610, #60 0.8564, #120 0.8503. From #2
+to #24 is only -0.0137 and #24 to #60 another -0.0046 — flat, not a cliff. (#1
+`recal_holdannot` at 0.8964 is +0.0217 clear of #2 and is a suspect outlier, not a member to
+plan around; `hold_annotations` is one of D303's flagged supervision flags, so the gap may be
+the flag. The `oof_*` rows are a different eval population D303 said not to pool. All midpoint,
+not `@ledger75`.)
+
+**So the binding constraint is CORRELATION, not member quality.** Essentially all 273 are
+dinov2/dinov3 variants of one another, which is why `distinct14` — built explicitly for
+maximum diversity — still only reached 0.937: its diversity was knob-diversity inside one
+family. The untested axis is FAMILY count, not seat count. We own two families (the DINOv2/v3
+line, and borrowed raptor whose quality is unmeasurable at `--fold -1`) plus exactly one
+all-ours convolutional member, `resnet_224_short_s2026`, trained 2026-09-10.
