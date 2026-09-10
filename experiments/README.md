@@ -12737,3 +12737,71 @@ axis under them: 228 seed-2026 members sit on disk, pairwise prediction correlat
 and the margin can be read for many subsets. That yields a LOCAL slope of margin against member
 diversity, which is what turns "train a genuinely different family" from a hunch into an arithmetic
 prediction. M289 asks the researcher whether that slope is already published.
+
+## What a unit of member DIVERSITY buys — diversity_slope, 2026-09-10, no card, no slot
+
+The section above ended by pointing at this: two points (ours at +0.006, Klontzas at +0.024) and no axis
+between them. `kneemri.evaluation.diversity_slope` puts the axis in, on records already on disk. 300
+random subsets of the 216 seed-2026 members that share a split, 4-16 seats, each priced on two things at
+once — diversity (1 minus the mean pairwise Spearman over the flattened predictions) and margin (the
+subset's score over its OWN best single member) — then regressed.
+
+```
+300 random subsets of 216 members, 4-16 seats, over 909 studies, ruler cut0.5, vote RankAverage
+diversity (1 - mean pairwise spearman)  min 0.1075  max 0.4864  span 0.3789
+margin over best single                 min -0.0172  median +0.0034  max +0.0151
+RAW      margin on diversity   slope -0.0314 per unit  p 5.2e-11
+CONFOUND margin on best single slope -0.4328 per unit  p 1.5e-11
+CONFOUND margin on mean single slope +0.1639 per unit  p 3.8e-20
+PARTIAL  margin on diversity   slope +0.1328 per unit  p 2.6e-35   <- the answer
+what the whole observed diversity span is worth at the partial slope: +0.0503
+but the span reached by the top-25% subsets by mean member quality is only 0.0718, worth +0.0095
+```
+
+**Read the raw slope and you get the sign backwards.** It is NEGATIVE (-0.0314): across our full pool,
+more diverse subsets have SMALLER margins. That is not a statement about diversity. It is a statement
+about which subsets are diverse — at the wide end of this pool, a subset is decorrelated because its
+members are bad, and a subset of one good member and five bad ones scores BELOW its own best member
+(the minimum margin here is -0.0172, i.e. the vote actively destroying the best member's number).
+
+**Two quality terms are needed, and controlling for the best single alone is not enough.** That was the
+construction's first mistake and it is worth writing down because it is subtle: residualising the margin
+on the BEST single member fixes a subset's ceiling and leaves its floor completely free. A subset of one
+good member and five bad ones has an unremarkable best-single, high diversity and a negative margin, and
+it enters the fit as evidence that diversity hurts. Adding the MEAN single score as a second covariate is
+what closes it, and the sign flips: the partial slope is **+0.1328 per unit, p 2.6e-35**.
+
+**And it replicates.** The same fit over the thirteen champion-adjacent arms alone — a completely
+different, much narrower pool — gives +0.1186 per unit. Two pools, spans differing by a factor of eleven,
+the same slope to within 10%. Diversity at fixed quality really does buy margin, and this is the first
+number this project has that says so with an axis rather than an anecdote.
+
+**Now the part that decides where the card goes. The slope is real and the REACH is small.** Our pool's
+whole diversity span is worth +0.0503 at that slope — three times the significance bar — but that span is
+bought with badness. Restricted to the top quarter of subsets by mean member quality, the span the pool
+actually reaches is **0.0718 wide, worth +0.0095**. That is the honest ceiling on the entire diversity
+lever as this project can currently exercise it: two thirds of the bar, for perfect play. The thirteen
+champion-adjacent members span 0.034 of it and have already banked +0.0045, so roughly half the reachable
+gain is spent.
+
+**What that licenses and what it forbids.** It forbids what we have been doing: re-seating, re-weighting
+and re-lensing inside one recipe family moves along an axis whose remaining length is +0.005 — under the
+noise floor, and the board has now flattened on that operation seven times, which is the same fact seen
+from the other side. It licenses exactly one thing: a member that is BOTH good AND lands past 0.0718 of
+reachable diversity. Nothing in 216 members has done that, so the slope out there is a prediction and not
+an observation, and the module prints that line rather than letting the extrapolation hide inside a
+coefficient.
+
+**Which makes the next question a QUALITY question, not a diversity one.** A foreign family is worth card
+only if it is good; its decorrelation is worthless — worse than worthless, per the raw slope — if it is
+merely different. This project has never put a CNN on the board alone. `kneemri-cnnsolo` does that, and
+its pre-registration is in the kernel's own docstring: `resnet_224_short_s2026` reads offline 0.8527,
+within 0.0003 of `labels_v4hybrid` (board 0.922) and 0.0018 under `calib_span` (board 0.921), so if a CNN
+transfers the way our transformers do it lands **0.920-0.923**.
+
+**And it retires `kneemri-cnnseat`, which was built and green and was going to have the 11:14Z slot.**
+Grepping the board for the operation is what stopped it: `fleettwo_v1` (2026-08-29) already put a CNN —
+`raptor_ft_effv2l480` — into the champion seven and read 0.942 against the champion's 0.944. Same
+operation, different CNN, already answered, and the paired offline interval prices this member's addition
+at +0.0009. A seat asks about the MIXTURE; the mixture cannot be read until the family's own quality is on
+the board. Solo first.

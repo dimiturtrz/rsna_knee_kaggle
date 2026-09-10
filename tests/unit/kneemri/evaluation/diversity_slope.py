@@ -87,6 +87,15 @@ def test_residuals() -> None:
     assert DiversitySlope.residuals(combined, [values, other]) == pytest.approx([0.0] * len(values), abs=1e-9)
 
 
+def test_reachable_span() -> None:
+    """The good subsets' span is a real span, and never wider than the one the whole draw covers."""
+    fit = _fit()
+    readings = fit.draw()
+    reachable = DiversitySlope.reachable_span(readings)
+    diversity = [reading.diversity for reading in readings]
+    assert 0.0 <= reachable <= max(diversity) - min(diversity)
+
+
 def test_report() -> None:
     """All three slopes are named, the confound among them, and the answer is marked as the answer."""
     fit = _fit()

@@ -69,6 +69,11 @@ on the fit an order of magnitude under the per-subset scatter."""
 SUBSET_SEED = 2026
 """The project seed, so a re-run of this fit is the same fit."""
 
+QUALITY_QUARTILE = 0.25
+"""Which slice of the subsets counts as 'good' when asking how much diversity good members reach. A
+quarter of 300 draws is 75 subsets — enough that the span is not one lucky draw, narrow enough that it
+is still describing the good end rather than the middle."""
+
 MIN_SEATS = 4
 """Below four members a 'margin over the best single' is dominated by which single happened to be best."""
 
@@ -172,6 +177,7 @@ class DiversitySlope:
         floor, floor_p = self.slope(average, margin)
         partial, partial_p = self.slope(self.residuals(diversity, quality), self.residuals(margin, quality))
         span = max(diversity) - min(diversity)
+        reachable = self.reachable_span(readings)
         lines = [
             f"{len(readings)} random subsets of {len(self.pool)} members, {MIN_SEATS}-{min(MAX_SEATS, len(self.pool))}"
             f" seats, over {self.pool.truth.shape[0]} studies, ruler {self.scores.name()}, vote {self.pool.rule()}",
@@ -184,11 +190,29 @@ class DiversitySlope:
             f"CONFOUND margin on mean single slope {floor:+.4f} per unit  p {floor_p:.2g}",
             f"PARTIAL  margin on diversity   slope {partial:+.4f} per unit  p {partial_p:.2g}   <- the answer",
         ]
-        lines.append(
+        lines += [
             f"what the whole observed diversity span is worth at the partial slope: {partial * span:+.4f}"
-            f" — against a 0.0150 significance bar"
-        )
+            f" — against a 0.0150 significance bar",
+            f"but the span reached by the top-{QUALITY_QUARTILE:.0%} subsets by mean member quality is only"
+            f" {reachable:.4f}, worth {partial * reachable:+.4f} — everything past it is decorrelated"
+            f" BECAUSE it is bad, so the partial slope out there is a prediction and not an observation",
+        ]
         return lines
+
+    @staticmethod
+    def reachable_span(readings: list[SubsetReading]) -> float:
+        """The diversity span among the BEST subsets — the part of the axis a good member could occupy.
+
+        The partial slope prices diversity at fixed quality, which is the right quantity and is also a
+        model: nothing in this pool is simultaneously high-quality and highly decorrelated, so the slope
+        at that corner is extrapolated from subsets that are one thing or the other. This bounds how far
+        the extrapolation reaches by asking what diversity the pool actually achieves WITHOUT paying for
+        it in quality. A foreign family landing past this span is a bet that a good model can be that
+        different — which is exactly the bet, and it should be stated rather than hidden in a slope.
+        """
+        floor = float(np.quantile([reading.mean_single for reading in readings], 1.0 - QUALITY_QUARTILE))
+        best = [reading.diversity for reading in readings if reading.mean_single >= floor]
+        return max(best) - min(best)
 
 
 def main() -> None:
