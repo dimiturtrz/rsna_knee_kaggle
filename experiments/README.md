@@ -12698,3 +12698,42 @@ resolving power produces. **Nothing inside the 0.851-0.863 band is worth another
 worth it is anything whose mechanism could plausibly deliver 1.5% — a genuinely different architecture
 family, more supervised data, or a change to the truth definition — and the ONLY instrument that can
 price those is the board itself, five reads a day.
+
+## The margin, priced on the RIGHT interval — margin_interval, 2026-09-10, no card, no slot
+
+The section above priced the ensemble margin by cutting the holdout in two and reading the margin in each
+half. That is the wrong interval for this quantity, and I should have said so before quoting a spread off
+it. A disjoint half costs BOTH terms half the studies AND throws away the pairing; what a keep/kill
+actually consumes is the difference between the ensemble and its best single member **on the same
+studies**, and the interval for that comes from resampling those studies once for both terms. 2000 paired
+study bootstraps, best single member re-chosen inside every draw:
+
+```
+                                        value    95% interval        width
+13 arms, midpoint                      +0.0063  [+0.0035, +0.0090]  0.0055
+12 arms, midpoint (no resnet_224_short) +0.0054  [+0.0025, +0.0081]  0.0056
+```
+
+**The correction does not rescue anything, and that is the finding.** The paired interval is 0.0055 wide
+against the split-half spread's 0.0047 — the same size. The construction was wrong and the conclusion it
+produced was right anyway: the margin is known only to within its own magnitude, and the retraction above
+stands. It now stands on the interval the decision actually consumes rather than on a proxy for one.
+
+**One thing the paired reading can say that the split-half reading could not.** The interval EXCLUDES
+ZERO. Thirteen members really do beat the best one of them — by +0.0063, about a quarter of our 1.5%
+significance bar. That is not nothing; it is the honest size of every ensembling gain this project has
+banked, and it is why ensembling stays in the entry while no longer being a place to spend card.
+
+**And the cnnseat pre-registration, on the right statistic.** Twelve arms buy +0.0054; adding
+`resnet_224_short` — the only member from a different architecture family — takes it to +0.0063. A
+**+0.0009 move, a sixth of the interval's own width**, with the two intervals overlapping almost entirely.
+The pre-registration for `kneemri-cnnseat` is therefore a null offline, and it ships as an INSTRUMENT
+asking the board a question our holdout has no power to answer (knee-j07a0).
+
+**What this points the next spend at.** Klontzas et al. report +0.024 internal / +0.066 external for a
+cross-architecture ensemble — four to ten times ours — across three architectures that differ far more
+than our thirteen variations of one recipe. Two points, no axis. The next free instrument is to put an
+axis under them: 228 seed-2026 members sit on disk, pairwise prediction correlation is free to compute,
+and the margin can be read for many subsets. That yields a LOCAL slope of margin against member
+diversity, which is what turns "train a genuinely different family" from a hunch into an arithmetic
+prediction. M289 asks the researcher whether that slope is already published.
