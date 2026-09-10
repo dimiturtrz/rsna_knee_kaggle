@@ -13248,3 +13248,47 @@ seat into `honest12` at **+0.0014 both**, identical to three decimals. The solo 
 an ensemble at all — which is the ledger's standing reading that pooling shifts budget and does not create
 it, now measured on the frozen side too.
 
+
+## `ortho_fresh_lowlr` reads 0.8248 — the third branch fires, and `ortho_lpft` now has a different control — 2026-09-10
+
+The initialisation control of the ortho triple. Random head, backbone 1e-5, whole stack, twelve epochs,
+`ortholarge` at 224 px / 12 slices, every other flag identical to `ortho_dense`.
+
+| arm | head | backbone lr | score |
+| --- | --- | --- | --- |
+| `ortho_dense` | random | 4e-5 | 0.8452 |
+| **`ortho_fresh_lowlr`** | random | 1e-5 | **0.8248** |
+| `ortho_lpft` | fitted (LP first) | 1e-5 | on disk |
+
+**−0.0204 against `ortho_dense`, which is the pre-registered `s <= ortho_dense - 0.006` branch by more
+than three floor-widths.** 1e-5 undertrains this trunk in twelve epochs. Converged and clean —
+`convergence_check` does not list it, peak e10 0.8248 with e11 at 0.8247, so the one-cycle anneal ran and
+this is the schedule's own answer rather than a killed process. 324-326 s/epoch against the 432 priced,
+zero stall lines, 885-903 img/s, peak memory 28.59 GB reserved / 13.48 GB allocated.
+
+Trajectory: 0.7360, 0.7726, 0.7933, 0.7990, 0.8164, 0.8159, 0.8182, 0.8212, 0.8237, 0.8241, 0.8248, 0.8247.
+The e3 -> peak gain is +0.0258, above the 12-epoch median (+0.0210) and under p90 (+0.0380), so the arm
+was not short-changed by its budget — it climbed normally to a lower ceiling.
+
+**WHAT THIS BUYS, and it is the whole point of running an instrument.** `ortho_lpft` must now be read
+against **0.8248**, not against `ortho_dense`'s 0.8452. Read against the wrong control, any LP-FT result
+in the 0.83-0.84 band would have been written as "the warm start costs 0.01" when the rate alone accounts
+for 0.02. And a flat between the two 1e-5 arms says the warm start did not rescue an undertrained
+schedule — NOT that a fitted head does nothing. That sentence was unwriteable before this arm and is the
+reason it was priced as an instrument rather than sold as an improvement.
+
+**WHAT IT DOES NOT SAY.** The top branch did NOT fire: `s >= ortho_dense + 0.015` would have made 4e-5 too
+hot for a ViT-L on 4,400 studies and re-opened `radnet121`'s written decline (0.6716 at 4e-4 against
+0.8197 frozen) as a RATE finding. It fired the opposite way, so that decline stands as written and every
+external trunk this project declined on a fine-tune stays declined. P(that branch) was priced at ~0.3
+before the run; it lost.
+
+### `disagreed_ramp` was queued behind this arm and the overwrite guard REFUSED it, correctly
+
+The watcher fired at 17:55:47Z and `run_train` answered `REFUSED disagreed_ramp - ... already holds a
+checkpoint`. It does: the arm ran 2026-09-02 and sits in this ledger at **0.8574 (+0.0067)**, rostered,
+with `certainty_ramp` 0.8584 beside it. The queue was built from a letter that called that cell
+"pre-registered and EMPTY" and the letter was stale. **The guard is what stopped a repeated experiment
+from spending 1.2 h of card**, and it is the second time this week a check has caught a stale premise that
+prose carried. Cost of the miss: the card idled from 17:55:47Z to 17:59:56Z, four minutes.
+
