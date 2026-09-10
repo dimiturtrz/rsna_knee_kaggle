@@ -12473,3 +12473,90 @@ closed by literature before any of them cost a card (D279, section above). None 
 Recipe confirmed by the arm's own harness check before the number was read: `scheme merged3`,
 `merged3_labels.csv`, `eval_labels report_labels_v2.csv`, `image_size 336`, `distill_weight 0.7`,
 `teacher_targets teacher_merged3.npz`, 6393 studies / 5484 train / 909 holdout, `init: None`. 223 s/epoch.
+
+## The offline ruler resolves its TOP and not its MIDDLE, and the cut re-draws the order rather than lifting it — rank_stability, 2026-09-10
+
+The question the seven board flats could not answer, asked of our own holdout instead of the board:
+**does resampling the 909 studies change which arm is best?** Researcher D281 §3(1) named the method
+(Maier-Hein et al., Nat Commun 2018, arXiv:1806.02051, Figs. 3-4 — resample the test set, re-derive the
+ranking of unchanged submissions). `python -m kneemri.evaluation.rank_stability` is it, and it costs no
+card and no slot: 13 arms of the 0.851-0.863 family, 909 shared studies, 500 resamples, rank-average vote.
+
+**Midpoint ruler (`cut0.5`, the one every ledger number was read at):**
+
+```
+arm                                score  rank  first%  mean rk  cols
+seat_clean_distill_s2026          0.8634     1   96.8%     1.03    12
+band_dense_long_s2026             0.8587     2    2.6%     3.05    12
+band_dense_s2026                  0.8578     3    0.2%     4.02    12
+grade_ladder_s2026                0.8565     4    0.2%     5.44    12
+band_span_s2026                   0.8565     5    0.2%     5.55    12
+depth_regions_narrow_s2026        0.8554     6    0.0%     6.78    12
+band_wide_s2026                   0.8553     7    0.0%     7.22    12
+noisy_student_s2026               0.8549     8    0.0%     7.55    12
+calib_span_s2026                  0.8545     9    0.0%     7.99    12
+resnet_224_short_s2026            0.8527    10    0.0%     9.85    12
+lr4e-5_ws_s2026                   0.8525    11    0.0%    10.40    12
+res392_ws_s2026                   0.8523    12    0.0%    10.69    12
+base_dense_s2026                  0.8512    13    0.0%    11.42    12
+```
+
+**READING 1 — the ruler is not noise, and it is not a ranking either. It is both, in different places.**
+`seat_clean_distill` holds rank 1 in **96.8%** of resamples, so "everything offline is inside the noise"
+is FALSE for the top of the band: the best arm is genuinely the best arm and the holdout can say so. But
+read the mean ranks of ranks 4-9 — 5.44, 5.55, 6.78, 7.22, 7.55, 7.99 across a score span of 0.0020. That
+cluster is ONE number with error bars. Every keep/kill this project took inside 0.8545-0.8565 was decided
+by a difference the holdout cannot resolve, and no appeal to the competition's test set is needed to
+explain a flat board result from a reseating inside it. The correct statement of the ruler's power is
+therefore neither of the two that have been argued all week: **it resolves first place and does not
+resolve the middle of its own leaderboard.**
+
+**READING 2 — D281 §1.1 is CLOSED, with a null.** `LabelScores.mean` is a `nanmean` and
+`area_under_curve` returns NaN on a one-class column, so our macro could silently have been a mean over
+fewer than the twelve the board always averages. It is not: the `cols` column reads **12 for all thirteen
+arms**. There is no denominator difference against the competition on this holdout. Do not re-raise it.
+
+**READING 3, AND IT IS THE ONE THAT MATTERS — the cut is NOT an offset. Kendall tau +0.6667.**
+`ledger75` was known to move the LEVEL by +0.026 (knee-f9aao). Nobody had asked whether it moves the
+ORDER. Same predictions, two truths, and the ordering is substantially re-drawn:
+
+```
+arm                                score  rank  first%  mean rk      midpoint rank
+seat_clean_distill_s2026          0.8897     1   38.4%     2.10          1
+calib_span_s2026                  0.8895     2   38.6%     2.44          9  <-- +7
+band_dense_s2026                  0.8877     3   11.2%     4.05          3
+grade_ladder_s2026                0.8868     4    4.2%     5.00          4
+band_dense_long_s2026             0.8867     5    3.8%     4.98          2
+band_span_s2026                   0.8851     6    0.4%     7.22          5
+band_wide_s2026                   0.8843     7    0.4%     8.31          7
+resnet_224_short_s2026            0.8842     8    1.4%     7.85         10
+depth_regions_narrow_s2026        0.8841     9    1.4%     8.12          6
+lr4e-5_ws_s2026                   0.8840    10    0.2%     8.29         11
+noisy_student_s2026               0.8826    11    0.0%    10.17          8
+res392_ws_s2026                   0.8817    12    0.0%    11.12         12
+base_dense_s2026                  0.8812    13    0.0%    11.35         13
+```
+
+`calib_span` moves from rank 9 to rank 2 and takes first place in **38.6%** of resamples — more often
+than `seat_clean_distill`'s 38.4%. Its own roster line reads *"calib_span_s2026.pt 0.8545 — band_span +
+calibrated targets, NEGATIVE at this operating point."* That verdict was written under the midpoint, and
+under the cleaner truth the same predictions are co-best in the pool. This is D281 §2.2's inversion
+criterion firing on OUR data: a truth change that reweights which cases count is model-DEPENDENT, and it
+re-draws rather than shifts.
+
+**Why this points at the ruler and not at the members.** `ledger75.py`'s own docstring records D27:
+across ~530 leaderboard pairs `ledger75` leaves **5 inversions where the midpoint leaves 21**, and 0 of
+326 above the 0.0053 floor, with R^2 .80 -> .96. So the ordering we have been making decisions from is
+the one already measured to be the WORSE predictor of the board. That is a mechanism for "why do the
+people ahead of us move while we do not" that needs no new data and no new architecture: some fraction of
+our keep/kills were taken with a ruler whose false positives sit in the TRUTH.
+
+**What this does NOT license.** It is one pool of thirteen arms, one holdout, one vote rule, and a single
+tau. It does not reprice the ledger, it does not promote `calib_span` to anything, and it is not a claim
+that `ledger75` is correct — only that the two rulers disagree about ORDER and that the board has already
+sided with one of them. Under `ledger75` the top of the band is itself unresolved (38.4% vs 38.6%, 10 of
+13 arms take first place in some resample), so the recut buys a better board correlation and LESS local
+resolving power at once. The next question is whether a decision procedure that requires agreement from
+both rulers keeps anything at all.
+
+`cols` reads 12 everywhere under both rulers.

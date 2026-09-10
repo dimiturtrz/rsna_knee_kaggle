@@ -2990,6 +2990,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.raptor_feed",
       "target": "core.cli",
       "weight": 1
@@ -18616,6 +18658,150 @@
       "kind": "calls",
       "source": "kneemri.evaluation.published_ruler.PublishedRuler.per_seed",
       "target": "kneemri.evaluation.published_ruler.PublishedFold.of",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.rank_stability.RankStability",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.rank_stability.RankStability",
+      "target": "kneemri.evaluation.rank_stability.ArmStability",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.rank_stability.RankStability",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.cut_agreement",
+      "target": "kneemri.evaluation.rank_stability.RankStability.ruler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.cut_agreement",
+      "target": "kneemri.evaluation.rank_stability.RankStability.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.defined",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.report",
+      "target": "kneemri.evaluation.pool.Pool.rule",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.report",
+      "target": "kneemri.evaluation.rank_stability.RankStability._verdict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.report",
+      "target": "kneemri.evaluation.rank_stability.RankStability.cut_agreement",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.report",
+      "target": "kneemri.evaluation.rank_stability.RankStability.table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.report",
+      "target": "kneemri.evaluation.scores.LabelScores.name",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.rank_stability.RankStability.ruler",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.scored",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.rank_stability.RankStability.table",
+      "target": "core.bootstrap.StudyBootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.table",
+      "target": "core.bootstrap.StudyBootstrap.draws",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.rank_stability.RankStability.table",
+      "target": "kneemri.evaluation.rank_stability.ArmStability",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.table",
+      "target": "kneemri.evaluation.rank_stability.RankStability.defined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.table",
+      "target": "kneemri.evaluation.rank_stability.RankStability.order",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.RankStability.table",
+      "target": "kneemri.evaluation.rank_stability.RankStability.scored",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.rank_stability.main",
+      "target": "kneemri.evaluation.rank_stability.RankStability",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.main",
+      "target": "kneemri.evaluation.rank_stability.RankStability.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.main",
+      "target": "kneemri.evaluation.rank_stability.RankStability.ruler",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.rank_stability.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.rank_stability.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
       "weight": 1
     },
     {
@@ -36919,7 +37105,7 @@
       "role": null
     },
     {
-      "descendants": 289,
+      "descendants": 290,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -36983,7 +37169,7 @@
       "role": null
     },
     {
-      "descendants": 103,
+      "descendants": 104,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -37458,6 +37644,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.published_ruler",
       "label": "published_ruler",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability",
+      "label": "rank_stability",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -41373,6 +41567,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.published_ruler",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.ArmStability",
+      "label": "ArmStability",
+      "level": "class",
+      "parent": "kneemri.evaluation.rank_stability",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability",
+      "label": "RankStability",
+      "level": "class",
+      "parent": "kneemri.evaluation.rank_stability",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -53460,6 +53670,102 @@
       "label": "per_seed",
       "level": "method",
       "parent": "kneemri.evaluation.published_ruler.PublishedRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.ArmStability.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.ArmStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.ArmStability.thin",
+      "label": "thin",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.ArmStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability._verdict",
+      "label": "_verdict",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.cut_agreement",
+      "label": "cut_agreement",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.defined",
+      "label": "defined",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.order",
+      "label": "order",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.ruler",
+      "label": "ruler",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.scored",
+      "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.RankStability.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability.RankStability",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.rank_stability.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.rank_stability",
       "role": null
     },
     {
