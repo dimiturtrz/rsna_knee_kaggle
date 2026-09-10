@@ -44,6 +44,14 @@ def test_scales() -> None:
     assert MEASURED_AGREEMENT[MIDDLE][CALIBRATED] != BAND
 
 
+def test_rung() -> None:
+    """A different rung brackets against different neighbours, and selects none of the default's cells."""
+    resolution = BandResolution(_table(), SHARE, RAW, MIDDLE + 1)
+    assert resolution.band == pytest.approx(UPPER)
+    assert resolution.lower == pytest.approx(BAND)
+    assert int(resolution.banded(TARGETS[0]).sum()) == STUDIES - 5
+
+
 def test_banded() -> None:
     """Only the cells sitting on the rung are selectable, and a CSV round trip must not lose them."""
     resolution = BandResolution(_table(), SHARE)

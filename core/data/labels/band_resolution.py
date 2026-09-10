@@ -69,7 +69,20 @@ from core.findings import TARGETS
 logger = logging.getLogger(__name__)
 
 MIDDLE = 2
-"""Which of the reader's five rungs is the one that asserts almost nothing."""
+"""Which of the reader's five rungs is the one that asserts almost nothing — the default, not the only one.
+
+The fourth rung (calibrated 0.6879) is the other candidate and D301 §4 makes the case that is NOT
+obvious: it holds almost the same mass (6427 cells, 12.16% of the table) distributed BETTER for us —
+43.54% of it sits on the six columns we read worst against the middle rung's 34.98%, and Medial and
+Lateral Meniscus carry 26.7% and 12.0% of their own cells there. Against that, D300 measured its
+within-band AUC at 0.7002 (0.7578 stratified), below the middle rung's, and its target sits at 0.688
+rather than near a coin — so a flat target throws away less there by construction. Two effects pointing
+opposite ways, which is why this is a flag and not a second module."""
+
+FIRST = 1
+LAST = 3
+"""The rungs a re-spread can bracket at all. The reader's outermost two have only one neighbour each, and
+a one-sided spread would move the rung's mean by construction — the confound `reach` exists to avoid."""
 
 RAW = 0
 CALIBRATED = 1
@@ -95,12 +108,12 @@ MIDPOINT = 0.5
 class BandResolution:
     """One label table, with the reader's middle rung re-spread from a model's out-of-fold order."""
 
-    def __init__(self, table: pd.DataFrame, share: float, scale: int = RAW) -> None:
+    def __init__(self, table: pd.DataFrame, share: float, scale: int = RAW, rung: int = MIDDLE) -> None:
         self.table = table
         self.share = share
-        self.band = MEASURED_AGREEMENT[MIDDLE][scale]
-        self.lower = MEASURED_AGREEMENT[MIDDLE - 1][scale]
-        self.upper = MEASURED_AGREEMENT[MIDDLE + 1][scale]
+        self.band = MEASURED_AGREEMENT[rung][scale]
+        self.lower = MEASURED_AGREEMENT[rung - 1][scale]
+        self.upper = MEASURED_AGREEMENT[rung + 1][scale]
 
     def banded(self, target: str) -> "pd.Series[bool]":
         """The rows whose value for this finding sits on the middle rung — the only rows this may write."""
@@ -181,6 +194,9 @@ def main() -> None:  # devtools-ignore: test-mirror
     command.parser.add_argument("--stitch", required=True, help="glob for the five out-of-fold records")
     command.parser.add_argument("--share", type=float, default=0.5, help="how far toward a neighbouring rung")
     command.parser.add_argument("--scale", default="raw", choices=sorted(SCALES), help="the table's own scale")
+    command.parser.add_argument(
+        "--rung", type=int, default=MIDDLE, choices=range(FIRST, LAST + 1), help="which reader rung to re-spread"
+    )
     command.parser.add_argument("--out", type=Path, required=True, help="where the re-spread table is written")
     arguments = command.parsed()
     root = command.rooted(arguments)
@@ -205,7 +221,7 @@ def main() -> None:  # devtools-ignore: test-mirror
         raise ValueError(message)
     scores = predictions[rows.to_numpy(dtype=np.int64)].astype(np.float64)
 
-    resolution = BandResolution(table, arguments.share, SCALES[arguments.scale])
+    resolution = BandResolution(table, arguments.share, SCALES[arguments.scale], arguments.rung)
     command.report(resolution.census(scores))
     out: Path = arguments.out
     out.parent.mkdir(parents=True, exist_ok=True)
