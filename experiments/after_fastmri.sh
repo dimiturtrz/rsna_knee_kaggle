@@ -25,6 +25,15 @@ first_alive() {
     2>/dev/null | tr -d '\r' | grep -qv '^0$'
 }
 
+# THE FIRST LINE IS WHAT MAKES THIS WATCHER VISIBLE, and it is not decoration. `queue_check` finds a
+# watcher two ways and a bespoke one like this defeats both: `Watch.of` refuses any `logs/after_*.log`
+# whose first line lacks the header `after.sh` prints, and `_invokes` tests the process line for the
+# literal `after.sh`, which `after_fastmri.sh` is not. So without this echo the check reads
+# **"OK: nothing is queued"** over a live watcher owing 1.6 h of card — the exact hole it was written
+# to close. Measured 2026-09-10 with this arm at epoch 8 and pid 62452 alive. Format copied from
+# `after.sh:47` verbatim, since the parse takes the marker from the first quoted pair.
+echo "waiting for 'ARM DONE ortho_fastmri' in $LOG before running: experiments/arms/ortho_fastmri_masked.sh"
+
 while true; do
   grep -aq "ARM DONE ortho_fastmri" "$LOG" 2>/dev/null && break
   first_alive || break
