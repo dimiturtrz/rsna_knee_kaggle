@@ -140,3 +140,4 @@ scratchpad/
 # A letter attachment is the SENDER's file, not our source: it is not ours to reformat, and the
 # tree-wide ruff format gate would demand exactly that. Data attachments stay tracked; code does not.
 /inbox/*/attach/*.py
+.kernel_out_*/
