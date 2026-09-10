@@ -14637,6 +14637,24 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.reachable_span",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.reachable_span",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.reachable_span",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
       "target": "kneemri.evaluation.diversity_slope.DiversitySlope.residuals",
       "weight": 1
     },
@@ -51266,6 +51284,30 @@
       "descendants": 0,
       "id": "kneemri.evaluation.diversity_slope.DiversitySlope.price",
       "label": "price",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.reachable_span",
+      "label": "reachable_span",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.reachable_span",
+      "label": "reachable_span",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.reachable_span",
+      "label": "reachable_span",
       "level": "method",
       "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
       "role": null
