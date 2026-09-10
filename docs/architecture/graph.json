@@ -1868,6 +1868,42 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.diversity_slope",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.diversity_slope",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.diversity_slope",
+      "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.diversity_slope",
+      "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.diversity_slope",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.diversity_slope",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.encoder_drift",
       "target": "core.cli",
       "weight": 1
@@ -14547,6 +14583,120 @@
     {
       "kind": "construct",
       "source": "kneemri.evaluation.competence_axis.main",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "target": "kneemri.evaluation.diversity_slope.SubsetReading",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.draw",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.price",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.price",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.diversity",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.price",
+      "target": "kneemri.evaluation.diversity_slope.SubsetReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.price",
+      "target": "kneemri.evaluation.pool.Pool.combined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.price",
+      "target": "kneemri.evaluation.scores.LabelScores.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.residuals",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.slope",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "target": "kneemri.evaluation.pool.Pool.rule",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "target": "kneemri.evaluation.scores.LabelScores.name",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.diversity_slope.main",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.main",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.draw",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.main",
+      "target": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.diversity_slope.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.narrow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.diversity_slope.main",
+      "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.diversity_slope.main",
       "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
@@ -37249,7 +37399,7 @@
       "role": null
     },
     {
-      "descendants": 290,
+      "descendants": 291,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -37313,7 +37463,7 @@
       "role": null
     },
     {
-      "descendants": 104,
+      "descendants": 105,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -37436,6 +37586,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.competence_axis",
       "label": "competence_axis",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope",
+      "label": "diversity_slope",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -40983,6 +41141,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.competence_axis",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "label": "DiversitySlope",
+      "level": "class",
+      "parent": "kneemri.evaluation.diversity_slope",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.SubsetReading",
+      "label": "SubsetReading",
+      "level": "class",
+      "parent": "kneemri.evaluation.diversity_slope",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -51062,6 +51236,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.competence_axis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.diversity",
+      "label": "diversity",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.draw",
+      "label": "draw",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.price",
+      "label": "price",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.residuals",
+      "label": "residuals",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.DiversitySlope.slope",
+      "label": "slope",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope.DiversitySlope",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.diversity_slope.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.diversity_slope",
       "role": null
     },
     {
