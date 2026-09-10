@@ -747,3 +747,16 @@ fovjitter160_s2026.pt       # 0.8545 kept — above the 0.8521 seat bar, and the
                             # is not an argument against a 0.8545 solo, and every other member on this
                             # roster saw one fixed extent. Rostered on solo plus that one structural
                             # difference; whether it earns a seat is seat_value's call, not this file's.
+noisy_student_s2026.pt      # 0.8548 kept — above the 0.8521 seat bar, and the pool's ONLY member fitted on
+                            # a three-site corpus (6,393 studies: ours plus MRNet plus the third site) with
+                            # a fold-0-clean teacher supervising all twelve columns on every row. Its own
+                            # ARM read FLAT (+0.0027 over merged3_corpus, the pre-registered 0.852-0.856
+                            # branch, ledger 2026-09-10) and that closed the external-data axis — but a
+                            # null on the CORPUS question is not an argument against a 0.8548 solo, and
+                            # this member differs structurally from every other seat in the pool on two
+                            # axes at once: the studies it saw and the distillation target it carried.
+                            # Rostered for DIVERSITY on that basis. Its per-column profile is a rotation
+                            # away from the pool's — PF OA +0.016, Contusion +0.016, Lateral OA +0.011
+                            # against Lateral Meniscus -0.006 and Fracture -0.011 — which is exactly the
+                            # shape that can pay in a vote and cannot pay in a solo. Whether it earns a
+                            # seat is seat_value's call, not this file's.
