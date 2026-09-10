@@ -8157,6 +8157,12 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.build_merged.main",
+      "target": "core.data.corpus.merged_cache.MergedCache.drop_unslotted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_merged.main",
       "target": "core.data.corpus.merged_cache.MergedCache.labels",
       "weight": 1
     },
@@ -9508,6 +9514,12 @@
       "kind": "calls",
       "source": "core.data.corpus.merged_cache.MergedCache.build",
       "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.merged_cache.MergedCache.drop_unslotted",
+      "target": "core.data.corpus.merged_cache.MergedCache._index",
       "weight": 1
     },
     {
@@ -46998,6 +47010,14 @@
       "descendants": 0,
       "id": "core.data.corpus.merged_cache.MergedCache.check",
       "label": "check",
+      "level": "method",
+      "parent": "core.data.corpus.merged_cache.MergedCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.merged_cache.MergedCache.drop_unslotted",
+      "label": "drop_unslotted",
       "level": "method",
       "parent": "core.data.corpus.merged_cache.MergedCache",
       "role": null
