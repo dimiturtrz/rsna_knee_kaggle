@@ -13258,7 +13258,7 @@ The initialisation control of the ortho triple. Random head, backbone 1e-5, whol
 | --- | --- | --- | --- |
 | `ortho_dense` | random | 4e-5 | 0.8452 |
 | **`ortho_fresh_lowlr`** | random | 1e-5 | **0.8248** |
-| `ortho_lpft` | fitted (LP first) | 1e-5 | on disk |
+| `ortho_lpft` | fitted (LP first) | 1e-5 | **TRUNCATED e4 of 12, floor 0.7937** |
 
 **−0.0204 against `ortho_dense`, which is the pre-registered `s <= ortho_dense - 0.006` branch by more
 than three floor-widths.** 1e-5 undertrains this trunk in twelve epochs. Converged and clean —
@@ -13271,7 +13271,13 @@ The e3 -> peak gain is +0.0258, above the 12-epoch median (+0.0210) and under p9
 was not short-changed by its budget — it climbed normally to a lower ceiling.
 
 **WHAT THIS BUYS, and it is the whole point of running an instrument.** `ortho_lpft` must now be read
-against **0.8248**, not against `ortho_dense`'s 0.8452. Read against the wrong control, any LP-FT result
+against **0.8248**, not against `ortho_dense`'s 0.8452. It cannot be read yet at all — `convergence_check`
+calls it `TRUNCATED  best e4 of 5 run, 12 asked`, so its 0.7937 is a FLOOR and the row at :7749 already
+says the arm "cannot answer the question it was built for". Completing it costs 1.44 h and its BEST
+pre-registered branch (+0.015 on this control) lands at 0.8398, still under `ortho_dense`'s 0.8452 — so
+it is a mechanism finding with no path to a better member, and it is not being queued ahead of score work.
+The control is banked and keeps: whenever that arm is completed, it is readable, which it was not before
+today. Read against the wrong control, any LP-FT result
 in the 0.83-0.84 band would have been written as "the warm start costs 0.01" when the rate alone accounts
 for 0.02. And a flat between the two 1e-5 arms says the warm start did not rescue an undertrained
 schedule — NOT that a fitted head does nothing. That sentence was unwriteable before this arm and is the
@@ -13291,4 +13297,50 @@ with `certainty_ramp` 0.8584 beside it. The queue was built from a letter that c
 "pre-registered and EMPTY" and the letter was stale. **The guard is what stopped a repeated experiment
 from spending 1.2 h of card**, and it is the second time this week a check has caught a stale premise that
 prose carried. Cost of the miss: the card idled from 17:55:47Z to 17:59:56Z, four minutes.
+
+
+## The regeneratable-cache sweep took four members and an arm with it, and `roster_check` names only some of them — 2026-09-10
+
+`diversity_curve` was put on the card at 17:59:56Z to fill it after the overwrite guard refused
+`disagreed_ramp`. It died twice, both times on a deleted array:
+
+    FileNotFoundError: images_336px_12sl_extended.npy
+    FileNotFoundError: images_336px_16sl.npy
+
+Both are casualties of the approved regeneratable-cache deletion. The first killed it after six solo
+rows; the second after the same six, one member later. Four of its eleven members cannot be read
+without first rebuilding a cache on the card: `extended_ws_s2026`, `res392_ws_s2026`,
+`intensity392_ws_s2026` and `slices16_ws_s2026`.
+
+**`roster_check` does not name all four.** Its gone-cache list carries twelve members, and
+`slices16_ws_s2026` is not among them — the check reports the arrays a member's own record points at,
+and this one was found only by a crash. So the twelve are a floor on the blast radius, not the radius.
+
+**What it costs the question.** The arm asks whether mechanism-ensembling buys what fold-ensembling
+bought. `extended_ws` is its ONLY member whose INPUTS differ (line 51 of the arm says so in its own
+words); the other ten are different recipes over the same inputs. With `extended_ws` gone the arm can
+answer the RECIPE-diversity half and not the input-diversity half, and the withdrawal is written into
+the script so no later reading quotes it as the whole answer. The three 392/extended members are a
+cache rebuild away, not a re-train — the checkpoints are all on disk.
+
+**A second thing fell out of the six rows it did read.** The arm's own header quotes
+`lr5x_d6_s2026` 0.8323, `max12_s2026` 0.8310 and `large_deep_rank24` 0.8304; `member_curve` read them
+at 0.8475, 0.8451 and 0.8450 — **+0.0152, +0.0141, +0.0146**, a systematic offset and not scatter.
+That is the cut, not the members: a bare number in this repo is midpoint unless it says otherwise, and
+the header's numbers and the tool's are two different statistics over the same predictions. Nothing
+here is a gain; it is a reminder that a solo score quoted without STATISTIC/POPULATION/CUT is not a
+number, and this offset is about three times the board gap.
+
+### The undocumented thirteen were not hiding a shippable member
+
+`roster_check` reported thirteen members in neither the roster nor the declines — the shape in which
+`stackfit_s2026` at 0.8631 once sat unshippable for as long as nobody typed a line. They are not that:
+eight are `oof_{band,reader}_fold[1-4]`, fitted on folds whose holdout IS this holdout and therefore
+unseatable by construction rather than by score; one is `mae_unitfix_s2026_run1`, killed at epoch 1
+after WDDM paged it to 57 img/s, so its record is a floor over one epoch; one is
+`ortho_fresh_lowlr_s2026`, today's initialisation control, which is an instrument by construction.
+All ten are now declined in writing. The three genuinely open ones are `oof_band_fold0_s2026`,
+`oof_reader_fold0_s2026` and `reader_through_s2026` — fold 0 is the holdout fold, so unlike its
+siblings it is legitimately readable (`wsfold0_e6` is rostered at 0.8457) — and they are owed a score,
+not a decline.
 

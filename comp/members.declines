@@ -1008,3 +1008,24 @@ resnet_224_long_s2026_run1.pt  # Killed at epoch 9 of 48; no checkpoint, superse
                             # roster and reads 0.8460. Nothing re-opens this row: a truncated duplicate of
                             # a finished arm has no question left to answer.
                             # Ledger 2026-09-10.
+oof_band_fold1_s2026  # fitted on fold 1, so this holdout IS its training data. Unseatable by construction and never
+    # by score: an ensemble of five such members once reported 0.8807 while its own members logged
+    # 0.83. Re-open only by refitting on fold 0, never by quoting a number read here.
+oof_band_fold2_s2026  # fitted on fold 2 - same reason as oof_band_fold1_s2026.
+oof_band_fold3_s2026  # fitted on fold 3 - same reason as oof_band_fold1_s2026.
+oof_band_fold4_s2026  # fitted on fold 4 - same reason as oof_band_fold1_s2026.
+oof_reader_fold1_s2026  # fitted on fold 1 - same reason as oof_band_fold1_s2026.
+oof_reader_fold2_s2026  # fitted on fold 2 - same reason as oof_band_fold1_s2026.
+oof_reader_fold3_s2026  # fitted on fold 3 - same reason as oof_band_fold1_s2026.
+oof_reader_fold4_s2026  # fitted on fold 4 - same reason as oof_band_fold1_s2026.
+mae_unitfix_s2026_run1  # the 336 px / 20 slice arm that held 32,024 MiB of a 32,607 MiB card and reported 51 MiB free
+    # from its first step. It survived epoch 0 at 510 img/s and collapsed to 57 img/s the moment
+    # epoch 0's holdout eval allocated on top - WDDM pages GPU memory over PCIe rather than
+    # failing - and it never recovered. Killed at epoch 1, so its holdout record is a FLOOR with
+    # one epoch behind it and is a fact about a paged process, not about a recipe. Re-open by re-
+    # running the recipe at a footprint that fits the card, never by quoting this number.
+ortho_fresh_lowlr_s2026  # an INSTRUMENT and never a seat candidate. It is the initialisation control of the ortho
+    # triple - random head, 1e-5, whole stack - and read 0.8248 against ortho_dense's 0.8452,
+    # firing its own pre-registered s <= ortho_dense - 0.006 branch. Its rate is deliberately one
+    # its own row now shows undertrains this trunk in twelve epochs, so the score measures the
+    # schedule and not the member. Ledger 2026-09-10.

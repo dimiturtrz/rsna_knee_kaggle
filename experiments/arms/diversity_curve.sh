@@ -67,14 +67,21 @@ require "$LABELS"
 # a weak member that fails on different studies and is usually hurt by one that is simply worse, and
 # nothing except the curve distinguishes those two cases. It costs NOTHING extra to serve: it reads 224
 # off the same 336 cache, so it shares that decode and resamples inside the model.
+# WITHDRAWN 2026-09-10, four members, and the withdrawal is NOT a judgement about them. The approved
+# regeneratable-cache sweep deleted images_336px_12sl_extended.npy, images_336px_16sl.npy, ..._res392.npy and ..._intensity392.npy,
+# so `extended_ws`, `res392_ws` and `intensity392_ws` cannot be read without first rebuilding a cache on the
+# card. The first run of this arm died on exactly that (FileNotFoundError, logs/diversity_curve.log) AFTER
+# six solo rows, which is how the deletion's blast radius was found. `extended_ws` is the arm's ONLY member
+# whose INPUTS differ, so the input-diversity half of the question is withdrawn rather than answered: what
+# runs below is the RECIPE-diversity half alone, and it may not be quoted as the whole reading.
 MEMBERS=(
   "$MODELS/dinov3_v3small_224_s2026.pt"
-  "$MODELS/extended_ws_s2026.pt"
-  "$MODELS/res392_ws_s2026.pt"
-  "$MODELS/intensity392_ws_s2026.pt"
+  # "$MODELS/extended_ws_s2026.pt"   # cache deleted, see WITHDRAWN note above
+  # "$MODELS/res392_ws_s2026.pt"   # cache deleted, see WITHDRAWN note above
+  # "$MODELS/intensity392_ws_s2026.pt"   # cache deleted, see WITHDRAWN note above
   "$MODELS/sliceattn_s2026.pt"
   "$MODELS/wsfold0_e6.pt"
-  "$MODELS/slices16_ws_s2026.pt"
+  # "$MODELS/slices16_ws_s2026.pt"   # images_336px_16sl.npy is gone too, see WITHDRAWN note
   "$MODELS/lr5x_d6_s2026.pt"
   "$MODELS/max12_s2026.pt"
   "$MODELS/max20_s2026.pt"
