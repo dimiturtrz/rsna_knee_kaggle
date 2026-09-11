@@ -1,0 +1,1071 @@
+How Much More Data Do I Need? Estimating Requirements for Downstream Tasks
+
+arXiv:2207.01725v2 [cs.CV] 13 Jul 2022 Accuracy LPoogwareirthLamiwc Algebraic Root Ground Truth Arctan
+
+Rafid Mahmood1 James Lucas1,2,3 David Acuna1,2,3 Daiqing Li1 Jonah Philion1,2,3 Jose M. Alvarez1 Zhiding Yu1 Sanja Fidler1,2,3 Marc T. Law1 1NVIDIA 2University of Toronto 3Vector Institute
+{rmahmood, jalucas, dacunamarrer, daiqingl, jphilion, josea, zhidingy, sfidler, marcl}@nvidia.com
+https://nv-tlabs.github.io/estimatingrequirements/
+
+Abstract
+Given a small training data set and a learning algorithm, how much more data is necessary to reach a target validation or test performance? This question is of critical importance in applications such as autonomous driving or medical imaging where collecting data is expensive and time-consuming. Overestimating or underestimating data requirements incurs substantial costs that could be avoided with an adequate budget. Prior work on neural scaling laws suggest that the power-law function can fit the validation performance curve and extrapolate it to larger data set sizes. We find that this does not immediately translate to the more difficult downstream task of estimating the required data set size to meet a target performance. In this work, we consider a broad class of computer vision tasks and systematically investigate a family of functions that generalize the power-law function to allow for better estimation of data requirements. Finally, we show that incorporating a tuned correction factor and collecting over multiple rounds significantly improves the performance of the data estimators. Using our guidelines, practitioners can accurately estimate data requirements of machine learning systems to gain savings in both development time and data acquisition costs.
+1. Introduction
+Before deploying a deep learning model, designers may mandate that the model meet a baseline performance, such as a target metric over a held out validation or test set. For example, an object detector may require a minimum mean average precision before being deployed in a safety-critical application. One of the most effective ways of meeting the target performance is by collecting more training data for a given model. However, how much more data is needed?
+Overestimating data requirements can incur costs from unnecessary collection, cleaning, and annotation. For example, annotating segmentation data sets may require 15 to 40 seconds per object [2], meaning annotating a driving
+
+Estimtaotimngeetht ea atamrgoeutnot nofImdaatgaenNeeetded
+70 Target (67%)
+60
+
+50
+
+40
+
+30
+
+Power Law (10%)
+
+Power Law (50%)
+
+Arctan (10%)
+
+Arctan (50%)
+
+20
+
+Logarithmic (10%) Algebraic Root (10%)
+
+Logarithmic (50%) Algebraic Root (50%)
+
+100.0
+
+Ground Truth
+
+0.2
+
+0.4 Data se0t.6size 0.8
+
+1.0 1e6
+
+Figure 1. Extrapolating accuracy on ImageNet [9] as a function
+
+of data set size from 10% of the data set (125, 000 images; dotted)
+
+and 50% (600, 000 images; dashed) using four regression func-
+
+tions. The vertical dashed lines show how much data is needed to
+
+meet a target 67% validation accuracy according to each dashed
+
+curve. All the dashed curves can accurately extrapolate perfor-
+
+mance as they are given a sufficient amount of images. Although
+
+the functions have an error of 1-6% from the ground truth (67%
+
+at 900, 000 images), they mis-estimate the data requirement by
+
+120, 000 to 310, 000 images.
+
+data set of 100, 000 images with on average 10 cars per image can take between 170 and 460 days-equivalent of time. On the other hand, underestimating means having to collect more data at a later stage, incurring future costs and workflow delays. For instance in autonomous vehicle applications, each period of data collection requires managing a fleet of drivers to record driving videos. Thus, accurately estimating how much data is needed for a given task can reduce both costs and delays in the deep learning workflow.
+There is a growing body of literature on estimating the sample complexity of machine learning models [4, 14, 15]. Recently proposed neural scaling laws suggest that gener-
+
+alization scales with the data set size according to a power law [3, 17, 18, 23, 30]. Rosenfield et al. [30] propose fitting a power law function using the performance statistics from a small data set to extrapolate the performance for larger data sets; while not a focus of their paper, they suggest this can be used to estimate the data requirements. However, the power law function is not the only possible choice. We propose in this paper to use it with similar functions that can be more accurate in practice. Figure 1 illustrates the data collection process in image classification with the ImageNet data set [9] for the power law function and several effective alternatives. When using small data sets to extrapolate, the fitted functions may diverge in different ways from the ground truth performance curve. More importantly, even a small error in extrapolating accuracy can lead to large errors in over or under-estimating the data requirements, which may present huge operational costs.
+In this paper, we ask: given a small training data set and a model not yet meeting target performance in some metric, what is the least amount of data we should collect to meet the target? Generalizing the estimation of data requirements from power laws, we investigate several alternate regression functions and show that all of them are well-suited towards estimating model performance. Moreover, each function is almost always either overly optimistic (i.e. under-estimating the data requirement) or pessimistic (i.e. over-estimating), meaning that there is no unique best regression function for all situations, but using all of the different functions, we can approximately bound the true data requirement. Through a simulation of the data collection workflow, we show that incrementally collecting data over multiple rounds is critical to meeting the requirement without significantly exceeding it. Finally, we introduce a simple correction factor to help these functions meet data requirement more often; this factor can be learned by simulating on prior tasks. We explore classification, detection, and segmentation tasks with different data sets, models, and metrics to show that our results hold in every setting considered.
+Altogether, our empirical findings and proposed enhancements yield easy-to-implement guidelines for data collection in real-world applications: practitioners should allocate for up to five rounds of data collection and use the correction factor introduced in this paper to augment an optimistic regression function (e.g. Power Law, Logarithmic, Algebraic Root) in order to accurately estimate data requirements and ultimately collect only a relatively small amount more than the minimum data required to meet the desired performance. We believe that this approach can improve workflows and yield large cost savings in the future.
+2. Related work
+Neural scaling laws. Prior work has estimated model performance as a function of data set size [1, 4, 14, 30, 35, 42].
+
+The recent literature on neural scaling laws argues that model performance (usually defined as decreasing loss over a validation set) scales with data set size according to a power law function, i.e. V  1n2 where n is the data set size. Hestness et al. [17] empirically validate that power laws accurately model negative validation set loss and top-1 error over different image classification, language, and audio tasks. Bahri et al. [3] prove that for over-parametrized networks, under Lipschitz continuity of the loss function, model, and data distribution, the out-of-sample loss scales in O(n-1/). Rosenfeld et al. [30] fit power law functions using small data subsets. Finally, Hoiem et al. [18] use power laws to construct learning curves and investigate modeling questions. One key difference between these studies and our own is that we focus on estimating target data requirements given an approximate relationship between data size and model performance; such as a power law function. More broadly, this area also relates to the study of learning curves in classical machine learning [13, 22, 36]. Our work differentiates from this literature through a detailed simulation that investigates the operational costs of poorly estimating a learning curve. Active learning. In this work, we consider collecting data over multiple rounds. This is related to active learning [7], where a model selects which data to use during multiple rounds of training. The focus of active learning is to intelligently select this data given a fixed collection budget [26, 31, 32, 34, 39], sometimes with a focus on the performance on rare categories [29]. However, the goal of this work is to predict the optimal collection budget itself. This paper focuses on random sampling, but includes experiments with active learning in the Appendix to demonstrate that our insights on estimating the data requirement hold independent of the sampling strategy. Statistical learning theory. Loosely speaking, statistical learning theory seeks to relate model performance and data set size. Accurate theoretical characterizations of this relationship could be used to infer the target data requirements, but these results are typically only tight asymptotically; if at all. More recent work has explored empirically estimating this theoretical relationship [20, 21]. Bisla et al. [4] build models of generalization for deep neural networks under assumptions on the training and test behaviour that are validated empirically. Bisla et al. highlight the utility in being able to estimate data requirements from such a model, but do not explore this empirically as we do in this work.
+3. Main problem
+In this section, we mathematically define the data collection problem and the general solution method. The goal of this problem is to estimate the data set size that returns a desired performance in a limited number of rounds. We first model performance as a function of data set size and then
+
+Our problem: Estimate the amount of data needed
+
+Labeled subset ()
+
+Target performance ()
+
+Model
+Performance (  ) Create regression data set
+
+Regression
+
+data set Sub-modular
+
+( 0 ,  0 ),
+
+Function
+
+...,
+
+( -1 ,  -1 )
+
+Estimated data requirement ()
+
+Regress on performance and estimate required data set size
+
+Newly collected data (0  )
+Model
+Performance ((0  )) Collect data and train
+
+If     < 
+Figure 2. The iterative data collection loop.
+
+Regression Function Power Law Arctan Logarithmic Algebraic Root
+
+v^(n; )
+
+1n2 + 3
+
+200
+
+
+
+ arctan 1 2 n + 2
+
+1 log(n + 2) + 3
+
+100n (1 + |1n|2 )1/2 + 3
+
++ 3
+
+Table 1. Four concave monotonic increasing regression functions explored in this paper. The set of learnable parameters is  := {1, 2, 3}.
+
+solve for the data given an input performance.
+
+Algorithm 1 The data collection problem
+
+3.1. The data collection problem
+Let z  p(z) be data drawn from a distribution p. For
+instance, z := (x, y) may correspond to images x and labels
+y. Consider a prediction problem for which we currently have an initial training data set D0 := {zi}ni=01 of n0 points and a model f . Let Vf (D) be a score function of the model after it is trained on a set D. Our goal is to obtain a predetermined target score V  > Vf (D0).
+To achieve our goal, we sample n^ additional points to create D^ := {z^i}in^=1  p(z) and then evaluate Vf (D0  D^). If we do not meet the target, we must determine a larger n^ and augment D^ with more data. Because each data point in-
+curs a cost from collecting, cleaning, and labeling, we ide-
+ally want the fewest number of points n^ that achieve the
+
+1: Input: Initial data set D0, Score function Vf (D), Target score V , Maximum rounds T , Regression model v^(n; ), Initial regression set
+
+size r 2: Set n0  |D0|, D^ = 
+
+3: CREATE REGRESSION DATA SET
+
+4: Sample subsets S0  S1  · · ·  Sr-1 = D0 5: Evaluate Vf (Si) and create R  {(|Si|, Vf (Si))}ir=-01
+
+6: PERFORM DATA COLLECTION
+
+7: repeat
+
+8:
+
+Fit   arg min (n,v)R(v - v^(n; ))2
+
+9:
+
+Minimize n^ subject to v^(n0 + n^; )  V 
+
+10:
+
+Sample points from p(z) until |D^| = n^
+
+11:
+
+Train model and evaluate score Vf (D0  D^)
+
+12:
+
+Update R  R  {(n0 + n^, Vf (D0  D^))}
+
+13: until Vf (D0  D^)  V  or T rounds have passed
+
+14: Output: Final collected data set D0  D^
+
+target. Furthermore, because initiating a round of data col-
+lection is itself expensive and time-consuming, we are only permitted a maximum of T rounds; failing to meet the requirement within T rounds means failing to solve the prob-
+lem. This problem is summarized in the following iterative sequence. Initialize D^ = . Then in each round, repeat:
+(1) Estimate the amount of additional data n^ needed. (2) Sample points until |D^| = n^ and then evaluate the score. If Vf (D0  D^)  V , then terminate. Otherwise, repeat for another round up to T rounds.
+The objective of the data collection problem is to select the minimum n^ such that Vf (D0  D^)  V  within T rounds. This paper focuses on the first step of the loop: accurately estimating the n^ required to meet V .
+3.2. Regressing performance using data set size
+
+Recall that Vf (Di) is the model score after it is trained on Di. We refer to v(n) as the model score function over the training data set size. The observation implies that intuitively, as we collect more data, the marginal value of each additional data point should decrease (e.g. Figure 1). Furthermore, we can model v(n) by regression using concave, monotonically increasing functions. Within the data collection loop, we first estimate n^ by using the available data, D0 and D^, and the corresponding scores by fitting a regression model v^(n; ) of v(n), where  is the set of regression parameters. We consider four functions that satisfy the Observation (see Table 1) from the learning curve literature [36]. While we could use more complicated models, we find these simpler structured functions with a small number of parameters are easier to fit to smaller data sets of
+
+Figure 2 illustrates our data collection pipeline to estimate n^, motivated by the following empirical observation.
+
+learning statistics. Using the fitted regression function, we solve for the smallest n^ such that v^(n0 + n^; )  V .
+
+Observation from [14, 30]. Let D0  D1  · · · be a
+
+Algorithm 1 summarizes the main steps. We first cre-
+
+growing sequence of data sets and let ni = |Di| for each i ate a regression data set by selecting r subsets S0  S1 
+
+in the sequence. Then, the piecewise linear function
+
+· · ·  Sr-1 = D0 and computing their scores; this yields a
+
+v(n) :=
+
+Vf (D0 n0
+
+)
+
+n,
+
+Vf (Di)-Vf (Di-1) ni -ni-1
+
+(n
+
+-
+
+ni)
+
++
+
+Vf (Di),
+
+n  n0
+
+set of r pairs R := {(|Si|, Vf (Si))}ri=-01. Then, in the data collection loop, we select a function v^(n; ) from Table 1
+
+ni-1
+
+
+
+n
+
+
+
+naind fit the set tion. Finally,
+
+of parameters  via least squares minimizawe minimize n^ subject to v^(n^; )  V ,
+
+is concave and monotonically increasing.
+
+and then collect n^ new points. In subsequent rounds of
+
+Data set
+
+Task
+
+Score
+
+Full data set size
+
+CIFAR10 [24] CIFAR100 [24] ImageNet [9]
+
+Classification Classification Classification
+
+Accuracy Accuracy Accuracy
+
+50, 000 50, 000 1, 281, 167
+
+VOC [11, 12] nuScenes [5]
+
+2-D Object Detection 3-D Object Detection
+
+Mean AP Mean AP
+
+16, 551 28, 130
+
+BDD100K [40] Semantic Segmentation Mean IoU
+
+nuScenes [5] BEV Segmentation
+
+Mean IoU
+
+7, 000 28, 130
+
+Table 2. Data sets, tasks, and score functions considered.
+
+data collection as we obtain D^, we augment R with pairs (|D0| + |D^|, Vf (D0  D^)), and then re-fit v^(n; ).
+The existing literature shows that power laws can estimate model accuracy using data set size, but the practical application of estimating the required data set size to meet a target score presents three major challenges. We highlight them below using the ImageNet data set in Figure 1.
+All of the functions in Table 1 fit the model score. With enough data, all of the regression functions in Table 1 can accurately fit v(n). When fit using |D0| = 600, 000 images ( 50% of the data set), Figure 1 shows that each link function (dashed curves) achieves at most 6% error from the ground truth accuracy when extrapolating. Although power laws are theoretically motivated [3, 19], is there empirical justification for using them over other functions?
+Extrapolating accuracy with small data sets is hard. With limited data, all of the regression functions extrapolate v(n) poorly. Figure 1 shows how each curve (dotted curves) diverges significantly from the ground truth when fitting with |D0| = 125, 000 images ( 10% of the data set). Further, some curves provide better fit than power laws. This small data regime was observed in [17, 30] who proposed jointly regressing on data set and model size; while this improves extrapolating performance, it also requires a 2× larger R obtained by sampling subsets and modifying different models. This can grow computationally expensive and time-consuming; as a result, we focus on simple estimators using a small number of training statistics, i.e., r  10.
+Small accuracy errors yield large data errors. Suppose we must build a model meeting 67% test set accuracy on ImageNet, which requires 900, 000 data points. Even though the functions fit using 600, 000 images achieve error |67% - v^(900, 000; )| between 1 to 6%, they misestimate the data requirement between 120, 000 to 310, 000 images--collecting up to 34% less data than actually required. Since the tolerance for extrapolation errors is low, we must determine best practices for estimating data needs.
+
+4. Empirical findings
+We investigate the three challenges using regression and simulation over different data sets and tasks. We first summarize our experimental setup before analyzing the results.
+
+4.1. Data and methods
+We assess the data collection problem on image classification, object detection, and semantic segmentation tasks summarized in Table 2. In classification, we train ResNets [16] on the CIFAR10 [24], CIFAR100 [24], and ImageNet [9] data sets, where we determine the amount of data needed to meet a target validation set accuracy. We train SSD300 [25] for 2-D object detection using the PASCAL VOC data sets [11, 12], where we determine the amount of data needed to meet a target mean average precision (AP). For 3-D object detection, we train the FCOS3D network architecture [38] on different subsets of the nuScenes training set. We report mean average precision (mAP) following the nuScenes 3D detection evaluation protocol [5]. Samples are obtained randomly across different scenes. We explore semantic segmentation using BDD100K [40], which is a large-scale driving dataset collected over 50K drives with various geographic, environmental, and weather conditions. For multi-view Bird's-EyeView (BEV) segmentation, we train the "Lift Splat" architecture [28] on the nuScenes data set [5]. Here, we report mean intersection-over-union (IoU). For each task, we fix the architecture of the model and learning algorithm including data sampling. Details are in the supplementary content.
+For each data set and task, we have an initial dataset D0 (e.g. n0 = 10% of the training data set). In our analyses, we report n0 in terms of the relative size of D0 w.r.t. the full training data set. We first create a regression data set R according to Algorithm 1 by sampling r subsets that grow linearly in size (i.e. each |Si| = |D0|(i + 1)/r for all i  {0, . . . , r - 1}). To ensure that this regression procedure is inexpensive, we use a small r  10. Then to evaluate our regression functions on extrapolating performance and estimating data requirements, we sample larger subsets D1  D2  · · · of growing size (e.g. 10%, 20%, 30%, . . . , 100% of the full training data set). For each subset, we train our model and evaluate the score Vf (Di). Using these sets, we construct the piecewise linear score function v(n), which we use as a ground truth.
+We perform two types of experiments. In the first, preliminary, analysis we fit each regression function from Table 1 using R and then evaluate their error with respect to predicting Vf (Di) for all |Di| > |D0|. This analysis reveals how well each of the regression functions can extrapolate the model's score for larger data sets. Our second, main, analysis is a simulation of the data collection problem in Algorithm 1 where we initialize with n0 = 10% of the full training data set (n0 = 20% for VOC) and estimate how much data is needed to obtain different target values V  within T = 1, 3, 5 rounds. Here, we repeat the same steps described in the Data Collection stage of Algorithm 1, except with one difference. In our simulations, rather than sampling more data and evaluating Vf (D0  D^)
+
+Classification
+
+Data set
+
+n0 r
+
+Power Law
+
+Arctan
+
+Logarithmic Algebraic Root
+
+CIFAR10 CIFAR10 CIFAR10
+
+10% 5 39.02 ± 20.3 7.98 ± 7.1 32.28 ± 13.1 20% 10 15.26 ± 1.3 1.0 ± 0.6 11.53 ± 1.5 50% 17 6.0 ± 0.5 0.38 ± 0.3 4.4 ± 0.5
+
+33.63 ± 22.1 4.97 ± 1.6 0.76 ± 0.4
+
+CIFAR100 10% 5 34.38 ± 35.1 13.3 ± 5.3 17.25 ± 21.8 CIFAR100 20% 10 29.52 ± 3.9 4.71 ± 2.0 19.87 ± 2.5 CIFAR100 50% 17 5.49 ± 0.2 0.69 ± 0.2 5.42 ± 0.2
+
+26.29 ± 16.8 40.33 ± 1.5 3.65 ± 0.3
+
+ImageNet ImageNet ImageNet
+
+10% 4 20% 8 50% 15
+
+23.89 ± 7.4 10.12 ± 0.4 5.06 ± 0.1
+
+3.19 ± 2.1 2.38 ± 0.5 0.74 ± 0.2
+
+17.2 ± 3.2 9.46 ± 0.6 3.81 ± 0.2
+
+60.1 ± 1.1 7.61 ± 1.0 1.64 ± 0.2
+
+VOC VOC VOC
+
+20% 4 30% 6 50% 10
+
+4.66 ± 3.1 3.16 ± 1.6 1.15 ± 0.5
+
+2.98 ± 1.6 2.31 ± 1.2 0.79 ± 0.5
+
+3.23 ± 2.1 2.55 ± 1.3 1.08 ± 0.4
+
+3.28 ± 1.8 2.83 ± 1.3 1.13 ± 0.5
+
+nuScenes nuScenes nuScenes
+
+10% 2 20% 4 50% 6
+
+6.57 ± 0.5 2.10 ± 2.1 0.69 ± 0.2
+
+13.43 ± 0.3 1.65 ± 1.0 0.71 ± 0.1
+
+0.79 ± 0.2 1.73 ± 1.3 0.51 ± 0.2
+
+4.53 ± 0.4 2.32 ± 1.6 0.36 ± 0.2
+
+BDD100K 10% 5 BDD100K 20% 10 BDD100K 50% 17
+
+9.85 ± 7.9 2.98 ± 1.2 1.30 ± 0.5
+
+8.12 ± 7.6 0.76 ± 0.3 0.95 ± 0.3
+
+9.18 ± 8.9 1.60 ± 0.9 0.82 ± 0.2
+
+5.82 ± 2.3 2.76 ± 1.2 1.10 ± 0.5
+
+nuScenes nuScenes nuScenes
+
+10% 5 20% 10 50% 17
+
+2.78 ± 0.0 0.61 ± 0.2 0.38 ± 0.3
+
+2.30 ± 0.7 3.34 ± 0.6 2.40 ± 0.1
+
+2.03 ± 0.9 0.91 ± 0.7 0.28 ± 0.2
+
+1.47 ± 0.6 2.31 ± 1.0 1.77 ± 1.7
+
+Table 3. Mean±standard deviation of multiple runs evaluating the RMSE on extrapolating performance in each task when trained on small subsets of the data. We report n0 in terms of the percentage of the true data set. The lowest error for each setting is bolded. We provide regression plots and alternate error metrics in the supplementary content. Given 50% of the data, every function achieves low regression error, whereas, with 10% of the data all of the functions have significant error in their estimation. Furthermore, the alternative functions typically outperform the Power Law across different values of n0 and over different tasks.
+
+Detection
+
+Segmentation
+
+in each round (e.g. lines 11­13), we evaluate v(n0 + n^) to obtain the model score. This simulation approximates the true data collection problem, while simplifying experimentation since we do not have to repeatedly re-train our model.
+4.2. Analysis
+Regression. Table 3 summarizes the Root Mean Squared Error (RMSE) of each regression function when extrapolating the score for larger data sets. In each data set and task, we perform three runs with different random seeds, showing how well we can extrapolate with small, medium, and large subsets of the data. In the supplement, we provide regression plots for v(n) versus v^(n; ) and a table summarizing regression error in terms of relative error ratio.
+We validate that the first two challenges mentioned in Section 3.2 hold for every task that we consider. Given a sufficient amount of initial data D0 to fit a regression model (i.e. when n0 is equal to 50% of the full data set size), every link function achieves a low RMSE (whose range is the interval [0, 100]). Moreover, there is always at least one regression function that achieves an RMSE less than 1. When n0 is equal to 10% of the full data set size, most of the link functions yield high RMSE, suggesting that the functions are susceptible to diverging from the true v(n) when fitted on a small data set. Finally, for most data sets, our alternative regression functions consistently yield low RMSE. In particular, the Arctan function is the best for all of the classification data sets, and often cuts the RMSE from the Power Law by half. These results show that extrapolating model performance from small data sets is difficult, but furthermore, other regression functions instead of the Power Law may obtain more accurate regressions of the score.
+
+Simulation. We simulate data collection for each of the different regression functions by sweeping a range of targets V  when n0 and T are given. Figure 3 reports the ratio of the final data collected by each function versus the minimum data required according to the ground truth score, i.e. (n0 +n^)/(n0 +n) where n is the smallest value satisfying v(n0 +n) = V . The value of n is easy to find since v(n) is a piecewise linear monotonically increasing function.
+In evaluating how each regression function collects data, there are two scenarios to consider. If the ratio is less than one, the function is described as an optimistic predictor of the score that under-estimates how much data will be needed. A ratio less than one means that using this regression function, we will not collect enough data to meet V  within T rounds, thereby failing to solve the problem. On the other hand if the ratio is greater than one, the function is a pessimistic predictor that over-estimates how much data will be needed. An ideal data collection policy will achieve the smallest ratio greater than one. Our experiments show that in general, the Arctan function is the most pessimistic and often achieves the largest ratios by a large margin.
+We first validate the third challenge from Section 3.2 and remark that low regression error does not necessarily translate to better data collection. On CIFAR100, ImageNet, and VOC, using Arctan may lead to collecting up to five times more data than is actually needed; with BEV segmentation on nuScenes, it may lead to over 10 times more. Recall from Figure 1 that on ImageNet, we require approximately 900, 000 images to reach a target V  = 67%. Using Arctan when initialized with n0 = 10% of the data would result in collecting approximately 4.5 million images in the first round alone, whereas all of the other regression func-
+
+Figure 3. The ratio of the amount of data collected versus the minimum data needed (y-axis) for different target V  (x-axis) in
+simulations initializing with n0 = 10% of the data set (n0 = 20% for VOC). For each data set, we show simulations for T = 1, 3, 5
+maximum rounds. The dashed black line corresponds to collecting the least amount of data needed to reach V .
+
+tions achieve a ratio approximately equal to 1. Although Table 3 showed that Arctan achieved the lowest RMSE (3.19) of all functions in regression, using it to estimate data requirements would lead to an unnecessarily expensive data collection procedure. This reveals that simply analyzing regression error is insufficient when determining good data collection policies, necessitating our simulation approach.
+For most regression functions, collecting enough data requires multiple rounds. When T = 1, the Power Law, Logarithmic, and Algebraic Root functions under-estimate the data requirement for all data sets and tasks except for VOC. However when T = 5, for every data set except for CIFAR10, all of the functions yield ratios greater than 0.9 over the entire range of V . That is, we can consistently reach at least 90% of the data needed with any of the functions.
+Ultimately, even with T = 5, these estimators can still under-estimate the requirement when V  is large (e.g. on ImageNet, the Power Law, Logarithmic, and Algebraic Root functions achieve ratios less than 1 for V   62%). From an operational perspective, although these methods do not incur large costs, they also fail to solve the problem. In the next section, we show simple techniques to correct these estimators and better guide data collection.
+Ablations. In the supplement, we perform ablations that evaluate regressions and simulations on different model depths and widths for CIFAR100. We also consider alternate score functions such as collecting enough data to meet a target performance on a specific class using nuScenes. Finally, we explore estimating requirements when using active learning rather than random sampling for CIFAR100.
+
+Our results indicate the same trends, further supporting the challenges towards estimating the data requirement.
+5. Towards better estimates of data
+We previously showed that some optimistic estimators fail to collect enough data to meet V  whereas other pessimistic estimators lead to collecting far more data than required. Here, we first introduce a correction factor, which is a bias term that addresses the problem of under-estimating data requirements. We then show how analyzing both the optimistic and pessimistic regression functions considered in this paper can lead to a collection of estimates that often bound the true data requirement.
+5.1. A correction factor to help meet the target
+From Algorithm 1, in each round of data collection, we minimize n^ subject to v^(n0 + n^; )  V . Ideally, we would want to minimize the true data requirement, i.e. solving for n satisfying v(n0 + n) = V . However, our simulations show that most of the regression functions are optimistic and under-estimate how much data is needed. Intuitively, a simple way to correct for collecting less than the data needed to meet V  is to impose a correction factor   0 and instead estimate the data required to meet a "corrected" higher target V  +  . As a result, we fix a constant  and modify Algorithm 1 so that in each round, we now minimize n^ subject to v^(n0 + n^; )  V  +  .
+In order to determine how large this correction factor should be, we treat it as a hyper-parameter to fit. For instance, suppose that we have the full CIFAR10 data set and
+
+Classification
+
+Detection
+
+Data set
+
+n0
+
+T
+
+Power Law
+
+Arctan
+
+Logarithmic
+
+Algebraic Root
+
+Without With Without With Without With Without With
+
+CIFAR100 10% 1 CIFAR100 10% 3 CIFAR100 10% 5
+
+0.53 0.81 0.9
+
+0.91 1.09 1.03
+
+1.13 1.13 1.13
+
+1.36 1.19 1.19
+
+0.68 0.9 0.94
+
+1.54 1.08 1.11
+
+0.54 0.83 0.91
+
+0.82 0.94 1.01
+
+ImageNet ImageNet ImageNet
+
+10% 1 10% 3 10% 5
+
+0.43 0.77 0.85
+
+1.16 1.10 1.07
+
+1.02 1.03 1.03
+
+1.35 1.08 1.08
+
+0.47 0.83 0.9
+
+1.28 1.06 1.06
+
+0.33 0.85 0.94
+
+0.5 1.03 1.03
+
+VOC VOC VOC
+
+20% 1 20% 3 20% 5
+
+1.08 1.1 1.1
+
+6.42 2.75 2.03
+
+1.24 1.25 1.25
+
+5.05 1.64 1.64
+
+1.11 1.12 1.13
+
+7.4 2.23 2.23
+
+1.1 1.11 1.11
+
+6.03 1.54 1.54
+
+nuScenes nuScenes nuScenes
+
+10% 1 10% 3 10% 5
+
+0.56 0.94 1.0
+
+2.9 1.05 1.09
+
+0.39 1.0 1.0
+
+0.51 1.0 1.0
+
+0.83 1.0 1.0
+
+32.45 1.68 1.68
+
+0.61 0.94 1.0
+
+2.9 1.07 1.07
+
+BDD100K 10% 1 BDD100K 10% 3 BDD100K 10% 5
+
+0.49 0.86 0.94
+
+2.45 1.76 1.48
+
+0.66 0.95 0.96
+
+1.79 1.2 1.2
+
+0.52 0.9 0.94
+
+5.2 1.58 1.58
+
+0.53 0.92 0.94
+
+2.17 1.19 1.19
+
+nuScenes 10% 1
+
+0.58 24.58
+
+0.9
+
+4.63 0.67 27.46 0.83 51.12
+
+nuScenes 10% 3
+
+0.9
+
+1.42
+
+1.0
+
+1.25 0.94
+
+1.31
+
+1.0
+
+1.25
+
+nuScenes 10% 5 0.94 1.07
+
+1.0
+
+1.25 1.0
+
+1.31
+
+1.0
+
+1.25
+
+Table 4. The minimum ra-
+
+tio
+
+n0 +n^ n0 +n
+
+for each regression
+
+function without (baseline) and
+
+with using  when estimating
+
+data requirements. The best ra-
+
+tio (i.e. smallest value greater
+
+than 1) for each data set is
+
+bolded. Instances where using
+
+ for a given regression func-
+
+tion increased the ratio from
+
+below to above 1 are under-
+
+lined. Power Law, Logarith-
+
+mic, and Algebraic Root im-
+
+prove for nearly every setting to
+
+obtain ratios above 1. Further-
+
+more, these functions achieve
+
+their best performance when
+
+T = 5.
+
+Segmentation
+
+Figure 4. For T = 5, the ratio of the amount of data collected versus the minimum data needed to meet different target V  when using regression functions with correction factors fitted using CIFAR10.
+
+we want to construct a T -round collection policy for future data sets. We first simulate data collection with  = 0 for CIFAR10 with each regression function to obtain the plots in Figure 3. We then increase  until the entire ratio curve for that function is above 1. In other words, we solve for the smallest  such that the data collection policy will collect just enough data to meet all target values V  for CIFAR10 (for a given fixed T and function). We then use this fitted  as a correction factor for future data sets.
+By combining the correction factor with multiple rounds of data collection, we can consistently collect just above the minimum data requirement. Table 4 compares the effect of using  for each of the regression functions on the minimum ratio over all V  for each data set. We use the CIFAR10 data set to fit  for each setting of T and regression function. Without correction, the Power Law, Logarithmic, and Algebraic Root functions achieve ratios less than 1 for every data set except VOC. Using  , these functions almost always achieve ratios between 1 to 2. Furthermore for each data set, these three regression functions achieve their respective lowest ratios (above 1) when T = 5. Figure 4 further plots simulations using  over all V  for each data set with T = 5. Here, the Power Law, Logarithmic, and Algebraic Root functions achieve ratios between 1.03 to 2.5 for all V  with every data set. Furthermore, there is no consistently best regression function for all data sets. For instance, the Algebraic Root function dominates over VOC, but the
+
+Power Law is particularly effective on nuScenes BEV segmentation when V  is large. However, recall that Arctan naturally over-estimates the data requirement, so this function does not benefit from correction. We conclude that correcting any of the three optimistic estimators, Power Law, Logarithmic, or Algebraic Root, and collecting data over five rounds is enough to approximately minimize the total data collected while still meeting the desired target.
+5.2. Empirical bounds on the data requirement
+If the correction factor is poorly fit or the number of rounds is constrained to be small, we may still underor over-estimate the data requirement. From Table 4, on nuScenes segmentation with T = 1, the Power Law without  leads to estimating 58% of the required data, whereas using  leads to estimating 28 times more data than needed.
+In some applications, modelers may also desire rule-ofthumb estimates of the amount of data that they should immediately collect. We now consider the problem where we have a single T = 1 round remaining with n0 data points; in a single round or the final of multiple rounds, we must meet the data collection target. As a result here, we seek to obtain worst and best-case estimates (i.e. upper and lower bounds) on how much more data is needed. All of the different regression functions yield an ensemble of predictions. Then, the largest prediction is the worst-case estimate and the smallest prediction is the best-case estimate.
+
+Figure 5. (Top row) For T = 1 and varying n0, the frequency of instances where the largest and smallest n^ estimated by the different functions upper and lower bound the true n. (Bottom row) The largest and smallest ratios (n0 + n^)/(n0 + n) estimated by the different
+functions. The dashed black line corresponds to ratio 1.
+
+For each data set, we set T = 1 and sweep over n0 and V  to estimate the data requirement with eight regression functions. Figure 5 (top row) shows for each n0, the frequency of instances of V  in which the most optimistic and pessimistic regression function bound the true data requirement. The bottom row further shows the average value of these upper and lower bounds. For image classification, our estimators bound the true requirement over 80% of the time. This trend also holds for VOC wherein we bound the requirement over 80% of the time for n0  30% of the data set. Since BDD100K and nuScenes BEV segmentation are more challenging data sets, our probability of bounding the data requirement can at times decrease. Because training the 3-D object detector on nuScenes is computationally far more expensive than the other tasks, we omit their plots and only report values for n0 = 10%, 20%, 50%. Here, the range of estimators bound the true data requirement 88%, 91%, and 83% of the time with ratios in the interval [0.56, 31.1], [0.76, 40.8], [0.56, 26.9], respectively. Nonetheless, the results show that if we are given a single round with a large initial data set, we will be able to accurately estimate upper and lower bounds on the data requirement. Moreover, even if we are given multiple rounds to collect data, on the final round, we should be able to obtain upper and lower intervals for the requirement. In practical applications, these bounds can guide modelers to make optimistic or pessimistic choices, for example if the real-world deadline for training and deploying a model is strict.
+6. Discussion
+In this work, we propose an effective solution to the problem of estimating how much data must be collected to meet a target performance. While the problem of predicting a model's performance has received growing research interest as a springboard for various design decisions, we find that estimating performance does not capture the downstream problem of estimating data requirements. Even small errors in predicting performance can yield large
+
+errors in data collection, meaning that the error permissible from a good data estimator is far smaller than intuition suggests. Furthermore, errors are divided into under- or overestimation, where each poses different challenges to data collection. To better analyze data collection strategies, we formulate an iterative data collection simulation. Our experiments draw several high-level insights:
+· Different techniques estimate either far more data or far less data than needed. Using multiple rounds of data collection with techniques that under-estimate can lead to collecting up to 90% of the true amount of data needed.
+· By simulating on previous tasks, we can identify which approaches under-estimate data requirements and learn a correction factor to address this deficiency. Using a correction factor and collecting for up to five rounds allows us to collect at most one to two times the minimum amount of data needed for any desired performance.
+· With only one round of data collection remaining, we can use all of the different regression functions to obtain an interval that often bounds the true data requirement. These bounds can guide modelers to collect data more or less aggressively with respect to practical requirements. Limitations. The data collection problem and the simulation proposed in this work approximate real collection practices. Our simulation relies on a pre-constructed ground truth v(n) rather than sampling points, training a model, and evaluating Vf (D). The latter is computationally too expensive to perform for the range of settings explored in this paper. The quality of our simulation depends on the number of subsets used to construct v(n). More subsets means v(n) better approximates Vf (D) and from inspection (see the supplementary content), all of our v(n) appear to be visually smooth curves. Moreover in our data collection problem, we assume that the model f and sampling strategy p(z) are constant. In practice, designers may update f in between rounds; this may be incorporated in a more complete model of the deep learning workflow. In addition, secondary metrics can be used to optimize p(z). For example, if a classifier is particularly poor for a single class in a
+
+given round, modelers may seek to obtain more samples of that specific class in the next round. We leave these more sophisticated problem settings to future research.
+
+References
+
+[1] Samira Abnar, Mostafa Dehghani, Behnam Neyshabur, and
+
+Hanie Sedghi. Exploring the limits of large scale pre-
+
+training. In International Conference on Learning Repre-
+
+sentations, 2022. 2
+
+[2] David Acuna, Huan Ling, Amlan Kar, and Sanja Fidler. Ef-
+
+ficient interactive annotation of segmentation datasets with
+
+polygon-rnn++. In Proceedings of the IEEE Conference
+
+on Computer Vision and Pattern Recognition (CVPR), June
+
+2018. 1
+
+[3] Yasaman Bahri, Ethan Dyer, Jared Kaplan, Jaehoon Lee, and
+
+Utkarsh Sharma. Explaining neural scaling laws. arXiv
+
+preprint arXiv:2102.06701, 2021. 2, 4
+
+[4] Devansh Bisla, Apoorva Nandini Saridena, and Anna Choro-
+
+manska. A theoretical-empirical approach to estimating sam-
+
+ple complexity of dnns. In Proceedings of the IEEE/CVF
+
+Conference on Computer Vision and Pattern Recognition,
+
+pages 3270­3280, 2021. 1, 2
+
+[5] Holger Caesar, Varun Bankiti, Alex H Lang, Sourabh Vora,
+
+Venice Erin Liong, Qiang Xu, Anush Krishnan, Yu Pan, Gi-
+
+ancarlo Baldan, and Oscar Beijbom. nuscenes: A multi-
+
+modal dataset for autonomous driving. In Proceedings of
+
+the IEEE/CVF Conference on Computer Vision and Pattern
+
+Recognition, pages 11621­11631, 2020. 4
+
+[6] Liang-Chieh Chen, George Papandreou, Florian Schroff, and
+
+Hartwig Adam. Rethinking atrous convolution for seman-
+
+tic image segmentation. arXiv preprint arXiv:1706.05587,
+
+2017. 11
+
+[7] David A Cohn, Zoubin Ghahramani, and Michael I Jordan.
+
+Active learning with statistical models. Journal of Artificial
+
+Intelligence Research, 4:129­145, 1996. 2
+
+[8] Cody Coleman, Christopher Yeh, Stephen Mussmann, Baha-
+
+ran Mirzasoleiman, Peter Bailis, Percy Liang, Jure Leskovec,
+
+and Matei Zaharia. Selection via proxy: Efficient data se-
+
+lection for deep learning. In International Conference on
+
+Learning Representations, 2020. 11
+
+[9] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li,
+
+and Li Fei-Fei. Imagenet: A large-scale hierarchical image
+
+database. In 2009 IEEE Conference on Computer Vision and
+
+Pattern Recognition, pages 248­255. Ieee, 2009. 1, 2, 4
+
+[10] Ismail Elezi, Zhiding Yu, Anima Anandkumar, Laura Leal-
+
+Taixe, and Jose M Alvarez. Not all labels are equal: Ratio-
+
+nalizing the labeling costs for training object detection. Pro-
+
+ceedings of the IEEE/CVF Conference on Computer Vision
+
+and Pattern Recognition, 2022. 11
+
+[11] Mark Everingham, Luc Van Gool, Christopher KI
+
+Williams, John Winn, and Andrew Zisserman.
+
+The PASCAL Visual Object Classes Challenge
+
+2007 (VOC2007) Results.
+
+http://www.pascal-
+
+network.org/challenges/VOC/voc2007/workshop/index.html.
+
+4
+
+[12] Mark Everingham, Luc Van Gool, Christopher KI
+
+Williams, John Winn, and Andrew Zisserman.
+
+The PASCAL Visual Object Classes Challenge
+
+2012 (VOC2012) Results.
+
+http://www.pascal-
+
+network.org/challenges/VOC/voc2012/workshop/index.html.
+
+4
+
+[13] Rosa L Figueroa, Qing Zeng-Treitler, Sasikiran Kandula,
+
+and Long H Ngo. Predicting sample size required for classifi-
+
+cation performance. BMC Medical Informatics and Decision
+
+Making, 12(1):1­10, 2012. 2
+
+[14] Lewis J Frey and Douglas H Fisher. Modeling decision tree
+
+performance with the power law. In Seventh International
+
+Workshop on Artificial Intelligence and Statistics. PMLR,
+
+1999. 1, 2, 3
+
+[15] Baohua Gu, Feifang Hu, and Huan Liu. Modelling classifica-
+
+tion performance for large data sets. In International Confer-
+
+ence on Web-Age Information Management, pages 317­328.
+
+Springer, 2001. 1
+
+[16] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+
+Deep residual learning for image recognition. In Proceed-
+
+ings of the IEEE Conference on Computer Vision and Pattern
+
+Recognition, pages 770­778, 2016. 4, 11
+
+[17] Joel Hestness, Sharan Narang, Newsha Ardalani, Gregory
+
+Diamos, Heewoo Jun, Hassan Kianinejad, Md Patwary,
+
+Mostofa Ali, Yang Yang, and Yanqi Zhou. Deep learn-
+
+ing scaling is predictable, empirically. arXiv preprint
+
+arXiv:1712.00409, 2017. 2, 4
+
+[18] Derek Hoiem, Tanmay Gupta, Zhizhong Li, and Michal
+
+Shlapentokh-Rothman. Learning curves for analysis of deep
+
+networks. In International Conference on Machine Learn-
+
+ing, pages 4287­4296. PMLR, 2021. 2
+
+[19] Marcus Hutter. Learning curve theory. arXiv preprint
+
+arXiv:2102.04074, 2021. 4
+
+[20] Yiding Jiang, Pierre Foret, Scott Yak, Daniel M Roy, Hos-
+
+sein Mobahi, Gintare Karolina Dziugaite, Samy Bengio,
+
+Suriya Gunasekar, Isabelle Guyon, and Behnam Neyshabur.
+
+Neurips 2020 competition: Predicting generalization in deep
+
+learning. arXiv preprint arXiv:2012.07976, 2020. 2
+
+[21] Yiding Jiang, Parth Natekar, Manik Sharma, Sumukh K
+
+Aithal, Dhruva Kashyap, Natarajan Subramanyam, Carlos
+
+Lassance, Daniel M Roy, Gintare Karolina Dziugaite, Suriya
+
+Gunasekar, et al. Methods and analysis of the first com-
+
+petition in predicting generalization of deep learning. In
+
+NeurIPS 2020 Competition and Demonstration Track, pages
+
+170­190. PMLR, 2021. 2
+
+[22] S Jones, S Carley, and M Harrison. An introduction to power
+
+and sample size estimation. Emergency Medicine Journal:
+
+EMJ, 20(5):453, 2003. 2
+
+[23] Jared Kaplan, Sam McCandlish, Tom Henighan, Tom B
+
+Brown, Benjamin Chess, Rewon Child, Scott Gray, Alec
+
+Radford, Jeffrey Wu, and Dario Amodei. Scaling laws for
+
+neural language models. arXiv preprint arXiv:2001.08361,
+
+2020. 2
+
+[24] Alex Krizhevsky. Learning multiple layers of features from
+
+tiny images. 2009. 4
+
+[25] Wei Liu, Dragomir Anguelov, Dumitru Erhan, Christian
+
+Szegedy, Scott Reed, Cheng-Yang Fu, and Alexander C
+
+Berg. Ssd: Single shot multibox detector. In Proceedings
+
+of the European Conference on Computer Vision, pages 21­
+
+37. Springer, 2016. 4, 11
+
+[26] Rafid Mahmood, Sanja Fidler, and Marc T. Law. Low-budget active learning via wasserstein distance: An integer programming approach. In International Conference on Learning Representations, 2022. 2
+[27] Jorge J More´. The levenberg-marquardt algorithm: implementation and theory. In Numerical analysis, pages 105­ 116. Springer, 1978. 11
+[28] Jonah Philion and Sanja Fidler. Lift, splat, shoot: Encoding images from arbitrary camera rigs by implicitly unprojecting to 3d. In Proceedings of the European Conference on Computer Vision, 2020. 4, 11
+[29] Fait Poms, Vishnu Sarukkai, Ravi Teja Mullapudi, Nimit S Sohoni, William R Mark, Deva Ramanan, and Kayvon Fatahalian. Low-shot validation: Active importance sampling for estimating classifier performance on rare categories. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 10705­10714, 2021. 2
+[30] Jonathan S Rosenfeld, Amir Rosenfeld, Yonatan Belinkov, and Nir Shavit. A constructive prediction of the generalization error across scales. In International Conference on Learning Representations, 2020. 2, 3, 4
+[31] Ozan Sener and Silvio Savarese. Active learning for convolutional neural networks: A core-set approach. In International Conference on Learning Representations, 2018. 2, 15
+[32] Burr Settles. Active learning literature survey. 2009. 2, 15 [33] Karen Simonyan and Andrew Zisserman. Very deep convo-
+lutional networks for large-scale image recognition. International Conference on Learning Representations, 2015. 11 [34] Samarth Sinha, Sayna Ebrahimi, and Trevor Darrell. Variational adversarial active learning. In Proceedings of the IEEE/CVF International Conference on Computer Vision, pages 5972­5981, 2019. 2 [35] Chen Sun, Abhinav Shrivastava, Saurabh Singh, and Abhinav Gupta. Revisiting unreasonable effectiveness of data in deep learning era. In Proceedings of the IEEE International Conference on Computer Vision, pages 843­852, 2017. 2 [36] Tom Viering and Marco Loog. The shape of learning curves: a review. arXiv preprint arXiv:2103.10948, 2021. 2, 3 [37] Pauli Virtanen, Ralf Gommers, Travis E. Oliphant, Matt Haberland, Tyler Reddy, David Cournapeau, Evgeni Burovski, Pearu Peterson, Warren Weckesser, Jonathan Bright, Ste´fan J. van der Walt, Matthew Brett, Joshua Wilson, K. Jarrod Millman, Nikolay Mayorov, Andrew R. J. Nelson, Eric Jones, Robert Kern, Eric Larson, C J Carey, Ilhan Polat, Yu Feng, Eric W. Moore, Jake VanderPlas, Denis Laxalde, Josef Perktold, Robert Cimrman, Ian Henriksen, E. A. Quintero, Charles R. Harris, Anne M. Archibald, Anto^nio H. Ribeiro, Fabian Pedregosa, Paul van Mulbregt, and SciPy 1.0 Contributors. SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python. Nature Methods, 17:261­272, 2020. 11 [38] Tai Wang, Xinge Zhu, Jiangmiao Pang, and Dahua Lin. Fcos3d: Fully convolutional one-stage monocular 3d object detection. In Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) Workshops, pages 913­922, October 2021. 4, 11 [39] Donggeun Yoo and In So Kweon. Learning loss for active learning. In Proceedings of the IEEE/CVF Conference on
+
+Computer Vision and Pattern Recognition, pages 93­102, 2019. 2
+[40] Fisher Yu, Haofeng Chen, Xin Wang, Wenqi Xian, Yingying Chen, Fangchen Liu, Vashisht Madhavan, and Trevor Darrell. Bdd100k: A diverse driving dataset for heterogeneous multitask learning. In Proceedings of the IEEE/CVF conference on Computer Vision and Pattern Recognition, pages 2636­2645, 2020. 4, 11
+[41] Sergey Zagoruyko and Nikos Komodakis. Wide residual networks. British Machine Vision Conference (BMVC), 2016. 13
+[42] Xiaohua Zhai, Alexander Kolesnikov, Neil Houlsby, and Lucas Beyer. Scaling vision transformers. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, 2022. 2
+
+Supplementary Content
+A. Experiment setup
+We first summarize the regression problem before detailing the data collection and training process for each data set and task. All models were implemented using PyTorch and trained on machines with up to eight NVIDIA V100 GPU cards.
+We fit each regression function by minimizing a least squares problem using the Levenberg-Marquardt algorithm as implemented by Scipy [27, 37]. The parameters for each function are initialized to either 1 or 0 depending on if they are product or bias terms. To further help fit the data, we use weighted least squares where each subsequent point is weighted twice as much as the previous point. This ensures that our regression model is tuned to better fit the curve for larger n. Image classification tasks. For all experiments with CIFAR10 and CIFAR100, we use a ResNet18 [16] following the same procedure as in [8]. For ImageNet, we use a ResNet34 [16] using the procedure in [8]. All models are trained with cross entropy loss using SGD with momentum. We evaluate all models on Top-1 Accuracy.
+For all experiments, we first create 10 subsets S0  S1  S2  · · ·  S9 = D0 containing 2%, 4%, 6%, . . . 20% of the training data set, respectively. For example on CIFAR10, S0 contains 1000 images, S1 contains 2000 images, and so on. This data is used to build our initial regression models. Thus, when we use n0 = 10% of the training data, our initial regression data contains five points evaluating the score from training with 1000, 2000, . . . , 5000 images. For evaluation, we sample D1  D2  D3  · · ·  D8 containing 30%, 40%, 50%, . . . , 100% of the training data set, respectively. In regression, we evaluate our estimators on predicting Vf (Di) for each of these data sets. VOC. We use the Single-Shot Detector 300 (SSD300) [25] based on a VGG16 backbone [33], following the same procedure as in [10]. All models are trained using SGD with momentum. We evaluate all models on mean AP.
+For all experiments, we create 8 regression subsets S0  S1  S2  · · ·  S7 = D0 containing approximately 2.5%, 5%, 7.5%, . . . 20% of the training data set, meaning n0 = 10% of the data corresponds to an initial regression data set of four points. For evaluation, we sample D1  D2  D3  · · ·  D8 containing approximately 30%, 40%, 50%, . . . , 100% of the full training data, respectively. nuSenes (Detection). We use the FCOS3D network architecture [38], which received first place in the NeurIPS 2020 nuScenes 3-D detection challenge. We follow the same procedure from the original paper for training using SGD. We evaluate on mean AP.
+Because training this 3-D detector is computationally expensive, we only use a small number of points for these experiments. We first create initial subsets S0  S1  S2  S3 containing 5%, 10%, 15%, 20% of the training data set, respectively. For evaluation, we sample D1  D2  D3  D4 containing 25%, 50%, 75%, 100% of the training data set, respectively. BDD100K. We use Deeplabv3 [6] with ResNet50 backbone. We use random initialization for the backbone. We use the original dataset split from [40] with 7k train and 1k validation set. The evaluation metrics is mean Intersection over Union (IoU).
+For all experiments, we first create 10 regression subsets S0  S1  S2  · · ·  S9 = D0 containing 2%, 4%, 6%, . . . , 20% of the training data set, respectively. For evaluation, we sample D1  D2  D3  · · ·  D8 containing 30%, 40%, 50%, . . . , 100% of the training data set, respectively. nuScenes (Segmentation). We use the "Lift Splat" architecture [28], which is used for BEV segmentation from driving scenes, following the steps from the original paper to train this model. We evaluate on mean IoU. Our data collection procedure follows the same steps and percentages of the data set as used for BDD100K.
+B. Further regression analysis
+In this section, we provide regression plots visualizing each of the functions from Table 1 as well as error measurements using the log of the prediction ratio, which is an alternative metric to RMSE. This analysis supports the three challenges observed in Section 3.2 and reinforces the necessity of our simulation analysis. Visualizing the regression models. Figure 6 plots the regression functions versus the ground truth for each of the regression experiments in Section 4.2. These results support the RMSE errors given in Table 6. That is, when n0 = 50% of the full data set, all of the functions are close to the ground truth curve, but when n0 = 10%, the regression functions can diverge significantly. Moreover, the Arctan function is often the closest function to the ground truth, as reflected by RMSE.
+We observe that the regression functions are almost always either optimistic (i.e. their curve is above the ground truth) or pessimistic (i.e. their curve is below) over the entire range of the data set size. In particular, the Arctan function is one of the two most pessimistic estimators for 19/21 plots, Algebraic Root for 13/21 plots, Logarithm for 7/21 plots, and Power Law
+
+Figure 6. Regression plots showing mean±standard deviation of multiple runs extrapolating performance in each task when trained on small subsets of the data. The solid blue line in each plot represents the ground truth performance.
+
+Classification
+
+Data set
+
+n0 r Power Law
+
+Arctan
+
+Logarithmic Algebraic Root
+
+CIFAR10 CIFAR10 CIFAR10
+
+10% 5 20% 10 50% 17
+
+0.19 ± 0.1 0.1 ± 0.0 0.06 ± 0.0
+
+0.06 ± 0.1 0.01 ± 0.0 -0.01 ± 0.0
+
+0.17 ± 0.1 0.08 ± 0.0 0.04 ± 0.0
+
+0.17 ± 0.1 0.04 ± 0.0 0.01 ± 0.0
+
+CIFAR100 10% 5 CIFAR100 20% 10 CIFAR100 50% 17
+
+0.1 ± 0.2 0.21 ± 0.0 0.07 ± 0.0
+
+-0.12 ± 0.1 0.05 ± 0.0 -0.01 ± 0.0
+
+0.01 ± 0.2 0.15 ± 0.0 0.07 ± 0.0
+
+0.06 ± 0.1 0.27 ± 0.0 0.05 ± 0.0
+
+ImageNet ImageNet ImageNet
+
+10% 4 20% 8 50% 15
+
+0.18 ± 0.1 0.1 ± 0.0 0.07 ± 0.0
+
+-0.03 ± 0.0 -0.03 ± 0.0 -0.01 ± 0.0
+
+0.14 ± 0.0 0.09 ± 0.0 0.05 ± 0.0
+
+0.38 ± 0.0 0.07 ± 0.0 0.02 ± 0.0
+
+VOC VOC VOC
+
+20% 4 0.02 ± 0.0 30% 6 0.04 ± 0.0 50% 10 0.01 ± 0.0
+
+-0.0 ± 0.0 0.02 ± 0.0 0.01 ± 0.0
+
+0.01 ± 0.0 0.03 ± 0.0 0.01 ± 0.0
+
+0.01 ± 0.0 0.03 ± 0.0 0.01 ± 0.0
+
+nuScenes nuScenes nuScenes
+
+10% 2 20% 4 50% 6
+
+0.15 ± 0.0 0.06 ± 0.1 0.02 ± 0.0
+
+0.3 ± 0.0 -0.03 ± 0.1 -0.02 ± 0.0
+
+0.02 ± 0.0 0.04 ± 0.1 0.01 ± 0.0
+
+0.11 ± 0.0 0.03 ± 0.1 0.01 ± 0.0
+
+BDD100K 10% 5 BDD100K 20% 10 BDD100K 50% 15
+
+0.2 ± 0.1 0.08 ± 0.0 0.05 ± 0.0
+
+0.17 ± 0.2 0.01 ± 0.0 -0.03 ± 0.0
+
+0.19 ± 0.2 0.05 ± 0.0 0.03 ± 0.0
+
+0.14 ± 0.1 0.08 ± 0.0 0.04 ± 0.0
+
+nuScenes nuScenes nuScenes
+
+10% 5 0.09 ± 0.0 -0.04 ± 0.0 0.07 ± 0.0 20% 10 0.01 ± 0.0 -0.1 ± 0.0 -0.02 ± 0.0 50% 15 0.01 ± 0.0 -0.08 ± 0.0 -0.01 ± 0.0
+
+0.03 ± 0.1 -0.07 ± 0.0 0.03 ± 0.1
+
+Table 5. Mean±standard deviation of multiple runs evaluating the mean log relative ratio for extrapolating performance in each task when trained on small subsets of the data. We report n0 in terms of the percentage of the true data set. The lowest error (i.e. smallest positive value) for each setting is bolded. Given 50% of the data, there is always at least one regression function achieving a log ratio less than 0.03, whereas with n0 = 10% of the data, we may achieve ratios as low as -0.12 or as high as 0.2 (i.e. an order of magnitude higher error compared to performance with n0 = 50%).
+
+Detection
+
+Segmentation
+
+for 0/21. This leads us to conclude that Arctan is generally a pessimistic estimator whereas Logarithmic and Power Law are generally optimistic. Algebraic Root lies in the middle. We hypothesize that this is because when 3 is held constant, both Arctan and Algebraic Root converge to a finite value as n  + (i.e. they flatten), but Power Law and Logarithm are unbounded.
+Finally, we remark on the shape of the ground truth curves. Recall from Section 3.2 that we observe the ground truth score function v(n) to be piecewise linear, concave, and monotonically increasing. Figure 6 shows that this observation generally holds for CIFAR10, CIFAR100, ImageNet, and the two nuScenes tasks. However for VOC and BDD100K, we observe that the curves are not always concave and monotonically increasing. Nonetheless, our observations about using regression to evaluate data requirement estimation persists. Moreover, our proposed techniques for estimating data requirements remain effective, emphasizing that the initial observation of v(n) from Section 3.2 is not a theoretical requirement but a motivating
+
+Architecture
+
+n0 r
+
+ResNet18 (baseline) 10% 5 ResNet18 (baseline) 20% 10 ResNet18 (baseline) 50% 17
+
+Power Law
+34.38 ± 35.1 29.52 ± 3.9 5.49 ± 0.2
+
+Arctan
+13.3 ± 5.3 4.71 ± 2.0 0.69 ± 0.2
+
+Logarithmic
+17.25 ± 21.8 19.87 ± 2.5 5.42 ± 0.2
+
+Algebraic Root
+26.29 ± 16.8 40.33 ± 1.5 3.65 ± 0.3
+
+Table 6. For different architectures with CIFAR100, mean±standard deviation of multiple runs evaluating the RMSE
+
+ResNet50 ResNet50 ResNet50
+
+10% 5 275.98 ± 521.1 20% 10 31.04 ± 13.1 50% 17 6.57 ± 1.0
+
+44.94 ± 41.7 4.14 ± 4.4 1.07 ± 0.8
+
+49.43 ± 72.1 21.48 ± 8.3 6.71 ± 1.4
+
+24.01 ± 7.1 37.73 ± 3.4
+4.8 ± 1.7
+
+on extrapolating performance when trained on small subsets of the
+
+ResNet101 ResNet101 ResNet101
+
+10% 5 20% 10 50% 17
+
+88.47 ± 115.3 47.34 ± 12.1
+8.07 ± 0.3
+
+25.53 ± 17.1 10.23 ± 4.7 0.78 ± 0.3
+
+46.73 ± 60.9 32.35 ± 8.5 7.95 ± 0.3
+
+26.96 ± 4.5 40.89 ± 1.5 5.57 ± 0.5
+
+data. The lowest error for each architecture is bolded. These results
+
+WideResNet-16-4 WideResNet-16-4 WideResNet-16-4
+
+10% 5 20% 10 50% 17
+
+34.38 ± 35.1 13.78 ± 1.8 5.35 ± 0.3
+
+13.3 ± 5.3 0.99 ± 0.1 1.61 ± 0.4
+
+17.25 ± 21.8 12.86 ± 0.6 4.24 ± 0.3
+
+26.29 ± 16.8 12.55 ± 1.8 1.55 ± 0.5
+
+reinforce the initial results for CIFAR100 in Table 3, as the Arctan function
+
+WideResNet-16-8 10% 5
+
+57.7 ± 19.3
+
+5.0 ± 3.8 33.34 ± 10.2 65.31 ± 2.2 consistently dominates in
+
+WideResNet-16-8 WideResNet-16-8
+
+20% 10 50% 17
+
+14.01 ± 1.8 5.57 ± 0.2
+
+1.04 ± 0.3 1.87 ± 0.1
+
+13.62 ± 1.2 4.32 ± 0.2
+
+12.74 ± 1.7 1.4 ± 0.2
+
+nearly every setting.
+
+Figure 7. The ratio of the amount of data collected versus the minimum data needed (y-axis) for different target V  (x-axis) in simulations initializing with n0 = 10% of the data set. For each data set, we show simulations for T = 1, 3, 5 maximum rounds. The dashed black line corresponds to collecting the least amount of data needed to reach V .
+trend. Alternative metrics to RMSE. When evaluating regression functions on their ability to estimate data requirements, we must be able to differentiate between estimators that over- versus under-estimate model performance (and therefore under- or overestimate data requirements). Since RMSE is not a signed metric, it does not provide this information, and we consequently explore alternative signed metrics. Table 5 evaluates each regression function on the log of the relative ratio of estimation error log v^(n; ) - log v(n) when extrapolating to larger data sets. The log relative ratio is a signed metric where negative values means that we are pessimistic (i.e. v^(n; ) < v(n) on average) and positive values means that we are optimistic. Ideally, we want the smallest positive log relative ratio.
+Unlike Table 3, the Arctan function does not consistently dominate on any individual task when evaluating on the log relative ratio. However, Table 5 also does not reveal any clear best performing regression function. Specifically, Power Law, Arctan, Logarithmic, and Algebraic Root each rank the best 4, 7, 7, and 8 times, respectively. This result supports our belief that evaluating regression error alone does not permit us to identify a good data collection policy.
+C. Ablations on different architectures
+In this section, we further explore CIFAR100 and repeat the previous experiments but with different architectures, to show that our results are consistent even with larger models. Specifically, we observe that with small data sets, estimating data requirements is more difficult and that moreover, regression error does not give a complete picture in terms of determining a good data collection policy. Comparing against the baseline ResNet18, we consider ResNet50 and ResNet101 as well as WideResNet-16-4 and WideResNet-16-8 [41]. All models are trained in the exact same setup.
+Table 6 reports RMSE from fitting each regression function with n0 = 10%, 20%, 50% of the data. Similar to the baseline, the Arctan function is almost always the best performing regression function. Figure 7 plots the ratios of the amount of data collected versus the minimum data required for each of the alternative architectures. ResNet50 and ResNet101 follows the
+
+Figure 8. Experiments where the score function Vf (D) corresponds to the AP of each individual class from the nuScenes data set. All plots show mean±standard deviation. (Left columns) Regression plots extrapolating performance of each individual class. (Right columns) The ratio of the amount of data collected versus the minimum data needed for different target V  in simulations initializing with n0 = 10% of the data set. We fix T = 5 and apply the correction factor fit using CIFAR10. The dashed black line corresponds to collecting the least amount of data needed to reach V .
+same trends as the baseline ResNet18 (see Figure 3) in that Arctan significantly over-estimates the data requirement, even though it presents the lowest RMSE among the regression functions. The WideResNets show a slightly different picture. Here, although Arctan does not always over-estimate the requirement for all V , it is nonetheless, the most pessimistic estimator and recommends collecting more data than the other functions.
+D. The data collection problem for class specific metrics
+In many applications, we may be motivated to collect data in order to improve on a specific class. In this section, we explore scenarios where the score function Vf (D) is a class-specific metric. We consider 3-D object detection over the nuScenes data set. For every class, we perform regression and simulation over the entire data set after setting Vf (D) to be the AP for that specific class. That is, we use the same setup and data collection as described in Appendix A but now fit our regression models to the class-specific metric.
+Figure 8 (left) plots regression analysis for each class when n0 = 10% of the data. We first observe that the ground truth v(n) are not always concave, monotonically increasing functions. In particular, the bicycle, construction vehicle, and truck classes contain situations where performance slightly decreases after increasing data. Moreover, these three classes are also the classes with the lowest AP even after training with the full data set. Finally, all of the regression functions, including the Arctan function, tend to be optimistic for most of the classes. In particular, only the traffic cone class features multiple pessimistic regression functions. These results suggest that in general, it can be more difficult to fit regression curves for individual class-specific metrics as opposed to fitting for mean AP.
+Figure 8 (right) plots simulation results after employing the  fit from CIFAR10 data for T = 5 rounds. Here, we demonstrate the effectiveness of our general recipe (i.e. to use T = 5 rounds and incorporate a correction factor  ). That is, for most of the classes, the Power Law, Logarithmic, and Algebraic Root functions consistently achieve ratios between 1 to 3. These methods achieve their poorest performance for the bicycle and construction vehicle classes, as these classes are naturally the most noisy and thus more challenging for estimating the data requirement.
+It is worth noting that Arctan continues to over-estimate the data requirement by large margins for six out of nine classes, even though the regression plots themselves show that the Arctan function is optimistic. This behavior is due to the fact that we have T = 5 rounds to meet the data requirement. For instance in the first round when our initial data set contains 2, 813 images, we will significantly under-estimate the data requirement. After the first round however, we will have added a new data point into our regression set and re-fit the Arctan function. It is likely that after this first round, the next Arctan function will be pessimistic. As a result in the second round, we would over-estimate the data requirement, leading to the corresponding curve. Since the simulations show Arctan to over-estimate, we conclude the pessimistic nature of the Arctan
+
+Figure 9. Experiments evaluating three different active learning strategies on CIFAR100 with n0 = 20% of the data set and T = 5 rounds. (Left) regression plots showing mean±standard deviation extrapolating performance. (Right) The ratio of data collected versus the minimum data needed (y-axis) for different target V  (x-axis) in simulations.
+function is generally consistent across data sets and tasks, likely being a factors of the function and the model fitting process.
+E. The data collection problem with active learning
+Although all of our experiments so far have considered collecting data by randomly sampling data points from a fixed training data set, we can also consider structured techniques such as active learning, where data is collected and labeled using sample efficient strategies. In conventional active learning, we would collect a pre-determined budget of B data points each round over T rounds to attain the best possible final model. Instead, if we are given a performance target V , we can use our data collection framework to dynamically choose a budget Bt to collect in each round for up to T rounds.
+Figure 9 plots experiments of data collection for CIFAR100 when using three active learning strategies, k-centers [31], Least Confidence [32], and Max Entropy [32], rather than random sampling. Figure 9 (left) demonstrate regression analysis for each strategy when initializing with n0 = 20% of the data set. We use a larger initial set than in the previous experiments because the ground truth learning curves are not always concave monotonically increasing, especially in the lower data regimes. By giving a sufficiently large initial data set, the regime of extrapolation is stable and does not contain erratic trends.
+Figure 9 (right) show our simulation analysis for T = 5 rounds of data collection using each active learning strategy. We set  = 0 since the previous correction factor values were designed from random sampling and with an initial n0 = 10% of the data set. Nonetheless, this simulation approximates the scenario where we would dynamically choose the budget before each active learning round for up to T rounds. These plots validate that our main empirical findings all hold regardless of the specific techniques used in collecting data. For each active learning strategy, all four of the regression functions achieve ratios between 0.8 and 1.1. Furthermore, Arctan typically over-estimates the data requirement whereas the others are more likely to under-estimate the requirement.
+
+

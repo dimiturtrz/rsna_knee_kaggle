@@ -5,9 +5,19 @@
 # key I never opened, under a rubric fixed before the first verdict:
 #     unanimous cells   5/338 = 1.48%  (u95 2.37%)
 #     discordant cells 10/64  = 15.6%  (u95 20.3%)
-# Ten and a half times. The selector is four-way extractor disagreement over blend_four,
-# blend_hybrid_fx_v4, confident and report_labels_v3 binarised >=0.5 — already computed, free, and
-# model-free. It flags 7369 of 52872 cells (13.94%).
+# Ten and a half times.
+#
+# RE-GROUNDED 2026-09-11T13:56Z, after D334. Those two rates were measured on the RESEARCHER'S voter set
+# (ours_v2 + flight + lixin + steven v4_blend + steven full). THIS ARM'S SELECTOR IS A DIFFERENT ONE:
+# four-way disagreement over blend_four, blend_hybrid_fx_v4, confident and report_labels_v3 binarised
+# >=0.5 — already computed, free, and model-free, flagging 7369 of 52872 cells (13.94%). The 15.6% does
+# NOT transfer to it: different voters make different cells discordant, and these four are our own
+# pipeline's downstream products, so their agreement is partly circular (M341 was retracted in M342 for
+# exactly this mixing). The arm is still a valid experiment — a defined 13.94% of cells masked against a
+# matched control — but its selector's true error rate is UNMEASURED. What the audit does license is the
+# DIRECTION: under the researcher's four-way recount the discordant stratum concentrates to 9/12 = 75%
+# error (~50x baseline) while lone dissents err at 1.9%, so a disagreement selector's purity rises with
+# the number of dissenting tables. Ours requires only one dissent, so it sits at the dilute end.
 #
 # The published shape says repair the flagged minority and LEAVE THE REST ALONE: FCF (Jiang, AAAI-24)
 # Thm 6 — low-noise-probability cells "should be retained without any change"; Thm 5 — correction beats
@@ -18,7 +28,13 @@
 # NOT A REPEAT of confident_span. Measured, before arming: the discordant cells and confident.csv's UNK
 # cells overlap on 188 cells — 2.55% of discordant, 1.3% of UNK. Disjoint populations. confident_span
 # clears low-CONFIDENCE cells (27.3%, extractor-self-reported); this clears DISAGREED cells (13.9%,
-# cross-extractor, adjudicated at 15.6% true error). One is a threshold, the other is a measurement.
+# cross-extractor). One is a threshold, the other is a disagreement count.
+#
+# AND confident_span HAS NOW LANDED: 0.8449 against control 0.8565, i.e. -0.0116 — its third
+# pre-registered band. Masking the 27.3% low-confidence cells COSTS score; they carry signal. That is
+# FCF Thm 6 measured on our corpus rather than cited. It raises the prior that this arm also lands
+# below control, and if it does, the SUBTRACTION route on the label axis is closed and only CORRECT
+# (re-extraction) remains.
 #
 # control  band_span = 0.8565, same recipe, same fold, same span, same density, --labels report_labels_v2.
 #          confident_span (running) is the second control: same idea, different selector.
