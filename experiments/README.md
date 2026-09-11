@@ -14585,8 +14585,9 @@ mechanism.**
 report-derived table and weak to a radiologist. Three further readings already on disk point the same
 way: it is the column the 336 -> 392 px step hurt WORST (**-0.0134**, `README:7900`, when the mean moved
 -0.0002); `relabel_hold`'s gold delta on it is +0.0078, seventh of twelve, so the label axis does not
-move it either; and the live `calib_hold_clean_distill_s2026` reads **0.8239** on it at epoch 8, its
-second-lowest column. Four independent instruments, one column.
+move it either; and the live `calib_hold_clean_distill_s2026` puts it second-lowest of its twelve
+columns at epoch 8 — a PER-COLUMN **0.8239**, against that run's 0.8641 holdout mean. Four independent
+instruments, one column.
 
 **What this does NOT license.** n+ on gold is 9-35 cells per column over 58 studies; no per-column gold
 delta here carries an interval and none is a claim of size. The ORDER is the object, not the values, and

@@ -16,6 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "inbox"))
 from agents import (  # pyrefly: ignore[missing-import]  (the sys.path line above is what resolves it)
     ACTIVE,
     FIELDS,
+    HEARTBEAT_NAME,
+    HEARTBEAT_STALE_SECONDS,
     STALE_SECONDS,
     Agent,
     Registry,
@@ -154,6 +156,30 @@ def test_stale(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     assert not Status.stale("main", fresh)
     assert Status.stale("main", fresh + STALE_SECONDS + 1)
     assert Status.stale("researcher", fresh), "a box with no status is infinitely old, never fresh"
+
+
+def test_heartbeat(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The pulse file is per-box and named as the listener names it — a different name reads as death."""
+    monkeypatch.setattr("agents.SCRIPT_DIR", str(tmp_path))
+
+    assert Status.heartbeat("main") == str(tmp_path / "main" / HEARTBEAT_NAME)
+
+
+def test_alive(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """The three classes: polling now, stopped polling, never armed. Only the first is alive.
+
+    The middle one is the failure this replaced — a listener that armed, wrote `.status`, and died.
+    Its `.status` is seconds old and says `armed`; its heartbeat is gone, because the listener
+    removes it on exit, and that absence is the evidence.
+    """
+    monkeypatch.setattr("agents.SCRIPT_DIR", str(tmp_path))
+    (tmp_path / "main").mkdir()
+    (tmp_path / "main" / HEARTBEAT_NAME).write_text("pulse")
+    beat = os.path.getmtime(Status.heartbeat("main"))
+
+    assert Status.alive("main", beat)
+    assert not Status.alive("main", beat + HEARTBEAT_STALE_SECONDS + 1), "a pulse older than the bound is not one"
+    assert not Status.alive("researcher", beat), "no heartbeat file at all is positive proof of death"
 
 
 def test_unread(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):

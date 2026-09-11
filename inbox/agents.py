@@ -16,6 +16,13 @@ delivering nothing. A flag a human typed can never be the only evidence a lane i
 JOINS the two and flags both lies: `active=1` with no live listener reads STALE, and `active=0` with
 letters sitting in the box reads OFF with the count, because off must mean silenced and never lost.
 
+LIVENESS IS THE HEARTBEAT, NOT THE ARM RECORD. `.status` is written when a listener ARMS and when it
+DELIVERS; a listener that died in between leaves it behind saying `armed`, and reading its mtime is
+how this file passed a lane whose listener had been dead for 55 minutes with two letters undelivered
+(2026-09-11). The listener already maintains the right signal and deletes it on exit: it touches
+`.listener_heartbeat` every poll, so a missing file is proof of death and a 30-second mtime bound is
+a pulse. `Status.alive()` reads that; `Status.stale()` is a day-scale backstop for the wording only.
+
 WHAT THE SWITCH DOES NOT DO. Switching a box off silences its MAIL. It does not stop that side's
 wakeup loop, which is the owner's `/loop` control, and it does not let one side arm or disarm
 another's listener — a box is still armed by its owner, one listener per box.
@@ -30,10 +37,12 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BOXES = ("main", "researcher", "mastermind")
 REGISTRY = os.path.join(SCRIPT_DIR, "agents.csv")
 STATUS_NAME = ".status"
+HEARTBEAT_NAME = ".listener_heartbeat"
 
 FIELDS = ("box", "role", "active", "note", "updated_utc")
 ACTIVE, INACTIVE = "1", "0"
 STALE_SECONDS = 24 * 60 * 60
+HEARTBEAT_STALE_SECONDS = 30
 LETTERS = (".txt", ".md")
 NOT_LETTERS = ("README.md",)
 
@@ -141,10 +150,31 @@ class Status:
 
     @classmethod
     def stale(cls, box: str, now: float) -> bool:
-        """Whether that box's arm is too old to be believed — a listener dies with its session, and
-        the file it left behind says nothing about that. The MTIME is the evidence, not the stamp
-        inside: a listener touches its status as it polls, so a fresh file means a live poller."""
+        """Whether that box's arm is too old to be believed AT ALL — a day-scale backstop, never
+        liveness. `.status` is written by `_record()` on arm and on delivery, NOT on every poll, so
+        its mtime says when the listener last had something to say, not whether it is still there.
+        This method used to be the only liveness test and it claimed otherwise in its own docstring;
+        that is how a listener dead for 55 minutes read green. `alive()` is the liveness test."""
         return _age(cls.path(box), now) > STALE_SECONDS
+
+    @classmethod
+    def heartbeat(cls, box: str) -> str:
+        """Where that box's listener touches on every poll — the only file whose mtime tracks a pulse."""
+        return os.path.join(SCRIPT_DIR, box, HEARTBEAT_NAME)
+
+    @classmethod
+    def alive(cls, box: str, now: float) -> bool:
+        """Whether a listener is polling this box RIGHT NOW, on the evidence the listener maintains.
+
+        `listen_for_mail.py` touches `.listener_heartbeat` every `POLL_SECONDS` (2) and DELETES it on
+        exit, so the file's absence is positive proof of death and its mtime bounds the pulse at
+        `HEARTBEAT_STALE_SECONDS` (30) rather than at a day. Both constants mirror the listener's;
+        they are duplicated rather than imported because the listener imports THIS module.
+
+        A listener too old to write a heartbeat reads dead here, which is the safe direction: a lane
+        wrongly flagged STALE costs a re-arm, a lane wrongly flagged live costs every letter in it.
+        """
+        return _age(cls.heartbeat(box), now) <= HEARTBEAT_STALE_SECONDS
 
 
 def unread(box: str) -> int:
@@ -213,9 +243,11 @@ class Registry:
     def table(self, now: float) -> list[str]:
         """The JOINED view: config beside the runtime evidence, with both lies named.
 
-        A lane flagged active whose listener never armed, or armed a day ago, is the dead-watcher
-        failure wearing a green flag. A lane switched off with letters in the box is fine — but the
-        count has to be visible, because that mail is waiting on a human to switch it back on.
+        A lane flagged active with no listener POLLING it is the dead-watcher failure wearing a green
+        flag, and liveness is `alive()` — the heartbeat — never the arm record. `stale()` only sharpens
+        the complaint: an arm over a day old says the lane has been dark for a long time, a fresh one
+        that stopped polling says it died since. A lane switched off with letters in the box is fine —
+        but the count has to be visible, because that mail is waiting on a human to switch it back on.
         """
         lines = []
         for agent in self.agents:
@@ -223,8 +255,9 @@ class Registry:
             waiting = unread(agent.box)
             armed = status.armed_utc if status is not None else "never"
             flag = ""
-            if agent.active and (status is None or Status.stale(agent.box, now)):
-                flag = "  STALE — flagged active, no live listener"
+            if agent.active and not Status.alive(agent.box, now):
+                since = "; last arm over a day old" if Status.stale(agent.box, now) else f"; armed {armed}, not polling"
+                flag = f"  STALE — flagged active, no live listener{since}"
             if not agent.active and waiting:
                 flag = f"  OFF, {waiting} letters waiting"
             delivered = status.delivered if status is not None else 0
