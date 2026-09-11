@@ -14117,3 +14117,67 @@ effect matches a known artefact to two decimal places, the artefact is the first
 is its complement: **a treatment that survives the removal of its confound at a smaller size is a
 finding, and the smaller size is the finding.** +0.0056 twice is worth more to this project than
 +0.0108 once, because only one of the two can be added to anything.
+
+### The 336/20 corner is a 2x2x2 factorial and six of its eight cells were already on disk — calibration's entire effect is an INTERACTION — 2026-09-11 04:30Z
+
+Assembled from `*.metrics.jsonl` line 0, zero card spent. Every cell below is 336 px / 20 slices /
+band 0.1-0.9 / 12 epochs / 4e-5 / max pooling / whole-stack / `report_labels_v2.csv` — identical to the
+flag, so these are cells of one factorial and not six separate arms that happen to be nearby.
+
+| calib | hold | teacher | run | peak | vs control |
+|---|---|---|---|---|---|
+| — | — | — | `band_dense_s2026` | 0.8578 | — |
+| — | ✓ | — | `band_dense_hold_s2026` | 0.8573 | **−0.0005** |
+| ✓ | — | — | `calib_dense_s2026` | 0.8562 | **−0.0016** |
+| ✓ | ✓ | — | `calib_dense_hold_s2026` | 0.8634 | **+0.0056** |
+| — | — | clean | `seat_clean_distill_s2026` | 0.8634 | +0.0056 |
+| ✓ | — | clean | `clean_calib_s2026` | **0.8649** | **+0.0071** |
+| ✓ | ✓ | clean | `calib_hold_clean_distill_s2026` | RUNNING | ? |
+| — | ✓ | clean | — | never run | — |
+
+**Calibration does not work. Holding annotations does not work. Together they are +0.0056.** Each is
+NEGATIVE as a main effect — −0.0016 and −0.0005, both inside the control's 0.0071 bar, so read them as
+"nothing" rather than as harm. Additively they predict **0.8557**. They measure **0.8634**. The
+interaction term is **+0.0077**, and it is larger than either treatment this project has been crediting.
+
+Every quotation of `--calibrated-targets` as a +0.0056 treatment in this ledger is therefore wrong in
+KIND, not in size. It is not a treatment with an effect; it is one half of a pair that does nothing
+alone. The two flags have been carried together since they were introduced, which is why the shape was
+never visible — and it is why `calib_span`, `calib_dense`, `warm_calib_*` and every other arm that took
+one of them without the other reads flat, a pattern the ledger has recorded four times as "calibration
+is corner-specific". It is not corner-specific. It is conditional on `--hold-annotations`.
+
+**The clean teacher stacks, and it stacks SUPER-additively with calibration.** `clean_calib_s2026`
+combines calibrated targets with `teacher_clean.npz` at 0.7 and reads 0.8649. Main effects alone predict
+0.8578 − 0.0016 + 0.0056 = 0.8618; the measured 0.8649 is **+0.0031 above** that. So the calib×teacher
+interaction is positive too, on top of the calib×hold one.
+
+**This re-prices the arm currently on the card, in BOTH directions.**
+`calib_hold_clean_distill.sh`'s header claims the two treatments "have never been combined". That is
+false and I should have checked before spending the card: `clean_calib_s2026` combined them a run ago,
+without `--hold-annotations`, and read 0.8649. Two consequences:
+
+1. **The number to beat is 0.8649, not 0.8634.** The arm's bands were anchored on
+   `calib_dense_hold` and are all one cell too low. Read the peak against 0.8649 as the nearest
+   neighbour, and against the factorial prediction below as the mechanism claim.
+2. **The prediction is HIGHER than the header's, not lower.** Main effects (−0.0005 − 0.0016 + 0.0056)
+   put the cell at 0.8613; adding the two measured interactions (+0.0077 calib×hold, +0.0031
+   calib×teacher) puts it at **0.8721**. A negative three-way term will damp that. The honest
+   pre-registration for the eighth cell, stated now while it runs: **0.8650-0.8720, centred ~0.8685**,
+   with anything below 0.8649 meaning the three-way interaction eats both two-way gains.
+
+**One confound in the eighth cell, recorded rather than argued away.** It runs
+`teacher_clean_full.npz` while `clean_calib` and `seat_clean_distill` both ran `teacher_clean.npz`. So
+against `clean_calib` it moves two variables (the hold flag AND the teacher file), not one. Both teachers
+are leak-free by construction and both measured +0.0056 as the solo distillation term at their own
+corners, so the files are interchangeable on every reading taken so far — but the comparison is
+two-variable and must not be quoted as one.
+
+**The missing cell is cheap and it is the one that would close the mechanism.** `— / ✓ / clean`
+(hold-annotations plus a clean teacher, no calibration) is the only unrun corner of the eight, and it
+separates "the teacher needs calibration" from "the teacher needs whatever the pair provides". ~1.2 h at
+this corner's honest price.
+
+**The rule.** A flag pair introduced together and never separated is not two treatments, it is one
+treatment with a two-word name — and a ledger that prices the flags separately will mis-credit both.
+Before crediting ANY flag, check whether a run exists that carries it alone.
