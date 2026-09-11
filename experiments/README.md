@@ -13880,3 +13880,44 @@ at all: every fold-fit member already has a `.holdout.npz`, the overlap between 
 is known exactly from their fold assignments, and the correlation is a read. Nobody has that curve in
 print, in any regime. It is the cheapest instrument in the backlog and it decides whether the
 100%-refit operation is free here or only on CIFAR.
+
+### The overlap-vs-correlation curve cannot be read off our disk, and k-fold is why — 2026-09-11
+
+D312 names member error correlation as a function of pairwise training-set overlap as the one measurement
+absent from the literature in every regime. The section above called it the cheapest instrument in the
+backlog — a CPU read over holdout files we already have. **That was wrong, and the audit that found it
+took four minutes and no card.**
+
+Census of every `*.holdout.npz` on disk: **357 files, 12 distinct study sets.**
+
+| study set | n | members | example |
+|---|---|---|---|
+| `26b8a303` | 909 | **309** | `adapt_null_s2026` |
+| `84d31d3a` | 896 | 10 | `raptor_ft_hisrecipe_distill` |
+| `b9d9c8fa` / `c8146533` / `84a3402a` / `1ff8952d` | 875 / 884 / 849 / 890 | 6 / 5 / 5 / 5 | `oof_band_fold1..4_s2026` |
+| `6da0bc94` | 4406 | 1 | `foreign_oof_corpus` |
+| the rest | 8-83 | 1-10 | smokes and probes |
+
+Read that as an overlap axis and it has **two levels, and only one of them is measurable**:
+
+* **100% overlap** — the 309 members sharing `26b8a303` all trained on the same 3498 studies and held out
+  the same 909. Every pair among them is at full overlap. One level, 309 members deep.
+* **75% overlap** — `oof_fold0..4` hold out five sets whose pairwise intersection is **exactly 0** and
+  whose union is **4407, the whole corpus**. Two members that held out different folds each train on 4 of
+  5 folds and share 3, so they sit at 75%. **They have no evaluation row in common, by construction.**
+
+A pair at 75% is never both out-of-sample anywhere. That is not a gap in what we saved — it is what
+k-fold *is*, and it is the most likely reason the curve is missing from the literature rather than an
+oversight anybody could correct by looking harder.
+
+**What the measurement actually costs.** To vary overlap continuously while keeping a shared
+out-of-sample set, members must be fit on RANDOM subsets rather than fold complements — which is exactly
+how Nixon et al. sampled. Draw K members at ~80% of the corpus with independent random subsets: any two
+share ~64% of their training data, and their held-out remainders intersect in ~4% of the corpus, ~176
+rows at n=4407. That intersection is the common evaluation set, and it is small — so a single pair's
+correlation is noisy and the curve needs many PAIRS, not many rows. Cost is K fits of card, not zero.
+Filed on knee-57d68, which is re-scoped rather than queued.
+
+**The rule this leaves behind.** "We already have the artefacts" is a claim about files, not about
+design. Before pricing an instrument at zero, check that the two things it must compare were ever
+measured on common ground — here they never were and never could be.
