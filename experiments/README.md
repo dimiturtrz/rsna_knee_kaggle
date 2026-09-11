@@ -14755,3 +14755,73 @@ bits degrades the holdout's validity (Dwork et al., Science 2015, PMID 26250683;
 ICML 2015, arXiv:1502.04585). **Our probe is the benign end of that family — one query, one scalar, no
 label recovery attempted** — but it does spend a small unquantified amount of the public board's
 remaining information, which is an argument for the single-slot form over the twelve-slot map.
+
+## 2026-09-11 — RETRACTION: M327's column-null probe was already run, and the axis it aimed at was closed on 2026-09-05
+
+**M327 is wrong in its central claim and the arm it proposed is cancelled.** It said the board's per-column
+areas *"have never been read"* and proposed a single-slot probe to read them, gated on the researcher's
+Q1/Q2. D322 cleared that gate this morning. M328 then refined the design to null against the gold-58
+ordering rather than the refuted offline map. **All of it is a re-derivation.** The probe ran six days
+earlier, four slots were spent on the family, and the axis was retired AS A CLASS in writing.
+
+```
+56020638  2026-09-04  colnull    0.500   constant in every column: the metric is a plain unweighted mean
+56020054  2026-09-04  colmcl     0.904   MCL nulled      -> MCL board AUC 0.980, interval 0.968-0.992
+56023244  2026-09-05  colbaker   0.903   Baker's nulled  -> Baker's board AUC 0.992, interval 0.980-1.004
+56037952  2026-09-05  colhalf    0.728   the SIX weakest columns nulled, one slot, the exact M327 design
+```
+
+`colhalf`'s ablated six were chosen by our 909-study offline ordering — MCL 0.8104, Fracture 0.8255,
+Lateral OA 0.8309, Effusion 0.8663, PF OA 0.8698, Synovitis 0.8717 — the same instrument M327 wanted to
+test and M328 wanted to swap for the gold ordering. Its arithmetic is forced by `colnull`:
+S = (0.944 − 0.728) × 12 + 3.0 = **5.592**, so the **weak six average 0.932** and the strong six average
+(11.328 − 5.592)/6 = **0.956**.
+
+**What that verdict already settled, in its own words:** *"a 0.024 gap between the halves against a 0.110
+offline spread — our map transfers in SIGN at the half-split and nowhere near in SIZE, and it cannot
+resolve a single column, since MCL, the worst column in the ablated half, is 0.980, above the STRONG
+half's own mean. The board's 0.056 of headroom is distributed, not pooled. To gain the 0.010 that
+separates this project from first place, every one of the twelve columns has to move about 0.010 of AUC;
+there is no weak lane to attack and no per-column shortcut exists."*
+
+### The three readings that have to be withdrawn with it
+
+1. **M327's "what it opens" is empty.** It closed the member and seat axes correctly and then pointed the
+   only surviving lever at an axis already retired. The board-level ceiling reading stands; the arm does
+   not.
+2. **M328's aiming refinement is moot.** Swapping the gold-58 ordering in for the offline one improves a
+   probe that will not be run, and `colhalf` already showed why no ordering would have helped: at this
+   resolution the ablation cannot separate MCL (0.980) from Baker's (0.992) — the endpoints of a
+   0.110-wide OFFLINE spread land 0.012 apart on the board, inside the rounding interval of two
+   three-decimal scores.
+3. **Lateral OA and Synovitis are both smaller prizes than they looked.** The whole weak half averages
+   0.932 on the board. A column driven from 0.932 to a perfect 1.000 is worth (1.000 − 0.932)/12 =
+   **0.0057** — barely half the gap, for a column that cannot be made perfect. The Synovitis generation
+   thread and the Lateral OA band-geometry test are therefore both priced at **≤0.005 board**, not at the
+   0.010 the gap needs. They stay open as understanding; neither is a path to first place on its own.
+
+### What this actually leaves, and it is the only thing left
+
+*"Every one of the twelve columns has to move about 0.010 of AUC."* That is a statement about the
+REPRESENTATION, not about any label, head, seat, weight or table. It rules out, by arithmetic rather than
+by taste, every per-column intervention this project has queued — and it rules in exactly the class of
+change that lifts all twelve columns at once: **what the model sees and how much of it, and what it was
+pretrained on.** The depth axis (D323 §1: our only depth evidence under a working head is the foreign
+curve, still steepening at 20, and knee-ezz's −0.0001 was max pooling measuring its own indifference),
+more corpus, and a stronger trunk are the surviving candidates. They are also the three the owner has
+been asking for from the start.
+
+### Why this happened, since it is the fifth time
+
+M327 was written from `comp/board.jsonl` — it read all 128 rows for the SCORE histogram and the member
+sets, and it did not read the `what` field of the four rows whose `scope` is `excluded`. Those four are
+excluded from `board_transfer` for a good reason (they are damaged entries and must never enter the fit)
+and that exclusion made them invisible to a pass that was looking for entries. **An `excluded` row is
+excluded from the FIT, never from the RECORD.** The four instrument rows carry more settled per-column
+information than any other rows in the file, and they were the exact rows the question was about.
+
+The cost: M327 and M328 were written, committed and pushed, two letters went to the researcher (M327
+Q1/Q2, answered in full as D322), and the only thing that stopped a fifth slot was reading the board file
+one field wider before spending it. The check that would have caught it at the start is the one already on
+the books — grep the ledger and the record for the OPERATION before proposing it, not just before
+submitting it.
