@@ -14411,3 +14411,65 @@ price each against its own labelwise control -- never against a max-pooling numb
 `MULTISCALE_SLOTS` is twelve slots (the six wide then the SAME six tight), so the dilution the extended
 scheme showed at nine applies harder. Its cache is not on disk and a decode must run alone, which is
 what prices the arm, not the training.
+
+## 2026-09-11 — our label table is the WORST of five independent extractions, and the offline ruler cannot see it (M326)
+
+**COST: no card.** Statistic **cell disagreement at midpoint on both sides**, population **gold57**
+(the 58 organiser-labelled studies of `raw/train.csv`, one absent from our tables), cut **midpoint**.
+
+```
+flight0234  report_labels_v4hybrid   FP  86  FN 38   0.1813
+lixin73     report_labels_gpt56sol   FP  86  FN 38   0.1813
+steven      llm_labels_v4_blend      FP  87  FN 38   0.1827
+steven      llm_labels_full          FP 104  FN 32   0.1988
+OURS        report_labels_v2         FP 108  FN 32   0.2047
+MAJORITY_5                           FP  87  FN 38   0.1827
+```
+
+Paired study-clustered bootstrap, 20,000 resamples, `default_rng(2026)`, 57 studies:
+**ours − majority5 = +0.0219, 95% CI [+0.0044, +0.0395].** `experiments/lib.sh:72` puts
+**286 arm invocations** on the losing table.
+
+**These are not circular the way `report_labels_v3` is.** v3 was FITTED on these 58
+(`interpretations/kneemri/2026-09-03_the-report-reader-is-the-weaker-half.md:25`), which is why it reads
+0.1696 — and the threshold sweep shows why: v3 is v2 RE-CUT, not re-extracted. v2's five levels are
+`0.08 / 0.28 / 0.68 / 0.82 / 0.94`, and cutting the 0.68 rung out reproduces v3's number to three
+decimals (0.2047 -> 0.1696, FP 108 -> 47). That reconciles
+`2026-09-02_what-label-correction-is-actually-worth.md:50`'s "identical to v2 on every gold column" with
+a 61/37 cell split: same table, different cut. The foreign tables were built by other people from the
+same reports and none pasted gold — seven tables in `raw/knee_label_tables/` read EXACTLY 0.0000 on all
+58 and are unrulable for that reason; the five above do not.
+
+**The error is one-sided and that is the mechanism.** Ours: **FP 108 against FN 32**, a 3.4:1 over-call.
+Per column, ours-positive vs gold-positive: Contusion 36/18, MCL 18/9, Effusion 50/34, ACL 32/23 —
+Contusion's precision is 16/36 = 0.44, so more than half of our Contusion positives are wrong. Synovitis
+is the lone inversion (16/27, under-called). An extractor reading a MENTION as a FINDING produces exactly
+this shape, and the 0.68 rung is where it lives: that rung's precision here is 37/98 = **0.38**, which is
+`MEASURED_AGREEMENT`'s pooled 0.378 arrived at independently.
+
+**WHY THIS WAS NEVER FOUND — the ruler is rigged against it.** Our 909-study holdout labels are derived
+from v2. A member trained on a TRUER table is scored against a v2-derived ruler and must read worse by
+construction; the truer the table, the worse it reads. Every offline test of a label swap this project
+could run is a test of agreement-with-v2 wearing a score's clothes. `oof_band_folds` (README:13061)
+already hit the other horn: the only clean ruler is gold@58 and it cannot resolve ±0.012, which is what
+D301 §6 and D297 §4 both mean by "the cheapest thing that would settle it is more gold".
+
+**The board is the third ruler and it is the right one.** `README:3844-3847` records the competition's
+labels as image-read radiologist consensus with third-reader adjudication — the same KIND of object the
+58 are, and NOT report-derived. So a table closer to radiologist truth should transfer better to the
+board even while reading worse offline, and the board is the only instrument that can show it.
+
+**PRE-REGISTRATION.** One arm, `band_dense`'s recipe with `--labels` pointing at
+`lixin73_.../report_labels_gpt56sol.csv` and nothing else changed. Offline against `band_dense_s2026`
+(0.8578 on the v2-derived holdout) the prediction is **NEGATIVE, and a negative is not a refutation** —
+the ruler shares its labels with the control. Branches: (a) offline within −0.010 -> the table is
+competitive despite the rigged ruler, ship it and read the board; (b) offline below −0.020 -> the table
+is worse on the pixels too and the gold advantage does not survive training; (c) the read that matters is
+the BOARD delta against an otherwise identical entry, and that costs one slot.
+
+**What this does NOT claim.** The four foreign tables are 93.9% unanimous over all 52,872 cells, so this
+is about TWO opinions, not five, and the majority vote (0.1827) does not beat its own best member
+(0.1813) — voting buys nothing here. Whether those teams tuned their prompts on the same 58 is
+unknowable from the files; if they did, their 0.181 is optimistic and ours is the only honest number in
+the table. +0.0219 is above the 0.005 floor but it is a LABEL-SPACE delta, not a score, and no score
+follows from it until an arm runs.
