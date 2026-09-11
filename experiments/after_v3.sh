@@ -36,10 +36,10 @@ while true; do
   sleep 30
 done
 
-echo "=== launching v3_labels_span at $(date -u +%H:%MZ) ==="
-bash experiments/arms/v3_labels_span.sh
+echo "=== launching v5blend_span at $(date -u +%H:%MZ) ==="
+bash experiments/arms/v5blend_span.sh
 
-echo "=== V3 DONE at $(date -u +%H:%MZ) - launching labelwise_depth24 ==="
+echo "=== V5BLEND DONE at $(date -u +%H:%MZ) - launching labelwise_depth24 ==="
 bash experiments/arms/labelwise_depth24.sh
 
 echo "=== QUEUE DONE at $(date -u +%H:%MZ) ==="
