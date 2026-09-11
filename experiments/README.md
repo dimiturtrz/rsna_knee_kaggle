@@ -14354,3 +14354,60 @@ Two honest caveats, both of which sharpen the target rather than blunt it:
 **THIS RE-RANKS THE BLOCKERS.** The foreign corpora are blocked on LICENCE, not on availability, value, or
 card. As of this measurement the licence thread is no longer hygiene — it gates the largest priced lever on
 the board. The P0 licence bead and the SKM-TEA RUA question to the owner move to the front of the queue.
+
+## 2026-09-11 — the HEAD gates whether an INPUT change reaches the score: a matched 2x2 (M325)
+
+**The extended-scheme axis was closed on half its evidence.** `README:324`'s `extended_slots` row
+(+0.0002) and the D181-D185 block above both read the axis through ONE pooling operator. Two arms with
+`--slice-pooling labelwise` ran on 2026-09-08 and were rostered on their solo numbers; the CONTRAST was
+never taken. Taken now, off the four `metrics.jsonl` on disk, peak epoch, statistic **per-column ROC-AUC
+unweighted 12-column macro**, population **holdout909**, cut **midpoint**:
+
+```
+                        canonical   extended      d
+  --slice-pooling max      0.8578     0.8519   -0.0059     (band_dense / extended_band)
+  --slice-pooling labelwise 0.8613    0.8623   +0.0010     (labelwise_dense / labelwise_extended)
+                                   interaction  +0.0069
+```
+
+**The pairs are matched.** `band_dense` -> `extended_band` differs by `--scheme extended` and the
+batch/accumulate pair the 9-slot cache forces (6/2 vs the default); `labelwise_dense` ->
+`labelwise_extended` by `--scheme extended` and 4/3. `--calibrated-targets --hold-annotations` are in
+BOTH labelwise arms and cancel in that row. At `ledger75` the labelwise pair reads 0.8959 -> 0.8986,
+**+0.0027**, same sign.
+
+**D184's headline prediction is REFUTED, and by its own arm.** The affinity table called `AX_T1` the
+single slot in the nine that reads patellofemoral OA properly, PF OA having no 1.00 cell among the
+canonical six. PF OA is **-0.0141** in the max pair and **-0.0060** in the labelwise pair. It is the
+worst column in one and among the worst in the other. Whatever the extras carry, it is not that.
+
+**What they DO carry is the `COR_FLUID_NOFS` pair, and only the labelwise head can read it.** The two
+largest moves in the whole 24-cell table are **MCL +0.0278** and **Lateral Meniscus +0.0205**, both
+under labelwise, both far above the 0.005 floor -- and both are exactly the findings `COR_FLUID_NOFS`
+scores 1.00 for (primary plane, matched sequence). The same two columns under max pooling read
+**-0.0150** and **-0.0004**. Coronal PD without fat suppression is a standard meniscus sequence; the
+pixels were always informative and the aggregator was throwing them away.
+
+**This is the branch the arm pre-registered for a negative read, and it landed on it:** "negative ->
+nine slots dilute slot attention faster than three channels inform it, which is a fact about the HEAD".
+Confirmed, with the amount named: the dilution costs **-0.0069** relative to a head that routes per label.
+
+**SCOPE, and it is the expensive part.** `attend_true` (`README:302`) concluded the slice-aggregation
+stage is "saturated from both ends at once" and "the limit is upstream, in what one slice's feature
+vector contains". That reading stands ON A FIXED INPUT AT SIX SLOTS -- three operators spanning 0.0019.
+It does not survive as stated: at nine slots the operator is worth more than the input change it is
+gating. The limit is upstream AND the head decides whether upstream arrives.
+
+**The consequence for the refuted pile.** Every input-scale axis this project has closed --
+`extended_slots` +0.0002, `resolution_420`, `multiscale`, `knee-ezz` (20 cached slices vs 12, -0.0001)
+-- was measured on a max-pooling head. A flat read from a head that demonstrably suppresses a real
+input change is not evidence the input change is inert. **Those rows are downgraded from REFUTED to
+UNREAD, not re-opened as promising:** the 2x2 gives one interaction, single seed, and +0.0010 is itself
+inside the noise floor on the macro. What clears the floor is the per-column pair, which is mechanism,
+not score. Re-open an axis by re-running it under `--slice-pooling labelwise`, one axis at a time, and
+price each against its own labelwise control -- never against a max-pooling number.
+
+**Cheapest next test, unrun:** `multiscale` is the input change most likely to be dilution-limited --
+`MULTISCALE_SLOTS` is twelve slots (the six wide then the SAME six tight), so the dilution the extended
+scheme showed at nine applies harder. Its cache is not on disk and a decode must run alone, which is
+what prices the arm, not the training.
