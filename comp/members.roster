@@ -852,3 +852,14 @@ band_dense_s2026_n24b0.1-0.9  # 0.8598 @holdout909 midpoint, ep 8. Dense 24-slic
 seat_distill_clean_s2026    # 0.8581 @holdout909 midpoint, ep 8. Below the others in this block and
                             # rostered anyway — the honest pool is what it is, and a member that cannot
                             # be shipped cannot be measured in an entry.
+distill_stack_clean_s2026   # 0.8645 @holdout909 midpoint, ep 12 of 12, converged (convergence_check:
+                            # 1 runs, 1 converged). The CLEAN twin of distill_stack_max_s2026 (0.8634,
+                            # ~80% teacher exposure) on a matched recipe, and it reads +0.0011 ABOVE it.
+                            # That is the fourth honesty filter priced at the member level for the first
+                            # time: removing teacher exposure cost nothing, so the exposed stack's score
+                            # was never carried by exposure. Agrees with the ensemble-level substitution
+                            # estimate of ~0.0004 through two of six seats. Do not confuse this with the
+                            # fold-0 LEAK, a different quantity that transfers at +0.0051.
+                            # At 0.8645 it is second on the honest pool, behind clean_calib_s2026 0.8649
+                            # and ahead of chainfour_s2026 0.8648 — and unlike oof_teacher_s2026's voided
+                            # 0.8685 it is clean, so it is a live seat candidate.

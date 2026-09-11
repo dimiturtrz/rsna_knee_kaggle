@@ -646,7 +646,17 @@ grade_ladder_s2026_r280           # resize price for grade_ladder_s2026
 lr4e-5_ws_s2026_n12b0.1-0.9       # regroup price for lr4e-5_ws_s2026
 lr4e-5_ws_s2026_r224              # resize price for lr4e-5_ws_s2026
 lr4e-5_ws_s2026_r280              # resize price for lr4e-5_ws_s2026
-merged_blend_cf_n12b0.1-0.9       # regroup price for merged_blend_cf
+merged_blend_cf_n12b0.1-0.9       # VOID DECLINE REASON (2026-09-11). This line read 'regroup price for
+                                  # merged_blend_cf' and priced NOTHING: the variant's holdout npz is
+                                  # byte-identical to its parent's, max|delta| = 0.000000 over all 909x12
+                                  # cells. The re-band never executed and a cached decode was reused, so
+                                  # the zero was a packaging bug wearing a measurement's clothes. D384
+                                  # is what proves it: a real same-weights re-band from 0.2-0.8 to
+                                  # 0.1-0.9 moves probabilities by up to 0.042. Its three siblings are
+                                  # genuine (_r224 0.638, _r280 0.634, _r392 0.483 max|delta|), so the
+                                  # defect is isolated to the re-band variant. Declined either way, and
+                                  # never shipped in any kernel's chosen tuple, so no entry is touched.
+                                  # DO NOT re-derive 'regrouping is free' from this pair.
 merged_blend_cf_r224              # resize price for merged_blend_cf
 merged_blend_cf_r280              # resize price for merged_blend_cf
 through_dense_s2026_n12b0.1-0.9   # regroup price for through_dense_s2026
