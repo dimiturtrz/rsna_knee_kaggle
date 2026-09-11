@@ -14229,3 +14229,59 @@ README:4743's "calibration at the span corner ... SIGN INVERTED" is this interac
 it compares calibration's effect WITHIN the hold family (+0.0072) against WITHOUT it (-0.0020) and calls
 the 0.0092 difference an inversion. That difference IS the interaction term, to four decimals, and the
 2x2 it belongs to was already complete on disk when the line was written.
+
+### The 100%-refit axis, priced on the board for the first time: delta 0.000 — and the axis was never blocked — 2026-09-11 05:43Z
+
+Two things were believed about refitting a member on all 4407 studies instead of fold 0's 3,498, and the
+record contradicts both. No card was spent establishing this; it is all read off `comp/board.jsonl` and
+`*.metrics.jsonl` line 0.
+
+**IT WAS NEVER BLOCKED.** `knee-xi3y3` (P1, raised the same day) said *"BLOCKS the 100%-refit axis; do not
+queue a refit arm before this has an answer, or the card buys a member no gate will accept."* The project
+has run that operation **28 times** and the pinned champion is built out of it. Twenty-five of the 28 carry
+an `_ff`/`_cf`/`_df` suffix and eighteen have a fold-fit `_s2026` twin on disk. Every board entry at 0.936
+and above carries at least one. What the gates actually refuse is an OFFLINE NUMBER for a refit, which is
+a narrower claim than the bead made: **a refit is unpriceable, not unshippable.**
+
+A corollary worth its own line: `roster_check` asserts a holdout record only for checkpoints that HAVE
+one, so a dark arm passes it in silence. `calib_span_df` and `final_ws_df` are consequently in neither
+`comp/members.roster` nor `comp/members.declines` — invisible to the guard that exists to catch exactly
+this. They are not broken runs: both completed all twelve epochs with loss converging normally (0.6261 and
+0.6253), and every epoch reads `auc: NaN`, `ece: NaN`, `per_label: {}` because `--fold -1` holds out
+nothing. The `peak nan e0` this ledger has carried for them is the reader meeting a dark arm, not a death.
+
+**AND IT HAS A PRICING ROUTE, ALREADY USED ONCE WITHOUT ANYONE NOTICING.** The board is an out-of-sample
+set, so a matched one-member swap prices a refit directly, with no carved selection set and no assumption
+that a twin's OOF ranks its sibling. Sweeping all 94 entries that name their members for pairs differing
+in exactly one seat at equal size, **exactly one fold-fit → refit twin swap exists**:
+
+| entry | board | n | the one seat that moved |
+|---|---|---|---|
+| `lastseat_v1` | 0.937 | 7 | `small_batch6_s2026` (fold 0) |
+| `dark7_v1` | 0.937 | 7 | `small_batch6_ff` (fold -1, `train_fraction` 1.0) |
+
+**Delta board = 0.000.** Six seats held fixed, same vote, same kit.
+
+**The caveat, stated because it is the whole uncertainty.** The recorded-recipe diff of the two twins is
+TWO flags, not one: `fold` 0 → -1 and `ema` False → True. So this is a refit+EMA read. EMA is normally
+non-negative, which bounds the quantity of interest rather than leaving it open — **refit alone is
+≤ 0.000.** That agrees in sign and order with the ledger's own independent argument at README:7467, where
+`k/(k-1)` more data under an `N^{-β}` error scaling was reckoned worth "a low single-digit thousandth" at
+our corpus size. That was an argument. This is a measurement, and it is the first one.
+
+> Refitting on the same 4407 studies buys nothing measurable on our board. The owner's standing
+> *"use more data"* is therefore not served by refitting the corpus we already have — it is served by
+> MORE CORPUS, which is the foreign-data axis and its licence problem, not this one.
+
+**WHAT THIS DOES NOT LICENSE.** It does not license refitting the current best members to give them
+champion-class twins, and the reason is on record rather than a matter of taste. `experiments/arms/clean_calib.sh`
+line 33 pre-registers exactly that: *">= +0.008 licensed: calibrated distillation is the member lever, and
+the full-fit twin is queued."* `clean_calib_s2026` reads **0.8649** against its parent
+`seat_clean_distill_s2026` **0.8634** — **+0.0015**, a fifth of the gate. THE BRANCH DID NOT FIRE, and
+README:9494 prices `clean_calib` NO-GO for the block on an independent instrument. The best fold-0 member
+with no twin at all, `foreign_distill_mix07_s2026` at 0.8657, is foreign-corpus and declined on licence.
+So the axis is OPEN and nothing currently on the bench has earned an arm on it.
+
+`knee-57d68` closes on the same reading: its own audit had already found the overlap curve unreadable from
+k-fold predictions (two levels, 100% and 75%, and pairs at the 75% level share no evaluation row by
+construction), and the decision it existed to make is answered above from the board instead.
