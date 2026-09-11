@@ -14285,3 +14285,72 @@ So the axis is OPEN and nothing currently on the bench has earned an arm on it.
 `knee-57d68` closes on the same reading: its own audit had already found the overlap curve unreadable from
 k-fold predictions (two levels, 100% and 75%, and pairs at the 75% level share no evaluation row by
 construction), and the decision it existed to make is answered above from the board instead.
+
+### CORRECTION, same morning: the corpus is NOT saturated — beta = 0.22 measured on our own three-point curve, and "use more data" is the biggest live lever we own — 2026-09-11 05:50Z
+
+The section immediately above concluded that refitting on all 4,407 studies "buys nothing measurable on
+our board" from a matched pair reading delta 0.000. **That conclusion was wrong, and the error was
+statistical power, not arithmetic.** The correction costs no card either: the learning curve was already
+on disk and nobody had fitted it.
+
+**THE CURVE.** Three runs, matched, differing in `train_fraction` and nothing else that is set
+(`quarter_data_s2026` and `half_data_s2026` diff in exactly one recorded flag; `band_dense_s2026` is the
+1.0 control — its recipe is an older vintage so several fields read absent rather than equal, and those
+absences are the defaults the other two record explicitly). All three: 336 px, 20 slices, band 0.1-0.9,
+max pooling, whole-stack, lr 4e-5, 12 epochs, fold 0, seed 2026, no calibration, no hold, no distill.
+
+| train_fraction | N studies | peak AUC | error |
+|---|---|---|---|
+| 0.25 | 874 | 0.7907 | 0.2093 |
+| 0.50 | 1,749 | 0.8344 | 0.1656 |
+| 1.00 | 3,498 | **0.8578** | 0.1422 |
+
+Fitting `error ∝ N^{-β}` on each doubling:
+
+    beta(874 -> 1749)  = 0.338
+    beta(1749 -> 3498) = 0.220
+
+**Declining, but nowhere near zero.** β ≈ 0.22 is the live exponent at our corpus size.
+
+**WHY THE BOARD PAIR READ 0.000 ANYWAY.** At β = 0.22 a 1.26× refit (3,498 → 4,407) predicts **+0.0070
+offline** for the MEMBER. The matched pair that measured 0.000 — `lastseat_v1` → `dark7_v1` — moved ONE
+SEAT OF SEVEN. A member-level +0.007 entering one of seven seats arrives at the ensemble output diluted by
+roughly a factor of seven, i.e. ~+0.001, against a board that resolves ~0.005. **The test could not have
+detected the effect even if it were exactly as large as the curve predicts.** Delta 0.000 is therefore
+consistent with β = 0.22 and is not evidence against it; it is an underpowered test, and this ledger has
+the same wall recorded from the other side at README:13567 ("one ruler that cannot separate them").
+
+What survives from the section above, unchanged: the axis was never blocked (28 refits shipped, the
+champion is built out of them), a refit is unpriceable rather than unshippable, and the matched-board-pair
+route is real — it is just far too blunt at one seat in seven. What is retracted is the sentence
+"refitting on the same 4,407 studies buys nothing measurable on our board", and the ≤ 0.000 bound that
+sentence rested on.
+
+**THE CONSEQUENCE, WHICH IS MUCH LARGER THAN THE REFIT.** β ≈ 0.22 prices the owner's standing
+*"use more data"* directive for the first time:
+
+| operation | N factor | predicted delta offline | at board transfer x1.55 |
+|---|---|---|---|
+| refit fold-0 member on all our studies | 1.26x | +0.0070 | +0.011 |
+| **double the corpus** | 2.0x | **+0.0201** | **+0.031** |
+
+Nothing on the knob axis has produced anything of that size. The whole calibration/hold/distill factorial
+this ledger has spent weeks on moves members by 0.002-0.007, and the replicated calib x hold interaction —
+the most reproducible term we own — is +0.008 and is a repair rather than a gain. **Doubling the corpus is
+priced at two to four times the best knob we have ever found**, and it is the one operation the owner has
+asked for repeatedly and the project has never run.
+
+Two honest caveats, both of which sharpen the target rather than blunt it:
+
+1. **β is declining (0.338 → 0.220), so the next doubling is worth less than this fit says.** Continuing
+   the decay to β ≈ 0.15 still prices a doubling at +0.014 offline / +0.022 board — larger than every
+   knob on record. The lever survives the pessimistic reading.
+2. **A doubling means FOREIGN studies, and the curve above was fitted on in-distribution data.** Every
+   point on it is RSNA knee MRI; adding fastMRI/MRNet/Rijeka/SKM-TEA adds studies from a different
+   distribution, and no term in this fit says what an out-of-distribution study is worth relative to an
+   in-distribution one. That is the question, and it is now the highest-value open question this project
+   has (M322 to the researcher).
+
+**THIS RE-RANKS THE BLOCKERS.** The foreign corpora are blocked on LICENCE, not on availability, value, or
+card. As of this measurement the licence thread is no longer hygiene — it gates the largest priced lever on
+the board. The P0 licence bead and the SKM-TEA RUA question to the owner move to the front of the queue.
