@@ -56,6 +56,13 @@
 # Whatever it reads, it is a fact about supervision rather than about seating, which is the axis that
 # has been flat for seven entries.
 #
+# deliberate: --eval-labels report_labels_v2.csv — the control band_span was measured against that
+#   table, and confident.csv scores 14,445 holdout cells differently, so leaving the ruler to follow
+#   --labels would make the whole comparison a ruler change wearing a label-content result's clothes
+#   (knee-df7t). The TRAIN table is the single variable; the HOLDOUT table is pinned to the control's.
+#
+# bead: knee-ulxn1
+#
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
@@ -65,4 +72,5 @@ require "$CONFIDENT"
 run_train confident_span \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 \
-  --labels "$CONFIDENT" --out "$MODELS/confident_span_s2026.pt"
+  --labels "$CONFIDENT" --eval-labels "$PROCESSED/labels/report_labels_v2.csv" \
+  --out "$MODELS/confident_span_s2026.pt"
