@@ -3805,3 +3805,38 @@ its schedule was already right.
 
 **Slot accounting.** Fifth of five for 2026-09-10, spent 22:40Z against a 23:30Z mark. The owner's
 "land the last submission by midnight" was met with 3h20m to spare.
+
+## `cleanseat_v1` — 0.942, ref 56168691, 2026-09-11 — the corrected ruler's preference did not transfer, and its sign went the other way
+
+Six seats chosen by greedy T1 on the **corrected** label ruler, licence-clean, sharing **zero members**
+with the champion's six — the first selection this project has run that returned a different SET rather
+than a permutation of the same one. Members: `stack_increments_s2026`, `chainfour_s2026`,
+`labelwise_extended_s2026`, `blendhold_s2026`, `stack_increments_base_s2026`, `resnet_224_long_s2026`.
+
+Offline, the corrected ruler preferred it and the old ruler could not see the difference: **T1 0.8843 vs
+the T0-era selection's 0.8817 (+0.0026)**, while on T0 the same six read 0.8763 against 0.8773. D343
+rescored the gap with 94 blind human adjudications substituted (T1a +0.0026) and on a one-sided
+correction (+0.0025) — three correction variants, one answer. Both numbers are in-sample by
+construction, which is why the board row carries `offline: null`.
+
+**The board read 0.942 against the champion's 0.944, and the pre-registered `<0.9425` branch fired.**
+
+Say the magnitude before the verdict: **−0.002 is inside what this board resolves**, and 0.942 sits
+0.0005 under a boundary that was chosen before the slot was spent. So the finding is the **sign**, not
+the size. The +0.0026 the corrected ruler promised did not arrive, and what did arrive pointed the other
+way.
+
+**What this closes.** D340's ruler-error finding — the v2 ruler mismeasures members by +0.0010 to
++0.0140 with a member-dependent sign — is real offline and **does not license reseating**. The
+corrected-ruler correction rung of D333 stays closed. And "the seven seating flats were an artefact of a
+biased ruler" is now **refuted rather than merely unproven**: this is the eleventh seating entry to fail
+to beat 0.944 and the first with a genuinely disjoint member set, which was the strongest remaining form
+of the seating hypothesis. The member axis stays shut; the pool is the constraint.
+
+**What it does not close, and it matters for the same evening.** This priced a SELECTION made on a
+corrected ruler. It did not price the corrections themselves as label **operations**. `goldseat`
+(`discord_mask_s2026`) and `corrseat` (`v2_corrected_s2026`) each swap a single seat and are chosen on
+the blind-adjudicated **gold** ruler, not on T1; their question is whether MASKING or SUBSTITUTING the
+discordant cells produces a better MEMBER — the one axis this row leaves open. One caution does
+transfer, and it is written here before their scores land: **an offline ruler that named a preference
+has already failed to transfer it once tonight.**
