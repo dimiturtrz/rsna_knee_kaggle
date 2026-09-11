@@ -242,6 +242,81 @@ outright.** The confound to guard is that band width correlates with other recip
 pool, so the reading has to come from within-family pairs differing only in band, with a small honest n
 preferred over a large confounded one.
 
+## 4. The geometry candidate is dead, three ways, and the band acts through training rather than through inference
+
+Section 3 ends on a hypothesis. D384 killed it the same evening, at zero card cost, from members already
+on disk (`research/scripts/band_geometry.py`, per-column AUC @holdout909 midpoint, honest pool n=304 with
+56 members of undeterminable band excluded from group medians only). Section 3's closing paragraph should
+be read as the record of a question asked, not as a live lever.
+
+**The framing was wrong before the data arrived.** `SLICE_BAND = (0.20, 0.80)` at
+`core/data/corpus/slot_reader.py:35` is the inherited default, carried into TrainingOptions, and the
+recipe records the RESOLVED band -- so passed-versus-defaulted is unrecoverable from disk. The
+no-band-flag group is therefore the NARROWEST crop, not a full-stack control. Section 3 assumed the
+opposite and called that group the big control arm. There was never a full-stack control group. The same
+docstring records the axis already closed at 12 slices in August: 0.2-0.8 0.8525, 0.1-0.9 0.8565,
+0.0-1.0 0.8427, full stack refuted with Baker's, ACL and Contusion named as the losers.
+
+**The prediction inverted on exactly the columns it needed.** Within-family pairs, recipes verified
+identical except band (12 slices, 336, v2, e12, max pool):
+
+| contrast | class B | class C |
+|---|---|---|
+| 0.2-0.8 -> 0.1-0.9 (`lr4e-5_ws` -> `band_span`) | +0.0026 | +0.0065 |
+| 0.1-0.9 -> 0.0-1.0 (`band_span` -> `band_full`) | -0.0137 | -0.0140 |
+| slices 20 -> 24 at fixed 0.1-0.9 (control) | +0.0016 | +0.0030 |
+
+Widening helps the CENTRAL columns twice as much as the peripheral ones -- the opposite of the
+hypothesis -- and going to full stack collapses both classes uniformly with no class separation at all.
+The slices control shows the same non-separation, so there is no class-selective geometry term anywhere
+in the family. Per column, the two members the story most needed move the wrong way: ACL +0.0148,
+Contusion +0.0108, Baker's +0.0105 against **MCL -0.0039 and Lateral OA -0.0038**. And the sharpest
+single reading is that **MCL's best band is the NARROWEST** -- 0.7908 at 0.2-0.8, 0.7869 at 0.1-0.9,
+0.7823 at full -- with Lateral OA the same shape (0.8178 at 0.2-0.8, best). That is a monotone loss where
+a monotone gain was predicted, which is a reversal rather than a null.
+
+**The band is not an inference-geometry knob at all.** A same-weights decode re-banded from 0.2-0.8 to
+0.1-0.9 is flat: class means -0.0002, max per-column delta 0.0006, while the probabilities themselves
+genuinely move by up to 0.042, so the re-decode really executed. **The band acts through TRAINING, not
+through inference.** The outer slices carry nothing the model would use even if shown them, which means
+"the evidence was cropped away" was never available as a mechanism regardless of anatomy.
+
+**The orientation worry does not exist.** All 4,407 studies carry Axial, Coronal and Sagittal
+(`canonical_metadata.csv`), so the worse variant -- a different anatomy cropped away per STUDY, which
+would have looked exactly like unlearnable noise -- is ruled out. What remains is that `band_indices`
+samples within ONE series' ordered file list, so a crop trims different anatomy per PLANE (sagittal edges
+are the medial and lateral joint line, coronal anterior and posterior, axial superior and inferior),
+uniformly across studies. The medial-lateral structure the hypothesis needed is at most one plane of
+three. The 2026-08-19 collateral reading (MCL +0.0133 at a wider band) does not rescue it either: that
+arm moved slices 12 to 16 together with the band, and its per-column pattern was recorded at the time as
+the opposite of what was predicted.
+
+### Where that leaves the eight columns
+
+Three input-coverage explanations have now been tested and all three are refuted: **rarity** (section 3,
+Spearman -0.333, p=0.29), **external corpus coverage** (section 3, MCL +4, Fracture +0, Lateral OA +0),
+and **geometry** (this section, reversed). The class-B hole is none of the stories in which the model was
+never shown the finding. What is left standing is supervision and task difficulty per column.
+
+The live instrument is therefore the one that prices the label side directly: a successor to denom60,
+weighted to the class-B columns. It does double duty -- it is the honest widening of `eps_unanimous`,
+whose Wilson interval [0.009, 0.114] off **two cells** is the single point of failure for the whole of
+section 2, and it tests whether MCL's 0.121 hole is partly the section-2 label wall wearing a smaller
+numerator. MCL's unanimous-stratum error has never been audited, and its gold n of 17 is the smallest of
+any column carrying gold at all; the hedge-rung family lives in exactly these soft-tissue columns. If
+MCL's measured unanimous error comes back materially above 0.033, class B loses its three largest
+members and the strategic picture changes. Commissioned in M391; zero card cost.
+
+### A packaging defect found on the way
+
+`merged_blend_cf_n12b0.1-0.9.holdout.npz` is byte-identical to its parent `merged_blend_cf.holdout.npz`
+(max|delta| = 0.000000 over all 909x12 cells) -- a cached decode reused under a re-banded name. Its three
+resize siblings are genuine (`_r224` 0.638, `_r280` 0.634, `_r392` 0.483), so the defect is isolated. It
+was declined and never entered any kernel's `chosen` tuple, so no entry is contaminated, but its decline
+reason claimed a "regroup price" that was a no-op by construction and has been rewritten as void. The
+generalisable rule: **a variant npz reading exactly 0.000000 against its parent is a packaging bug, never
+a null result** -- this section's own re-decode number, up to 0.042, is what proves it.
+
 ---
 
 ## Population note
@@ -255,4 +330,9 @@ One process note worth keeping. D381 reported `distill_stack_clean` as truncated
 at `step 550/582`. A live run and a dead one are indistinguishable on disk and `convergence_check`
 cannot separate them -- only the process table can, and MSYS `ps` shows no argv, so the check is
 `Get-CimInstance Win32_Process -Filter "Name='python.exe'"` filtered on `CommandLine`. The reading that
-mattered, `S - S'` for the exposure pair, was not broken, only not yet takeable.
+mattered, `S - S'` for the exposure pair, was not broken, only not yet takeable -- and it was taken
+hours later: `distill_stack_clean_s2026` converged at **0.8645**, +0.0011 ABOVE its ~80%-exposed twin
+`distill_stack_max_s2026` at 0.8634. Removing teacher exposure cost the member nothing, which is the
+first member-level price for the fourth honesty filter and agrees with the ensemble-level substitution
+estimate of ~0.0004 through two of six seats. Exposure and the fold-0 LEAK (+0.0051) are different
+quantities and only the second was ever inflating anything.
