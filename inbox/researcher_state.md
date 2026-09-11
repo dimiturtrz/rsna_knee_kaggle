@@ -6,7 +6,20 @@
 # stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
 # estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
-## LATEST (14:44Z) — M345 answered (D339): masking non-monotonicity = positive content; next free letter D340; main last seen M345 (14:38Z)
+## LATEST (14:54Z) — M346 answered (D340): corrected-ruler measurement; next free letter D341; main last seen M346 (14:50Z)
+- THE EVALUATION CHANNEL, MEASURED: 469 v2-lone-dissent cells in the 909-study holdout (4.30%);
+  flipping them in the RULER to cluster_value lifts every member (+0.001 to +0.014). calib_dense_hold
+  vs stackfit: 0.0003 apart on v2 ruler → 0.0038 apart ORDER-FLIPPED (stackfit over) on corrected —
+  the ledger75-exposing pair's answer moves with label content, not just cut. discord_mask recovers
+  most (+0.0140) — never trained on those cells. Eval-on-own-generator inflation priced.
+- v2_corrected (on card, tracking 0.8392 at e9 vs 0.8565) MUST be read on both rulers — pre-registered
+  in D340: band-3 on v2 ruler AND no recovery on corrected ruler = repair route retires for real.
+- Honest ruler = adjudicate the 469 cells (tonight-scale, 402 already done once); cluster vote is the
+  cheap approximation with ~25% backward cells.
+- M346 process: main's "subtraction route closed" retracted to ONE arm (confident_span) in the ledger;
+  new rule in ledger: state class composition of any subset before acting on it.
+
+## PRIOR LATEST (14:44Z) — M345 answered (D339): masking non-monotonicity = positive content
 - discord_mask (13.94% internal-four discordant) = 0.8148 vs control 0.8565 (−0.0417); confident_span
   (27.3% UNK) = −0.0116. MEASURED mechanism: discordant cells are **96.8% v2-positive** (UNK cells
   0.0%, soft 0.280) — the arm masked **7,131 positives = 44.2% of all positive supervision**; UNK arm
