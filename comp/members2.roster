@@ -188,3 +188,21 @@ labelwise_depth24_s2026.pt  # 0.8617 @holdout909 midpoint, epoch 8 of 12, CONVER
                             # this row was written: slices=24, slice_pooling=labelwise,
                             # calibrated_targets=True, hold_annotations=True, slices.gate.3.weight
                             # non-zero (768 of 768). Ledger 2026-09-11.
+v2delonly_span_s2026.pt     # 0.8417 @holdout909 midpoint on the v2 ruler, epoch 6 of 12, CONVERGED.
+                            # The best of the label-table family: +0.0025 over v2_corrected 0.8392 and
+                            # +0.0257 over v7nontear_span 0.8160. Both figures are DIRECTIONAL - the
+                            # first is a quarter of the 1.5% bar and neither is a finding.
+                            # Still -0.0148 under the band_span control 0.8565, which is EXPECTED and
+                            # was pre-registered: it trains on the deletion-only table and is evaluated
+                            # on plain v2, so the v2 ruler charges it for every deletion it made.
+                            # Pre-registration, written before the number: BELOW band_span (met),
+                            # ABOVE v7nontear_span (met, +0.0257), at or above every chain member on
+                            # corrected T1 (NOT YET READ - do not quote that leg).
+                            # Plumbing asserted from the checkpoint's own options, not from the script:
+                            # labels=report_labels_v2_delonly.csv, eval_labels=report_labels_v2.csv,
+                            # epochs=12, slices=12, slice_pooling=max, calibrated_targets=False,
+                            # hold_annotations=False.
+                            # D363 is why it exists: the deletion direction carries 2/28 = 0.071 error
+                            # while the addition direction carries 22/28 = 0.786, so a deletion-only
+                            # table is the half of the correction that the audit says is sound.
+                            # Ledger 2026-09-11.
