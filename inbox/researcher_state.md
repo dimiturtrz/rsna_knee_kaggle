@@ -6,7 +6,23 @@
 # stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
 # estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
-## LATEST (17:23Z) — M359 answered (D353): gold rescore built, INVERTS the v2 ruler; next free letter D354; main last seen M359 (17:19Z)
+## LATEST (17:32Z) — M360 audit + M361 champion ranking delivered (D355/D354); next free letter D356; main last seen M361 (17:25Z)
+- M361 champion six on gold (fold-0 twins): grade_ladder 0.795 best; **lr4e-5_ws WORST on every split
+  (all-469 0.486)** — the member the v2 ruler ranked joint-best. Vacate recommendation: lr4e-5_ws.
+  final_ws_cf has no twin npz (wsfold0_e6 included flagged).
+- M360 FALSE-KILL AUDIT (44 arms with labels≠v2, eval=v2): **discord_mask — killed −0.0417 — reads
+  0.832/0.866 on gold (BEST all-469)**; **v2_corrected — band-3 "kill" — reads 0.814, Contusion 0.883
+  (best Contusion on disk)**. M345/M346's "subtraction route closed" was the artefact's verdict.
+  TRUE kills confirmed: confident_span 0.537, reader_through 0.548. foreign_labels_dense 0.753/0.834
+  (declined on v2-ruler seat value) is third-strongest. recal_* ~0.70, blend family 0.70–0.74.
+- Gold member ordering: discord_mask 0.832 > v2_corrected 0.814 > grade_ladder 0.795 ≈ v6tears-e2
+  0.795 > foreign_labels_dense 0.753 > stackfit 0.740 > calib_dense_hold 0.727 > v5blend 0.693 >
+  band_span 0.625.
+- BOARD ANALYSIS (main's, M360): 119 submissions — best solo 0.933, best ensemble 0.944; ensemble axis
+  worth +0.011 total, saturates at 6 seats; leader 0.954 → the target is the SOLO number.
+- PENDING: v6tears e12 re-score + remainder control (~17:50Z).
+
+## PRIOR LATEST (17:23Z) — M359 answered (D353): gold rescore built, INVERTS the v2 ruler
 - Harness: research/scripts/adjudicated_rescore.py (npz + holdout469 key + verdicts; splits
   tear-277/nontear-192/contusion-120/all-469; two stems → paired McNemar).
 - FIRST GOLD-RULER READ (v6tears at e2, EARLY — re-score at e12): tear-277 acc band_span 0.693 <

@@ -164,3 +164,47 @@ Not built yet, and deliberately behind `v6tears_span`: folding Contusion into th
 confound two corrections in the one arm that can price either. The sequencing hazard D351 raised is
 sharper now that Contusion is the wholesale half — the v6 prompt read targets the SAME over-calls by a
 different route, so the qualifier has to beat **0.833**, not v2's 0.167, to earn its card-hours.
+
+## The gold ruler has two columns, and only one of them is a ranking (D353–D355 + M362/M363)
+
+`research/scripts/adjudicated_rescore.py` scores an arm's fold-0 holdout npz on these 469 cells against
+the blind verdicts. It prints accuracy at cut 0.5 AND `AUC-vs-verdict`; the first three letters reported
+only the accuracy, and that column has a trivial ceiling nobody stated.
+
+**32 of the 469 cells are affirmed.** So a constant-0 predictor scores **0.932** on all-469, ~1.000 on
+tear-277 and 0.858 on Contusion-120 — above every arm ever scored here. Accuracy at a fixed cut on a
+93%-negative split ranks arms by how little they call, and the arms that mask or substitute away v2's
+over-calls are exactly the arms that call least. The v2 ruler's artefact with the sign flipped.
+
+The cut-free column settles it. All-469, ten arms:
+
+    arm                acc@0.5    AUC-vs-verdict
+    discord_mask        0.832        0.6982
+    stack_increments    0.695        0.6834
+    v5blend_span        0.693        0.6813
+    through_dense       0.542        0.6364
+    v2_corrected        0.814        0.6272
+    grade_ladder        0.795        0.6070
+    band_span (ctrl)    0.625        0.6008
+    calib_span          0.729        0.5890
+    lr4e-5_ws           0.486        0.5781
+    wsfold0_e6          0.601        0.5387
+
+Every arm is above 0.5, so the accuracy ordering was not pure under-calling — but three of the ten move
+four or more places. Three consequences:
+
+1. **`discord_mask` holds the top on both columns.** Killed on the v2 ruler at −0.0417 for masking 13.9%
+   of cells; on the gold cells it is the best thing the project has. The subtraction route re-opens on a
+   cut-free number, which is the strongest form the objection could have been answered in.
+2. **`grade_ladder`'s gold lead was calibration.** 0.795 accuracy, 0.6070 AUC — a hair over the control.
+   Its ordinal-concordance signal is independent and untouched; the gold ruler simply does not second it.
+3. **`lr4e-5_ws` is worst on both columns** among the champion's real seats, and it is the seat the v2
+   ruler ranked joint-best of the whole pool. The member most aligned with v2's error distribution wins
+   on v2 and loses on gold. That is the same artefact at member level, and it is the mechanism behind
+   three differently-seated entries all reading 0.944: the seat search was optimising v2-alignment, and
+   every v2-aligned set ties.
+
+Limits, so this column is not the next thing that has to be retracted: **tear-277 AUC is `nan`** — the
+verdict has zero variance there — so all-469 AUC is carried by the 192 non-tear cells. 32 positives makes
+the interval wide. And accuracy is still the right statistic for how an entry VOTES at a cut; it is only
+the wrong statistic for ranking members.
