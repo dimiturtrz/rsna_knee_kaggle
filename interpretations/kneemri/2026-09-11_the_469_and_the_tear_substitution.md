@@ -303,3 +303,59 @@ the corrected chain's residual error is over-deletion.** Same disease, opposite 
 batch was commissioned to price the second one, and until it reports, `v2_corrected`'s cell-level
 precision is evidence that the chain can FIND cells, not that it can FIX them. Those are different
 skills, and the board is still the only ruler that separates them.
+
+## The substitution's two directions are not one operation (D363)
+
+`balance56` was built to ask whether the corrected chain deletes true positives. It answered that, and
+then answered a question nobody had asked, which turned out to be the bigger one. 56 cells, blind,
+stratified by DIRECTION before any verdict existed:
+
+| direction | n | chain wrong (cluster != verdict) | Wilson 95% |
+|---|---|---|---|
+| neg - deletions (v2=1 -> cluster 0) | 28 | 2 = 0.071 | [0.020, 0.226] |
+| pos - additions (v2=0 -> cluster 1) | 28 | **22 = 0.786** | [0.605, 0.898] |
+
+Constant-0 floor on these 56: **0.857**, which is why neither rate may be quoted as an accuracy.
+
+**Deletions work. Additions fail catastrophically.** And the failure has one mechanism, not twenty-two:
+**21 of the 22 pos-direction errors are OA columns** (Lateral OA 11, Medial OA 8, PF OA 2, plus one
+Contusion). In every one of them the cluster asserts a compartment the report does not NAME - a report
+saying "gonarthrosis" or "femorotibial degenerative change" becomes a positive `Lateral OA` cell. This is
+the D319 compartment-assignment problem surfacing in the label table rather than in an image head. The
+rule was named in M370, with all nineteen cells listed, BEFORE the key was opened; the key then agreed.
+That is the second time in two batches that a pre-registered rule is what separated a mechanism from
+scattered noise, and the first time it was the letter rather than the manifest carrying the
+pre-registration.
+
+At corpus scale the selector holds 2,315 cells: 2,080 deletions and 235 additions. At the measured
+rates, the deletions are right ~93% of the time (about +1,934 net) and the additions are right ~21%,
+against a v2 that was right ~87% on those same cells - so the additions cost roughly **-185** relative to
+doing nothing at all, about 150 of that on OA columns.
+
+**Every table that writes both directions carries those ~185 known-wrong cells**: `v2_corrected`,
+`v6tears`, `v5blend`, `v7nontear`. `v7nontear_span` was on the card while this was being written. The
+one-directional correction is the operation the evidence licenses, and
+`research/scripts/apply_lone_dissent.py --direction down` now writes it
+(`report_labels_v2_delonly.csv`, 2,080 cells changed, 235 selector rows deliberately skipped).
+
+**The consequence for the mask-vs-substitute tie, which nothing offline had been able to move.** Every
+prior attempt came back symmetric: the gold ruler picks the mask on the ranking column (AUC 0.6982 vs
+0.6272, against a 0.932 constant-0 floor), the selector audit picks the substitution's cells (precision
+0.727 / recall 0.533 vs 0.156), and 2,301 of the substitution's 2,315 cells sit inside the mask's 7,369
+anyway. D363 is the first asymmetry with a mechanism behind it: **the mask cannot make this error,
+because it writes nothing.** Removing supervision from a cell cannot assert an unnamed compartment.
+That is a measured argument for the mask on the OA columns specifically, not a philosophical preference
+about correction versus filtering.
+
+It does not settle the tie - it prices one side of it. `corrseat` still ships tonight, but it is now
+expected to LOSE to `goldseat`, and what it measures is a TRADE (over-call replaced by over-deletion plus
+mis-addition) rather than an improvement. Writing that down before the score lands is the whole point of
+having written it down.
+
+**The one-sided disease, now across four batches.** v2's residual error is OVER-CALL: denom60's two
+wrong cells are both over-calls with zero under-calls in 60; D360's blind adjudicator sided with v2 on
+all 28 flagU cells. The corrected chain's residual error is OVER-DELETION and, as of D363,
+OVER-ASSERTION on compartments. Same disease, opposite signs, and the direction is consistent across
+four independently-built batches. A chain that finds the right cells and then writes the wrong value
+into them is demonstrating that FINDING and FIXING are different skills - which is exactly what the
+selector audit and the gold ruler have been disagreeing about all along.
