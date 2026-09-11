@@ -9153,6 +9153,12 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.straddled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
       "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
       "weight": 1
     },
@@ -46696,6 +46702,14 @@
       "descendants": 0,
       "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.stack",
       "label": "stack",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.straddled",
+      "label": "straddled",
       "level": "method",
       "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
       "role": null
