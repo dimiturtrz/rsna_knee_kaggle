@@ -162,3 +162,16 @@ v2_corrected_s2026.pt       # The 2,315-cell corrected-table arm the v2 ruler pu
                             # Contusion reading of anything on disk. Validated, not retired (D355 §2);
                             # note the AUC column puts it fifth, not second, so its accuracy lead is part
                             # calibration. Same provenance argument as the line above. Ledger 2026-09-11.
+v5blend_span_s2026.pt       # The v5 blended-table arm. v2 ruler 0.8113 (a FLOOR: it is scored against
+                            # the table it was taught not to reproduce). Seated on DECORRELATION, not on
+                            # solo: D367 measured its residual correlation with the fold-0 proxy
+                            # ensemble at 0.849 (v2) / 0.837 (T1), the LOWEST of the six candidates -
+                            # while its marginal add is -0.0025. The two rankings disagree and D367
+                            # declines to resolve them; the board is the only ruler that can. No foreign
+                            # corpus. Ledger 2026-09-11.
+v6tears_span_s2026.pt       # The tear-substitution arm. v2 ruler 0.8116. Gold cells rank 3 (0.6734) but
+                            # BROKEN on the pre-registered tear-277 split (spec 0.866 vs 0.762) - never
+                            # quote that as a lead. Rostered to make it shippable, not to seat it.
+v7nontear_span_s2026.pt     # The non-tear half of the same substitution. v2 ruler 0.8160, the best of
+                            # the three span arms on that ruler. Carries ~185 known-wrong addition cells
+                            # (D363) it cannot shed without a rebuild. Rostered, not seated.
