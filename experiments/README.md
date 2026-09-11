@@ -14049,7 +14049,9 @@ last.**
 is silent on it. It lands in the arm's own **band two** (0.8560-0.8599): *"distillation is real but
 roughly half of every distilled offline number in this repo is leak."*
 
-The full four-point table at the 224/12 seat, one control, one moved variable each time:
+The full four-point table at the 336 px / 12 sl / band 0.2-0.8 seat, one control, one moved variable
+each time (the `224/8` this section first printed is the TEACHER FILE's row geometry, not the student's —
+read off `*.metrics.jsonl` line 0, 04:22Z):
 
 | arm | teacher | offline | vs control |
 |---|---|---|---|
@@ -14076,14 +14078,24 @@ leaky arms read high. The pass-through measured last night refutes it: a teacher
 0.0067 weaker costs the student ~0.0004 — one thirteenth of the 0.0052 that has to be explained. The
 surcharge is the leak.
 
-**The verdict was already on disk and nobody read it.** `seat_clean_distill.sh`'s pre-registered middle
-band, written 2026-09-07 before that card was spent, reads: *"0.860-0.864 — a knob. Kept if free, never
-planned around, **no 8.5 h arm multiplies it**."* It landed at 0.8634, inside that band, four days ago.
-`retrain_six_distill` was then written and queued against +0.0108 anyway. The arm that would have
-prevented it had already run, pre-registered the exact conclusion, and been left unread. That is a
-process failure worth more than the measurement: **a pre-registered band that lands is a decision, and a
-decision that is not propagated is card spent for nothing.** `reading_check` guards that an arm left the
-artefact it named; nothing guards that a band which LANDED was ever acted on.
+**CORRECTION, 04:25Z — the claim this paragraph first made is false and is retracted.** It read *"the
+verdict was already on disk and nobody read it"*, and said `seat_clean_distill`'s landed band had never
+been propagated. It had. That reading is in this file twenty-one times, with the correction stated
+explicitly at README:8535-8540 — *"the distillation term is a treatment effect whose size is +0.0055,
+not +0.0107 (corrected 2026-09-08, D122/D123) … the clean twin `seat_clean_distill` is 0.8634 →
++0.0056"* — and again in its own section at README:8660, which closes: *"`retrain_six_distill`
+(knee-ygi2k) was priced here at 8.5 h of card … **That price is void and the arm is closed (2026-09-08,
+D122–D125).**"* The number AND the void were both written down three days before tonight, and the 8.5 h
+arm was already closed when last night's retraction "cancelled" it. There is no unpropagated verdict and
+no process defect here; the record did its job.
+
+**So what tonight actually adds, stated without the borrowed drama.** Three things, none of them the
+discovery of a number the repo already held: the **second corner** (336 px / 12 sl / band 0.2-0.8,
+against `lr4e-5_ws_s2026`), which turns +0.0056 from one reading into a replicated measurement; the
+**decomposition** into an honest +0.0056 and a +0.0052 leak surcharge, which prices the confound rather
+than only subtracting it; and the **6% pass-through**, which is what kills the weak-clean-teacher
+objection that a single corner could not answer. The rule that survives is the one below, not a claim
+about who read what.
 
 **What is now re-priced.** Every distilled member in the pool whose offline number was taken through a
 teacher that had seen its holdout is due a discount of about **0.005**. That includes `oof_teacher`'s
