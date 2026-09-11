@@ -14042,3 +14042,66 @@ student's +0.0108 — were taken through teachers that had seen the holdout, and
 tenth of the leak's own priced size. The tell was available before either arm ran: **when a measured
 effect matches a known artefact to two decimal places, the artefact is the first hypothesis, not the
 last.**
+
+### The honest distillation term is +0.0056, replicated at two corners, and the leak is a +0.0052 surcharge — 2026-09-11 03:15Z
+
+`seat_distill_clean` finished at 03:00Z, 12 epochs at 168 s, peak **0.8581** at e8. `convergence_check`
+is silent on it. It lands in the arm's own **band two** (0.8560-0.8599): *"distillation is real but
+roughly half of every distilled offline number in this repo is leak."*
+
+The full four-point table at the 224/12 seat, one control, one moved variable each time:
+
+| arm | teacher | offline | vs control |
+|---|---|---|---|
+| `lr4e-5_ws_s2026` | none | 0.8525 | — |
+| `seat_distill_clean_s2026` | **clean**, `teacher_clean_full.npz` | **0.8581** | **+0.0056** |
+| `seat_distill_lr4e5_s2026` | leaky, `teacher_oof_corpus.npz` | 0.8633 | +0.0108 |
+| `seat_distill_gen2_s2026` | leaky, `teacher_gen2_full.npz` | 0.8640 | +0.0115 |
+
+**Distillation is real and it is worth +0.0056. The leak is a +0.0052 surcharge on top of it**, which is
+almost exactly half of the +0.0108 that has been quoted as the per-seat distillation term since the axis
+opened.
+
+**And it replicates.** `seat_clean_distill` asked the same question on 2026-09-07 at a completely
+different corner — 336 px / 20 slices, control `band_dense_s2026` 0.8578, a different clean teacher file
+(`teacher_clean.npz`, not `teacher_clean_full.npz`) — and read **0.8634**. That is **+0.0056**. Two
+geometries, two teacher files, two control arms, the same number to four decimal places. The honest
+distillation term is a knob and it is now one of the better-measured quantities in this record.
+
+**The clean teacher's own handicap does not explain the gap, and the gen-2 probe is why we can say so.**
+The clean twins are starved of one fold and cost −0.0067 as teachers (`compose_v4b_clean.sh:47`), so the
+obvious objection is that the clean arm reads low because its teacher is weak rather than because the
+leaky arms read high. The pass-through measured last night refutes it: a teacher whose blocks read
++0.0121 better moved the same student by **+0.0007**, a pass-through of about 6%. At 6%, a teacher
+0.0067 weaker costs the student ~0.0004 — one thirteenth of the 0.0052 that has to be explained. The
+surcharge is the leak.
+
+**The verdict was already on disk and nobody read it.** `seat_clean_distill.sh`'s pre-registered middle
+band, written 2026-09-07 before that card was spent, reads: *"0.860-0.864 — a knob. Kept if free, never
+planned around, **no 8.5 h arm multiplies it**."* It landed at 0.8634, inside that band, four days ago.
+`retrain_six_distill` was then written and queued against +0.0108 anyway. The arm that would have
+prevented it had already run, pre-registered the exact conclusion, and been left unread. That is a
+process failure worth more than the measurement: **a pre-registered band that lands is a decision, and a
+decision that is not propagated is card spent for nothing.** `reading_check` guards that an arm left the
+artefact it named; nothing guards that a band which LANDED was ever acted on.
+
+**What is now re-priced.** Every distilled member in the pool whose offline number was taken through a
+teacher that had seen its holdout is due a discount of about **0.005**. That includes `oof_teacher`'s
+**0.8685**, quoted throughout this repo as the best honest solo the project owns — honestly it is nearer
+0.8635, which puts `calib_dense_hold_s2026` at 0.8634 level with it and makes the best LICENCE-CLEAN,
+leak-free solo on disk substantially worse than the record implies. The 0.874 the 0.955 target needs is
+further away than last night's numbers said, not nearer.
+
+**What is queued on the back of it.** `calib_hold_clean_distill` at 03:14Z, ~1.2 h: the best
+licence-clean corner (`calib_dense_hold`, 0.8634, `--calibrated-targets --hold-annotations`) plus the
+clean teacher at 0.7. Two orthogonal treatments measured against the SAME control at the SAME geometry
+and never combined — 0.8634 + 0.0056 = 0.8690 if additive, and its bands separate additive from damped
+from overlapping from actively fighting. The foreign-teacher cell at that corner reads higher
+(`foreign_distill_mix07`, 0.8657, +0.0079) and is closed: all three foreign members sit in
+`comp/members.declines:677-679` on licence exposure, so nothing built there can ship whatever it reads.
+
+**The rule this leaves behind, alongside last night's.** The retraction's rule was *when a measured
+effect matches a known artefact to two decimal places, the artefact is the first hypothesis.* This one
+is its complement: **a treatment that survives the removal of its confound at a smaller size is a
+finding, and the smaller size is the finding.** +0.0056 twice is worth more to this project than
++0.0108 once, because only one of the two can be added to anything.
