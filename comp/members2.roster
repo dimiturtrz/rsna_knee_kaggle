@@ -175,3 +175,16 @@ v6tears_span_s2026.pt       # The tear-substitution arm. v2 ruler 0.8116. Gold c
 v7nontear_span_s2026.pt     # The non-tear half of the same substitution. v2 ruler 0.8160, the best of
                             # the three span arms on that ruler. Carries ~185 known-wrong addition cells
                             # (D363) it cannot shed without a rebuild. Rostered, not seated.
+labelwise_depth24_s2026.pt  # 0.8617 @holdout909 midpoint, epoch 8 of 12, CONVERGED (peak is not the last
+                            # epoch). The best new solo in the label-table cohort and +0.0052 over
+                            # band_span 0.8565 - DIRECTIONAL, under the 1.5% bar, never a finding.
+                            # Seated on a different argument: D367 measured it as the ONLY candidate of
+                            # six with a POSITIVE marginal add on either ruler (+0.0012 v2 / +0.0011 T1),
+                            # and it is the only one of the six that is not a label-table variant at all -
+                            # 24 slices with labelwise slice-pooling, trained on plain v2. Its residual
+                            # correlation with the proxy is 0.897/0.888, second-HIGHEST of the six, so
+                            # gain and decorrelation disagree on it in the opposite direction to
+                            # v5blend_span. Plumbing asserted from the checkpoint's own options before
+                            # this row was written: slices=24, slice_pooling=labelwise,
+                            # calibrated_targets=True, hold_annotations=True, slices.gate.3.weight
+                            # non-zero (768 of 768). Ledger 2026-09-11.
