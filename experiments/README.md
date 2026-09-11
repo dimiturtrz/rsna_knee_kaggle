@@ -14185,3 +14185,47 @@ this corner's honest price.
 **The rule.** A flag pair introduced together and never separated is not two treatments, it is one
 treatment with a two-word name — and a ledger that prices the flags separately will mis-credit both.
 Before crediting ANY flag, check whether a run exists that carries it alone.
+
+### The calib x hold interaction REPLICATES at a second slice count — eight runs, two 2x2s, agreeing to 0.0015 — 2026-09-11 05:00Z
+
+The factorial section above reports the interaction at 20 slices. It is not a one-corner accident. The
+same 2x2 exists at 12 slices, was run weeks earlier, and this ledger has been carrying it as a separate
+puzzle headed "0.0092, SIGN INVERTED" (README:4743) rather than as the same term. Read off
+`*.metrics.jsonl` line 0, zero card spent:
+
+| slices | control | + hold | + calib | + both | additive predicts | measured | **interaction** |
+|---|---|---|---|---|---|---|---|
+| 12 | `band_span` 0.8565 | `band_span_hold` 0.8493 (**-0.0072**) | `calib_span` 0.8545 (**-0.0020**) | `calib_span_hold` **0.8565** | 0.8473 | 0.8565 | **+0.0092** |
+| 20 | `band_dense` 0.8578 | `band_dense_hold` 0.8573 (-0.0005) | `calib_dense` 0.8562 (-0.0016) | `calib_dense_hold` **0.8634** | 0.8557 | 0.8634 | **+0.0077** |
+
+Every one of the eight is 336 px / band 0.1-0.9 / 12 epochs / 4e-5 / max / whole-stack; the two quads
+differ from each other in SLICE COUNT and in nothing else.
+
+**+0.0092 and +0.0077 is a replication.** Two independent 2x2s at different slice counts put the
+interaction term within 0.0015 of each other — well inside the 0.0071 noise bar that each individual
+cell carries, while the term itself is larger than that bar in both quads. Four main effects, all four
+negative or nil (-0.0072, -0.0020, -0.0005, -0.0016). This is no longer a curiosity read off six runs at
+one corner; it is the most reproducible term this ledger holds about either flag.
+
+**AND IT CHANGES WHAT THE PAIR IS WORTH.** At 12 slices the pair does not GAIN anything: 0.8565 against
+a control of 0.8565, exactly. The interaction is real and it is worth +0.0092, but all of it is spent
+repairing the -0.0092 the two flags do on their own. Only at 20 slices does the pair come out ahead
+(+0.0056), because there the individual damage is nearly zero (-0.0021 together) while the interaction
+stays the same size. So the correct statement is:
+
+> The pair is a REPAIR, not a gain. Its benefit is the removal of a mutual defect, and it nets positive
+> only where each flag alone happens to cost little — which is the dense corner and not the sparse one.
+
+That also retires "calibration is corner-specific", which this ledger has now recorded five times. The
+corner-dependence is not in the interaction (it replicates) — it is in the MAIN EFFECTS, which are what
+decide whether the repair clears zero. At 12 slices `--hold-annotations` alone costs -0.0072, at 20 it
+costs -0.0005. It is the hold flag's solo damage that is corner-specific, and nobody was looking at it
+because it had never been run alone at the dense corner until `band_dense_hold`.
+
+**Two prose defects found in the same reading, both the 224/12 kind.** The `*_span` runs are recorded in
+this file as the "0.2-0.8 span" family. Their recipes say **band 0.1-0.9 at 12 slices** — identical band
+to the dense quad. Whatever `band_span` was named for, the file says the flag is slices. And
+README:4743's "calibration at the span corner ... SIGN INVERTED" is this interaction seen from one side:
+it compares calibration's effect WITHIN the hold family (+0.0072) against WITHOUT it (-0.0020) and calls
+the 0.0092 difference an inversion. That difference IS the interaction term, to four decimals, and the
+2x2 it belongs to was already complete on disk when the line was written.
