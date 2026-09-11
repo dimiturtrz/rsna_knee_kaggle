@@ -1066,3 +1066,25 @@ ortho_fastmri_s2026  # DECLINED ON LICENCE, not on score, and it may never be re
 # average +0.0040), so the premise this arm was queued on is already falsified and its result closes
 # the site axis rather than optimising it. See experiments/README.md 2026-09-10 and knee-i3ahx.
 ortho_fastmri_masked_s2026  # DECLINED ON LICENCE, not on score; fitted on mergedf, see the block above.
+
+# --- 2026-09-11 sweep. Four of these are declined on the SECOND honesty filter, which no score can
+# argue with: a holdout npz whose studies vector is not the canonical 909 is a number about a
+# different population, and substituting it into any pool statistic is the cut error CLAUDE.md names.
+oof_gen2_fold1_s2026        # n=875, not 909. Reads 0.8707, which is MEANINGLESS beside the pool: a
+                            # smaller holdout drawn by fold geometry, not the canonical one. Not a
+                            # judgement on the member — it has never been scored on a comparable cut.
+oof_gen2_fold2_s2026        # n=884, not 909. Reads 0.8733. Same defect, same reason.
+oof_gen2_fold3_s2026        # n=849, not 909. Reads 0.8814 — the highest apparent number in the whole
+                            # sweep and the least believable, since it is the SMALLEST holdout. This is
+                            # what the honesty filter exists to catch; it would have entered the pool as
+                            # the second-best member this project owns.
+oof_gen2_fold4_s2026        # n=890, not 909. Reads 0.8820. Same defect, same reason.
+hold_clean_distill_s2026_run1  # TRUNCATED at epoch 1 (its sibling ran to 8). 0.8172 is a FLOOR, not a
+                            # score, and convergence_check classes it TRUNCATED. Re-open by re-running,
+                            # never by quoting this number.
+v8named_span_s2026          # 0.8468 @holdout909 midpoint, peak at ep 8 — BELOW the band_span control at
+                            # 0.8565 on its own axis. The v8-named label table was the deliberate
+                            # variable and it lost to the control, so this is the reading, not a failure
+                            # to reach it. Declined on its own refutation.
+confident_span_s2026        # 0.8449 @holdout909 midpoint, ep 9 — below the pool median of 0.8470.
+                            # Confidence-filtered supervision, measured, and it costs rather than pays.
