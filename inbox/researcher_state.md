@@ -6,7 +6,23 @@
 # stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
 # estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
-## LATEST (17:10Z) — M358 verified + answered (D352): Simpson's paradox confirmed; next free letter D353; main last seen M358 (17:08Z)
+## LATEST (17:23Z) — M359 answered (D353): gold rescore built, INVERTS the v2 ruler; next free letter D354; main last seen M359 (17:19Z)
+- Harness: research/scripts/adjudicated_rescore.py (npz + holdout469 key + verdicts; splits
+  tear-277/nontear-192/contusion-120/all-469; two stems → paired McNemar).
+- FIRST GOLD-RULER READ (v6tears at e2, EARLY — re-score at e12): tear-277 acc band_span 0.693 <
+  v5blend 0.762 < **v6tears 0.866** (McNemar 39–10); all-469 0.625→0.693→0.795. On the v2 ruler the
+  same arms read 0.8565 → 0.8113 → 0.755 — MONOTONE WORSE with more correction. **The v2 ruler's
+  anti-correction gradient is measured as artefact on gold: it penalises each arm in proportion to
+  how much of v2's error it unlearned.** The table chain must be read on the adjudicated rescore +
+  T1, never the v2 ruler.
+- Anomaly to re-check at e12: v6tears also jumps on NON-tear (0.693) and Contusion (0.675) cells
+  despite changing only tear labels — shared-feature liberation or early-epoch artefact.
+- Chain (his card): v5blend_span DONE (peak 0.8113 v2-ruler), v6tears_span running, v7nontear_span
+  queued. 469/334 studies/1.4 cells per study; tear split one-sided by construction.
+- OPEN: re-score v6tears at e12 + add remainder-control (agreement with npz v2-truth outside the
+  1,379 corrected cells) to the harness.
+
+## PRIOR LATEST (17:10Z) — M358 verified + answered (D352): Simpson's paradox confirmed
 - Main's re-cut reproduces exactly on my join: Contusion hi-margin cluster 0.780 / lo 0.861 (INVERTED);
   OA-family hi 0.783 / lo 0.294. My D351 aggregate was Contusion's 0.833 base rate leaking through a
   shared margin threshold — recorded as my error.

@@ -14936,3 +14936,50 @@ cells (D335/D336) overwritten with the foreign cluster's SOFT value, pre-registe
 **What this does NOT license.** Nothing here says the labels are clean — the blind 402-cell adjudication
 and the gold-58 cross-check both put v2's error on disagreement-selected cells at 75%. It says removing
 supervision is the wrong response to that error, which is a statement about the REMEDY, not the defect.
+
+## The label-SUBSTITUTION chain, and the v2 ruler inverts it (2026-09-11)
+
+Masking supervision costs score (the section above). Substituting a corrected value for it is the other
+remedy, and it is the one the blind 469-cell adjudication licensed. Three arms, same recipe as the
+masking section, same fold-0 909-study holdout, `--eval-labels` pinned to `report_labels_v2` throughout:
+
+| arm | table | cells substituted | best holdout (v2 ruler) |
+|---|---|---|---|
+| `band_span` (control) | v2 | 0 | **0.8565** (e6) |
+| `v5blend_span` | v5blend | reader-blend | 0.8113 (e5, then monotone decline to 0.7984 by e11) |
+| `v6tears_span` | v6tears | 1,379 contested TEAR cells | *running* |
+| `v7nontear_span` | v7nontear | +703 contested NON-TEAR cells | *queued* (knee-lv4fx) |
+
+On the v2 ruler the chain is monotone WORSE with more correction. **That ordering is an artefact of the
+ruler, and it is now measured rather than suspected.**
+
+### The gold ruler, and it orders the same arms the opposite way
+
+469 cells were hand-adjudicated blind, ten chunks, key sealed until the last verdict was on disk
+(`interpretations/kneemri/2026-09-11_the_469_and_the_tear_substitution.md`). They are inside this same
+fold-0 holdout, and no table can contaminate them: they were written before any of these tables existed.
+`research/scripts/adjudicated_rescore.py` scores an arm's holdout npz on those cells alone.
+
+| split (n) | `band_span` | `v5blend_span` | `v6tears_span` |
+|---|---|---|---|
+| tear-277 | 0.693 | 0.762 | **0.866** |
+| nontear-192 | 0.526 | 0.594 | 0.693 |
+| Contusion-120 | 0.483 | 0.500 | 0.675 |
+| all-469 | 0.625 | 0.693 | 0.795 |
+
+Paired McNemar on the tear cells: v6tears-only 39 against v5blend-only 10; v5blend over band_span 31–12
+the same way. **PROVISIONAL — the `v6tears_span` column was read at epoch 2 of 12 off a live-written npz
+and must be re-scored when the arm lands.** The `band_span` and `v5blend_span` columns are final.
+
+### What this means for every other number in this file
+
+The v2 ruler penalises an arm roughly in proportion to how much of v2's error the arm unlearned. So a
+number recorded here for an arm whose `--labels` was NOT `report_labels_v2` while its `--eval-labels` was
+carries a bias whose SIGN is now known. Arms on that axis that read flat or slightly negative are exactly
+the signature the artefact produces, and a kill delivered by a biased ruler is not a kill. The audit of
+which rows could flip is open (M360); until it closes, **do not quote a v2-ruler delta for a
+corrected-table arm as a verdict.**
+
+The adjudicated rescore is the chain's primary ruler. Its limits, stated: 469 cells over 334 studies,
+mean 1.4 cells per study so the cells are not independent, and the tear split has zero variance on the v2
+side by construction — its McNemar is a count, not a test.
