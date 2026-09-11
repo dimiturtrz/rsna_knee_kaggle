@@ -13754,3 +13754,50 @@ above.** It is left to finish rather than killed for one reason only: it is the 
 the alternative was not a better arm, it was no arm. Its result is pre-declared here as an **offline
 close on fastMRI either way** — a win does not re-open a shippable path, because there is no shippable
 path.
+
+### CORRECTION, 2026-09-11 00:19Z — the masked arm PRODUCED the signature the paragraph above calls falsified
+
+The sentence "its premise is falsified by the table above" was written before the masked arm had a
+number, off the unmasked arm's per-finding shape. It is wrong, and the arm's own breakdown is why.
+
+`ortho_fastmri_masked_s2026` peaks at **0.8464** (e6 of 12) against control `ortho_dense` **0.8452**
+and unmasked `ortho_fastmri` **0.8475** — so on the SCALAR the masked arm is flat, which is what the
+scalar was always going to say. The per-finding table against the same control is not flat:
+
+| finding | fastMRI grades it | `ortho_dense` | `ortho_fastmri_masked` | delta |
+| --- | --- | --- | --- | --- |
+| ACL | yes | 0.8879 | 0.8943 | **+0.0064** |
+| MCL | yes | 0.7961 | 0.8046 | **+0.0085** |
+| Effusion | yes | 0.8425 | 0.8488 | **+0.0063** |
+| Medial Meniscus | no | 0.8875 | 0.8811 | −0.0064 |
+| Lateral Meniscus | no | 0.8099 | 0.8113 | +0.0013 |
+| Medial OA | no | 0.8718 | 0.8718 | −0.0000 |
+| Lateral OA | no | 0.7980 | 0.8061 | +0.0081 |
+| PF OA | no | 0.8294 | 0.8324 | +0.0029 |
+| Synovitis | no | 0.8648 | 0.8379 | **−0.0269** |
+| Baker's | no | 0.8876 | 0.8977 | +0.0101 |
+| Contusion | no | 0.8599 | 0.8665 | +0.0066 |
+| Fracture | no | 0.8066 | 0.8039 | −0.0027 |
+
+The three columns fastMRI actually grades average **+0.0071** here, against **−0.0025** for the same
+three columns unmasked — a **+0.0096 swing on exactly the columns the masking mechanism names**, and
+nothing else in the arm touches those three selectively. That is the pre-registration in
+`arms/ortho_fastmri.sh` firing: the absence prior WAS eating the gain, and setting the nine ungraded
+columns to weight 0.0 (NaN, `Targets.load`'s `said = ~np.isnan(value)`) recovered it.
+
+What eats the scalar is **Synovitis −0.0269**. It is not masking noise: the unmasked arm reads
+**−0.0159** on the same column, same direction, and Synovitis is the one finding where a merged corpus
+of knees acquired for a different question can plausibly shift the decision boundary. That column, not
+the mechanism, is the open question — and it is a question about MERGES, not about fastMRI.
+
+**What does NOT change.** Both arms stay declined and the axis stays offline-only: NYU grants fastMRI
+"for internal research or educational purposes only" and forbid distributing "any subsequent variables
+or data files derived from the fastMRI Dataset", so no member fitted on any merge of ours is shippable.
+The site axis also stays closed on the scalar, now with four readings all inside noise —
+`merged3_corpus` +0.0043 / −0.0024, `ortho_fastmri` +0.0023, `ortho_fastmri_masked` +0.0012.
+
+**What this costs going forward.** A mechanism that lands +0.0071 on the columns it supervises is worth
+carrying into a corpus we may actually ship — the finding is "column masking recovers foreign-corpus
+transfer", and it was measured on the one corpus whose licence forbids using it. The transferable form
+is: any merge whose extra corpus grades a SUBSET of our twelve findings must blank the rest to NaN
+rather than teach them as absent, and must be read per-column rather than on the mean.

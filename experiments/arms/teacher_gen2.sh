@@ -36,7 +36,11 @@
 # is exist and cover 4407 studies, which `oof_teacher` then asserts by refusing a short corpus. The
 # reading that matters is the CONSUMER's, and the consumer is the second retrain.
 #
-# COST five eight-epoch fits at 224 px. `oof_folds` measured ~1.2 h per fold, so about **6 h of card**
+# COST five eight-epoch fits at 224 px. The "~1.2 h per fold" this line quoted came from prose, not from
+# a metrics file, and it is wrong by about six times. MEASURED 2026-09-11 off the `seconds` field of the
+# last epoch of every `oof_*.metrics.jsonl` on disk: `oof_fold0..4` ran **86-88 s per epoch**, the band
+# twins 67-74 s, the clean twins 66-67 s. Eight epochs at 88 s is ~12 min a fold, so five folds are
+# about **1 h of card**
 # and zero submission slots. It is the arm to run on the branch where `seat_distill` did NOT clear —
 # multiplying a damped term buys 0.952 at best, and a bigger term is what the retrain then multiplies.
 #
