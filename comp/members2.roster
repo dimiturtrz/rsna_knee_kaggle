@@ -142,3 +142,23 @@ resnet_224_short_s2026.pt   # 0.8527 solo (peak e8, 12 epochs, converged) — TH
 # shelf 1 is where they are and this file may not name them. The rule to take forward: check
 # `comp/members.roster` for the name BEFORE adding a line here — the shelf split is about what has not
 # been pushed yet, never about what is convenient to mount.
+
+                            # against its solo, and expect the divergence to be where its value is if
+                            # it has any. Ledger 2026-09-10.
+discord_mask_s2026.pt       # The masked-table arm the v2 ruler killed at -0.0417 and the gold cells put
+                            # FIRST. Trained with the 7,369 four-way-extractor-discordant cells masked
+                            # (13.94% of cells), evaluated against v2 — which is why it read as a kill:
+                            # the ruler scored the missing BIAS as missing supervision. On the 469
+                            # blind-adjudicated holdout cells it is the best member on disk on BOTH
+                            # columns, accuracy 0.832 and AUC-vs-verdict 0.6982 (M363, 2026-09-11), and
+                            # the AUC column is the cut-free one, so the lead is not under-calling.
+                            # Rostered to make it SHIPPABLE — its ledger row still says killed and that
+                            # row is not yet retracted. Read it as a diversity seat against v2-aligned
+                            # members, which is exactly what it is: it never saw the cells they overfit.
+                            # No foreign corpus is fitted; the discordance selector is four extractors
+                            # reading OUR reports. Ledger 2026-09-11.
+v2_corrected_s2026.pt       # The 2,315-cell corrected-table arm the v2 ruler put in band 3. Gold cells
+                            # 0.814 accuracy / 0.6272 AUC all-469, and 0.883 on Contusion-120 — the best
+                            # Contusion reading of anything on disk. Validated, not retired (D355 §2);
+                            # note the AUC column puts it fifth, not second, so its accuracy lead is part
+                            # calibration. Same provenance argument as the line above. Ledger 2026-09-11.
