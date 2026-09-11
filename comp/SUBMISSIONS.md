@@ -3840,3 +3840,76 @@ the blind-adjudicated **gold** ruler, not on T1; their question is whether MASKI
 discordant cells produces a better MEMBER — the one axis this row leaves open. One caution does
 transfer, and it is written here before their scores land: **an offline ruler that named a preference
 has already failed to transfer it once tonight.**
+
+## `goldseat_v1` — 0.944, ref 56172032, 2026-09-11 — the gold ruler named a preference too, and the board declined it as well
+
+The section above ends with a caution written before this score landed: *"an offline ruler that named a
+preference has already failed to transfer it once tonight."* It has now failed twice, and the second
+ruler was the strongest one this project owns.
+
+One seat moved out of the champion six. `lr4e-5_ws_cf` OUT — AUC against blind hand-adjudicated
+verdicts **0.5781**, the worst of the champion's six on that ruler, and the member the v2 ruler ranked
+joint-best of the entire pool. `discord_mask_s2026` IN — **0.6982**, rank 1 of everything on disk. All
+469 gold cells were adjudicated blind with the key sealed until the last verdict was written. A
+**+0.0970** cut-free lead, and the board moved by **zero**: 0.944 against the champion's 0.944.
+
+**Say the magnitude before the verdict.** 0.944 against 0.944 is a null, not a loss. D368 puts the
+board's estimability floor at ~0.003 with the score quantized to 0.001, so this row cannot separate "the
+gold ruler's preference is worth nothing at the operating point" from "it is worth less than the board
+can see". What it does refute is the **size**: +0.0970 on the ruler bought at most +0.0005 on the board.
+
+**What this closes.** Twelfth seating entry to fail to beat 0.944, and the second in one evening. Eight
+board rows now read exactly 0.9440 across nine distinct seatings. The seating axis has been tried on
+three rulers — v2, the corrected T1, and now the blind gold adjudication — and all three named a
+preference the board declined. The gold one was the strongest remaining form of the hypothesis, because
+it is the only ruler that was **not fitted on the same labels the members were trained under**. Seating
+is saturated on every ruler available.
+
+**The one thing that did resolve, and it is worth the slot by itself.** D367 priced `discord_mask`'s
+marginal add at **−0.0029** on the v2 ruler and **−0.0019** on the corrected T1, while the gold ruler
+called it the best member on disk. Two rulers in direct contradiction about the same member. The board
+says **neither**: it says zero. The proxy's negative did not transfer any more than the gold's positive
+did — which means the disagreement between them was never about the board at all. A label-table member
+is scored by the v2 proxy under the very labels it declines to use, so that cost is now measured as an
+**artefact** rather than a finding, and it should stop being quoted against label-table members.
+
+**What it does not close.** Nothing about the mask **mechanism**. `discord_mask` writes nothing where
+readers disagree, and D363/D365 give that a real target: the substitution family's addition direction is
+78.6% wrong, 21 of 22 errors land on OA columns, and a lone dissent against v2 is 0.850 wrong where it
+**asserts** against 0.017 where it **withholds**. A member that cannot make that error is still the
+right shape. This row says only that swapping one seat for it inside a saturated seating does not move a
+saturated number. Its sensitivity cost stays **unreadable** at 32 affirmed cells.
+
+## `oofsolo_v1` — 0.926, ref 56065873, 2026-09-07 — priced in `board.jsonl`, and until now named nowhere here
+
+This entry has carried a row since the day it scored and never had a section, which is the hole
+`board_check` names. It is the entry that **caught the fold-0 leak**, so the omission was not a small
+one.
+
+The argument ran entirely on this file's own solo calibration. Solos of this family transfer
+offline → board at about 0.79 board points per offline point: `spansolo_v1` 0.8545 → 0.921 and
+`holdsolo_v1` 0.8634 → 0.928. `oof_teacher_s2026` read **0.8681 offline, above `holdsolo`**, and both
+anchors extrapolated it to 0.932. It scored **0.926** — *below* `holdsolo`, a pass-through of 0.37 from
+the low anchor and **negative** from the high one, against a pre-registration naming ≤0.928 as "the
+teacher's fold structure is the first suspect". It was, and the code said so: `ReportFolds.holdout` puts
+fold 0 in every `--fold k` training set.
+
+**Amended 2026-09-11, and the amendment matters more than the original.** The size of the leak was
+re-measured on a genuinely **matched** pair. `oof_teacher.sh` and `seat_clean_distill.sh` are identical
+`run_train` blocks apart from `--teacher-targets` — leaky `teacher_oof_corpus.npz` against clean
+`teacher_clean.npz` — and they read **0.8685 vs 0.8634 @holdout909 midpoint**. The transferred leak is
+**+0.0051**, which is the entire margin by which that member led the pool.
+
+D374 had read the same term as ~zero off `seat_distill_lr4e5` against the 20-slice clean student, a pair
+confounded on **slice count and band** — both attributes D371 prices positive. So D374 was wrong in its
+argument, and so was its retraction, which cited the same confounded pair from `oof_teacher.sh`'s own
+header. Only the void's **conclusion** survives both. The matched pair is now the only correct
+measurement in that file, and the header should say so.
+
+**The honest pool maximum is 0.8649 (`clean_calib_s2026`), not 0.8685.** Every entry built after this
+amendment is seated against that number.
+
+**What it bought.** An un-leaked ruler, and a flag — `--exclude-fold` — that can state "drop this fold
+from TRAINING without putting it in the holdout", which nothing in this repo could express before. It
+also seeded the finding that closed the night: teacher exposure is a **fourth honesty filter** that none
+of the three enforced ones reads, and twelve members of the packaged honest pool fail it.
