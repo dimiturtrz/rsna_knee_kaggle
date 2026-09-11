@@ -8,6 +8,7 @@ import torch
 
 from core.data.corpus.fastmri_corpus import (
     ACQUISITION,
+    CARTILAGE_LOSS,
     FASTMRI_CORPUS,
     FASTMRI_PLANE,
     FASTMRI_SEQUENCE,
@@ -17,6 +18,7 @@ from core.data.corpus.fastmri_corpus import (
     PLAIN_ACQUISITION,
     POSITIVE_LEVEL,
     READER_CONFIDENCE,
+    READINGS,
     RECONSTRUCTION,
     FastmriCorpus,
     Reading,
@@ -80,9 +82,10 @@ def _annotations(
     path = tmp_path / "Annotations"
     path.mkdir(parents=True, exist_ok=True)
     rows = [
-        {"file": "file100", "slice": 12, "label": "Ligament - ACL High Grade Sprain"},
-        {"file": "file100", "slice": 14, "label": "Meniscus Tear"},
-        {"file": "file101", "slice": 9, "label": "Ligament - ACL Low Grade sprain"},
+        {"file": "file100", "slice": 12, "label": "Ligament - ACL High Grade Sprain", "x": 150.0, "width": 20.0},
+        {"file": "file100", "slice": 14, "label": "Meniscus Tear", "x": 80.0, "width": 20.0},
+        {"file": "file100", "slice": 15, "label": "Meniscus Tear", "x": 230.0, "width": 20.0},
+        {"file": "file101", "slice": 9, "label": "Ligament - ACL Low Grade sprain", "x": 100.0, "width": 10.0},
     ]
     boxes = pd.DataFrame([row for row in rows if row["file"] in boxed])
     boxes.to_csv(path / "knee.csv", index=False)
@@ -288,10 +291,51 @@ def test_labels(tmp_path: Path):
     assert table.index.tolist() == ["file100", "file101"]
     assert table.loc["file100", "ACL"] == POSITIVE_LEVEL
     assert table.loc["file101", "ACL"] == NEGATIVE_LEVEL, "a low-grade sprain is below our threshold"
-    assert pd.isna(table.loc["file100", "Medial Meniscus"]), "a tear with no side leaves both columns unlabelled"
+    assert table.loc["file100", "Medial Meniscus"] == POSITIVE_LEVEL, "boxed in both compartments, so in this one"
+    assert table.loc["file100", "Lateral Meniscus"] == POSITIVE_LEVEL, "and in the other one, symmetrically"
     assert table.loc["file101", "Medial Meniscus"] == NEGATIVE_LEVEL
     assert "Synovitis" not in table.columns, "the vocabulary has no synovial term; the readers were never asked"
     assert set(table["ACL__conf"]) == {READER_CONFIDENCE}
+
+
+def test_straddled(tmp_path: Path):
+    """A term boxed on BOTH sides of the compartment trough is located; one boxed on one side is not.
+
+    Keyed like `read`, so a study that was listed and never boxed answers with an empty set rather than
+    being absent — the same denominator rule, for the same reason.
+    """
+    straddling = FastmriCorpus(_root(tmp_path), _annotations(tmp_path), _cache(tmp_path)).straddled()
+
+    assert set(straddling) == {"file100", "file101", "file102"}
+    assert straddling["file100"] == frozenset({"Meniscus Tear"}), "boxed at 90 and at 240, either side of 165"
+    assert straddling["file101"] == frozenset(), "one box cannot straddle"
+    assert straddling["file102"] == frozenset(), "listed, never boxed"
+
+
+def test_verdict_keeps_blocking_the_negative_when_a_coarse_term_sits_on_one_side():
+    """The compartment rule ADDS a positive; it never turns a one-sided tear into a negative.
+
+    A tear boxed in one compartment still proves a tear is present and still cannot say which compartment
+    it is, which is the case `coarse` was written for and the case the geometry does not resolve.
+    """
+    reading = READINGS["Medial Meniscus"]
+    seen = frozenset({"Meniscus Tear"})
+
+    assert reading.verdict(seen, frozenset()) is None, "present, unlocated: no gradient either way"
+    assert reading.verdict(seen, seen) == POSITIVE_LEVEL
+    assert reading.verdict(frozenset(), frozenset()) == NEGATIVE_LEVEL
+
+
+def test_verdict_refuses_the_compartment_rule_for_a_column_that_is_in_no_pair():
+    """`PF OA` has no contralateral half, so straddling says nothing about it and must not assert.
+
+    The cartilage columns are left non-compartmental for a different reason — the rule fires on 15 studies
+    there, which is the n=4 MCL number one decimal place up — and this asserts the structural half.
+    """
+    straddling = frozenset(CARTILAGE_LOSS)
+
+    assert READINGS["PF OA"].verdict(straddling, straddling) is None
+    assert not READINGS["Medial OA"].compartmental, "15 studies is not a sample, it is a coincidence"
 
 
 def test_labels_skips_a_volume_that_was_never_read(tmp_path: Path):

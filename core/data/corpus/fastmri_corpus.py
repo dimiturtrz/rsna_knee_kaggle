@@ -141,6 +141,25 @@ on it cannot capture the wrong one.
 FILE_COLUMN = "file"
 SLICE_COLUMN = "slice"
 LABEL_COLUMN = "label"
+X_COLUMN = "x"
+WIDTH_COLUMN = "width"
+
+COMPARTMENT_TROUGH = 165.0
+"""Where the medial and lateral compartments part, in reconstruction pixels of the 320-wide matrix.
+
+MEASURED, NOT CHOSEN. Every one of the 973 train exams is `CORPD_FBK` or `CORPDFS_FBK` — CORONAL, read
+off the `acquisition` attribute of all 973 files and confirmed by `protocolName` COR in the ISMRMRD
+header. So image x IS the medial-lateral axis, and the 5,658 meniscus box centres (`x + width/2`) fall in
+two clusters with a deep trough between them: over a 32-bin histogram the interior minimum sits at 165.0,
+against peaks near 90 and 235 carrying more than a thousand boxes each. The value is the argmin of that
+histogram between 100 and 220, not a midpoint and not a median — the median, 196.5, lies INSIDE the upper
+cluster and would cut it in half.
+
+This matters because the plane is what makes the axis mean anything. On a SAGITTAL knee the same centre-x
+would be the anterior-posterior axis and the two clusters would be the anterior and posterior horns of one
+meniscus, which is a different finding entirely. Check the acquisition before reusing this constant on
+another corpus; `Annotations/brain.csv` obviously has no compartments at all.
+"""
 
 POSITIVE_LEVEL = 0.82
 """What a boxed finding that meets our criterion is worth on the level scale.
@@ -205,14 +224,38 @@ class Reading:
     would assert two lesions where one was read, and not negative on both, which would be false.
     """
 
-    def verdict(self, seen: frozenset[str]) -> float | None:
+    compartmental: bool = False
+    """Whether this column is one half of a `core.findings.COMPARTMENT_PAIRS` pair.
+
+    A pair is two columns describing ONE finding that differ only in where it sits, so a coarse term that
+    is boxed in BOTH compartments of a coronal exam has located itself in both without anyone having to
+    say which compartment is which. That is the whole trick, and it is why this needs no laterality: the
+    rule is symmetric under swapping the sides, so it survives not knowing whether the knee is a left or a
+    right one — which nothing in fastMRI states (no laterality in the ISMRMRD header, no side column in
+    the file list, and a knee coil that is the same coil either way).
+
+    It buys the meniscus pair 190 studies and therefore 380 positive cells, in two columns that held
+    ZERO. It is deliberately NOT claimed for the cartilage pair, where the same rule fires on 15 studies —
+    the n=4 MCL number this module already records as unusable, one decimal place up. And `PF OA` is not
+    compartmental because it is in no pair: the patellofemoral joint has no contralateral half to straddle.
+    """
+
+    def verdict(self, seen: frozenset[str], straddling: frozenset[str] = frozenset()) -> float | None:
         """This finding's level for a study whose boxed terms are `seen`, or None to leave it unlabelled.
 
         None is the mechanism, not a gap. `Targets.pair` gives an absent column weight 0.0 and score 0.5,
         so a finding this corpus cannot speak to contributes no gradient at all — which is the whole
         reason a one-column corpus like Rijeka's is usable beside a twelve-column one.
+
+        `straddling` is the subset of `seen` whose boxes fall on BOTH sides of `COMPARTMENT_TROUGH`. A
+        compartmental column reads that as a positive, because a finding boxed in both compartments is
+        present in this one whichever compartment this one turns out to be. A term seen on one side only
+        keeps blocking the negative exactly as before — it proves the finding is somewhere and cannot say
+        where, which is the case `coarse` was written for.
         """
         if any(term in seen for term in self.positive):
+            return POSITIVE_LEVEL
+        if self.compartmental and any(term in straddling for term in self.coarse):
             return POSITIVE_LEVEL
         if any(term in seen for term in self.coarse):
             return None
@@ -253,8 +296,8 @@ radiologist meant.
 READINGS: dict[str, Reading] = {
     "ACL": Reading(positive=("Ligament - ACL High Grade Sprain",)),
     "MCL": Reading(positive=("Ligament - MCL High Grade sprain",)),
-    "Medial Meniscus": Reading(coarse=MENISCUS_TERMS),
-    "Lateral Meniscus": Reading(coarse=MENISCUS_TERMS),
+    "Medial Meniscus": Reading(coarse=MENISCUS_TERMS, compartmental=True),
+    "Lateral Meniscus": Reading(coarse=MENISCUS_TERMS, compartmental=True),
     "Medial OA": Reading(coarse=CARTILAGE_LOSS),
     "Lateral OA": Reading(coarse=CARTILAGE_LOSS),
     "PF OA": Reading(coarse=CARTILAGE_LOSS),
@@ -437,6 +480,31 @@ class FastmriCorpus:
         logger.info(f"{len(seen)} studies read, {sum(1 for terms in seen.values() if terms)} carrying a box")
         return seen
 
+    def straddled(self) -> dict[str, frozenset[str]]:
+        """Per study, the terms boxed on BOTH sides of `COMPARTMENT_TROUGH` — located without a laterality.
+
+        Keyed like `read`, so a study with no box appears with an empty set rather than absent, and a term
+        boxed only once cannot straddle by arithmetic. Boxes with no coordinates are dropped: 13 of the
+        16,167 rows carry a study-level label and no geometry, and averaging a NaN into a centre would make
+        every term in those studies vanish from both sides at once.
+
+        The 16,167 box coordinates were read and discarded here until 2026-09-11 (knee-1w6t), which is why
+        `Medial Meniscus` and `Lateral Meniscus` shipped holding not one positive between them.
+        """
+        boxes = pd.read_csv(self.annotations / "knee.csv")
+        boxes.columns = [str(column).strip() for column in boxes.columns]
+        listed = pd.read_csv(self.annotations / "knee_file_list.csv", header=None)
+        straddling: dict[str, frozenset[str]] = {str(name): frozenset() for name in listed.iloc[:, 0]}
+        located = boxes[boxes[X_COLUMN].notna() & boxes[WIDTH_COLUMN].notna()].copy()
+        located["centre"] = located[X_COLUMN] + located[WIDTH_COLUMN] / 2
+        for identifier, group in located.groupby(FILE_COLUMN):
+            below = set(group.loc[group["centre"] < COMPARTMENT_TROUGH, LABEL_COLUMN].astype(str))
+            above = set(group.loc[group["centre"] >= COMPARTMENT_TROUGH, LABEL_COLUMN].astype(str))
+            straddling[str(identifier)] = frozenset(below & above)
+        carrying = sum(1 for terms in straddling.values() if terms)
+        logger.info(f"{len(located)} located boxes, {carrying} studies carry a term in both compartments")
+        return straddling
+
     def metadata(self) -> list[StudyMetadata]:
         """What each exam was acquired with — the corpus whose geometry is STATED rather than derived.
 
@@ -474,15 +542,17 @@ class FastmriCorpus:
         column.
         """
         seen = self.read()
+        straddling = self.straddled()
         rows = []
         for volume in self.volumes():
             terms = seen.get(volume.identifier)
             if terms is None:
                 continue
+            located = straddling.get(volume.identifier, frozenset())
             row: dict[str, str | float] = {STUDY: volume.identifier}
             for target in TARGETS:
                 reading = READINGS.get(target)
-                level = None if reading is None else reading.verdict(terms)
+                level = None if reading is None else reading.verdict(terms, located)
                 if level is not None:
                     row[target] = level
                     row[f"{target}__conf"] = self.confidence
