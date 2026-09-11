@@ -14867,3 +14867,51 @@ the excess to system RAM over PCIe. The number above is sound (allocation never 
 own prediction), but it was bought at roughly four times its quiet-card price. Fixed in `d212242d`
 (`DESKTOP_RESERVE_GB`); the eighth cell was killed at epoch 1 and relaunched under the fix, and its gate
 now reads 28934 MiB admitted. Quote the relaunch's epoch times, not this one's.
+
+## The label-masking axis: both selectors cost score, and the cost is NON-MONOTONIC (2026-09-11)
+
+Two arms, one control, disjoint selectors, same recipe (`$RECIPE --epochs 12 --slice-pooling max
+--whole-stack --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9`, fold 0). Both
+`--eval-labels` pinned to `report_labels_v2` so the comparison is label CONTENT and never a ruler
+change (knee-df7t).
+
+| arm | selector | masked | best holdout | vs control |
+|---|---|---|---|---|
+| `band_span` (control) | — | 0% | **0.8565** | — |
+| `confident_span` | extractor self-reported confidence below threshold | 27.3% (14,445 cells) | 0.8449 | **−0.0116** |
+| `discord_mask` | four-way cross-extractor disagreement, `>=0.5` binarised | 13.94% (7,369 cells) | 0.8148 | **−0.0417** |
+
+`discord_mask` ran its full 12 epochs, peaked at e6 and plateaued 0.806–0.810 through e11 — converged,
+not truncated, not a patience stop. Its table is verified: 7,369 NaN against v2's 0, 13.94% of 52,872,
+and **zero all-NaN rows**, so no study lost supervision entirely. The two selectors overlap on 188
+cells — 2.55% of discordant, 1.3% of UNK — so these are disjoint populations answering the same
+question twice.
+
+**Both land in their third pre-registered band. The SUBTRACTION route on the label axis is closed.**
+That is FCF (Jiang, AAAI-24) Thm 6 — low-noise-probability cells "should be retained without any
+change" — measured on our corpus rather than cited, and Menon 2015's one-sided-noise result (the
+Bayes-optimal ranking survives label noise) showing up as score.
+
+**The finding is not the closure, it is the shape.** Masking 27.3% of cells cost 0.0116. Masking 13.9%
+— half as many — cost 0.0417, nearly four times as much. If masked cells were interchangeable the cost
+would scale with count and `discord_mask` should have landed near −0.006; it is off by a factor of
+seven in the wrong direction. The hypothesis on the table, UNCONFIRMED and sent to the researcher for
+attack (M345): cross-extractor disagreement selects the HARD POSITIVES — a cell four extractors split
+on is a cell where the report is equivocal, which is where the subtle findings and the gradient-carrying
+positives live — while low CONFIDENCE is diffuse and catches easy negatives too. If that holds, the
+selector best at finding WRONG labels is also the one best at finding INFORMATIVE ones, and they are
+substantially the same cells. The cheaper alternative explanation, which must be excluded first: the
+selector may be concentrated in two or three high-prevalence COLUMNS, making −0.0417 a column effect
+inside a 12-column mean rather than a hard-positive effect. Three measurements are owed on this
+(positive rate by stratum, column concentration, per-column deltas off the holdout npz) before either
+reading is written down as fact.
+
+**What this licenses.** Correction, not filtering — the top rung of D333's ladder. The cells most worth
+fixing are the ones least affordable to lose, which is the mechanism argument FCF Thm 5 makes
+theoretically and this axis now makes empirically. `v2_corrected` is that arm: the 2,315 v2-lone-dissent
+cells (D335/D336) overwritten with the foreign cluster's SOFT value, pre-registered
+`>=0.8665` / `0.8515–0.8665` / `<=0.8515` against the same control.
+
+**What this does NOT license.** Nothing here says the labels are clean — the blind 402-cell adjudication
+and the gold-58 cross-check both put v2's error on disagreement-selected cells at 75%. It says removing
+supervision is the wrong response to that error, which is a statement about the REMEDY, not the defect.

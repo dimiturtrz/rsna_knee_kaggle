@@ -393,7 +393,15 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   from the directory the script sat in, so a copy watched the wrong side's mail and MOVING one silently
   relocated that side's mailbox and killed the arm in flight — both happened, and a name cannot do
   either. A letter is a `.txt` or `.md` file named `<utc-stamp>-<sender>-<subject>.<ext>`, one message
-  per file, written atomically (`.part` then `mv`).
+  per file, written atomically (`.part` then `mv`). **The utc-stamp is READ from
+  `date -u +%Y%m%dT%H%MZ` at write time, never estimated.** An estimated stamp DRIFTS with session
+  length — measured 2026-09-11 across eleven letters at +1h after one hour and +4h after three, so
+  letters arrived carrying a stamp from a time that had not happened yet. Two costs, and neither is
+  cosmetic: the cross-side sort breaks, because one side's true-UTC letters no longer interleave with
+  the other's estimated ones, and a sender reading its own sent record cannot tell what the recipient
+  has already seen. The listener is not fooled — it files by arrival — so the drift is invisible until
+  somebody builds a timeline out of filenames. Run `date -u` in the same command that delivers the
+  file (D338).
   **A scalar read off the pool carries STATISTIC, POPULATION and CUT, or it may not be substituted into a
   term fitted elsewhere.** Write `nn_corr@pool251`, `solo@ledger75` — never a bare `nn_corr` or `solo`.
   Two "blocking defects" in one night on 2026-09-08 were the same error on different axes and neither was

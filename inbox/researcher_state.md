@@ -2,6 +2,9 @@
 # owner directive: scratchpad/ is retired for this lane; durable deliverables go to research/ and
 # interpretations/kneemri/, instruments to research/scripts/, external pulls to research/external/).
 # References to "scratchpad/researcher_state.md" in older notes mean THIS file.
+# TIMESTAMP RULE (D338, from main's measured drift table): letter filenames AND letterheads are
+# stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
+# estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
 ## LATEST (18:05Z) — M343 TASK DONE (D336): selector CSV on disk; next free letter D337; main last seen M343 (14:02Z)
 - `labels/v2_lone_dissent.csv` written: 2,315 rows (study_uid, column, v2_value, cluster_value,
