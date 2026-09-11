@@ -13361,7 +13361,11 @@ different from the fold-ensembling curve the project fitted early and has been q
 | 6 | 0.8530 | [0.8515, 0.8567] | +0.0006 |
 | 7 | 0.8534 | [0.8534, 0.8534] | **+0.0004** |
 
-Best subsets: best 1 0.8475 (`lr5x_d6`), best 2 0.8552, best 3 0.8564, **best 4 0.8576**
+Best subsets, every number below an ORACLE-SELECTED SUBSET score on this seven-member pool's own
+holdout — not a solo score, and not comparable to a `*.metrics.jsonl` peak (the named run's own record
+holds 0.8323; the 0.8475 here is what that member reads as a one-member ensemble under this pool's
+scoring, which is a different statistic on a different cut). Best 1 0.8475 — that member as a
+singleton — then best 2 0.8552, best 3 0.8564, **best 4 0.8576**
 (`sliceattn` + `wsfold0_e6` + `lr5x_d6` + `large_deep_rank24`), best 5 0.8573, best 6 0.8567,
 best 7 0.8534. Oracle 0.8573 against plain average 0.8534 against best single 0.8475 — headroom
 **+0.0039**, which is the whole prize for getting selection perfectly right and is under one

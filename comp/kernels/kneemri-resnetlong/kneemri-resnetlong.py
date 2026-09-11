@@ -140,7 +140,6 @@ def main() -> None:
 
     from kneemri.inference.budget import (  # noqa: PLC0415 - the kit is on sys.path only after boot
         KERNEL_SECONDS,
-        KERNEL_SECONDS,
         Budget,
     )
     from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same

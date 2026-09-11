@@ -322,3 +322,26 @@ def test_main_exits_on_a_fault(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     with pytest.raises(SystemExit) as exit_code:
         main()
     assert exit_code.value.code == 2
+
+
+BESPOKE = "User 57616 1 ? bash experiments/after_holdclean.sh\n"
+
+
+def test_bespoke(tmp_path: Path):
+    """A bespoke `after_<thing>.sh` was not a watcher at all here until 2026-09-11 — hence a green queue."""
+    assert QueuedArms(tmp_path, LIVE).bespoke() == [], "the generic chain script is not bespoke"
+    assert QueuedArms(tmp_path, BESPOKE).bespoke() == ["after_holdclean.sh x1"]
+
+
+def test_duplicated(tmp_path: Path):
+    """Two live processes on one bespoke script is one arm launched twice on one card."""
+    assert QueuedArms(tmp_path, BESPOKE).duplicated() == [], "one process owing one arm is the healthy case"
+    assert QueuedArms(tmp_path, BESPOKE * 2).duplicated() == ["after_holdclean.sh"]
+
+
+def test_lines_never_says_ok_over_a_live_bespoke_watcher(tmp_path: Path):
+    """`no watcher logs` followed by `OK` is the exact sentence that was printed over a live queue."""
+    rows = QueuedArms(tmp_path, BESPOKE).lines()
+    assert rows[0].startswith("no watcher logs"), "a bespoke watcher writes no log with a chain header"
+    assert "OK" not in rows[-1], "and its absence must not read as an empty queue"
+    assert "after_holdclean.sh x1" in rows[-1]

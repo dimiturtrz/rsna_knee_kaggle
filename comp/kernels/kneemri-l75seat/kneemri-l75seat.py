@@ -45,7 +45,10 @@ PRE-REGISTERED, and these are the rulers' branches, not a hoped-for score:
   trials, so a standard error of ~0.0038 is all that test established.
 
 **THE CAVEAT THAT IS NOT WAVED AT.** ledger75 0.9138 is PAST THE EDGE of the data the fit was made on
-(max on record 0.9040, `greedyseat_v1` itself), so 0.949 is an extrapolation of 0.010 beyond a ~0.05
+(max on record 0.9040, `greedyseat_v1` itself), so the score predicted here was an extrapolation of
+0.010 beyond a ~0.05 range — and the extrapolation MISSED: `greedyseat_v1` scored 0.936 on the board,
+not the number this paragraph pre-registered. Kept as written, with its outcome attached. It was 0.010
+beyond a ~0.05
 range. Separately, the PRICEABLE population — entries whose every member is fold-0 and therefore
 scoreable, which this one is — has never exceeded board 0.937, while the unpriceable population holds
 0.944. This entry predicts the priceable population jumps 0.015 past its own record. The mechanism

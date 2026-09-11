@@ -42,6 +42,15 @@ MEASURED 2026-08-26 as well: `misarmed` fired on a HEALTHY queue, because `after
 and records `/d/…` while Windows Python resolves that to a nonexistent `\\d\\…`. A blocking verdict whose
 advice was to re-arm — that is, to tear down a live chain — over a file plainly on disk. See `_local`.
 
+MEASURED 2026-09-11, a fifth hole, and it had swallowed the dominant case for weeks: the check could not
+see a BESPOKE watcher at all. `WATCHER = "after.sh"` was matched by suffix, so `after_holdclean.sh` — and
+the ~40 other `after_*.sh` scripts in `experiments/` — were not watchers to it; and `Watch.of` returns
+None for any log with no `before running: ` header, which a bespoke watcher never prints. Both eyes shut
+on the same queue, so it printed `no watcher logs under logs` and then `OK: nothing is queued` with TWO
+live watchers owing one arm — the DOUBLE-QUEUED shape this module was written for in August, invisible
+because the generic chain script is one script out of forty. `bespoke` and `duplicated` read the same
+crossing off the PROCESS side alone, which is the only side a bespoke watcher writes to.
+
 The process listing is passed in rather than read inside, so the crossing itself is a pure function of
 two strings and the unit test needs no process to kill.
 """
@@ -57,6 +66,19 @@ logger = logging.getLogger(__name__)
 
 WATCHER_GLOB = "after_*.log"
 WATCHER = "after.sh"
+WATCHER_PREFIX = "after"
+"""A watcher is ANY `after*.sh`, not only the generic chain script.
+
+MEASURED 2026-09-11, and it had been silent for weeks. `WATCHER` was matched by SUFFIX, so
+`after_holdclean.sh` — and the thirty-odd other bespoke watchers in `experiments/` — were not watchers
+to this check at all. Both of its eyes were shut on the same queue: `watchers()` saw no process because
+no token ended in `after.sh`, and `watches()` saw no log because a bespoke watcher prints no
+`before running:` header. So it printed `no watcher logs under logs` and then `OK: nothing is queued`
+while TWO live watchers owed one arm — the DOUBLE-QUEUED shape this module was written for in August,
+going unreported because the queue was written in the form the repo actually uses. The generic
+`after.sh` is one script out of about forty.
+"""
+INTERPRETERS = ("bash", "bash.exe", "sh", "sh.exe")
 ARM_SUFFIX = ".sh"
 HEADER = "before running: "
 WATCHED = "' in "
@@ -154,6 +176,43 @@ class QueuedArms:
         return [line for line in lines if ProcessTable.parentage(line)[0] not in parents]
 
     @staticmethod
+    def _watcher_at(line: str) -> int:
+        """Where the watcher script sits in this process line, or -1 when the line is not a watcher.
+
+        One place decides what a watcher IS, because three callers used to decide it separately and two
+        of them used a different rule from the third.
+        """
+        tokens = line.split()
+        if "-c" in tokens:
+            return -1
+        names = [PurePosixPath(token.strip("\"'").replace("\\", "/")).name for token in tokens]
+        return next(
+            (
+                index
+                for index, name in enumerate(names)
+                if index > 0
+                and name.startswith(WATCHER_PREFIX)
+                and name.endswith(ARM_SUFFIX)
+                and names[index - 1] in INTERPRETERS
+            ),
+            -1,
+        )
+
+    @staticmethod
+    def _mentions_watcher(line: str) -> bool:
+        """Whether any token here NAMES a watcher script, wherever it sits.
+
+        Used only to exclude lines from the producer search. Broader than `_watcher_at` on purpose: a
+        launcher's `-c` string is not a watcher but still carries its marker, and a producer search that
+        matched it would let a watcher vouch for itself.
+        """
+        return any(
+            PurePosixPath(token.strip("\"'").replace("\\", "/")).name.startswith(WATCHER_PREFIX)
+            and token.strip("\"'").endswith(ARM_SUFFIX)
+            for token in line.split()
+        )
+
+    @staticmethod
     def _invokes(line: str) -> bool:
         """Whether this process IS a watcher, rather than a process whose argv mentions one.
 
@@ -176,16 +235,7 @@ class QueuedArms:
         (`bash experiments/after.sh …`, quoted executable or not). An onlooker's mention is preceded
         by something else entirely.
         """
-        tokens = line.split()
-        if "-c" in tokens:
-            return False
-        interpreters = ("bash", "bash.exe", "sh", "sh.exe")
-        return any(
-            token.strip('"').endswith(WATCHER)
-            and index > 0
-            and PurePosixPath(tokens[index - 1].strip('"').replace("\\", "/")).name in interpreters
-            for index, token in enumerate(tokens)
-        )
+        return QueuedArms._watcher_at(line) >= 0
 
     def alive(self, watch: Watch) -> bool:
         """Whether a live `after.sh` carries this watch's marker AND the exact arms it names.
@@ -211,7 +261,7 @@ class QueuedArms:
         """
         token = watch.marker.removeprefix(DONE).removeprefix(PID).strip()
         as_field = token.isdigit()
-        rows = (line for line in self.running.splitlines() if WATCHER not in line)
+        rows = (line for line in self.running.splitlines() if not self._mentions_watcher(line))
         return next((line for line in rows if (token in line.split() if as_field else token in line)), "")
 
     def collided(self) -> list[str]:
@@ -285,14 +335,22 @@ class QueuedArms:
         BLOCKING, because the verdict it corrupts is the green one. A stranded arm is announced loudly;
         a check that is merely looking in the wrong place says OK, which is the shape this repo has now
         paid for three times.
+
+        GENERIC ONLY. A bespoke `after_<thing>.sh` takes no arm in argv, so `_armed` is empty for one and
+        it would match no watch here and fire this BLOCKING alarm forever. Bespoke watchers are reported
+        by `bespoke` instead, which does not pretend to know what they owe.
         """
         seen = {watch.arms for watch in self.watches()}
-        return [" ".join(armed) for line in self.watchers() if (armed := self._armed(line)) not in seen]
+        return [
+            " ".join(armed)
+            for line in self.watchers()
+            if self._script(line) == WATCHER and (armed := self._armed(line)) not in seen
+        ]
 
     def _producing(self, watch: Watch) -> bool:
         """Whether the arm this watch waits on is itself live, read off any line that is not a watcher."""
         producer = watch.marker.removeprefix(DONE)
-        return any(producer in line for line in self.running.splitlines() if WATCHER not in line)
+        return any(producer in line for line in self.running.splitlines() if not self._mentions_watcher(line))
 
     def landed(self, arm: str) -> bool:
         """Whether this arm's own log already carries its completion marker — the work is DONE.
@@ -357,6 +415,12 @@ class QueuedArms:
         MISARMED or STRANDED verdict computed over the wrong directory is noise either way.
         """
         found = []
+        if duplicated := self.duplicated():
+            found.append(
+                f"DUPLICATE WATCHER: {' '.join(duplicated)} — one bespoke watcher script is carried by more "
+                "than one live process, and each will start the arm hardcoded in its body, so kill all but "
+                "one (Get-CimInstance Win32_Process -Filter \"Name='bash.exe'\", then Stop-Process)"
+            )
         if unlogged := self.unlogged():
             found.append(
                 f"UNLOGGED: {' '.join(unlogged)} — a live after.sh owes these and has no watcher log under "
@@ -390,9 +454,20 @@ class QueuedArms:
     def lines(self) -> list[str]:
         """The queue, then the verdict — and the verdict is the last line so a tail sees it."""
         watches = self.watches()
+        bespoke = self.bespoke()
         if not watches:
-            return [f"no watcher logs under {self.directory}", "OK: nothing is queued"]
+            head = [f"no watcher logs under {self.directory}"]
+            if not bespoke:
+                return [*head, "OK: nothing is queued"]
+            return [
+                *head,
+                *self.faults(),
+                f"REPORT: {' '.join(bespoke)} live — bespoke watchers, each owing an arm named in its body "
+                "and in no log, so what they owe cannot be read here; this is NOT an idle card",
+            ]
         rows = [f"{len(watches)} watcher logs under {self.directory}"]
+        if bespoke:
+            rows.append(f"  (plus {' '.join(bespoke)} live — bespoke, owed arm not readable from a log)")
         rows += [
             f"  {watch.log}  waits on '{watch.marker}'  {watch.started}/{len(watch.arms)} started"
             f"  {'live' if self.alive(watch) else 'no watcher'}"
@@ -411,8 +486,41 @@ class QueuedArms:
         Picked out by the `.sh` suffix rather than by argv position, so an arm carrying its own argument
         ("resolution.sh 448") loses that argument on BOTH sides of the comparison instead of on one.
         """
-        tail = line.split(WATCHER, 1)[1]
-        return tuple(token.strip("\"'") for token in tail.split() if token.endswith(ARM_SUFFIX))
+        index = QueuedArms._watcher_at(line)
+        if index < 0:
+            return ()
+        tail = line.split()[index + 1 :]
+        return tuple(token.strip("\"'") for token in tail if token.strip("\"'").endswith(ARM_SUFFIX))
+
+    @staticmethod
+    def _script(line: str) -> str:
+        """The watcher script this process line runs, by basename, or empty when it is not a watcher."""
+        index = QueuedArms._watcher_at(line)
+        if index < 0:
+            return ""
+        return PurePosixPath(line.split()[index].strip("\"'").replace("\\", "/")).name
+
+    def bespoke(self) -> list[str]:
+        """Live watchers that are not the generic chain script, each with its live process count.
+
+        A bespoke `after_<thing>.sh` hardcodes the arm it owes in its BODY rather than taking it in argv,
+        so `waiting()` cannot be computed for one and the log-crossing every other verdict here rests on
+        does not exist. That is a reason to REPORT it, never a reason to omit it: before this existed the
+        omission was total and the check said `OK: nothing is queued` over a live queue.
+        """
+        scripts = [script for line in self.watchers() if (script := self._script(line)) and script != WATCHER]
+        return [f"{script} x{scripts.count(script)}" for script in dict.fromkeys(scripts)]
+
+    def duplicated(self) -> list[str]:
+        """Bespoke watcher scripts carried by more than one live process — one arm, two launches.
+
+        `doubled` reads arms out of chain logs and cannot see these, because a bespoke watcher names its
+        arm nowhere a log can be read. Counting the PROCESSES per script catches the same failure by its
+        other end, and it is the one that actually happened on 2026-09-11: a botched launch and its
+        correction both survived, two live `after_holdclean.sh`, one arm, one card.
+        """
+        scripts = [script for line in self.watchers() if (script := self._script(line)) and script != WATCHER]
+        return sorted({script for script in scripts if scripts.count(script) > 1})
 
     @staticmethod
     def local(watched: str) -> Path:
