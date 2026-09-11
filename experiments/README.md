@@ -14536,3 +14536,71 @@ armed on the card this morning. It had already RUN on 2026-09-07 (75 min, `READM
 D56 at solo 0.8862 / corr-to-nine 0.881, is declined in writing at `comp/members.declines:728`, and
 SHIPPED on the board yesterday inside `cnnseat_v1`. The script and its watcher are deleted. This is the
 fourth re-derivation of a recorded result in two sessions and the first one that reached the card queue.
+
+## 2026-09-11 — the two rulers rank the columns at rho +0.538, and exactly ONE column is weak on both (M328)
+
+**COST: no card, no slot.** Both numbers were already on disk. Ledger-896 per-column from `README:7900`
+(`column_headroom`, 336 px, 909 studies, OUR v2-derived labels); gold-58 per-column from `README:9025`
+(`annotated_readings`, `band_dense_hold_s2026`, 58 organiser-annotated studies, radiologist labels, no
+member trained on those cells). Statistic **per-column ROC AUC**, populations **ledger896** and
+**gold58**, cut **midpoint** on both.
+
+| column | ours@ledger896 | rank | gold@58 | rank | n+ |
+|---|---|---|---|---|---|
+| MCL | 0.7908 | 1 | 0.9229 | 8 | 9 |
+| Fracture | 0.8066 | 2 | 0.8931 | 5 | 18 |
+| **Lateral OA** | **0.8178** | **3** | **0.7872** | **2** | 11 |
+| PF OA | 0.8392 | 4 | 0.9035 | 7 | 21 |
+| Lateral Meniscus | 0.8460 | 5 | 0.8832 | 4 | 23 |
+| Effusion | 0.8542 | 6 | 0.8522 | 3 | 35 |
+| **Synovitis** | 0.8546 | 7 | **0.7515** | **1** | 27 |
+| Contusion | 0.8685 | 8 | 0.8961 | 6 | 19 |
+| ACL | 0.8706 | 9 | 0.9755 | 12 | 24 |
+| Medial OA | 0.8763 | 10 | 0.9535 | 9 | 15 |
+| Medial Meniscus | 0.8983 | 11 | 0.9736 | 11 | 26 |
+| Baker's | 0.9076 | 12 | 0.9547 | 10 | 12 |
+
+**Spearman rho = +0.538** (sum d^2 = 132, n = 12). That is the first cross-RULER column-order number
+this project owns, and it belongs beside the two cross-FRAME numbers it sits between: D84c's **+0.056**
+between two offline frames of the same ruler, and D85's **+0.713 / +0.839** ceiling for shrinking one
+frame from 4407 rows to 909. So changing the LABEL SOURCE costs less column order than changing the
+frame size did in D84c, and more than the pure row-count shrink of D85. The map is not noise — it is
+half-signal, and the half that disagrees is where the information is.
+
+**Two columns carry nearly all the disagreement, in opposite directions, and both have a recorded
+mechanism.**
+
+1. **MCL — our WEAKEST column (rank 1) is rank 8 to a radiologist.** 0.7908 ours against 0.9229 gold.
+   The model reads MCL fine; our TABLE does not. M326 measured this independently on the same 58:
+   ours calls 18 MCL positives where gold calls 9, a 2:1 over-call, part of the 3.4:1 global FP:FN
+   shape. An over-called column depresses AUC against a truer ruler by construction. **MCL's offline
+   weakness is a label defect, not a model defect, and no architecture arm aimed at MCL can fix it.**
+2. **Synovitis — rank 7 ours, rank 1 gold.** 0.8546 ours against 0.7515 gold, the lowest cell in the
+   entire gold table. This is the inversion: M326 found Synovitis is our lone UNDER-call (16 ours vs 27
+   gold), and D20 recorded Synovitis at **84% UNK** in report text — the report simply does not say it.
+   Our ruler agrees with our model because both inherit the same silence. **Synovitis is genuinely
+   model-bound and our offline ruler has been hiding it for the whole project.**
+
+**What survives both rulers: Lateral OA, and only Lateral OA.** Rank 3 ours, rank 2 gold, weak on a
+report-derived table and weak to a radiologist. Three further readings already on disk point the same
+way: it is the column the 336 -> 392 px step hurt WORST (**-0.0134**, `README:7900`, when the mean moved
+-0.0002); `relabel_hold`'s gold delta on it is +0.0078, seventh of twelve, so the label axis does not
+move it either; and the live `calib_hold_clean_distill_s2026` reads **0.8239** on it at epoch 8, its
+second-lowest column. Four independent instruments, one column.
+
+**What this does NOT license.** n+ on gold is 9-35 cells per column over 58 studies; no per-column gold
+delta here carries an interval and none is a claim of size. The ORDER is the object, not the values, and
+the two absolute means (0.8525 ledger896 vs 0.9039 gold58) are not comparable — different frames,
+different prevalence, 58 rows against 909. Nor does rho +0.538 rehabilitate `column_headroom`: D84c
+refuted it on the frame axis, which this says nothing about. What it adds is a SECOND, independent
+ordering, and the two named disagreements are backed by a measured cell-count mechanism rather than by
+the scatter.
+
+**What it changes about the aiming question M327 opened.** M327 said the board's per-column areas have
+never been read and proposed a single-slot column-null probe to read them, gated on the researcher's
+Q1/Q2. That gate stands. But the probe's DESIGN improves today: M327 would have nulled "the six columns
+our offline map calls weakest", which is MCL, Fracture, Lateral OA, PF OA, Lateral Meniscus, Effusion —
+and two of those six (MCL, PF OA) are now on record as label artefacts that a radiologist ruler ranks
+7th and 8th. The competition's own labels are image-read radiologist consensus with third-reader
+adjudication (`README:3844-3847`) — the same KIND of object as the 58, and NOT report-derived. So the
+gold ordering is the better predictor of the board ordering, and the probe should null against IT.
