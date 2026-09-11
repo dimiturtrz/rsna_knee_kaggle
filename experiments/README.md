@@ -14983,3 +14983,26 @@ corrected-table arm as a verdict.**
 The adjudicated rescore is the chain's primary ruler. Its limits, stated: 469 cells over 334 studies,
 mean 1.4 cells per study so the cells are not independent, and the tear split has zero variance on the v2
 side by construction — its McNemar is a count, not a test.
+
+### Retraction: `discord_mask`'s kill, and what the masking table row above now means (2026-09-11)
+
+The label-masking axis table above records `discord_mask` at 0.8148, **−0.0417 against control**, and that
+number was read as closing the subtraction route: masking half as many cells as `confident_span` cost four
+times as much. **The verdict is retracted. The number is not.**
+
+Both arms were evaluated with `--eval-labels` pinned to v2, and the 469 blind-adjudicated cells now show
+that v2 is wrong on 89.1% of the contested cells — so masking the cells v2 disagrees with the field on
+removes BIAS, and the v2 ruler scores removed bias exactly like removed supervision. On the gold cells:
+
+    arm               v2 ruler            gold acc@0.5   gold AUC-vs-verdict
+    discord_mask      0.8148  (-0.0417)      0.832            0.6982
+    confident_span    0.8449  (-0.0116)      0.537              --
+    band_span (ctrl)  0.8565                 0.625            0.6008
+
+`discord_mask` is the best member on disk on both gold columns. `confident_span` is a TRUE kill on both
+rulers — masking v2's self-reported-uncertain cells loses real signal. **The two masking arms were never
+the same experiment, and the v2 ruler could not tell them apart.** The masked-table route re-opens; the
+open question is no longer "does subtraction work" but "which selector picks the biased cells".
+
+`v2_corrected` is retracted the same way: band-3 on the v2 ruler, 0.814/0.6272 on gold and **0.883 on
+Contusion-120, the best Contusion reading on disk.** Both members are now on `comp/members.roster`.
