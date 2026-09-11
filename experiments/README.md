@@ -14473,3 +14473,66 @@ is about TWO opinions, not five, and the majority vote (0.1827) does not beat it
 unknowable from the files; if they did, their 0.181 is optimistic and ours is the only honest number in
 the table. +0.0219 is above the 0.005 floor but it is a LABEL-SPACE delta, not a score, and no score
 follows from it until an arm runs.
+
+## 2026-09-11 — 0.944 is a CEILING, not a plateau: ten disjoint entries, one number (M327)
+
+**COST: no card, no slot.** Read off `comp/board.jsonl` (128 rows) and four ledger regions. Nothing
+new was measured; this is the ledger's own numbers put next to each other for the first time.
+
+**The board has never exceeded 0.944.** Over all 128 submissions the maximum is 0.944, and it was hit
+**ten times** between 2026-08-30 and 2026-09-10, at **6, 7 and 8 members**. Two of those ten share
+**zero members with each other**:
+
+```
+55875622  2026-08-30  kneemri-raptorweight  7m  final_ws_cf calib_span_ff grade_ladder_cf
+                                                merged_blend_cf lr4e-5_ws_cf through_dense_cf raptor_v4_swa
+56147841  2026-09-10  kneemri-cnnseat       7m  labelwise_dense_s2026 foreign_labels_dense_s2026
+                                                warm_calib_dense_s2026 warm_calib_lowlr_s2026
+                                                span_dense_s2026 raptor_v4_swa resnet_224_short_s2026
+```
+
+Six of seven seats replaced, an entire family swapped in, twelve days apart — **0.944 both times.**
+The score histogram is quantised around it: 0.944 x10, 0.943 x8, 0.937 x11. Nothing above.
+
+**The mechanism is already recorded and this is its confirmation at the board level.**
+`README:9525`: *"the weak columns are weak in EVERY member, so a seat cannot buy them."* D56 prices the
+diversity pitch at **+0.0004 [-0.0001, +0.0008]** at nine seats and states the consequence: *"Any future
+arm whose pitch is 'a more diverse member' is priced at ~0 before it runs; the pitch has to be solo LIFT
+or a different axis."* Three seating operations — reweight (raptorweight), add (vjepaseat), swap
+(holdswap) — read +0.001 / -0.001 / 0.000, all inside BOARD_RESOLVABLE = 0.0015. The ten-way tie is the
+fourth and strongest support for knee-uco3's inert-seat reading: **an ensemble cannot average away an
+error its members share.**
+
+**What the ceiling costs, in the metric's own units.** `kernels/kneemri-colnull` submitted a constant
+0.5 in every cell and read EXACTLY 0.500, which measured the metric rather than assuming it: an
+unweighted mean of twelve per-column ROC AUCs, no offset, no prevalence weighting, no non-AUC term. So a
+column gaining `d` moves the board `d/12`, and the 0.010 gap to the leader is **0.120 of summed column
+area** — one column +0.12, or three at +0.04, or twelve at +0.01. No seating operation can produce any
+of those, because seating does not change what a column knows.
+
+**And the map we would aim that at is refuted.** knee-zsyp4. D84c: Spearman **0.056** between two frames
+on which columns pay (896 says Fracture/MedMen/Synovitis, 4406 says MCL/PFOA/Baker's). D85: shrinking a
+frame from 4407 to 909 rows costs rho **0.16-0.29** of column ordering with nothing else changed.
+`column_headroom.py`'s own docstring says its ordering is *"OUR supervision binarised at its midpoint,
+not Kaggle truth"*. **Every per-column plan since 2026-09-05 was aimed by an instrument this ledger
+calls refuted, at per-column board values that have never been read.**
+
+**What this closes.** The member axis and the seat axis, jointly and at the board rather than on a
+holdout. Not "no more seatings because it keeps reading flat" — *no more seatings because ten disjoint
+rosters produce one number, and the metric says why.* Any arm whose pitch is a new member, a new seat, a
+new weight or a new vote is priced at ~0 before it runs.
+
+**What it opens.** Exactly one thing: the board's OWN per-column areas, which `comp/README.md:301`
+already says how to read — an entry replacing ONE column with a constant drops from the champion by
+`(that column's board AUC - 0.5) / 12`. At AUC 0.80 that is a 0.025 drop, ~17x the resolution floor.
+Twelve slots for the full map is too much; the single-slot form is a go/no-go on the aiming instrument
+itself — null the six columns our offline map calls weakest, compare the measured summed area against
+what the map predicts, and either license every per-column plan or kill the map on the board. Sent to
+the researcher as M327 Q1/Q2: whether one constant column beside eleven live ones scores 0.5 the way all
+twelve did, and whether the competition rules permit it. **Not armed until both come back clean.**
+
+**Withdrawn in the same breath: `foreign_labels_dense`.** An arm by that name was built, priced and
+armed on the card this morning. It had already RUN on 2026-09-07 (75 min, `README:9311`), is priced by
+D56 at solo 0.8862 / corr-to-nine 0.881, is declined in writing at `comp/members.declines:728`, and
+SHIPPED on the board yesterday inside `cnnseat_v1`. The script and its watcher are deleted. This is the
+fourth re-derivation of a recorded result in two sessions and the first one that reached the card queue.
