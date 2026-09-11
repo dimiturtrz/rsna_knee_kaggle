@@ -13801,3 +13801,82 @@ carrying into a corpus we may actually ship — the finding is "column masking r
 transfer", and it was measured on the one corpus whose licence forbids using it. The transferable form
 is: any merge whose extra corpus grades a SUBSET of our twelve findings must blank the rest to NaN
 rather than teach them as absent, and must be read per-column rather than on the mean.
+
+## D311 recut on a ruler that was already retracted; D312 hands us the one published result that re-prices the whole member pool — 2026-09-11
+
+Two researcher letters, read together because the first is void on its instrument and the second is not.
+
+### D311 — the blurry-ruler audit does not fire, and the reason is written above it
+
+D311 swept every closure resting on a delta in 0.002-0.008 and recut each one with `LedgerSeventyFive()`
+at n=909. Its headline is that `calib_span` vs `band_span` reverses (-0.0020 midpoint to +0.0044
+ledger75), which would mean `calib_dense` was killed by a gate read on the wrong ruler and should be
+re-opened.
+
+**It does not, because ledger75 was retracted on 2026-09-10 and the retraction anticipated exactly this
+use.** `l75seat_v1` (ref 56151868) was the ruler's only out-of-sample test: midpoint predicted ~0.936,
+ledger75 predicted 0.949, the board read **0.939**. The section that records it closes: *"It does not
+restore any operation dismissed as sub-floor. The floor is midpoint's 0.0071 again, which is the wider
+one, so the dismissals stand and this retraction removes the licence to re-run them rather than granting
+one."* Every re-open, sign-flip and evaporated negative in D311 is a reading on that ruler. None of them
+fires. This is not a criticism of the sweep — the letter went out at 21:41Z and the retraction is the
+kind of thing a lane can miss — but the work is not usable as a licence, and it must not be cited as
+one later.
+
+**What survives from D311, and it is worth keeping.** Its meta-point is a claim about the CUT rather
+than about the ruler's accuracy: the recut moved *every* corpus-corner delta up (all four `merged_*_cf`
+vs `merged_blend_cf` pairs) and moved every supervision-flag delta (ema, labelwise) down-to-flat. A
+blurry ruler scatters; a ruler that moves one family one way and another family the other way is
+DIRECTIONALLY BIASED PER FAMILY, and `ledger75.py:8-14`'s Effusion mechanism is the named carrier —
+midpoint counts a 0.68 grade as positive on exactly the columns the corpus arms move. That is a real
+statement about what our default cut does to a family of arms, and it stands whether or not ledger75 is
+a better ruler, because it never needed ledger75 to be right — only to be different in a patterned way.
+
+**And the licence D311 was reaching for exists, from a different source.** `resnetlong_v1` (board 0.907)
+the same evening resolved a -0.0067 offline delta as -0.008 on the board at slope ~1.19, out of sample,
+against a holdout whose own 2sd bar is 0.0071. So the board DOES resolve deltas a third the size of our
+noise bar. That re-opens arms dismissed on *"inside the floor, therefore nothing"* — but on board
+evidence, not on a recut, and never one dismissed on a mechanism.
+
+### D312 — five nulls, and one measured result that says our member pool is built on the wrong data fraction
+
+The nulls first, all confirmed as nulls so nobody searches them again: no measured 100%-refit vs
+80%-fold gain at n~1k-10k and no decomposition of it into extra-data vs fold-boundary; no
+member-correlation-vs-training-overlap curve anywhere; nothing on the weak-refit vs strong-fold-fit
+ordering; nothing treating the binarisation cut of graded truth as an estimator-variance knob (so our
+resid-sd 0.0015-vs-0.0036 / corr 0.982-vs-0.901 at n=34 is ours, and belongs in the ledger as ours);
+nothing supporting ensembles transferring worse than their members under shift — Ovadia et al.
+(arXiv:1906.02530), Pagliardini et al. (arXiv:2202.04414) and Kumar et al. (PMLR 180) all run against
+us, so our +0.0036 on n=5 solo anchors is scatter.
+
+**The result that is not a null: Nixon, Lakshminarayanan & Tran, "Why Are Bootstrapped Deep Ensembles
+Not Better?", NeurIPS 2020 ICBINB workshop (OpenReview only — there is NO arXiv entry, do not cite
+one).** Ten-member WRN-28-10 ensembles on CIFAR-10/100, sweeping the unique-training-point fraction per
+member across 63.2% / 70 / 80 / 90 / 99 / 100%. **Member accuracy AND ensemble accuracy both rise
+monotonically with the fraction and peak at 100%**, at every ensemble size 2-10, on accuracy and on
+ECE; with vs without replacement made no difference.
+
+Why that lands on us: a large part of our pool is FOLD-FIT — each member sees ~80% of the corpus and
+holds out its fold. We have carried the assumption that the held-out fifth buys diversity that pays for
+the lost data. Nixon measures that trade directly and it does not pay: the data fraction is the whole
+effect, and the resampling contributes nothing. The mechanism for why diversity survives a 100% refit
+is Fort, Hu & Lakshminarayanan (arXiv:1912.02757) — random init alone lands members in different loss
+basins with genuinely different functions, so deep ensembles do not need data partitioning to be
+diverse. The classical caution (Breiman 1996) is about unstable weak learners; for CNNs specifically
+Lee et al. (arXiv:1511.06314, CVPRW 2016) found bootstrap HURTING. Kuncheva & Whitaker (ML 2003) and
+Wood et al. (JMLR 24, 23-0041) add that diversity measures correlate weakly with ensemble gain at all.
+
+**The consequence, stated so it can be argued with.** Our own two-population record is 0.937 cap for a
+fold-only entry against 0.944 with a refit member (n=52/48), and our own learning curve prices 79% to
+100% at about +0.003 — sub-floor on the midpoint bar, but the board has just shown it resolves deltas
+that size. Nixon says that +0.003 is not paid for with lost diversity; it is free. If that holds on our
+corpus, the operation is not a new architecture at all: it is refitting existing recipes on 100% of the
+data and keeping the seed as the diversity source. That is also the one thing the owner has asked for
+repeatedly and the project has never done — *use more data*.
+
+**What would prove it here rather than on CIFAR.** The missing measurement D312 names — member error
+correlation as a function of pairwise training-set overlap — is one our pool can produce with no card
+at all: every fold-fit member already has a `.holdout.npz`, the overlap between any two fold-fit members
+is known exactly from their fold assignments, and the correlation is a read. Nobody has that curve in
+print, in any regime. It is the cheapest instrument in the backlog and it decides whether the
+100%-refit operation is free here or only on CIFAR.
