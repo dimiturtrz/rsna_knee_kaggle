@@ -213,3 +213,16 @@ v2delonly_span_s2026.pt     # 0.8417 @holdout909 midpoint on the v2 ruler, epoch
                             # while the addition direction carries 22/28 = 0.786, so a deletion-only
                             # table is the half of the correction that the audit says is sound.
                             # Ledger 2026-09-11.
+
+# The member that killed additive pricing. Five positive-marginal attributes stacked in one recipe --
+# labelwise head, distill at w=0.7, blend-three labels, calib-tgt, hold-annot -- on top of a teacher
+# (teacher_foreign_corpus.npz) that is ~80% exposed to fold 0 by construction. Under strict additivity
+# its 0%-pool marginals promise 0.9032; the saturation curve fitted before it finished predicted
+# 0.865-0.867; it landed 0.8634, CONVERGED, peaking at epoch 8 of 12. So it does not reach the honest
+# pool max 0.8649 despite carrying more positive attributes than any member that does, and it is the
+# second member ever to sit in the k=5 bin (chainfour_s2026, 0.8648, was the first and only). Rostered
+# because it is the strongest evidence on disk that attribute terms rank rather than add, and because a
+# k=5 member is worth a seat TEST even below the max -- never because its solo number earns one.
+# EXPOSURE: ~80%, non-zero. It fails the fourth honesty filter and must not enter an entry whose
+# offline number is quoted as clean. Its 0%-exposure twin distill_stack_clean_s2026 is the control.
+distill_stack_max_s2026.pt           # 0.8634 -- ~80% teacher exposure, NOT clean
