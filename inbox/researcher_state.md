@@ -3,7 +3,36 @@
 # interpretations/kneemri/, instruments to research/scripts/, external pulls to research/external/).
 # References to "scratchpad/researcher_state.md" in older notes mean THIS file.
 
-## LATEST (17:20Z) — M341 phantom claim ANSWERED (D334); next free letter D335; main last seen M341 (13:40Z)
+## LATEST (18:05Z) — M343 TASK DONE (D336): selector CSV on disk; next free letter D337; main last seen M343 (14:02Z)
+- `labels/v2_lone_dissent.csv` written: 2,315 rows (study_uid, column, v2_value, cluster_value,
+  v2_soft, cluster_soft); selector = 3 foreign tables unanimous AND v2 differs. Four paths cited in
+  D336. Main builds report_labels_v2_corrected.csv and arms `v2_corrected` tonight behind
+  discord_mask.
+- My answer on correct-vs-mask: CORRECT, but write cluster SOFT mean not hard vote (v2's targets are
+  confidence-graded; hard flips smuggle a second variable; the 25% tail gets a lean not a flip).
+- Process bug of mine: a temp draft named *.tmp.md in inbox/main/ got archived by his listener as a
+  letter — .part convention requires the FINAL suffix after .part. Caught and repaired in minutes.
+- discord_mask prediction on record (both sides): lands near control — 86% of its cells are clean.
+
+## PRIOR LATEST (17:50Z) — M342 answered (D335): the selector is v2-lone-dissent
+- Audit chain closed: B=0.0787 five-way / 0.0714 four-way, REFUTED both ways; M341 phantom retracted
+  by main. Decomposition: 52 steven_full-only cells err 1.9%; 12 four-way-discordant cells err 75%.
+- THE SELECTOR (D335): "≥2-of-4 dissent" = 93 cells corpus-wide (useless). The real structure: the 3
+  foreign tables vote as ONE cluster (flight/steven_blend lone-dissent 0.0%); lone dissent ≈ **v2 vs
+  the cluster** = **2,315 cells (4.38%)**, 90% v2-says-1 (over-call), concentrated MedMen 567 /
+  Contusion 556 / LatMen 431 / ACL 298. Purity 75% measured TWICE independently (pack 9/12; gold-58
+  24/32). ≈1,700 probable label errors pre-identified. Interpretation:
+  interpretations/kneemri/2026-09-11_the-label-error-selector-is-v2-vs-the-field.md
+- confident_span (mask 27.3% UNK) = 0.8449 vs control 0.8565 (−0.0116): subtraction by CONFIDENCE
+  fails; the v2-lone-dissent set is subtraction by measured ERROR. discord_mask (circular 13.94%
+  selector) running on his card.
+- LANE HYGIENE (owner directive 17:30Z): scratchpad/ retired for this lane. State file =
+  inbox/researcher_state.md; instruments = research/scripts/ (build_audit400.py, score_audit400.py,
+  paired_boot.py, attn_full.py); external pulls = research/external/pubkernels/. Letter drafts no
+  longer written (inbox/main/ is the record). audit400 pack stays in session Temp until the audit
+  closes, then belongs under the data root beside overcall_audit.csv.
+
+## PRIOR LATEST (17:20Z) — M341 phantom claim answered (D334)
 - The audit's 0.6934 is REAL for the five M326 tables (13,774 unanimous-POSITIVE cells — a phantom
   caps that at ~57); main's phantom-combo exact match at 36,664 is a COINCIDENCE (11-col perturbation:
   35,962 vs 32,844). His search space (internal labels dir) never contained the foreign tables. His

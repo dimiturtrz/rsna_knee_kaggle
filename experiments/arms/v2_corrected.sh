@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# v2_corrected — CORRECT the 2,315 label cells two independent references measure as 75% wrong.
+#
+# WHY. This is the top rung of D333's ladder, and the first arm on the label axis whose selector was
+# validated against references that owe nothing to the voter structure that produced it.
+#
+# THE SELECTOR (D335/D336): the three foreign report-label tables vote UNANIMOUSLY and our v2 differs.
+#     flight0234_rsna-knee-hybrid-report-labels/report_labels_v4hybrid.csv
+#     lixin73_rsna-knee-llm-report-labels-sol56/report_labels_gpt56sol.csv
+#     stevenleehans_rsna-knee-llm-report-labels/llm_labels_v4_blend.csv
+# 2,315 cells, 4.38% of the corpus, written out at labels/v2_lone_dissent.csv. 2,080 of them (90%) are
+# v2-says-1 against the cluster's 0 — an OVER-CALL direction. Per column: MedMen 567, Contusion 556,
+# LatMen 431, ACL 298, LatOA 141, MedOA 97, MCL 83, PF OA 49, Effusion 36, Synovitis 31, Baker's 26,
+# Fracture 0.
+#
+# PURITY, MEASURED TWICE AGAINST DIFFERENT REFERENCES, SAME NUMBER:
+#     blind adjudication of 12 such cells against the reports   9/12  = 75%
+#     organisers' radiologist gold-58, 32 such cells            24/32 = 75%
+# Neither reference is derived from the voter tables. n=12 and n=32 are small and the intervals are
+# wide; the coincidence across two independent rulers is what carries it, not either alone.
+#
+# WHY CORRECT AND NOT MASK. FCF (Jiang, AAAI-24) Thm 5: correction beats filtering at equal
+# cleaned-noise rate, because it keeps the sample count. And masking is now MEASURED here, not assumed:
+# confident_span masked 27.3% of cells by low confidence and scored 0.8449 against this arm's control
+# at 0.8565 — minus 0.0116. Removal at 4.4% prices near -0.002 by proportion. Correction's arithmetic
+# is ~1,700 cells fixed against ~600 broken.
+#
+# WHY SOFT. The written value is the cluster's soft MEAN, not its hard vote. v2's targets are
+# confidence-graded ({0.08, 0.28, 0.68, 0.82, 0.94}); writing hard 0/1 into exactly the cells this arm
+# varies would change the target DISTRIBUTION on those cells and smuggle a second variable into a
+# one-variable arm. Soft also halves the expected damage on the 25% tail, since a cell where v2 was
+# right gets a lean rather than a flip. Built by research/scripts/apply_lone_dissent.py, which asserts
+# every selected cell held the v2_soft value the selector recorded before overwriting it — 2,315 of
+# 2,315 passed, so the selector and the table agree about the corpus.
+#
+# THE RULER IS DELIBERATELY THE UNCORRECTED TABLE. --eval-labels pins report_labels_v2, the same ruler
+# band_span and discord_mask are read on, because that is the only way the three arms are comparable.
+# It is also CONSERVATIVE against this arm's own hypothesis: if the correction is right, the holdout it
+# is scored on still carries the errors it removed from training, so a real gain is measured through a
+# noisy ruler and understated. That is Khosravi's test-side schema effect (D333) pointed at us on
+# purpose. A gain here is a floor, never a ceiling.
+#
+# control  band_span = 0.8565 — same recipe, same fold, same span, same density, same eval table.
+#          Only --labels differs. confident_span 0.8449 and discord_mask are the masking arms on the
+#          same axis; this is the correction arm.
+#
+# PREDICTION, written before the run.
+#   >= 0.8665   correction propagates. The repair route is real and a re-extraction pass aimed at these
+#               2,315 cells is worth building — the Jain shape, structured repair reaching the encoder.
+#   0.8515-0.8665  within the floor. The label axis's training side is flat and what value remains is
+#               in the EVALUATION channel (Khosravi), not the training one. Stop spending card here.
+#   <= 0.8515   correction HURT, which means the cluster is wrong more often than v2 on these cells and
+#               the twin 75% readings are an artefact of n=12 and n=32. That retires the selector and,
+#               with it, the agreement-based repair route entirely.
+#
+# deliberate: --eval-labels pins the uncorrected table so the arm is comparable to band_span and the
+#             measured gain is a floor (knee-df7t).
+# reading: D:/models/rsna_knee_abnormality/experiments/v2_corrected_s2026*.holdout.npz
+# bead: knee-nz6r7
+set -euo pipefail
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+CORRECTED="$PROCESSED/labels/report_labels_v2_corrected.csv"
+require "$CORRECTED"
+require "$LABELS"
+
+run_train v2_corrected \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.1 --band-high 0.9 \
+  --labels "$CORRECTED" --eval-labels "$LABELS" \
+  --out "$MODELS/v2_corrected_s2026.pt"
