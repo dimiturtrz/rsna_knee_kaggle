@@ -128,14 +128,30 @@ the hole, and the bound is tight precisely BECAUSE the dissent stratum is small.
 what makes the interval narrow. (Contrast `discord_mask`'s sensitivity at 32 affirmed cells, where the
 small n IS the denominator and nothing bounds the quantity -- that one stays unreadable.)
 
-### The single point of failure
+### The single point of failure, and its provenance (D383)
 
 All eight class-B ceilings rest on `eps_unanimous = 0.033` multiplying the ~98% of cells nobody
-contested. At 0.033 MCL's ceiling is 0.949 and its hole +0.121; at 0.10 the hole is +0.05; at 0.15 MCL
-becomes class C and the finding inverts. **Its provenance is asked and outstanding (M389), and until it
-is answered this entire table is conditional on that one constant.** Separately, Fracture has zero gold
-cells, so its +0.115 rests on the unanimous leg alone and belongs one confidence notch below the other
-seven however attractive its size.
+contested. Provenance, answered: it is **denom60** -- 60 cells drawn uniformly from the five-way
+unanimous stratum (v2 plus all four readers agreeing) over the whole corpus, no member signal in the
+draw, no overlap with the other packs, **2/60 = 0.033, Wilson 95% [0.009, 0.114]** (D362). That is a
+measurement on the population the arithmetic needs, not an assumption. It is also two cells.
+
+The interval spans a regime change, so the table has to be read in two halves:
+
+| eps_u | MCL ceiling | MCL hole |
+|---|---|---|
+| 0.009 (lower) | 0.972 | +0.145 |
+| 0.033 (point) | 0.949 | +0.121 |
+| 0.114 (upper) | ~0.869 | ~+0.06 |
+
+**Class membership for MCL, Fracture and Lateral OA survives the entire interval -- they stay class B
+even at the top of it. The SIZE ordering against the 0.011 board gap does not.** So the honest statement
+is "these three are the biggest holes", and NOT "closing three buys +0.009 board"; the +0.009 may not be
+quoted without the interval beside it. Widening this honestly means a bigger unanimous batch, which is a
+priced instrument, not a free re-estimate off the same 60.
+
+Separately, Fracture has zero gold cells, so its +0.115 rests on the unanimous leg alone and belongs one
+confidence notch below the other seven however attractive its size.
 
 ### Two deflations, neither fatal
 
@@ -157,10 +173,74 @@ member-specific variance.
 **And the fix is not loss-engineering.** The obvious move is to upweight those three in the objective,
 and the project's standing rule forbids it -- keep the objective general, fix needs with balanced data.
 The rule is right here for a concrete reason: all three are rare positives, so upweighting buys AUC on
-them by trading calibration everywhere else, and macro AUC would hide the trade until the board did
-not. The answer is data, and the outstanding ask (M389) is the coverage matrix over the external tables
-already on disk plus the prevalence-versus-gap correlation that would tell us in one join whether these
-are simply the rare columns.
+them by trading calibration everywhere else, and macro AUC would hide the trade until the board did not.
+
+---
+
+## 3. Neither obvious explanation survives: the holes are not rarity, and no external corpus fills them
+
+D383 tested the two cheap hypotheses that would each have sent the card somewhere definite, and killed
+both. This section is a pair of negatives and it is the most useful thing in this document, because it
+is what stops six weeks of acquisition work.
+
+### Rarity is refuted
+
+Positive prevalence per column in `holdout909` against the D382 gap: **Spearman -0.333 (p=0.29, n=12)**
+on gap-best, **-0.406 (p=0.19)** on gap-median. Nothing. The individual rows kill it more plainly than
+the coefficient does. MCL has **171** holdout positives -- more than Synovitis's 124 -- and is still the
+second-worst column in the table. Effusion has **558**, the most prevalent of all twelve, and carries a
++0.093 hole. Medial Meniscus has 482 and sits 0.065 ABOVE its ceiling. Fracture at 68 is the only
+genuinely rare class-B column.
+
+So the holes are not data-count holes, and **MCL specifically cannot be fixed by more MCL positives of
+the same kind.** It has 596 in train and reads a 0.784 median.
+
+### No external corpus covers class B
+
+| source | usable positives on class B |
+|---|---|
+| fastmri_findings (1,172 studies, NYU DUA) | MCL **4**, Effusion 142; OA / PF OA / Synovitis / Baker's / Contusion / Fracture **0** |
+| mrnet_acl.csv (1,248, Stanford) | ACL 262 only -- no MCL, no OA, no fracture |
+| rijeka_acl.csv (736, CC BY-NC-ND) | ACL 189 only |
+| labels_hisfluid.csv (4,406) | MCL 767, Lateral OA 1,087, Fracture 314 -- **on our own studies** |
+
+Per column: MCL gains **+4** from the entire external world. Fracture **+0** (fastMRI merges
+contusion/fracture into one bone-injury term and splitting it would be guessing). Lateral OA **+0** from
+any image corpus. fastMRI+ is an assessed-ABSENCE corpus -- 1,050 to 1,168 negatives per column, with
+only high-grade positives recorded, and Synovitis absent from its vocabulary by design. And
+`fastmri_findings_effusion.csv` is byte-identical to `fastmri_findings.csv` (md5 match): two filenames,
+one table.
+
+`labels_hisfluid` is the apparent exception and is not one. Its 4,406 rows are OUR studies, and its
+teacher is the ~80%-exposure foreign_corpus teacher -- a supervision-diversity lever on identical
+pixels, which cannot be sold as new data.
+
+**Consequence, acted on: the 231 presigned fastMRI volume URLs are parked, not open.** Pulling them buys
+ACL +101 (class C, label-walled), MCL +4, Effusion +142, meniscus +190/+190 (class C), and **zero
+class-B volume**, plus an unlabelled in-domain SSL corpus. It adds no new label rows. That thread has
+looked like a lever for weeks and is written down here as closed so it stops looking like one.
+
+### What is left is a mechanism question, and the candidate is geometry
+
+With rarity and acquisition both dead, the question is why 596 MCL train positives produce a 0.784. The
+candidate on the table (M390, measurement outstanding) is that **the class-B columns are the
+PERIPHERAL ones and the recipes crop them off.**
+
+Class C -- where we score at or above ceiling -- is entirely central anatomy: menisci, ACL, and
+contusion as a central marrow signal. Class B is not: MCL is superficial and medial, Lateral OA is the
+lateral compartment, PF OA is anterior, Baker's is posterior in the popliteal fossa, effusion and
+synovitis pool in the capsular recesses. Meanwhile 32 arms train at `--band-low 0.1 --band-high 0.9`,
+discarding the outer 10% of the slice stack each side, and 11 train at 0.2/0.8, discarding 20% a side.
+If the slice axis runs medial-lateral, the discarded slices are where MCL and the lateral compartment
+live, and the members are scoring findings whose pixels were cropped out of their input -- which is
+exactly the shape of a hole that more positives do not close.
+
+The contrast needed to test it is **already on disk** (1 arm at 0.0/1.0, 32 at 0.1/0.9, 11 at 0.2/0.8)
+and costs zero card. The prediction is falsifiable in the useful direction: class-B AUC should rise with
+band width while class-C stays flat, and **a flat class-B row across band widths kills the hypothesis
+outright.** The confound to guard is that band width correlates with other recipe attributes across the
+pool, so the reading has to come from within-family pairs differing only in band, with a small honest n
+preferred over a large confounded one.
 
 ---
 
