@@ -47,7 +47,7 @@
 # The refutation I am most alert to is PLUMBING: assert the recipe's `labels` field names v5blend and
 # its `eval_labels` names v2 before any number here is written down.
 #
-# reading: holdout909
+# reading: D:/models/rsna_knee_abnormality/v5blend_span_s2026*.holdout.npz
 # bead: knee-clzzs
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 

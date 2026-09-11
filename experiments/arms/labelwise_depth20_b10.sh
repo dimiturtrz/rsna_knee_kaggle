@@ -28,7 +28,7 @@
 # Dump the checkpoint and assert `slices.pool.gate.3.weight` is non-zero before any number here is
 # written down.
 #
-# reading: holdout909
+# reading: D:/models/rsna_knee_abnormality/labelwise_depth20_b10_s2026*.holdout.npz
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

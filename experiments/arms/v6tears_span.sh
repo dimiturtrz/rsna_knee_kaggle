@@ -43,7 +43,7 @@
 # Assert the recipe's `labels` field names v6tears and its `eval_labels` names v2 before writing any
 # number here down.
 #
-# reading: holdout909
+# reading: D:/models/rsna_knee_abnormality/v6tears_span_s2026*.holdout.npz
 # bead: knee-57aec
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 

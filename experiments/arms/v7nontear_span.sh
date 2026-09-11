@@ -43,7 +43,7 @@
 # rule and sends the 703 back, PLUMBING first - assert `labels` names v7nontear and `eval-labels`
 # names v2 before writing any number down.
 #
-# reading: holdout909
+# reading: D:/models/rsna_knee_abnormality/v7nontear_span_s2026*.holdout.npz
 # bead: knee-lv4fx
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 

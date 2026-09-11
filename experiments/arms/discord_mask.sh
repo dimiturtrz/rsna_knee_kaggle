@@ -55,7 +55,7 @@
 # deliberate: --eval-labels is PINNED to the control's table (report_labels_v2). discordant_masked.csv
 #   scores holdout cells differently, and without the pin this comparison would be a ruler change wearing
 #   a label-content result's clothes. Same pin, same reason, as confident_span. (knee-df7t)
-# reading: D:/models/rsna_knee_abnormality/discord_mask_s2026.holdout.npz
+# reading: D:/models/rsna_knee_abnormality/discord_mask_s2026*.holdout.npz
 # bead: knee-nz6r7
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 

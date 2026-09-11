@@ -43,7 +43,7 @@
 # one-directional reading and says the deletions are not the half that carries - PLUMBING first,
 # assert `labels` names v2_delonly and `eval-labels` names v2 before writing any number down.
 #
-# reading: holdout909
+# reading: D:/models/rsna_knee_abnormality/v2delonly_span_s2026*.holdout.npz
 # bead: knee-lv4fx
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
