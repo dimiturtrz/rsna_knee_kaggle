@@ -14887,24 +14887,45 @@ and **zero all-NaN rows**, so no study lost supervision entirely. The two select
 cells — 2.55% of discordant, 1.3% of UNK — so these are disjoint populations answering the same
 question twice.
 
-**Both land in their third pre-registered band. The SUBTRACTION route on the label axis is closed.**
-That is FCF (Jiang, AAAI-24) Thm 6 — low-noise-probability cells "should be retained without any
-change" — measured on our corpus rather than cited, and Menon 2015's one-sided-noise result (the
-Bayes-optimal ranking survives label noise) showing up as score.
+Both land in their third pre-registered band.
 
-**The finding is not the closure, it is the shape.** Masking 27.3% of cells cost 0.0116. Masking 13.9%
-— half as many — cost 0.0417, nearly four times as much. If masked cells were interchangeable the cost
-would scale with count and `discord_mask` should have landed near −0.006; it is off by a factor of
-seven in the wrong direction. The hypothesis on the table, UNCONFIRMED and sent to the researcher for
-attack (M345): cross-extractor disagreement selects the HARD POSITIVES — a cell four extractors split
-on is a cell where the report is equivocal, which is where the subtle findings and the gradient-carrying
-positives live — while low CONFIDENCE is diffuse and catches easy negatives too. If that holds, the
-selector best at finding WRONG labels is also the one best at finding INFORMATIVE ones, and they are
-substantially the same cells. The cheaper alternative explanation, which must be excluded first: the
-selector may be concentrated in two or three high-prevalence COLUMNS, making −0.0417 a column effect
-inside a 12-column mean rather than a hard-positive effect. Three measurements are owed on this
-(positive rate by stratum, column concentration, per-column deltas off the holdout npz) before either
-reading is written down as fact.
+**CORRECTED THE SAME DAY, BEFORE THE INK DRIED (D339). The two arms are not comparable, and this
+section first claimed they were.** Measured on disk, denominators stated:
+
+| set | n | v2-positive rate (≥0.5) | v2 soft mean |
+|---|---|---|---|
+| discordant — what `discord_mask` masked | 7,369 | **0.9677** | 0.680 |
+| UNK — what `confident_span` masked | 14,445 | **0.0000** | 0.280 |
+| corpus | 52,872 | 0.3051 | 0.351 |
+
+**The discordant selector is 96.8% positive.** `discord_mask` removed 7,131 positive cells — **44.2%
+of all positive supervision in the corpus** (16,128 v2-positives). `confident_span` removed ZERO hard
+positives; its cells are v2's uncertain class. So `discord_mask` did not test "does removing noisy
+labels hurt". It tested "does removing 44% of the positive class hurt", and the answer to that was
+never in doubt. All twelve columns fell, and the share of each column's POSITIVES masked tracks its
+delta at **Pearson −0.65 (n=12)**: MCL lost 65.1% of its positives and fell 0.1058; Baker's 50.1% and
+0.0845; PF OA 27.7% and 0.0116.
+
+**So the −0.0417 is a class-balance result wearing a label-noise result's clothes, and the closure
+rests on `confident_span` alone.** That arm is still a clean test — it cleared an uncertain,
+overwhelmingly-negative 27.3% and still cost 0.0116 — so the subtraction route is closed, by one arm
+rather than two, and with the weaker of the two effect sizes. FCF (Jiang, AAAI-24) Thm 6 and Menon 2015
+remain the frame; the evidence for them here is thinner than this section first said.
+
+**What was wrong with the reasoning, since the selector was built here.** The non-monotonicity (half the
+cells, four times the cost) was read as evidence that the masked cells differed in HARDNESS, and the
+alternative named for exclusion was column concentration. The actual answer was a third thing never
+considered: positive CONTENT. Nobody checked the base rate of the selector before spending an hour of
+card on it — a one-line `df[cols].mean()` would have shown 96.8% and predicted the outcome without the
+run. The lesson generalises past this arm: **state the class composition of any subset before masking
+it**, for the same reason a rate is stated with its denominator (knee-f9aao).
+
+**What survives of the hardness hypothesis, second-order.** The blind audit measured these contested
+cells at 15.6% error against 1.48% unanimous, so the positives removed were the CONTESTED ones —
+roughly 6,000 true-and-hard positives plus ~1,100 errors. That is the hardest 44% of positives, not a
+random 44%, and r = −0.65 leaves scatter for hardness to live in (Baker's −0.0845 at 50.1% masked
+against Contusion −0.0392 at 60.5% is the shape it would take). Per-POSITIVE-cell the two arms sit
+within ~2× of each other; that residual is hardness's remaining claim, and it is not established.
 
 **What this licenses.** Correction, not filtering — the top rung of D333's ladder. The cells most worth
 fixing are the ones least affordable to lose, which is the mechanism argument FCF Thm 5 makes

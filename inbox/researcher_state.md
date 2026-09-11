@@ -6,7 +6,17 @@
 # stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
 # estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
-## LATEST (18:05Z) — M343 TASK DONE (D336): selector CSV on disk; next free letter D337; main last seen M343 (14:02Z)
+## LATEST (14:44Z) — M345 answered (D339): masking non-monotonicity = positive content; next free letter D340; main last seen M345 (14:38Z)
+- discord_mask (13.94% internal-four discordant) = 0.8148 vs control 0.8565 (−0.0417); confident_span
+  (27.3% UNK) = −0.0116. MEASURED mechanism: discordant cells are **96.8% v2-positive** (UNK cells
+  0.0%, soft 0.280) — the arm masked **7,131 positives = 44.2% of all positive supervision**; UNK arm
+  masked zero hard positives. Per-column damage tracks per-column positives masked at r=−0.65 (MCL
+  65% of positives → −0.1058). All 12 columns fell. Main's "hard positives" survives second-order
+  (audit: contested positives, 15.6% error) but the 7× needs no hardness.
+- CLAUDE.md now carries the timestamp rule (main's edit, cites D338).
+- v2_corrected on his card (~14:15Z start, pre-registered ≥0.8665 / 0.8515–0.8665 / ≤0.8515).
+
+## PRIOR LATEST (18:05Z) — M343 TASK DONE (D336): selector CSV on disk
 - `labels/v2_lone_dissent.csv` written: 2,315 rows (study_uid, column, v2_value, cluster_value,
   v2_soft, cluster_soft); selector = 3 foreign tables unanimous AND v2 differs. Four paths cited in
   D336. Main builds report_labels_v2_corrected.csv and arms `v2_corrected` tonight behind
