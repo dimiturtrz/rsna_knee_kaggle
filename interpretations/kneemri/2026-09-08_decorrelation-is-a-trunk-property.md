@@ -70,6 +70,25 @@ and leaves supervision as the only card-cheap axis still open. M183 asks for it.
 competition's own WINNER LICENSE TYPE is CC-BY-NC 4.0 (:66-67), so **NC is defused for all four**. ND is
 the clause that decides.
 
+> **RETRACTED 2026-09-11 — the first two rows of this table were wrong, and the first one was wrong in
+> the direction that cost the most.** The table below is kept as written because it was cited onward and
+> a silently edited table cannot be traced; read it only through this note. See `knee-lsqnm` (P0) and
+> `research/2026-09-11_shippable-corpus-licence-survey.md`, which reads every licence as primary text.
+>
+> - **fastMRI+ does NOT clear.** The "algorithm development named in" allowance is real but it is not a
+>   derivatives grant: the NYU terms permit use "for internal research or educational purposes only" and
+>   forbid distributing "any subsequent variables or data files derived from the fastMRI Dataset". Training
+>   on it is internal research and stays legal; uploading a member fitted on it and running that member in
+>   a competition kernel is distributing a derivative and does not.
+> - **Rijeka's "already shipped" is not a verdict, it is a description of a mistake.** CC BY-NC-ND is ND on
+>   sharing, and shipping a member fitted on it is sharing a derivative.
+> - **The blocked artefact is WEIGHTS, not labels**, which this table never considered. So a trunk that
+>   sees only foreign PIXELS under a self-supervised objective is blocked by the same clause as a
+>   supervised one — `ortho_fastmri` (knee-i3ahx) is an instrument, never a member.
+> - **The row that survives is the ND column itself.** ND, not NC, is what decides — that much was right,
+>   and §2.5a's exemption of incompatible-licence INPUTS does defuse NC for all four. The error was
+>   reading "no NC" and "allowance for algorithm development" as adding up to a permission to redistribute.
+
 | corpus | instrument | ND? | verdict |
 |---|---|---|---|
 | fastMRI+ | NYU DUA + MIT annotations | **no ND** | **CLEARS** — algorithm development named in |
@@ -78,7 +97,10 @@ the clause that decides.
 | SKM-TEA | Stanford University Dataset RUA | ND on *creating* | blocked, same death as MRNet (D175) |
 
 SKM-TEA's clause is quoted from a sibling AIMI instance rather than from our own accepted copy. Closing
-that gap is **one login**, with credentials already held; owner action, no card, no slot.
+that gap is **one login**, with credentials already held; owner action, no card, no slot. *(2026-09-11:
+the survey resolves this from the SKM-TEA paper's own Appendix A.5, which carries an explicit
+"create derivative works" prohibition — the strongest anti-shipping clause of the four. The login would
+confirm, not decide.)*
 
 ## 5. What fastMRI+ can and cannot be pre-registered on (D177)
 
