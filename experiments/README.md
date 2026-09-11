@@ -14604,3 +14604,154 @@ and two of those six (MCL, PF OA) are now on record as label artefacts that a ra
 7th and 8th. The competition's own labels are image-read radiologist consensus with third-reader
 adjudication (`README:3844-3847`) — the same KIND of object as the 58, and NOT report-derived. So the
 gold ordering is the better predictor of the board ordering, and the probe should null against IT.
+
+## 2026-09-11 — the depth curve we never measured, and the montage we were about to build backwards (D323, D324)
+
+**COST: no card, no slot.** Two researcher syntheses, filed at
+`research/2026-09-11_attention-pool-depth-saturation-and-lateral-oa-reads.md` and
+`research/2026-09-11_vlm-montage-prompting-and-small-gold-validation.md`. Every claim below is theirs
+with a verified citation; the declared NULLs are as load-bearing as the numbers.
+
+### 1. Our max-pooled slice sweep was never evidence about depth — the mechanism is in print
+
+`knee-ezz` read **−0.0001** for 20 slices over 12 and that number closed the depth axis for this
+project. It ran under `--slice-pooling max`. CLAM (Lu et al., Nat Biomed Eng 2021, PMC8711640), verbatim:
+max-pooling *"uses the gradient signal from only a single instance in each slide"* — the training signal
+is one slice deep no matter how deep the bag, so slices past the argmax cannot pay. Ilse et al.
+(arXiv:1802.04712): *"attention serves as a gradient update filter during backpropagation."* CLAM-MB's N
+parallel branches each mine *"a different set of highly attended regions … strong positive evidence for
+one of N classes"* — which is what `--slice-pooling labelwise` is, arrived at independently here.
+
+So `knee-ezz` is downgraded the way M325 downgraded the max-pooled axes: **UNREAD, not refuted.** It
+measured max pooling's indifference to depth, which is a property of max pooling.
+
+**The foreign curve is the only depth evidence this project holds that was taken under a working head.**
+`foreign_gate` on Raptor's per-finding attention model through our caches, 58 gold studies:
+`336px_12sl 0.8700 → 16sl 0.8727 (+0.0027) → 20sl 0.8773 (+0.0046)`. The second increment is LARGER.
+
+**NULL declared, and it is the reason to run this.** No published paper reports accuracy-vs-instance-count
+separated by class-specific vs shared/max aggregation. A 12/16/20/24 sweep under both heads would be the
+first such curve in the literature.
+
+**The two on-regime curves that do exist disagree with each other**, which is what makes 24 a question
+rather than a knob:
+- Ilse et al. 2018, MNIST-bags, mean bag size {10, 50, 100}: attention 0.996 vs instance+max 0.553 at
+  size 100; at size 10, attention ~0.80–0.86 vs max ~0.55–0.75. Attention's advantage is LARGEST in the
+  small-sample regime and *"the more instances in a bag the easier the MIL task becomes"*.
+- Li et al., MICCAI 2025, doi:10.1007/978-3-032-04927-8_30 — MIL over CT slices per lymph node, a bag
+  regime nearly identical to ours: **9 sl 81.12±2.78 → 18 sl 82.54±2.10 → 27 sl 81.77±2.60.** Saturates
+  by ~18, degrades at 27 (within its own ±2.6).
+
+So the pre-registration for the 24-slice labelwise arm is **flat-to-slightly-negative**, and it is armed
+as an INSTRUMENT that settles the depth axis under a head that can see it — not as a predicted gain. The
+cache is on disk (`images_336px_24sl_0.1-0.9band.npy`, 66.7 GB); the arm is one variable against
+`labelwise_dense_s2026` (0.8613@holdout909). Counter-direction on record: FocusMIL (arXiv:2408.09449)
+argues max is more robust under domain shift — about shift, not depth.
+
+### 2. Lateral OA is retired as a card target: the gap is over-determined, and none of it is the model
+
+M328 named Lateral OA the one column weak on BOTH rulers and pointed the next arm at it. Five independent
+literature findings say a gap of our size is what a healthy pipeline produces there:
+
+1. **Prevalence geometry.** Stoddart et al., OAC 2021, PMID 33253887 (meta-analysis, 16 studies, 3,786
+   knees): all lateral-TF patterns sum to **15% (CI 8.5–18.7) vs isolated medial 27%**.
+2. **Harder for radiologists AND for CNNs.** Fritz et al., Skeletal Radiol 2020, PMID 32170334:
+   sensitivity medial **93–96%** vs lateral **67–71%**; κ 0.876 vs 0.741; DCNN AUC 0.882 vs 0.781.
+3. **Under-read from REPORTS specifically — our ruler's own channel.** Krakowski et al., Appl Sci 2021,
+   doi:10.3390/app11041552, 190 arthroscopy-correlated knees read from clinical reports: lateral tibial
+   condyle AUC **0.578**, lowest of five locations; chondral-lesion report sensitivity 24–42%.
+4. **Noisiest reference standard.** MOAKS reliability (Hunter et al., OAC 2011, PMC4058435): inter-rater
+   tibial cartilage area **κ=0.36** against 0.61–1.0 elsewhere. Subregion granularity is SYMMETRIC between
+   compartments; what differs is reliability.
+5. **Sequence, not plane.** The cartilage/OA cornerstone is 2D FSE intermediate-weighted FAT-SUPPRESSED,
+   TE 30–40 ms (Omoumi, Skeletal Radiol 2023, PMID 37154871); BMLs are fs-T2/STIR-only signal (Del Grande
+   2014 PMC4126144; Mirowitz AJR 1994 PMID 8273669) — **our non-FS acquisitions are blind to BMLs by
+   physics.** No plane is compartment-specific, which corroborates the slot-affinity reading.
+
+**The one actionable, card-free piece.** Bloecker et al., JMRI 2013, PMC3696373 (OAI 3D morphometry):
+the **lateral meniscus covers 59±6.8% of its tibial plateau vs medial 50±5.5% (p<0.001)** — proportionally
+more lateral cartilage hidden under meniscus on every coronal slice. Nobody has counted coronal-slice
+coverage by compartment and no banded-MIL sampling-bias work exists (NULL). The test is ours and costs no
+card: count informative-slice coverage by compartment in the gold-58 stacks against our `--band-low 0.1
+--band-high 0.9` window. A geometry defect there is fixable with a cache flag.
+
+### 3. The montage we were about to build is the design the measurements reject
+
+M330 asked for montage geometry for a generated Synovitis column. The 2026 3D-medical-VQA evidence runs
+against dense tiling, twice:
+
+- **SpatialMed (arXiv:2603.13800), Table 5** — 3 orthogonal centre slices vs a 20-axial-slice tiled grid,
+  three models, montage loses for all three; **HealthGPT-XL32 62.44 vs 41.69, −20.75**, the largest loss
+  belonging to the medical-specialized model: *"tiling perturbs the visual statistics it relies on most."*
+- **UCSF-PDGM-VQA (arXiv:2605.17140)** — brain MRI; montage of best slices HARMED vs separate slices;
+  MedGemma-1.5 multi-slice-separate 63.57% vs single-slice 55.37%.
+- LoCoVQA (EMNLP 2024 Findings): accuracy decays ~log in image count. Visual Haystacks (ICLR 2025,
+  arXiv:2407.13766): degradation plus placement bias. Chest-CT GPT-4V (Jpn J Radiol 2024,
+  doi:10.1007/s11604-024-01606-3): practical ceiling ~4 slices per conversation.
+- Resolution is not a smooth knob — LLaVA-UHD (ECCV 2024, arXiv:2403.11703) measured a PHASE CHANGE in
+  GPT-4V behaviour with input resolution, and SpatialMed's stated mechanism for the montage loss is
+  *"substantial per-slice down-scaling"*. Synovitis is a resolution-sensitive finding.
+
+**Design that survives: few tiles at high per-tile resolution, multiple planes, slices as SEPARATE images
+— not a grid.** Rendering slice index or sequence name as text into the tile is a NULL, and the adjacent
+evidence discourages it: MedBLINK (arXiv:2508.02951) — models detect marks at 99–100% but score barely
+above chance on tasks requiring USE of the mark; BLINK (ECCV 2024, arXiv:2404.12390) — GPT-4V 51.26% vs
+human 95.70%. Marks are seen, not reasoned about.
+
+### 4. Grade prompts UNDER-call — the opposite of what an under-called column needs
+
+Synovitis is our lone UNDER-call (M326: 16 ours vs 27 gold) and 84% UNK in report text (D20). The instinct
+was a graded prompt. Measured, it points the other way: **Chetla et al., Clin Ophthalmol 2025,
+PMC12411675** (2,500 fundus photos, 8 prompt designs) — graded 5-level prompts biased hard toward
+"absent", sensitivity for mild disease **0.028–0.040**, adjacent grades collapsed into "no disease".
+
+What measurably moves the operating point, in controlled directions:
+- **Explanation prompts recover FNs.** Guo et al., MELBA 2025:004, LLaVA-Med on MIMIC-CXR/CheXpert:
+  pathology-explanation prompts (definition + visual findings) raised recall substantially at minimal
+  precision cost, **F1 +0.115 to +0.194**.
+- **Reference-classifier prompts suppress FPs** — the same paper's weak-learner-augmented prompt cut
+  Edema FPs by **78.5%**.
+- **The instruction itself sets the point.** Sorin et al., JAMIA Open 2025, PMC12343119, 11,999 reports,
+  22 variants: explicit *"prioritize minimizing false negatives"* drove recall to **0.997**; FP counts
+  ranged 3–56 and FN 3–104 across variants; **chain-of-thought DEGRADED** performance.
+- **Repeat-and-vote is priced.** Liu et al. 2026, PMC13060412: majority vote over 10 samples raised
+  Fleiss' κ for every model and task with F1 preserved; prompt PARAPHRASING degrades agreement more than
+  temperature does. Sorin measured nondeterminism at temperature 0 across cloud regions (sensitivity
+  0.90–0.998) — the variance exists whether or not we invite it.
+- **One-finding-per-call vs all-twelve: NULL.** No measured head-to-head exists; joint prompting is the
+  community default (MADE, arXiv:2604.15203, which also finds self-verbalized confidence unreliable).
+
+**So our generated table does NOT inherit the extractor's 3.4:1 FP:FN shape by necessity.** The prompt
+sets the operating point, and the measured lever for the FN side is explanation CONTENT, not grading.
+
+### 5. The n=58 validation trap has a floor, and the floor decides where the reading happens
+
+Split-the-gold is the CheXpert precedent (Irvin et al., AAAI 2019, arXiv:1901.07031 — labeler tuned on
+200 studies, compared once on a separate 500-study consensus set). At n=58 that is ~29/29, and the
+researcher computed the Hanley & McNeil closed form (Radiology 1982,
+doi:10.1148/radiology.143.1.7063747; flagged DERIVED, not measured): at 27 pos / 31 neg, SE(AUC) ≈ 0.12
+at true AUC 0.80 → **95% CI half-width ≈ ±0.19–0.24 on the full 58, ±0.27+ on a 29/29 split.**
+
+**A split of the 58 certifies "better than chance". It cannot resolve "the VLM column beats the report
+column by 0.05".** This is the same wall `oof_band_folds` hit (README:13061) and what D301 §6 and D297 §4
+both mean by "the cheapest thing that would settle it is more gold" — now with a number on it. So a
+generated column is read against the report-table channel over all 4407, or against the board. Never
+against a split of the 58. Routes that do not need gold, for the record: partial identification (Maia
+Polo et al., arXiv:2312.04601 — bounds from labelling-function marginals alone, the only published
+protocol aimed at exactly this situation), Confident Learning (Northcutt et al., JAIR 2021,
+arXiv:1911.00068), and concordance adjudication (Sorin et al. — truth by agreement between independent
+pipelines, manual review of discrepancies only), which is a published route to a ruler LARGER than 58
+without re-annotation if the pixel-VLM column and the report column are near-independent.
+
+### 6. M327-Q3 — what the column-null probe IS, in the literature's terms
+
+**NULL for the specific design:** nobody has published per-class recovery of a column-mean multi-label
+metric by constant substitution. It is a novel instance of a named family — Whitehill's oracle attacks
+(AAAI 2016, arXiv:1506.01339, AUC-oracle exploits with a proof that labelings consistent with an observed
+AUC grow exponentially; 2017, arXiv:1707.01825, FULL test-label recovery on a real Kaggle competition via
+the log-loss oracle, rank #4/848 without training a classifier). Two priced consequences: the oracle leaks
+far more than one number per query when exploited deliberately, and adaptive consumption of leaderboard
+bits degrades the holdout's validity (Dwork et al., Science 2015, PMID 26250683; Blum & Hardt's Ladder,
+ICML 2015, arXiv:1502.04585). **Our probe is the benign end of that family — one query, one scalar, no
+label recovery attempted** — but it does spend a small unquantified amount of the public board's
+remaining information, which is an argument for the single-slot form over the twelve-slot map.
