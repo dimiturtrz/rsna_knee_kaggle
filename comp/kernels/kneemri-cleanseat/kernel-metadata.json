@@ -1,0 +1,24 @@
+{
+  "id": "dimiturnt/kneemri-cleanseat",
+  "title": "kneemri-cleanseat",
+  "code_file": "kneemri-cleanseat.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": [
+    "dimiturnt/kneemri-kit",
+    "dimiturnt/kneemri-members",
+    "dimiturnt/resnet50d-224",
+    "dreaddevelopment/raptor-knee-widedense"
+  ],
+  "competition_sources": [
+    "rsna-knee-abnormality-detection"
+  ],
+  "kernel_sources": [],
+  "model_sources": [
+    "metaresearch/dinov2/PyTorch/small/1"
+  ]
+}
