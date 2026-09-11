@@ -15042,3 +15042,35 @@ Consequence for the seat: the mechanism now favours `v2_corrected` (substitutes 
 the gold AUC favours `discord_mask` (0.6982 vs 0.6272, masking a superset whose extra 5,068 cells are
 only ~7% wrong — mostly-good supervision thrown away). Those two disagree, and running them through the
 same vacated seat across two slots is what settles it.
+
+### The image-side selector is closed by its own stratified batch (2026-09-11, D358 → D360)
+
+D358 opened a route to the one stratum no report-text selector can reach: ~18% of v2's errors are made
+where all four extractors agree with each other and are wrong together, and an image-side selector
+(four members from four different label families, ≥3-of-4 agreeing with each other and disagreeing with
+v2) appeared to flag them at precision 0.273 with 90.9% of its flags in that unanimous stratum. The
+pilot was n=3 wrong cells.
+
+A 56-cell blind pack (`audit400/imagesel56`, seed 20260911, key sealed until all four answer files were
+on disk) stratified the flags four ways, 14 each, and settled it:
+
+| stratum | n | v2-wrong | precision [95% Wilson] |
+|---|---|---|---|
+| flagU_top (top third of margin) | 14 | 0 | 0.000 [0.000, 0.215] |
+| flagU_mid (middle third) | 14 | 0 | 0.000 [0.000, 0.215] |
+| flagD (dissent stratum) | 14 | 6 | 0.429 [0.214, 0.674] |
+| unflagU (recall arm) | 14 | 1 | 0.071 [0.013, 0.315] |
+
+**Zero of 28 in the unanimous stratum, at both margins.** The selector's score is flat there — no
+threshold salvages it. What the selector actually finds is the dissent stratum (0.429), which
+`discord_mask` already masks. The axis is closed plainly: there is still no route to the unanimous
+stratum, and the D358 point estimate was a three-cell mirage. The pre-registered stratification is what
+caught it; an unstratified follow-up batch would have reproduced the mirage with a bigger n.
+
+Two residuals worth carrying forward. (a) The recall arm reads **0.071**, above its 1.5% pre-registration
+with an interval that still covers it — if the unanimous stratum is really 7% wrong, the 18%-of-errors
+arithmetic is a floor, and its denominator needs its own fresh batch before it is quoted again. (b) On
+all 28 flagU cells — v2 and four extractors say PRESENT, four corrected-family members say ABSENT — the
+blind adjudicator sided with **v2 on every one**. Selected for member-v2 disagreement, so not a rate; but
+it is the first cell-level sign that the corrected chain deletes true positives, and it rhymes with the
+31 over-corrections D345 found in v3.
