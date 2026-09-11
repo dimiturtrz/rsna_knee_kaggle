@@ -252,3 +252,54 @@ v2-ruler number is, and the only thing that separated the artefact from the find
 remainder control behaved throughout: agreement with v2-truth on the 10,439 non-adjudicated cells reads
 band_span 0.8427, v6tears 0.8154, v5blend 0.8086 — the corrected tables drift from v2 in proportion to
 how much they corrected, with no blow-out.
+
+## The image-side axis is closed, and the 18% above is retracted (D360 + D362)
+
+Both numbers in the section above were measured properly and both are now wrong. They are written here
+rather than edited out, because the shape of how they failed is the transferable part.
+
+**The image-consensus selector was an n=3 mirage.** D358's precision 0.273 / recall 1.000 licensed a
+56-cell blind pack, stratified FOUR ways before any verdict existed — top-third and middle-third of the
+unanimous-flag margin, the dissent stratum, and an unflagged recall arm. The result:
+
+| stratum | n | v2-wrong | precision [95% Wilson] |
+|---|---|---|---|
+| flagU_top (top third of margin) | 14 | 0 | 0.000 [0.000, 0.215] |
+| flagU_mid (middle third) | 14 | 0 | 0.000 [0.000, 0.215] |
+| flagD (dissent stratum) | 14 | 6 | 0.429 [0.214, 0.674] |
+| unflagU (recall arm) | 14 | 1 | 0.071 [0.013, 0.315] |
+| **flagU pooled** | **28** | **0** | **0.000 [0.000, 0.117]** |
+
+Zero of 28 in the unanimous stratum at BOTH margin thirds. What the selector actually finds is the
+dissent stratum at 0.429 — cells `discord_mask` already masks. The axis is closed on the merits, not on
+a threshold, and the pre-registered stratification is the only reason the mirage did not become a
+second-order design. **That is the transferable rule: a pre-registered stratification is what separates
+a finding from an n=3 mirage**, and it cost 56 hand-adjudicated cells to learn cheaply instead of a
+card-week to learn expensively.
+
+**The 18% is retracted as a point estimate.** It was `0.693 x 0.015 / (0.693 x 0.015 + 0.307 x 0.156)`
+— arithmetic on a 1.5% that had never been measured. D360's recall arm read 0.071 on n=14 and flagged
+it; the denom60 batch measured it on n=60:
+
+- **U-stratum v2-wrong: 2/60 = 0.033 [0.009, 0.114]** (Wilson 95%)
+- D-stratum comparator: 10/64 = **0.156 [0.087, 0.264]**
+- constant-0 floor on those 60: accuracy 0.717
+
+The share, computed as a RANGE across the interval endpoints rather than as a point: **0.325 at the
+point estimates, spanning 0.07 to 0.75.** So the honest line is "about a third of v2's errors sit in
+the unanimous stratum, with a range reaching both 7% and 75% until the D interval tightens" — and never
+a point. The direction in the section above survives: the dissent stratum still carries the majority,
+so `discord_mask` still addresses the bigger half. The size does not.
+
+The measurement also landed strictly BETWEEN the two branches pre-registered for it in M369 — the point
+sits where "1.5% stands" would have been restored, but the interval's upper bound (0.114) blows through
+that branch's <=0.08 condition. Pre-registration that cannot be satisfied by the number that arrives is
+still doing its job: it forbids picking the flattering reading afterwards.
+
+**And the error direction is one-sided across three independent batches.** Both U-stratum errors are v2
+firing 1 where the report does not support it — zero under-calls in 60. D360's blind adjudicator sided
+with v2 on all 28 flagU cells. D345 found 31 over-corrections in v3. **v2's residual error is over-call;
+the corrected chain's residual error is over-deletion.** Same disease, opposite signs. The balance56
+batch was commissioned to price the second one, and until it reports, `v2_corrected`'s cell-level
+precision is evidence that the chain can FIND cells, not that it can FIX them. Those are different
+skills, and the board is still the only ruler that separates them.
