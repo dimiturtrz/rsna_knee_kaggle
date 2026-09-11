@@ -14136,7 +14136,7 @@ flag, so these are cells of one factorial and not six separate arms that happen 
 | ✓ | ✓ | — | `calib_dense_hold_s2026` | 0.8634 | **+0.0056** |
 | — | — | clean | `seat_clean_distill_s2026` | 0.8634 | +0.0056 |
 | ✓ | — | clean | `clean_calib_s2026` | **0.8649** | **+0.0071** |
-| ✓ | ✓ | clean | `calib_hold_clean_distill_s2026` | RUNNING | ? |
+| ✓ | ✓ | clean | `calib_hold_clean_distill_s2026` | 0.8641 | +0.0063 |
 | — | ✓ | clean | — | never run | — |
 
 **Calibration does not work. Holding annotations does not work. Together they are +0.0056.** Each is
@@ -14826,3 +14826,44 @@ Q1/Q2, answered in full as D322), and the only thing that stopped a fifth slot w
 one field wider before spending it. The check that would have caught it at the start is the one already on
 the books — grep the ledger and the record for the OPERATION before proposing it, not just before
 submitting it.
+
+### calib_hold_clean_distill — the seventh cell lands BELOW its own pre-registration, and the three-way term is −0.0080 — 2026-09-11
+
+`calib_hold_clean_distill_s2026` reads **0.8641**, converged clean (twelve epochs, no TRUNCATED row;
+epochs 9/10/11 at 0.8633/0.8635/0.8635 with the peak at epoch 10). The pre-registration written into the
+factorial section above while it ran was **0.8650-0.8720, centred ~0.8685**. It missed the band low.
+
+That is the reading, and it is worth more than the number. All three treatments are ON in this cell, and
+every two-way term the factorial measured is POSITIVE (+0.0077 calib x hold, +0.0031 calib x teacher).
+Main effects plus both interactions predict 0.8721. Measured 0.8641, so the **three-way term is −0.0080**
+— larger in size than either two-way term, and negative. The treatments do not compose.
+
+**What that rules out.** The factorial was being read as a set of stackable parts: find the flags with
+positive interactions, turn them all on, collect the sum. This cell is the direct test of that reading and
+it refutes it. Turning on the third treatment did not add its +0.0056; it gave back most of what the
+pairs bought. The best cell in the whole eight remains `clean_calib_s2026` at **0.8649** — two treatments,
+not three — and this arm did not beat it.
+
+**It also bounds the eighth cell, which is on the card now.** `hold_clean_distill` is the `— ✓ clean`
+corner, the last unrun one. Its own header priced reading (b) at ~30% on the theory that hold-annotations
+is a general soft-target enabler. The three-way term says the opposite about this family's composition:
+the more of these flags are on at once, the worse the sum does against its parts. The eighth cell carries
+hold + teacher WITHOUT calibration, so it is the two-way `hold x teacher` term measured for the first
+time, and the honest prior after this number is the LOW half of its pre-registered bands — 0.8580-0.8639,
+"hold damps the teacher" — not the 0.8660 that reading (b) needs. The bands stay as written; this
+paragraph is the prior, not a rewrite of them.
+
+Per-column at the peak epoch: ACL 0.890, MCL 0.805, Medial Meniscus 0.902, Lateral Meniscus 0.868,
+Medial OA 0.880, Lateral OA 0.826, PF OA 0.863, Effusion 0.861, Synovitis 0.857, Baker's 0.907,
+Contusion 0.881, Fracture 0.823. MCL and Fracture are again the floor, which is the same ordering every
+arm at this corner produces — consistent with the board's own verdict that there is no weak lane to
+attack (the `colhalf` retraction above), since the offline ordering does not transfer in size.
+
+**A note on what it cost, because the price was not the recipe's.** This arm and the eighth cell both ran
+against an unbounded VRAM ceiling — `capped()` derived 32.5 GB on a 31.84 GB card, and
+`set_per_process_memory_fraction` silently clamps an over-card fraction to 1.0, so the "cap" REMOVED the
+cap. This run reserved 51 GB against 21.93 allocated and its epochs grew 1594s -> 2681s as Windows paged
+the excess to system RAM over PCIe. The number above is sound (allocation never exceeded the model's
+own prediction), but it was bought at roughly four times its quiet-card price. Fixed in `d212242d`
+(`DESKTOP_RESERVE_GB`); the eighth cell was killed at epoch 1 and relaunched under the fix, and its gate
+now reads 28934 MiB admitted. Quote the relaunch's epoch times, not this one's.
