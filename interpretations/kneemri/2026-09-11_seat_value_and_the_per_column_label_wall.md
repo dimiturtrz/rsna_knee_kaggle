@@ -336,3 +336,60 @@ hours later: `distill_stack_clean_s2026` converged at **0.8645**, +0.0011 ABOVE 
 first member-level price for the fourth honesty filter and agrees with the ensemble-level substitution
 estimate of ~0.0004 through two of six seats. Exposure and the fold-0 LEAK (+0.0051) are different
 quantities and only the second was ever inflating anything.
+## 5. The answer section 4 was waiting for: MCL's hole is modelling, not wall
+
+Section 4 closed on a commissioned instrument and an explicit branch -- "if MCL's measured unanimous error
+comes back materially above 0.033, class B loses its three largest members and the strategic picture
+changes." It did not. It came back at **zero**.
+
+`classb120` was built, sealed and pre-registered by the researcher within seven minutes of the commission
+(D385): three columns x 40 rows, drawn uniformly inside each column's five-way unanimous stratum
+(`v2 + flight + lixin + steven_blend + steven_full`, binarised at 0.5), over the same five-table UID
+intersection of 4,406 studies that denom60 used, no member signal, zero overlap asserted against all six
+prior packs, seed 20260911. Pack sha `cc6fddb6c09e213e`, key sha `aa177af27706d982`. All 120 cells were
+adjudicated blind from the free-text reports -- nine languages -- and `adjudication_key.csv` was opened
+only after the last of the 120 answers was on disk.
+
+| population | k / n | rate | Wilson 95% |
+|---|---|---|---|
+| MCL | **0 / 40** | 0.0000 | [0, 0.0876] |
+| Lateral OA | **0 / 40** | 0.0000 | [0, 0.0876] |
+| Fracture | 1 / 40 | 0.0250 | [0.0044, 0.1288] |
+| classb120 pooled | 1 / 120 | 0.0083 | [0.0015, 0.0457] |
+| denom60 (prior) | 2 / 60 | 0.0333 | [0.0092, 0.1136] |
+| **pooled, n = 180** | **3 / 180** | **0.0167** | **[0.0057, 0.0478]** |
+
+The pre-registered null was ~6/180 with [0.015, 0.071]. The observed 3/180 sits just under that interval's
+floor: the unanimous stratum is CLEANER than denom60's two cells implied, not dirtier.
+
+**The single disagreement is an adjudicator boundary call, not a demonstrated label error.** `c0113` reads
+"subacute osteochondral injury at the medial patellar facet (about 1.3 x 1.5 cm)" plus a bone bruise at the
+lateral femoral condyle, with no free fragment and the word fracture nowhere in the report. It was scored 1
+on the reasoning that an osteochondral injury breaches subchondral bone; the tables scored 0. That is a
+definition of the Fracture column, not a defect in it -- so the honest reading of this batch is 0-to-1
+errors in 120, and the pessimistic end is the one tabled above.
+
+**What it decides.** MCL's unanimous error is 0/40 with a Wilson upper of 0.0876 -- not materially above
+0.033, and nowhere near the class-C regime (Medial Meniscus 111/111, Lateral Meniscus 89/89, ACL 60/60).
+**MCL's +0.121 hole is real modelling headroom, and so is Lateral OA's.** Class B is attackable. Section 4
+listed three refuted input-coverage stories -- rarity, external corpus coverage, geometry -- and named
+supervision and task difficulty as the survivors; this section removes the label wall from the supervision
+half AT UNANIMITY, which is the half that would have capped the columns outright.
+
+**And section 2's single point of failure is closed on the high side.** That section's whole per-column
+ceiling table rested on `eps_unanimous` = 2 cells, Wilson [0.009, 0.114], and the class-B ordering flipped
+depending on which end of that interval you stood on. At n=180 the interval is [0.0057, 0.0478], about 2.4x
+narrower: **0.114 is now excluded**, so any reading that was only true at the high end is dead, and the
+0.033 reading survives as the conservative one. The D383 rule stands -- `+0.009 board` is never quoted
+without its interval beside it -- but the interval it now carries is a different object.
+
+**What is left.** Unanimity is 69.34% of the corpus. The disagreement stratum (`W_D` = 0.3066) has never
+been audited on any class-B column, and it is exactly where a GRADED soft-tissue finding would hide: MCL is
+a grade I/II/III call and the reports are written in grades, so tables binarising at 0.5 will disagree
+precisely on the rungs. A disagreement-stratum successor on the same three columns is commissioned in M392,
+scored against the majority sign and, if free, against each table separately -- a table carrying the
+disagreements names itself as the one to drop. Adjudication cost is now known and small: one agent, ~25
+minutes, zero card.
+
+---
+
