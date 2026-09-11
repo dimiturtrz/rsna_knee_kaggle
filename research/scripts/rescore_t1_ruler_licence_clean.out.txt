@@ -1,0 +1,37 @@
+scored pool 312 -> honest 295 -> licence-clean 277
+
+=== dropped members (18 of 18 listed are in the scored pool) ===
+  merged3_corpus_s2026                mrnet                     roster :639 `# licence: mrnet`
+  merged3_oversample_s2026            mrnet (merged3)           declines :956 - oversampling variant of the merged3 corpus, 'its corpus is contested'
+  merged_blend_cf                     rijeka                    roster :406 `# licence: rijeka`
+  merged_blend_cf_n12b0.1-0.9         rijeka                    declines :649 - regroup price for merged_blend_cf
+  merged_blend_cf_r224                rijeka                    declines :650 - resize price for merged_blend_cf
+  merged_blend_cf_r280                rijeka                    declines :651 - resize price for merged_blend_cf
+  merged_blend_cf_r392                rijeka                    declines :685 - resize price for merged_blend_cf
+  merged_blend_s2026                  rijeka                    roster :446 `# licence: rijeka`
+  merged_corpus_s2026                 rijeka                    roster :585 `# licence: rijeka`
+  merged_dense_cf                     rijeka                    roster :495 `# licence: rijeka`
+  merged_dense_cf_run1                rijeka                    declines :921 - one-epoch repeat of merged_dense_cf
+  merged_distill_cf                   rijeka (merged_blend_v1)  declines :115 - one variable off stack_increments is the corpus, blend_three_v1 -> merged_blend_v1
+  merged_labelwise_cf                 rijeka (merged_blend_v1)  declines :128 - 'the corpus again', one variable off labelwise_dense_s2026
+  merged_span_cf                      rijeka                    roster :516 `# licence: rijeka`
+  mrnet_warm_s2026                    mrnet                     declines :298 - trunk warm-started from MRNet pretrain; CC/RUA copyright question knee-ib4t unresolved
+  mrnet_warm_s2026_run1               mrnet                     declines :940 - the higher MRNet run of the pair
+  ortho_fastmri_masked_s2026          fastmri (mergedf)         declines :1068 - DECLINED ON LICENCE, fitted on mergedf
+  ortho_fastmri_s2026                 fastmri (mergedf)         declines :1044 - DECLINED ON LICENCE, fitted on the mergedf cache (our corpus + NYU fastMRI)
+
+=== greedy forward selection on T1 (licence-clean pool, 277 members) ===
+  seat 1: + stack_increments_s2026                   joint T1 0.8748
+  seat 2: + chainfour_s2026                          joint T1 0.8802
+  seat 3: + labelwise_extended_s2026                 joint T1 0.8819
+  seat 4: + blendhold_s2026                          joint T1 0.8832
+  seat 5: + stack_increments_base_s2026              joint T1 0.8836
+  seat 6: + resnet_224_long_s2026                    joint T1 0.8843
+  FINAL 6-seat joint: T0 0.8763 | T1 0.8843
+
+=== constraint cost ===
+  licence-clean T1 joint 0.8843 vs unconstrained honest-pool T1 joint 0.8850 -> cost -0.0007
+  licence-clean T0 joint 0.8763 vs unconstrained honest-pool T0 joint 0.8762 -> +0.0001
+
+  selected seats: ['stack_increments_s2026', 'chainfour_s2026', 'labelwise_extended_s2026', 'blendhold_s2026', 'stack_increments_base_s2026', 'resnet_224_long_s2026']
+  foreign_labels_dense_s2026 survives the filter: True; selected: False

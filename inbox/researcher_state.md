@@ -6,7 +6,74 @@
 # stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
 # estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
-## LATEST (14:54Z) — M346 answered (D340): corrected-ruler measurement; next free letter D341; main last seen M346 (14:50Z)
+## LATEST (15:58Z) — M351 answered (D345); next free letter D346; main last seen M351 (15:54Z)
+- CHUNK-3 CORRECTION to my D344 headline: v3 over-call right 0.709 (n=86) → **0.473 (n=129)**; v5
+  0.488 — statistically indistinguishable, no re-queue case. v2 0.039. Under-call n=12: v3 0.583 /
+  v5 0.500. v3-vs-v5 corpus disagreement 3,062 cells (5.79%, balanced) — a real next-arm variable.
+- Residual: 68/129 wrong under v3 = 37 persistent over-call + **31 over-CORRECTIONS** (verdict=1,
+  v3=0). Contusion worst (0.351). A v4 prompt buys ≤half the persistent 37 and risks growing the 31 —
+  not worth card yet.
+- EFFUSION ANSWERED: criterion = "moderate or large amount of fluid". All 1,599 flips are v2-soft
+  0.68 (hedge rung) → v3 0.38: small/hedged effusions graded negative = criterion-line CORRECTION not
+  bias. Explains gold-58 Effusion weakness: blends inherited the lexicon's threshold error, so
+  κ~0.90 agreement was agreement ON the same error.
+- Main queued v3_labels_span (band_span recipe, v2-pinned eval, T1 read clears at ≥0.8742). Chunks
+  4–10 still coming; every rate provisional.
+
+## PRIOR LATEST (15:46Z) — M350 all four parts DONE (D344): THE FIX EXISTS (v3)
+- MECHANISM (1): report_labels_v2.csv written 2026-08-11 = LEXICON-era pipeline. Criteria entered the
+  reader 2026-08-27 (ec4d3f72; grade-wording fix 229101d9 same day). The criteria explicitly grade
+  degeneration negative — but no prompt held them when v2 was made. Blast radius 12.1% of positives.
+- THE FIX (2): report_labels_v3.csv ALREADY EXISTS (criteria-era Qwen reader). On main's 94 verdicts:
+  over-call right 0.709 vs v2's 0.058, under-call preserved 0.875. v5reader similar (0.733/0.750).
+  v4/v6/v7 are v2-lineage (0.058). Corpus-wide: v3 flips 6,461 v2=1→0 (ZERO reverse), deleting 40% of
+  v2's positives (16,129→9,668); agrees with cluster on 1,420/2,315 selector cells.
+- COST (3): using v3 = zero. New v4 per-finding prompt = card-hours on the Qwen reader, not card-free.
+- PRIZE (4): pre-register band_span-recipe on v3, TWO-ruler read (v2 ruler punishes it by construction;
+  T1 is the honest primary). If it clears control on T1, the lexicon table is the project's largest
+  measured defect. D330 silence layer untouched by any prompt.
+- Card (his): labelwise_depth20_b10 (~16:35Z), depth24 behind. Slot mark 15:57Z passing with the
+  licence-clean six building as a kernel.
+
+## PRIOR LATEST (15:36Z) — M349 answered (D343): the bias is ONE-SIDED
+- 469 interim read (94 cells): over-call (v2=1 vs cluster 0, n=86) = **94.2% v2-WRONG**; under-call
+  (v2=0 vs cluster 1, n=8) = **87.5% v2-RIGHT**. Mechanism: v2 reads degeneration as tear on TEAR
+  columns (ACL 0/15, MedMen 0/18, LatMen 0/17) but correctly as OA on OA columns (LatOA 4/4 right).
+  **The correction should be ONE-SIDED (flip only the 2,080 v2=1 cells)** — two-sided writes ~205
+  wrong flips into the 235 under-call cells. v2_corrected arm flipped both ways.
+- Corpus contamination priced: ~1,955 false-positive labels = **12.1% of all 16,128 positive labels**
+  in report_labels_v2, systematic degeneration→tear, concentrated MedMen/Contusion/LatMen/ACL.
+  Prompt-addressable (reports CONTAIN the words; the extractor maps them wrong).
+- T1a (94 verdicts substituted): T1-six 0.8840 vs T0-six 0.8814 → reseat holds at +0.0026; one-sided
+  ruler says the same (+0.0025). The reseat's case is robust to every correction variant.
+- Main moved audit400 + holdout469 to the data root (D:/data/.../audit400/) — the durable home.
+  His answers land there as answers_<i>of10.csv; chunks 3–10 pending.
+
+## PRIOR LATEST (15:30Z) — M348 licence-clean reseat DONE (D342)
+- Licence-clean pool 277 (18 dropped: 6 roster `# licence:` tags + 12 declines-sourced; tags vs names
+  agree; tag gate covers ROSTERED only — 12 unrostered tainted live only in declines prose).
+- Licence-clean six: stack_increments, chainfour, labelwise_extended, blendhold, stack_increments_base,
+  resnet_224_long → T1 0.8843 / T0 0.8763. Constraint cost −0.0007 (vs 0.8850 unconstrained).
+- VERDICT: T0-era greedy six (same pool) = T0 0.8773 / T1 0.8817. T1-six does NOT beat T0-six on T0
+  (−0.0010, inside floor) → "ship tonight" arm of M347's outcomes FAILS; on T1 +0.0026 → ruler-aligned
+  move, STAND-IN until the 469 verdicts. foreign_labels_dense licence-clean but NOT selected.
+- Scripts: research/scripts/rescore_t1_ruler{,_licence_clean}.py (+ .out.txt).
+
+## PRIOR LATEST (15:14Z) — M347 all three parts DONE (D341)
+- (a) 369 npz → 312 kept / 57 excluded (named). Full two-ruler table: research/scripts/rescore_t1_ruler.py
+  + .out.txt. VOID-INSAMPLE flags on raptor published (896/909) + DINOv3 folds (703/909). Nearly all
+  honest members gain ~+0.003 under T1. **v2_corrected: 0.8392 → 0.8555 (+0.0163, pool's largest) vs
+  band_span 0.8592 on T1 → −0.0037, a TIE not a kill — repair route NOT retired.** 8 of 469 selector
+  cells pre-masked in npz (no-op flips).
+- (b) Honest-pool greedy six on T1: stack_increments, merged_labelwise_cf, labelwise_extended,
+  merged_span_cf, blendhold, foreign_labels_dense → T1 0.8850 / T0 0.8762. ZERO overlap with champion;
+  champion 0/6 scorable (2 ff fold−1 + 4 no-npz) so the comparison is VACUOUS — champion is fully blind,
+  and the corrected-ruler six can only be tested on the board.
+- (c) holdout469 pack built (audit400/holdout469/, 10 chunks, key shut): pre-registered v2-right ~25%
+  (~117/469). Awaits main's blind adjudication tonight.
+- Card (his): labelwise_depth20_b10 then depth24 (instrument arms). Label axis off the card.
+
+## PRIOR LATEST (14:54Z) — M346 answered (D340): corrected-ruler measurement
 - THE EVALUATION CHANNEL, MEASURED: 469 v2-lone-dissent cells in the 909-study holdout (4.30%);
   flipping them in the RULER to cluster_value lifts every member (+0.001 to +0.014). calib_dense_hold
   vs stackfit: 0.0003 apart on v2 ruler → 0.0038 apart ORDER-FLIPPED (stackfit over) on corrected —
