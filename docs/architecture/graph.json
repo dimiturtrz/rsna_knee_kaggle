@@ -26666,6 +26666,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms._armed",
+      "target": "kneemri.experiments.queue_check.QueuedArms._watcher_at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms._invokes",
+      "target": "kneemri.experiments.queue_check.QueuedArms._watcher_at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms._owed_by_the_dead",
       "target": "kneemri.experiments.queue_check.QueuedArms.alive",
       "weight": 1
@@ -26678,6 +26690,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms._producing",
+      "target": "kneemri.experiments.queue_check.QueuedArms._mentions_watcher",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms._script",
+      "target": "kneemri.experiments.queue_check.QueuedArms._watcher_at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.alive",
       "target": "kneemri.experiments.queue_check.QueuedArms._armed",
       "weight": 1
@@ -26685,6 +26709,18 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.bespoke",
+      "target": "kneemri.experiments.queue_check.QueuedArms._script",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.bespoke",
       "target": "kneemri.experiments.queue_check.QueuedArms.watchers",
       "weight": 1
     },
@@ -26720,6 +26756,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.duplicated",
+      "target": "kneemri.experiments.queue_check.QueuedArms._script",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.duplicated",
+      "target": "kneemri.experiments.queue_check.QueuedArms.watchers",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.faults",
       "target": "kneemri.experiments.queue_check.QueuedArms.collided",
       "weight": 1
@@ -26728,6 +26776,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.faults",
       "target": "kneemri.experiments.queue_check.QueuedArms.doubled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.faults",
+      "target": "kneemri.experiments.queue_check.QueuedArms.duplicated",
       "weight": 1
     },
     {
@@ -26764,6 +26818,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.lines",
       "target": "kneemri.experiments.queue_check.QueuedArms.alive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.lines",
+      "target": "kneemri.experiments.queue_check.QueuedArms.bespoke",
       "weight": 1
     },
     {
@@ -26810,6 +26870,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.producer",
+      "target": "kneemri.experiments.queue_check.QueuedArms._mentions_watcher",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.stranded",
       "target": "kneemri.experiments.queue_check.QueuedArms._owed_by_the_dead",
       "weight": 1
@@ -26836,6 +26902,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.queue_check.QueuedArms.unlogged",
       "target": "kneemri.experiments.queue_check.QueuedArms._armed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.queue_check.QueuedArms.unlogged",
+      "target": "kneemri.experiments.queue_check.QueuedArms._script",
       "weight": 1
     },
     {
@@ -60134,6 +60206,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms._mentions_watcher",
+      "label": "_mentions_watcher",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms._owed_by_the_dead",
       "label": "_owed_by_the_dead",
       "level": "method",
@@ -60150,8 +60230,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms._script",
+      "label": "_script",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms._watcher_at",
+      "label": "_watcher_at",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.alive",
       "label": "alive",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.bespoke",
+      "label": "bespoke",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
@@ -60168,6 +60272,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.queue_check.QueuedArms.doubled",
       "label": "doubled",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.QueuedArms",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.queue_check.QueuedArms.duplicated",
+      "label": "duplicated",
       "level": "method",
       "parent": "kneemri.experiments.queue_check.QueuedArms",
       "role": null
