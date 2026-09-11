@@ -415,6 +415,16 @@ merged_blend_cf.pt          # merged_blend_s2026's flags plus --calibrated-targe
 # band_dense_long_s2026, which is what makes `kneemri-allfit` a six-of-seven swap rather than a clean
 # sweep — stated here because an entry whose composition looks like an oversight will be read as one.
 #
+# Added 2026-09-11 05:57Z, found by hand and NOT by roster_check: the check asserts a holdout record only
+# for checkpoints that HAVE one, so a dark arm passes it in silence and these two sat in neither this file
+# nor members.declines. Both completed all twelve epochs with loss converging normally (0.6261, 0.6253);
+# the `peak nan e0` the ledger carried for them is a reader meeting a dark arm, not a death.
+calib_span_df.pt            # DARK. calib_span_cf's recipe plus --distill-weight 0.7 off teacher_oof5 (12 slices)
+final_ws_df.pt              # DARK. final_ws_cf's recipe plus --distill-weight 0.7 off teacher_oof5 (20 slices)
+# Every caveat on the cf block applies to both without exception: --fold -1 with train_fraction 1.0 holds
+# out nothing, they have seen every holdout study, no offline score exists or can exist for them, and they
+# must never enter a pool that reports an offline mean.
+#
 # Added 2026-08-24 23:06Z, ahead of the run finishing, so the reset window is fire-only.
 small_batch6_ff.pt          # DARK. small_batch6_s2026's flags plus --fold -1 --ema. The SEVENTH dark
 # member and the first one that has ever existed; count-of-dark-members was held at six by every board
