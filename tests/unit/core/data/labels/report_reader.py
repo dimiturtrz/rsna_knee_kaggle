@@ -10,6 +10,8 @@ import pandas as pd
 
 from core.data.labels.report_reader import (
     ABSENT,
+    CONTUSION_CLARIFIED,
+    CONTUSION_IMPACT_QUALIFIER,
     LEVEL,
     PRESENT,
     UNSURE,
@@ -41,6 +43,22 @@ def test_criteria():
     assert all(f"- {target}: " in criteria for target in TARGETS)
     assert CRITERIA["Medial Meniscus"] in criteria
     assert len(criteria.splitlines()) == len(TARGETS)
+
+
+def test_criteria_clarified():
+    """A clarification lands on its own finding's line and leaves the other eleven byte-identical.
+
+    The line count is the assertion that matters: a sentence appended to a criterion must not become a
+    thirteenth line the reader can read as a thirteenth finding.
+    """
+    plain = ReadingPrompt().criteria().splitlines()
+    clarified = ReadingPrompt(clarifications=CONTUSION_CLARIFIED).criteria().splitlines()
+    assert len(clarified) == len(plain)
+    changed = [new for old, new in zip(plain, clarified, strict=True) if old != new]
+    assert len(changed) == 1
+    assert changed[0].startswith("- Contusion: ")
+    assert CONTUSION_IMPACT_QUALIFIER in changed[0]
+    assert CRITERIA["Contusion"] in changed[0]
 
 
 def test_system():

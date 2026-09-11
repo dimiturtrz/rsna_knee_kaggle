@@ -149,6 +149,34 @@ on one card in a window measured in hours rather than days.
 JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
 """The model is asked for bare JSON and mostly gives it; this survives the times it adds a sentence."""
 
+CONTUSION_IMPACT_QUALIFIER = (
+    "Subchondral or degenerative marrow edema next to cartilage loss, chondromalacia, osteophytes or "
+    "gonarthrosis is NOT a contusion, however extensive. Grade it present only when the report ties the "
+    "edema to trauma: a named impact or pivot-shift pattern, or an acute, osteochondral or stress "
+    "fracture it is described with."
+)
+"""The one qualifier the blind adjudication asked for, and the only column-specific line in the prompt.
+
+MEASURED, NOT INVENTED. On 282 adjudicated verdicts every column reads 0.71-0.96 except Contusion at
+0.559 on n=68, which carries 26 of 38 persistent over-calls and 4 of 6 over-corrections (D347 §3). The
+30 residual cells decompose (D348 §a): ~17-19 are degenerative subchondral edema graded as contusion,
+~7-9 are fracture-entity confusions running BOTH ways, ~3-4 are negation-scope. The reader fires on the
+edema WORD and never reads the cause — the host criterion says "bone marrow edema-like signal FROM
+IMPACT", and the qualifier is that missing clause put where the reader will see it.
+
+BOTH DIRECTIONS ON PURPOSE. A sterner instruction would fix the 26 and cost the 4 over-corrections,
+which are real fracture-adjacent bruising the reader already wrote 0 on. So the second sentence names
+the fracture association as a POSITIVE condition rather than leaving it to be inferred from silence.
+"""
+
+CONTUSION_CLARIFIED: tuple[tuple[str, str], ...] = (("Contusion", CONTUSION_IMPACT_QUALIFIER),)
+"""The v6 prompt: v5's words for eleven columns, one added sentence on the twelfth.
+
+ONE COLUMN ON PURPOSE. Eleven of the twelve currently read 0.71-0.96 against hand adjudication; changing
+the instruction they share would re-open all of them for a defect measured in one. So the clarification
+is addressed to `Contusion` alone and every other criterion line renders byte-identical to v5's.
+"""
+
 
 @dataclass(frozen=True)
 class ReadingPrompt:
@@ -159,6 +187,14 @@ class ReadingPrompt:
     """
 
     findings: tuple[str, ...] = TARGETS
+    clarifications: tuple[tuple[str, str], ...] = ()
+    """Per-finding sentences appended to that finding's criterion line, empty by default.
+
+    A TUPLE OF PAIRS RATHER THAN A DICT because the dataclass is frozen and therefore hashable, and a
+    prompt is compared and cached by value. Empty is the honest default: every clarification is a
+    deviation from the host's published words, so it has to be passed in by a caller that can name the
+    measurement it came from — `CONTUSION_IMPACT_QUALIFIER` is the only one this project has earned.
+    """
 
     def criteria(self) -> str:
         """The host's published criterion for each finding, in the contract order, one per line.
@@ -166,8 +202,12 @@ class ReadingPrompt:
         Rendered from `core.findings.CRITERIA` rather than restated here so the reader is told the same
         words `data.labels.rubric_gap` measures it against. A prompt that paraphrased them would be
         scored by a ruler reading the originals.
+
+        A clarification is appended to its finding's own line rather than collected into a block, so the
+        reader meets it while reading that criterion and not as a separate list it may skip.
         """
-        return "\n".join(f"- {finding}: {CRITERIA[finding]}" for finding in self.findings)
+        added = {finding: f" {sentence}" for finding, sentence in self.clarifications}
+        return "\n".join(f"- {finding}: {CRITERIA[finding]}{added.get(finding, '')}" for finding in self.findings)
 
     def system(self) -> str:
         """What the reader is, what it may claim, and the vocabulary it must answer in.
