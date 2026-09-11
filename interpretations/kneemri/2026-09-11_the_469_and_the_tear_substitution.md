@@ -208,3 +208,47 @@ Limits, so this column is not the next thing that has to be retracted: **tear-27
 verdict has zero variance there — so all-469 AUC is carried by the 192 non-tear cells. 32 positives makes
 the interval wide. And accuracy is still the right statistic for how an entry VOTES at a cut; it is only
 the wrong statistic for ranking members.
+
+## The stratum no report-text selector can reach, and the first signal that reaches it (D357–D358)
+
+The selector work closed one axis and opened another on the same day, and the arithmetic that did both
+is small enough to write in one line.
+
+**v2's errors are not where the selectors look.** v2 is wrong on 1.5% of cells where all four report
+extractors agree and 15.6% of cells where they do not; those strata are 69.3% and 30.7% of the corpus.
+So the unanimous stratum carries `0.693 x 0.015 = 0.0104` of all v2 error against the discordant
+stratum's `0.307 x 0.156 = 0.0479` — **about 18% of every mistake v2 makes is made where all four
+extractors agree with each other and are wrong together.** That is a correlated-failure population, and
+no selector built on extractor disagreement can flag a single one of its cells at any threshold. It is
+not a tuning problem; it is a construction one.
+
+This reframes the whole selector ladder D357 measured. `lone_dissent` at precision 0.727 (~20x base) and
+five-way discordance at 0.156 are not two ideas — 99.4% of lone-dissent cells sit inside the discordance
+set, so they are one contrast cut at two sharpnesses, and the confidence control below random is the
+same contrast cut at zero. The correction axis was never precision-bound. It was coverage-bound, and it
+had reached its coverage.
+
+**The image is a second opinion the reports cannot give.** D358 §2 ran the obvious complement: take four
+members fitted on four DIFFERENT label families, flag the cells where at least three agree with each
+other and disagree with v2. Precision 0.273 against a 0.037 base (~7.4x), recall 1.000 — at n=3, which
+must be said — and the number that matters: **90.9% of what it flags is unanimous-stratum.** It fires
+almost entirely where extractor consensus already spoke, which is the definition of a different
+contrast. The pre-registered negative control — cells where the members disagree with EACH OTHER — flagged
+four cells and got **zero** of them right. Model variance is not label error; that was a live alternative
+explanation and it is now dead rather than merely unlikely.
+
+The precision is low and that is expected rather than disappointing: hunting a 1.5%-wrong population
+yields mostly false positives no matter how good the signal is. What the number licenses is a
+second-order design — discordance banks the sharp 2,315 cells, image-consensus becomes the sampler for
+the stratum discordance cannot see — and what it does NOT yet license is a table. Three wrong cells in
+eighty is where the estimate lives, so the next adjudication batch goes to this selector's flags,
+stratified by margin so the answer is a precision curve rather than an inflated point, with unflagged
+unanimous cells included as the recall arm (M366).
+
+**And a process point, paid for in the same letter.** v6tears' epoch-2 adjudicated scores looked like a
+Contusion breakthrough (acc 0.675) and did not survive to e12 (0.517). No leak, no shared-feature relief
+— a checkpoint read too early. An early-epoch adjudicated number is a stand-in exactly as an early-epoch
+v2-ruler number is, and the only thing that separated the artefact from the finding was waiting. The
+remainder control behaved throughout: agreement with v2-truth on the 10,439 non-adjudicated cells reads
+band_span 0.8427, v6tears 0.8154, v5blend 0.8086 — the corrected tables drift from v2 in proportion to
+how much they corrected, with no blow-out.
