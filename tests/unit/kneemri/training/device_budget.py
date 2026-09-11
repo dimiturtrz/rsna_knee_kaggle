@@ -16,6 +16,7 @@ from kneemri.training.device_budget import (
     CONTENTION_POLL_SECONDS,
     CONTENTION_WAIT_SECONDS,
     DEFAULT_SHARE,
+    DESKTOP_RESERVE_GB,
     FITTED_BATCH,
     FITTED_DEPTH,
     FITTED_PARAMS_M,
@@ -192,7 +193,23 @@ def test_capped():
     # 20-slice arm below its own measured demand. Those arms RAN, at a hand-typed 28. A cap under a
     # measured need does not prevent the over-commit, it schedules it.
     assert DeviceBudget(slices=20).capped(31.8) > DEFAULT_SHARE * 31.8, "a measured need outranks the blind default"
-    assert DeviceBudget(slices=20).capped(31.8) == pytest.approx(CAP_HEADROOM * (26.92 + 1.335), abs=0.02)
+    # AND NO BRANCH MAY LAND ABOVE THE CARD, which is what 20 slices did. Its derivation is
+    # 1.15 * 28.26 = 32.5 on a 31.84 GB device, and `select` clamps the fraction at 1.0 — so that
+    # ceiling did not widen the cap, it REMOVED it, and `hold_clean_distill_s2026` went on to reserve
+    # 38.62 GB against 23.96 allocated and froze the machine through WDDM's sysmem fallback.
+    assert DeviceBudget(slices=20).capped(31.8) == pytest.approx(31.8 - DESKTOP_RESERVE_GB), (
+        "a derivation over the card is held to the card, less the desktop's own"
+    )
+    assert DeviceBudget(vram_gb=40.0).capped(31.8) == pytest.approx(31.8 - DESKTOP_RESERVE_GB), (
+        "a hand-typed number over the card is a typo, not a measurement — the device is the fact"
+    )
+    assert DeviceBudget(slices=20).capped(0.0) > 0.0, "no card means no ceiling to clamp against"
+    # The derivation ITSELF is unchanged — it is the card that bounds it. On a device with room, 20
+    # slices still ask for exactly what the fit predicts, which is what makes the clamp above a
+    # statement about this card rather than a quiet retuning of the cost model.
+    # 35 GB, not a huge card: `DEFAULT_SHARE` is a FRACTION, so on a 64 GB device the share itself
+    # (51.2) outranks the derivation and the assertion would measure the wrong branch.
+    assert DeviceBudget(slices=20).capped(35.0) == pytest.approx(CAP_HEADROOM * (26.92 + 1.335), abs=0.02)
     # AND IT MUST ONLY EVER RAISE THE CEILING (knee-l93q). Handing `needed()` to the allocator as a
     # ceiling made a recipe that matched its own prediction OOM: `dinov3_base_lora`, which this repo ran
     # to 0.8268, died at "15.14 GiB is allocated by PyTorch ... 16.27 GiB allowed", and so did the arm

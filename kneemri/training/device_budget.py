@@ -61,6 +61,30 @@ IT APPLIES TO THE DERIVATION ONLY. A hand-named `--vram-gb` is a measured number
 prediction and is left exactly as typed, and `DEFAULT_SHARE` is a fraction of a real card and needs no
 margin over itself."""
 
+DESKTOP_RESERVE_GB = 2.0
+"""VRAM held back from every cap, so the allocator's ceiling always lands BELOW the physical card.
+
+WITHOUT IT THE CEILING CAN EXCEED THE CARD, AND THEN THERE IS NO CEILING. `capped` takes a max against
+a derived need, and 20 slices at batch 12 derive 28.26 GB, which `CAP_HEADROOM` lifts to **32.5 on a
+31.84 GB card**. `select` hands that to `set_per_process_memory_fraction` as `min(budget / whole, 1.0)`,
+so the fraction silently clamps to 1.0 — an over-card ceiling is not a tight cap, it is the ABSENCE of
+one, and the log says `VRAM capped at 32.5 GB of 31.8 GB` while capping nothing.
+
+MEASURED ON THE RUN THAT FROZE THE MACHINE. `hold_clean_distill_s2026` logged `peak memory 38.62 GB
+reserved, 23.96 GB allocated` — 6.8 GB PAST the card. Windows does not raise on that: WDDM answers an
+over-commit by evicting to system RAM over PCIe, which is the desktop freeze the owner has reported
+repeatedly, and the same mechanism as the three nvlddmkm resets `select` already documents.
+
+THE GAP IS SLACK, NOT NEED, which is why this costs no recipe. That run ALLOCATED 23.96 GB against a
+38.62 GB reservation: the 14.7 GB between them is caching-allocator slack that grew only because
+nothing bounded it. Against a real ceiling the allocator frees cached blocks instead of reserving more,
+so the recipe still fits — and a run that genuinely needs more now dies on an immediate
+OutOfMemoryError, which is this class's stated preference over a silent PCIe crawl.
+
+2.0 IS READ OFF THIS CARD, NOT PICKED. That same arm logged `30.3 GB free of 31.8` with the full
+desktop up — dwm, a browser, Teams — so the desktop and driver context hold about 1.5 GB. 2.0 is the
+next step above the measurement, and being wrong costs an OOM rather than a frozen machine."""
+
 SMALLEST_RUN_GB = 5.5
 """Free VRAM below which no run this repo has ever recorded could have fitted, so starting is futile.
 
@@ -388,8 +412,16 @@ class DeviceBudget:
         the fragmentation the derivation does not model.
 
         A hand-named `--vram-gb` is measured rather than derived, so it is left exactly as typed.
+
+        AND EVERY BRANCH IS THEN HELD UNDER THE CARD by `DESKTOP_RESERVE_GB`, because a ceiling above
+        the device is not a ceiling: `select` clamps the fraction at 1.0, so an over-card budget removes
+        the cap instead of widening it, and the run walks into WDDM's sysmem fallback. That is the one
+        failure this whole class exists to prevent, and until now the arithmetic above could produce it
+        — 20 slices at batch 12 derive a 32.5 GB ceiling on a 31.84 GB card. The clamp applies to a
+        hand-named number too: a typed 40 is a typo, not a measurement, and the card is the fact.
         """
-        return self.vram_gb or max(self.needed() * CAP_HEADROOM, DEFAULT_SHARE * whole)
+        asked = self.vram_gb or max(self.needed() * CAP_HEADROOM, DEFAULT_SHARE * whole)
+        return min(asked, whole - DESKTOP_RESERVE_GB) if whole else asked
 
     def floor(self) -> float:
         """Free VRAM below which this run refuses to start at all — not the same number as its CAP.
