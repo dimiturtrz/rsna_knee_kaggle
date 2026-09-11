@@ -13921,3 +13921,52 @@ Filed on knee-57d68, which is re-scoped rather than queued.
 **The rule this leaves behind.** "We already have the artefacts" is a claim about files, not about
 design. Before pricing an instrument at zero, check that the two things it must compare were ever
 measured on common ground — here they never were and never could be.
+
+### teacher_gen2: five twins, every fold up over its gen-1 counterpart, mean +0.0121 — 2026-09-11
+
+The born-again round ran 2026-09-11 00:21Z-01:10Z and finished all five folds. **Forty-nine minutes**,
+67 s an epoch, against a docstring that had quoted "~1.2 h per fold". The re-price written into the arm
+that morning off the `seconds` field of every `oof_*.metrics.jsonl` on disk said ~1 h; the arm then ran
+in 49 min. The prose figure was wrong by about six times and had been sitting unchallenged in the cost
+line of a card-scheduling decision.
+
+Matched per fold against the gen-1 twins, same geometry, same eight epochs, `--distill-weight 0.7
+--teacher-targets teacher_oof_full.npz` the only moved variable:
+
+| fold | gen-1 (`oof_fold*`) | gen-2 (`oof_gen2_fold*`) | delta |
+|---|---|---|---|
+| 0 | 0.8498 | **0.8609** | +0.0111 |
+| 1 | 0.8578 | **0.8707** | +0.0129 |
+| 2 | 0.8567 | **0.8733** | +0.0166 |
+| 3 | 0.8740 | **0.8814** | +0.0074 |
+| 4 | 0.8695 | **0.8820** | +0.0125 |
+
+**Every fold up, mean +0.0121.** `convergence_check` reports nothing against any of the five, and all
+five `.holdout.npz` exist. The comparison is matched PER FOLD and never pooled: each fold's holdout is a
+different 849-909 study set, so the five deltas are five independent readings of one treatment, not one
+reading with n=4407. Five-for-five in the same direction at a magnitude 1.7x the 0.0071 noise bar is the
+strongest single-treatment signal in this record.
+
+**What the number is NOT.** The arm's own header declares it: *"IT HAS NO PRE-REGISTRATION AND WANTS
+NONE. This is a producer, not a member and not a candidate."* These are distillation STUDENTS, so
+0.8820 prices the distillation term, not a shippable member — a student taught by a teacher is not
+comparable to a solo fit on the same axis, and none of the five belongs on the roster on the strength of
+this table. What the table licenses is the claim the producer was built to support: **the gen-2 teacher's
+blocks read ~0.0121 above the gen-1 blocks they replace**, and every consumer downstream MULTIPLIES that
+term.
+
+**And the union exists.** `oof_teacher --twins 'oof_gen2_fold[0-4]_s2026.holdout.npz'` wrote
+`teacher_gen2_full.npz`: 909 + 875 + 884 + 849 + 890 = **4407 studies, 12 targets, no fill and no
+witness needed**. Gen-1 covered folds 1-4 (3498 rows) and needed a fold-0 block from a differently-shaped
+reader, which `oof_teacher --fill`'s witness read outside the fold-to-fold scatter on 9/12 labels. Gen-2
+is homogeneous by construction: five blocks, one recipe, one teacher. The heterogeneity caveat that has
+followed every filled teacher in this record does not attach to it.
+
+**The leak property is inherited, not fixed, and it decides which consumer may read it.** Each gen-2
+block held its own fold out, so a study's teacher row never comes from a model that trained on it. But
+the twins were fitted WITHOUT `--exclude-fold`, so twin 1's fit saw fold 0 — the same structure that
+makes `teacher_oof_corpus.npz` leaky for a fold-0-scored student (README.md:8526, knee-zwcyk), by the
+residual-mimicry mechanism D30 measured at +0.0127. So `teacher_gen2_full.npz` is for `--fold -1`
+consumers scored on the BOARD, where there is no offline holdout for a mimicked residual to inflate. A
+fold-k-scored consumer needs an `--exclude-fold k` refit of the other four twins first, which is four
+fits of card per scored fold and is not owed by anything currently queued.
