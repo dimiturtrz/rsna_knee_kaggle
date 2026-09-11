@@ -13970,3 +13970,75 @@ residual-mimicry mechanism D30 measured at +0.0127. So `teacher_gen2_full.npz` i
 consumers scored on the BOARD, where there is no offline holdout for a mimicked residual to inflate. A
 fold-k-scored consumer needs an `--exclude-fold k` refit of the other four twins first, which is four
 fits of card per scored fold and is not owed by anything currently queued.
+
+### RETRACTION, 2026-09-11 02:25Z — the +0.0121 above is the leak, and the probe that was meant to gate an 8.5 h arm is the control that proves it
+
+The section above was written at 01:32Z and is wrong in its central claim. It reports five gen-2 fold
+twins beating their gen-1 counterparts by a mean of **+0.0121**, five for five, and reads that as the
+gen-2 teacher's blocks being that much better. **They are not. That number is a leak, and the arm that
+was launched forty minutes later to gate a consumer is what shows it.**
+
+**The probe.** `seat_distill_gen2` — the same seat, the same control, one moved variable, 12 epochs at
+168 s, 35 minutes of card:
+
+| arm | teacher | offline | vs control |
+|---|---|---|---|
+| `lr4e-5_ws_s2026` | none | 0.8525 | — |
+| `seat_distill_lr4e5_s2026` | gen-1, `teacher_oof_corpus.npz` | 0.8633 | +0.0108 |
+| `seat_distill_gen2_s2026` | gen-2, `teacher_gen2_full.npz` | **0.8640** | **+0.0115** |
+
+Gen-2 over gen-1 on the same student: **+0.0007**. `convergence_check` is silent on both, both peaked
+mid-schedule (e11 and e8 of 12), and the recipe line of the running arm confirms the teacher flag landed.
+Pre-registered band three of four: *"inside the gen-1 student's own scatter. The teacher got better and
+the student did not."*
+
+**The arithmetic that says which of the two readings is true.** The gen-1 twins (`oof_fold*`) were
+fitted PLAIN — no teacher. The gen-2 twins were fitted under `teacher_oof_full.npz`, whose fold-k rows
+are written by models that TRAINED on fold k, so each gen-2 twin's own holdout score carries residual
+mimicry — the mechanism this ledger already measured at **+0.0127** (README.md:8526, knee-zwcyk, D30).
+
+Measured **+0.0121** against a mechanism priced at **+0.0127** is not a gain with a leak in it. It is
+the leak, to within a tenth of its own size. And the probe is the matched control that separates them:
+when BOTH students carry the same leak, the gen-2-over-gen-1 difference collapses from +0.0121 to
++0.0007. A teacher-quality difference would have survived that subtraction. A leak is exactly what does
+not.
+
+**What this retracts.**
+
+1. *"the gen-2 teacher's blocks read ~0.0121 above the gen-1 blocks they replace"* — withdrawn. The
+   blocks are not measurably better. `teacher_gen2_full.npz` remains the more homogeneous file (five
+   real out-of-fold blocks at one geometry, no fill, no witness needed) and that property is unaffected
+   — it was never a claim about quality.
+2. The multiply-the-term thesis, which is the entire premise of the born-again round: *"everything
+   downstream MULTIPLIES the teacher's term, and this is the only place left to grow the term."* A
+   teacher whose blocks moved by whatever the +0.0121 really was moved its student by +0.0007. The term
+   did not multiply. It did not pass through at all.
+3. The queued 8.5 h `retrain_six_distill` under gen-2. It has no premise and it is not queued. Thirty-five
+   minutes of card bought the answer that eight and a half hours would have bought worse, and the
+   pre-registered bands are why it reads as an answer rather than as a disappointment.
+
+**What it does NOT retract, stated so a later letter cannot over-read this.** It does not say the
+born-again idea is wrong; it says this generation of it, on this corpus, at this geometry, did not move
+a student. It does not kill `teacher_gen2_full.npz`, which is still the only teacher in the project with
+no heterogeneous block. And it does not, yet, say anything about distillation itself.
+
+**The larger claim it opens, which is now on the card.** `seat_distill_lr4e5`'s **+0.0108** — the
+per-seat term the champion's own reasoning applies six times — was taken through
+`teacher_oof_corpus.npz`, which is folds 1-4, every block fitted without `--exclude-fold`, every one of
+them having trained on fold 0, against a seat scored on fold 0. That is the same leak structure and
++0.0108 is the same coincidence with +0.0127 a second time. **Distillation may buy nothing on this seat
+and may never have**, and if so, every distilled member in the pool carries an offline number taken the
+same way.
+
+`seat_distill_clean` was launched at 02:25Z to settle it: the same seat a third time under
+`teacher_clean_full.npz`, whose folds 1-4 were refitted under `--exclude-fold 0` so that not one block
+was written by a model that saw fold 0. Four bands pre-registered, the bottom one set INSIDE the
+control's own 0.0071 bar so that "indistinguishable from the control" is a verdict rather than a shrug.
+Forty minutes, and it prices a term that has been steering card and slots for weeks.
+
+**The rule this leaves behind.** A treatment measured only through an instrument that shares its
+failure mode has not been measured. Both readings of the born-again round — the twins' +0.0121 and the
+student's +0.0108 — were taken through teachers that had seen the holdout, and both landed within a
+tenth of the leak's own priced size. The tell was available before either arm ran: **when a measured
+effect matches a known artefact to two decimal places, the artefact is the first hypothesis, not the
+last.**
