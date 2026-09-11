@@ -120,3 +120,47 @@ into a one-variable arm. `__conf` and `__verdict` are untouched: a corrected cel
   `LocalReader.annotated` probe, and it cannot share the card with a training arm.
 - **`v6tears_span`** (knee-57aec), queued ahead of `labelwise_depth24`. Prediction on record: at or
   below `v5blend_span` on the v2 ruler, at or above on the corrected T1.
+
+## The non-tear half: a pooled margin rule is Simpson's paradox (D351 + M358)
+
+D351 measured a soft-margin gradient on the 72 adjudicated OA-family cells: at `|cluster_soft − v2_soft|`
+≥ 0.6 the cluster is right 0.83, below it a coin flip, Spearman −0.323 (p=0.006). It proposed
+substituting the 365 corpus cells clearing that bar.
+
+Re-cut on **all 192** non-tear adjudicated cells — D351's 72 plus the 120 Contusion cells — the rule
+does not survive pooling:
+
+    stratum      n    cluster acc
+    hi (>=0.6)  67    0.791
+    lo (<0.6)  125    0.704
+
+The "coin flip below the threshold" is an artefact of the 72-cell denominator. Per column:
+
+    column        hi n   hi cl    lo n   lo cl
+    Contusion       41   0.780      79   0.861     <-- INVERTED
+    Lateral OA       7   0.714      12   0.167
+    Medial OA        8   0.750      13   0.385
+    PF OA            6   0.833       5   0.400
+    Baker's          2   1.000       4   0.250
+    Effusion         3   1.000       6   0.667
+    Synovitis        -       -        6   1.000
+
+The gradient is real and sharp on the OA family (hi 18/23 = 0.78 against lo 11/34 = 0.32), and it runs
+BACKWARD on Contusion, whose whole-column cluster accuracy is 0.833 over 120 cells regardless of margin.
+Contusion is 204 of D351's 365 high-margin cells, so the pooled 0.83 is Contusion's high base rate
+leaking into an OA statistic through a shared threshold — a textbook Simpson reversal, and the reason
+the pooled rule would spend 79 cells the cluster gets right at 0.861 to buy a threshold that hurts them.
+
+The pre-registered report split (chunks 9–10, never used to derive anything) gives a free held-out check
+and agrees in direction: hi n=8 cluster 0.875, lo n=27 cluster 0.667. Thin, but not fitted.
+
+**The operation that falls out is per COLUMN, not per margin**: Contusion wholesale (556 corpus cells at
+~0.833, ~93 expected breaks — the residual budget, stated before banking), the OA family margin-gated at
+≥0.6 (147 cells at ~0.78), Effusion (n=9) and Synovitis (n=6) left alone as too thin to bank either way,
+and the other 571 left alone as genuinely contested. Net ~+453 corrected cells against the pooled rule's
+~+241.
+
+Not built yet, and deliberately behind `v6tears_span`: folding Contusion into the same table would
+confound two corrections in the one arm that can price either. The sequencing hazard D351 raised is
+sharper now that Contusion is the wholesale half — the v6 prompt read targets the SAME over-calls by a
+different route, so the qualifier has to beat **0.833**, not v2's 0.167, to earn its card-hours.

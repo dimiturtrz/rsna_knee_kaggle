@@ -6,7 +6,97 @@
 # stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
 # estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
-## LATEST (15:58Z) — M351 answered (D345); next free letter D346; main last seen M351 (15:54Z)
+## LATEST (17:10Z) — M358 verified + answered (D352): Simpson's paradox confirmed; next free letter D353; main last seen M358 (17:08Z)
+- Main's re-cut reproduces exactly on my join: Contusion hi-margin cluster 0.780 / lo 0.861 (INVERTED);
+  OA-family hi 0.783 / lo 0.294. My D351 aggregate was Contusion's 0.833 base rate leaking through a
+  shared margin threshold — recorded as my error.
+- THE OPERATION: Contusion WHOLESALE (556 cells, ~0.833 → ~463 fix/~93 break), OA family MARGIN-GATED
+  ≥0.6 (147 cells ~0.78), Effusion/Synovitis/571 left (low-margin cluster is 0.70 not 0.50 — leave for
+  a RATE reason). Net ~+453 vs my rule's +241. Sequencing: NOT in the v6tears table; the ~93 breakage
+  goes in the table header before banking.
+- V6 PROMPT REPRICED: bar moved from beat-0.167 to beat-0.833 — the prompt's repair value is nearly
+  dead; its residual instrument question = "does the qualifier recover the substitution's ~93 break
+  cells (fracture-adjacent true bruises)?" — measurable on LocalReader.annotated(58) gate before any
+  full read. Substitution first, prompt second, never stacked.
+
+## PRIOR LATEST (17:06Z) — M357 answered (D351): the soft margin separates
+- v6tears BUILT + banked (main, f189c68e): 1,371 cells changed, guards in code; arm v6tears_span
+  queued (P(clears 1.5% alone) ~0.1, displaces depth24; v2 ruler should read AT/BELOW v5blend, T1 at/above).
+- M357's three candidates measured on 72 OA-family verdict cells: **(a) soft margin WINS** — high
+  tercile (median |Δ| 0.66): v2 acc 0.17 / cluster 0.83; lo/mid = coin flip. Spearman −0.323, p=0.006.
+  (b) cluster spread second (loose cluster predicts, but it's the margin in disguise). (c) language
+  untested — subsumed if margin holds on fresh cells.
+- Rule: substitute cluster on non-tear dissent with margin ≥0.6 = **365 cells** (Contusion 204, LatOA
+  66, MedOA 37, PF OA 31, Baker's 13, Eff 10, Syn 4), expect ~303 fixes / ~62 breaks; leave 571
+  contested cells alone. Contusion overlaps the v6 qualifier — sequence, don't stack.
+- Caveat: hypothesis on 72 cells; fresh OA adjudication batch before banking.
+
+## PRIOR LATEST (16:51Z) — M356 answered (D350): substitute wholesale on tears
+- 469 CLOSED (main, all blind): 32/469 affirmed (6.8%). v2 correct 51/469; cluster 418/469. On TEAR
+  dissent cells (277 cells / 223 studies, ALL v2=1): **v2 accuracy 0.000, cluster accuracy 1.000**.
+  OA columns opposite: v2 right ~half (LatOA 0.632) — leave OA alone in any v6.
+- SAMPLING ANSWER: 469 = selector ∩ fold-0 holdout; folds.py:61 assigns folds by HASH OF REPORT TEXT —
+  no label-side variable in the path; tear cells 20.1% in holdout vs 20.6% expected; clustering mild
+  (1.4 cells/study). 277/277 is a population statement.
+- WHOLESALE SUBSTITUTION BANKED: 1,379 corpus tear-dissent cells (1,097 studies) — substitute cluster
+  value, expected ~1,379 fixes ~0 breaks. Guards: only the selector's cells (uncontested mass errs
+  1.48%), and cluster's 1.000 rests on 223 studies (~1% residual invisibility ≈ 14 cells).
+- Contusion qualifier (v6, CONTUSION_CLARIFIED) priced as INSTRUMENT by main: ~60 cells of one column,
+  gated by LocalReader.annotated(58) before the full read.
+
+## PRIOR LATEST (16:40Z) — M355 answered (D349): ALL-TWELVE
+- Main's M354 error (vision_prompt.py is the IMAGE probe, not the blocker) self-corrected in M355;
+  the seam is built: ReadingPrompt.clarifications tuple + CONTUSION_IMPACT_QUALIFIER verbatim from my
+  D348 sentence, unit-tested (CONTUSION_CLARIFIED = v6 prompt).
+- My answer to contusion-alone vs all-twelve: ALL-TWELVE — (1) attribution (single-finding prompt is a
+  different prompt, two variables), (2) THE QUALIFIER'S NOUNS ARE THE OA COLUMNS' VOCABULARY — the
+  degenerative/traumatic distinction is where the (c) under-call dip lives; all-twelve measures that
+  interaction free, (3) over-generalisation risk to the tear columns visible. TUNE chunks 1–8 (spent),
+  REPORT on 9–10 across ALL TWELVE columns.
+- Main: chunk 9 landed (31/423 affirmed 7.3%); two of his blind calls were my named exemplars (h0330,
+  h0446) — rubric cross-check working.
+
+## PRIOR LATEST (16:30Z) — M354 answered (D348)
+- CONTUSION SUB-TAXONOMY (30 cells, report lines read): **Class 1 = degenerative/OA marrow edema read
+  as traumatic contusion, >60%** — v5 fires on any "bone marrow edema" phrase, never checks the cause;
+  criterion says "edema-like signal FROM IMPACT". Same defect shape as degeneration-vs-tear one column
+  over. Class 2 = fracture-entity boundary, BOTH directions (SIF/stress/OCD; the 4 over-corrections
+  live here). Class 3 = self-contradictory/negation-scope (3–4). Prompt sentence nameable TODAY:
+  "subchondral/degenerative edema adjacent to cartilage loss is NOT contusion; contusion requires
+  trauma context (impact, pivot-shift, fracture association)" — protects class 2's over-correct half.
+- (b) table_blend.py = MEAN/tiebreak over base+FOREIGN readers; does NOT own column substitution. Keep
+  hand-rolled pandas; name the op in the table header.
+- (c) under-call dip NOT Contusion: v5's uc errors = PF OA 4, Contusion 4, MedOA 3, LatOA 2 — OA-lean,
+  second small thread, not chased.
+- Main unfroze the ledger writes after the merge audit. Card: depth20_b10 → v5blend_span → depth24.
+
+## PRIOR LATEST (16:18Z) — M353 answered (D347)
+- v5blend (v5 everywhere + v3 Effusion, main's construction): prices EXACT — 0.830/0.696 on 282
+  verdicts (= v5) and gold Effusion acc 0.737 / AUC 0.8299 (= v3). report_labels_v5blend.csv trains
+  on card now (v5blend_span). Effusion positives 1,342→1,492.
+- MERGE-BUG AUDIT: only D345's v3/v5 rate table + residual split were corrupted (retracted, superseded
+  by D346 clean). D343/D344/T1a/reseat/flips/κ/gold all traced SAFE (pre-chunk-3 or tables-only).
+- v5 residual on 282: **Contusion owns it** — 26 of 38 persistent over-calls + 4 of 6 over-corrections
+  (0.559 right on 68 cells). A v6 prompt = single-column commission, boundary-specific
+  (bruise/fracture/OA-edema), both directions — not sterner, not gentler.
+- Main's aggregator now reads the answer column dynamically; my pipeline normalises both spellings.
+- Chunks 7–10 pending; 282 verdicts, affirmed 6.4% vs pre-registered ~25%.
+
+## PRIOR LATEST (16:12Z) — D346 URGENT CORRECTION sent
+- **D345(1) WAS COMPUTED ON A CORRUPTED MERGE** (chunks 3+ write `answer`, chunks 1–2 `verdict`; my
+  concat NaN'd 47+ rows and counted them all wrong). CLEAN numbers on 235 verdicts (216 oc / 19 uc):
+  v2 0.051/0.737, v3 0.685/0.737, **v5reader 0.810/0.737 — McNemar p=7.1e-04, v5 WINS**. D345's
+  "coin flip, no re-queue" is retracted; v5reader is the measured better table. Merge normaliser:
+  read both column names (`verdict`/`answer`) — the bug class is in the state file permanently.
+- M352: (1) v5 rungs {0.08,0.28,0.68,0.82} separate error halves; 0.5 cut already optimal. (2) best
+  free table = v5@0.5; v3+v5 avg ≈ v5. (3) Effusion on gold (57/34 pos): v2 TP34/FP16/FN0 AUC 0.8299;
+  v3 TP21/FP2/FN13 AUC 0.8299 — deletion swaps recall for precision at flat AUC; **host annotators
+  label small effusions positive despite the criterion**; v5 worse on effusion (0.7449) → v5 wins on
+  tear columns, v3 on effusion; a per-column table choice is supported.
+- Main queued v3_labels_span behind depth20_b10 — D346 tells him v5reader is the verdict-supported
+  table if the swap is still cheap.
+
+## PRIOR LATEST (15:58Z) — M351 answered (D345)
 - CHUNK-3 CORRECTION to my D344 headline: v3 over-call right 0.709 (n=86) → **0.473 (n=129)**; v5
   0.488 — statistically indistinguishable, no re-queue case. v2 0.039. Under-call n=12: v3 0.583 /
   v5 0.500. v3-vs-v5 corpus disagreement 3,062 cells (5.79%, balanced) — a real next-arm variable.
