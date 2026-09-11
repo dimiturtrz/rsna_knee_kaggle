@@ -15006,3 +15006,39 @@ open question is no longer "does subtraction work" but "which selector picks the
 
 `v2_corrected` is retracted the same way: band-3 on the v2 ruler, 0.814/0.6272 on gold and **0.883 on
 Contusion-120, the best Contusion reading on disk.** Both members are now on `comp/members.roster`.
+
+## The selector ladder, and the 18% no report-text selector can reach (2026-09-11, D357)
+
+M364 asked which selector picks the cells v2 gets wrong, ranked on the blind 469 and on the audit400.
+The answer closed the axis it measured.
+
+| selector | audit400 precision | recall | n flagged | lift over 3.7% base |
+|---|---|---|---|---|
+| `lone_dissent` (the v2_corrected table's own selector) | **0.727** | 0.533 | 11 | **~20x** |
+| five-way discordance (the discord_mask family) | 0.156 | 0.667 | 64 | ~4x |
+| confidence-below-threshold (the pre-registered NEGATIVE CONTROL) | 0.031 | 0.133 | 65 | **<1x, below random** |
+
+The control failed as it was required to, by a factor of four on the 469 and by twenty here, so the
+measurement is behaving. Two structural facts come out of it:
+
+**The selectors are not independent.** Corpus-wide, **2,301 of the 2,315 lone-dissent cells (99.4%) sit
+inside the 7,369-cell four-way discordance set.** `discord_mask` and the substitution chain are one
+finding wearing two hats: the CELLS are the same, only the OPERATION differs (mask vs substitute).
+Seating both buys operation diversity, never cell diversity — and a seat argued on cell diversity would
+have been argued on something that is not there.
+
+**And the whole ladder rides ONE contrast.** v2 is wrong on 1.5% of unanimous cells and 15.6% of
+discordant cells; the strata are 69.3% / 30.7% of the corpus. So of every error v2 makes,
+0.693x0.015 = 0.0104 against 0.307x0.156 = 0.0479 — **~18% of v2's errors live in the unanimous stratum,
+where all four extractors agree with each other and are wrong together.** No extractor-discordance
+selector can flag one of them, at any threshold, by construction. The correction axis is coverage-bound,
+not precision-bound: the sharp 4.4% is banked, the 5,068-cell tail is priced at ~0.07 and is not worth
+buying, and the next real gain needs a signal that is not the report text. M365 asks for the image-side
+version (members that never shared a label table agreeing with each other and disagreeing with v2), with
+the fraction-in-the-unanimous-stratum as the number that decides whether it is a new axis or the same
+contrast in a costume.
+
+Consequence for the seat: the mechanism now favours `v2_corrected` (substitutes on the 0.727 cells) while
+the gold AUC favours `discord_mask` (0.6982 vs 0.6272, masking a superset whose extra 5,068 cells are
+only ~7% wrong — mostly-good supervision thrown away). Those two disagree, and running them through the
+same vacated seat across two slots is what settles it.
