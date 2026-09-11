@@ -359,3 +359,62 @@ OVER-ASSERTION on compartments. Same disease, opposite signs, and the direction 
 four independently-built batches. A chain that finds the right cells and then writes the wrong value
 into them is demonstrating that FINDING and FIXING are different skills - which is exactly what the
 selector audit and the gold ruler have been disagreeing about all along.
+
+## D365 -- a lone dissent is informative in ONE direction only (2026-09-11)
+
+`dstratum120` was adjudicated blind, 120 cells, key sealed until the answers were on disk: 10 affirmed
+of 120, constant-0 floor 0.917. The naive batch rate of v2-wrong is 0.433 [0.348, 0.523]. **That number
+is not the corpus rate and must never be quoted as one** -- the batch was built DIRECTION-BALANCED, 60
+cells each way, while the natural D population is 85.5% pos-direction. Reweighted to the natural mix the
+D-stratum v2-wrong rate is **0.138**, which is what audit400's 0.156 [0.087, 0.264] already said with a
+looser interval. The pre-registered branch that fires is 2, not 3, and the reading of D362 stands.
+
+The U-share re-derives to **~0.35, range [0.07, 0.55]**. The 18% figure stays retracted. It is quotable
+only as "about a third, with a range that still reaches both ends".
+
+### The finding is the split, not the aggregate
+
+| direction | meaning | v2-wrong | n |
+|---|---|---|---|
+| neg | v2 says PRESENT, cluster says absent | **0.850** [0.703, 0.947] | 60 |
+| pos | v2 says absent, cluster says PRESENT | **0.017** [0.000, 0.114] | 60 |
+
+Fifty-fold. OA vs non-OA shows nothing by comparison (0.450 vs 0.417).
+
+So: **a lone dissent against v2 carries information in one direction and noise in the other.**
+steven_full's dissents cover 25.7% of the corpus and are ~98% wrong where they ADD a positive, ~85%
+right where they REMOVE one. Any future use of a dissent signal -- a weight, a mask, a confidence
+feature -- must carry the direction, or it averages a 0.85 signal against a 0.017 one and measures
+neither.
+
+This is the third independent arrival at the same table. D362 said v2's residual disease is over-call.
+D363 measured the substitution's own two directions at ~93% right (deletions) and 78.6% wrong
+(additions), with 21 of 22 addition errors on OA columns. D365 now measures the underlying cells from
+the third side and agrees. `report_labels_v2_delonly.csv` -- deletions applied, additions dropped --
+was built on the D363 reading alone; it is no longer resting on one letter.
+
+### What it does NOT say
+
+It does not say the substitution is worthless: its deletion direction is the 85%-wrong reservoir and
+repairing that is real. It says the additions are the part that must go, and that
+`v2_corrected`/`v6tears`/`v5blend`/`v7nontear` each carry ~185 known-wrong cells they cannot shed
+without being rebuilt. The mask is exempt by construction -- it writes nothing, so it cannot make an
+addition error. That remains a mechanism, not a preference.
+
+### The second column: attribution, not dissent
+
+The same letter carries a count on a different axis. Over all 4,406 studies, v2 positives whose
+compartment lexeme appears nowhere in the report:
+
+| column | positives | unnamed | share |
+|---|---|---|---|
+| Medial OA | 1,619 | 154 | 0.095 |
+| Lateral OA | 1,087 | 42 | 0.039 |
+| **PF OA** | **1,991** | **515** | **0.259** |
+
+"Named" is presence-anywhere, not attribution, so each share is a FLOOR on the unattributed fraction.
+PF OA is the outlier by a factor of three, and 515 cells is a build with a known size before a card
+hour is spent on it. Whether it is a NEW axis or a re-cut of `discord_mask`'s cells is the open
+question, and it is answered by one crosstab -- {named, unnamed} x {U stratum, D stratum} per column --
+requested in M373. If the unnamed cells are mostly unanimous, this reaches cells no dissent-based
+operation can see.
