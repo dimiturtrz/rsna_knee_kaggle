@@ -326,8 +326,21 @@ def main() -> None:
         # It reads 0.0148 UNDER the `band_span` control 0.8565, and that was PRE-REGISTERED as the
         # expected outcome, not discovered after: it deletes cells and is then scored on a ruler that
         # still asserts them, so the v2 ruler charges it for every deletion it made. Two of its three
-        # pre-registered legs are met (below `band_span`, above `v7nontear_span`); the corrected-T1 leg
-        # is NOT READ and is not quoted anywhere in this entry.
+        # pre-registered legs are met (below `band_span`, above `v7nontear_span`), and D369 has now read
+        # the third: 0.8555 on the corrected T1 ruler @holdout909 @t1flip469, which TIES `v2_corrected`
+        # at 0.8555 exactly and beats `v7nontear` 0.8282, `v5blend` 0.8258 and `v6tears` 0.8235.
+        # ALL THREE PRE-REGISTERED LEGS PASS.
+        #
+        # THE TIE IS THE ARGUMENT, NOT A DELTA. This member reaches the SAME corrected-ruler quality as
+        # `v2_corrected` while carrying NONE of the ~185 known-wrong addition cells that member cannot
+        # shed without a rebuild. Same destination, bad half never applied. That is why it takes a seat
+        # here and `v2_corrected` does not.
+        #
+        # NOT AN IMPROVEMENT CLAIM: its T0 0.8417 -> T1 0.8555 gap of +0.0138 is a RULER change on a
+        # fixed model. The model never moved and the two numbers are not comparable. The lift is also
+        # NOT uniform -- the three tear columns carry about +0.035 apiece, the OA columns +0.002 to
+        # +0.003, and Fracture is exactly +0.0000 with no selector cells -- which is the tear-dissent
+        # signature rather than a flat shift.
         #
         # WHY DELETION-ONLY. D363 split the correction by direction on 56 adjudicated cells: the
         # deletion direction carries 2 of 28 errors (0.071), the addition direction 22 of 28 (0.786),

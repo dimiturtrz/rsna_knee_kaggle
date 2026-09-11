@@ -197,7 +197,14 @@ v2delonly_span_s2026.pt     # 0.8417 @holdout909 midpoint on the v2 ruler, epoch
                             # on plain v2, so the v2 ruler charges it for every deletion it made.
                             # Pre-registration, written before the number: BELOW band_span (met),
                             # ABOVE v7nontear_span (met, +0.0257), at or above every chain member on
-                            # corrected T1 (NOT YET READ - do not quote that leg).
+                            # corrected T1 (MET - D369 reads 0.8555 @holdout909 @t1flip469, tying
+                            # v2_corrected 0.8555 exactly and beating v7nontear 0.8282, v5blend 0.8258
+                            # and v6tears 0.8235). ALL THREE LEGS PASS.
+                            # The result that matters is the TIE, not a delta: it reaches the same
+                            # corrected-ruler quality as v2_corrected while carrying none of the ~185
+                            # known-wrong addition cells (D363). Same destination, bad half never applied.
+                            # Do NOT read its T0->T1 gap of +0.0138 as improvement - that is a RULER
+                            # change on a fixed model, and the two numbers are not comparable.
                             # Plumbing asserted from the checkpoint's own options, not from the script:
                             # labels=report_labels_v2_delonly.csv, eval_labels=report_labels_v2.csv,
                             # epochs=12, slices=12, slice_pooling=max, calibrated_targets=False,
