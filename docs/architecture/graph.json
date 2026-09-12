@@ -140,6 +140,42 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.data.corpus.kmar_studies",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.data.corpus.study_metadata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.build_merged",
       "target": "core.cli",
       "weight": 1
@@ -586,6 +622,30 @@
       "kind": "import",
       "source": "core.data.corpus.kmar_stats",
       "target": "core.data.corpus.kmar_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.kmar_studies",
+      "target": "core.data.corpus.kmar_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.kmar_studies",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.kmar_studies",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.kmar_studies",
+      "target": "core.data.corpus.study_metadata",
       "weight": 1
     },
     {
@@ -8342,6 +8402,54 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.data.corpus.kmar_studies.KmarStudies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.metadata",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.data.corpus.study_metadata.StudyMetadata.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_kmar.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.corpus.build_merged.main",
       "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
       "weight": 1
@@ -9561,7 +9669,25 @@
     {
       "kind": "references",
       "source": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "target": "core.data.corpus.kmar_corpus.KmarCohortRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus",
       "target": "core.data.corpus.kmar_corpus.KmarPair",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.cohort",
+      "target": "core.data.corpus.kmar_corpus.KmarCohortRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_corpus.KmarCorpus.cohort",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus._key",
       "weight": 1
     },
     {
@@ -9585,7 +9711,7 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
-      "target": "core.data.corpus.kmar_corpus.KmarCorpus.spacings",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus.cohort",
       "weight": 1
     },
     {
@@ -9597,7 +9723,7 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.kmar_corpus.KmarCorpus.spacings",
-      "target": "core.data.corpus.kmar_corpus.KmarCorpus._key",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus.cohort",
       "weight": 1
     },
     {
@@ -9658,6 +9784,132 @@
       "kind": "calls",
       "source": "core.data.corpus.kmar_stats.main",
       "target": "core.data.corpus.kmar_stats.Measurement.report",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.kmar_studies.KmarStudies",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_studies.KmarStudies",
+      "target": "core.data.corpus.kmar_corpus.KmarPair",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_studies.KmarStudies",
+      "target": "core.data.corpus.kmar_studies.KmarStudy",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.kmar_studies.KmarStudies",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_studies.KmarStudies",
+      "target": "core.data.corpus.study_metadata.StudyMetadata",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.__init__",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus.volume",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.stack",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.study_cache.StudyCache.prepare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.study_cache.StudyCache.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.study_cache.StudyCache.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.metadata",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.metadata",
+      "target": "core.data.corpus.study_metadata.StudyMetadata",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.position",
+      "target": "core.data.corpus.slots.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.stack",
+      "target": "core.data.corpus.study_cache.StudyCache.reader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "target": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.position",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "target": "core.data.corpus.kmar_studies.KmarStudies.subject",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "target": "core.data.corpus.kmar_studies.KmarStudy",
       "weight": 1
     },
     {
@@ -37833,7 +38085,7 @@
   ],
   "nodes": [
     {
-      "descendants": 77,
+      "descendants": 79,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -37857,7 +38109,7 @@
       "role": null
     },
     {
-      "descendants": 67,
+      "descendants": 69,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -37865,7 +38117,7 @@
       "role": null
     },
     {
-      "descendants": 40,
+      "descendants": 42,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -37908,6 +38160,14 @@
       "descendants": 0,
       "id": "core.data.corpus.build_fastmri",
       "label": "build_fastmri",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.build_kmar",
+      "label": "build_kmar",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -38060,6 +38320,14 @@
       "descendants": 0,
       "id": "core.data.corpus.kmar_stats",
       "label": "kmar_stats",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies",
+      "label": "kmar_studies",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -41218,6 +41486,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCohortRow",
+      "label": "KmarCohortRow",
+      "level": "class",
+      "parent": "core.data.corpus.kmar_corpus",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.kmar_corpus.KmarCorpus",
       "label": "KmarCorpus",
       "level": "class",
@@ -41246,6 +41522,22 @@
       "label": "Residual",
       "level": "class",
       "parent": "core.data.corpus.kmar_stats",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies",
+      "label": "KmarStudies",
+      "level": "class",
+      "parent": "core.data.corpus.kmar_studies",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudy",
+      "label": "KmarStudy",
+      "level": "class",
+      "parent": "core.data.corpus.kmar_studies",
       "role": "satellite"
     },
     {
@@ -46906,6 +47198,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.build_kmar.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.build_kmar",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.build_merged.main",
       "label": "main",
       "level": "method",
@@ -47602,6 +47902,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.kmar_corpus.KmarCorpus.cohort",
+      "label": "cohort",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_corpus.KmarCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.kmar_corpus.KmarCorpus.pairs",
       "label": "pairs",
       "level": "method",
@@ -47670,6 +47978,78 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.corpus.kmar_stats",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "label": "build",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.metadata",
+      "label": "metadata",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.paired",
+      "label": "paired",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.position",
+      "label": "position",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.stack",
+      "label": "stack",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.studies",
+      "label": "studies",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies.subject",
+      "label": "subject",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudy.present",
+      "label": "present",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudy",
       "role": null
     },
     {

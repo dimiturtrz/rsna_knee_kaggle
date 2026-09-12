@@ -35,8 +35,16 @@ def _root(tmp_path: Path, missing: str = "") -> Path:
         [
             # The cohort writes the index as an int and a `.nii.gz` suffix; disk writes it as a float and
             # `.nii`. Same acquisition, two spellings — the join that has to survive.
-            {"NII_FileName": "2020_1_transection_0.nii.gz", "PixelSpacing": f" [{SPACING}, {SPACING}]"},
-            {"NII_FileName": "2020_2_sagittal_0.nii.gz", "PixelSpacing": f" [{SPACING}, {SPACING}]"},
+            {
+                "NII_FileName": "2020_1_transection_0.nii.gz",
+                "PixelSpacing": f" [{SPACING}, {SPACING}]",
+                "SeriesDescription": " 'qPD_tse_fs_tra_320'",
+            },
+            {
+                "NII_FileName": "2020_2_sagittal_0.nii.gz",
+                "PixelSpacing": f" [{SPACING}, {SPACING}]",
+                "SeriesDescription": " 'pd_tse_fs_sag'",
+            },
         ]
     )
     cohort.to_csv(root / "KMAR-50K" / "TrainingCohort.csv", index=False)
@@ -87,3 +95,16 @@ def test_volume(tmp_path: Path):
     assert volume.shape == (DEPTH, MATRIX, MATRIX)
     assert volume.dtype == np.float32
     assert abs(float(volume.mean()) - 0.4) < 1e-6
+
+
+def test_cohort(tmp_path: Path):
+    """Both columns come out of one pass, and the description is lowercased where it is read.
+
+    Lowercased HERE rather than at each consumer because every consumer matches substrings (`_fs`,
+    `t1`, `sag`), and a corpus spelling one acquisition two ways would route one sequence into two slots.
+    """
+    rows = KmarCorpus(_root(tmp_path)).cohort()
+
+    assert rows["2020_1_transection_0"].spacing == SPACING
+    assert rows["2020_1_transection_0"].description == "qpd_tse_fs_tra_320"
+    assert "2020_2_sagittal_1" not in rows, "the cohort lists two rows, not three"

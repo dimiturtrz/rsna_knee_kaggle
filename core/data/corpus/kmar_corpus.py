@@ -53,6 +53,7 @@ together are the only source of pixel spacing this corpus has.
 """
 
 SPACING_COLUMN = "PixelSpacing"
+DESCRIPTION_COLUMN = "SeriesDescription"
 KEY_PATTERN = re.compile(r"^(?P<body>.+?_(?:sagittal|coronal|transection))_(?P<index>[\d.]+)$")
 """Subject, plane and repeat index out of a stem, with the index left as written.
 
@@ -76,6 +77,18 @@ putting none of it in the background is not reproducing motion.
 
 
 @dataclass(frozen=True)
+class KmarCohortRow:
+    """What the cohort tables record about one acquisition, for the two columns anything here reads.
+
+    A row rather than two parallel dicts because both come out of the same pass over the same tables,
+    and a spacing present where a description is absent would be a state neither caller could represent.
+    """
+
+    spacing: float
+    description: str
+
+
+@dataclass(frozen=True)
 class KmarPair:
     """One knee acquired twice: with motion and without, at a known in-plane spacing."""
 
@@ -84,6 +97,14 @@ class KmarPair:
     clean: Path
     plane: str
     spacing: float | None
+    description: str = ""
+    """The cohort's `SeriesDescription`, lowercased, or empty where no cohort row lists this file.
+
+    It is what says which SLOT this volume occupies — `pd`/`t2` against `t1` is the weighting axis and
+    `_fs` is fat suppression — so it is a recorded fact per volume rather than a modal claim about the
+    corpus. `kmar_studies` is what reads it; a pair carries it because the cohort join already happened
+    there and a second pass over the tables would be the same read twice.
+    """
     """None when neither cohort table lists this file — a real state, not an error.
 
     The two tables cover 1,444 rows and the fetch left 2,681 volumes on disk, so a pair with no metadata
@@ -107,10 +128,17 @@ class KmarCorpus:
         """
         artifacts = self._volumes(ARTIFACT_DIRECTORY)
         cleans = self._volumes(CLEAN_DIRECTORY)
-        spacings = self.spacings()
+        cohort = self.cohort()
         shared = sorted(set(artifacts) & set(cleans))
         pairs = [
-            KmarPair(stem, artifacts[stem], cleans[stem], self._plane(stem), spacings.get(self._key(stem)))
+            KmarPair(
+                stem,
+                artifacts[stem],
+                cleans[stem],
+                self._plane(stem),
+                row.spacing if (row := cohort.get(self._key(stem))) else None,
+                row.description if row else "",
+            )
             for stem in shared
         ]
         located = sum(1 for pair in pairs if pair.spacing is not None)
@@ -147,14 +175,22 @@ class KmarCorpus:
         return f"{found.group('body')}_{int(float(found.group('index')))}"
 
     def spacings(self) -> dict[str, float]:
-        """Millimetres per pixel in plane, keyed the way `_key` keys a stem.
+        """Millimetres per pixel in plane, keyed the way `_key` keys a stem."""
+        return {key: row.spacing for key, row in self.cohort().items()}
+
+    def cohort(self) -> dict[str, KmarCohortRow]:
+        """Both cohort tables as one mapping, keyed the way `_key` keys a stem.
 
         `PixelSpacing` arrives as the string ` [0.5, 0.5]` — a Python literal inside a quoted CSV field,
         so it is parsed as one rather than pulled apart with a regex. The two axes are equal on every row
         read here; the first is taken and a row whose axes disagree would be taking the wrong one, which
         is why the value is read rather than assumed square anywhere downstream.
+
+        `SeriesDescription` arrives quoted and space-padded the same way and is lowercased once, here,
+        because every consumer of it matches substrings (`_fs`, `t1`, `sag`) and a corpus that spells one
+        acquisition two ways would route the same sequence into two different slots.
         """
-        spacings: dict[str, float] = {}
+        rows: dict[str, KmarCohortRow] = {}
         for name in COHORT_FILES:
             # rglob, because the tables ship one level down beside the part directories rather than at the
             # root the volumes are found from. Looking only at the root finds nothing and reports a corpus
@@ -163,9 +199,12 @@ class KmarCorpus:
                 table = pd.read_csv(path, skipinitialspace=True)
                 for _, row in table.iterrows():
                     stem = str(row.iloc[0]).strip().strip("'").split(".nii")[0]
-                    spacings[self._key(stem)] = float(ast.literal_eval(str(row[SPACING_COLUMN]).strip())[0])
-        logger.info(f"{len(spacings)} cohort rows carrying a pixel spacing")
-        return spacings
+                    rows[self._key(stem)] = KmarCohortRow(
+                        spacing=float(ast.literal_eval(str(row[SPACING_COLUMN]).strip())[0]),
+                        description=str(row.get(DESCRIPTION_COLUMN, "")).strip().strip("'").lower(),
+                    )
+        logger.info(f"{len(rows)} cohort rows carrying a pixel spacing")
+        return rows
 
     def volume(self, path: Path) -> NDArray[np.float32]:
         """One NIfTI as slices-first float32, which is the axis order every other corpus here uses.

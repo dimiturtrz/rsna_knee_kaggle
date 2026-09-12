@@ -80,9 +80,10 @@ numbers logged -- did not recur. Neither gate was added after the numbers were s
 **THE DECIDING NUMBER.** The 0.40 dose against the same documented control `band_dense_s2026` (-0.0361)
 is **-0.0229, a toll +0.0132 shallower** -- 3.5 sd of the eleven-member pool (mean -0.0336, sd 0.0038), the
 shallowest toll-vs-matched-control this project has measured, deeper than the 0.25 dose's +0.0090, and
-above the +0.0040 floor the board itself confirmed the previous day. The same pass ran `fieldwide`, an arm built to test the SAME thesis on
-a different shared field, and it came back FLAT (+0.0042 against its matched control, inside its own
-pre-registered -0.0049..+0.0049 band) and a TWIN. So the pass refutes one field and supports the other,
+above the +0.0040 floor the board itself confirmed the previous day. The same pass ran `fieldwide`, an arm
+built to test the SAME thesis on a different shared field, and it came back FLAT (+0.0042 against its
+matched control, inside its own pre-registered -0.0049..+0.0049 band) and a TWIN. So the pass refutes one
+field and supports the other,
 which is what a working instrument looks like rather than a pass that agrees with whoever ran it.
 
 **WHY THE CROSS-SITE RULER IS THE RIGHT ONE FOR A BOARD THIS RULER CANNOT MOVE.** `board_transfer` is a

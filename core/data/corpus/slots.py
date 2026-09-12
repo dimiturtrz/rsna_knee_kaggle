@@ -231,6 +231,56 @@ the other. That is a real cost, stated rather than hidden, and it is not a reaso
 corpus: the decode is the expensive step, it runs once, and an extended-scheme merge would carry both.
 """
 
+KMAR_SCHEME = "kmar"
+"""The slot axis of the KMAR-50K corpus — five of the canonical six, ROUTED per volume.
+
+Same safety argument as `RIJEKA_SCHEME`: `Routing.suffix()` is empty for the canonical scheme, so a
+foreign corpus decoded under it writes onto the arrays every member on disk was fitted on. The scheme
+name makes that collision unrepresentable. This is the FOURTH foreign corpus and the fourth chance at
+that error.
+
+IT IS THE ONLY CORPUS ON THIS MACHINE WHOSE LICENCE CLEARS. CC BY 4.0 (Mendeley, DOI
+10.17632/xw7mrg7ntg.6). Rijeka is CC BY-NC-ND, MRNet's Stanford agreement bars adaptations, fastMRI bars
+distributing derived files, and SKM-TEA's Stanford RUA is non-commercial and no-derivative-works. So a
+member fitted here is the first foreign-data member this project could actually SHIP — which is the
+whole reason the corpus is worth a decode.
+"""
+
+KMAR_SLOTS: tuple[Slot, ...] = (SLOTS[0], SLOTS[1], SLOTS[2], SLOTS[4], SLOTS[5])
+"""SAG_FLUID_FS, COR_FLUID_FS, AX_FLUID_FS, COR_T1 and SAG_T1 — canonical five, in canonical order.
+
+READ OFF THE COHORT TABLES, not off a paper, and not modally. Every volume carries a
+`SeriesDescription` and ALL 1,339 paired volumes on disk join to one (measured 2026-09-12, 1339/1339) —
+`pd_tse_fs_{tra,sag,cor}`, `t1_tse_{sag,cor}` and their `q`/`_p2`/`_256` variants. Proton density and
+T2 are fluid-sensitive, `_fs` is fat suppression, and the plane word is in both the description and the
+filename and agrees. So each volume's slot is a RECORDED FACT, the stated impurity `MRNET_SLOTS` has to
+carry and this one does not.
+
+Canonical ORDER is load-bearing: `MergedCache.positions` matches by slot NAME, so an ascending
+subsequence of `SLOTS` is what lets a merge copy block i into the canonical position of the same name.
+
+MOST STUDIES FILL ONE SLOT, and that is the honest caveat rather than a footnote. Grouped by subject:
+918 of 1,101 fill exactly one, 152 fill two, 30 fill three, 1 fills four. So this corpus has Rijeka's
+shape per study — five zero slots on the typical row — and a flat reading is ambiguous between "the
+corpus does not transfer" and "one filled slot is a degenerate input", which belongs in an arm's
+pre-registration rather than its post-mortem.
+
+WHAT IS STILL DIFFERENT FROM RIJEKA, and it is what makes the ambiguity narrower here. Rijeka fills
+`SLOTS[0]` and only ever `SLOTS[0]`, so its presence mask is a constant and carries no information at
+all. Here the FILLED slot varies across the corpus — 434 axial fluid-FS, 359 sagittal fluid-FS, 296
+coronal fluid-FS, 109 sagittal T1, 103 coronal T1 — so the mask varies within the corpus itself, the
+property `FASTMRI_SLOTS` names as a feature.
+
+THE THIRTEEN `COR_FLUID_NOFS` AND TWO `SAG_FLUID_NOFS` VOLUMES ARE DROPPED, along with four whose
+description is a free-text scanner string and two reading `pd_tse_fs_con`. Nineteen of 1,339 is 1.4%,
+they are named here so the denominator is never the published one by accident, and carrying them would
+need `EXTENDED_SLOTS` — which no canonical merge could then copy.
+
+THERE IS NO PATHOLOGY SUPERVISION HERE. The metadata JSON is `[]` and neither cohort table carries a
+finding, so this scheme names an axis and a cache; what supervises an arm over it is a separate
+question (`kmar_corpus` carries the argument for why the SSL-as-init answer is closed).
+"""
+
 MERGED_SCHEME = "merged"
 """Our corpus and a foreign one in ONE array — the canonical slot axis under a name of its own.
 
@@ -309,6 +359,7 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     RIJEKA_SCHEME: RIJEKA_SLOTS,
     MRNET_SCHEME: MRNET_SLOTS,
     FASTMRI_SCHEME: FASTMRI_SLOTS,
+    KMAR_SCHEME: KMAR_SLOTS,
     MERGED_SCHEME: SLOTS,
     TRIPLE_SCHEME: SLOTS,
     FASTMRI_MERGED_SCHEME: SLOTS,
@@ -320,6 +371,7 @@ FOREIGN_SCHEMES = (
     RIJEKA_SCHEME,
     MRNET_SCHEME,
     FASTMRI_SCHEME,
+    KMAR_SCHEME,
     MERGED_SCHEME,
     TRIPLE_SCHEME,
     FASTMRI_MERGED_SCHEME,
