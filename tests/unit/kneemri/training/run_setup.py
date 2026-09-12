@@ -8,6 +8,7 @@ import torch
 from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
+from kneemri.training.adaptation import Adaptation
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.landed import Request
 from kneemri.training.objective import (
@@ -26,7 +27,6 @@ from kneemri.training.remembered_margin import RememberedMargin
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.run_setup import RunSetup
 from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Uniform
-from kneemri.training.trainer import Adaptation
 
 
 def _setup(**asked: object) -> RunSetup:
@@ -408,7 +408,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 48, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 49, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

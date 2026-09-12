@@ -10,9 +10,9 @@ import argparse
 from pathlib import Path
 
 from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.training.adaptation import Adaptation
 from kneemri.training.init_scope import INIT_SCOPES
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
-from kneemri.training.trainer import Adaptation
 
 
 class EncoderFlags:

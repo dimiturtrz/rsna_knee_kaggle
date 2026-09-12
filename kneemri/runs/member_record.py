@@ -71,6 +71,9 @@ NOT_IN_CONFIG = {
     "settled are what a rebuild loads. Adds no module and no parameter",
     "grad_clip": "same path and same write-off — a ceiling on how far one step could move, applied "
     "between backward and step, with nothing left in the checkpoint to rebuild",
+    "sharpness": "same path and same write-off as `grad_clip` — a radius the step climbed before it "
+    "descended, spent entirely between backward and step. It moves WHERE the walk settled and leaves "
+    "no module and no parameter behind, so the member a rebuild constructs is byte-identical",
     "weight_floor": "supervision policy, same",
     "calibrated_targets": "supervision policy, same",
     "finding_calibration": "supervision policy, same — it shifts each finding's level in the training "

@@ -18,7 +18,6 @@ lateral one and teaching the model that the distinction is noise.
 import logging
 from collections.abc import Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
@@ -33,9 +32,9 @@ from core.data.corpus.slot_reader import GROUP
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import CONFIDENCE_FLOOR, Targets
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
-from kneemri.models.encoder_surgery import NO_OFFSET
 from kneemri.models.model import NO_LAYER_DECAY, StudyModel
 from kneemri.training.accumulation import Accumulation
+from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import (
     INTENSITY_AUGMENT,
     PADDING_MODE,
@@ -47,64 +46,18 @@ from kneemri.training.augmentation import (
 from kneemri.training.grades import Predicted
 from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
-from kneemri.training.mixup import Mixup
+from kneemri.training.mixup import Blend, Mixup
 from kneemri.training.objective import Objective
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.training.sampling import Sampling, Uniform
+from kneemri.training.sharpness import Sharpness
 from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 
 logger = logging.getLogger(__name__)
 
 
-WEIGHT_DECAY = 0.02
 SEED = 2026
-
-
-@dataclass(frozen=True)
-class Adaptation:
-    """How much of the encoder moves, and how fast — one object because they cannot be read apart.
-
-    The head is random at initialisation and has everything to learn; the encoder starts from a good
-    solution and needs only to be moved off it. That argument sets the 125:1 default ratio, and it was
-    inherited from the reference rather than measured.
-
-    Depth and rate are ENTANGLED, which is why they stopped being three constants. Our bracket found
-    unfreezing every block worth +0.0008, and a null result at a backbone rate of 8e-6 cannot
-    distinguish "more trainable blocks do not help" from "no block was going to move anyway". Asking
-    how many blocks should train is only a real question at a rate where a block moves.
-    """
-
-    head_lr: float = 1e-3
-    backbone_lr: float = 8e-6
-    weight_decay: float = WEIGHT_DECAY
-    """How hard AdamW pulls every trained weight back toward zero — a member of the same entangled set.
-
-    It was a module constant until 2026-08-31 and no arm had ever varied it. 0.02 came in with the
-    reference recipe at a backbone rate of 8e-6; the rate sweep then moved the trunk five-fold to 4e-5
-    without re-deriving it, so the decay every current number was measured under is the one chosen for a
-    trunk that barely moved. Defaults to that constant, which is what keeps every existing arm identical.
-    """
-
-    unfreeze_last: int = 6
-    """Six of twelve blocks — inherited from the reference, and only meaningful beside the rate above."""
-
-    unfreeze_offset: int = NO_OFFSET
-    """How many blocks at the TOP of the trunk stay frozen, which turns the suffix into a WINDOW.
-
-    Zero for every run before 2026-09-05, and that is the suffix every ledger number was measured
-    under. It exists because the block a run should open is decided by the KIND of distribution shift
-    (Lee et al., ICLR 2023) and the input-level case — which natural-image pretraining to greyscale MRI
-    is — wants EARLY blocks, the one thing `unfreeze_last` alone cannot express. See `BlockWindow`.
-    """
-
-    layer_decay: float = NO_LAYER_DECAY
-    """How much slower each block below the top one moves — the third member of the entangled triple.
-
-    Defaults to no decay, which is what every ledger number was measured under. It belongs here rather
-    than beside the schedule because it is the term that makes the OTHER two separable: at one flat rate
-    a depth result and a rate result are the same measurement read twice.
-    """
 
 
 ONE_CYCLE_WARMUP = 0.15
@@ -124,6 +77,11 @@ MIXUP = "mixup_alpha"
 OPTIMISER_DECAY = "optimiser_weight_decay"
 WARMUP = "one_cycle_warmup"
 CLIPPING = "gradient_clip_norm"
+SHARPNESS = "sharpness_radius"
+NO_SHARPNESS_UNDER_ACCUMULATION = (
+    "--sharpness needs --accumulate 1: the ascent is built from the whole group's gradient and the "
+    "second forward covers only its last micro-batch"
+)
 SAMPLING = "sampling_tilt"
 SAMPLING_RAMP = "sampling_ramp"
 CERTAINTY_RAMP = "certainty_ramp"
@@ -198,6 +156,9 @@ class Trainer:
         # Attached and null by default for the same reason: an unbounded step is what every number in
         # the ledger was measured under, and `GradientClip()` leaves `fit_epoch` doing exactly nothing.
         self.clipping = GradientClip()
+        # Attached and null by default for the same reason: a radius of zero perturbs nothing, so the
+        # step is the single forward and backward every number in the ledger was measured under.
+        self.sharpness = Sharpness()
         # Attached and null by default for the same reason, and here the default matters more than
         # anywhere else on this list: `Uniform` returns the positions untouched WITHOUT drawing from the
         # generator, so a run that asks for no sampling policy descends on exactly the stream every
@@ -275,6 +236,7 @@ class Trainer:
             OPTIMISER_DECAY: self.weight_decay(),
             WARMUP: self.warmup,
             CLIPPING: self.clipping.max_norm,
+            SHARPNESS: self.sharpness.radius,
             SAMPLING: self.sampling.tilt(),
             SAMPLING_RAMP: self.sampling.ramp(),
             CERTAINTY_RAMP: self.certainty_ramp,
@@ -419,6 +381,20 @@ class Trainer:
     def clip_gradients(self, max_norm: float) -> None:
         """Bound the norm of one optimiser step — see `GradientClip` for why this project never had one."""
         self.clipping = GradientClip(max_norm)
+
+    def sharpen(self, radius: float) -> None:
+        """Descend from the worst point of a ball — see `Sharpness` for why the scaler is left alone.
+
+        REFUSES TO COMBINE WITH ACCUMULATION, rather than quietly approximating. The ascent is built from
+        the WHOLE group's gradient, while the second forward this trainer can afford to re-run covers
+        only the group's LAST micro-batch — so the direction the ball was measured in and the gradient
+        the step is taken with would describe different batches. That mismatch reads as a bad radius
+        rather than as a bug, which is exactly the failure this project has paid for before. Call
+        `accumulate` before this, as `run_setup` does.
+        """
+        if radius and not self.accumulation.closes(1):
+            raise ValueError(NO_SHARPNESS_UNDER_ACCUMULATION)
+        self.sharpness = Sharpness(radius)
 
     def draw_with(self, sampling: Sampling) -> None:
         """Attach the policy that decides which studies each epoch descends on."""
@@ -594,10 +570,27 @@ class Trainer:
             # withheld before it would be restored by any partner study that carries one. Dropout has to
             # be the last statement about what this step is allowed to see.
             pixels, flags = self.augmentation.dropped(pixels, flags, self.torch_generator)
-            with torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
-                # Both readouts from ONE encoder pass. The report head costs a small Linear and gets no
-                # gradient when report supervision is off, so the loop needs no branch for it.
-                readout = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
+
+            # A CLOSURE RATHER THAN STRAIGHT-LINE CODE, because `Sharpness` needs this exact forward run a
+            # SECOND time at the perturbed weights — same pixels, same augmentation draw, same blend. A
+            # second forward over a freshly drawn batch would measure the sharpness of a different point
+            # and is the standard way a SAM implementation silently becomes an ordinary step at half the
+            # throughput. Under the default radius it is called once and this is the loop the ledger ran.
+            # THE LOOP VARIABLES ARE BOUND AS DEFAULTS, not captured: a closure defined in a loop reads
+            # them at CALL time, so the binding is what makes "this exact forward" a fact rather than a
+            # coincidence of the call landing in the same iteration.
+            def forward(
+                pixels: Tensor = pixels,
+                flags: Tensor = flags,
+                rows: tuple[NDArray[np.float32], NDArray[np.float32]] = (score, weight),
+                blend: Blend = blend,
+                batch: NDArray[np.int64] = batch,
+            ) -> tuple[Tensor, Predicted]:
+                score, weight = rows
+                with torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
+                    # Both readouts from ONE encoder pass. The report head costs a small Linear and gets
+                    # no gradient when report supervision is off, so the loop needs no branch for it.
+                    readout = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
                 judged = Predicted(
                     readout.logits.float(),
                     torch.from_numpy(score).to(self.device),
@@ -623,7 +616,9 @@ class Trainer:
                         else torch.from_numpy(blend.rows(self.feature_teacher.rows(batch))).to(self.device)
                     ),
                 )
-                loss = self.objective(judged) + self.reports(readout.report.float(), batch)
+                return self.objective(judged) + self.reports(readout.report.float(), batch), judged
+
+            loss, judged = forward()
             # PER-STUDY LOSS for the epoch's quantiles: the same weighted BCE the scalar is built from,
             # averaged over labels within each study. Done under no_grad so it cannot feed back into
             # training, and on the UNSHARED loss so the distribution matches the number the epoch reports.
@@ -641,6 +636,21 @@ class Trainer:
             # total mid-run, and an EMA updated between accumulations would average weights that never
             # took a step.
             if self.accumulation.closes(steps):
+                # THE ASCENT SITS HERE AND NOWHERE ELSE: once per OPTIMISER step, on the gradient the
+                # step will actually apply. Perturbing per micro-batch would build the ball out of a
+                # fraction of the group's gradient and then take a step from weights that no longer
+                # correspond to it. Under the default radius `climbed` returns False on one comparison
+                # and this block is the loop every number in the ledger was measured under.
+                if self.sharpness.climbed(self.model):
+                    # THE GROUP'S GRADIENT IS DISCARDED DELIBERATELY. SAM descends on the gradient AT the
+                    # worst point of the ball, not on a sum of the two, so the first backward's only job
+                    # was to say which direction the ball's worst point lies in.
+                    self.optimiser.zero_grad(set_to_none=True)
+                    self.scaler.scale(self.accumulation.share(forward()[0])).backward()
+                    # BEFORE the clip and the step, so the optimiser updates the weights `climbed` found
+                    # rather than the perturbed ones — the gradient is the perturbed point's, the weights
+                    # it is applied to are not, and that asymmetry IS the method.
+                    self.sharpness.descended(self.model)
                 # AFTER the last micro-batch's backward and BEFORE the step: the norm has to be the one
                 # the optimiser will actually apply, so clipping a partially accumulated gradient would
                 # bound a quantity that is never used.

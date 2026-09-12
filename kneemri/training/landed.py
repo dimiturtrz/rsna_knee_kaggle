@@ -61,6 +61,7 @@ from kneemri.training.objective import (
     PER_LABEL,
     RANK_TERM,
 )
+from kneemri.training.sharpness import FLAT
 from kneemri.training.side_ranking import SIDE_TERM
 from kneemri.training.teacher_features import FEATURE_TEACHER
 from kneemri.training.teacher_targets import TEACHER
@@ -80,6 +81,7 @@ from kneemri.training.trainer import (
     SAMPLING,
     SAMPLING_RAMP,
     SCHEDULED,
+    SHARPNESS,
     TARGET_CORPUS,
     WARMUP,
     WINDOW,
@@ -286,6 +288,9 @@ class Request:
     unfreeze_offset: int = NO_OFFSET
     """How many blocks at the TOP the request left frozen — zero for every arm before 2026-09-05."""
 
+    sharpness: float = FLAT
+    """Radius of the SAM ball — zero, the ordinary step, for every arm before 2026-09-12."""
+
     sample_spread: Path | None = None
     sample_alpha: float = 0.0
     certainty_ramp: int = 0
@@ -395,6 +400,7 @@ class Request:
             OPTIMISER_DECAY: self.weight_decay,
             WARMUP: self.warmup,
             CLIPPING: self.grad_clip,
+            SHARPNESS: self.sharpness,
             # THE ANCHOR, added 2026-09-05, and the reason LAYER_DECAY above was never enough on its
             # own: the decay is a RATIO, so it lands at exactly the asked 0.7 whether the rate it
             # divides is the one this run asked for or the one the recipe inherited.

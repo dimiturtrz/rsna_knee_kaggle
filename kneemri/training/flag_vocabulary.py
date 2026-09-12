@@ -17,10 +17,12 @@ from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
+from kneemri.training.adaptation import Adaptation
 from kneemri.training.encoder_flags import EncoderFlags
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.mixup import OFF
-from kneemri.training.trainer import ONE_CYCLE_WARMUP, Adaptation
+from kneemri.training.sharpness import FLAT
+from kneemri.training.trainer import ONE_CYCLE_WARMUP
 
 
 class FlagVocabulary:
@@ -585,6 +587,19 @@ class FlagVocabulary:
             "which is the shape a few large late steps produce. Clipping bounds how far one batch may "
             "move the weights; it does not change where the walk is allowed to end up, which is "
             "--weight-decay. 1.0 is the usual value in the ViT recipes this project's trunk came from.",
+        )
+        parser.add_argument(
+            "--sharpness",
+            type=float,
+            default=FLAT,
+            help="radius of the ball sharpness-aware minimisation descends from the worst point of "
+            "(0 = the ordinary step, which is what every number in the ledger was measured under). It "
+            "doubles the forward and backward cost of a step, and it needs --accumulate 1. The gap it "
+            "addresses is the one every closed axis here shares: the corner reads ~0.865 held out while "
+            "the board reads 0.944, and aggregation, readout, slice depth, model scale, corpus, labels "
+            "and weight-space averaging all closed by moving the offline number without moving the "
+            "transfer. This changes the flatness of the minimum rather than what is read. 0.05 is the "
+            "usual value in the ViT recipes this project's trunk came from.",
         )
         parser.add_argument(
             "--weight-decay",

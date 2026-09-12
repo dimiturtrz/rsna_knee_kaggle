@@ -24,11 +24,13 @@ from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS
 from kneemri.models.slot_head import ATTENDED
 from kneemri.models.token_pooling import CLS_MEAN
+from kneemri.training.adaptation import Adaptation
 from kneemri.training.flag_vocabulary import FlagVocabulary
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.mixup import OFF
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
-from kneemri.training.trainer import ONE_CYCLE_WARMUP, Adaptation
+from kneemri.training.sharpness import FLAT
+from kneemri.training.trainer import ONE_CYCLE_WARMUP
 
 NOT_STATED = "None"
 """How `recipe` spells a field that was never given — `str(None)`, since it stringifies every value.
@@ -192,6 +194,9 @@ class TrainingOptions:
 
     grad_clip: float = UNCLIPPED
     """Ceiling on one step's global gradient norm; 0 is the unbounded step the ledger was measured on."""
+
+    sharpness: float = FLAT
+    """Radius of the ball SAM descends from the worst point of; 0 is the ordinary step the ledger ran."""
 
     pool: str = CLS_MEAN
     slice_pooling: str = CHANNELS

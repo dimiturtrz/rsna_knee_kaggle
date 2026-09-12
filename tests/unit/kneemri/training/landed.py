@@ -27,6 +27,7 @@ from kneemri.models.model import (
     StudyModel,
 )
 from kneemri.models.slice_pooling import ATTEND, CHANNELS, MAXIMUM
+from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.mixup import OFF
@@ -44,9 +45,7 @@ from kneemri.training.trainer import (
     SAMPLING,
     SCHEDULED,
     WARMUP,
-    WEIGHT_DECAY,
     WINDOW,
-    Adaptation,
     Trainer,
 )
 

@@ -13,6 +13,7 @@ from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
+from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
 from kneemri.training.augmentation import INTENSITY_AUGMENT, PADDING_MODE, SCALE_JITTER, SLOT_DROPOUT
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import GRADE_LADDER, Predicted
@@ -34,6 +35,7 @@ from kneemri.training.objective import (
 )
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.sampling import Disagreed
+from kneemri.training.sharpness import FLAT
 from kneemri.training.side_ranking import SIDE_TERM
 from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
@@ -55,11 +57,10 @@ from kneemri.training.trainer import (
     SAMPLING,
     SAMPLING_RAMP,
     SCHEDULED,
+    SHARPNESS,
     TARGET_CORPUS,
     WARMUP,
-    WEIGHT_DECAY,
     WINDOW,
-    Adaptation,
     Trainer,
 )
 
@@ -203,6 +204,23 @@ def test_clip_gradients():
     assert trainer.policies()[CLIPPING] == UNCLIPPED, "every ledger number was measured unbounded"
     trainer.clip_gradients(1.0)
     assert trainer.policies()[CLIPPING] == pytest.approx(1.0)
+
+
+def test_sharpen():
+    """The radius is visible in the trainer's own account of itself, and it REFUSES accumulation.
+
+    The POSITIVE WITNESS for `--sharpness`: a radius that never reached the trainer trains exactly the
+    ledger's ordinary step and reports it under the SAM arm's name. The refusal is the second half —
+    the ascent is built from the whole group's gradient while the second forward covers only the last
+    micro-batch, and a silent approximation would read as a badly chosen radius rather than as a bug.
+    """
+    trainer = _trainer()
+    assert trainer.policies()[SHARPNESS] == FLAT, "every ledger number was measured on the plain step"
+    trainer.sharpen(0.05)
+    assert trainer.policies()[SHARPNESS] == pytest.approx(0.05)
+    trainer.accumulate(2)
+    with pytest.raises(ValueError, match="accumulate 1"):
+        trainer.sharpen(0.05)
 
 
 def test_warm_up():
@@ -456,6 +474,7 @@ def test_policies():
         MIXUP: OFF,
         SAMPLING: OFF,
         SAMPLING_RAMP: 0,
+        SHARPNESS: FLAT,
     }
 
     trainer.bfloat16()
@@ -480,6 +499,7 @@ def test_policies():
         MIXUP: OFF,
         SAMPLING: OFF,
         SAMPLING_RAMP: 0,
+        SHARPNESS: FLAT,
     }
 
 

@@ -22,6 +22,7 @@ from numpy.typing import NDArray
 
 from kneemri.models.backbone import ENCODERS, Encoder
 from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
@@ -48,7 +49,7 @@ from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Sampling, 
 from kneemri.training.side_ranking import PairedSides, SideRanking
 from kneemri.training.teacher_features import TeacherFeatures
 from kneemri.training.teacher_targets import TeacherTargets
-from kneemri.training.trainer import Adaptation, Trainer
+from kneemri.training.trainer import Trainer
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +184,7 @@ class RunSetup:
             weight_decay=options.weight_decay,
             warmup=options.warmup,
             grad_clip=options.grad_clip,
+            sharpness=options.sharpness,
             backbone_lr=options.backbone_lr,
             sample_spread=options.sample_spread,
             sample_alpha=options.sample_alpha,
@@ -661,6 +663,9 @@ class RunSetup:
         trainer.accumulate(options.accumulate)
         trainer.blend(options.mixup)
         trainer.clip_gradients(options.grad_clip)
+        # AFTER `accumulate` above, and that order is forced: `sharpen` refuses a radius under a group
+        # larger than one micro-batch, and it can only see the group if the group is already attached.
+        trainer.sharpen(options.sharpness)
         # ATTACHED UNCONDITIONALLY, unlike the policies above it, because the null here is an object and
         # not an absence — and because a policy only some runs attach is a policy the options-to-policies
         # walk cannot see. ALIGNED AGAINST `identifiers`, the corpus's own study order, and not against
