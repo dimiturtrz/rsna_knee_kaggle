@@ -4007,3 +4007,35 @@ an INSTRUMENT and declared as one in its submission message.
 voided `raptor_solo`'s 0.8938 on 2026-08-29. So the row is `scope: excluded` from the `board_transfer`
 fit: it carries no (offline, board) pair. Its payload is the DIFFERENCE against the champion, which shares
 its other seven exactly.
+
+## `slotseat_v1` -- 0.944, ref 56192818, 2026-09-12 -- the CROSS-SITE ruler cannot pick a board tick either
+
+The champion six plus `slot_dropout_s2026`, one line different. This entry was the first PREDICTION in a
+week rather than an instrument, and what makes its flat informative instead of another reseating is that
+**it was chosen although the offline ruler scored it at nothing**:
+
+| ruler | prices `slot_dropout_s2026` |
+| --- | --- |
+| `seat_value --against cleanseat_v1`, cut 0.5 | **-0.0001** [-0.0008, +0.0006], DISTINCT (rank 0.9051, js 0.0190, maha 3.618) |
+| cross-site, against its own control `band_dense_s2026` | **+0.0090** |
+
+Every previous candidate was seated because the OFFLINE ruler liked it. This one was seated on the
+disagreement, and the bet on the second ruler was written down before the slot was spent.
+
+| band | meaning | fired |
+| --- | --- | --- |
+| >= 0.947 | the cross-site ruler PICKED A TICK the offline ruler scored at zero — a new selection instrument | no |
+| 0.9455-0.9469 | a real gain, smaller than the ruler's own scale | no |
+| 0.9425-0.9455 | FLAT — the cross-site ruler cannot pick a board tick either | **yes** |
+| < 0.9425 | the seat is actively harmful | no |
+
+**What this retires.** The cross-site ruler joins the offline ruler as a thing that cannot select a seat
+the board will pay for. What survives of `slot_dropout` is an EXPLANATION of why offline flats are
+uninformative — not a selection rule, and no longer an argument for spending a slot. The two rulers
+disagreed by 0.009 on this member and the board sided with neither.
+
+Fifth independent line to land on 0.944.
+
+**No offline number BY CONSTRUCTION**, same as `labelseat_v1` and `honestfar_v1`: the raptor blend sits at
+`FOREIGN_WEIGHT` 1/3 and `foreign_overlap` reads its provenance 98.6% in-sample. `scope: excluded` from the
+`board_transfer` fit — the row carries no (offline, board) pair.
