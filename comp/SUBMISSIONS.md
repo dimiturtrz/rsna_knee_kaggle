@@ -3973,3 +3973,37 @@ value would have bought, and no more.
 **What the pair does not say.** It does not price the foreign seat at a different `FOREIGN_WEIGHT`, and it
 does not price it inside the champion's own six rather than these six. One weight, one pool, one pair of
 board reads at a resolution of 0.001.
+
+## `labelseat_v1` -- 0.944, ref 56186455, 2026-09-12 -- the seat gate's floor was CONFIRMED, not assumed
+
+Priced in `board.jsonl` since it landed and named nowhere here until now, which is the same hole
+`oofsolo_v1` sat in. `board_check` reports it on every run; this closes it.
+
+The champion six plus `labelwise_depth24_s2026` as a seventh seat, `raptor` unchanged at 1/3. One line
+different from the champion, and the champion carried NO labelwise member, so this is a SOURCE change and
+not a reseating.
+
+**The flat IS the result the slot was bought for.** Four bands, pre-registered before the spend:
+
+| band | meaning | fired |
+| --- | --- | --- |
+| >= 0.947 | refutes the +0.0040 seat gate as a shipping gate | no |
+| 0.9455-0.9469 | a real gain | no |
+| 0.9425-0.9455 | FLAT — confirms +0.0040 as the floor | **yes** |
+| < 0.9425 | `seat_value`'s SIGN becomes untrusted | no |
+
+`knee-gcgbk` predicted exactly the third band. `seat_value` priced this seat at **+0.0008
+[+0.0001, +0.0017]** and called it DISTINCT on all three axes while its own gate read 0 of 3 clear
++0.0040. The board now says a seat the offline ruler likes at +0.0008 buys nothing measurable — which
+CONFIRMS +0.0040 as the shipping floor instead of leaving it an assumption, and it is the fourth
+independent line landing on 0.944.
+
+**What it does not say.** Not that labelwise pooling is worthless — that ONE labelwise member at ONE seat
+in THIS pool is. The offline ruler could not have told us either way, which is why the slot was spent as
+an INSTRUMENT and declared as one in its submission message.
+
+**No offline number BY CONSTRUCTION**, the same reason as `honestfar_v1`: the raptor foreign blend sits at
+`FOREIGN_WEIGHT` 1/3 and `foreign_overlap` measures its provenance 98.6% in-sample — the provenance that
+voided `raptor_solo`'s 0.8938 on 2026-08-29. So the row is `scope: excluded` from the `board_transfer`
+fit: it carries no (offline, board) pair. Its payload is the DIFFERENCE against the champion, which shares
+its other seven exactly.
