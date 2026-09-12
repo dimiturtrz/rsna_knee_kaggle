@@ -1,0 +1,16 @@
+population: 4406 studies in the five-way table intersection (corpus-wide — same as classb120/denom60)
+MCL: disagreement stratum 547 cells (majority-positive 38, majority-negative 509)
+  drew 40: 6 majority-positive, 34 majority-negative
+Lateral OA: disagreement stratum 1283 cells (majority-positive 129, majority-negative 1154)
+  drew 40: 5 majority-positive, 35 majority-negative
+Fracture: disagreement stratum 1912 cells (majority-positive 18, majority-negative 1894)
+  drew 40: 1 majority-positive, 39 majority-negative
+overlap vs the seven prior packs: 0 (must be 0)
+pack composition: {'Fracture': 40, 'Lateral OA': 40, 'MCL': 40}
+  chunk 1: {'Fracture': 8, 'MCL': 8, 'Lateral OA': 4}
+  chunk 2: {'Lateral OA': 11, 'MCL': 7, 'Fracture': 2}
+  chunk 3: {'MCL': 8, 'Lateral OA': 6, 'Fracture': 6}
+  chunk 4: {'Fracture': 9, 'Lateral OA': 6, 'MCL': 5}
+  chunk 5: {'Fracture': 8, 'MCL': 7, 'Lateral OA': 5}
+  chunk 6: {'Lateral OA': 8, 'Fracture': 7, 'MCL': 5}
+classbd120 120 -> D:/data/volumetric/mri/processed/rsna_knee_abnormality/audit400/classbd120

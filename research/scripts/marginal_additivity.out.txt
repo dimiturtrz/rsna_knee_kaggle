@@ -1,0 +1,29 @@
+POPULATION: 0%-exposure sub-pool n=290 (honest 303 minus 13 exposed); @holdout909, midpoint-binarised v2 truth
+marginals recomputed vs carried: labelwise head +0.0138/+0.0138, distill +0.0125/+0.0125, merged-rijeka +0.0117/+0.0117, hold-annot +0.0112/+0.0112, calib-tgt +0.0109/+0.0109, blend-three-llm +0.0109/+0.0109, ema +0.0105/+0.0105
+
+=== PRIMARY: seven attributes (merged-rijeka included): base = median solo of k=0 members = 0.8439 (n=222) ===
+  k=0: n=222  median solo 0.8439  median residual +0.0000
+  k=1: n= 31  median solo 0.8545  median residual -0.0004
+  k=2: n= 23  median solo 0.8575  median residual -0.0085
+  k=3: n= 11  median solo 0.8607  median residual -0.0191
+  k=4: n=  2  median solo 0.8609  median residual -0.0293
+  k=5: n=  1  median solo 0.8648  median residual -0.0364
+  (thin bins n<5 at k=[4, 5])
+  coarse: k<=1 n=253 median residual -0.0001 | k>=3 n=14 median residual -0.0197
+  top-8 solos with their k: clean_calib_s2026(k=2), chainfour_s2026(k=5), calib_hold_clean_distill_s2026(k=3), calib_dense_hold_s2026(k=2), seat_clean_distill_s2026(k=1), stackfit_s2026(k=3), chaindense_s2026(k=4), labelwise_extended_s2026(k=3)
+
+=== VARIANT: six shippable attributes (merged-rijeka excluded): base = median solo of k=0 members = 0.8441 (n=224) ===
+  k=0: n=224  median solo 0.8441  median residual +0.0000
+  k=1: n= 37  median solo 0.8549  median residual -0.0001
+  k=2: n= 16  median solo 0.8576  median residual -0.0092
+  k=3: n= 10  median solo 0.8610  median residual -0.0189
+  k=4: n=  2  median solo 0.8609  median residual -0.0295
+  k=5: n=  1  median solo 0.8648  median residual -0.0365
+  (thin bins n<5 at k=[4, 5])
+  coarse: k<=1 n=261 median residual -0.0001 | k>=3 n=13 median residual -0.0197
+  top-8 solos with their k: clean_calib_s2026(k=2), chainfour_s2026(k=5), calib_hold_clean_distill_s2026(k=3), calib_dense_hold_s2026(k=2), seat_clean_distill_s2026(k=1), stackfit_s2026(k=3), chaindense_s2026(k=4), labelwise_extended_s2026(k=3)
+
+=== TASK 2: distill_stack_max_s2026 under strict additivity (context only — ~80% exposure, NOT in the 0% pool) ===
+  recipe carries: ['distill', 'labelwise head', 'blend-three-llm', 'calib-tgt', 'hold-annot'] (k=5 of the seven; not ema, not merged-rijeka)
+  additive prediction = base 0.8439 + 0.0125 + 0.0138 + 0.0109 + 0.0109 + 0.0112 = 0.9032
+  (realised-combo check: the full-pool realised top stack oof_teacher 0.8685 / calib_hold_clean_distill 0.8641 carried 2-3 of these terms, so additivity has never been observed at k=5)

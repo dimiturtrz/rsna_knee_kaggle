@@ -1,0 +1,50 @@
+CUT: per-column AUC @holdout909, midpoint binarised v2 truth; scored 319, minus 17 VOID in-sample -> honest pool n=302 (licence-tainted kept; profiles, not shipping)
+
+column pool medians (difficulty, subtracted):
+  ACL               0.8706
+  MCL               0.7838
+  Medial Meniscus   0.8901
+  Lateral Meniscus  0.8302
+  Medial OA         0.8709
+  Lateral OA        0.8124
+  PF OA             0.8333
+  Effusion          0.8482
+  Synovitis         0.8592
+  Baker's           0.8986
+  Contusion         0.8629
+  Fracture          0.8024
+
+=== pairwise Spearman of centered profiles (45451 pairs) ===
+  mean +0.0144 | p10 -0.4406 | median +0.0000 | p90 +0.4965 | min -0.9510 | max +1.0000
+  pairs < 0: 49.7%
+  null (columns permuted within member, 500 reps): mean -0.0001, 95% interval [-0.0022, +0.0034], observed vs null z = 9.9
+
+=== Kendall's W over 302 members x 12 columns: 0.0176 (0 = no agreement, 1 = identical rankings) ===
+
+=== bottom-3 (weakest centered columns) census ===
+  exactly {MCL, Fracture, Lateral OA}: 2/302 (0.7%)
+  distinct bottom-3 sets: 132 of 220 possible
+    15 ( 5.0%)  [np.str_('Lateral Meniscus'), np.str_('MCL'), np.str_('Medial Meniscus')]
+    11 ( 3.6%)  [np.str_("Baker's"), np.str_('Lateral Meniscus'), np.str_('MCL')]
+     8 ( 2.6%)  [np.str_('ACL'), np.str_("Baker's"), np.str_('Fracture')]
+     7 ( 2.3%)  [np.str_("Baker's"), np.str_('Fracture'), np.str_('Medial Meniscus')]
+     6 ( 2.0%)  [np.str_('ACL'), np.str_('Contusion'), np.str_('Effusion')]
+     6 ( 2.0%)  [np.str_('ACL'), np.str_('Contusion'), np.str_('Medial Meniscus')]
+     6 ( 2.0%)  [np.str_("Baker's"), np.str_('Lateral Meniscus'), np.str_('Medial Meniscus')]
+     5 ( 1.7%)  [np.str_("Baker's"), np.str_('Contusion'), np.str_('MCL')]
+     5 ( 1.7%)  [np.str_('Lateral OA'), np.str_('Medial OA'), np.str_('Synovitis')]
+     5 ( 1.7%)  [np.str_('ACL'), np.str_('Lateral Meniscus'), np.str_('Medial Meniscus')]
+
+=== per-column: how often in a member's bottom-3 ===
+  MCL                103/302 (34.1%)
+  Baker's             99/302 (32.8%)
+  Fracture            97/302 (32.1%)
+  Lateral Meniscus    97/302 (32.1%)
+  Synovitis           83/302 (27.5%)
+  Medial Meniscus     78/302 (25.8%)
+  ACL                 74/302 (24.5%)
+  Contusion           67/302 (22.2%)
+  Effusion            61/302 (20.2%)
+  Medial OA           52/302 (17.2%)
+  Lateral OA          48/302 (15.9%)
+  PF OA               47/302 (15.6%)

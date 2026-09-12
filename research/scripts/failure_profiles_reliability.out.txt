@@ -1,0 +1,14 @@
+CUT: 302-frame — scored 320 minus 17 VOID -> honest n=303; per-column AUC, midpoint-binarised v2 truth
+SPLIT: seeded permutation of the 909 studies (numpy default_rng, seed 2026+split), halves 455/454, 25 splits; centering = pool median recomputed within each half
+
+=== within-member split-half Spearman (own profile A vs B) ===
+  splits used: 25 (skipped 0, single-class column)
+  pooled 7575 member-x-split correlations: median +0.4965 | p10 +0.0280 | p90 +0.8112
+  per-split median: mean +0.4965 sd 0.0245 [+0.4406, +0.5455]
+  per-member median-across-splits distribution: median +0.4895 | p10 +0.1538 | p90 +0.7538 | members with median r < 0: 16/303
+
+=== attenuation correction ===
+  mean split-half reliability (per-split medians): +0.4965
+  observed between-member mean pairwise Spearman (full data): +0.0144
+  noise-adjusted between-member agreement: +0.0290
+  Spearman-Brown estimate of full-length profile reliability: +0.6636

@@ -1,0 +1,41 @@
+OWN CORPUS (D:/data/volumetric/mri/processed/rsna_knee_abnormality/labels/report_labels_v2.csv): 4406 studies = train 3497 + holdout 909
+
+=== (a) coverage matrix: usable positives (soft >= 0.5) ===
+table                                      ACL       MCL Medial Me Lateral M Medial OA Lateral O     PF OA  Effusion Synovitis   Baker's Contusion  Fracture
+fastmri_findings.csv                       101         4         0         0         0         0         0       142         .         0         0         0
+  rows 1172, cols annotated 11/12     licence: fastMRI+ (NYU), DUA: internal research only, no redistribution of derived data
+fastmri_findings_compartment.csv           101         4       190       190         0         0         0       142         .         0         0         0
+  rows 1172, cols annotated 11/12     licence: fastMRI+ compartment variant, same DUA
+fastmri_findings_effusion.csv              101         4         0         0         0         0         0       142         .         0         0         0
+  rows 1172, cols annotated 11/12     licence: fastMRI+ effusion variant, same DUA
+mrnet_acl.csv                              262         .         .         .         .         .         .         .         .         .         .         .
+  rows 1248, cols annotated 1/12      licence: MRNet (Stanford), agreement bars creating adaptations
+rijeka_acl.csv                             189         .         .         .         .         .         .         .         .         .         .         .
+  rows 736, cols annotated 1/12       licence: Rijeka external expert reads, CC BY-NC-ND
+labels_hisfluid.csv                       1226       767      2347      1121      1619      1087      1991      1162       580      1114      1297       314
+  rows 4406, cols annotated 12/12     licence: raptor author's 12-finding labels on OUR studies, CC0-1.0
+
+non-null-but-negative (assessed absence) cells, same order:
+fastmri_findings.csv                      1071      1168       509       509      1050      1050      1050      1030         .      1011       875      1053
+fastmri_findings_compartment.csv          1071      1168       509       509      1050      1050      1050      1030         .      1011       875      1053
+fastmri_findings_effusion.csv             1071      1168       509       509      1050      1050      1050      1030         .      1011       875      1053
+mrnet_acl.csv                              986         .         .         .         .         .         .         .         .         .         .         .
+rijeka_acl.csv                             547         .         .         .         .         .         .         .         .         .         .         .
+labels_hisfluid.csv                       3180      3639      2059      3285      2787      3319      2415      3244      3826      3292      3109      4092
+
+fastmri_findings.csv == fastmri_findings_effusion.csv byte-identical (md5 8d8576f7...); compartment variant differs — differences below.
+  compartment-variant diffs (col, base positives, compartment positives): [('Medial Meniscus', 0, 190), ('Lateral Meniscus', 0, 190)]
+
+=== (b) the three columns: own train vs holdout vs external adds ===
+  MCL       train(3498)  596 | holdout909  171 | external adds: {'fastmri_findings.csv': 4, 'fastmri_findings_compartment.csv': 4, 'fastmri_findings_effusion.csv': 4, 'labels_hisfluid.csv': 767}
+  Fracture  train(3498)  244 | holdout909   70 | external adds: {'labels_hisfluid.csv': 314}
+  Lateral OA train(3498)  851 | holdout909  236 | external adds: {'labels_hisfluid.csv': 1087}
+  Effusion  train(3498) 2106 | holdout909  560 | external adds: {'fastmri_findings.csv': 142, 'fastmri_findings_compartment.csv': 142, 'fastmri_findings_effusion.csv': 142, 'labels_hisfluid.csv': 1162}
+  PF OA     train(3498) 1582 | holdout909  409 | external adds: {'labels_hisfluid.csv': 1991}
+  Synovitis train(3498)  460 | holdout909  120 | external adds: {'labels_hisfluid.csv': 580}
+  Medial OA train(3498) 1285 | holdout909  334 | external adds: {'labels_hisfluid.csv': 1619}
+  Baker's   train(3498)  896 | holdout909  218 | external adds: {'labels_hisfluid.csv': 1114}
+
+holdout909 check vs letter: ACL 249, MCL 171, Medial Meniscus 484, Lateral Meniscus 228, Medial OA 334, Lateral OA 236, PF OA 409, Effusion 560, Synovitis 120, Baker's 218, Contusion 273, Fracture 70
+
+231-URL record: docs/EXTERNAL_CORPORA.md:47 — D:/life/creds/machine/fastmri_urls.txt (231 presigned URLs across knee/brain/breast/prostate, credential file outside the repo, not read). The knee singlecoil h5 archives are the ONLY carrier of the fastMRI+ label namespace (fileNNNNNNN); the DICOM batch on disk cannot join. Pulling adds VOLUMES for the 1172 fastMRI+ studies whose labels are already tabulated above — i.e. it makes the fastMRI rows in the coverage matrix trainable, it does not add new label rows.

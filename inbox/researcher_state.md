@@ -6,7 +6,146 @@
 # stamped from `date -u` RUN AT SEND TIME in the same command — never estimated. D326–D337 carry
 # estimated stamps, drifting +1h→+4h; D337's letterhead (18:40Z) is local-mislabeled, file is 1540Z.
 
-## LATEST (17:32Z) — M360 audit + M361 champion ranking delivered (D355/D354); next free letter D356; main last seen M361 (17:25Z)
+## LATEST (19:09Z) — D367: M374 marginal-gain table; next free letter D368; main last seen M374 (19:05Z)
+- Proxy = champion's 5 fold-0 twins + wsfold0_e6 (0.8704 v2 / 0.8744 T1, prob-mean joints, midpoint,
+  holdout909). **Only labelwise_depth24 adds positively (+0.0012 v2 / +0.0011 T1)**; every
+  label-table member costs the proxy on BOTH rulers (v2_corrected −0.0012/−0.0000; discord_mask
+  −0.0029/−0.0019). **Decorrelation ranking: v5blend 0.837 > v7nontear ≈ v6tears > discord_mask >
+  depth24 > v2_corrected.** Gain and decorrelation rankings are ANTI-ALIGNED — the flat board's
+  signature appearing offline: the pool's own arithmetic cannot see why a new error shape should
+  help. depth24's +0.001 is mechanism-free but buys little new shape (corr 0.897).
+- The board is the only ruler left that can see the label family — goldseat + corrseat tonight are
+  the measurement.
+- v8named built + queued by main (711 masked, overlap 9 with delonly / 232 with discord_mask → 479
+  untouched).
+
+## PRIOR LATEST (18:59Z) — D366: cell list written, unnamed is 97% unanimous-stratum
+- Files: labels/unnamed_compartment_cells.csv (711 rows: 515 PFOA/154 MedOA/42 LatOA) +
+  unnamed_compartment_lexemes.json (matcher definition, presence-not-attribution caveat).
+- CROSSTAB: unnamed positives are **97.3% U-stratum (692/711)** — every extractor agrees, no report
+  names the compartment = D319's SHARED-INFERENCE error in purest form. v8named (mask, never zero) is
+  a NEW axis reaching cells no dissent operation can see — the reservoir the image-side selector
+  failed to reach (D360), now reachable lexically.
+- delonly (2,080 over-call fixes) and v8named (711 unnamed masks) overlap ≤19 cells → v9 composable.
+  Main builds v8named + runs v2delonly_span behind the depth arm.
+
+## PRIOR LATEST (18:55Z) — D365: dstratum120 scored + named-compartment count
+- D batch (120/120): naive rate 0.433 BUT direction-balanced ≠ natural mix (**D cells are 85.5%
+  pos-direction, 14.5% neg**). **Direction-reweighted corpus estimate 0.138** — audit400's 0.156
+  stands, branch 2, share re-derives to ~0.35 [0.07, 0.55]. REAL FINDING: **neg-direction (v2=1 vs
+  cluster) 0.850 wrong; pos-direction 0.017** — v2's dissent errors are over-call, and steven_full's
+  lone dissents are ~98% noise. OA vs non-OA: no difference (0.45 vs 0.42).
+- NAMED-COMPARTMENT COUNT (lexeme-presence anywhere, overestimates support): MedOA unnamed 9.5%
+  (154/1,619), LatOA 3.9% (42/1,087), **PF OA 25.9% (515/1,991)**. v8named build is real but
+  PF-OA-centred (~500 cells minimum).
+- 18% stays retracted; "about a third" with range is the only quotable form.
+
+## PRIOR LATEST (18:38Z) — D364: dstratum120 built
+- Main banked D363: `apply_lone_dissent.py --direction down` → **report_labels_v2_delonly.csv** (2,080
+  written / 235 dropped). corrseat (~20:43Z) now pre-registered as "measuring a TRADE" since v7nontear
+  writes both directions.
+- D-STRATUM BATCH BUILT (audit400/dstratum120/, 120 cells, 6×20, blind): four strata of 30 =
+  direction × OA; OA over-sampled to 50% vs natural ~20% (reweight 0.4× in corpus estimate);
+  direction contrast preserved within each OA class. Branches in manifest verbatim. Main adjudicates
+  over ~2 evenings.
+- The mask's OA argument is now measured: it writes nothing, so it cannot assert an unnamed
+  compartment — the first asymmetric fact in the mask/substitute tie.
+
+## PRIOR LATEST (18:29Z) — D363: balance56 scored, correction is ASYMMETRIC
+- balance56: **deletions wrong 0.071 [0.020, 0.226]; ADDITIONS wrong 0.786 [0.605, 0.898]**. 21 of 22
+  pos-direction wrong cells are OA columns — main's 19-cell naming rule fires (cluster asserts
+  compartments reports don't NAME). THE OPERATION: **one-directional correction (deletions only)** —
+  v2_corrected/v6tears/v5blend/v7nontear all write BOTH directions = ~185 known-wrong cells (~150 OA).
+  The mask cannot make this error (writes nothing) — measured argument for mask on OA columns.
+- Disease pair: v2's residual is over-call; the chain's residual is over-deletion, and the addition
+  direction IS the over-deletion vector.
+- D-stratum 120-cell batch priced (builder free, ~2 evenings adjudication). Main confirmed the
+  denom60 17-vs-14 was his letter's miscount.
+- Slots: goldseat ~19:20Z, corrseat ~20:43Z — mask/substitute tie breaks on the board tonight.
+- STATE FILE HAZARD: inbox/researcher_state.md is git-tracked and main's wide commits sweep it
+  (commits 47b86ee2, 68c97232) — the file flickers between versions. If blocks vanish, the letters
+  in inbox/main/ are the durable record; this file is a cache.
+
+## PRIOR LATEST (18:22Z) — D362: denom60 scored, 18% retracted as a point
+- U-stratum v2-wrong: **2/60 = 0.033 [0.009, 0.114]** (Wilson); D comparator 10/64 = 0.156
+  [0.087, 0.264]. U share of v2 error: **~0.325 at point estimates, range 0.07–0.75** — the "18%"
+  was arithmetic on an unmeasured denominator; RETRACTED as a point. U stratum carries a MINORITY
+  (~1/3) so discordance operations still address the bigger half. Strictly BETWEEN main's branches
+  1 and 2 (upper bound 0.114 > 0.08) — 1.5% not restored.
+- Both wrong cells are over-calls (Effusion 0.68, PF OA 0.82) — the U-stratum's residual is the
+  same disease at a lower rate; no under-call errors in the batch.
+- DISCREPANCY: answer files hold 17 affirmed (5/5/4/3), main's letter says 14 (5/4/3/2). v2-wrong
+  count (2) unaffected; asked him to confirm which is the edit.
+- balance56 adjudication in progress on his side. goldseat slot went ~19:10Z; v6tears entry ~20:37Z.
+
+## PRIOR LATEST (18:14Z) — D361: denom60 + balance56 built
+- BATCH 1 (audit400/denom60/): 60 uniform U-stratum cells, no member signal, no overlap with prior
+  packs. Gates the 18% figure (0.693×0.015 vs 0.307×0.156): at U-rate 0.07 the share of v2-error in
+  the unanimous stratum is ~50%, not 18%.
+- BATCH 2 (audit400/balance56/): 56 of v2_corrected's 2,315 substitution cells, 28 neg_direction
+  (deletions) / 28 pos_direction (additions). The asymmetry question: if pos-direction is materially
+  wrong → one-directional correction is the right operation, and v2_corrected/v6tears/v5blend all
+  currently write both directions.
+- Main adjudicates denom60 first. Builder: research/scripts/build_denom60_balance56.py.
+- Pending his side: goldseat ~19:10Z slot, v6tears entry ~20:37Z, v7nontear_span on card (assert
+  labels resolved from log before reading; score both columns + remainder control).
+
+## PRIOR LATEST (18:08Z) — D360: imagesel56 scored, axis CLOSED plainly
+- imagesel56 (56/56 blind verdicts): **flagU_top 0/14, flagU_mid 0/14 [0, 0.215] — the image-side
+  selector finds NOTHING in the unanimous stratum**; flagD 0.429 [0.214, 0.674] (carries it, dissent
+  stratum as expected); unflagU recall arm 0.071 [0.013, 0.315]. Per main's pre-registered branch 2:
+  image-side = dissent-stratum finding wearing an image-side hat; corpus operation shrinks to the 533
+  dissent flags discord_mask already masks. **The unanimous-18% route measured 0 of 28 — AXIS CLOSED.**
+  The D358 n=3 pilot was the small-sample mirage.
+- Sub-findings: no margin curve on U cells (flat score); unflagU 0.071 > 1.5% pre-registration (wide
+  interval — the U-stratum base needs its own fresh batch); SIDE-READING: on 28 flagU cells the
+  adjudicator sided with v2 on EVERY one — the corrected-table family UNDER-CALLS where v2 is right
+  (biased sample, can't project, but rhymes with D345's 31 over-corrections).
+- Main's rubric conventions recorded (R/O=1, physiologic effusion=0, degenerative edema≠contusion,
+  SIF=0, compartment OA needs compartment named, mucoid ACL=0) — in his M367, reuse for future packs.
+
+## PRIOR LATEST (17:59Z) — D359: imagesel56 pack built
+- IMAGE-SELECTOR BATCH BUILT (audit400/imagesel56/, 56 cells, 4×14, blind, key sealed, builder
+  research/scripts/build_imagesel56.py): flagU_top / flagU_mid (precision curve vs margin), flagD
+  (overlap check with banked discordance), unflagU (recall arm, expect ~1.5%). Full-holdout selector
+  flags 1,567 cells (1,034 U / 533 D; 297 pos-dir / 1,270 neg-dir — mostly an over-call hunter).
+  Awaits main's blind adjudication (ahead of any more dissent-cell work — marginal value argument).
+- Push-back accepted: slot call is "indistinguishable on the ranking column (0.6734 vs 0.6813 at
+  n=32 affirmed), broken on the pre-registered split (tear-277 spec 0.866 vs 0.762)" — NOT a lead.
+  D358's "takes the slot on this evidence" one step too strong; outcome stands, wording corrected.
+- Slots (his): kneemri-goldseat ~19:10Z (discord_mask seated), v6tears entry ~20:37Z.
+
+## PRIOR LATEST (17:54Z) — D358: v6tears e12 + M365 image-side selector
+- v6tears e12: all-469 AUC 0.6734 / bal 0.653 / tear spec 0.866. **The e2 Contusion/nontear jump was
+  an EARLY-EPOCH ARTEFACT — did not survive to e12** (Contusion acc 0.517, nontear AUC 0.5715).
+  Remainder control clean (v6tears-v2-truth agreement 0.8154, no target-distribution artefact).
+  Gold cut-free order: discord_mask 0.6982 > v5blend 0.6813 > v6tears 0.6734 > v2_corrected 0.6272 >
+  grade_ladder 0.6070 > band_span 0.6008. v6tears takes the second slot over v2_corrected.
+  (kneemri-goldseat already pushed by main: lr4e-5_ws_cf vacated, discord_mask seated.)
+- M365 IMAGE-SIDE SELECTOR (band_span/chainfour/foreign_labels_dense/recal_dense consensus ≥3-of-4
+  vs v2): on audit400∩holdout (80 cells, 3 v2-wrong): flags 11, all neg-direction, precision 0.273,
+  recall 1.0 (n=3!), **U-stratum fraction 0.909 — reaches the unanimous 18% no extractor selector
+  can**. Negative control (2-2 variance) = 0.000. Role: second-order audit sampler for the U stratum,
+  not a bankable selector at this precision; next = full-holdout run + ~50-cell adjudication.
+- The 18%: unanimous stratum (69.3% × 1.5%) holds ~18% of all v2-wrong cells, unreachable by any
+  extractor-discordance selector by construction.
+
+## PRIOR LATEST (17:44Z) — M362/M363/M364 answered (D356/D357)
+- M362 base-rate correction: harness rewritten (CONST rows first, ranking column = AUC-vs-verdict,
+  sens with Wilson interval). discord_mask leads on AUC (0.698 vs 0.601) BUT its acc lead was
+  specificity inflation; **sensitivity gap vs band_span is INSIDE the n=32 interval** — resurrection
+  with an interval on it. tear-277 has ZERO affirmed cells → specificity-only split, always named.
+  M363 (main ran the AUC column himself): discord_mask top on both columns; grade_ladder's #1 was
+  under-calling (0.6070 AUC); v2_corrected 0.6272; **vacate lr4e-5_ws survives on both rulers**.
+- M364 SELECTOR LADDER (two populations): on the 469 precision is base-rate-bound (0.891) — recall
+  only; on audit400 (base 3.7%): **lone_dissent precision 0.727 (~20× lift), recall 0.533** >
+  five-way disc 0.156 > confidence-UNK 0.031 (BELOW RANDOM). **(1)∩(2) = 99.4% of lone_dissent —
+  discord_mask and the substitution chain select the SAME cells; diversity is in the OPERATION (mask
+  vs substitute), not the cells.** Tail priced: discordance-minus-lone-dissent = 5,068 cells at
+  ~0.07 v2-wrong.
+- PENDING: v6tears e12 re-score (at e8, 0.807) with remainder control — watcher bash-m4dcnbje armed.
+
+## PRIOR LATEST (17:32Z) — M360 audit + M361 champion ranking delivered (D355/D354)
 - M361 champion six on gold (fold-0 twins): grade_ladder 0.795 best; **lr4e-5_ws WORST on every split
   (all-469 0.486)** — the member the v2 ruler ranked joint-best. Vacate recommendation: lr4e-5_ws.
   final_ws_cf has no twin npz (wsfold0_e6 included flagged).

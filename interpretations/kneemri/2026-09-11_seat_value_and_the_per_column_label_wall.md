@@ -458,7 +458,17 @@ change and is a one-file question where they sit. Recording the ambiguity rather
 the point -- this is exactly the shape of finding that has twice been written down here as a fact about
 a model when it was a fact about plumbing.
 
-### 6.3 The first zero-card supervision lever this project has found
+### 6.3 A supervision lever that looked free, and was not there at all
+
+**RETRACTED, same night, by the measurement in 6.6.** The claim below -- that "use v2 alone instead
+of the five-table majority" is a new, zero-card supervision lever -- is WRONG on its own terms, for a
+reason that was already in the repo when it was written: `core/data/labels/targets.py` supervises from
+v2's five rungs ALREADY, through `MEASURED_AGREEMENT`. The five-table blend and its `majority_sign`
+are an AUDIT-STRATUM construct built for this pack; nothing trains on them. So "stop averaging" is not
+a change that can be made -- it describes the status quo. The paragraph is left standing rather than
+deleted because the per-table numbers in it are real and the error is the interpretation laid over
+them. Read 6.6 for what the numbers actually mean.
+
 
 For MCL, **v2 alone beats the five-table majority, 1/40 against 5/40.** All five majority under-calls
 are rows where v2 sits at its 0.68 rung and the other four tables sit low -- g0000, g0004, g0029,
@@ -500,6 +510,86 @@ report text, not merely uncorrelated with ours**, so grade-anchored soft supervi
 this source. If the ordinal lever exists it lives in the readers' own structured grade fields upstream
 of binarisation -- which is the open question in M393, and which section 6.3 makes urgent, since v2's
 0.68/0.82 rungs are demonstrably carrying real signal that the blend destroys.
+
+---
+
+### 6.6 The rung calibration is CORRECT, and the gold cells were the wrong ruler for it
+
+Section 6.3 was written and retracted inside one hour. What survives the retraction is worth more than
+what it claimed, because the thing that killed it was a measurement nobody had taken.
+
+**The question.** `targets.py` maps each of v2's five rungs to a training target through
+`MEASURED_AGREEMENT` -- 0.08/0.28/0.68/0.82/0.94 become 0.041/0.136/0.378/0.688/0.958, then shift per
+finding through `FINDING_OFFSETS`. Pool the 240 adjudicated gold cells this project now owns
+(classb120's 120 unanimous plus classbd120's 120 disagreement) and cut them per rung per column, and
+the positive rungs look badly under-trained:
+
+| column | rung | n | gold k | gold rate | Wilson | trained at |
+|---|---|---|---|---|---|---|
+| Fracture | 0.08 | 30 | 1 | 0.033 | (0.006, 0.167) | 0.043 |
+| Fracture | 0.28 | 46 | 0 | 0.000 | (0, 0.077) | 0.143 |
+| Fracture | 0.82 | 3 | 3 | 1.000 | (0.438, 1.0) | 0.700 |
+| Lateral OA | 0.28 | 37 | 4 | 0.108 | (0.043, 0.247) | 0.090 |
+| Lateral OA | 0.68 | 6 | 6 | 1.000 | (0.610, 1.0) | 0.277 |
+| Lateral OA | 0.82 | 8 | 8 | 1.000 | (0.676, 1.0) | 0.582 |
+| MCL | 0.28 | 30 | 1 | 0.033 | (0.006, 0.167) | 0.089 |
+| **MCL** | **0.68** | **13** | **13** | **1.000** | **(0.772, 1.0)** | **0.274** |
+| MCL | 0.82 | 2 | 2 | 1.000 | (0.342, 1.0) | 0.579 |
+
+The negative rungs land on their trained values. The positive rungs read 1.000 against targets of
+0.27-0.70. MCL's 0.68 rung is 13 for 13 with a Wilson lower bound of 0.772 against a target of 0.274.
+That is a target-value defect on constants fitted over 684 cells, on the three columns carrying class
+B's largest holes. It is not `grade_ladder` (which changed how a grade is SUPERVISED and bought
+-0.0013 solo); it changes the VALUE the existing binary heads train against.
+
+**And it is not real.** The two numbers are rates over different populations, which is the check this
+project's own CLAUDE.md demands before a scalar is believed. `MEASURED_AGREEMENT` is the rate at which
+the **image annotator** -- a radiologist reading pixels on the 58 annotated studies, 684 cells -- calls
+a cell positive given the rung the **reporting** radiologist wrote. My 240 gold cells are an
+**adjudicator reading the same report** the rung was extracted from. The gold cells therefore measure
+whether v2 TRANSCRIBED the report correctly; `MEASURED_AGREEMENT` measures whether the report PREDICTS
+the pixels. Those are different questions and `targets.py`'s own docstring, lines 9-12, says so in
+advance: *"The reporting radiologist and the annotator do not share a threshold -- a report saying
+small joint effusion can sit against a negative annotation because the annotator marked only effusions
+they judged significant."*
+
+Re-cutting the 684 annotated cells per rung -- the same cells, the pixel denominator, no new gold and
+no card -- settles it:
+
+| rung | n | annot k | annot rate | Wilson | `MEASURED_AGREEMENT` |
+|---|---|---|---|---|---|
+| 0.08 | 196 | 8 | 0.041 | (0.021, 0.078) | 0.041 |
+| 0.28 | 177 | 24 | 0.136 | (0.093, 0.194) | 0.136 |
+| 0.68 | 98 | 37 | 0.378 | (0.288, 0.476) | 0.378 |
+| 0.82 | 141 | 97 | 0.688 | (0.607, 0.759) | 0.688 |
+| 0.94 | 72 | 69 | 0.958 | (0.885, 0.986) | 0.958 |
+
+Exactly, to three places, because the constants ARE this fit. And per column, on the same cells:
+MCL's 0.68 rung is **0 of 6** annotation-positive (Wilson upper 0.39) against a trained 0.274; Lateral
+OA's 0.68 is 2 of 3; Fracture's 0.68 is 1 of 4. So the rung that my report-read gold calls 13-for-13
+certain is the rung the pixel reader calls negative more often than not. The whole gap between the two
+tables above IS the documented threshold difference, measured, with the direction and the size the
+docstring predicted.
+
+**Which ruler is the one that matters is not a matter of taste here.** The competition's truth is the
+annotation protocol, not the report. Supervising toward the reporter's threshold would train the model
+to agree with a radiologist writing prose about findings the graded truth does not count. The shipped
+calibration points at the right population; the gold cells point at the other one.
+
+**What is left standing, and it is not nothing.** The 240 cells still say what they were built to say:
+v2 transcribes reports faithfully (5/120 off unanimity against the majority's 9/120), the
+off-unanimity majority sign is 7.5% wrong with seven of nine errors being under-calls, and
+`steven_full` over-calls the corpus genuinely (D387). What dies is the supervision LEVER -- twice in
+one night, first as "stop averaging" (already the status quo) and now as "re-price the rungs" (the
+prices are right). Section 5's reading holds and hardens: class B's 0.115-0.121 per-column holes are
+**task difficulty**, not label noise. Three independent attacks on the supervision hypothesis have now
+each come back negative, and the corpus's labels are in better shape than any of them assumed.
+
+The open question this leaves is a RULER question, not a label question, and it is the sharper one:
+every offline number this project ranks members by is scored against the REPORT labels, while Kaggle
+scores against the ANNOTATION protocol. If those two rankings disagree across the pool, the pool's
+whole ordering is biased, and that is a candidate mechanism for a 0.86 offline ceiling sitting under a
+0.944 board. Commissioned as M394.
 
 ---
 

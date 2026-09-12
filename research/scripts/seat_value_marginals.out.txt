@@ -1,0 +1,41 @@
+  attr fallback (binarised-truth admit, raw-truth differ): oof_band_fold0_s2026
+POPULATION: 134 packaged-honest (both rosters); the six are seated as shipped (two raptor-teacher members inside); candidates = 133 - 6 - 3 exposed ['distill_stack_max_s2026', 'oof_teacher_s2026', 'raptor_distill_s2026'] -> n=125
+CUT: LogitAverage macro AUC, midpoint-binarised v2 truth @holdout909; 20 splits x 2 = 40 readings per attribute
+merged-rijeka INCLUDED as a seat attribute (consistent with marginal_additivity.py); its candidates are licence-tagged for shipping but 0%-exposure
+
+=== TASK 1: seat-value delta (carrying X - not carrying X), added to the shipped six ===
+  labelwise        delta +0.0005±0.0005 | carry 0.8740 vs not 0.8735 | win 31/40 loss 9/40
+      picks: [('chaindense_s2026', 17), ('labelwise_extended_s2026', 10), ('labelwise_depth24_s2026', 9)]
+      control: [('stackfit_s2026', 14), ('recal_calib_s2026', 10), ('merged_span_cf', 10)]
+  distill          delta -0.0007±0.0004 | carry 0.8730 vs not 0.8737 | win 2/40 loss 38/40
+      picks: [('stack_increments_fx_s2026_run1', 21), ('distill_pairs_s2026', 18), ('noisy_student_s2026', 1)]
+      control: [('chaindense_s2026', 9), ('labelwise_extended_s2026', 7), ('recal_calib_s2026', 6)]
+  hold-annot       delta -0.0000±0.0007 | carry 0.8738 vs not 0.8738 | win 17/40 loss 23/40
+      picks: [('labelwise_extended_s2026', 10), ('chaindense_s2026', 10), ('recal_calib_s2026', 6)]
+      control: [('merged_span_cf', 21), ('small_batch6_s2026', 6), ('merged_blend_cf', 3)]
+  calib-tgt        delta +0.0002±0.0006 | carry 0.8738 vs not 0.8736 | win 29/40 loss 11/40
+      picks: [('merged_span_cf', 9), ('labelwise_depth24_s2026', 8), ('recal_calib_s2026', 7)]
+      control: [('chaindense_s2026', 27), ('recal_dense_s2026', 3), ('small_batch6_s2026', 2)]
+  blend-three-llm  delta +0.0001±0.0005 | carry 0.8739 vs not 0.8738 | win 18/40 loss 22/40
+      picks: [('chaindense_s2026', 38), ('blendhold_s2026', 2)]
+      control: [('labelwise_depth24_s2026', 8), ('merged_span_cf', 8), ('recal_calib_s2026', 7)]
+  ema              delta -0.0003±0.0005 | carry 0.8736 vs not 0.8739 | win 8/40 loss 32/40
+      picks: [('stackfit_s2026', 22), ('chaindense_s2026', 18)]
+      control: [('labelwise_depth24_s2026', 11), ('recal_calib_s2026', 8), ('labelwise_extended_s2026', 8)]
+  merged-rijeka    delta +0.0005±0.0005 | carry 0.8742 vs not 0.8737 | win 36/40 loss 4/40
+      picks: [('merged_span_cf', 33), ('merged_blend_cf', 5), ('merged_blend_s2026', 2)]
+      control: [('chaindense_s2026', 10), ('labelwise_extended_s2026', 9), ('recal_calib_s2026', 6)]
+
+=== TASK 2: saturation curve, 0% pool + augmented k=5 ===
+  0% pool n=291 (honest 304): distill_stack_clean_s2026 ENTERED since D380 — its npz landed during this session, TRUNCATED at epoch 3 of 12 (one_cycle anneal never ran): its 0.8426 is a FLOOR by the convergence_check rule, not a realised k=5 point
+  base (k=0 median) = 0.8439
+  k=0: n=222 median solo 0.8439 median residual +0.0000 (D380: n=222, 0.8439, +0.0000; d_residual +0.0000)
+  k=1: n= 31 median solo 0.8545 median residual -0.0003 (D380: n=31, 0.8545, -0.0004; d_residual +0.0001)
+  k=2: n= 23 median solo 0.8575 median residual -0.0085 (D380: n=23, 0.8575, -0.0085; d_residual -0.0000)
+  k=3: n= 11 median solo 0.8607 median residual -0.0191 (D380: n=11, 0.8607, -0.0191; d_residual +0.0000)
+  k=4: n=  2 median solo 0.8609 median residual -0.0294 (D380: n=2, 0.8609, -0.0293; d_residual -0.0001)
+  k=5: n=  2 median solo 0.8537 median residual -0.0485 (D380: n=1, 0.8648, -0.0364; d_residual -0.0121)  [n=2 incl. distill_stack_clean TRUNCATED-FLOOR; converged-only: n=1 chainfour 0.8648 residual -0.0364]
+  augmented k=5 (EXPOSED member marked):
+    chainfour_s2026          solo 0.8648 residual -0.0364 [clean, converged]
+    distill_stack_max_s2026  solo 0.8634 residual -0.0398 [~80% EXPOSED, converged e8/12; additive prediction 0.9032]
+    augmented converged k=5 median residual -0.0381 (n=2)

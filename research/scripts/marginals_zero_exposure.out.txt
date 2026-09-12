@@ -1,0 +1,58 @@
+POPULATION: honest pool 303 @holdout909-midpoint-v2 (scored npz minus 17 void); dropped 100%-exposure 9: ['merged_distill_cf', 'oof_teacher_s2026', 'raptor_distill_s2026', 'seat_distill_gen2_s2026', 'seat_distill_lr4e5_s2026', 'stack_increments_base_s2026', 'stack_increments_fx_s2026', 'stack_increments_s2026', 'swin_distill_pre_s2026']
+          dropped ~80%-exposure 4: ['distill_stack_max_s2026', 'foreign_dissent_s2026', 'foreign_distill_calib_s2026', 'foreign_distill_mix07_s2026']
+          -> 0%-exposure sub-pool 290
+          map names not in tonight's honest pool (7): ['cnx_distill_warm_s2026', 'compose_v4b_oof_s2026', 'distill_v3base_oof_s2026', 'foreign_distill_mix30_s2026', 'retrain_six_distill_s2026', 'seat_oof5_distill_s2026', 'stack_increments_ff']
+
+reconciliation: my attributes tag 24 members distill/raptor-teacher; of the drop set, 1 are NOT tagged by my attributes: ['foreign_dissent_s2026']
+  tagged-but-clean (stay in 0% pool, zero fold-0 exposure by the map): ['calib_hold_clean_distill_s2026', 'clean_calib_s2026', 'distill_pairs_s2026', 'foreign_distill_s2026', 'hold_clean_distill_s2026', 'hold_clean_distill_s2026_run1', 'noisy_student_s2026', 'oof_gen2_fold0_s2026', 'raptor_feat_fit_s2026', 'seat_clean_distill_s2026', 'seat_distill_clean_s2026', 'stack_increments_fx_s2026_run1']
+
+=== MARGINALS: full honest (n=303) vs 0%-exposure (n=290) ===
+attribute                   d_full n_with |  d_zero n_with |    move
+distill                    +0.0161     23 | +0.0125     11 | -0.0037
+blend-three-llm            +0.0152      9 | +0.0109      6 | -0.0043
+labelwise head             +0.0135     12 | +0.0138     11 | +0.0003
+calib-tgt                  +0.0117     41 | +0.0109     37 | -0.0007
+hold-annot                 +0.0114     40 | +0.0112     37 | -0.0001
+ema                        +0.0096     10 | +0.0105     10 | +0.0009
+slices>=20                 +0.0030    173 | +0.0020    162 | -0.0010
+merged-rijeka              +0.0112     12 | +0.0117     11 | +0.0004
+grade_ladder               +0.0072      5 | +0.0080      5 | +0.0008
+mixup                      +0.0027      4 | +0.0035      4 | +0.0008
+res 336                    +0.0020    221 | +0.0015    208 | -0.0005
+res 224                    -0.0001     60 | +0.0015     60 | +0.0016
+span>=0.70                 +0.0015    196 | +0.0013    185 | -0.0001
+dinov2-small               +0.0249    230 | +0.0246    218 | -0.0003
+dinov3                     -0.0210     11 | -0.0209     11 | +0.0001
+external extra-corpus      +0.0081     17 | +0.0083     16 | +0.0002
+external medical-pretrain  -0.0340     22 | -0.0337     22 | +0.0003
+epochs>=24                 +0.0004      7 | +0.0014      7 | +0.0010
+
+distill on 0% pool: n=11 (was 23), marginal +0.0125, bootstrap 95% [+0.0105, +0.0172] over members (1000 reps)
+
+=== TASK 2: zero-joint pairs/triples among the seven non-null attributes (on the 0% sub-pool, n=290) ===
+  positive-marginal components on 0% pool: [('distill', 0.0125), ('blend-three-llm', 0.0109), ('labelwise head', 0.0138), ('calib-tgt', 0.0109), ('hold-annot', 0.0112), ('ema', 0.0105), ('slices>=20', 0.002)]
+  NEVER COMBINED (2): distill + blend-three-llm
+  NEVER COMBINED (2): distill + labelwise head
+  NEVER COMBINED (2): distill + ema
+  NEVER COMBINED (3): distill + blend-three-llm + labelwise head
+  NEVER COMBINED (3): distill + blend-three-llm + calib-tgt
+  NEVER COMBINED (3): distill + blend-three-llm + hold-annot
+  NEVER COMBINED (3): distill + blend-three-llm + ema
+  NEVER COMBINED (3): distill + blend-three-llm + slices>=20
+  NEVER COMBINED (3): distill + labelwise head + calib-tgt
+  NEVER COMBINED (3): distill + labelwise head + hold-annot
+  NEVER COMBINED (3): distill + labelwise head + ema
+  NEVER COMBINED (3): distill + labelwise head + slices>=20
+  NEVER COMBINED (3): distill + calib-tgt + ema
+  NEVER COMBINED (3): distill + hold-annot + ema
+  NEVER COMBINED (3): distill + ema + slices>=20
+
+=== TASK 3: two-roster packaged population ===
+  comp/members.roster: 137 names
+  comp/members2.roster: 20 names
+  union 157, duplicates across the two files: ['calib_span_df', 'final_ws_df']
+  packaged-honest from BOTH rosters: 133 (excluded: 21 no npz ['base_dense_ff', 'blend_calib', 'blend_ladder', 'blend_ws', 'calib_dense_hold_ff', 'calib_span_df', 'calib_span_ff', 'final_ws_cf', 'final_ws_df', 'final_ws_e12', 'grade_ladder_cf', 'grade_ladder_ff', 'labelwise_dense_ff', 'lr4e-5_ws_cf', 'lr4e-5_ws_ff', 'merged_span_ff', 'seat_oof5_distill_s2026', 'small_batch6_ff', 'stack_increments_ff', 'through_dense_cf', 'through_dense_ff'], 0 studies, 0 truth, 1 epoch<0 ['deep24_s2026'])
+  seat_clean_distill_s2026: rostered=True
+  clean_calib_s2026: rostered=True
+  chainfour_s2026: rostered=True
+  vs main's 133: delta 0

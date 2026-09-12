@@ -1,0 +1,27 @@
+POPULATION: roster 137 names -> packaged+honest 117 (excluded: 19 no npz [all ff/cf/df dark], 0 wrong studies, 0 truth mismatch, 1 epoch<0 probe)
+  NOTE: main's letter said 133; this count is 117 with the breakdown above — definition: roster names with a same-stem holdout npz, exact 909-study set, binarised truth cell-identical, npz epoch >= 0.
+CUT: LogitAverage (clip 1e-06), macro AUC vs midpoint-binarised v2 truth @holdout909; 20 splits x 2 directions = 40 readings per k
+
+full-909 reference (this population/cut):
+  greedy@1 0.8649
+  greedy@2 0.8714
+  greedy@3 0.8731
+  greedy@4 0.8745  | top-4 solo 0.8728
+  greedy@5 0.8758
+  greedy@6 0.8765  | top-6 solo 0.8736
+  greedy@7 0.8772
+  greedy@8 0.8777  | top-8 solo 0.8746
+
+=== PRIMARY: greedy vs top-k solo, out-of-half (40 readings each) ===
+  k=4: greedy 0.8722±0.0040 | top-k 0.8715±0.0041 | delta +0.0007±0.0014 (win 30/40, loss 10/40)
+  k=6: greedy 0.8739±0.0041 | top-k 0.8730±0.0040 | delta +0.0009±0.0013 (win 30/40, loss 10/40)
+  k=8: greedy 0.8749±0.0041 | top-k 0.8737±0.0040 | delta +0.0013±0.0013 (win 37/40, loss 3/40)
+
+=== selection stability across the 40 greedy runs ===
+  k=6: mean pairwise Jaccard 0.221 of 6-sets; most picked: [('resnet_224_long_s2026', 28), ('chainfour_s2026', 24), ('labelwise_extended_s2026', 19), ('merged_span_cf', 16), ('clean_calib_s2026', 15), ('merged_blend_cf', 15), ('labelwise_dense_s2026', 15), ('finding_calib_dense_s2026', 12)]
+  k=8: mean pairwise Jaccard 0.260 of 8-sets; most picked: [('resnet_224_long_s2026', 32), ('chainfour_s2026', 26), ('labelwise_extended_s2026', 25), ('labelwise_dense_s2026', 20), ('merged_blend_cf', 20), ('merged_span_cf', 19), ('finding_calib_dense_s2026', 18), ('clean_calib_s2026', 15)]
+
+=== SECONDARY: coverage-greedy (MCL+Fracture criterion) vs macro-greedy, scored on macro AUC ===
+  k=4: coverage 0.8689±0.0047 vs macro 0.8722±0.0040 | delta -0.0033±0.0021 (win 3/40)
+  k=6: coverage 0.8707±0.0044 vs macro 0.8739±0.0041 | delta -0.0032±0.0021 (win 3/40)
+  k=8: coverage 0.8713±0.0044 vs macro 0.8749±0.0041 | delta -0.0036±0.0020 (win 2/40)

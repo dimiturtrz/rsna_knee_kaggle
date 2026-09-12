@@ -1,0 +1,107 @@
+TASK 0 — the default: SLICE_BAND = (0.20, 0.80), core/data/corpus/slot_reader.py:35; TrainingOptions.band_low/band_high default to it (kneemri/training/options.py:104-105). The default is NOT full-stack, and the slot_reader docstring records the axis as closed at 12 slices: 0.2-0.8 = 0.8525, 0.1-0.9 = 0.8565, 0.0-1.0 = 0.8427 (interior optimum; full stack REFUTED). Every shipped member passes 0.1/0.9 explicitly. The recipe records the RESOLVED band, so a passed-vs-defaulted split is not recoverable — there is no separable no-flag group.
+
+POOL: honest n=304 @holdout909-midpoint-v2 (skipped 57 non-909/truth-mismatch; void foreign excluded). Band undetermined for 56 members (name-inferred pool: probes, run1s, foreign-named honest, fold0 bases).
+
+=== (a) per-column median AUC by band group ===
+      band   n       ACL       MCL  Medial M  Lateral   Medial O  Lateral      PF OA  Effusion  Synoviti   Baker's  Contusio  Fracture
+(0.0, 1.0)   1    0.8618    0.7823    0.8912    0.8429    0.8630    0.8124    0.8201    0.8521    0.8489    0.8933    0.8578    0.7864
+(0.05, 0.95)   2    0.8757    0.7989    0.8975    0.8084    0.8775    0.8202    0.8245    0.8495    0.8720    0.9021    0.8644    0.7920
+(0.1, 0.9) 166    0.8707    0.7851    0.8959    0.8402    0.8706    0.8125    0.8411    0.8504    0.8635    0.8996    0.8649    0.8005
+(0.2, 0.8)  79    0.8765    0.7874    0.8889    0.8258    0.8727    0.8153    0.8291    0.8482    0.8570    0.9010    0.8603    0.8099
+class means by group (B = 8 peripheral-hypothesis cols, C = 4 central):
+  (0.0, 1.0) n=  1  class-B 0.8323  class-C 0.8634
+  (0.05, 0.95) n=  2  class-B 0.8421  class-C 0.8615
+  (0.1, 0.9) n=166  class-B 0.8404  class-C 0.8679
+  (0.2, 0.8) n= 79  class-B 0.8401  class-C 0.8629
+
+=== the GUARD: clean band-only contrasts ===
+  recipe diff band_span vs band_full: {'band_high': ('0.9', '1.0'), 'band_low': ('0.1', '0.0')}
+  recipe diff band_span vs lr4e-5_ws: {'band_high': ('0.9', '0.8'), 'band_low': ('0.1', '0.2')}
+
+  TRAINED 0.2-0.8 -> 0.1-0.9 (identical recipes, 12sl): lr4e-5_ws_s2026 -> band_span_s2026
+    [C] ACL               0.8706 -> 0.8854  d=+0.0148
+    [B] MCL               0.7908 -> 0.7869  d=-0.0039
+    [C] Medial Meniscus   0.8983 -> 0.9042  d=+0.0059
+    [C] Lateral Meniscus  0.8460 -> 0.8406  d=-0.0054
+    [B] Medial OA         0.8763 -> 0.8735  d=-0.0029
+    [B] Lateral OA        0.8178 -> 0.8140  d=-0.0038
+    [B] PF OA             0.8392 -> 0.8420  d=+0.0028
+    [B] Effusion          0.8542 -> 0.8622  d=+0.0079
+    [B] Synovitis         0.8546 -> 0.8570  d=+0.0024
+    [B] Baker's           0.9076 -> 0.9181  d=+0.0105
+    [C] Contusion         0.8685 -> 0.8794  d=+0.0108
+    [B] Fracture          0.8066 -> 0.8146  d=+0.0080
+    class-B mean delta +0.0026 | class-C mean delta +0.0065
+
+  TRAINED 0.1-0.9 -> 0.0-1.0 (identical recipes, 12sl): band_span_s2026 -> band_full_s2026
+    [C] ACL               0.8854 -> 0.8618  d=-0.0236
+    [B] MCL               0.7869 -> 0.7823  d=-0.0046
+    [C] Medial Meniscus   0.9042 -> 0.8912  d=-0.0130
+    [C] Lateral Meniscus  0.8406 -> 0.8429  d=+0.0023
+    [B] Medial OA         0.8735 -> 0.8630  d=-0.0105
+    [B] Lateral OA        0.8140 -> 0.8124  d=-0.0017
+    [B] PF OA             0.8420 -> 0.8201  d=-0.0218
+    [B] Effusion          0.8622 -> 0.8521  d=-0.0101
+    [B] Synovitis         0.8570 -> 0.8489  d=-0.0081
+    [B] Baker's           0.9181 -> 0.8933  d=-0.0247
+    [C] Contusion         0.8794 -> 0.8578  d=-0.0216
+    [B] Fracture          0.8146 -> 0.7864  d=-0.0282
+    class-B mean delta -0.0137 | class-C mean delta -0.0140
+
+  SAME WEIGHTS, decode-time re-band 0.2-0.8 -> 0.1-0.9: lr4e-5_ws_s2026 -> lr4e-5_ws_s2026_n12b0.1-0.9
+    [C] ACL               0.8706 -> 0.8705  d=-0.0002
+    [B] MCL               0.7908 -> 0.7906  d=-0.0003
+    [C] Medial Meniscus   0.8983 -> 0.8985  d=+0.0002
+    [C] Lateral Meniscus  0.8460 -> 0.8457  d=-0.0003
+    [B] Medial OA         0.8763 -> 0.8763  d=-0.0001
+    [B] Lateral OA        0.8178 -> 0.8172  d=-0.0006
+    [B] PF OA             0.8392 -> 0.8392  d=+0.0000
+    [B] Effusion          0.8542 -> 0.8540  d=-0.0002
+    [B] Synovitis         0.8546 -> 0.8546  d=+0.0001
+    [B] Baker's           0.9076 -> 0.9075  d=-0.0001
+    [C] Contusion         0.8685 -> 0.8680  d=-0.0005
+    [B] Fracture          0.8066 -> 0.8064  d=-0.0002
+    class-B mean delta -0.0002 | class-C mean delta -0.0002
+
+  SAME WEIGHTS, decode-time re-band 0.2-0.8 -> 0.1-0.9 [LICENCE-TAINTED]: merged_blend_cf -> merged_blend_cf_n12b0.1-0.9
+    [C] ACL               0.8702 -> 0.8702  d=+0.0000
+    [B] MCL               0.8195 -> 0.8195  d=+0.0000
+    [C] Medial Meniscus   0.8891 -> 0.8891  d=+0.0000
+    [C] Lateral Meniscus  0.8552 -> 0.8552  d=+0.0000
+    [B] Medial OA         0.8808 -> 0.8808  d=+0.0000
+    [B] Lateral OA        0.8175 -> 0.8175  d=+0.0000
+    [B] PF OA             0.8369 -> 0.8369  d=+0.0000
+    [B] Effusion          0.8533 -> 0.8533  d=+0.0000
+    [B] Synovitis         0.8735 -> 0.8735  d=+0.0000
+    [B] Baker's           0.9174 -> 0.9174  d=+0.0000
+    [C] Contusion         0.8588 -> 0.8588  d=+0.0000
+    [B] Fracture          0.8440 -> 0.8440  d=+0.0000
+    class-B mean delta +0.0000 | class-C mean delta +0.0000
+
+  SLICES CONTROL: band FIXED 0.1-0.9, 20 -> 24 slices (separates band from slice count): band_dense_s2026 -> band_dense_s2026_n24b0.1-0.9
+    [C] ACL               0.8740 -> 0.8756  d=+0.0016
+    [B] MCL               0.7931 -> 0.7927  d=-0.0004
+    [C] Medial Meniscus   0.9047 -> 0.9025  d=-0.0022
+    [C] Lateral Meniscus  0.8464 -> 0.8491  d=+0.0027
+    [B] Medial OA         0.8797 -> 0.8786  d=-0.0012
+    [B] Lateral OA        0.8156 -> 0.8178  d=+0.0022
+    [B] PF OA             0.8583 -> 0.8608  d=+0.0025
+    [B] Effusion          0.8595 -> 0.8595  d=-0.0000
+    [B] Synovitis         0.8764 -> 0.8746  d=-0.0018
+    [B] Baker's           0.9065 -> 0.9085  d=+0.0020
+    [C] Contusion         0.8705 -> 0.8803  d=+0.0098
+    [B] Fracture          0.8088 -> 0.8180  d=+0.0093
+    class-B mean delta +0.0016 | class-C mean delta +0.0030
+
+=== (b) sharpest single contrast: band_full (0.0-1.0) vs band_span (0.1-0.9), identical recipes ===
+  MCL         span 0.7869 vs full 0.7823  (full-span -0.0046)
+  MCL         span 0.7869 vs ws0.2-0.8 0.7908  (span-ws -0.0039)
+  Lateral OA  span 0.8140 vs full 0.8124  (full-span -0.0017)
+  Lateral OA  span 0.8140 vs ws0.2-0.8 0.8178  (span-ws -0.0038)
+
+=== (c) slice-axis orientation ===
+  canonical_metadata.csv: 4407 studies; plane value counts:
+    Axial+Coronal+Sagittal: 4407
+  sequence mix: {'PD+T1+T2': np.int64(1968), 'PD+T1': np.int64(1661), 'PD+T2': np.int64(561), 'GRE+PD+T1+T2': np.int64(166)}
+  field strength: {1.5: np.int64(2541), 3.0: np.int64(1601), 1.16: np.int64(24)}
+  slot_reader.band_indices samples WITHIN one series' ordered file list; every study is Axial+Coronal+Sagittal (4407/4407 — uniform, no per-study plane variation). Slice-axis meaning differs by plane: sagittal edges = medial/lateral joint line, coronal edges = anterior/posterior, axial edges = superior/inferior — so one band crop trims DIFFERENT anatomy per plane, uniformly across studies. From disk I cannot establish per-series slice counts per study, but the plane mix is exact and uniform.

@@ -1,0 +1,16 @@
+population: 4406 studies in the five-way table intersection (corpus-wide, NOT the train split — same population denom60 used)
+MCL: unanimous stratum 3794 cells (agreement-positive 632, agreement-negative 3162)
+  drew 40: 5 agreement-positive, 35 agreement-negative
+Lateral OA: unanimous stratum 3030 cells (agreement-positive 1032, agreement-negative 1998)
+  drew 40: 18 agreement-positive, 22 agreement-negative
+Fracture: unanimous stratum 2451 cells (agreement-positive 299, agreement-negative 2152)
+  drew 40: 3 agreement-positive, 37 agreement-negative
+overlap vs the six prior packs: 0 (must be 0)
+pack composition: {'Fracture': 40, 'Lateral OA': 40, 'MCL': 40}
+  chunk 1: {'Fracture': 8, 'MCL': 8, 'Lateral OA': 4}
+  chunk 2: {'Lateral OA': 11, 'MCL': 7, 'Fracture': 2}
+  chunk 3: {'MCL': 8, 'Lateral OA': 6, 'Fracture': 6}
+  chunk 4: {'Fracture': 9, 'Lateral OA': 6, 'MCL': 5}
+  chunk 5: {'Fracture': 8, 'MCL': 7, 'Lateral OA': 5}
+  chunk 6: {'Lateral OA': 8, 'Fracture': 7, 'MCL': 5}
+classb120 120 -> D:/data/volumetric/mri/processed/rsna_knee_abnormality/audit400/classb120

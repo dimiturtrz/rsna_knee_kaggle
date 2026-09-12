@@ -1,0 +1,23 @@
+GOLD: 469 adjudicated cells; selector cells inside holdout909: 469; per-column match: True -> the audit adjudicated EVERY dissent cell in the holdout, so the per-column dissent base IS the gold n (no scale-up; the 2,315 in v2_lone_dissent.csv is the corpus-wide count). Rates describe the DISSENT stratum, not the column at large.
+overall v2 contradiction in gold: 0.8913 (record: 0.891); tear dissent contradicted: 277/277 (record: 0/277 for v2); verdict agrees with cluster_value on 0.8913 of cells
+
+member frame: honest pool n=304 @holdout909-midpoint-v2 (void foreign excluded)
+
+column            gold contr   rate  eps_i eps_ii ceil_i ceil_ii medAUC bestAUC    gap  class
+ACL                 60    60  1.000 0.0660 0.0968  0.934   0.903 0.8706  0.9009 +0.002  A/C at a LOW ceiling (labels)
+MCL                 17    17 n too small (gold 17) 0.0187 0.0511  0.981   0.949 0.7841  0.8274 +0.121  B? [strata estimate only — no gold]
+Medial Meniscus    111   111  1.000 0.1221 0.1511  0.878   0.849 0.8902  0.9135 -0.065  A/C at a LOW ceiling (labels)
+Lateral Meniscus    89    89  1.000 0.0979 0.1277  0.902   0.872 0.8304  0.8771 -0.005  A/C at a LOW ceiling (labels)
+Medial OA           21    11 n too small (gold 21) 0.0121 0.0443  0.988   0.956 0.8710  0.9002 +0.055  B? [strata estimate only — no gold]
+Lateral OA          19     7 n too small (gold 19) 0.0077 0.0400  0.992   0.960 0.8125  0.8395 +0.121  B? [strata estimate only — no gold]
+PF OA               11     7 n too small (gold 11) 0.0077 0.0403  0.992   0.960 0.8334  0.8733 +0.086  B? [strata estimate only — no gold]
+Effusion             9     7 n too small (gold 9) 0.0077 0.0404  0.992   0.960 0.8483  0.8662 +0.093  B? [strata estimate only — no gold]
+Synovitis            6     6 n too small (gold 6) 0.0066 0.0394  0.993   0.961 0.8594  0.8852 +0.075  B? [strata estimate only — no gold]
+Baker's              6     3 n too small (gold 6) 0.0033 0.0361  0.997   0.964 0.8987  0.9317 +0.032  B? [strata estimate only — no gold]
+Contusion          120   100  0.833 0.1100 0.1387  0.890   0.861 0.8629  0.8916 -0.030  A/C at a LOW ceiling (labels)
+Fracture             0     0 n too small (gold 0) 0.0000 0.0330  1.000   0.967 0.8024  0.8517 +0.115  B? [strata estimate only — no gold]
+
+best member per column: ACL=foreign_distill_mix07_s2026, MCL=distill_stack_max_s2026, Medial Meniscus=small_batch6_s2026, Lateral Meniscus=labelwise_extended_s2026, Medial OA=foreign_labels_dense_s2026, Lateral OA=foreign_labels_dense_s2026, PF OA=stackfit_s2026, Effusion=distill_stack_clean_s2026, Synovitis=chainfour_s2026, Baker's=foreign_labels_dense_s2026, Contusion=foreign_labels_dense_s2026, Fracture=merged_blend_cf_r392
+
+macro: ceiling(ii) 0.9301 | best-member macro 0.8799 | pool-median macro 0.8470 | best->ceiling +0.0502, median->ceiling +0.0831
+direction of contradicted cells: v2=1->verdict 0 on 0.9689 (over-call), n=418

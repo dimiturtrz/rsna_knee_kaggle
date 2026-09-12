@@ -1,0 +1,101 @@
+POPULATION: npz scanned 376; scored @holdout909-midpoint-v2 319 (excluded: 51 wrong study set, 6 truth mismatch); metrics-only members with no 909 npz (dark/ff/cf/smoke): 88; of the scored, 17 VOID in-sample foreign, 18 licence-tainted; attributes from recipe for 284, name-inferred for 35
+anchor: labelwise_depth24_s2026 = 0.8617 (reference 0.8617)
+
+=== TOP 30 (score, family/size, res, slices, span, epochs, labels, warm, head, loss, external) ===
+ 1. 0.8938 raptor_v4_swa                      raptor/v4/coatnet     ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 2. 0.8915 raptor_v4                          raptor/v4/coatnet     ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 3. 0.8874 dinov3f0_solo                      dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 4. 0.8812 foreign_dinov3_matched             dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 5. 0.8777 foreign_dinov3_band1189            dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 6. 0.8769 raptor_v9                          raptor/v4/coatnet     ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 7. 0.8729 foreign_dinov3_tta3                dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 8. 0.8724 foreign_dinov3_band1387            dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+ 9. 0.8704 foreign_dinov3_band1090            dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+10. 0.8703 foreign_dinov3_tta4                dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+11. 0.8703 raptor_effv2l480                   efficientnet/v2l          480px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+12. 0.8685 foreign_dinov3_band1486            dinov3/served-folds   ?px  ?sl sp?    e ? ?                stock            ?              -                            foreign-weights VOID
+13. 0.8685 oof_teacher_s2026                  dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   distill                      none
+14. 0.8657 foreign_distill_mix07_s2026        dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   distill                      none
+15. 0.8649 clean_calib_s2026                  dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   calib-tgt+distill            none
+16. 0.8648 chainfour_s2026                    dinov2/small        336px 20sl sp0.80 e12 blend-three-llm  stock            labelwise/cls_mean calib-tgt+ema+hold-annot     none
+17. 0.8642 stack_increments_s2026             dinov2/small        336px 20sl sp0.80 e12 blend-three-llm  stock            max/cls_mean   calib-tgt+distill+hold-annot none
+18. 0.8641 foreign_distill_calib_s2026        dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   calib-tgt+distill            none
+19. 0.8641 calib_hold_clean_distill_s2026     dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   calib-tgt+distill+hold-annot none
+20. 0.8640 seat_distill_gen2_s2026            dinov2/small        336px 12sl sp0.60 e12 v2               stock            max/cls_mean   distill                      none
+21. 0.8637 merged_distill_cf                  dinov2/small        336px 20sl sp0.80 e12 merged-rijeka    stock            max/cls_mean   calib-tgt+distill+hold-annot extra-corpus:merged-rijeka LIC
+22. 0.8635 stack_increments_base_s2026        dinov2/small        336px 20sl sp0.80 e12 blend-three-llm  stock            max/cls_mean   distill                      none
+23. 0.8634 calib_dense_hold_s2026             dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   calib-tgt+hold-annot         none
+24. 0.8634 seat_clean_distill_s2026           dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   distill                      none
+25. 0.8633 seat_distill_lr4e5_s2026           dinov2/small        336px 12sl sp0.60 e12 v2               stock            max/cls_mean   distill                      none
+26. 0.8631 stackfit_s2026                     dinov2/small        336px 20sl sp0.80 e12 v2               stock            max/cls_mean   calib-tgt+ema+hold-annot     none
+27. 0.8628 chaindense_s2026                   dinov2/small        336px 20sl sp0.80 e12 blend-three-llm  stock            labelwise/cls_mean ema+hold-annot               none
+28. 0.8623 labelwise_extended_s2026           dinov2/small        336px 20sl sp0.80 e12 v2               stock            labelwise/cls_mean calib-tgt+hold-annot         none
+29. 0.8620 recal_calib_s2026                  dinov2/small        336px 20sl sp0.80 e12 v3               stock            max/cls_mean   calib-tgt+hold-annot         none
+30. 0.8618 merged_span_cf                     dinov2/small        336px 20sl sp0.60 e12 merged-rijeka    stock            max/cls_mean   calib-tgt                    extra-corpus:merged-rijeka LIC
+... median context (rank 158-161 of 319):
+158. 0.8490 native224_long_s2026               dinov2/small
+159. 0.8489 stack_increments_fx_s2026          dinov2/small
+160. 0.8488 foreign_dinov3_band208             dinov3/served-folds
+161. 0.8488 clip224_tight_s2026                dinov2/small
+
+=== SPREAD (all 319; honest 302) ===
+  best    0.8938
+  p90     0.8613
+  p75     0.8557
+  median  0.8488
+  p25     0.8297
+  p10     0.7939
+  worst   0.4747
+  gap best->median +0.0450 | honest best 0.8685 (oof_teacher_s2026), honest median 0.8485, gap +0.0200
+
+=== ATTRIBUTE CONTRASTS (honest pool n=302; median with vs without) ===
+  warm own-corpus-mim                with 0.7059 (n= 10) vs without 0.8487 (n=292)  d=-0.1428
+  labels v3+                         with 0.8116 (n=  9) vs without 0.8487 (n=293)  d=-0.0371
+  family radiodino/mricore           with 0.8137 (n=  7) vs without 0.8487 (n=295)  d=-0.0350
+  external medical-pretrain          with 0.8151 (n= 22) vs without 0.8490 (n=280)  d=-0.0340
+  family swin/convnext/resnet/coatnet with 0.8224 (n= 21) vs without 0.8489 (n=281)  d=-0.0265
+  family dinov2-small                with 0.8507 (n=229) vs without 0.8258 (n= 73)  d=+0.0249
+  family dinov3 (any)                with 0.8277 (n= 11) vs without 0.8487 (n=291)  d=-0.0210
+  family vjepa2                      with 0.8325 (n=  4) vs without 0.8487 (n=298)  d=-0.0162
+  loss distill                       with 0.8623 (n= 22) vs without 0.8472 (n=280)  d=+0.0151
+  labels blend-three-llm             with 0.8609 (n=  8) vs without 0.8476 (n=294)  d=+0.0133
+  head labelwise                     with 0.8607 (n= 11) vs without 0.8476 (n=291)  d=+0.0132
+  loss calib-tgt                     with 0.8578 (n= 40) vs without 0.8462 (n=262)  d=+0.0116
+  loss hold-annot                    with 0.8575 (n= 39) vs without 0.8462 (n=263)  d=+0.0113
+  labels merged-rijeka               with 0.8588 (n= 12) vs without 0.8476 (n=290)  d=+0.0112
+  family orthodiffusion              with 0.8379 (n= 12) vs without 0.8487 (n=290)  d=-0.0108
+  loss ema                           with 0.8579 (n= 10) vs without 0.8479 (n=292)  d=+0.0099
+  external extra-corpus              with 0.8557 (n= 17) vs without 0.8476 (n=285)  d=+0.0081
+  loss grade_ladder                  with 0.8555 (n=  5) vs without 0.8482 (n=297)  d=+0.0072
+  external any                       with 0.8417 (n= 39) vs without 0.8487 (n=263)  d=-0.0070
+  slices >=20                        with 0.8501 (n=172) vs without 0.8471 (n=130)  d=+0.0030
+  loss mixup                         with 0.8510 (n=  4) vs without 0.8483 (n=298)  d=+0.0027
+  head max                           with 0.8487 (n=264) vs without 0.8466 (n= 38)  d=+0.0021
+  res 336                            with 0.8491 (n=220) vs without 0.8471 (n= 82)  d=+0.0019
+  span >=0.70                        with 0.8489 (n=195) vs without 0.8475 (n=107)  d=+0.0014
+  epochs >=24                        with 0.8490 (n=  7) vs without 0.8485 (n=295)  d=+0.0005
+  slices 12                          with 0.8485 (n=111) vs without 0.8486 (n=191)  d=-0.0002
+  family dinov2-base                 with 0.8486 (n= 10) vs without 0.8485 (n=292)  d=+0.0001
+  res 224                            with 0.8486 (n= 60) vs without 0.8485 (n=242)  d=+0.0001
+
+=== TOP-DECILE PROFILE (honest pool; decile = top 30) ===
+  top-decile floor: 0.8597; members: oof_teacher_s2026, foreign_distill_mix07_s2026, clean_calib_s2026, chainfour_s2026, stack_increments_s2026, foreign_distill_calib_s2026, calib_hold_clean_distill_s2026, seat_distill_gen2_s2026, merged_distill_cf, stack_increments_base_s2026, calib_dense_hold_s2026, seat_clean_distill_s2026, seat_distill_lr4e5_s2026, stackfit_s2026, chaindense_s2026, labelwise_extended_s2026, recal_calib_s2026, merged_span_cf, labelwise_depth24_s2026, labelwise_dense_s2026, raptor_distill_s2026, merged_blend_cf_r392, recal_dense_s2026, oof_gen2_fold0_s2026, labelwise_depth20_b10_s2026, hold_clean_distill_s2026, finding_calib_dense_s2026, small_batch6_s2026, band_dense_s2026_n24b0.1-0.9, merged_blend_cf
+  enriched: loss calib-tgt                   17/30 of decile vs 40/302 of pool
+  enriched: loss hold-annot                  15/30 of decile vs 39/302 of pool
+  enriched: loss distill                     14/30 of decile vs 22/302 of pool
+
+=== EMPTY CELLS (honest pool; additive-marginal sketch, NOT a fit) ===
+  honest-pool median 0.8485, honest best 0.8685; est = median + marginals (marginals are confounded — realised combos over-add by ~2x, so read these as upper-bound sketches)
+  est 0.8896  dinov2-small    labelwise v2-corrected     slices 20-24
+  est 0.8866  dinov2-small    labelwise v2-corrected     slices 12-16
+  est 0.8785  dinov2-small    max       v2-corrected     slices 20-24
+  est 0.8781  dinov2-base     labelwise blend-three-llm  slices 20-24
+  est 0.8751  dinov2-base     labelwise blend-three-llm  slices 12-16
+  est 0.8671  orthodiffusion  labelwise blend-three-llm  slices 20-24
+  est 0.8670  dinov2-base     max       blend-three-llm  slices 20-24
+  est 0.8648  dinov2-base     labelwise v2               slices 20-24
+  est 0.8648  dinov2-base     labelwise v2-corrected     slices 20-24
+  est 0.8642  orthodiffusion  labelwise blend-three-llm  slices 12-16
+  est 0.8641  dinov2-base     max       blend-three-llm  slices 12-16
+  est 0.8618  dinov2-base     labelwise v2               slices 12-16
+  (v2-corrected marginal exists at n=1 only — single trial v2_corrected_s2026 = 0.8392 at a plain operating point, so every 'corrected' row is one observation deep)
