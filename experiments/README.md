@@ -15522,3 +15522,43 @@ PRIOR ART CHECKED (the Einstein gate). Distance-picked SEVENTH seats have been s
 `grade_ladder` on objective distance (0.931) and `through_dense` on pixel distance (0.932), each
 bolted onto a fixed core. This measurement is a different claim and explains why those were small:
 the collapse happens across all six, so exchanging one seat cannot undo it.
+
+## 2026-09-12 — external DATA did not buy decorrelation; a foreign PIPELINE is what pays
+
+Follow-on from the contraction finding above, on the same 909-study holdout at cut 0.75. If averaging
+washes out seat composition, then the only thing that can move the board is a member far from the
+pool's consensus. So: how far from consensus is everything we own? Consensus = the best six of the
+149-member pool; distance = rank-space correlation to it. No slot spent.
+
+    for scale, corr-to-consensus over the 149 pool members:
+      min 0.0400   p10 0.8630   median 0.9106   max 0.9653
+
+THE EXTERNAL-DATA MEMBERS ARE NOT FOREIGN AT ALL.
+
+    corr 0.8828  solo 0.8800  blend@1/3 -0.0040  ortho_fastmri_s2026
+    corr 0.8823  solo 0.8812  blend@1/3 -0.0040  ortho_fastmri_masked_s2026
+    corr 0.8867  solo 0.8861  blend@1/3 -0.0030  mrnet_warm_s2026
+    corr 0.9127  solo 0.8883  blend@1/3 -0.0038  merged3_corpus_s2026
+    corr 0.9195  solo 0.8889  blend@1/3 -0.0039  merged_corpus_s2026
+
+Every one lands INSIDE the pool's own ordinary spread -- above p10, around the median. Training on
+fastMRI, on MRNet, or on a two- or three-site merged corpus produced members no more decorrelated
+from our consensus than an ordinary sibling, and all five LOSE when blended at 1/3. This is a
+separate and stronger statement than the ledger's existing site-count result (`merged_corpus`
++0.0043, `merged3_corpus` -0.0024, the site-count corner closed negative): that one says more sites
+do not raise the mean, this one says more sites do not buy DISTANCE either, which is the axis the
+contraction finding leaves open. **Adding a fourth site is priced dead on both rulers now.**
+
+THE raptor_* ROWS IN THIS TABLE ARE VOID AS OFFLINE READINGS and are recorded only so nobody
+re-derives them as live. They are dreaddevelopment's competition-trained checkpoints, in-sample on
+our 909 (`foreign_overlap` measured `raptor_solo` at 98.6% in-sample, 2026-08-29). The inflation is
+measurable against the board: `raptor_v4_swa` reads solo 0.9484 and blend@1/3 +0.0193 OFFLINE, while
+the board read it at 0.923 solo and its seating gained +0.003. Roughly +0.025 of offline solo and an
+order of magnitude of apparent blend gain are in-sample artefact. Do not quote them.
+
+WHAT THIS PREDICTS, AND IT IS TESTABLE. What made raptor pay is a foreign PIPELINE -- another
+author's architecture, training and preprocessing -- not a foreign DATASET. That gives `fleettwo` a
+mechanism it never had: its second seat was ANOTHER dreaddevelopment checkpoint, same author, same
+pipeline, so it bought weight without buying distance, and it read 0.942 against 0.944. The
+prediction is that a second foreign seat from a DIFFERENT author would behave unlike fleettwo's. That
+has never been tried and is the only mechanism-backed slot candidate currently open.
