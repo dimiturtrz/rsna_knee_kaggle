@@ -16340,3 +16340,72 @@ renaming run 1's checkpoint and holdout to `_run1`. Run 2 was killed at startup 
 restored to their declared names; the numbers above are run 1's. The lesson is that a `/T` kill is not
 transitive through MSYS reparenting: enumerate `Win32_Process` by CommandLine and kill the TRAINER first,
 then each shell, or the shell relaunches what you just killed.
+
+## slot_dropout has now met two seats, and both reads were taken at a wall
+
+`blendhold_drop40` and `chainfour_drop40` were run as a pair to close one question: the champion roster
+(`cleanseat_v1`, 0.942, six members) carries `--calibrated-targets` / `--hold-annotations` and mostly
+`$BLEND` labels, while EVERY slot_dropout arm to date — `slot_dropout`, `slot_dropout_hi`,
+`slot_dropout_max`, `mergedk_drop40` — is plain-label. So the operator with the largest cross-site gain
+this project has measured (+0.0132 vs control at dose 0.40 on `foreign_readout`) had never met a seat,
+and the roster carried zero cross-site hardening. Two seats, not one, because a negative on a single
+recipe reads as "wrong seat" and keeps an axis open forever.
+
+Both refused, on both rulers that decide:
+
+```
+member                                     LEDGER  LEDGER75     move  epoch   rows
+chainfour_drop40_s2026                     0.8589    0.8917  +0.0328     11    909
+chainfour_s2026                            0.8648    0.8912  +0.0264      7    909
+blendhold_s2026                            0.8575    0.8829  +0.0254      9    909
+blendhold_drop40_s2026                     0.8507    0.8806  +0.0299     11    909
+
+cleanseat_v1 scored 0.942 on the board with 6 members; roster of 6: 0.8755
+  +chainfour_drop40_s2026.pt: 0.8750  (-0.0005)  [-0.0012, +0.0002]
+  +blendhold_drop40_s2026.pt: 0.8744  (-0.0011)  [-0.0018, -0.0003]
+best seat each could take: chainfour_drop40 for stack_increments_base (-0.0008),
+                           blendhold_drop40 for blendhold (-0.0016)
+0 of 2 clear +0.0040, under which this ruler has never been shown to pick a board tick
+```
+
+`chainfour_drop40.sh`'s pre-registration says a `seat < 0.000 on BOTH` closes the axis on two points.
+**It is not being closed, and the reason is in the epoch column of that same table.**
+
+### the cut reverses the sign, and that had to be said before anything else
+
+At midpoint both arms lose: blendhold −0.0068, chainfour −0.0059. At `ledger75` they do not: blendhold
+0.8829→0.8806 is −0.0023 and chainfour 0.8912→**0.8917** is **+0.0005**, i.e. the 336 px seat is AHEAD
+of its control on the recut. Per the STATISTIC/POPULATION/CUT rule this is one experiment with two
+honest numbers, not a contradiction — and blendhold_drop40's −0.0068 midpoint BREACHES the ±0.006
+holdout band its own header pre-registered, which by that header's words makes it "a fact about the
+recipe interaction, not a cross-site number".
+
+### the epoch column: both treatments peaked on their LAST epoch, both controls did not
+
+```
+chainfour_drop40   e9 0.8579   e10 0.8586   e11 0.8589   <- last epoch, monotone into the wall
+blendhold_drop40   e9 0.8493   e10 0.8505   e11 0.8507   <- last epoch, monotone into the wall
+chainfour          peak e7 of 12, then decays
+blendhold          peak e9 of 12, then decays
+```
+
+The seat was priced by comparing a control AT ITS PEAK against a treatment AT A WALL. This project has
+already written the mechanism down once, in `dropstack_long.sh`: at stochastic-depth 0.05 the arm read
+0.8654 @e12 STILL CLIMBING while dense 0.1 plateaued at e11, and the note reads "budget BINDING — the
+control cannot spend twelve epochs; it has nothing to do after six but memorise." A regulariser removes
+capacity per step and buys it back with steps. Both drop40 arms inherited `--epochs 12` from controls
+that do not need it, which is the faulty-TRAINING suspect named in CLAUDE.md, not a refutation of the
+operator. `convergence_check` does not flag either arm, because peak-at-11-of-12 is neither TRUNCATED
+nor peaked-on-the-last-recorded-epoch by its definition — the bound is real and invisible to the check.
+
+So `knee-kiss9` re-runs both at `--epochs 24` and nothing else, and the seat question is re-asked at
+treatment-peak vs control-peak. Its pre-registration adds the branch this pair could not have:
+an arm that STILL peaks last at 24 licenses no seat verdict at all.
+
+### and the arm was mispriced twice over, which cost the card eleven idle minutes
+
+`chainfour_drop40` was priced at ~1.25 h off `chainfour`'s own log line `epoch 1: … (364s)`. It ran at
+**185 s/epoch** and finished in ~37 minutes, and because the queue behind it was built for the longer
+number the card sat idle from 21:37:50Z. Earlier the same day 224 px arms were priced at 30 min and cost
+13. The rule: **read the epoch time off the arm that is actually running, not off an older log of the
+same recipe** — a recipe's cost is a fact about the machine's current load, not about the recipe.
