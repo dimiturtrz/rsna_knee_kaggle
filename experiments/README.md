@@ -15562,3 +15562,43 @@ mechanism it never had: its second seat was ANOTHER dreaddevelopment checkpoint,
 pipeline, so it bought weight without buying distance, and it read 0.942 against 0.944. The
 prediction is that a second foreign seat from a DIFFERENT author would behave unlike fleettwo's. That
 has never been tried and is the only mechanism-backed slot candidate currently open.
+
+## 2026-09-12 — the foreign-weights licence gate, resolved: RadImageNet is closed, CC0 is open
+
+`kaggle datasets list --csv` reports `licenseName` as `None` for every dataset, and so did my first read of
+`kaggle datasets metadata` — because that file carries the licence under `info.licenses`, not at the top
+level. Neither was evidence of unlicensed data; both were a parse that looked at the wrong key. The
+dataset VIEW endpoint answers directly, costs no slot, and gave a clean verdict on all nine sets the
+public kernels mount.
+
+CLEAN, mountable under the standing licence gate:
+
+| dataset | licence | size | what is in it |
+| --- | --- | --- | --- |
+| `mattiaangeli/rsna-knee-coat-resgated-ep10-top3` | CC0 | 818 MB | 3 checkpoints + architecture + inference code + manifest |
+| `pilkwang/rsna-knee-weights` | CC0 | 1.66 GB | 20 bare `.pt`, no code |
+| `mattiaangeli/knee-mri-fold-weights` | CC0 | 439 MB | 5 fold `.pt` + a timm wheel, no code |
+| `royceplayz/rsna-medicalnet-resnet50-weights` | Apache 2.0 | 343 MB | MedicalNet / Med3D pretraining, not competition-trained |
+
+BLOCKED: `marwanmath/resnet-50-radimagenet-marwan`, `antoinegg1/rsna-knee-e9-radimagenet-heads-v15` and
+`antoinegg1/rsna-knee-e11-diverse-heads-v20` are all CC BY-**NC**-SA 4.0; `prvsiyan/rsna-knee-v52-radimagenet-heads`
+and `tonylica/rsna-knee-bend-dinov3-0917-repro-assets` read "Other (specified in description)".
+
+**Every RadImageNet route is non-commercial with share-alike, and that is upstream, not one uploader's
+choice** — RadImageNet itself ships NC-SA, so the three reposts inherit it. NC bars use in a prize
+competition and SA would attach to anything trained from it. The owner named the `marwanmath` ResNet from
+the discussions; it is precisely the one we may not mount. The distance argument survives the loss:
+MedicalNet is a foreign PRETRAINING at Apache 2.0, and the two CC0 sets are foreign PIPELINES by an author
+who is not dreaddevelopment — which is the category `fleettwo` left unpriced.
+
+**The free distance measurement is NOT available.** The coat package ships `gold58_top3_predictions.npz`
+carrying `study_uids`, our twelve labels in our order, `truth`, `raw_probabilities` (3, 58, 12) and a
+`rank_ensemble`. Only **13 of its 58 studies are in our 909** (`POP ba989a3c44`). A rank correlation over
+thirteen studies cannot price distance against a pool whose ordinary spread is 0.863–0.965, so nothing from
+that file enters the ledger. Their own reading is `gold_auc` 0.9005 / 0.8976 / 0.8969 at epochs 4 / 6 / 8,
+on their fifty-eight, and it is not comparable to anything of ours.
+
+What that leaves is a SUBMISSION question rather than an offline one. Their checkpoints are
+competition-trained and therefore in-sample on our 909 exactly as `raptor_*` is — the board is the only
+instrument. That is the same footing the current champion's foreign seat already stands on, so it is a
+lane we have run before, not a new kind of risk.
