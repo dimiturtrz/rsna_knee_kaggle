@@ -15602,3 +15602,53 @@ What that leaves is a SUBMISSION question rather than an offline one. Their chec
 competition-trained and therefore in-sample on our 909 exactly as `raptor_*` is — the board is the only
 instrument. That is the same footing the current champion's foreign seat already stands on, so it is a
 lane we have run before, not a new kind of risk.
+
+## 2026-09-12 -- the foreign SYSTEM loses at every weight, and averaging is why
+
+`knee-zkfin` opened the licence-clean foreign lane; this closes it. The measurement the lane turned on
+was never one foreign MEMBER against our consensus -- the champion seats raptor as a whole SYSTEM at
+1/3, so the analogue is their ensemble, not their best checkpoint.
+
+**The 20 pilkwang checkpoints are 5 fold-splits x 4 seeds.** Their oof id-sets come in five sizes
+(834/870/881/885/937) and my first script intersected our 909 with ALL twenty at once, which is empty by
+construction. The right join is per-study coverage: percentile-rank each checkpoint inside its OWN oof
+population, then average whichever members cover that study. Every one of our 909 is covered by
+EXACTLY 4 -- the seed group of the split that held it out. So the foreign system is readable on the
+full 909, not on a 178-study corner.
+
+```
+FOREIGN SYSTEM: solo 0.8628   corr-to-ours 0.8645
+  blend w=0.150: 0.9117   delta -0.0023
+  blend w=0.200: 0.9105   delta -0.0035
+  blend w=0.250: 0.9089   delta -0.0051
+  blend w=0.333: 0.9058   delta -0.0082
+  blend w=0.400: 0.9028   delta -0.0112
+  blend w=0.500: 0.8977   delta -0.0163
+our best-6 consensus solo@0.75 0.9140 (top member 0.9076 labelwise_depth24_s2026)
+corr-to-consensus over 149 pool members: min 0.0426  p10 0.8632  median 0.9118  max 0.9662
+```
+
+Monotonically down, no vertex inside the swept range -- the fitted optimum is w=0.
+
+**The system loses HARDER than its own member did, and that is the mechanism, not a contradiction.**
+The single checkpoint `m_013dc75703` read corr 0.8578 (below our p10) and -0.0048 at 1/3. Their
+four-seed average reads corr 0.8645 -- AT our p10, no longer an outlier -- and -0.0082. Rank-averaging
+four seeds of one architecture CONTRACTS them toward each other, the same 4.8x pairwise collapse
+measured on our own six-member pool. **A foreign ensemble is less distant than the foreign members it
+is built from.** So "assemble a distant foreign system" is self-defeating: the assembly step destroys
+the property being bought.
+
+**THIS DOES NOT TOUCH THE CHAMPION'S RAPTOR SEAT.** That seat's board value was never predicted by an
+offline distance argument and cannot be -- every `raptor_*` offline row is void at 98.6% in-sample on
+our 909 (2026-08-29). The pilkwang oof is genuinely held out by construction, which is exactly why it
+is readable here and exactly why its verdict is honest. What this closes is the EXTRAPOLATION: "find a
+more distant licence-clean foreign system and seat it". Measured now three independent ways --
+external DATA (fastMRI/MRNet/merged, all above p10, all losing at 1/3), ORTHOGONALITY reseating (a
+seat built to minimise internal correlation reads 0.9799 against the by-score seat while two RANDOM
+seats read 0.9725), and the foreign SYSTEM here -- **the distance lever is dead on every ruler this
+project can build.** It is not that we failed to find a distant source; it is that averaging removes
+distance faster than sourcing adds it.
+
+The lane that survives is therefore NOT diversity. It is what the owner has said twice: the labels,
+and generalisation. `knee-zkfin` is closed to the extent it proposed mounting foreign weights for
+decorrelation.
