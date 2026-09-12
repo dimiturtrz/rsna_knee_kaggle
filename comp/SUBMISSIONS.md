@@ -3114,10 +3114,10 @@ submission adds an efficiency candidate rather than displacing the 0.944.
 
 Reading 0.939 as an accuracy result. It is three seats where the champion has seven, and it was built
 to be cheap. The accuracy row stays 0.944, 0.010 behind a 0.954 leader.
-On 2026-08-30 it stood at rank 45 of 3239; the board read of 2026-09-11T22:41:24Z puts the same score at
-**rank 67 of 3551** — the score did not move, the field did, which is the only thing a remembered rank
-can never tell you. Twenty-two ranks in twelve days, NINE of them in the two days since the
-2026-09-09T19:53Z read (rank 58 of 3421), is the drift rate this line exists to make visible, and it is
+On 2026-08-30 it stood at 45th of 3239; the board read of 2026-09-12T13:28:17Z puts the same score at
+**rank 70 of 3588** — the score did not move, the field did, which is the only thing a remembered rank
+can never tell you. Twenty-five places in thirteen days, TWELVE of them in the three days since the
+2026-09-09T19:53Z read (58th of 3421), is the drift rate this line exists to make visible, and it is
 accelerating: standing still now costs about a rank every three hours.
 
 ## corpusdose_v1 (0.943) + corpusfull_v1 (0.940) — the external-corpus dose curve

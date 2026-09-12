@@ -1286,6 +1286,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings",
+      "target": "kneemri.embeddings.embedding_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings",
+      "target": "kneemri.models.medicalnet",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings",
+      "target": "kneemri.models.medicalnet_weights",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.embeddings.build_ortho_embeddings",
       "target": "core.cli",
       "weight": 1
@@ -1989,6 +2031,18 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.feature_probe",
+      "target": "core.data.labels.ruler",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.feature_probe",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.feature_probe",
       "target": "core.denominator",
       "weight": 1
     },
@@ -2008,6 +2062,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.feature_probe",
       "target": "kneemri.evaluation.slice_readout",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.feature_probe",
+      "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
     {
@@ -6442,6 +6502,18 @@
       "kind": "import",
       "source": "kneemri.models.load_check",
       "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.medicalnet",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.medicalnet_weights",
+      "target": "kneemri.models.medicalnet",
       "weight": 1
     },
     {
@@ -12838,6 +12910,66 @@
       "kind": "construct",
       "source": "kneemri.embeddings.build_embeddings.main",
       "target": "kneemri.models.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache.build",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingSpec",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "kneemri.models.medicalnet_weights.MedicalNetWeights",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "target": "kneemri.models.medicalnet_weights.MedicalNetWeights.trunk",
       "weight": 1
     },
     {
@@ -33523,6 +33655,54 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.models.medicalnet.MedicalNetTrunk.encoded",
+      "target": "kneemri.models.medicalnet.MedicalNetTrunk.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.medicalnet.MedicalNetTrunk.encoded",
+      "target": "kneemri.models.medicalnet.MedicalNetTrunk.prepared",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.medicalnet.MedicalNetTrunk.slice_features",
+      "target": "kneemri.models.medicalnet.MedicalNetTrunk.encoded",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.medicalnet_weights.MedicalNetWeights",
+      "target": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.medicalnet_weights.MedicalNetWeights.network",
+      "target": "kneemri.models.medicalnet_weights.MedicalNetWeights.factory",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.medicalnet_weights.MedicalNetWeights.trunk",
+      "target": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.medicalnet_weights.MedicalNetWeights.trunk",
+      "target": "kneemri.models.medicalnet_weights.MedicalNetWeights.network",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.medicalnet_weights.MedicalNetWeights.trunk",
+      "target": "kneemri.models.medicalnet_weights.MedicalNetWeights.stripped",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.models.model.StudyDesign",
       "target": "kneemri.models.model.StudyDesign",
@@ -38205,7 +38385,7 @@
       "role": null
     },
     {
-      "descendants": 300,
+      "descendants": 303,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -38229,7 +38409,7 @@
       "role": null
     },
     {
-      "descendants": 4,
+      "descendants": 5,
       "id": "kneemri.embeddings",
       "label": "embeddings",
       "level": "module",
@@ -38240,6 +38420,14 @@
       "descendants": 0,
       "id": "kneemri.embeddings.build_embeddings",
       "label": "build_embeddings",
+      "level": "module",
+      "parent": "kneemri.embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.build_medicalnet_embeddings",
+      "label": "build_medicalnet_embeddings",
       "level": "module",
       "parent": "kneemri.embeddings",
       "role": null
@@ -39909,7 +40097,7 @@
       "role": null
     },
     {
-      "descendants": 34,
+      "descendants": 36,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -40024,6 +40212,22 @@
       "descendants": 0,
       "id": "kneemri.models.lora",
       "label": "lora",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet",
+      "label": "medicalnet",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet_weights",
+      "label": "medicalnet_weights",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -45146,6 +45350,22 @@
       "label": "LoRALinear",
       "level": "class",
       "parent": "kneemri.models.lora",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "label": "MedicalNetTrunk",
+      "level": "class",
+      "parent": "kneemri.models.medicalnet",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet_weights.MedicalNetWeights",
+      "label": "MedicalNetWeights",
+      "level": "class",
+      "parent": "kneemri.models.medicalnet_weights",
       "role": "primary"
     },
     {
@@ -50994,6 +51214,14 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.embeddings.build_embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.build_medicalnet_embeddings.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.embeddings.build_medicalnet_embeddings",
       "role": null
     },
     {
@@ -66202,6 +66430,86 @@
       "label": "rank",
       "level": "method",
       "parent": "kneemri.models.lora.LoRALinear",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet.MedicalNetTrunk.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet.MedicalNetTrunk.encoded",
+      "label": "encoded",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet.MedicalNetTrunk.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet.MedicalNetTrunk.prepared",
+      "label": "prepared",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet.MedicalNetTrunk.slice_features",
+      "label": "slice_features",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet.MedicalNetTrunk",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet_weights.MedicalNetWeights.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet_weights.MedicalNetWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet_weights.MedicalNetWeights.factory",
+      "label": "factory",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet_weights.MedicalNetWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet_weights.MedicalNetWeights.network",
+      "label": "network",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet_weights.MedicalNetWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet_weights.MedicalNetWeights.stripped",
+      "label": "stripped",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet_weights.MedicalNetWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.medicalnet_weights.MedicalNetWeights.trunk",
+      "label": "trunk",
+      "level": "method",
+      "parent": "kneemri.models.medicalnet_weights.MedicalNetWeights",
       "role": null
     },
     {

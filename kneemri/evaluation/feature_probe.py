@@ -72,6 +72,12 @@ TRUNKS: dict[str, str] = {
     # ridge probe here is width-sensitive and a LOSS is confounded with capacity -- only a WIN is clean.
     # Read it against dinov2-large 0.7852 / v3large 0.7446 / ortholarge 0.7387 on that understanding.
     "orthodiff": "features_orthodiff_336px_12sl_r256_gap256_volume",
+    # The SECOND volumetric trunk, and it exists to disambiguate the first. MedicalNet/Med3D reads the
+    # same (16, 256, 256) stacks at the same depth and size, so `orthodiff` is the only row it is
+    # controlled against -- and its readout is 2048 wide, WIDER than dinov2-large's 1024. That removes
+    # the capacity confound the row above could not read past: `orthodiff`'s loss was measured at 256.
+    # Bands are pre-registered in `kneemri.models.medicalnet` and are read against ortholarge 0.8170.
+    "medicalnet": "features_medicalnet_336px_12sl_r256_gap2048_volume",
     # The readout sweep (`experiments/arms/readout_probe.sh`, knee-n647). The rows above hold BOTH
     # poolings at their diluting end -- `mean` over patches, then `max` over slices -- and the three
     # numbers they produced closed two members. These eight move the two axes independently over the

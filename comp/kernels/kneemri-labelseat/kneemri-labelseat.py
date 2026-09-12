@@ -33,8 +33,9 @@ batch 10, backbone_lr 4e-5, 12 epochs, peak epoch 8, CONVERGED (peak is not the 
 
 **WHAT THIS ENTRY DOES NOT CLAIM.** The 0.75 ruler ranks this family first and that ranking is NOT the
 argument here. `board.jsonl` carries `offline75` on 0 of 133 rows, so no dual-ruler fit exists; and the
-0.75 family has had exactly one board test — `l75seat_v1`, which predicted 0.949 under ledger75 and read
-0.939. A 0.75 number may SUSPECT a midpoint null, never overturn one. Every number above is midpoint.
+0.75 family has had exactly one board test — `l75seat_v1`, which scored 0.939.
+Its ledger75 prediction had been 0.949, and the miss is the whole reason the rule below exists: a 0.75
+number may SUSPECT a midpoint null, never overturn one. Every number above is midpoint.
 
 **EVERYTHING ELSE IS THE CHAMPION, UNCHANGED.** Same six, same order, same `overlap=False`, same
 `LogitAverage`, same kit, same raptor checkpoint at weight 1/3, same rank-space join by study.
