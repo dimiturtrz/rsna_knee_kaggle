@@ -16121,3 +16121,49 @@ reading, not an entry-level one. And the toll is measured against ONE foreign de
 studies, 6 blocks); a second decode would be a second point on transfer, not a replication of this one.
 
 Bead knee-lhico. Control `band_dense_s2026`. Reading `slot_dropout_hi_decode.npz`.
+
+## 2026-09-12 — the ghosting arm: a CALIBRATED operator lands DIRECTIONAL, and the taste-dial keeps its lead
+
+`ghosting_s2026` is one variable off `band_dense_s2026`: `--ghosting 0.040`, a motion-artefact operator
+whose severity was fitted to KMAR-50K's measured residual (109 paired volumes, p50 0.040 of full scale,
+impulsiveness p99/mean ~9) rather than dialled to taste. It exists because `slot_dropout` — the one
+shared blind spot that has moved the cross-site ruler — is a corruption-robustness operator chosen by
+feel, and the obvious next question is whether removing the feel makes it better.
+
+    ghosting_s2026.pt:   native 0.8576 kept 0.8575 foreign 0.8271 | slots -0.0001 decode -0.0304
+    band_dense_s2026.pt: native 0.8578 kept 0.8578 foreign 0.8217 | slots +0.0000 decode -0.0361
+
+BOTH PRE-REGISTERED GATES PASSED BEFORE THE NUMBER WAS READ. The control reproduced -0.0361 exactly
+against the ~0.0001 bar the arm's header set as the condition for reading EITHER number, and `slot_cost`
+is -0.0001 / +0.0000, so the shifted path serves our own pixels intact. The own-holdout safety floor
+(>= 0.8500) is met at 0.8576, which is also flat against the control's 0.8578 — the expected reading on
+a ruler blind to the axis by construction, not a null.
+
+THE DECIDING NUMBER: decode_cost -0.0304 against -0.0361 is **+0.0057 shallower**, which lands in the
+arm's SECOND band (`-0.0291 to -0.0340`) and not its first. The pre-registered verdict for that band is
+written in the bead and is followed here without amendment: **directional — keep the operator, do not
+run a second severity.** Against the eleven-member pool (mean -0.0336, sd 0.0038) it is 1.5 sd.
+
+    operator                  slot_dropout 0.25   slot_dropout 0.40   ghosting 0.040
+    decode_cost                   -0.0271             -0.0229            -0.0304
+    vs control band_dense         +0.0090             +0.0132            +0.0057
+    sd of the eleven-member pool     2.4                 3.5                1.5
+
+WHAT IT REFUTES, AND IT IS THE THING THE ARM WAS BUILT TO TEST. The hypothesis was that calibration beats
+taste: an operator whose severity is a measured fact should buy more robustness than one whose severity
+was guessed. At the measured severity it buys LESS — less than half the 0.40 dose and under two thirds of
+the 0.25 dose. So the lever is not "calibration", and the thing `slot_dropout` does is not a generic
+corruption-robustness effect that any well-calibrated corruption would reproduce. Whatever carries the
++0.0132 is specific to dropping whole SLOTS, which is the one operator here that changes what the mask
+says rather than what the pixels look like. That is a sharper statement about the mechanism than a second
+confirming dose would have been, and it came from the arm that failed.
+
+WHAT IT DOES NOT SAY. It does not say a motion operator is worthless — +0.0057 is a positive move on a
+ruler where the pool sd is 0.0038, and the operator stays in the recipe at this severity. It does not
+refute the CALIBRATION method, only its payoff on this axis: the severity was fitted correctly (the
+module reproduces 7.50 impulsiveness from mechanism after the corpus refuted its first build at 3.39),
+and it is the axis that did not pay. And it does not price `ghosting_s2026` as an ENSEMBLE seat — a
+member flat on the native ruler and distinct in what it was trained to ignore is exactly the diversity
+case, which is a separate measurement on `member_distance` and has not been taken.
+
+Bead knee-bwqi9. Control `band_dense_s2026`. Reading `ghosting_decode.npz`.
