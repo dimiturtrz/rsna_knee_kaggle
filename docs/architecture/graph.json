@@ -5300,6 +5300,54 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "kneemri.inference.holdout_predictions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "kneemri.inference.holdout_slab",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pseudo_labels",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.inference.read_groups",
       "target": "kneemri.inference.members",
       "weight": 1
@@ -29281,6 +29329,108 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "target": "kneemri.inference.members.Member",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.PseudoLabels.believed",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.PseudoLabels.believed",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.PseudoLabels.believed",
+      "target": "kneemri.inference.members.Member.window",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "core.data.corpus.study_cache.CachedCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.holdout_slab.HoldoutSlab",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.pseudo_labels.PseudoLabels.believed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.pseudo_labels.PseudoLabels.pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.pseudo_labels.PseudoLabels.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.pseudo_labels.main",
+      "target": "kneemri.inference.pseudo_labels.PseudoLabels.table",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.read_groups.ReadGroups",
       "target": "kneemri.inference.members.Member",
@@ -38725,7 +38875,7 @@
       "role": null
     },
     {
-      "descendants": 305,
+      "descendants": 306,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39885,7 +40035,7 @@
       "role": null
     },
     {
-      "descendants": 25,
+      "descendants": 26,
       "id": "kneemri.inference",
       "label": "inference",
       "level": "module",
@@ -40024,6 +40174,14 @@
       "descendants": 0,
       "id": "kneemri.inference.prediction_cache",
       "label": "prediction_cache",
+      "level": "module",
+      "parent": "kneemri.inference",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels",
+      "label": "pseudo_labels",
       "level": "module",
       "parent": "kneemri.inference",
       "role": null
@@ -44882,6 +45040,14 @@
       "label": "PredictionCache",
       "level": "class",
       "parent": "kneemri.inference.prediction_cache",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "label": "PseudoLabels",
+      "level": "class",
+      "parent": "kneemri.inference.pseudo_labels",
       "role": "primary"
     },
     {
@@ -63058,6 +63224,54 @@
       "label": "write",
       "level": "method",
       "parent": "kneemri.inference.prediction_cache.PredictionCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels.PseudoLabels.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels.PseudoLabels.believed",
+      "label": "believed",
+      "level": "method",
+      "parent": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels.PseudoLabels.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels.PseudoLabels.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels.PseudoLabels.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.inference.pseudo_labels.PseudoLabels",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.pseudo_labels.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.inference.pseudo_labels",
       "role": null
     },
     {

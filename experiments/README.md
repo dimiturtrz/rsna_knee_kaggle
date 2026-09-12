@@ -16167,3 +16167,34 @@ member flat on the native ruler and distinct in what it was trained to ignore is
 case, which is a separate measurement on `member_distance` and has not been taken.
 
 Bead knee-bwqi9. Control `band_dense_s2026`. Reading `ghosting_decode.npz`.
+
+### 2026-09-12 addendum — `ghosting_s2026` priced as a seat: DISTINCT, and still negative
+
+The open question the ghosting ledger left was whether a member that is flat natively but trained to
+ignore a different corruption buys an ensemble seat. `seat_value --against cleanseat_v1` answers it, and
+the answer is no.
+
+```
+roster of 6: 0.8755
+  +ghosting_s2026.pt:          0.8752  (-0.0002)  [-0.0009, +0.0004]
+  +slot_dropout_hi_s2026.pt:   0.8748  (-0.0006)  [-0.0013, +0.0000]
+best swap: ghosting for stack_increments_base  ->  0.8751  (-0.0003)
+member axes (roster boundaries rank 0.9067  js 0.0154):
+  DISTINCT  ghosting_s2026.pt:        rank 0.9036  js 0.0180
+  DISTINCT  slot_dropout_hi_s2026.pt: rank 0.9015  js 0.0180
+```
+
+Both candidates read DISTINCT on the label-free axes and NEGATIVE on the seat ruler, and that pair is the
+reading, not a contradiction. Distance says the ordering is its own; seat value says the vote does not
+want it. Neither band excludes zero, and 0 of 2 clear the +0.0040 under which this ruler has never picked
+a board tick.
+
+**What it does NOT say.** It is not a verdict on `slot_dropout_hi_s2026`, which ships at the 20:00Z mark on
+its CROSS-SITE +0.0090 and not on this number — the premise of that submission is precisely that a ruler
+reading 909 studies from our own corpus, under our own decode and our own labels, cannot see a
+generalisation gain. Its -0.0006 here is what that premise predicts, and reading it as a refutation would
+be reading the blind ruler as the sighted one. What the row DOES retire is the ghosting member as an
+ensemble candidate: it is not shipped, and its arm stays what its own bands made it — directional on the
+operator, null on the seat.
+
+Bead knee-bwqi9. Against cleanseat_v1 (0.942, 6 members). Reading logs/seat_value_ghosting.log.
