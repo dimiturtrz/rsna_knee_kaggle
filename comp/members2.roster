@@ -226,3 +226,16 @@ v2delonly_span_s2026.pt     # 0.8417 @holdout909 midpoint on the v2 ruler, epoch
 # EXPOSURE: ~80%, non-zero. It fails the fourth honesty filter and must not enter an entry whose
 # offline number is quoted as clean. Its 0%-exposure twin distill_stack_clean_s2026 is the control.
 distill_stack_max_s2026.pt           # 0.8634 -- ~80% teacher exposure, NOT clean
+
+# THE BEST HONEST SOLO THIS PROJECT OWNS, and the first member on either shelf trained with stochastic
+# depth. 0.8654 @holdout909 midpoint, epoch 12 of 12, fold 0, every holdout study out-of-sample, 0%
+# teacher exposure. It passes all four honesty filters and may be quoted in a clean offline number.
+# It edges clean_calib_s2026 (0.8649) by +0.0005, which is noise -- the seat case is NOT the solo number.
+# The seat case is DIVERSITY OF MECHANISM: every other member on both shelves was trained with the trunk
+# fully connected on every step, and this one samples a different sub-network per sample per step. That
+# is a source of decorrelation no recipe knob on this roster produces, and the owner's standing rule is
+# that a member earns a seat test on diversity even when it does not outperform.
+# CAVEAT: it PEAKED ON ITS LAST EPOCH and was still climbing, so 0.8654 is a FLOOR for this recipe, not
+# its converged value. dropstack_long_s2026 (24 epochs, same rate, knee-ffku5) is the arm that reads the
+# converged number; if it lands, prefer it for the seat and keep this one as the 12-epoch control.
+dropstack_light_s2026.pt             # 0.8654 -- best honest solo, stochastic depth 0.05, budget-bound

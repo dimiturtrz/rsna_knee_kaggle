@@ -15399,3 +15399,45 @@ The question that survives goes to the researcher as M398: whether any published
 differing in OBJECTIVE rather than in hyperparameters, and whether soup quality has ever been reported
 against the members' learning rate at checkpoint time -- because (b) is now the live explanation and the
 kept epochs here run e6-e9 of a one-cycle anneal.
+
+## 2026-09-12 — stochastic depth: the published rate was wrong, and the budget is the real product
+
+Four regularisers had been measured at the dense corner at twelve epochs against `calib_dense_hold_s2026`
+(0.8634 @holdout909 midpoint), and the reading written down was a LAW: at twelve epochs of fine-tuning a
+pretrained trunk, every regulariser that costs convergence loses more than it buys, and EMA is positive
+only because it costs none. `dropstack_light` refutes that law. The competing explanation was the correct
+one: every rate had been taken from a published schedule calibrated on hundreds of from-scratch epochs.
+
+    dropstack_dense_s2026    0.8595  @e11   stochastic depth 0.10, ramped over 12 blocks   -0.0039
+    dropstack_light_s2026    0.8654  @e12   stochastic depth 0.05, ramped over 12 blocks   +0.0020
+
+Both arms are byte-identical to the control but for the one flag, and identical to each other but for the
+rate. Plumbing asserted from each log rather than from the script: `"stochastic_depth": "0.05"` and
+`stochastic depth ramped to 0.05 across 12 blocks`, at 336 px and bf16.
+
+**The +0.0020 is noise-sized and is directional only.** `dropstack_light_s2026` is nonetheless the best
+honest solo this project owns, ahead of `clean_calib_s2026` (0.8649). What is NOT noise is the shape:
+
+    calib_dense_hold_s2026   peaks e6 0.8634, decays to 0.8598 by e11     budget UNUSED
+    dropstack_dense_s2026    0.8595 @e11, e10 == e11                      plateaued, converged
+    dropstack_light_s2026    0.8654 @e12, still climbing at the wall       budget BINDING
+
+The control has nothing to do after six epochs but memorise; the half-rate run had not turned when the
+budget ran out. Per-label, `dropstack_light` moves 10 of 12 labels against `dropstack_dense`, largest on
+ACL (+0.017) and PF OA (+0.017), with no single-label concentration — which is what a trunk-wide mechanism
+is required to look like, and is why the mean is readable at all.
+
+    {'ACL': 0.882, 'MCL': 0.815, 'Medial Meniscus': 0.911, 'Lateral Meniscus': 0.868, 'Medial OA': 0.885,
+     'Lateral OA': 0.827, 'PF OA': 0.872, 'Effusion': 0.857, 'Synovitis': 0.855, "Baker's": 0.904,
+     'Contusion': 0.877, 'Fracture': 0.825}
+
+So the escalation is the BUDGET, not the rate sweep the arm header pre-registered: a sweep would map a
+curve whose whole measured span is 0.006, while a regulariser that buys epochs is the only lever measured
+at this corner whose mechanism could plausibly reach the 1.5% bar. `dropstack_long` (knee-ffku5) runs the
+same rate at 24 epochs, one variable, and its `<= 0.8654` branch closes budget as a lever.
+
+**The transferable lesson, which is not about stochastic depth.** A published regularisation rate is
+calibrated on the schedule it was published with. Carried onto a 12-epoch fine-tune of a pretrained trunk,
+the same number can be far too large — and the failure does not look like a mis-set knob, it looks like a
+mechanism that does not work here. Three of the four nulls in that "law" were measured at published rates.
+Halving is the cheapest discriminating test that exists, and it should precede the verdict, not follow it.
