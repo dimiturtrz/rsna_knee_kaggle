@@ -222,9 +222,17 @@ class BoardCensus:
         self.since = since
 
     def rows(self) -> list[BoardRow]:
-        """Every recorded entry, the notes skipped — they carry commentary and no submission."""
+        """Every recorded entry, the commentary lines skipped — they carry a note and no submission.
+
+        THE TEST IS THE MISSING REF, NEVER THE PRESENT NOTE. This read `"note" not in row` until
+        2026-09-12, which made ANNOTATING a scored row delete it from every consumer of this census:
+        `submit_check` stopped seeing it as a repeat, `duplicated` could not catch a second copy of it,
+        and the transfer fit dropped its point. Four priced rows were invisible that way, two of them at
+        the board's own maximum — and the symptom was a GREEN check, which is the shape that costs a slot.
+        A note is how a row explains itself; it cannot also be how a row disappears.
+        """
         lines = [json.loads(line) for line in self.record.read_text(encoding="utf-8").splitlines() if line]
-        return [BoardRow.parsed(row) for row in lines if "note" not in row]
+        return [BoardRow.parsed(row) for row in lines if row.get("ref") or "note" not in row]
 
     def refless(self) -> list[str]:
         """Rows carrying no submission ref — the ones no live comparison can reach at all."""

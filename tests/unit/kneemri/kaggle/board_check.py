@@ -109,8 +109,17 @@ def test_all_data():
 
 
 def test_rows(tmp_path: Path):
-    """Every entry, the notes skipped — a note is commentary and would parse as a ref-less row."""
+    """Every entry, the commentary skipped — commentary is a note with no submission behind it."""
     assert [row.identifier for row in _census(tmp_path).rows()] == ["alpha_v1", "beta_v1", "3"]
+
+
+def test_rows_keeps_an_annotated_submission(tmp_path: Path):
+    """A ROW EXPLAINING ITSELF MUST NOT VANISH. Skipping on the note rather than on the missing ref
+    hid four priced entries from every consumer, two of them at the board's own maximum, and every
+    gate stayed green over it — `submit_check` cleared a set it had already spent a slot on.
+    """
+    annotated = [*CLEAN, {"id": "noted_v1", "ref": "9", "board": 0.94, "scope": "ensemble", "note": "why"}]
+    assert "noted_v1" in [row.identifier for row in _census(tmp_path, annotated).rows()]
 
 
 def test_refless(tmp_path: Path):
