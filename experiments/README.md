@@ -15893,3 +15893,37 @@ is the board, which is what the slots are for.
 `resnetlong_v1` remains the one real licence in this area, and it is unaffected: it is a MIDPOINT delta
 that transferred to the board at slope ~1.19. Sub-floor midpoint deltas are worth ranking. Sub-floor
 midpoint deltas are not worth re-ranking with a different cut.
+
+### the labelwise seat prices positive, below the ruler's own resolution -- and the follow-up arm was already run
+
+Priced against `cleanseat_v1` (0.942, the best FULLY SCOREABLE entry -- the pinned champion is six
+`--fold -1` members and `seat_value` refuses it by construction, 0 of 6 carrying a holdout record).
+Roster of 6 at 0.8755, cut 0.5:
+
+| candidate | seat | interval | axes |
+|---|---|---|---|
+| `labelwise_depth24_s2026` | **+0.0008** | [+0.0001, +0.0017] | **DISTINCT** (rank 0.8985, js 0.0118, maha 3.907) |
+| `labelwise_drop_s2026` | +0.0006 | [-0.0001, +0.0012] | TWIN (rank 0.9219) |
+| `distill_stack_clean_s2026` | -0.0002 | [-0.0007, +0.0003] | TWIN (rank 0.9477) |
+
+One of three bands excludes zero and it is the DISTINCT one, which is the cell the tool says is the only
+one that is a seat at all. It is also the honest confirmation of today's other finding from the other
+direction: `distill_stack_clean`, the most-stacked member, is the most TWIN-like and the only negative
+seat. Stacking increments made the member LESS distinct, not better.
+
+**It is still not a submission.** `seat_value` prints its own gate: *"0 of 3 clear +0.0040, under which
+this ruler has never been shown to pick a board tick."* At the `resnetlong_v1` slope of ~1.19, +0.0008
+is ~+0.001 on the board, against solo-read board noise near 0.005. A slot spent here buys a reading the
+board cannot take.
+
+**And the escalation is already measured, negative.** The seat table says the family's distinct member is
+the 24-SLICE one, so the obvious next arm is labelwise pooling at more slices. That arm exists:
+`cover_labelwise` -- 36 slices, band 0.05-0.95, labelwise slice pooling -- and read **-0.0014**.
+`stack224` at 36 slices read **-0.0033**. The ledger's own words: this "closes the COVERAGE CONCEPT".
+The 336px 24-slice cache is on disk at 71.6 GB so the arm would have cost only card, not decode, which
+is exactly the kind of cheapness that gets a known null run again. The card was left free instead.
+
+**Card-free this window, and that is the finding, not an apology.** Three separate escalations were
+checked against the record and all three were already answered: composition (answered by two unrecorded
+runs on disk), the 0.75 re-rank (answered by `l75seat_v1`'s board test), and labelwise-at-more-slices
+(answered by `cover_labelwise`). Zero card and zero slots bought three closures.
