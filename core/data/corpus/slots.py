@@ -352,6 +352,36 @@ filled slot is too little input", which belongs in the arm's pre-registration ra
 post-mortem.
 """
 
+KMAR_MERGED_SCHEME = "mergedk"
+"""Our corpus and KMAR-50K in one array — the canonical six slots. THE ONLY MERGE THAT IS SHIPPABLE.
+
+**THIS NAME EXISTS BECAUSE THE FIRST BUILD USED `merged3` AND THAT WAS WRONG.** On 2026-09-12 the
+canonical+KMAR cache was written as `images_224px_12sl_merged3.npy`, which destroyed nothing — the
+image size is in the filename and `merged3` on disk is 336 px — but it left ONE scheme name meaning
+two different corpora depending on a size argument nobody would think to check. The arrays were
+renamed rather than rebuilt (a rename is free; a rebuild is ~19 GB and `/d` holds 23 GB), and the
+labels table moved with them.
+
+LICENCE — AND THIS IS THE POINT OF THE WHOLE LANE. `FASTMRI_MERGED_SCHEME` records that NO merged
+member of any name could be shipped: Rijeka is CC BY-NC-ND, MRNet's Stanford agreement bars an
+adaptation, fastMRI bars distributing a derivative. **KMAR-50K is CC BY 4.0** (Mendeley DOI
+10.17632/xw7mrg7ntg.6) — attribution and nothing else. A member fitted here may be packaged, mounted
+and submitted. It is the only corpus on this machine of which that is true.
+
+IT IS A SECOND SITE, WHICH IS THE CORNER THAT PAID. `merged3_corpus` measured the site axis at
+**+0.0043 for the second site and -0.0024 for the third**, and that closure is what refuses fastMRI
+as a fourth. 4,407 + 1,088 = 5,495 studies over two sites is the same operation the POSITIVE point
+was measured on, not the one that closed.
+
+AND ITS LABELS ARE A DIFFERENT MECHANISM FROM EVERY EARLIER MERGE. Rijeka supervises ACL alone and
+MRNet three findings; KMAR ships no findings at all, and its rows are supervised by
+`kneemri.inference.pseudo_labels` — our own champions' pooled belief over all twelve columns, weighted
+by how much those champions agree (mean 0.6548 over the 1,088). So a flat read here is NOT the
+site-count flat: the site axis added SPARSE human labels, this adds DENSE distilled ones, and
+`experiments/README.md:7411` states in its own words that external data as LABELLED augmentation is
+"a different mechanism and untested here".
+"""
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
@@ -363,6 +393,7 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     MERGED_SCHEME: SLOTS,
     TRIPLE_SCHEME: SLOTS,
     FASTMRI_MERGED_SCHEME: SLOTS,
+    KMAR_MERGED_SCHEME: SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
@@ -375,6 +406,7 @@ FOREIGN_SCHEMES = (
     MERGED_SCHEME,
     TRIPLE_SCHEME,
     FASTMRI_MERGED_SCHEME,
+    KMAR_MERGED_SCHEME,
 )
 """Schemes that name a corpus THIS repo's own decoder cannot produce, each owned by its own builder.
 

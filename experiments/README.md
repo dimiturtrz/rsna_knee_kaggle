@@ -16198,3 +16198,42 @@ ensemble candidate: it is not shipped, and its arm stays what its own bands made
 operator, null on the seat.
 
 Bead knee-bwqi9. Against cleanseat_v1 (0.942, 6 members). Reading logs/seat_value_ghosting.log.
+
+### 2026-09-12 — the slot-dropout dose curve SATURATES, and 0.40 is the operating point
+
+Third and last point on the axis `knee-yotj8` opened. `slot_dropout_max_s2026` trains at dose **0.55**
+and is read by `foreign_readout` against the same control, on the same foreign site, with the same
+decode:
+
+```
+slot_dropout_max_s2026.pt: native 0.8546 kept 0.8546 foreign 0.8333 | slots +0.0001 decode -0.0214 total -0.0213
+band_dense_s2026.pt:       native 0.8578 kept 0.8578 foreign 0.8217 | slots +0.0000 decode -0.0361 total -0.0361
+```
+
+The calibration gate clears exactly: `band_dense_s2026` reproduces its **-0.0361** to the fourth
+decimal, so the two readings are on one ruler and the comparison is licensed.
+
+| dose | decode_cost | vs control | reading |
+|---|---|---|---|
+| 0.25 | -0.0271 | +0.0090 | the first point |
+| 0.40 | -0.0229 | +0.0132 | |
+| **0.55** | **-0.0214** | **+0.0147** | this arm |
+
+`knee-yotj8` pre-registered four bands on `decode_cost` before this arm ran. **-0.0214 lands in
+`-0.0196..-0.0229` — SATURATING, and the pre-registration names 0.40 as the operating point.** The
+band is what governs, not the fourth decimal: 0.55 buys **+0.0015** over 0.40, which is a fifth of the
+step 0.25→0.40 bought and well inside the scatter this ruler has shown on repeated reads. The curve
+has flattened.
+
+**The consequence is a run NOT made.** The `>= -0.0195` branch would have licensed a dose-0.70 arm at
+roughly six hours of card. That arm is now refused by a number that cost one readout, which is the
+whole point of writing the branches down before the arm rather than after it.
+
+**What this does NOT say.** It is not a verdict on slot dropout — the operator is the largest
+cross-site gain this project has measured and it ships. It is not a claim that 0.55 is *worse* than
+0.40; the two are a plateau, and the operating point goes to 0.40 because a lower dose destroys less
+of the training signal for the same transfer. And it says nothing about dose on any other operator:
+`ghosting` at 0.040 reads -0.0304 / +0.0057 and was never dose-scanned, because its first point did
+not earn one.
+
+Bead knee-yotj8. Reading logs/after_maxdose.log, per-study at `$MODELS/maxdose_decode.npz`.
