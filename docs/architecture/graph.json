@@ -6608,6 +6608,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.weight_soup",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.weight_soup",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.process_table",
       "target": "kneemri.spawn",
       "weight": 1
@@ -34028,6 +34040,66 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.models.weight_soup.WeightSoup.__init__",
+      "target": "kneemri.models.weight_soup.IncompatibleSoupError",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.weight_soup.WeightSoup.agreed",
+      "target": "kneemri.models.weight_soup.IncompatibleSoupError",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.WeightSoup.agreed",
+      "target": "kneemri.models.weight_soup.WeightSoup.signature",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.weight_soup.WeightSoup.averaged",
+      "target": "kneemri.models.weight_soup.IncompatibleSoupError",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.WeightSoup.averaged",
+      "target": "kneemri.models.weight_soup.WeightSoup.agreed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.weight_soup.WeightSoup.signature",
+      "target": "kneemri.models.weight_soup.IncompatibleSoupError",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.WeightSoup.write",
+      "target": "kneemri.models.weight_soup.WeightSoup.averaged",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.weight_soup.main",
+      "target": "kneemri.models.weight_soup.WeightSoup",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.main",
+      "target": "kneemri.models.weight_soup.WeightSoup.agreed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.main",
+      "target": "kneemri.models.weight_soup.WeightSoup.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.process_table.Probe.read",
       "target": "kneemri.spawn.Spawn",
       "weight": 1
@@ -37977,7 +38049,7 @@
       "role": null
     },
     {
-      "descendants": 295,
+      "descendants": 296,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39681,7 +39753,7 @@
       "role": null
     },
     {
-      "descendants": 31,
+      "descendants": 32,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -39924,6 +39996,14 @@
       "descendants": 0,
       "id": "kneemri.models.volume_read",
       "label": "volume_read",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup",
+      "label": "weight_soup",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -45143,6 +45223,22 @@
       "level": "class",
       "parent": "kneemri.models.volume_read",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.IncompatibleSoupError",
+      "label": "IncompatibleSoupError",
+      "level": "class",
+      "parent": "kneemri.models.weight_soup",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.WeightSoup",
+      "label": "WeightSoup",
+      "level": "class",
+      "parent": "kneemri.models.weight_soup",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -66678,6 +66774,54 @@
       "label": "probe_frames",
       "level": "method",
       "parent": "kneemri.models.volume_read.VolumeRead",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.WeightSoup.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.weight_soup.WeightSoup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.WeightSoup.agreed",
+      "label": "agreed",
+      "level": "method",
+      "parent": "kneemri.models.weight_soup.WeightSoup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.WeightSoup.averaged",
+      "label": "averaged",
+      "level": "method",
+      "parent": "kneemri.models.weight_soup.WeightSoup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.WeightSoup.signature",
+      "label": "signature",
+      "level": "method",
+      "parent": "kneemri.models.weight_soup.WeightSoup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.WeightSoup.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.models.weight_soup.WeightSoup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.weight_soup.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.models.weight_soup",
       "role": null
     },
     {

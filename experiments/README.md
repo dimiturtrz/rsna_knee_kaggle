@@ -15251,3 +15251,66 @@ only that one initialised to the identity does not stay there inside twelve epoc
 And it is one arm, one seed, one corner, on `dinov2-small`, the trunk carrying the SMALLEST gap in the
 probe's nine-trunk table (+0.0129) -- so even the ceiling this corner could have shown is the smallest
 one available.
+
+## `moment_wide_s2026` -- 0.8600, FLAT, and the readout axis closes with the aggregation axis
+
+The concatenated form of the statistic `moment_dense` mixed back down. `WideMomentPooling` has **no
+parameters at all** -- it is `cat(mean, std)` along the slice axis -- and `SlicePooling.out_multiplier`
+widens the head that receives it, so the only thing the twelve epochs fit is the head, exactly as under
+`max`. Byte-identical to `calib_dense_hold` except the pooling name.
+
+| run | slice pooling | head in_features | holdout | vs control |
+|---|---|---|---|---|
+| `calib_dense_hold` (control) | `max` | 768 | **0.8634** | -- |
+| `moment_dense_s2026` | `moments` (mixed down) | 768 | 0.8516 | -0.0118 |
+| `moment_wide_s2026` | `moments_wide` (concatenated) | **1536** | **0.8600** | **-0.0034** |
+
+Epochs: 0.7436 / 0.7853 / 0.8288 / 0.8348 / 0.8440 / 0.8554 / 0.8536 / 0.8574 / **0.8600 (peak, e8)** /
+0.8586 / 0.8584 / 0.8582. 279 s an epoch after a 316 s first. **CONVERGED, NOT TRUNCATED** -- three
+epochs of monotone decline after the peak, under the one-cycle anneal, and `convergence_check` prints
+nothing for it.
+
+**THE PLUMBING ASSERTION RAN BEFORE THE VERDICT, AND IT PASSED.** The arm's own header made the width the
+gate, because it is the one thing that would silently make this a re-run of something else. The
+checkpoint:
+
+```
+slice_pooling  moments_wide
+head.proj.0.weight (1536,)      <- the LayerNorm, at double width
+head.proj.1.weight (256, 1536)  <- in_features 1536, not 768
+```
+
+The head was BUILT WIDE. There is no mix to be dead here and no optimiser group to fall out of
+(knee-7gyw) -- the module holds no tensors.
+
+**THE BAND THAT FIRED: 0.8573-0.8665, FLAT**, whose pre-registered reading was written before the run: a
+learned head over a max pool recovers what the standard deviation carries, and the frozen-probe gap does
+not survive fine-tuning. **THE READOUT AXIS CLOSES WITH THE AGGREGATION AXIS.** `attend`, `depth` and
+`labelwise` all landed within +0.0002 of the elementwise maximum; the second moment now lands within
+-0.0034 of it, which is inside the board's own solo noise and under the 0.0062 paired floor.
+
+**AND IT PRICES `moment_dense`'S -0.0118 RETROSPECTIVELY.** +0.0084 of that 0.0118 was the MIX, not the
+statistic -- the width-collapse diagnosis read off the checkpoint dump (the identity initialisation on
+the mean half was gone) is confirmed by the arm that removed the mix. The remaining -0.0034 is what the
+statistic itself costs at this corner. A mix-down initialised to the identity does not stay there inside
+twelve epochs at this head rate, and that is now a measured fact rather than an inference.
+
+**WHY THE FROZEN PROBE AND THE FINE-TUNED HEAD DISAGREE.** `feature_probe --slice-readout` ordered
+`moments > mean > max` on eight of nine trunks by +0.0116 to +0.0179 over a FROZEN trunk with a ridge
+readout. Nothing in that setup can learn to make the maximum informative; six unfrozen blocks can. The
+probe measured what a fixed representation carries, and this arm measures what a fitted one can be made
+to carry -- the gap between them is the value of fine-tuning, not of the statistic.
+
+**SEATED, NOT DECLINED.** 0.8600 is above sixteen of the forty-two honest members at this corner, and the
+internal structure is genuinely different: no slice is selected, both moments are read, and the head is
+twice as wide. That is a diversity argument that survives, which `moment_dense`'s did not.
+
+**WHAT IT DOES NOT SAY.** One arm, one seed, one corner, on `dinov2-small` -- the trunk carrying the
+SMALLEST gap in the probe's nine-trunk table (+0.0129), so the ceiling this corner could ever have shown
+was the smallest available. It does not say a third moment, or the moments at a LARGER trunk, would read
+the same. It says the two-moment readout does not beat the maximum here, and that the axis does not
+deserve a third arm before something else has moved.
+
+**PRICE, CORRECTED.** Both this arm's header and `moment_dense`'s ledger row quote "~2.5 h". Measured:
+279 s an epoch x 12 = **56 minutes**. Both arms were one-hour arms, and the 2.5 h figure was inherited
+from an older recipe and never re-measured.

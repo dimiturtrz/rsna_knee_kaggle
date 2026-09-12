@@ -863,3 +863,12 @@ distill_stack_clean_s2026   # 0.8645 @holdout909 midpoint, ep 12 of 12, converge
                             # At 0.8645 it is second on the honest pool, behind clean_calib_s2026 0.8649
                             # and ahead of chainfour_s2026 0.8648 — and unlike oof_teacher_s2026's voided
                             # 0.8685 it is clean, so it is a live seat candidate.
+moment_wide_s2026.pt        # 0.8600 ledger (peak e8 of 12, converged). The two slice moments handed to
+                            # the head CONCATENATED -- `WideMomentPooling` holds no parameters, and the
+                            # head is built at 1536 in_features instead of 768 (asserted off the
+                            # checkpoint before the score was read). Against calib_dense_hold 0.8634 it
+                            # is -0.0034, the arm's pre-registered FLAT band, so it is seated on
+                            # DIVERSITY and not on quality: no slice is selected, both moments are read,
+                            # and the head is twice as wide -- the only member on this roster whose slot
+                            # vector is not a selection among slices. It also prices moment_dense's
+                            # -0.0118: +0.0084 of it was the mix-down, not the statistic.
