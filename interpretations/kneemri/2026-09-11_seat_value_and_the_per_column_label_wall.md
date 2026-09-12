@@ -393,3 +393,113 @@ minutes, zero card.
 
 ---
 
+## 6. Off unanimity: the noise is half what was pre-registered, and one table carries it
+
+Section 5 closed on a commissioned successor -- the same three class-B columns drawn from the stratum
+where the five tables do NOT unanimously agree. The researcher built and sealed `classbd120` within
+minutes (D386): 40 MCL + 40 Lateral OA + 40 Fracture, uniform inside each column's disagreement
+stratum, same 4,406-study population and seed lineage as `classb120`, row_id prefix `g`, zero overlap
+asserted against all seven prior packs. Its key extends the `classb120` schema with ALL FIVE tables'
+softs per cell plus `majority_sign`, which is what makes section 6.2 possible. All 120 cells were
+adjudicated blind from the reports; the key was opened only after `answers_all.csv` was complete.
+
+### 6.1 The majority sign is 7.5% wrong here, against a pre-registered 13.8-15.6%
+
+| population | k / n | rate | Wilson 95% |
+|---|---|---|---|
+| MCL | 5 / 40 | 0.1250 | [0.0546, 0.2611] |
+| Lateral OA | 4 / 40 | 0.1000 | [0.0396, 0.2305] |
+| Fracture | 0 / 40 | 0.0000 | [0, 0.0876] |
+| **classbd120 pooled** | **9 / 120** | **0.0750** | **[0.0400, 0.1364]** |
+| unanimous pooled (n=180, sec. 5) | 3 / 180 | 0.0167 | [0.0057, 0.0478] |
+
+The pre-registered expectation was the audit400-root D-stratum comparator, ~0.138-0.156. The observed
+point estimate is roughly half it, and the interval's upper bound sits at its floor. So the
+disagreement stratum is about **4.5x dirtier than unanimity, not 9x**.
+
+D386 pre-registered the fork as SUPERVISION (the class-B hole concentrates where the target is noisy)
+against TASK DIFFICULTY (labels off-unanimity are as good as at unanimity, the finding is genuinely
+hard). Neither end wins outright, and the honest split is: supervision noise off unanimity is REAL and
+now measured, but at 7.5% over 30.66% of the corpus it contributes on the order of 0.023 of
+label-inconsistent mass -- it cannot by itself account for class B's 0.115-0.121 per-column holes.
+**Fracture, which carries a 0.115 hole, scored 0/40 even here.** Most of the hole remains task
+difficulty.
+
+**A pre-registered caveat is retired, with the correction on the record.** Both D386's manifest and
+M392 warned that an overwhelmingly majority-negative draw would price the OVER-call direction and must
+not be read as symmetric noise. The measurement went the other way: of the nine majority errors, SEVEN
+are under-calls (majority 0, adjudicator 1) and two are over-calls. The majority sign MISSES soft-tissue
+positives in this stratum rather than inventing them.
+
+### 6.2 The per-table read fired: `steven_full` carries the disagreements
+
+Same 120 cells, each table binarised at 0.5 and scored separately against the same blind answers.
+
+| table | pooled err | MCL | Lateral OA | Fracture | positive-call rate |
+|---|---|---|---|---|---|
+| **v2** | **5 / 120 = 0.0417** | **1 / 40** | 4 / 40 | 0 / 40 | 0.100 |
+| flight | 9 / 120 = 0.0750 | 5 / 40 | 4 / 40 | 0 / 40 | 0.100 |
+| steven_blend | 10 / 120 = 0.0833 | 5 / 40 | 4 / 40 | 1 / 40 | 0.092 |
+| lixin | 11 / 120 = 0.0917 | 8 / 40 | 2 / 40 | 1 / 40 | 0.067 |
+| **steven_full** | **109 / 120 = 0.9083** | 35 / 40 | 35 / 40 | 39 / 40 | **0.933** |
+| majority sign | 9 / 120 = 0.0750 | 5 / 40 | 4 / 40 | 0 / 40 | -- |
+| adjudicator | -- | 11 pos | 5 pos | 1 pos | 0.142 |
+
+`steven_full` calls 93.3% of this stratum positive -- 100% of the Fracture cells -- against a measured
+true rate of 14.2% and against every other table's ~10%. That is self-consistent with the stratum's own
+construction: the disagreement stratum is largely "steven_full says yes and the other four say no",
+which is also why Fracture's stratum is 1,912 rows holding only 18 majority-positives. M392's
+pre-registration said a table carrying the disagreements would name itself as the one to drop. It did.
+
+**It is not yet licensed to drop it.** Two causes produce this number and the key cannot separate them:
+a genuine corpus-wide over-call by that table, or a mis-extraction / mis-mapping / polarity flip between
+its source and `table_blend`. M393 asks the researcher which, because the answer gates a corpus-wide
+change and is a one-file question where they sit. Recording the ambiguity rather than the conclusion is
+the point -- this is exactly the shape of finding that has twice been written down here as a fact about
+a model when it was a fact about plumbing.
+
+### 6.3 The first zero-card supervision lever this project has found
+
+For MCL, **v2 alone beats the five-table majority, 1/40 against 5/40.** All five majority under-calls
+are rows where v2 sits at its 0.68 rung and the other four tables sit low -- g0000, g0004, g0029,
+g0035, g0036, respectively MCL irritation (`Reizzustand`), distension by an extruded meniscus,
+periligamentous oedema, distension without rupture, and periligamentous oedema again. Five languages,
+one clinical category: **abnormality of the MCL that is not a tear.** v2's 0.68 rung reads it; the
+blend averages it away.
+
+So the MCL target's off-unanimity error can be taken from 0.125 to 0.025 by NOT averaging -- putting the
+disagreement stratum (30.66% of the corpus) at roughly unanimous-stratum quality for that column, at
+zero card cost. Sections 2-5 priced supervision as a suspicion; this is the first measured, actionable
+instance of it, and it is a target-construction change rather than a model change.
+
+Caveats that travel with it: n=40 on one column, the interval on 1/40 is [0.0044, 0.1288] and on 5/40 is
+[0.0546, 0.2611], so the ORDERING is what is measured, not the size of the gap; and the same per-table
+read gives v2 no advantage at all on Lateral OA (4/40, tied with three others) or on Fracture (0/40,
+tied). The lever is MCL-specific until something else measures it elsewhere.
+
+### 6.4 A data defect found in passing
+
+`g0030` -- finding column MCL -- is a **SHOULDER report filed under a knee study**: subscapularis
+tendinopathy, glenoid labrum, infraspinatus and supraspinatus, with no knee structure named anywhere in
+it. Scored 0 by default. One in 120 is 0.83% with a Wilson upper near 0.046; if the rate holds
+corpus-wide that is up to ~200 studies supervised by text about a different joint. Unlike everything
+else in sections 5 and 6, this is a DATA defect with a mechanical fix, and a keyword screen for
+shoulder / hip / ankle anatomy across the report corpus prices it in minutes. Commissioned in M393.
+
+### 6.5 And the ordinal lever is not in the reports
+
+D386's second half, recorded here because it lives nowhere else. Of the 26 agreement-positive rows in
+`classb120`, only 8 carry a parseable grade anywhere near the finding (extraction covering grade I-IV
+and 1-4, `stupnja`/`stupanj`, `Grad`/`Grade`, roman numerals); 16 carry no grade mention at all. On the
+8, Spearman(grade, `v2_soft`) = +0.000, and it is DEGENERATE rather than negative -- 7 of the 8 are
+grade II, and the single grade I and the single grade IV both read `v2_soft` 0.82. There is no variance
+to correlate against.
+
+The reading is an instrument result, not a headline: **the ordinal signal is mostly ABSENT from the
+report text, not merely uncorrelated with ours**, so grade-anchored soft supervision does not scale from
+this source. If the ordinal lever exists it lives in the readers' own structured grade fields upstream
+of binarisation -- which is the open question in M393, and which section 6.3 makes urgent, since v2's
+0.68/0.82 rungs are demonstrably carrying real signal that the blend destroys.
+
+---
+
