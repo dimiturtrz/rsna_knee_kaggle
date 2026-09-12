@@ -15856,3 +15856,40 @@ discarding readable results with two different instruments at once.
 The 0.75 cut is not established as the better ruler; it is established as a DIFFERENT one that separates
 where the midpoint does not. Which of the two predicts the board is a question this cannot answer,
 because the board is the only instrument that can, and the ordering above has never been shipped.
+
+### AMENDED SAME DAY -- the 0.75 ruler does NOT re-rank anything, and I should not have left that open
+
+The section above closed by saying which ruler predicts the board "is a question this cannot answer."
+It is answerable further than that, from the record, and leaving it open invited exactly the re-ranking
+lane it must not license.
+
+**First: C172's proposed experiment cannot run.** The 2026-09-08 mastermind letter asked us to fit
+`board_transfer` under both rulers and compare R2 -- "the board can tell us which cut matches the host."
+`board_transfer.py:87` does carry `RULERS = {"midpoint": OFFLINE, "ledger75": "offline75"}`, so the
+plumbing is real. **But `comp/board.jsonl` holds 133 rows and NOT ONE carries an `offline75` field.**
+The docstring's own rule is that a row without one DROPS rather than falling back, so `--ruler ledger75`
+fits on the empty set. The experiment is not cheap-and-unrun; it is unrunnable until somebody recuts 133
+board rows, and that is a real cost to state rather than a twenty-minute job to hand off.
+
+**Second, and it settles the direction anyway: the 0.75 family already had its board test and lost it.**
+`l75seat_v1` (ref 56151868) was the ruler's only out-of-sample read. Midpoint predicted ~0.936, ledger75
+predicted 0.949, **the board read 0.939.** ledger75 was retracted 2026-09-10, and the retraction says
+explicitly that it "does not restore any operation dismissed as sub-floor."
+
+The cut used for the four-member table above is a flat 0.75 on all twelve columns -- a COUSIN of
+ledger75, not ledger75 itself, which holds Medial Meniscus and Baker's at the midpoint. So the loss is
+not formally its own. But it shares the mechanism the retraction names (`ledger75.py:8-14`, the Effusion
+grade the midpoint counts as positive), it has never been read against the board itself, and its nearest
+tested relative mispredicted the board by +0.010 in the optimistic direction.
+
+**What that leaves standing, exactly.** The 0.75 cut SEPARATES four members the midpoint reads as one --
+that is a fact about the two rulers' resolution and it is not in doubt. What does not follow is that the
+separation is CORRECT. A blurry ruler and a biased one both disagree with a sharp one, and the only
+instrument that distinguishes them mispriced this family's last attempt. So: no member is re-ranked on
+a 0.75 number, no closed axis re-opens on one, and no seat is bought with one. It may be quoted as a
+reason to SUSPECT a midpoint null, never as a reason to overturn it -- and the way to settle a suspicion
+is the board, which is what the slots are for.
+
+`resnetlong_v1` remains the one real licence in this area, and it is unaffected: it is a MIDPOINT delta
+that transferred to the board at slope ~1.19. Sub-floor midpoint deltas are worth ranking. Sub-floor
+midpoint deltas are not worth re-ranking with a different cut.
