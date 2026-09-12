@@ -15074,3 +15074,74 @@ all 28 flagU cells — v2 and four extractors say PRESENT, four corrected-family
 blind adjudicator sided with **v2 on every one**. Selected for member-v2 disagreement, so not a rate; but
 it is the first cell-level sign that the corrected chain deletes true positives, and it rhymes with the
 31 over-corrections D345 found in v3.
+
+## `chainfour_v5blend_s2026` -- 0.8285, and the lowest pre-registered branch fired
+
+`chainfour.sh`'s invocation with ONE flag moved: `--labels` from `blend_three_v1.csv` to
+`report_labels_v5blend.csv`, the gold-ruler-derived table. Everything else held -- variant small,
+336 px, 20 slices, 12 epochs, band 0.1-0.9, labelwise slice pooling, attend slot pooling, fold 0, EMA,
+one-cycle, backbone 4e-5, head 1e-3, batch 12, whole stack. `--eval-labels report_labels_v2.csv` so the
+proxy does not move with the arm.
+
+| run | labels | table positive rate | holdout | vs control |
+|---|---|---|---|---|
+| `chainfour_s2026` (control) | `blend_three_v1.csv` | 0.269 | **0.8648** | -- |
+| `chainfour_v5blend_s2026` | `report_labels_v5blend.csv` | 0.177 | **0.8285** | **-0.0363** |
+
+Epochs: 0.7331 / 0.7873 / 0.8111 / 0.8235 / 0.8254 / 0.8273 / 0.8275 / **0.8285 (peak, e7)** / 0.8266 /
+0.8233 / 0.8214 / 0.8198. 281 s an epoch. **CONVERGED, NOT TRUNCATED** -- peak at e7 of 12 with four
+declining epochs after it.
+
+**THE BRANCH THAT FIRED.** The arm pre-registered four: `>= 0.8665` the gold ruler transfers at
+supervision; `0.8630-0.8664` lateral; `0.8560-0.8629` re-score under v5blend as eval; **`<= 0.8559`
+closes the gold ruler as a design instrument.** The result is 0.8285, which is 0.027 below the bottom
+branch's ceiling and **24x the 0.0015 resolution**. The gold ruler is closed as a design instrument:
+its ordering of label tables (discord_mask 0.6982 > v5blend 0.6813 > v6tears 0.6734 > v2_corrected
+0.6272 > grade_ladder 0.6070 > band_span 0.6008) does not transfer to supervision.
+
+**HOW TO SAY THIS HONESTLY.** Not "anticorrelated" -- that is one large negative on one arm, and
+nobody labelled anything deliberately wrong. The defensible sentence is: **the corrected ruler's
+preference has never been shown to transfer, in either direction.** One arm, one seed.
+
+**HARNESS CLEARED BEFORE THE NUMBER WAS BELIEVED**, and one suspect here was real enough to chase.
+The recipe JSON names `"labels": "...report_labels_v5blend.csv"` and `"eval_labels":
+"...report_labels_v2.csv"`, so the flag landed. The live suspect was `"calibrated_targets": "True"`
+against a table that is a CONTINUOUS blend rather than v2's five rungs -- if calibration had snapped
+those values to nearest rungs the arm would be measuring a mangled table. It does not:
+`targets.py:331-341` `applied()` replaces only values that match a level and passes everything else
+through untouched, and its docstring states the reason -- *"a table with a different scale would
+otherwise be silently reinterpreted as this one."* Designed against exactly this.
+
+**AND IT IS NOT A SEAT EITHER, WHICH IS THE PART WORTH RECORDING.** A losing solo can still earn a seat
+on diversity, and this one trained on a table nothing else in the pool used, so it was the best
+diversity candidate available. Priced by LogitAverage over the top-9 honest solos, best-of-combination
+at each k:
+
+| k | best without | with v5blend (k+1) | delta | best swap-in |
+|---|---|---|---|---|
+| 5 | 0.8738 | 0.8720 | **-0.0019** | 0.8714 (-0.0025) |
+| 6 | 0.8740 | 0.8723 | **-0.0016** | 0.8720 (-0.0020) |
+| 7 | 0.8740 | 0.8726 | **-0.0014** | 0.8723 (-0.0017) |
+
+Negative at every k, negative on every swap-in, and monotone in the right direction for a member that
+is simply worse. Declined with the reason on the record.
+
+**THE THIRD POINT ON A LABEL-TABLE CURVE, which is what this arm actually bought.** Three tables have
+now been priced at the chainfour corner or near it, and the axis is the table's POSITIVE RATE:
+
+| table | positive rate | mean soft | delta |
+|---|---|---|---|
+| `report_labels_v5blend.csv` | 0.177 | 0.281 | **-0.0363** |
+| `blend_three_v1.csv` | 0.269 | 0.317 | control |
+| `report_labels_v2.csv` | 0.305 | 0.351 | -0.0073 |
+
+So the training table's positive rate has an **interior optimum near 0.27**, and sparser is roughly
+**5x costlier than denser** per unit of rate. **CAVEAT THAT TRAVELS WITH IT:** the v2 point is
+`chainfour.sh:22`'s recorded +0.0073 for blend_three over v2, measured **at the 224 corner against
+native224**, not at chainfour's 336 -- so it is a different corner and the curve is two clean points
+plus one borrowed one. It is directional and it is not a fitted optimum.
+
+**CONSEQUENCE.** The label-table axis is now closed from both sides: sparser loses hard, denser loses
+mildly, and the table in use sits near the optimum. Together with the supervision thread's three
+negatives (interpretation section 6.6), the LABEL side of this project is closed as a lever.
+

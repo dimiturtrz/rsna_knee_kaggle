@@ -1098,3 +1098,12 @@ v8named_span_s2026          # 0.8468 @holdout909 midpoint, peak at ep 8 — BELO
                             # to reach it. Declined on its own refutation.
 confident_span_s2026        # 0.8449 @holdout909 midpoint, ep 9 — below the pool median of 0.8470.
                             # Confidence-filtered supervision, measured, and it costs rather than pays.
+chainfour_v5blend_s2026     # 0.8285 @holdout909 midpoint, ep 7, converged. The --labels v5blend arm
+                            # against chainfour_s2026 0.8648: -0.0363, firing the arm's own bottom
+                            # branch (<=0.8559), which closes the gold ruler as a design instrument.
+                            # Declined on the SEAT too, which is the part that matters: it was the
+                            # pool's strongest diversity candidate (the only member trained on that
+                            # table), and LogitAverage over the top-9 honest solos prices it at
+                            # -0.0019 / -0.0016 / -0.0014 at k=5/6/7, every swap-in worse still.
+                            # Diversity did not rescue it. Re-open by beating the SEAT number, never
+                            # by re-quoting the diversity argument.
