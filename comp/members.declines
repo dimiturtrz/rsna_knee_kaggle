@@ -1132,3 +1132,21 @@ moment_dense_s2026          # 0.8516 @holdout909 midpoint, ep 10 of 12, converge
                             # verdict on the statistic, and moment_wide runs the concatenation the
                             # frozen probe actually read. Re-open only by beating the SOLO number at
                             # this corner.
+soup_top5_s2026.pt          # 0.8570 @holdout909 midpoint. Uniform weight-space average of the top 5
+                            # honest dense fold-0 members. -0.0079 BELOW its own best member
+                            # (clean_calib_s2026 0.8649) and below all five of them. A valid network, so
+                            # the members are weakly linearly mode-connected -- but a uniform soup over
+                            # different recipes, label tables and anneal points lands under every member
+                            # it contains. Not shippable: strictly dominated by a member already seated.
+soup_top10_s2026.pt         # 0.8526, same construction at K=10. -0.0123.
+soup_top20_s2026.pt         # 0.8483, same construction at K=20. -0.0166. The three read -0.0044 per
+                            # doubling of K, monotone -- which is the failure mode Wortsman's GREEDY soup
+                            # exists to avoid. Declined as a family, not individually: uniform souping
+                            # over a top-K is refuted at this corner. A GREEDY soup is a different
+                            # construction and re-opens this by measurement, not by re-quoting a number.
+soup_siblings_s2026.pt      # 2-member uniform soup of stack_increments_s2026 + stack_increments_base_s2026,
+                            # the tight-neighbourhood instrument: siblings that differ in one knob rather
+                            # than in recipe. Built to separate "members too far apart for linear mode
+                            # connectivity" from "uniform weighting is the weak form". Declined in advance
+                            # of its number because it is an INSTRUMENT, not a candidate seat; if it reads
+                            # above both parents this line is replaced by a roster line.

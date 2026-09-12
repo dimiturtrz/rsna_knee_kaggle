@@ -15314,3 +15314,53 @@ deserve a third arm before something else has moved.
 **PRICE, CORRECTED.** Both this arm's header and `moment_dense`'s ledger row quote "~2.5 h". Measured:
 279 s an epoch x 12 = **56 minutes**. Both arms were one-hour arms, and the 2.5 h figure was inherited
 from an older recipe and never re-measured.
+
+## `soup_top{5,10,20}_s2026` -- the uniform weight soup is NEGATIVE, and it degrades monotonically with K
+
+The first weight-space average across INDEPENDENT runs this repo has taken. Eighty-four fold-0
+checkpoints share the dense corner's twelve architecture options byte for byte, all descend from one
+`facebook/dinov2-small` init, all hold out the same 909 studies and all are scored against
+`report_labels_v2.csv` -- that is Wortsman's model-soup setting, not an analogy to it. Forty-two of the
+eighty-four are on `comp/members.roster` (the whole `foreign_distill_*` family and `oof_teacher` are
+declined for leaky-teacher exposure, so the roster IS the honest filter). Soups were built over the
+top-K of those forty-two by ledger holdout, read through `holdout_backfill` on the card, and scored at
+the 0.5 midpoint on holdout909.
+
+| soup | K | mean AUC @holdout909 | vs best member 0.8649 |
+|---|---|---|---|
+| `clean_calib_s2026` (best member) | -- | **0.8649** | -- |
+| `soup_top5_s2026` | 5 | **0.8570** | **-0.0079** |
+| `soup_top10_s2026` | 10 | **0.8526** | **-0.0123** |
+| `soup_top20_s2026` | 20 | **0.8483** | **-0.0166** |
+
+Per label, `soup_top5` `0.886 0.785 0.901 0.852 0.878 0.819 0.849 0.854 0.854 0.900 0.885 0.822`
+against `clean_calib`'s `0.897 0.807 0.902 0.864 0.883 0.828 0.865 0.854 0.864 0.906 0.879 0.828`:
+the loss is spread across eleven of twelve columns, not concentrated in one. `soup_top20`
+`0.873 0.766 0.901 0.833 0.874 0.810 0.829 0.854 0.852 0.889 0.884 0.813` is the same shape, further out.
+
+**WHAT IS AND IS NOT REFUTED.** The soup is a VALID NETWORK -- 0.8483 at K=20, not 0.5 -- so twenty
+independently fitted runs at this corner ARE weakly linearly mode-connected, which is itself a fact the
+project did not have. What fails is the UNIFORM average: it lands below every member it contains and
+loses **-0.0044 per doubling of K**, almost exactly linear in log K over the three points measured. That
+is the published failure mode Wortsman's GREEDY soup exists to avoid, so this does not refute weight
+souping; it refutes uniform souping over a top-K here.
+
+**THREE CANDIDATE MECHANISMS, NOT YET DISCRIMINATED.** (a) The members are too far apart: they differ in
+recipe, label table and objective, not only in seed and data order -- the setting the soup literature
+assumes is one recipe with hyperparameter jitter, and this is twenty recipes. (b) They sit at different
+points of the one-cycle anneal: the kept epochs run e6-e9, so some members were averaged mid-anneal and
+some at the end, and weights at different LR are not interchangeable. (c) Uniform is simply the weak
+form. The monotone degradation with K is consistent with all three and separates none.
+
+**THE ESCALATION AND ITS PRICE.** A greedy soup -- start from the best member, add a candidate only if
+the holdout improves -- is the published recipe, ~2 min of card per candidate x 42 = ~90 min. It is a
+SELECTION ON THE HOLDOUT: 42 greedy accept/reject decisions over 909 studies carries optimism bias of the
+same family as the ~0.011 the per-column-maxima sweep carries, so its number is optimistic BY
+CONSTRUCTION and any seat built from it would have to be priced on the board, not on holdout909. The
+cheaper discriminating instrument is a TIGHT-NEIGHBOURHOOD uniform soup over siblings that differ only
+in a knob -- minutes of card -- which tests (a) directly and costs nothing to be wrong about.
+
+**WHAT IT DOES NOT SAY.** It does not say logit averaging is affected: every "soup" previously in this
+ledger is a logit ensemble, and those remain the project's best entries. It does not say a two-member
+soup fails; K=2 was not in this sweep. And it does not price a soup of members that share a recipe --
+which is the one configuration the literature actually measured.
