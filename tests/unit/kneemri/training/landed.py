@@ -117,6 +117,7 @@ PLAIN = Request(
     finding_calibration=False,
     severity_weight=False,
     hold_annotations=False,
+    hold_annotation_studies=False,
     grade_ladder=False,
     label_errors="",
     unread_targets="",

@@ -18,6 +18,7 @@ from core.data.labels.targets import (
     UNREAD,
     UNREAD_VALUE,
     WEIGHT_FLOOR,
+    WITHHELD,
     Supervision,
     Targets,
     UncalibratedFindingShiftError,
@@ -100,6 +101,7 @@ def test_supervised(tmp_path: Path):
         FINDING: False,
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
+        WITHHELD: False,
         SUSPECT: "",
         UNREAD: "",
     }
@@ -109,6 +111,7 @@ def test_supervised(tmp_path: Path):
         FINDING: False,
         SEVERITY_WEIGHT: False,
         ANNOTATIONS: True,
+        WITHHELD: False,
         SUSPECT: "",
         UNREAD: "",
     }

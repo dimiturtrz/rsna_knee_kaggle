@@ -153,7 +153,12 @@ python_classes = []
 # `inbox/` is the same shape one directory over: `listen_for_mail.py` imports its sibling `agents.py`,
 # resolved by `sys.path[0]` because the listener is launched as a SCRIPT (`python inbox/listen_for_mail.py
 # --box main`), never as a package module. Declaring `agents` would name a dependency that does not exist.
-extend_exclude = ["noxfile.py", "comp", "inbox"]
+# `research/` is the third of that same shape, and it is the most clearly not-a-dependency of the three:
+# `research/scripts/*.py` are one-off analyses run as SCRIPTS that import each other by bare name
+# (`marginals_zero_exposure`, `solo_rank`, `greedy_halfsplit`), resolved by `sys.path[0]`, and
+# `research/external/` holds checked-out third-party kernels we read and never install. Declaring any of
+# them would name a dependency that does not exist and cannot be installed.
+extend_exclude = ["noxfile.py", "comp", "inbox", "research"]
 
 # deptry does not scan tests/ (its default exclude), so DEP002 (declared-but-unused) fires for anything
 # only exercised by the test suite or by tooling. PERMANENT ignores (never imported in scanned source by

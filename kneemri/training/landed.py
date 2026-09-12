@@ -34,6 +34,7 @@ from core.data.labels.targets import (
     SUSPECT,
     UNREAD,
     WEIGHT_FLOOR,
+    WITHHELD,
     Targets,
 )
 from kneemri.models.encoder_surgery import NO_OFFSET
@@ -267,6 +268,7 @@ class Request:
     finding_calibration: bool
     severity_weight: bool
     hold_annotations: bool
+    hold_annotation_studies: bool
     grade_ladder: bool
     label_errors: str
     unread_targets: str
@@ -351,6 +353,7 @@ class Request:
             # reason WEIGHT_FLOOR gives above: taking `supervision.annotations` would compare that
             # property's output against itself and pass on whatever it produced.
             ANNOTATIONS: not self.hold_annotations,
+            WITHHELD: self.hold_annotation_studies,
             GRADE_LADDER: self.grade_ladder,
             SIDE_TERM: self.side_weight,
             FOCUS: self.focus_label,

@@ -104,6 +104,12 @@ UNREAD = "unread_targets"
 """The seventh switch. Named `unread` and not `teacher` because `landed` already spends that word on
 distillation, and because it says what the cells have in common rather than where their value comes from."""
 
+WITHHELD = "hold_annotation_studies"
+"""The eighth switch, and the one that exists because the seventh was read as doing its job.
+
+`annotations` withholds the annotator's VALUE. This withholds the STUDY. They were conflated in prose
+for weeks — see `Supervision.withheld` for the measurement that separates them."""
+
 SUSPECT_STUDY = "StudyInstanceUID"
 SUSPECT_TARGET = "target"
 """The two columns of the flag table `kneemri.evaluation.label_errors --flags` writes."""
@@ -153,6 +159,15 @@ class Supervision:
 
     annotations: bool = True
     """Whether the 58 image-read annotations are read into the TRAINING table at all.
+
+    IT WITHHOLDS THE ANNOTATOR'S VALUE, NOT THE STUDY, and the difference was misread for weeks. Off
+    skips exactly one block in `load` — the one that overwrites those cells at `ANNOTATED_WEIGHT`. The
+    ROWS stay in the training table at their report-derived values and keep pulling on the loss.
+    Measured 2026-09-12: of the 58 annotated studies, **45 sit in the fold-0 TRAINING split and 13 in
+    the 909 holdout**, so an annotated read taken off a member fitted with this flag is 78% in-sample.
+    Every header claiming this flag makes the gold reading "clean" or "held out" was wrong, including
+    `recal_holdannot.running.sh`. `withheld` is the switch that does what those headers said. See
+    knee-x4muo.
 
     Off makes a member whose predictions on those studies never saw their radiologist labels, which is
     the one input `kneemri.evaluation.supervision_gap` needs and cannot get from any member we fit: the
@@ -219,6 +234,31 @@ class Supervision:
     tables agree by construction. See knee-s6s9r.
     """
 
+    withheld: bool = False
+    """Whether the annotated STUDIES contribute nothing to the loss at all.
+
+    THE SWITCH `annotations` WAS READ AS BEING. Turning `annotations` off leaves all 58 rows training at
+    their report-derived values, and 45 of them sit in the fold-0 training split, so every gold reading
+    this project has taken was measured on a ruler that is 78% in-sample. That is not a small correction:
+    `knee-8wa0`'s +0.0105 gold move, and every arm header calling its gold read "clean", rest on it.
+
+    On, every cell of an annotated study is zeroed in the WEIGHT array — the row stays in the table and
+    in the study order, contributing exactly 0.0 to the loss. Zeroing rather than dropping, for the
+    reason `pruned` gives: the arrays are aligned to a caller-supplied study order, and removing rows
+    would make this switch change the batch composition and the epoch length as well as the supervision,
+    which would be three variables wearing one flag.
+
+    IT IS A COSTLY RULER TO BUY, and the price is stated rather than hidden: 58 of 3,498 training
+    studies is 1.66% of the corpus, on top of the 5.61% of training WEIGHT that `annotations` already
+    gives up. What it buys back is the only radiologist-truth ruler that is honestly out of sample — and
+    at n=13 usable studies today, a ruler this thin may still be unreadable. Price its noise floor before
+    reading a number off it.
+
+    IT DOES NOT REPLACE `annotations`; it implies it. A run with `withheld` on and `annotations` on would
+    write the gold values into cells whose weight is then zeroed, which is a no-op wearing a
+    contradiction, so `load` refuses the pair rather than silently picking one.
+    """
+
     measured: tuple[tuple[float, float], ...] = MEASURED_AGREEMENT
 
     offsets: tuple[tuple[str, float], ...] = FINDING_OFFSETS
@@ -244,6 +284,7 @@ class Supervision:
             or self.finding
             or self.severity
             or not self.annotations
+            or self.withheld
             or self.suspect is not None
             or self.unread is not None
         )
@@ -402,6 +443,7 @@ class Targets:
             FINDING: self.supervision.finding,
             SEVERITY_WEIGHT: self.supervision.severity,
             ANNOTATIONS: self.supervision.annotations,
+            WITHHELD: self.supervision.withheld,
             SUSPECT: str(self.supervision.suspect) if self.supervision.suspect else "",
             UNREAD: str(self.supervision.unread) if self.supervision.unread else "",
         }
@@ -420,6 +462,11 @@ class Targets:
         # inside the inner loop; it also needed three `float(Any)` suppressions, because a `.at` scalar
         # is untyped. Whole columns are typed, so both the cost and the suppressions go together.
         supervision = supervision or Supervision()
+        if supervision.withheld and supervision.annotations:
+            raise ValueError(
+                "hold_annotation_studies with annotations on would write the gold values into cells "
+                "whose weight is then zeroed: a no-op wearing a contradiction. Pass --hold-annotations too."
+            )
         floor = supervision.floor
         index = pd.Index(identifiers)
         derived = pd.read_csv(report_labels).set_index("StudyInstanceUID").reindex(index)
@@ -462,6 +509,14 @@ class Targets:
         override = ~np.isnan(taught) & ~read_by_radiologist
         scores[override] = taught[override]
         weights[supervision.pruned(identifiers) & ~read_by_radiologist] = 0.0
+        # LAST, and after the prune, because it is the only switch that overrides the radiologist rather
+        # than deferring to them: withholding the STUDY means the annotated cells are exactly the ones
+        # that must stop pulling, so `~read_by_radiologist` would invert the intent.
+        if supervision.withheld:
+            # The columns PRESENT, not all twelve: a foreign-corpus or smoke table carries a subset, and
+            # asking for a column it has no row for would kill the run on a property of the sample.
+            graded = [target for target in TARGETS if target in annotated.columns]
+            weights[annotated[graded].notna().to_numpy(dtype=np.bool_).any(axis=1)] = 0.0
         corpus = None
         if CORPUS in derived.columns:
             corpus = derived[CORPUS].fillna("").to_numpy(dtype=str)

@@ -222,7 +222,19 @@ class FlagVocabulary:
             "predictions on those studies never saw their radiologist labels. That is the one input "
             "`kneemri.evaluation.supervision_gap` needs and no member we fit can give it: the override "
             "weights them at 3.0, so every other member is scored against a ruler it trained on. The "
-            "holdout ruler is re-read WITH them, so this arm stays comparable to every ledger row.",
+            "holdout ruler is re-read WITH them, so this arm stays comparable to every ledger row. It "
+            "withholds the annotator's VALUE and NOT the study: all 58 rows still train at their "
+            "report-derived values, 45 of them in the fold-0 training split. For a gold read that is "
+            "actually out of sample, this flag is not enough — add --hold-annotation-studies.",
+        )
+        parser.add_argument(
+            "--hold-annotation-studies",
+            action="store_true",
+            help="withhold the annotated STUDIES themselves: every cell of all 58 is zeroed in the "
+            "WEIGHT array, so they contribute nothing to the loss. Requires --hold-annotations, which "
+            "it implies rather than replaces. This is what every header claiming a 'clean' or 'held "
+            "out' gold reading said it was doing and was not (knee-x4muo); it costs 1.66% of the "
+            "training corpus, and at 13 usable studies the ruler it buys may still be too thin to read.",
         )
         cls._label_quality_arguments(parser)
         parser.add_argument(

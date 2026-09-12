@@ -79,6 +79,10 @@ NOT_IN_CONFIG = {
     "severity_weight": "supervision policy, same — it grades the loss weight and leaves the head alone",
     "hold_annotations": "supervision policy, same — it decides which cells the loss READ and touches no "
     "parameter, so the head a rebuild serves is byte-identical",
+    "hold_annotation_studies": "supervision policy, same — it zeroes the loss WEIGHT on 58 studies and "
+    "touches no parameter, so the head a rebuild serves is byte-identical. It changes what the member "
+    "may be READ on rather than what it serves: this is the only flag under which an annotated-read "
+    "score is out of sample",
     "grade_ladder": "objective policy — the thresholds are subtracted INSIDE the loss, so the head still "
     "emits the one per-label logit a rebuild serves",
     "side_weight": "objective policy — the term compares two of the twelve logits against each "

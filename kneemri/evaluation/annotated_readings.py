@@ -7,8 +7,14 @@ annotated studies at 3.0 and scoring one there would be scoring its own training
 on the assumption that our members share a stranger's deficit SHAPE, and that assumption has never been
 tested.
 
-`holdannot` was fitted to close exactly that hole — `--hold-annotations` drops the annotated rows from the
-training table, so the radiologist cells are genuinely unseen — and then could not be read, because
+`holdannot` was fitted to close exactly that hole — or so this module said until 2026-09-12, when the
+claim turned out to be false. `--hold-annotations` does NOT drop the annotated rows: it withholds the
+annotator's VALUE and the 3.0 weight, and all 58 rows go on training at their report-derived values. 45
+of them sit in the fold-0 training split, so a reading taken here off a `--hold-annotations` member is
+**78% in-sample** and is not the clean instrument this paragraph promised (knee-x4muo). The flag that
+does what was claimed is `--hold-annotation-studies`, added the same day; until members exist that were
+fitted with it, the honest population here is the 13 annotated studies in the fold-0 holdout, and n=13
+may be too thin to read. The reading step below is unchanged, because
 nothing here predicts a member over a study list that is not a fold holdout. This is that step, and it is
 the whole distance between a finished instrument and its reading.
 

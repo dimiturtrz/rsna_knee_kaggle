@@ -15145,3 +15145,43 @@ plus one borrowed one. It is directional and it is not a fitted optimum.
 mildly, and the table in use sits near the optimum. Together with the supervision thread's three
 negatives (interpretation section 6.6), the LABEL side of this project is closed as a lever.
 
+
+## `pool_specialise_s2026` -- 0.8494, FLAT, and the corpus axis closes for good
+
+The last of the three combinations `merged3_corpus`'s row named as untried (per-site conditioning,
+harmonisation, pool-then-specialise). Stage one was already on disk, so this cost only stage two: warm
+start the TRUNK from `merged3_corpus_s2026.pt` (225 tensors, 11 head tensors left cold, its epoch 7)
+and re-fit on our 3,498 alone at the settled corner -- small, 336 px, 12 slices, band 0.2-0.8, max
+slice pooling, attend slot pooling, whole stack, backbone 4e-5, one-cycle, 12 epochs, fold 0.
+
+| run | trunk init | holdout | vs control |
+|---|---|---|---|
+| `lr4e-5_ws` (control) | cold | **0.8525** | -- |
+| `pool_specialise_s2026` | `merged3_corpus_s2026` trunk | **0.8494** | **-0.0031** |
+
+Epochs: 0.8450 / 0.8404 / 0.8446 / **0.8494 (peak, e3)** / 0.8419 / 0.8411 / 0.8440 / 0.8422 / 0.8416 /
+0.8393 / 0.8377 / 0.8382. 169 s an epoch. **CONVERGED, NOT TRUNCATED** -- eight epochs after the peak,
+and the one-cycle anneal (e8-e11) is where this arm was pre-registered to pay. It did not: the anneal
+epochs are the four WORST of the twelve.
+
+**THE BRANCH THAT FIRED: FLAT.** Four were pre-registered against the control's 0.8525 and the 0.0062
+paired floor -- `>= +0.0062` re-opens the corpus axis as a TWO-STAGE axis and is the only thing that
+would licence spending the parked fastMRI credentials; `+0.002 to +0.0062` directional, read per column;
+FLAT closes the corpus axis for good; `< -0.0062` closes warm-starting from foreign-touched trunks
+across both depths. -0.0031 sits inside the flat band, above the bottom branch's ceiling and well below
+the directional floor. Per the arm's own header, **the hypothesis is refuted: merged3's rotation is not
+foreign rows competing for HEAD capacity.** Refitting the head on our corpus alone, with the pooled
+trunk kept, does not hand back Lateral Meniscus, Contusion or PF OA.
+
+**CONSEQUENCE, AND IT IS THE POINT OF THE ARM.** The corpus axis is now closed on three measurements
+that agree: second site **+0.0043**, third site **-0.0024**, pool-then-specialise **-0.0031**. Two of
+the three named combinations are dead (this one and the site count it was a rescue for); only per-site
+conditioning and harmonisation were never tried, and neither is priced above the floor by anything on
+this board. **fastMRI stays PARKED, and no card is owed to it.**
+
+**WHAT IT DOES NOT SAY.** One arm, one seed, one depth of warm start (`--init-scope trunk`). It does not
+price a two-stage schedule that anneals the trunk into our corpus rather than re-fitting the head over a
+frozen-init trunk, and it does not refute harmonisation, which changes the FOREIGN data rather than the
+schedule. It also does not clear `--init-scope` as a suspect in the narrow sense -- but with the result
+inside the flat band rather than below it, that suspect is not load-bearing: the second measurement this
+would have joined (`mrnet_warm` 0.8487) is the one that needed it.

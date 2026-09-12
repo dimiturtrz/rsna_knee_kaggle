@@ -165,6 +165,7 @@ class RunSetup:
             finding_calibration=options.finding_calibration,
             severity_weight=options.severity_weight,
             hold_annotations=options.hold_annotations,
+            hold_annotation_studies=options.hold_annotation_studies,
             grade_ladder=options.grade_ladder,
             # The path as a STRING, and the empty string for the null case, because `Targets.supervised`
             # reports it that way and this comparison is a strict equality against exactly that report.

@@ -129,6 +129,7 @@ class TrainingOptions:
     finding_calibration: bool = False
     severity_weight: bool = False
     hold_annotations: bool = False
+    hold_annotation_studies: bool = False
     grade_ladder: bool = False
     label_errors: Path | None = None
     unread_targets: Path | None = None
@@ -312,6 +313,7 @@ class TrainingOptions:
             finding=self.finding_calibration,
             severity=self.severity_weight,
             annotations=not self.hold_annotations,
+            withheld=self.hold_annotation_studies,
             suspect=self.label_errors,
             unread=self.unread_targets,
         )

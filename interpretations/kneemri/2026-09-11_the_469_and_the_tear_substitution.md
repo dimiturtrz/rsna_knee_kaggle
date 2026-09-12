@@ -250,8 +250,14 @@ Contusion breakthrough (acc 0.675) and did not survive to e12 (0.517). No leak, 
 — a checkpoint read too early. An early-epoch adjudicated number is a stand-in exactly as an early-epoch
 v2-ruler number is, and the only thing that separated the artefact from the finding was waiting. The
 remainder control behaved throughout: agreement with v2-truth on the 10,439 non-adjudicated cells reads
-band_span 0.8427, v6tears 0.8154, v5blend 0.8086 — the corrected tables drift from v2 in proportion to
-how much they corrected, with no blow-out.
+the band-span TABLE 0.8427, the v6-tears TABLE 0.8154, the v5-blend TABLE 0.8086 — the corrected tables
+drift from v2 in proportion to how much they corrected, with no blow-out.
+
+(The names are HYPHENATED and the word TABLE is carried in each, deliberately, and neither is decoration.
+These three scalars are label-table agreement rates against v2-truth over 10,439 cells, not holdout AUCs;
+written with the repo's underscore spelling, `claims_check` reads the first as the RUN `band_span_s2026`
+and disputes the line — correctly, since that run's records hold 0.8565. A corrected table and a member
+fitted on it share a name in this project and share nothing else, so the table gets the hyphen.)
 
 ## The image-side axis is closed, and the 18% above is retracted (D360 + D362)
 
