@@ -15652,3 +15652,99 @@ distance faster than sourcing adds it.
 The lane that survives is therefore NOT diversity. It is what the owner has said twice: the labels,
 and generalisation. `knee-zkfin` is closed to the extent it proposed mounting foreign weights for
 decorrelation.
+
+## 2026-09-12 -- the label ceiling, measured; and why every axis downstream of the member is now closed
+
+**THE OWNER'S QUESTION, ANSWERED WITH NUMBERS.** *"dont all potential members get about the same score?
+and isnt the conclusion that this is a data problems?"* Yes, and yes. This section is the one place both
+halves are quantified.
+
+### 1. `labelwise_drop` is a NULL, and the per-label rule is what says so
+
+Best 0.8649 at e10 against `labelwise_dense` 0.8613 -- inside the pre-registered noise band
+(0.8614-0.8662). Plumbing asserted from the log (`stochastic depth ramped to 0.05 across 12 blocks`).
+The arm pre-registered that movement must be BROAD, since stochastic depth acts on the trunk every
+label reads through, and `dropstack_light` moved 10 of 12.
+
+```
+MCL              +0.0408      Medial OA        -0.0162
+Lateral OA       +0.0166      Contusion        -0.0114
+Lateral Meniscus +0.0103      PF OA            -0.0064
+Fracture         +0.0082      ACL              -0.0033
+Synovitis        +0.0053      Baker's          -0.0018
+Effusion         +0.0010      Medial Meniscus  -0.0004
+MEAN 0.8613 -> 0.8649 (+0.0035), labels up 6 of 12
+```
+
+Six of twelve is a coin flip, and the mean is carried by MCL alone. **MCL is the finding
+`reader_agreement` rates at 50.0% radiologist agreement over 18 calls** -- the second-worst-labelled
+column we own. A mean lifted by the noisiest label is not a trunk mechanism. The pooling x regulariser
+2x2 closes: the dropstack gain was pooling-specific.
+
+### 2. `labelwise_long24` is RETIRED UNRUN, on the adjacent measurement
+
+`dropstack_long` ran 24 epochs at the `max` corner: best **0.8641** against `dropstack_light`'s
+**0.8654** at 12. The budget is not the lever there, so a labelwise budget arm is a predicted repeat.
+~56 min of card not spent. knee-pfqtw closes on the Einstein gate rather than on its own null.
+
+### 3. THE LABEL CEILING, first quantification in one place (`core.data.labels.reader_agreement`)
+
+684 annotated cells over 57-58 studies -- 1.32% of the corpus, and the only ground truth that is not
+itself the reader's output.
+
+```
+311 positive calls by the reader; radiologist agrees 66.7% (en) / 64.2% (non-en)
+140 wrong cells of 684: 108 FALSE POSITIVES against 32 misses
+Contusion 44.4% | MCL 50.0% | Lateral OA 56.2% | Medial OA 63.6% ... Synovitis 81.2%
+177 silent (UNK) cells (25.9%); radiologist calls 13.6% of them positive
+  -> a perfect silence-filler fixes at most 24 cells; over-calling costs 108
+```
+
+**Our training targets are ~65% precise, and the error is asymmetric toward OVER-CALLING.** That is the
+data problem, with a number on it.
+
+**Language is NOT the cause.** English 66.7% vs non-English 64.2%: **+0.025 [-0.076, +0.126]** over
+studies. The interval straddles zero. That closes premise branch (a) of knee-mxj -- "the rest needs a
+multilingual encoder" -- on a measurement rather than a hunch, and it closes it CHEAP.
+
+### 4. Why correcting the labels cannot be the fix -- the board already said so, twice
+
+The tempting inference is that our OFFLINE ruler is made of this same 65%-precise reader, so the three
+label-correction arms (`confident_span` -0.0116, `errors_dense` -0.0158, `v2_corrected` -0.0173) were
+killed by a ruler that rewards the over-calling they removed -- the "faulty TEST" suspect. **That
+inference was already tested on the board, which is the one ruler not made of our reader:**
+
+- `relabel7_v1` 0.943 -- a member fitted on 1,932 confident-learning-corrected cells, appended seventh.
+- `cleanseat_v1` 0.942 -- six seats chosen on the CORRECTED ruler, sharing zero members with the champion.
+
+Both flat-to-down. `relabel7_v1`'s own row states the test and the result: *"If the board's labels were
+cleaner, the corrected member should have been worth more there than here. IT WAS NOT."*
+
+**The consequence is the important part: the competition's test labels are NOT cleaner than ours.** They
+are almost certainly read from reports by the same kind of pipeline. So the scored target is THE READER,
+not the radiologist, and correcting toward the radiologist moves AWAY from what is scored. This is not a
+ceiling at 0.91 -- the board runs to 0.954 against those same noisy labels. Label correction is closed
+as a lever for the BOARD, permanently and for a stated reason, while remaining true as a fact about our
+data.
+
+### 5. The state of the board axes, all of them
+
+Every axis downstream of the member is now closed, each on its own board reading:
+
+| axis | closed by | reading |
+|---|---|---|
+| seating / permutation | eleven entries | all tie 0.944 |
+| disjoint member SET | `cleanseat_v1` | 0.942 |
+| seat COUNT | dark6/dark7/farseat | flat |
+| foreign WEIGHT | fitted parabola | vertex w*=0.278, 1/3 already optimal |
+| COMBINER | `stackvote_v1` | 0.943 |
+| per-label WEIGHTING | `aucvote_v1` | identity map by construction |
+| CALIBRATION | `monotone_v1` | 0.944, identity test |
+| diversity via external DATA | fastMRI/MRNet/merged | all above p10, all lose at 1/3 |
+| diversity via ORTHOGONALITY | reseat | 0.9799 vs 0.9725 for random |
+| diversity via FOREIGN SYSTEM | this file, 2026-09-12 | negative at every weight |
+| SUPERVISION / labels | `relabel7_v1`, `cleanseat_v1` | 0.943 / 0.942 |
+
+**The only thing that has never moved is the member itself**, and the members all score 0.86-0.91. That
+is the answer: the pool is uniform, averaging contracts it 4.8x, and every post-hoc operation on a
+uniform contracted pool is arithmetic. Nothing after training is left to try.
