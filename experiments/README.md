@@ -15748,3 +15748,64 @@ Every axis downstream of the member is now closed, each on its own board reading
 **The only thing that has never moved is the member itself**, and the members all score 0.86-0.91. That
 is the answer: the pool is uniform, averaging contracts it 4.8x, and every post-hoc operation on a
 uniform contracted pool is arithmetic. Nothing after training is left to try.
+
+## 2026-09-12 -- the reader-side label lane closes, and the last diversity ruler reads +0.0005
+
+Three readings, no card and no slot between them. They finish the question the owner asked -- "isnt the
+conclusion that this is a data problem?" -- with: yes, and the data problem is NOT reachable from the
+label side. Every mechanism that acts on the reader's output is now measured.
+
+### `overcall_clustering` -- there is no per-study latent to shrink
+
+`core.data.labels.overcall_clustering` had tests and no caller; it had never been run. It asks the only
+question that gates a per-STUDY target weight, and it asks it without a covariate, a card or a slot: is
+the reader's over-call over-dispersed relative to independent cells at all?
+
+    56 annotated studies, 311 positive calls, 108 over-called (34.7%)
+    per-study over-call dispersion 1.24 [0.83, 1.65] against 1.00 for independent cells
+    INDEPENDENT within this interval
+
+The interval straddles 1.00. A per-study shrinkage would be fitting sampling noise exactly as the twelve
+per-finding scalars did. The module's own verdict line is the right one to quote: **do NOT spend card on
+a per-study weight.** The denominator is 56 studies and it is stated in the module -- this reading can
+separate strong clustering from none and can rank nothing.
+
+### the reader-side lane, complete
+
+| mechanism | verdict | where |
+|---|---|---|
+| pooled level map (`--calibrated-targets`) | **SHIPPED, +0.004 board** | `uncalib_v1` decomposition |
+| per-FINDING logit offsets | flat -- shrinkage collapsed them to the null the module can return | `finding_calibration` |
+| per-STUDY weight | no latent -- dispersion 1.24 [0.83, 1.65] | this reading |
+| confidence weighting (`--weight-floor`) | floors UNK cells UP, and removing UNK supervision costs -0.0071 | `confident224` |
+| label CORRECTION toward the radiologist | 0.943 / 0.942 -- moves AWAY from the scored target | `relabel7_v1`, `cleanseat_v1` |
+| report LANGUAGE as the driver | +0.025 [-0.076, +0.126], a null | `reader_agreement` |
+
+`--calibrated-targets` is the only member of that table that ever paid, and it is already on every
+champion seat. Nothing else in the lane is worth a card.
+
+### the Einstein gate fires twice more, and the second fire is a finding
+
+**`labelwise` x merged corpus.** Proposed here as the champion's missing seat: the `labelwise_*` family
+ranks top at the honest 0.75 cut, the champion holds no labelwise member, and the merged corpus is the
+one data lever already in the champion. `merged_labelwise_cf` had already run it. The ledger prices it at
+**+0.0005 [-0.0002, +0.0012]** as a seat, and -0.0026 three collisions deep -- while describing it as
+**the MOST DECODE-DIVERSE candidate ever priced here** (nearest 0.8873 against a seated spread of
+0.8772-0.9225). That is the reading, not the retirement: the most distant member this project has ever
+built, on the ruler diversity is supposed to be bought on, is worth half a thousandth. Diversity is now
+closed on a fifth independent ruler, after external DATA, ORTHOGONALITY reseating, the foreign SYSTEM,
+and the disjoint member SET.
+
+**Dropping `--weight-floor`.** Proposed on `label_errors.py`'s indictment (all 108 false positives are
+confident YES, so a weight rising with reader confidence up-weights the dominant error). The flag does
+the opposite of what that framing assumed -- `flag_vocabulary.py:212`, "an unmentioned finding pulls at
+0.25", a floor that raises SILENT cells -- and `confident224` already measured removal of UNK
+supervision at **-0.0071**. Retired before it was written.
+
+### what is actually left
+
+The ENS transfer is `board = 1.1905*offline - 0.1457`. The best-6 consensus reads offline 0.9140 at the
+0.75 cut and predicts 0.9424 against a measured 0.944. Reaching the leader's 0.954 needs offline
+**0.9241 -- plus 0.010 on the consensus.** No combination move produces that; every one of them is now
+measured flat, on its own board row or its own instrument. Only the member can, and the members sit at
+0.86-0.91. That is the whole of the remaining problem, stated as a number.
