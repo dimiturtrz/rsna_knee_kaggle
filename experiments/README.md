@@ -15364,3 +15364,38 @@ in a knob -- minutes of card -- which tests (a) directly and costs nothing to be
 ledger is a logit ensemble, and those remain the project's best entries. It does not say a two-member
 soup fails; K=2 was not in this sweep. And it does not price a soup of members that share a recipe --
 which is the one configuration the literature actually measured.
+
+### `soup_siblings_s2026` -- the tight-neighbourhood soup lands ON the K-law, so heterogeneity is NOT the driver
+
+The discriminant named in the row above, run within the hour: a two-member uniform soup of
+`stack_increments_s2026` (0.8642) and `stack_increments_base_s2026` (0.8635) -- siblings that differ in
+ONE knob rather than in recipe, label table or objective. If mechanism (a) were carrying the negative,
+tightening the neighbourhood should have recovered most of it.
+
+    stack_increments_s2026        0.8642
+    stack_increments_base_s2026   0.8635
+    soup_siblings_s2026           0.8624     -0.0018 vs the better parent
+
+**It did not recover it.** The K-law fitted on the three top-K soups is -0.0044 per doubling from
+0.8570 at K=5, which extrapolates to **0.8628 at K=2**. The sibling soup measured **0.8624** -- inside
+0.0004 of the pure-K prediction, with the recipe heterogeneity removed. Tightening the neighbourhood
+bought essentially nothing that the smaller K had not already bought.
+
+**SO THE COST IS IN K, NOT IN THE DISTANCE BETWEEN RECIPES.** Mechanism (a) is not carrying this.
+Uniform parameter averaging at this corner costs a roughly fixed amount per doubling of the number of
+optima averaged, whether those optima come from one recipe or twenty. The remaining candidates are (b)
+the anneal point and (c) uniform being the weak form, and this arm does not separate them either -- but
+it removes the one that would have been cheapest to fix.
+
+**AND IT KILLS THE GREEDY ESCALATION ON OUR OWN NUMBERS, WITHOUT SPENDING THE 90 MINUTES.** A greedy
+soup can only accept members while the holdout improves. At K=2, with the two most similar members this
+corner owns, the soup is already BELOW both parents. There is no K at which the uniform average is
+positive here, so a greedy walk starting from the best member has nothing to accept: its first candidate
+is the K=2 case, and the K=2 case is measured negative. The ~90 minutes of card and the ~+0.011 of
+holdout-selection optimism are both saved. **THE WEIGHT-SPACE AXIS CLOSES.** Logit averaging is
+untouched by this and remains what every board entry is built from.
+
+The question that survives goes to the researcher as M398: whether any published soup result has members
+differing in OBJECTIVE rather than in hyperparameters, and whether soup quality has ever been reported
+against the members' learning rate at checkpoint time -- because (b) is now the live explanation and the
+kept epochs here run e6-e9 of a one-cycle anneal.

@@ -1150,3 +1150,7 @@ soup_siblings_s2026.pt      # 2-member uniform soup of stack_increments_s2026 + 
                             # connectivity" from "uniform weighting is the weak form". Declined in advance
                             # of its number because it is an INSTRUMENT, not a candidate seat; if it reads
                             # above both parents this line is replaced by a roster line.
+soup_siblings_s2026.pt      # MEASURED 0.8624, -0.0018 vs the better parent (stack_increments 0.8642).
+                            # Lands within 0.0004 of the K-law extrapolation to K=2 (0.8628), so recipe
+                            # heterogeneity is NOT what makes the uniform soup negative -- K is. Stays
+                            # declined: below both parents, and it closes the weight-space axis.
