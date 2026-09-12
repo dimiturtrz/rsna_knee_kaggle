@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# bead: knee-uhknv
+# reading: chainfour_drop40_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `chainfour`'s byte-identical line with one flag added: `--slot-dropout 0.40`. chainfour is a SEATED
+#   member of `cleanseat_v1` (0.942 on the board, 6 members). Nothing else changes.
+#
+# WHY A SECOND SEAT AND NOT JUST blendhold_drop40
+#   One seated recipe cannot close the question. A negative on blendhold alone reads as "maybe blendhold
+#   was the wrong seat to test on" — which is the excuse that keeps an axis open forever and is exactly
+#   what this project has been told to stop doing. Two seats either both transfer or both refuse, and
+#   either answer is a closure. chainfour is chosen because it is the MOST DIFFERENT champion member:
+#   336 px where every slot_dropout arm to date sits at the 224 default, `labelwise` slice pooling where
+#   they are all `max`, plus EMA. If the operator's gain is a property of the plain 224/max recipe rather
+#   than of the operator, this is the arm that says so.
+#
+# DOSE IS PINNED, NOT SWEPT
+#   0.40 is the operating point `knee-yotj8` closed on (decode_cost -0.0271 / -0.0229 / -0.0214 at
+#   0.25 / 0.40 / 0.55, the last inside the pre-registered SATURATING band). No dose is re-asked here.
+#
+# THE HOLDOUT IS THE WRONG RULER, SAID BEFORE THE RUN
+#   `slot_dropout`'s measured gain is CROSS-SITE (+0.0132 vs control on `foreign_readout`) and holdout909
+#   is not cross-site. The DECIDING ruler is `seat_value --against cleanseat_v1` with chainfour swapped
+#   out; the holdout number is context, not the verdict.
+#
+# PRE-REGISTRATION (written before the run)
+#   seat >= +0.0040   the operator earns a seat on a second, structurally different recipe. Package on
+#                     shelf 2 and spend a slot on the swap.
+#   seat +0.000..+0.004
+#                     directional. Keep for the pool, re-open nothing, spend no slot.
+#   seat < 0.000 on BOTH this and blendhold_drop40
+#                     the operator does not transfer to blended-label seated recipes. The axis CLOSES on
+#                     two points, and what remains true of slot_dropout is what `foreign_readout` already
+#                     measured: a cross-site gain on the plain-label recipe, which is what the
+#                     `kneemri-slotseat` entry is already carrying to the board.
+#   holdout           expected within +-0.006 of chainfour. A read outside that band on either side is a
+#                     fact about the recipe interaction, not a cross-site number, and may not be quoted
+#                     as one.
+#
+# deliberate: --slot-dropout 0.40 — imported operating point, not a swept knob (knee-yotj8).
+# deliberate: --image-size 336 — copied from chainfour. The point of this arm is that it is NOT 224.
+# deliberate: every other flag copied from chainfour.sh unchanged, so the seat comparison is one variable.
+#
+# control  chainfour_s2026, already on disk and already seated. Costs no run.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+BLEND="$PROCESSED/labels/blend_three_v1.csv"
+require "$LABELS"
+require "$BLEND"
+
+run_train chainfour_drop40 \
+  $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --image-size 336 --hold-annotations --ema --calibrated-targets \
+  --slot-dropout 0.40 \
+  --labels "$BLEND" --eval-labels "$LABELS" --out "$MODELS/chainfour_drop40_s2026.pt"
