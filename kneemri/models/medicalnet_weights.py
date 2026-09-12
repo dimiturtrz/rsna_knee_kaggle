@@ -22,6 +22,7 @@ from kneemri.models.medicalnet import (
     CHECKPOINT,
     DEPTH,
     EXTERNAL,
+    LAST_STAGE,
     READ_SIZE,
     SEGMENTATION_CLASSES,
     SHORTCUT,
@@ -93,7 +94,7 @@ class MedicalNetWeights:
             shortcut_type=SHORTCUT,
         )
 
-    def trunk(self, device: torch.device) -> MedicalNetTrunk:  # devtools-ignore: test-mirror
+    def trunk(self, device: torch.device, stage: str = LAST_STAGE) -> MedicalNetTrunk:  # devtools-ignore: test-mirror
         """The encoder `build_medicalnet_embeddings` hands to `EmbeddingCache`, frozen and in eval mode.
 
         `weights_only=True` because a foreign `.pth` is an untrusted pickle, and the refusal on any
@@ -111,4 +112,4 @@ class MedicalNetWeights:
             raise ValueError(f"checkpoint does not fit: unexpected={unexpected[:4]} missing={missing[:4]}")
         logger.info("loaded %s from %s (%d tensors)", CHECKPOINT, self.directory, len(weights))
         frozen = network.to(device).eval().requires_grad_(requires_grad=False)
-        return MedicalNetTrunk(frozen).to(device)
+        return MedicalNetTrunk(frozen, stage).to(device)

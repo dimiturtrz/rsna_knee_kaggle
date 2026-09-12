@@ -78,6 +78,11 @@ TRUNKS: dict[str, str] = {
     # the capacity confound the row above could not read past: `orthodiff`'s loss was measured at 256.
     # Bands are pre-registered in `kneemri.models.medicalnet` and are read against ortholarge 0.8170.
     "medicalnet": "features_medicalnet_336px_12sl_r256_gap2048_volume",
+    # The same trunk read one stage shallower. `layer4` runs at dilation 4 and `layer3` at dilation 2 —
+    # segmentation dilations — so the DEPTH of the read is the last harness suspect standing between
+    # `medicalnet`'s 0.7348 and a verdict on the volumetric axis. Not a knob: the two rows differ in the
+    # stage alone, and only this one could still reopen the axis.
+    "medicalnet3": "features_medicalnet_336px_12sl_r256_gap1024_volume",
     # The readout sweep (`experiments/arms/readout_probe.sh`, knee-n647). The rows above hold BOTH
     # poolings at their diluting end -- `mean` over patches, then `max` over slices -- and the three
     # numbers they produced closed two members. These eight move the two axes independently over the

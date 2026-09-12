@@ -21,7 +21,7 @@ from core.data.corpus.cache_flags import CacheFlags
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
-from kneemri.models.medicalnet import READ_SIZE, WEIGHTS, WIDTH
+from kneemri.models.medicalnet import LAST_STAGE, READ_SIZE, STAGE_WIDTHS, WEIGHTS
 from kneemri.models.medicalnet_weights import MedicalNetWeights
 
 logger = logging.getLogger(__name__)
@@ -49,6 +49,9 @@ def main() -> None:
     CacheFlags.add_to(command.parser)
     command.parser.add_argument("--weights", default=WEIGHTS, help="checkpoint directory under the external root")
     command.parser.add_argument("--batch", type=int, default=BATCH, help="studies per forward")
+    command.parser.add_argument(
+        "--stage", default=LAST_STAGE, choices=sorted(STAGE_WIDTHS), help="the stage the readout comes off"
+    )
     arguments = command.parsed()
 
     rooted = command.rooted(arguments)
@@ -57,7 +60,7 @@ def main() -> None:
     corpus, identifiers = pixels.load()
 
     device = VisibleCards().device()
-    trunk = MedicalNetWeights(rooted.kind(EXTERNAL_KIND) / arguments.weights).trunk(device)
+    trunk = MedicalNetWeights(rooted.kind(EXTERNAL_KIND) / arguments.weights).trunk(device, arguments.stage)
 
     spec = EmbeddingSpec(
         variant=VARIANT,
@@ -65,7 +68,7 @@ def main() -> None:
         # Pinned to the sibling probe rather than flagged, so the two volumetric caches differ in the
         # trunk alone. Recorded in the key anyway: a later read at another size would share this name.
         read_size=READ_SIZE,
-        pool=f"gap{WIDTH}",
+        pool=f"gap{STAGE_WIDTHS[arguments.stage]}",
         slice_read=VOLUME,
     )
     cache = EmbeddingCache(root, spec)

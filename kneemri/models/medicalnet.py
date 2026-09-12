@@ -90,6 +90,17 @@ TRUNK_MODULES = ("conv1", "bn1", "relu", "maxpool", "layer1", "layer2", "layer3"
 instead of reaching through attributes is also what keeps the walk typed, since a `Module` attribute is
 a `Tensor | Module` to a checker and only `get_submodule` is a module by contract."""
 
+LAST_STAGE = "layer4"
+"""Where a classification ResNet is read, and where the first MedicalNet probe read (0.7348)."""
+
+STAGE_WIDTHS = {"layer3": 1024, "layer4": 2048}
+"""The readable stages and the width each one outputs. `layer3` is here because THEIR `layer3` runs at
+dilation 2 and `layer4` at dilation 4 — dilations a SEGMENTATION network wants and a whole-volume
+readout may not. That makes the depth of the read a named harness suspect against the 0.7348 band
+rather than a knob: if the deepest features are the segmentation-specialised ones, the stage below them
+is where a classification signal would still be, and it is the one alternative that could reopen the
+axis. A stage shallower than `layer3` is not offered — at that depth the read is texture."""
+
 
 class MedicalNetTrunk(nn.Module):
     """One plane-agnostic 3D ResNet-50, read as an encoder over our six-slot pixel cache.
@@ -99,9 +110,10 @@ class MedicalNetTrunk(nn.Module):
     orientation, not three orientation-specific ones.
     """
 
-    def __init__(self, resnet: nn.Module) -> None:
+    def __init__(self, resnet: nn.Module, stage: str = LAST_STAGE) -> None:
         super().__init__()
         self.resnet = resnet
+        self.walk = TRUNK_MODULES[: TRUNK_MODULES.index(stage) + 1]
 
     @staticmethod
     def prepared(volume: UInt8[Tensor, "b g p q"]) -> Float[Tensor, "b c d h w"]:
@@ -139,7 +151,7 @@ class MedicalNetTrunk(nn.Module):
         transpose-convolution head — a head this checkpoint does not carry and a probe does not want.
         """
         read = self.prepared(volume)
-        for name in TRUNK_MODULES:
+        for name in self.walk:
             read = self.resnet.get_submodule(name)(read)
         return self.pooled(read)
 
