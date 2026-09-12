@@ -29,6 +29,11 @@
 # depth on. This is not a repeat.
 #
 # ONE VARIABLE. Byte-identical to `calib_dense_hold` (ledger 0.8634 @holdout909 midpoint) except for
+# the flag below -- a claim that was FALSE as first written: the flag line omitted `--slice-pooling max`,
+# which the control carries, and the run died in seconds on `whole-stack reading needs per-slice pooling
+# or a tubelet trunk, not 'channels'`. A one-variable claim is checked by DIFFING the two flag lines, not
+# by remembering the control; the trainer refused here, but a flag that merely shifts a default would have
+# produced a perfectly good number against a control it no longer matched.
 # `--stochastic-depth 0.1`. Same recipe, epochs, backbone rate, slices, band, calibrated targets, held
 # annotations, label table and seed. The control is measured and is not re-run.
 #
@@ -62,7 +67,7 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
 run_train dropstack_dense \
-  $RECIPE --epochs 12 --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
   --stochastic-depth 0.1 \
   --labels "$LABELS" --out "$MODELS/dropstack_dense_s2026.pt"
