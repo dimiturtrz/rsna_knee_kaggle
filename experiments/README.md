@@ -16237,3 +16237,55 @@ of the training signal for the same transfer. And it says nothing about dose on 
 not earn one.
 
 Bead knee-yotj8. Reading logs/after_maxdose.log, per-study at `$MODELS/maxdose_decode.npz`.
+
+### 2026-09-12 — mergedk reads NULL, and the two nulls together say the gain is the SITE, not the supervision
+
+`mergedk_corpus` adds KMAR-50K's 1,088 studies — a second hospital, CC BY 4.0, the only merge on this
+machine whose licence permits shipping a derivative — under labels that no human wrote. Its twelve
+columns come from `kneemri.inference.pseudo_labels`: four 224-native teachers' pooled belief, each cell
+weighted `1 - 2*sd` over the teachers, mean agreement **0.6548**. `base224_control` is the identical
+line on our own 4,407 studies. Both ran 12 epochs at 67 s an epoch on one card.
+
+```
+member                                     LEDGER  LEDGER75     move  epoch   rows
+mergedk_corpus_s2026                       0.8490    0.8787  +0.0297      8    909
+base224_control_s2026                       0.8451    0.8754  +0.0302     10    909
+```
+
+**+0.0039 at midpoint, +0.0033 at ledger75**, population holdout909, statistic unweighted 12-column
+macro ROC-AUC. That lands inside the pre-registered `within +-0.006` branch, which was written to read:
+*"the extra rows are already fitted. This does NOT retire pseudo-labelling: mean teacher agreement is
+0.6548, so a flat here is equally consistent with the teachers being too weak on a foreign site."*
+Neither arm is named by `convergence_check`, so neither number is a truncation floor.
+
+**The mechanism the two numbers jointly carry.** `merged3_corpus` priced the SECOND SITE at **+0.0043**
+under SPARSE HUMAN labels (Rijeka labels ACL alone; MRNet three findings). mergedk pays **+0.0039**
+under DENSE DISTILLED ones over all twelve columns. Two supervisions that share nothing but the fact of
+a second hospital buy the same +0.004. The honest read is that **the gain is the site, and the
+distillation bought nothing on top of it** — the pseudo-labeller is not adding signal our own corpus
+lacks, it is re-describing signal the teachers already had.
+
+**What this does NOT close.** It does not retire pseudo-labelling as a mechanism — the branch said so
+before the run, and 0.6548 mean agreement is exactly the regime where a flat is confounded with weak
+teachers. It does not price the member for the POOL: a null solo from a corpus no other member has seen
+is the diversity case the owner's directive names, and `seat_value --against cleanseat_v1` is the tool
+that answers it. And it says nothing cross-site: KMAR subjects are new patients, so `foreign_readout`'s
+decode_cost can no longer separate corpus shift from decode shift on them.
+
+Bead knee-vrvus. Readings `mergedk_corpus_s2026.holdout.npz`, `base224_control_s2026.holdout.npz`.
+The 2x2's fourth cell (`mergedk_drop40`, bead knee-zrcww) is on the card as this is written.
+
+**And the seat says no too, which is the reading the diversity directive actually asked for.**
+`seat_value --against cleanseat_v1` (0.942 on the board, 6 members, cut0.5, roster reads 0.8755):
+
+```
+  +mergedk_corpus_s2026.pt: 0.8744  (-0.0011)  [-0.0018, -0.0003]
+  +base224_control_s2026.pt: 0.8741  (-0.0013)  [-0.0021, -0.0005]
+best is -0.0014 and NEGATIVE, which the board charges at about 3x, so roughly -0.0042
+```
+
+Both candidates are `DISTINCT` on the member-axes table and mergedk is the more divergent of the two
+(js 0.0209 nearest vs 0.0178), above five of the six seated members' own nearest-neighbour spread. So
+the diversity is REAL and it still does not buy a seat: the roster already covers what this corpus
+sees. `0 of 2 clear +0.0040`, under which this ruler has never picked a board tick. **Not packaged.**
+That is the null read honestly rather than shipped on the strength of its divergence column.
