@@ -239,3 +239,11 @@ distill_stack_max_s2026.pt           # 0.8634 -- ~80% teacher exposure, NOT clea
 # its converged value. dropstack_long_s2026 (24 epochs, same rate, knee-ffku5) is the arm that reads the
 # converged number; if it lands, prefer it for the seat and keep this one as the 12-epoch control.
 dropstack_light_s2026.pt             # 0.8654 -- best honest solo, stochastic depth 0.05, budget-bound
+dropstack_long_s2026.pt              # 0.8641 @e13 -- the 24-epoch twin of dropstack_light. Its OWN bottom
+                            # band (-0.0013): budget is closed as a lever at the max-pooling corner, and
+                            # there is no late peak to blame the stretched one-cycle for (peak e13, then
+                            # eleven declining epochs). Seated on DIVERSITY, not quality. It disagrees
+                            # with dropstack_light on six labels in each direction, up to 0.018 on a
+                            # single one, at a mean distance of 0.0013 -- two runs of one recipe that
+                            # order studies differently. The 2026-09-12 board read is that decorrelation,
+                            # not member quality, is the only channel that has ever added board points.

@@ -15441,3 +15441,84 @@ calibrated on the schedule it was published with. Carried onto a 12-epoch fine-t
 the same number can be far too large — and the failure does not look like a mis-set knob, it looks like a
 mechanism that does not work here. Three of the four nulls in that "law" were measured at published rates.
 Halving is the cheapest discriminating test that exists, and it should precede the verdict, not follow it.
+
+## 2026-09-12 — the budget was NOT the lever: `dropstack_long` lands in its own bottom band
+
+    dropstack_long_s2026     0.8641  @e13   stochastic depth 0.05, 24 epochs      -0.0013 vs dropstack_light
+
+Plumbing asserted from the log before the verdict, both lines required and both present:
+`"stochastic_depth": "0.05"`, `stochastic depth ramped to 0.05 across 12 blocks`, `"epochs": "24"`.
+
+**The section above predicted the opposite, and it was wrong.** `dropstack_light` was read as *still
+climbing at the wall*, so doubling the budget was the escalation with a mechanism that could plausibly
+reach the bar. It does not: the peak arrives at e13 and eleven epochs follow it downward, 0.8553-0.8592,
+never recovering. That fires the arm's pre-registered `<= 0.8654` branch — **budget is closed as a lever
+at the max-pooling corner.**
+
+The arm's SECOND harness suspect is answered rather than assumed. `$RECIPE` carries `--one-cycle`, so at
+24 epochs the anneal stretches and a null could have meant "the stretched schedule is wrong here" rather
+than "the budget does not help" — a late peak the longer anneal merely delayed. There is no late peak.
+The curve turns at e13 and spends eleven epochs declining through the entire second half of the stretched
+anneal. The two runs are also NOT comparable epoch-by-epoch for the same reason — the schedule differs
+from epoch 1 — so the only legitimate comparison is peak-to-peak, which is what is quoted.
+
+**Per-label, the movement is 6 of 12 up and 6 down, and that is the finding.** The mechanism's own
+pre-registered rule is that stochastic depth acts on the trunk, so a real effect must be BROAD, as
+`dropstack_light`'s 10-of-12 was. A 6/6 split is what a null looks like on this axis.
+
+    long  ACL:0.886 MCL:0.814 MedMen:0.901 LatMen:0.851 MedOA:0.875 LatOA:0.828
+          PFOA:0.865 Effusion:0.853 Synovitis:0.871 Baker's:0.914 Contusion:0.881 Fracture:0.831
+    light ACL:0.884 MCL:0.817 MedMen:0.911 LatMen:0.869 MedOA:0.885 LatOA:0.827
+          PFOA:0.872 Effusion:0.857 Synovitis:0.854 Baker's:0.904 Contusion:0.878 Fracture:0.825
+
+**And the scatter is worth more than the mean.** Two runs of the SAME recipe at the same rate, differing
+only in budget, disagree by up to 0.018 on a single label (Lateral Meniscus -0.018, Synovitis +0.017)
+while their means differ by 0.0013. That puts a number on something this ledger has been quoting per-label
+deltas against for weeks: **a per-label delta below roughly 0.02 is not readable from a single run pair.**
+Several per-column conclusions in this file were drawn inside that band.
+
+**The member is kept, and not for its mean.** Seated against `dropstack_light` it disagrees on six labels
+in each direction, which is genuine rank-space decorrelation between two runs of one recipe — and the
+board reading of the same day is that decorrelation, not member quality, is the only channel that has ever
+added board points. It goes to the roster as a diversity candidate, not as an improvement.
+
+## 2026-09-12 — averaging is a CONTRACTION: the pool cannot produce a new board point at any seating
+
+Measured on the 909-study shared holdout, cut 0.75, `comp/members.declines` enforced (pool 149).
+No slot was spent; this is entirely offline arithmetic on npzs already on disk.
+
+SOLO members are genuinely diverse. Pairwise rank correlation across the pool: min 0.0312,
+median 0.8695, max 0.9338. There are near-orthogonal members in our own pool.
+
+SIX-MEMBER ENSEMBLES ARE NOT. Forty random 6-member seats: pairwise rank correlation between the
+ENSEMBLES min 0.9295, median 0.9725, max 0.9880. Averaging six members compresses pairwise distance
+from 0.13 to 0.027 -- a 4.8x collapse. Their AUC span is 0.0151 offline, which the board's 0.001
+resolution and the 2/3 blend share both shrink further.
+
+AND ORTHOGONALITY SELECTION DOES NOT ESCAPE IT. A seat built greedily to MINIMISE internal
+correlation, under a quality floor at pool rank 40 (0.8946), reached max internal member correlation
+0.8684 against the by-score seat's 0.9324 -- a real reduction at the member level. The resulting
+ensembles:
+
+    AUC@0.75   by-score 0.9140   by-ortho 0.9131   delta -0.0009
+    rank corr between the two SEATS: 0.9799   (two RANDOM 6-seats: 0.9725)
+    50/50 of the two seats: 0.9146
+
+The deliberately decorrelated seat is MORE correlated with the by-score seat than two random seats
+are with each other. Selecting members for disagreement buys nothing the averaging does not undo.
+
+WHAT THIS EXPLAINS, AND WHAT IT RETIRES. It is the mechanism behind the eleven-kernel tie at 0.944
+recorded above: seat composition is washed out by the averaging itself, before the 1/3 blend touches
+it. Combined with that tie it closes RESEATING OUR OWN POOL as a submission category on both the
+by-score and the by-distance objective -- the two rules produce ensembles 0.98 correlated. A
+reseating entry is predicted flat at 0.944 before it ships.
+
+WHAT IT DOES NOT CLOSE. Source diversity still pays: the foreign raptor arm is WORSE solo than our
+pure ensemble (0.923 vs 0.941) and blending it at 1/3 still gains +0.003. The counter-evidence stands
+too -- `fleettwo` (two foreign seats) read 0.942, BELOW 0.944. The open channel is a genuinely
+foreign SOURCE, not another arrangement of ours.
+
+PRIOR ART CHECKED (the Einstein gate). Distance-picked SEVENTH seats have been shipped --
+`grade_ladder` on objective distance (0.931) and `through_dense` on pixel distance (0.932), each
+bolted onto a fixed core. This measurement is a different claim and explains why those were small:
+the collapse happens across all six, so exchanging one seat cannot undo it.
