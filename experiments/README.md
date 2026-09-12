@@ -15927,3 +15927,57 @@ is exactly the kind of cheapness that gets a known null run again. The card was 
 checked against the record and all three were already answered: composition (answered by two unrecorded
 runs on disk), the 0.75 re-rank (answered by `l75seat_v1`'s board test), and labelwise-at-more-slices
 (answered by `cover_labelwise`). Zero card and zero slots bought three closures.
+
+## 2026-09-12 — the cross-site pass: the arm dies, the THESIS survives, and it names a seat
+
+`foreign_readout` over four checkpoints in one invocation, one split, one foreign decode
+(`experiments/after_fieldwide.sh`, log `logs/after_fieldwide.log`, per-study
+`D:/models/rsna_knee_abnormality/fieldwide_decode.npz`).
+
+| member | native | kept | foreign | slot_cost | decode |
+|---|---|---|---|---|---|
+| `fieldwide_s2026` | 0.8668 | 0.8668 | 0.8359 | +0.0001 | **-0.0309** |
+| `labelwise_drop_s2026` (matched control) | 0.8649 | 0.8649 | 0.8299 | +0.0000 | -0.0351 |
+| `slot_dropout_s2026` | 0.8592 | 0.8592 | 0.8321 | -0.0000 | **-0.0271** |
+| `band_dense_hold_s2026` (calibration) | 0.8573 | 0.8573 | 0.8213 | +0.0000 | -0.0360 |
+
+READ IN THE PRE-REGISTERED ORDER. `slot_cost` lands inside +/-0.0001 on all four rows, so the shifted code
+path serves our own pixels unchanged and `decode_cost` is about pixels. `band_dense_hold` reproduces its
+known -0.0360 EXACTLY, so the -0.08 defect the tool's void notice records did not recur and these numbers
+may be read at all. Both gates were written down before the pass ran.
+
+**THE ARM'S OWN BAND: FLAT.** `decode(fieldwide) - decode(labelwise_drop) = +0.0042`, inside the
+pre-registered -0.0049..+0.0049 flat band by 0.0008. `--scale-jitter 0.25 --padding-mode reflection`
+is retired: it is not refuted as a mechanism, it is refuted as a LEVER at this dose, on the one ruler
+built to see it, against a matched control. The 0.95 h of card bought a closed lane and a valid ruler.
+
+**THE FLAT BAND'S SECOND CLAUSE DOES NOT FIRE, AND THE ROW THAT REFUSES IT WAS PRE-REGISTERED AS THE
+TEST.** The band said a flat here retires augmentation "on this corpus entire". It may not, because
+`slot_dropout_s2026` — put in the pass explicitly to test the THESIS rather than the arm, at the cost of
+one marginal member — reads **-0.0271 against its own documented control `band_dense` at -0.0360, a toll
++0.0089 shallower**. That is 2.3 sd of the 11-member pool (sd 0.0038), the shallowest toll-vs-matched-
+control this project has measured, and it clears the +0.0040 shipping floor `labelseat_v1` had confirmed
+that same day. The arm's own after_ script stated the prediction before the numbers existed: "If the
+thesis is right this member pays a SHALLOWER toll here despite that flat."
+
+**WHY THAT IS THE WHOLE POINT AND NOT A CONSOLATION.** `slot_dropout_s2026` is FLAT on our own holdout —
+0.8592 against `band_dense` 0.8578, +0.0014, knob-sized, the kind of number this repo calls noise and
+declines to plan around. The shared-blind-spot thesis says precisely that: `slot_dropout = 0.0` is one of
+three `AugmentConfig` fields sitting at the identity value EVERY member on disk shares, so no offline solo
+ruler can price it and a flat there is the EXPECTED reading, not a null. The cross-site ruler is the only
+one with the axis in it, and on that ruler the same member is +0.0089. Two members moving a shared-identity
+field, both shallower than their matched controls, same sign (+0.0042 and +0.0089), on one pass with both
+plumbing gates green.
+
+**WHAT IT NAMES.** `slot_dropout_s2026` is on `comp/members.roster` and appears in **0 of 130 board rows** —
+never shipped, in any entry, ever. So the champion six plus it as a seventh seat is a SOURCE change, not a
+reseating, and it is the first candidate in a week that clears +0.0040 on a ruler that is not refuted. It
+must NOT be sold the way `labelseat_v1` was: that entry was a seat the OFFLINE ruler liked at +0.0008 and
+the board said it bought nothing. This one the offline ruler cannot see BY CONSTRUCTION, and the argument
+is the cross-site number alone.
+
+**WHAT THIS DOES NOT SAY.** It does not say slot dropout raises the board — nothing has measured that. It
+says the shared-blind-spot thesis made a falsifiable prediction, the prediction was written down first,
+and the reading came back on its side at 2.3 sd while the arm built to test the same thesis on a different
+field came back flat. The remaining untested shared field is `padding_mode`, now confounded with the dead
+scale-jitter dose and NOT independently priced by this pass.
