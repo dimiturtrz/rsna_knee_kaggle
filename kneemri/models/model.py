@@ -227,16 +227,21 @@ class StudyModel(nn.Module):
         # STORED as well as used, because it is the width of `Readout.context` and a loss term that
         # projects out of the representation has to be built from it BEFORE the first batch — asking the
         # tensor at step one is too late, since the optimiser was assembled at construction.
-        self.head_width = dim * POOL_PARTS[self.pool]
-        head_width = self.head_width
-        # Built only for the design that uses it: an unused module would still land in the state dict
-        # and every published member would fail to load against it.
         # The lookup, not just a read: an unknown pooling raises HERE, before weights are fetched and
         # before a manifest's stale name can be served as channel stacking.
         pooling = SLICE_POOLINGS[self.slice_pooling]
+        pooled_width = dim * POOL_PARTS[self.pool]
+        # STORED as well as used, because it is the width of `Readout.context` and a loss term that
+        # projects out of the representation has to be built from it BEFORE the first batch — asking the
+        # tensor at step one is too late, since the optimiser was assembled at construction. It is what
+        # the head is FED, so a pooling that HANDS BACK more than it was given (`moments_wide`) moves it;
+        # the aggregator is still built at the width flowing IN.
+        self.head_width = pooled_width * pooling.out_multiplier
         self._encodes_each_slice = pooling.per_slice
-        self.slices = pooling.aggregator(head_width) if pooling.aggregator is not None else None
-        self.head = SLOT_POOLINGS[self.design.slot_pooling](head_width, n_slot, len(TARGETS), prior)
+        # Built only for the design that uses it: an unused module would still land in the state dict
+        # and every published member would fail to load against it.
+        self.slices = pooling.aggregator(pooled_width) if pooling.aggregator is not None else None
+        self.head = SLOT_POOLINGS[self.design.slot_pooling](self.head_width, n_slot, len(TARGETS), prior)
         # PERSISTENT, so they ride in the state dict — which is what makes fixing the default safe:
         # every member already on disk keeps the constants it was actually fitted under, whatever the
         # registry now says, and only a fresh fit moves.

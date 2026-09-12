@@ -1117,3 +1117,18 @@ pool_specialise_s2026       # 0.8494 @holdout909 midpoint, ep 3 of 12, converged
                             # Declined as a member on quality: 0.0155 under the honest solo max and a
                             # near-duplicate of the control's recipe, so no diversity argument either.
                             # Re-open only by beating the SOLO number at this corner.
+moment_dense_s2026          # 0.8516 @holdout909 midpoint, ep 10 of 12, converged (three flat epochs
+                            # under the one-cycle anneal). Slice pooling by the first two moments,
+                            # mixed back to one vector, against calib_dense_hold 0.8634: -0.0118, the
+                            # arm's own bottom band. Declined on quality: 0.0133 under the honest solo
+                            # max of 0.8649, and no diversity argument survives a member that is the
+                            # best corner we own minus one pooling name. The bottom band's instruction
+                            # was "suspect the MIX before the mechanism" and the checkpoint dump
+                            # retired both named suspects -- the spread half is alive at 0.79x the
+                            # first moment's magnitude -- while surfacing the third: the identity init
+                            # on the mean half washed out (mean|first-I| 0.0122 vs mean|first| 0.0135,
+                            # torch.eye's own 1/768 = 0.0013), so the head was fed a learned 768x768
+                            # projection of the pair, not the pair. That is a WIDTH COLLAPSE, not a
+                            # verdict on the statistic, and moment_wide runs the concatenation the
+                            # frozen probe actually read. Re-open only by beating the SOLO number at
+                            # this corner.

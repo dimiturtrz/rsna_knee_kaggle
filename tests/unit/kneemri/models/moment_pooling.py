@@ -12,7 +12,7 @@ def _stack(slices: int = SLICES, dim: int = DIM) -> torch.Tensor:
     return torch.arange(2 * 3 * slices * dim, dtype=torch.float32).reshape(2, 3, slices, dim) / 100.0
 
 
-def test_forward():
+def test_moment_pooling_forward():
     """An untrained pooling IS the mean over slices, and the spread reaches the output once trained."""
     pooling = MomentPooling(dim=DIM)
     x = _stack()

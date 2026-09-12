@@ -12,8 +12,10 @@ from torch import nn
 
 from kneemri.models.depth_attention import DepthAttention
 from kneemri.models.labelwise_attention import LabelwiseAttention
+from kneemri.models.moment_pooling import MOMENTS as MOMENT_PARTS
 from kneemri.models.moment_pooling import MomentPooling
 from kneemri.models.slice_attention import SliceAttention
+from kneemri.models.wide_moment_pooling import WideMomentPooling
 
 ATTEND = "attend"
 """The one slice pooling that carries a learned module, so it is the one spelled in more than one place."""
@@ -40,6 +42,16 @@ Named beside the four that are, because that is the comparison it exists to make
 `MomentPooling` for the frozen-feature reading that opened the axis and for why it is not the same
 instrument."""
 
+MOMENTS_WIDE = "moments_wide"
+"""The same two moments as `moments`, handed to the head CONCATENATED instead of mixed back down.
+
+Named beside `moments` because the pair is the measurement. `moment_dense` ran the mixed-down form at the
+best solo corner and read 0.8516 against a 0.8634 control; the checkpoint dump then retired both suspects
+that band named (the spread half of the mix is alive at 0.79x the first moment's magnitude) and surfaced a
+third: the identity initialisation on the mean half is gone, so the head was fed a learned projection of
+the pair rather than the pair. The frozen probe that opened this axis read the CONCATENATION. See
+`WideMomentPooling`."""
+
 LABELWISE = "labelwise"
 """`attend` with one set of pooling weights PER FINDING instead of one shared by all twelve.
 
@@ -59,6 +71,13 @@ class SlicePooling:
 
     per_slice: bool
     aggregator: Callable[[int], nn.Module] | None = None
+    out_multiplier: int = 1
+    """How many times the pooled width the aggregator HANDS BACK — 1 for every pooling that preserves it.
+
+    Recorded here rather than asked of the module, because the head is constructed in the same breath as
+    the aggregator and a width discovered from a tensor would be discovered one batch too late. It is the
+    third shape this vocabulary reconciles, beside the slice axis a pooling removes and the diagnosis axis
+    `labelwise` puts in its place."""
     """The module that pools the slice axis away, or None when a bare `amax` does it.
 
     It may replace that axis with a DIAGNOSIS axis rather than remove it outright — `labelwise` does —
@@ -72,6 +91,7 @@ SLICE_POOLINGS: dict[str, SlicePooling] = {
     DEPTH: SlicePooling(per_slice=True, aggregator=DepthAttention),
     LABELWISE: SlicePooling(per_slice=True, aggregator=LabelwiseAttention),
     MOMENTS: SlicePooling(per_slice=True, aggregator=MomentPooling),
+    MOMENTS_WIDE: SlicePooling(per_slice=True, aggregator=WideMomentPooling, out_multiplier=MOMENT_PARTS),
 }
 """The vocabulary, mapped to how the slice axis is read — the fact three call sites each decided.
 

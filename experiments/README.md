@@ -15185,3 +15185,69 @@ frozen-init trunk, and it does not refute harmonisation, which changes the FOREI
 schedule. It also does not clear `--init-scope` as a suspect in the narrow sense -- but with the result
 inside the flat band rather than below it, that suspect is not load-bearing: the second measurement this
 would have joined (`mrnet_warm` 0.8487) is the one that needed it.
+
+## `moment_dense_s2026` -- 0.8516, the bottom band, and BOTH pre-registered suspects retired by the checkpoint
+
+The first arm to change WHAT STATISTIC the slice axis is read by, rather than which slice is read. Byte
+identical to `calib_dense_hold` (ledger **0.8634**, the best solo member this project owns) except
+`--slice-pooling max` -> `moments`: `MomentPooling` reduces the slice axis to its mean concatenated with
+its biased standard deviation and mixes the pair back to one slot vector through a Linear initialised to
+the identity on the mean half and zeros on the spread half.
+
+| run | slice pooling | holdout | vs control |
+|---|---|---|---|
+| `calib_dense_hold` (control) | `max` | **0.8634** | -- |
+| `moment_dense_s2026` | `moments` | **0.8516** | **-0.0118** |
+
+Epochs: 0.7421 / 0.7784 / 0.8006 / 0.8194 / 0.8260 / 0.8390 / 0.8427 / 0.8461 / 0.8508 / 0.8514 /
+**0.8516 (peak, e10)** / 0.8513. 280 s an epoch after a 324 s first. **CONVERGED, NOT TRUNCATED** -- the
+last three epochs are flat under the one-cycle anneal and `convergence_check` prints nothing for it. The
+deficit against the control SHRINKS monotonically, -0.028 at e4 to -0.009 at e11, and then stops
+shrinking. The control's own shape is the opposite: it peaks at e6 and declines to 0.8598.
+
+**THE BRANCH THAT FIRED: `<= 0.8572`, whose pre-registered instruction was "suspect the MIX before the
+mechanism."** That instruction was followed BEFORE any verdict was written -- the failure mode it exists
+to catch is `attend_dense`'s (knee-7gyw), where an aggregator sat in no optimiser group and the arm
+compared the mean against the max while reporting it as attention. The dump:
+
+```
+shape (768, 1536)
+mean|first| 0.01349  mean|spread| 0.01068  ratio 0.7921
+spread nonzero: True  max|spread| 0.14384
+first drift from identity: mean|first-I| 0.01223
+bias mean|b| 0.00313
+```
+
+(The key path is `slices.mix.weight`, not the `slices.pool.mix.weight` this arm's own header guessed.)
+
+**SUSPECT 1 IS DEAD: the mix is alive.** The spread half did not stay at its zero initialisation -- it
+carries **0.79x** the first moment's magnitude, with a max of 0.144. **SUSPECT 2 IS DEAD FOR THE SAME
+REASON:** the 0.26x arrival scale of the second moment, measured on the frozen cache before the run,
+did not starve it.
+
+**WHAT THE DUMP DID SHOW, AND IT IS THE THIRD DIFFERENCE THIS ARM'S HEADER NAMED BEFORE IT RAN.** The
+identity initialisation on the mean half is **GONE**: `mean|first - I| = 0.0122` against a `mean|first|`
+of 0.0135, while `torch.eye`'s own mean magnitude at 768 wide is 1/768 = **0.0013**. So the head was
+never fed the mean beside its spread. It was fed a fully learned 768x768 projection of the pair, in
+place of the max pool it replaced, fitted from scratch inside the same 12-epoch budget.
+
+**THAT IS A WIDTH COLLAPSE, NOT A VERDICT ON THE STATISTIC.** `feature_probe --slice-readout` ordered
+`moments > mean > max` on eight of nine trunks by +0.0116 to +0.0179, and it read the two moments
+**CONCATENATED**, at double width, never mixed back down. The mix exists only because every
+`SLICE_POOLINGS` aggregator used to hand back the width it was given. That constraint is now lifted
+(`SlicePooling.out_multiplier`), and `moment_wide` runs the probe's actual shape.
+
+**THE HARNESS WAS CHECKED BEFORE THE IDEA WAS.** Both printed recipes were diffed key by key: the only
+shared-key difference is `slice_pooling` `max` vs `moments`. Every key present in the arm and absent in
+the control (`scale_jitter`, `spacing`, `padding_mode`, `warmup`, `weight_decay`, `sample_alpha`,
+`init_scope`, `hold_annotation_studies`) is an option added to `TrainingOptions` after the control ran.
+No plumbing defect. The one unexplained asymmetry is epoch time -- 280 s here against the control's
+410 s -- and the likeliest cause is card contention during the control, which moves its TIME and not its
+SCORE.
+
+**WHAT IT DOES NOT SAY.** It does not say the second moment is worthless: nothing here measured the
+statistic at the width the probe read it at. It does not say a mix-down is unworkable in general --
+only that one initialised to the identity does not stay there inside twelve epochs at this head rate.
+And it is one arm, one seed, one corner, on `dinov2-small`, the trunk carrying the SMALLEST gap in the
+probe's nine-trunk table (+0.0129) -- so even the ceiling this corner could have shown is the smallest
+one available.
