@@ -15940,6 +15940,14 @@ runs on disk), the 0.75 re-rank (answered by `l75seat_v1`'s board test), and lab
 | `labelwise_drop_s2026` (matched control) | 0.8649 | 0.8649 | 0.8299 | +0.0000 | -0.0351 |
 | `slot_dropout_s2026` | 0.8592 | 0.8592 | 0.8321 | -0.0000 | **-0.0271** |
 | `band_dense_hold_s2026` (calibration) | 0.8573 | 0.8573 | 0.8213 | +0.0000 | -0.0360 |
+| `band_dense_s2026` (slot_dropout's OWN control, taken separately) | 0.8578 | 0.8578 | 0.8217 | +0.0000 | -0.0361 |
+
+CORRECTION TAKEN RATHER THAN THE CLAIM SOFTENED. The first reading of this pass named
+`band_dense_hold_s2026` as slot_dropout's control. It is not: `experiments/arms/slot_dropout.sh`'s own
+header declares `band_dense_s2026` at 0.8578. The correct control was measured and reads -0.0361, so the
+deciding number is +0.0090 rather than +0.0089. The two sibling controls sit 0.0005 apart natively and
+0.0001 apart on the toll, which is a free estimate of this measurement's own stability -- about ninety
+times below the signal, and the reason the difference between them does not matter to the reading.
 
 READ IN THE PRE-REGISTERED ORDER. `slot_cost` lands inside +/-0.0001 on all four rows, so the shifted code
 path serves our own pixels unchanged and `decode_cost` is about pixels. `band_dense_hold` reproduces its
@@ -15954,8 +15962,8 @@ built to see it, against a matched control. The 0.95 h of card bought a closed l
 **THE FLAT BAND'S SECOND CLAUSE DOES NOT FIRE, AND THE ROW THAT REFUSES IT WAS PRE-REGISTERED AS THE
 TEST.** The band said a flat here retires augmentation "on this corpus entire". It may not, because
 `slot_dropout_s2026` — put in the pass explicitly to test the THESIS rather than the arm, at the cost of
-one marginal member — reads **-0.0271 against its own documented control `band_dense` at -0.0360, a toll
-+0.0089 shallower**. That is 2.3 sd of the 11-member pool (sd 0.0038), the shallowest toll-vs-matched-
+one marginal member — reads **-0.0271 against its own documented control `band_dense_s2026` at -0.0361, a toll
++0.0090 shallower**. That is 2.4 sd of the 11-member pool (sd 0.0038), the shallowest toll-vs-matched-
 control this project has measured, and it clears the +0.0040 shipping floor `labelseat_v1` had confirmed
 that same day. The arm's own after_ script stated the prediction before the numbers existed: "If the
 thesis is right this member pays a SHALLOWER toll here despite that flat."
@@ -15965,8 +15973,8 @@ thesis is right this member pays a SHALLOWER toll here despite that flat."
 declines to plan around. The shared-blind-spot thesis says precisely that: `slot_dropout = 0.0` is one of
 three `AugmentConfig` fields sitting at the identity value EVERY member on disk shares, so no offline solo
 ruler can price it and a flat there is the EXPECTED reading, not a null. The cross-site ruler is the only
-one with the axis in it, and on that ruler the same member is +0.0089. Two members moving a shared-identity
-field, both shallower than their matched controls, same sign (+0.0042 and +0.0089), on one pass with both
+one with the axis in it, and on that ruler the same member is +0.0090. Two members moving a shared-identity
+field, both shallower than their matched controls, same sign (+0.0042 and +0.0090), on one pass with both
 plumbing gates green.
 
 **WHAT IT NAMES.** `slot_dropout_s2026` is on `comp/members.roster` and appears in **0 of 130 board rows** —

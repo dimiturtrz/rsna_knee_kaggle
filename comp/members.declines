@@ -1154,3 +1154,13 @@ soup_siblings_s2026.pt      # MEASURED 0.8624, -0.0018 vs the better parent (sta
                             # Lands within 0.0004 of the K-law extrapolation to K=2 (0.8628), so recipe
                             # heterogeneity is NOT what makes the uniform soup negative -- K is. Stays
                             # declined: below both parents, and it closes the weight-space axis.
+fieldwide_s2026.pt          # MEASURED 0.8668 native, the best number in its own pass -- and DECLINED on
+                            # both rulers that matter. Its arm's deciding reading was CROSS-SITE, and it
+                            # came back FLAT: decode_cost(fieldwide) - decode_cost(labelwise_drop, its
+                            # matched control) = +0.0042, inside the pre-registered -0.0049..+0.0049 flat
+                            # band by 0.0008. So --scale-jitter 0.25 --padding-mode reflection is retired
+                            # as a lever. As a SEAT it is worse than flat: seat_value --against
+                            # cleanseat_v1 prices it +0.0008 [+0.0001, +0.0014] and calls it a TWIN
+                            # (rank 0.9188, js 0.0096), and +0.0008-DISTINCT is the exact selection that
+                            # labelseat_v1 shipped the day before and the board scored FLAT at 0.944.
+                            # Re-open by answering the flat, not by re-quoting the 0.8668 (knee-r1w4a).
