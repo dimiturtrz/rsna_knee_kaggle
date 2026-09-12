@@ -15809,3 +15809,50 @@ The ENS transfer is `board = 1.1905*offline - 0.1457`. The best-6 consensus read
 **0.9241 -- plus 0.010 on the consensus.** No combination move produces that; every one of them is now
 measured flat, on its own board row or its own instrument. Only the member can, and the members sit at
 0.86-0.91. That is the whole of the remaining problem, stated as a number.
+
+## 2026-09-12 -- four unrecorded runs answer the composition question for free, and the midpoint ruler is why nobody saw it
+
+`distill_stack_clean` and `distill_stack_max` both finished, both wrote holdout records, and NEITHER has
+a ledger row. They are the increment stack this session was about to spend the card re-deriving:
+labelwise pooling + distillation from a teacher + blend-three corpus + calibrated targets + held
+annotations. Scored off disk, card-free, beside the two members they should be read against:
+
+| run | midpoint | @0.75 | what it adds |
+|---|---|---|---|
+| `labelwise_drop_s2026` | 0.8649 | **0.9059** | labelwise + stochastic depth 0.05 |
+| `stack_increments_s2026` | 0.8642 | 0.8996 | max pooling + distill 0.3 + blend-three |
+| `distill_stack_clean_s2026` | 0.8645 | 0.8958 | labelwise + distill 0.7 + blend-three |
+| `distill_stack_max_s2026` | 0.8634 | 0.8948 | same, foreign-corpus teacher |
+
+### increments do NOT compose, and the measurement was already on disk
+
+`distill_stack_clean` IS `labelwise_drop`'s mechanism plus distillation, and it reads **-0.0101 at the
+0.75 cut**. Distillation does not add to the pooling stack; it subtracts from it. CLAUDE.md's "increments
+below the bar still compose" got its first board evidence from `resnetlong_v1` this week and its first
+REFUTATION here: composition is a hypothesis per pair, not a property of small deltas. The arm written to
+test this (`labelwise_drop_merged`, corpus increment onto the same stack) was deleted unrun -- it needed
+a 59.7 GB / one-hour `build_merged` decode, and the composition premise it rested on had just been
+answered negative for 65 minutes of nothing.
+
+### the midpoint ruler is seven times blinder than the 0.75 one, measured
+
+The four span **0.0015 at midpoint and 0.0110 at 0.75**. Same predictions, same 909 studies, same twelve
+labels -- only the threshold that turns a continuous `truth` column into a binary one moves. On the
+midpoint ruler these four members are one member; on the 0.75 ruler they are ordered, and the ordering
+is not the midpoint's.
+
+That re-reads a verdict taken THIS MORNING. `labelwise_drop` was called noise-band on its +0.0035
+midpoint mean over `labelwise_dense`, correctly under the ruler the ledger is written in. At 0.75 it is
+**the best of these four and +0.0063 over `stack_increments_s2026`, the solo the roster calls the pool's
+best.** It is also the family the champion holds no seat of.
+
+This is knee-ubue8's premise, now with a number attached: every verdict written on a midpoint delta below
+roughly 0.006 is UNRESOLVED, not null, and the ledger is full of them. Combined with `resnetlong_v1` --
+the board resolving an offline delta a third the size of our own noise floor -- the project has been
+discarding readable results with two different instruments at once.
+
+### what is NOT claimed
+
+The 0.75 cut is not established as the better ruler; it is established as a DIFFERENT one that separates
+where the midpoint does not. Which of the two predicts the board is a question this cannot answer,
+because the board is the only instrument that can, and the ordering above has never been shipped.
