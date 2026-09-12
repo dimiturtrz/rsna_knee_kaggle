@@ -3913,3 +3913,63 @@ amendment is seated against that number.
 from TRAINING without putting it in the holdout", which nothing in this repo could express before. It
 also seeded the finding that closed the night: teacher exposure is a **fourth honesty filter** that none
 of the three enforced ones reads, and twelve members of the packaged honest pool fail it.
+
+## `tablepool_v1` -- 0.944, ref 56172710, 2026-09-12 -- the largest pool change we have ever shipped, and it moved nothing
+
+Three seats arrive at once (`discord_mask_s2026`, `v2delonly_span_s2026`, `labelwise_depth24_s2026`) and
+two depart. That size was the whole design: D368 fitted board score on member presence across the 83
+scored entries that name their members, and three numbers came out of it -- the board is **quantised to
+0.001**, the statistical floor of that design is ~0.003-0.008, and the combined minimum detectable member
+effect is therefore **~0.003**. Measured seat-swap effects in this project run **0.001-0.002**. So no
+single seat swap in this project's history has ever been *measurable* on this board, and the only moves
+the board has ever resolved (0.005+) came from pool upgrades and label-table changes.
+
+This was a pool upgrade, chosen on the blind gold-adjudicated ruler rather than on v2 -- the only ruler
+we own that was not fitted on the labels the members trained under. **It read 0.944.**
+
+State the magnitude before the verdict: 0.944 against the champion's 0.944 is a **null**, not a loss.
+What the arm pre-registered for exactly this outcome fired: *"the pool axis closes with seating, leaving
+solo member quality as the only class with a non-zero hit rate."* This is the **thirteenth** seating entry
+to fail to beat 0.944 and the **ninth** board row reading exactly 0.9440.
+
+**What it does not close.** Nothing about `discord_mask`'s mask **mechanism** -- its sensitivity cost is
+still unreadable at 32 affirmed cells. And nothing about member **quality**, which is the one class this
+row explicitly hands the remaining hit rate to.
+
+## `honestsix_v1` -- 0.938, ref 56173554, 2026-09-12 -- and `honestfar_v1` -- 0.941, ref 56173880 -- the pair IS the measurement
+
+Two entries, one UTC day, **identical six members**, and exactly one difference: `honestfar` blends the
+raptor foreign seat at `FOREIGN_WEIGHT = 1/3` and `honestsix` does not. Neither row is to be read alone.
+
+The six are `clean_calib_s2026`, `chainfour_s2026`, `stack_increments_s2026`,
+`stack_increments_base_s2026`, `calib_dense_hold_s2026`, `seat_clean_distill_s2026` -- chosen by **solo
+rank** over the 296-member packaged honest pool, not by a search scored on the same 909 studies, so
+`MemberCurve.honest`'s +0.0025-to-+0.0031 search-optimism correction does not apply and none is taken.
+`honestsix` carries a real offline number, **0.8737 @holdout909 midpoint**; `honestfar` carries **none by
+construction**, because its seventh seat is `--fold -1` published weights that `foreign_overlap` measures
+at **98.6% in-sample** -- the exact provenance that voided `raptor_solo`'s 0.8938 on 2026-08-29.
+
+**THE DIFFERENCE IS +0.003. Say the number rather than rounding it either way.**
+
+The pre-registration named `-0.003 to +0.003` as a **null** inside D368's estimability floor, and
+`>= +0.004` as the threshold that would re-open the foreign axis as a **member** axis. +0.003 is the top
+edge of the null band and **one thousandth below** the reopen threshold. **The null branch fires; the
+foreign axis does not re-open.**
+
+The null is the more useful of the two outcomes, in the arm's own words: it says the champion's foreign
+seat **has been carrying approximately zero for weeks**, and that every entry built around protecting
+that seat was protecting nothing. That closes a thread this project has never been willing to close. It
+is equally **not** `<= -0.004`, so the champion is not indicted into a rebuild without the seat either.
+The honest reading is that this pair cannot resolve the foreign join's board value in either direction --
+and that what the null indicts is **the seating work, not the seat**.
+
+**What `honestsix` says on its own.** 0.938 is **-0.006** against the champion: an all-honest our-side
+pool chosen by offline solo rank does *not* reach the champion. The transfer arithmetic is worth
+recording -- 0.8737 offline -> 0.938 board, against the solo-family anchors `spansolo` 0.8545 -> 0.921 and
+`holdsolo` 0.8634 -> 0.928. That is an *ensemble* sitting almost exactly on a **solo**-fitted line: its
+whole +0.009 of offline lead over the best honest solo (0.8649) bought about what a solo of that offline
+value would have bought, and no more.
+
+**What the pair does not say.** It does not price the foreign seat at a different `FOREIGN_WEIGHT`, and it
+does not price it inside the champion's own six rather than these six. One weight, one pool, one pair of
+board reads at a resolution of 0.001.
