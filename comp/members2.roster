@@ -266,3 +266,24 @@ dropstack_long_s2026.pt              # 0.8641 @e13 -- the 24-epoch twin of drops
 # board's rows name it. It does NOT claim the 0.40 dose is optimal: monotone through the last point
 # leaves 0.55 open, and one foreign corpus is one point on transfer.
 slot_dropout_hi_s2026.pt             # 0.8551 -- the 0.40 dose; seated on decode, see above
+
+# THE SECOND SITE, WHICH HAS NEVER REACHED THE BOARD. Both members below are fitted on the KMAR-50K
+# merge: 4,407 of ours plus 1,088 studies from a different hospital, supervised by four 224-native
+# teachers' pooled belief over all twelve columns (`kneemri.inference.pseudo_labels`, mean agreement
+# 0.6548). KMAR-50K is CC BY 4.0 -- the ONLY corpus merge on this machine that is shippable at all
+# (Rijeka CC BY-NC-ND, MRNet's Stanford agreement bars an adaptation, fastMRI bars a derivative), which
+# is why these two are the only corpus lever whose answer can be read on the board instead of only
+# offline. `grep -c mergedk comp/board.jsonl` returns 0.
+#
+# WHAT THE OFFLINE RULER SAYS, AND WHY IT IS NOT THE REASON. mergedk_corpus 0.8490 against
+# base224_control 0.8451 is +0.0039, inside its own pre-registered +-0.006 null band; the stacked cell
+# reads +0.0040 over it. But holdout909's teachers SAW those 909 studies, so a gain there prices the
+# distillation, not the generalisation -- the arm's own header says so before the run. The board is
+# where the question is actually asked, and the owner's standing instruction is that a member earns a
+# trial on ENSEMBLE diversity even when its solo does not outperform.
+#
+# THE 2x2 THEY CLOSE. corpus +0.0039, dose +0.0040, stack +0.0079 -- the two levers ADD and do not
+# compose, which put the stack inside the `within +-0.005` branch and refused re-opening the corpus
+# axis at the dose operating point. Ledger 2026-09-12, beads knee-vrvus / knee-zrcww.
+mergedk_corpus_s2026.pt              # 0.8490 (l75 0.8787, e8)  -- second site, plain supervision
+mergedk_drop40_s2026.pt              # 0.8530 (l75 0.8805, e11) -- second site + slot dropout 0.40

@@ -1164,3 +1164,52 @@ fieldwide_s2026.pt          # MEASURED 0.8668 native, the best number in its own
                             # (rank 0.9188, js 0.0096), and +0.0008-DISTINCT is the exact selection that
                             # labelseat_v1 shipped the day before and the board scored FLAT at 0.944.
                             # Re-open by answering the flat, not by re-quoting the 0.8668 (knee-r1w4a).
+
+blendhold_drop40_s2026
+  seat_value against cleanseat_v1 reads -0.0011 [-0.0018, -0.0003] and its best available seat
+  (replacing blendhold itself) -0.0016; midpoint holdout 0.8507 against blendhold's 0.8575 is -0.0068,
+  which BREACHES the +-0.006 band its own header pre-registered. Declined as a SEAT, not as an asset:
+  the arm peaked on its last epoch and was monotone into it, so the read was taken at a budget wall and
+  knee-kiss9 re-asks it at 24 epochs. Re-open by answering that, not by re-quoting these numbers.
+
+chainfour_drop40_s2026
+  seat_value -0.0005 [-0.0012, +0.0002], best seat -0.0008; 0 of 2 clear the +0.0040 bar under which
+  this ruler has never picked a board tick. Midpoint 0.8589 vs chainfour 0.8648, but at ledger75 it is
+  0.8917 vs 0.8912 -- AHEAD on the recut, which is why this is a decline with a live question attached.
+  Same budget wall as above; knee-kiss9 holds the re-ask.
+
+chainfour_drop40_long_s2026
+  arm in flight as of 2026-09-12T22:06Z (24 epochs, ~200 s/epoch). Its holdout record exists only
+  because run_train writes one per epoch. No decision until it finishes; knee-kiss9 owns it.
+
+base224_control_s2026
+  0.8451 (l75 0.8754, e10). A DENOMINATOR, not a candidate: the matched control mergedk_corpus and the
+  plain-recipe dose arms are measured against. Shipping a control would destroy what it is for.
+
+labelwise_drop_s2026
+  0.8649 (l75 0.8984, e10) -- the highest ledger75 solo in this pool, and still not a seat. Against
+  cleanseat_v1 on ledger75 it ADDS +0.0011 [+0.0003, +0.0019] and its best seat (for blendhold) is
+  +0.0014: inside the +0.0040 bar under which this ruler has never been shown to pick a board tick. The
+  member-axes read says why -- TWIN, js 0.0095, rank 0.9219, the flattest divergence of the two priced.
+  A high solo that is a twin of the roster is the exact shape `member_curve` says buys nothing. It is
+  also fieldwide's matched control (hidose's header), so it has a second job. Re-open only with a
+  DISTINCT partner or a ruler validated below +0.0040.
+
+dropstack_dense_s2026
+  0.8595 (l75 0.8907, e11). Stochastic depth 0.1, the dose dropstack_light beat at 0.05 (0.8654, still
+  climbing at e12 -- the budget-binding read knee-kiss9 now generalises). Seat +0.0005 [-0.0003, +0.0012],
+  band includes zero. Declined as the losing dose of a closed sweep.
+
+ghosting_s2026
+  0.8576 (l75 0.8838, e10). The other decode operator: decode_cost -0.0304 against slot_dropout 0.40's
+  -0.0229, i.e. +0.0057 vs control where slot dropout reads +0.0132. Same axis, less than half the
+  effect; the 0.40 dose is what shelf 2 carries instead.
+
+slot_dropout_max_s2026
+  0.8546 (l75 0.8844, e11). Dose 0.55, which landed INSIDE the pre-registered -0.0196..-0.0229
+  SATURATING band (decode_cost -0.0214) and is what closed the dose axis on 0.40 as the operating point
+  (knee-yotj8). Declined as the saturated end of a closed sweep, not as a bad member.
+
+sam_dense_s2026
+  0.8213 (l75 0.8498, e6) -- the weakest member in this pool by 0.024 and peaked at epoch 6. Declined on
+  quality; nothing about it has ever been argued as diverse enough to buy a seat at that cost.
