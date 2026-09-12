@@ -16289,3 +16289,54 @@ Both candidates are `DISTINCT` on the member-axes table and mergedk is the more 
 the diversity is REAL and it still does not buy a seat: the roster already covers what this corpus
 sees. `0 of 2 clear +0.0040`, under which this ruler has never picked a board tick. **Not packaged.**
 That is the null read honestly rather than shipped on the strength of its divergence column.
+
+### 2026-09-12 — the mergedk 2x2 closes: the two levers ADD, and neither the sum nor the stack buys a seat
+
+Fourth cell (`mergedk_drop40`, bead knee-zrcww): `mergedk_corpus`'s line plus `--slot-dropout 0.40`, the
+operating point `knee-yotj8` closed on. Same recipe, same geometry, same 12 epochs, same eval labels.
+
+|  | no slot dropout | `--slot-dropout 0.40` |
+|---|---|---|
+| **canonical corpus** | base224_control **0.8451** | *(not run — the plain-recipe dose arms hold this corner)* |
+| **mergedk corpus** | mergedk_corpus **0.8490** (+0.0039) | mergedk_drop40 **0.8530** (+0.0079) |
+
+ledger75 reads 0.8754 / 0.8787 / 0.8805; the ordering is identical under both rulers. Population
+holdout909, statistic unweighted 12-column macro ROC-AUC, epoch 11 of 12 — `convergence_check` names
+none of the three.
+
+**Against its own pre-registration, +0.0040 over `mergedk_corpus` lands in the `within +-0.005` branch:
+they do not compose.** They also do not interfere — the corpus lever's +0.0039 and the dropout lever's
++0.0040 sum to the +0.0079 the stack actually reads, which is what INDEPENDENT levers look like. The
+`>= +0.012` compose branch is refused and the corpus axis is NOT re-opened at the dose operating point.
+
+Worth writing down separately: on the plain-label recipe `slot_dropout` reads ~flat offline and earns its
+keep only cross-site (+0.0132 on `foreign_readout`). Here it reads **+0.0040 on our own holdout**. That is
+still inside a null band and is not a finding, but it is the first time the operator has moved this ruler
+at all, and it moved it on a corpus containing a second hospital's patients — which is the direction the
+cross-site argument predicts.
+
+**The seat says no to all three, and says it in a readable order.** `seat_value --against cleanseat_v1`
+(0.942, 6 members, roster reads 0.8755, cut0.5):
+
+```
+  +mergedk_drop40_s2026.pt:   0.8748  (-0.0006)  [-0.0013, +0.0001]
+  +mergedk_corpus_s2026.pt:   0.8744  (-0.0011)  [-0.0018, -0.0003]
+  +base224_control_s2026.pt:  0.8741  (-0.0013)  [-0.0021, -0.0005]
+```
+
+The seat ordering reproduces the holdout ordering exactly, and only the stacked cell's band reaches
+zero. `0 of 3 clear +0.0040`. **Nothing here is packaged and no slot is spent on any of it.** What the
+column does buy is a direction: the operator is the only lever in the 2x2 that moved a seat toward zero,
+and it has never been run on a SEATED recipe — every champion member carries `--calibrated-targets` /
+`--hold-annotations` and blended labels, and every slot_dropout arm to date is plain-label. That arm is
+`blendhold_drop40` (bead knee-wy4vt), and it is on the card as this is written.
+
+Beads knee-zrcww, knee-vrvus. Reading `mergedk_drop40_s2026.holdout.npz`.
+
+**A process note that cost a run.** `mergedk_drop40` ran TWICE. A second launcher shell parked behind the
+first (the `lib.sh` guard working as designed), survived a `taskkill /T` on its original parent by
+reparenting, and un-parked the moment run 1 finished — relaunching the identical arm on a free card and
+renaming run 1's checkpoint and holdout to `_run1`. Run 2 was killed at startup and run 1's artefacts were
+restored to their declared names; the numbers above are run 1's. The lesson is that a `/T` kill is not
+transitive through MSYS reparenting: enumerate `Win32_Process` by CommandLine and kill the TRAINER first,
+then each shell, or the shell relaunches what you just killed.
