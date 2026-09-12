@@ -11,6 +11,7 @@ from core.data.corpus.slot_reader import GROUP
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
+from kneemri.models.drop_path import NO_DROP
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
@@ -47,6 +48,8 @@ from kneemri.training.trainer import (
     CERTAINTY_RAMP,
     CLIPPING,
     CORPUS_OVERSAMPLE,
+    DROP_PATH,
+    DROPPED_BLOCKS,
     LAYER_DECAY,
     LOSS_QUANTILES,
     MIXUP,
@@ -221,6 +224,33 @@ def test_sharpen():
     trainer.accumulate(2)
     with pytest.raises(ValueError, match="accumulate 1"):
         trainer.sharpen(0.05)
+
+
+class _Droppable(torch.nn.Module):
+    """The shape the walk looks for — a block that hangs its residual policy on `drop_path`."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.drop_path = torch.nn.Identity()
+
+
+def _droppable() -> torch.nn.Module:
+    return _Droppable()
+
+
+def test_drop_paths():
+    """The rate AND the block count are both reported, because only the count says the rate landed.
+
+    A stand-in trunk carries no `drop_path` attribute, so this also pins the refusal: a rate that
+    reaches nothing must raise rather than train an ordinary run under the arm's name.
+    """
+    trainer = _trainer()
+    assert trainer.policies()[DROP_PATH] == NO_DROP, "every ledger number ran on the intact trunk"
+    assert trainer.policies()[DROPPED_BLOCKS] == 0
+    trainer.model.backbone.blocks = torch.nn.ModuleList([_droppable(), _droppable()])
+    trainer.drop_paths(0.1)
+    assert trainer.policies()[DROP_PATH] == pytest.approx(0.1)
+    assert trainer.policies()[DROPPED_BLOCKS] == 2
 
 
 def test_warm_up():
@@ -475,6 +505,8 @@ def test_policies():
         SAMPLING: OFF,
         SAMPLING_RAMP: 0,
         SHARPNESS: FLAT,
+        DROP_PATH: NO_DROP,
+        DROPPED_BLOCKS: 0,
     }
 
     trainer.bfloat16()
@@ -500,6 +532,8 @@ def test_policies():
         SAMPLING: OFF,
         SAMPLING_RAMP: 0,
         SHARPNESS: FLAT,
+        DROP_PATH: NO_DROP,
+        DROPPED_BLOCKS: 0,
     }
 
 

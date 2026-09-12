@@ -31,8 +31,10 @@ from core.data.corpus.prefetch import Prefetch
 from core.data.corpus.slot_reader import GROUP
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import CONFIDENCE_FLOOR, Targets
+from kneemri.models.drop_path import NO_DROP
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
 from kneemri.models.model import NO_LAYER_DECAY, StudyModel
+from kneemri.models.stochastic_depth import StochasticDepth
 from kneemri.training.accumulation import Accumulation
 from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import (
@@ -78,6 +80,8 @@ OPTIMISER_DECAY = "optimiser_weight_decay"
 WARMUP = "one_cycle_warmup"
 CLIPPING = "gradient_clip_norm"
 SHARPNESS = "sharpness_radius"
+DROP_PATH = "drop_path_rate"
+DROPPED_BLOCKS = "drop_path_blocks"
 NO_SHARPNESS_UNDER_ACCUMULATION = (
     "--sharpness needs --accumulate 1: the ascent is built from the whole group's gradient and the "
     "second forward covers only its last micro-batch"
@@ -159,6 +163,8 @@ class Trainer:
         # Attached and null by default for the same reason: a radius of zero perturbs nothing, so the
         # step is the single forward and backward every number in the ledger was measured under.
         self.sharpness = Sharpness()
+        self.drop_path_rate = NO_DROP
+        self.dropped_paths = 0
         # Attached and null by default for the same reason, and here the default matters more than
         # anywhere else on this list: `Uniform` returns the positions untouched WITHOUT drawing from the
         # generator, so a run that asks for no sampling policy descends on exactly the stream every
@@ -237,6 +243,8 @@ class Trainer:
             WARMUP: self.warmup,
             CLIPPING: self.clipping.max_norm,
             SHARPNESS: self.sharpness.radius,
+            DROP_PATH: self.drop_path_rate,
+            DROPPED_BLOCKS: self.dropped_paths,
             SAMPLING: self.sampling.tilt(),
             SAMPLING_RAMP: self.sampling.ramp(),
             CERTAINTY_RAMP: self.certainty_ramp,
@@ -395,6 +403,11 @@ class Trainer:
         if radius and not self.accumulation.closes(1):
             raise ValueError(NO_SHARPNESS_UNDER_ACCUMULATION)
         self.sharpness = Sharpness(radius)
+
+    def drop_paths(self, rate: float) -> None:
+        """Ramp stochastic depth over the built trunk, keeping the COUNT — see `StochasticDepth`."""
+        self.dropped_paths = StochasticDepth(rate).applied(self.model.backbone)
+        self.drop_path_rate = rate
 
     def draw_with(self, sampling: Sampling) -> None:
         """Attach the policy that decides which studies each epoch descends on."""

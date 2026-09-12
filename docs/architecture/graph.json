@@ -6590,6 +6590,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.stochastic_depth",
+      "target": "kneemri.models.drop_path",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.timm_trunk",
       "target": "kneemri.models.trunk_tokens",
       "weight": 1
@@ -6867,6 +6873,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.flag_vocabulary",
+      "target": "kneemri.models.drop_path",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.flag_vocabulary",
       "target": "kneemri.models.model",
       "weight": 1
     },
@@ -7041,6 +7053,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.landed",
+      "target": "kneemri.models.drop_path",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
       "target": "kneemri.models.encoder_surgery",
       "weight": 1
     },
@@ -7204,6 +7222,12 @@
       "kind": "import",
       "source": "kneemri.training.options",
       "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.options",
+      "target": "kneemri.models.drop_path",
       "weight": 1
     },
     {
@@ -7671,6 +7695,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.trainer",
+      "target": "kneemri.models.drop_path",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
       "target": "kneemri.models.ema",
       "weight": 1
     },
@@ -7678,6 +7708,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.models.stochastic_depth",
       "weight": 1
     },
     {
@@ -33925,6 +33961,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.models.stochastic_depth.StochasticDepth.applied",
+      "target": "kneemri.models.drop_path.DropPath",
+      "weight": 1
+    },
+    {
       "kind": "inherits",
       "source": "kneemri.models.timm_trunk.TimmChunkedWeights",
       "target": "kneemri.models.timm_trunk.TimmHubWeights",
@@ -36777,6 +36819,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.drop_paths",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.exponential_average",
       "weight": 1
     },
@@ -37306,6 +37354,18 @@
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.clip_gradients",
       "target": "kneemri.training.gradient_clip.GradientClip",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.drop_paths",
+      "target": "kneemri.models.stochastic_depth.StochasticDepth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.drop_paths",
+      "target": "kneemri.models.stochastic_depth.StochasticDepth.applied",
       "weight": 1
     },
     {
@@ -38145,7 +38205,7 @@
       "role": null
     },
     {
-      "descendants": 298,
+      "descendants": 300,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39849,7 +39909,7 @@
       "role": null
     },
     {
-      "descendants": 32,
+      "descendants": 34,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -39884,6 +39944,14 @@
       "descendants": 0,
       "id": "kneemri.models.diffusion_schedule",
       "label": "diffusion_schedule",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.drop_path",
+      "label": "drop_path",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -40052,6 +40120,14 @@
       "descendants": 0,
       "id": "kneemri.models.state_dict_trunk",
       "label": "state_dict_trunk",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.stochastic_depth",
+      "label": "stochastic_depth",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -44962,6 +45038,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.drop_path.DropPath",
+      "label": "DropPath",
+      "level": "class",
+      "parent": "kneemri.models.drop_path",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.ema.LiveWeights",
       "label": "LiveWeights",
       "level": "class",
@@ -45223,6 +45307,14 @@
       "level": "class",
       "parent": "kneemri.models.state_dict_trunk",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.stochastic_depth.StochasticDepth",
+      "label": "StochasticDepth",
+      "level": "class",
+      "parent": "kneemri.models.stochastic_depth",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -65666,6 +65758,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.drop_path.DropPath.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.drop_path.DropPath",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.drop_path.DropPath.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.drop_path.DropPath",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.ema.LiveWeights.applied",
       "label": "applied",
       "level": "method",
@@ -66670,6 +66778,22 @@
       "label": "resolve",
       "level": "method",
       "parent": "kneemri.models.state_dict_trunk.StateDictWeights",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.stochastic_depth.StochasticDepth.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.stochastic_depth.StochasticDepth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.stochastic_depth.StochasticDepth.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.models.stochastic_depth.StochasticDepth",
       "role": null
     },
     {
@@ -70020,6 +70144,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.draw_with",
       "label": "draw_with",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.drop_paths",
+      "label": "drop_paths",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

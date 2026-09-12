@@ -37,6 +37,7 @@ from core.data.labels.targets import (
     WITHHELD,
     Targets,
 )
+from kneemri.models.drop_path import NO_DROP
 from kneemri.models.encoder_surgery import NO_OFFSET
 from kneemri.models.model import (
     ADAPTERS,
@@ -73,6 +74,7 @@ from kneemri.training.trainer import (
     CERTAINTY_RAMP,
     CLIPPING,
     CORPUS_OVERSAMPLE,
+    DROP_PATH,
     LAYER_DECAY,
     MIXUP,
     OPTIMISER_DECAY,
@@ -291,6 +293,9 @@ class Request:
     sharpness: float = FLAT
     """Radius of the SAM ball — zero, the ordinary step, for every arm before 2026-09-12."""
 
+    stochastic_depth: float = NO_DROP
+    """Rate the deepest block drops at — zero, the intact trunk, for every arm before 2026-09-12."""
+
     sample_spread: Path | None = None
     sample_alpha: float = 0.0
     certainty_ramp: int = 0
@@ -401,6 +406,7 @@ class Request:
             WARMUP: self.warmup,
             CLIPPING: self.grad_clip,
             SHARPNESS: self.sharpness,
+            DROP_PATH: self.stochastic_depth,
             # THE ANCHOR, added 2026-09-05, and the reason LAYER_DECAY above was never enough on its
             # own: the decay is a RATIO, so it lands at exactly the asked 0.7 whether the rate it
             # divides is the one this run asked for or the one the recipe inherited.

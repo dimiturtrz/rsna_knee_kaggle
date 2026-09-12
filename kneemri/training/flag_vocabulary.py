@@ -13,6 +13,7 @@ import argparse
 from pathlib import Path
 
 from core.data.corpus.cache_flags import CacheFlags
+from kneemri.models.drop_path import NO_DROP
 from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
@@ -587,6 +588,19 @@ class FlagVocabulary:
             "which is the shape a few large late steps produce. Clipping bounds how far one batch may "
             "move the weights; it does not change where the walk is allowed to end up, which is "
             "--weight-decay. 1.0 is the usual value in the ViT recipes this project's trunk came from.",
+        )
+        parser.add_argument(
+            "--stochastic-depth",
+            type=float,
+            default=NO_DROP,
+            help="rate at which the trunk's DEEPEST block drops its whole residual branch for a sample "
+            "during training, ramped linearly from zero at the first block (0 = the intact trunk every "
+            "number in the ledger was measured under). It costs nothing -- no second forward, no "
+            "parameter, no buffer -- and it is identity in eval(), so a member trained under it serves "
+            "byte-identically. Same axis as --sharpness and a different mechanism: that one flattens "
+            "the minimum the walk settles in, this one stops any single block's branch from being "
+            "depended on. transformers applies a FLAT rate at every depth, which is not the schedule "
+            "the published effect sizes were measured under; this ramps.",
         )
         parser.add_argument(
             "--sharpness",

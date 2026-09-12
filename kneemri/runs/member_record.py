@@ -74,6 +74,9 @@ NOT_IN_CONFIG = {
     "sharpness": "same path and same write-off as `grad_clip` — a radius the step climbed before it "
     "descended, spent entirely between backward and step. It moves WHERE the walk settled and leaves "
     "no module and no parameter behind, so the member a rebuild constructs is byte-identical",
+    "stochastic_depth": "same path and same write-off as `sharpness` — a residual branch dropped per "
+    "sample during training only. `DropPath` holds no parameter and registers no buffer, and is identity "
+    "in eval(), so a member trained under it rebuilds byte-identical and serves unaffected",
     "weight_floor": "supervision policy, same",
     "calibrated_targets": "supervision policy, same",
     "finding_calibration": "supervision policy, same — it shifts each finding's level in the training "

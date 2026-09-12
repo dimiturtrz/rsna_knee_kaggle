@@ -58,7 +58,8 @@
 # dead-mix check to run and no optimiser group it can fall out of (knee-7gyw) — the width IS the plumbing
 # assertion, and it is the one thing that would silently make this arm a re-run of something else.
 #
-# PRICE: ~2.5 h at 20 slices, no submission slot — the reading is offline against a control on the ledger.
+# PRICE: ~56 min at 20 slices (279 s/epoch MEASURED x 12, not the ~2.5 h this line guessed before any
+#        dense arm had been timed), no submission slot — the reading is offline against a ledger control.
 # EXPECTED GAIN: the frozen probe's +0.0129 at this trunk is the ceiling; the mix's -0.0118 is the floor it
 # has to climb back over first. So the honest expectation is a FLAT, and this is an INSTRUMENT: it retires
 # the width confound, and it is what licenses closing (or re-opening) the whole readout axis.

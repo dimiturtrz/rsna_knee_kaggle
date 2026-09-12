@@ -185,6 +185,7 @@ class RunSetup:
             warmup=options.warmup,
             grad_clip=options.grad_clip,
             sharpness=options.sharpness,
+            stochastic_depth=options.stochastic_depth,
             backbone_lr=options.backbone_lr,
             sample_spread=options.sample_spread,
             sample_alpha=options.sample_alpha,
@@ -666,6 +667,9 @@ class RunSetup:
         # AFTER `accumulate` above, and that order is forced: `sharpen` refuses a radius under a group
         # larger than one micro-batch, and it can only see the group if the group is already attached.
         trainer.sharpen(options.sharpness)
+        # BEFORE the optimiser groups are read by anything downstream is not a constraint here: stochastic
+        # depth registers no parameter, so the groups built in the constructor still name every tensor.
+        trainer.drop_paths(options.stochastic_depth)
         # ATTACHED UNCONDITIONALLY, unlike the policies above it, because the null here is an object and
         # not an absence — and because a policy only some runs attach is a policy the options-to-policies
         # walk cannot see. ALIGNED AGAINST `identifiers`, the corpus's own study order, and not against

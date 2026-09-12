@@ -20,6 +20,7 @@ from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
 from core.data.corpus.study_cache import StudyCache
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.backbone import SMALL
+from kneemri.models.drop_path import NO_DROP
 from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS
 from kneemri.models.slot_head import ATTENDED
@@ -197,6 +198,9 @@ class TrainingOptions:
 
     sharpness: float = FLAT
     """Radius of the ball SAM descends from the worst point of; 0 is the ordinary step the ledger ran."""
+
+    stochastic_depth: float = NO_DROP
+    """Rate the trunk's deepest block drops its residual branch at; 0 is the trunk the ledger ran."""
 
     pool: str = CLS_MEAN
     slice_pooling: str = CHANNELS
