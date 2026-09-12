@@ -1,4 +1,5 @@
-"""slotseat -- the champion six plus the one member the offline ruler scores at ZERO and the cross-site ruler scores at +0.0090.
+"""slotseat -- the champion six plus the one member the offline ruler scores at ZERO and
+the cross-site ruler scores at +0.0090.
 
 **THIS IS A PREDICTED GAIN, NOT AN INSTRUMENT, AND IT IS THE FIRST ONE IN A WEEK.** The standing rule is
 that a slot with nothing mechanism-backed behind it goes to an instrument with the instrument named.

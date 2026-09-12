@@ -640,6 +640,9 @@ merged3_corpus_s2026.pt              # 0.8521  # licence: mrnet
 disagreed_uniform_s2026.pt           # 0.8507
 disagreed_full_s2026.pt              # 0.8471
 slot_dropout_s2026.pt                # 0.8592 - best single member the project owns
+# slot_dropout_hi_s2026 (the 0.40 dose) is NOT here — it is on `comp/members2.roster`, for the reason
+# that file's header gives: this shelf is ~10 GB and a member added to it reaches the board only by
+# re-pushing all of it. Naming it on both is what `MemberPackage.spanning` refuses.
 # certainty_ramp_s2026 and disagreed_ramp_s2026 were named HERE and again in the 2026-09-02 block below,
 # so both packaged under one id and the second copy overwrote the first. MemberManifest.document refused
 # it on 2026-09-04; the duplicate rows are removed and the surviving rows are the later, fuller ones.

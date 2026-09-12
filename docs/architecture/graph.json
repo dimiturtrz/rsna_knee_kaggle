@@ -6794,6 +6794,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.augmentation",
+      "target": "kneemri.training.ghosting",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.device_budget",
       "target": "kneemri.device",
       "weight": 1
@@ -7144,6 +7150,12 @@
       "kind": "import",
       "source": "kneemri.training.landed",
       "target": "kneemri.training.augmentation",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
+      "target": "kneemri.training.ghosting",
       "weight": 1
     },
     {
@@ -7809,6 +7821,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.trainer",
+      "target": "kneemri.training.ghosting",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
       "target": "kneemri.training.grades",
       "weight": 1
     },
@@ -7864,6 +7882,18 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.teacher_targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.witness",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.witness",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -34825,6 +34855,24 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.augmentation.Augmentation._ghost",
+      "target": "kneemri.training.ghosting.Ghosting",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.augmentation.Augmentation._ghost",
+      "target": "kneemri.training.ghosting.Ghosting.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.augmentation.Augmentation.applied",
+      "target": "kneemri.training.augmentation.Augmentation._ghost",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.augmentation.Augmentation.applied",
       "target": "kneemri.training.augmentation.Augmentation._intensity",
@@ -35314,6 +35362,18 @@
       "kind": "calls",
       "source": "kneemri.training.flag_vocabulary.FlagVocabulary.parser",
       "target": "kneemri.training.encoder_flags.EncoderFlags.add",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.ghosting.Ghosting.applied",
+      "target": "kneemri.training.ghosting.Ghosting._replicas",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.ghosting.Ghosting.applied",
+      "target": "kneemri.training.ghosting.Ghosting.targets",
       "weight": 1
     },
     {
@@ -37447,6 +37507,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.witness.OptimiserWitness",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.models.ema.LiveWeights",
@@ -37510,6 +37576,12 @@
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.sharpness.Sharpness",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.witness.OptimiserWitness",
       "weight": 1
     },
     {
@@ -37707,19 +37779,19 @@
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.policies",
-      "target": "kneemri.training.trainer.Trainer.backbone_rate",
+      "target": "kneemri.training.witness.OptimiserWitness.backbone_rate",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.policies",
-      "target": "kneemri.training.trainer.Trainer.encoder_rate_decay",
+      "target": "kneemri.training.witness.OptimiserWitness.encoder_rate_decay",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.policies",
-      "target": "kneemri.training.trainer.Trainer.weight_decay",
+      "target": "kneemri.training.witness.OptimiserWitness.weight_decay",
       "weight": 1
     },
     {
@@ -38385,7 +38457,7 @@
       "role": null
     },
     {
-      "descendants": 303,
+      "descendants": 305,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -40465,7 +40537,7 @@
       "role": null
     },
     {
-      "descendants": 43,
+      "descendants": 45,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -40564,6 +40636,14 @@
       "descendants": 0,
       "id": "kneemri.training.flag_vocabulary",
       "label": "flag_vocabulary",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.ghosting",
+      "label": "ghosting",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -40812,6 +40892,14 @@
       "descendants": 0,
       "id": "kneemri.training.warm_start",
       "label": "warm_start",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.witness",
+      "label": "witness",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -45938,6 +46026,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.ghosting.Ghosting",
+      "label": "Ghosting",
+      "level": "class",
+      "parent": "kneemri.training.ghosting",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.grades.Grades",
       "label": "Grades",
       "level": "class",
@@ -46398,6 +46494,14 @@
       "label": "WarmStart",
       "level": "class",
       "parent": "kneemri.training.warm_start",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.witness.OptimiserWitness",
+      "label": "OptimiserWitness",
+      "level": "class",
+      "parent": "kneemri.training.witness",
       "role": "primary"
     },
     {
@@ -68194,6 +68298,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation._ghost",
+      "label": "_ghost",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.augmentation.Augmentation._intensity",
       "label": "_intensity",
       "level": "method",
@@ -68630,6 +68742,46 @@
       "label": "parser",
       "level": "method",
       "parent": "kneemri.training.flag_vocabulary.FlagVocabulary",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.ghosting.Ghosting.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.ghosting.Ghosting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.ghosting.Ghosting._replicas",
+      "label": "_replicas",
+      "level": "method",
+      "parent": "kneemri.training.ghosting.Ghosting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.ghosting.Ghosting.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.training.ghosting.Ghosting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.ghosting.Ghosting.severity",
+      "label": "severity",
+      "level": "method",
+      "parent": "kneemri.training.ghosting.Ghosting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.ghosting.Ghosting.targets",
+      "label": "targets",
+      "level": "method",
+      "parent": "kneemri.training.ghosting.Ghosting",
       "role": null
     },
     {
@@ -70410,14 +70562,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.backbone_rate",
-      "label": "backbone_rate",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.batches",
       "label": "batches",
       "level": "method",
@@ -70460,14 +70604,6 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.drop_paths",
       "label": "drop_paths",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.encoder_rate_decay",
-      "label": "encoder_rate_decay",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
@@ -70602,14 +70738,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.weight_decay",
-      "label": "weight_decay",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.whole_stack",
       "label": "whole_stack",
       "level": "method",
@@ -70630,6 +70758,38 @@
       "label": "applied",
       "level": "method",
       "parent": "kneemri.training.warm_start.WarmStart",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.witness.OptimiserWitness.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.witness.OptimiserWitness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.witness.OptimiserWitness.backbone_rate",
+      "label": "backbone_rate",
+      "level": "method",
+      "parent": "kneemri.training.witness.OptimiserWitness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.witness.OptimiserWitness.encoder_rate_decay",
+      "label": "encoder_rate_decay",
+      "level": "method",
+      "parent": "kneemri.training.witness.OptimiserWitness",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.witness.OptimiserWitness.weight_decay",
+      "label": "weight_decay",
+      "level": "method",
+      "parent": "kneemri.training.witness.OptimiserWitness",
       "role": null
     }
   ]

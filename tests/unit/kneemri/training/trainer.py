@@ -17,6 +17,7 @@ from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
 from kneemri.training.augmentation import INTENSITY_AUGMENT, PADDING_MODE, SCALE_JITTER, SLOT_DROPOUT
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
+from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.label_focus import FOCUS, UNFOCUSED
@@ -295,14 +296,14 @@ def test_weight_decay():
     the keyword and every group carries the library default while the config records the value asked
     for. Reading the built optimiser back is what makes that a refusal before the card is spent.
     """
-    assert _trainer().weight_decay() == pytest.approx(WEIGHT_DECAY), "the inherited default"
+    assert _trainer().witness.weight_decay() == pytest.approx(WEIGHT_DECAY), "the inherited default"
 
     tighter = Trainer(
         StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
         torch.device("cpu"),
         Adaptation(weight_decay=0.1),
     )
-    assert tighter.weight_decay() == pytest.approx(0.1)
+    assert tighter.witness.weight_decay() == pytest.approx(0.1)
     assert tighter.policies()[OPTIMISER_DECAY] == pytest.approx(0.1), "and it is what the pre-flight check reads"
 
 
@@ -474,6 +475,7 @@ def test_policies():
         UNFOCUSED: 0.0,
         INTENSITY_AUGMENT: False,
         SLOT_DROPOUT: 0.0,
+        GHOSTING: 0.0,
         SCALE_JITTER: 0.08,
         PADDING_MODE: "border",
         # The three optimiser-path knobs, in `constructed` because they are the same on both sides of
@@ -545,14 +547,14 @@ def test_encoder_rate_decay():
     """
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max"))
     flat = Trainer(model, torch.device("cpu"), Adaptation(unfreeze_last=4))
-    assert flat.encoder_rate_decay() == NO_LAYER_DECAY
+    assert flat.witness.encoder_rate_decay() == NO_LAYER_DECAY
 
     decayed = Trainer(
         StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
         torch.device("cpu"),
         Adaptation(unfreeze_last=4, layer_decay=0.5),
     )
-    assert decayed.encoder_rate_decay() == pytest.approx(0.5)
+    assert decayed.witness.encoder_rate_decay() == pytest.approx(0.5)
     assert decayed.policies()[LAYER_DECAY] == pytest.approx(0.5), "and it is what the pre-flight check reads"
 
 
@@ -571,15 +573,15 @@ def test_backbone_rate():
         return Trainer(model, torch.device("cpu"), Adaptation(backbone_lr=asked, **adaptation))
 
     flat = trainer_at(unfreeze_last=4)
-    assert flat.backbone_rate() == pytest.approx(asked)
+    assert flat.witness.backbone_rate() == pytest.approx(asked)
     assert flat.policies()[BACKBONE_RATE] == pytest.approx(asked), "and it is what the pre-flight check reads"
 
     decayed = trainer_at(unfreeze_last=4, layer_decay=0.5)
-    assert decayed.backbone_rate() == pytest.approx(asked), "the decay divides the blocks BELOW the anchor"
+    assert decayed.witness.backbone_rate() == pytest.approx(asked), "the decay divides the blocks BELOW the anchor"
 
     frozen = trainer_at(unfreeze_last=0)
-    assert frozen.backbone_rate() == pytest.approx(asked), "the group is built at the rate even with none open"
-    assert frozen.encoder_rate_decay() == NO_LAYER_DECAY, "so the anchor is defined where the ratio is not"
+    assert frozen.witness.backbone_rate() == pytest.approx(asked), "the group is built at the rate even with none open"
+    assert frozen.witness.encoder_rate_decay() == NO_LAYER_DECAY, "so the anchor is defined where the ratio is not"
 
 
 def test_one_cycle():

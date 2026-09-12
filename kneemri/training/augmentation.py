@@ -17,6 +17,8 @@ import torch
 from jaxtyping import Float, UInt8
 from torch import Tensor, nn
 
+from kneemri.training.ghosting import Ghosting
+
 SLOT_DROPOUT = "slot_dropout"
 """The key slot dropout answers under when a run checks its switches landed (`kneemri.training.landed`).
 
@@ -142,6 +144,20 @@ class AugmentConfig:
     which is a supervision axis rather than a seating one.
     """
 
+    ghosting: float = 0.0
+    """Target median per-pixel residual for phase-encode motion ghosting, in [0, 1] image units.
+
+    Zero is the identity and the recipe every member on disk was fitted under. The value KMAR-50K's
+    paired volumes measure is **0.040** — see `kneemri.training.ghosting`, which owns the mechanism and
+    the argument for why this field is a measured residual rather than a replica amplitude.
+
+    It is the only augmentation in this config whose magnitude was READ OFF A CORPUS rather than chosen.
+    That is the whole reason it exists: `slot_dropout` is the one field of the three shared blind spots
+    that survived 2026-09-12 (cross-site toll -0.0271 against its control's -0.0361, +0.0090 shallower
+    and 2.4 sd of the eleven-member pool), and it is a corruption-robustness operator dialled to taste.
+    This is the same mechanism class with the taste removed.
+    """
+
     @classmethod
     def geometric_only(cls) -> "AugmentConfig":
         """The public baseline's augmentation: rigid jitter and one global gain, no intensity ops.
@@ -183,7 +199,15 @@ class Augmentation:
         rather than a Python branch, so a batch costs one kernel per transform and not one per image.
         """
         warped = self._warp(images, generator)
-        return self._intensity(warped, generator)
+        # Ghosting LAST, after the intensity block. It is an acquisition artefact, so it belongs on the
+        # image the scanner would have produced — putting it before a gamma curve would have the gamma
+        # act on the replicas too, which no scanner does and which would break the residual the operator
+        # was calibrated to produce.
+        return self._ghost(self._intensity(warped, generator), generator)
+
+    def _ghost(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
+        """Phase-encode motion replicas at the config's measured severity, or the identity at zero."""
+        return Ghosting(self.config.ghosting).applied(images, generator)
 
     def _warp(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
         """Rotation, scale and translation as a single affine resample."""

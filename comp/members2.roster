@@ -247,3 +247,22 @@ dropstack_long_s2026.pt              # 0.8641 @e13 -- the 24-epoch twin of drops
                             # single one, at a mean distance of 0.0013 -- two runs of one recipe that
                             # order studies differently. The 2026-09-12 board read is that decorrelation,
                             # not member quality, is the only channel that has ever added board points.
+
+# THE 0.40 SLOT-DROPOUT DOSE, and the first member on either shelf rostered on a CROSS-SITE number
+# rather than on holdout909. Added 2026-09-12. Its own-holdout 0.8551 is 0.0027 BELOW its matched
+# control band_dense_s2026 (0.8578), and that is not a trade-off to be weighed -- holdout909 is drawn
+# from the same decode as training, so it is blind BY CONSTRUCTION to the axis this member exists for.
+# The two numbers measure different things and only the second is about how the real test set differs
+# from us. Do not rank it against the pool on 0.8551.
+#
+# WHAT IT IS ROSTERED ON. Its foreign decode toll is -0.0229 against the control's -0.0361: +0.0132
+# shallower, 3.5 sd of the eleven-member pool the toll was calibrated on. The 0.25 dose already on the
+# first shelf reads +0.0090 / 2.4 sd. Three doses, one direction -- 0.00 -0.0361, 0.25 -0.0271,
+# 0.40 -0.0229 -- and monotone through the last measured point, which is what makes slot dropout a
+# recipe TERM rather than one lucky checkpoint. Calibration gate passed: the control reproduced -0.0361
+# exactly and slot_cost landed inside +/-0.0001 on both rows. Bead knee-lhico, ledger 2026-09-12.
+#
+# THE SEAT QUESTION IT ASKS is a straight dose A/B against slot_dropout_s2026 in one seat, and 0 of the
+# board's rows name it. It does NOT claim the 0.40 dose is optimal: monotone through the last point
+# leaves 0.55 open, and one foreign corpus is one point on transfer.
+slot_dropout_hi_s2026.pt             # 0.8551 -- the 0.40 dose; seated on decode, see above

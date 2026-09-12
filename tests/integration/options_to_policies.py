@@ -94,7 +94,7 @@ skip absent slots (5561bd4a), because both the masked and the unmasked path coll
 one of them had to name it. A run cannot ask for it and a builder attaching it would attach nothing —
 same standing as `over_depth` and `slice_features` beside it."""
 
-TRAINER_REPORTER = {"policies", "encoder_rate_decay", "weight_decay", "backbone_rate"}
+TRAINER_REPORTER = {"policies"}
 MODEL_REPORTER = {"applied"}
 """Each object's account of WHICH policies landed on it — read by `Landed` before the card is spent.
 
@@ -102,21 +102,15 @@ They are the check this file makes at commit time, made again at run time, so th
 public method a builder must NOT call: attaching them would mean the builder answering its own question.
 The stale-exemption assert wants names the owner really has, so the two are named apart.
 
-`encoder_rate_decay` is one of them rather than a policy: layer-wise decay is decided when the optimiser
-is BUILT, out of `Adaptation`, so there is no method for a builder to call and nothing for it to attach.
-The method measures the ratio back off the optimiser's own groups, which is precisely what makes it a
-witness rather than a switch — a decay that never landed cannot report itself.
-
-`weight_decay` is the same shape and for the same reason: `--weight-decay` is an `AdamW` CONSTRUCTOR
-keyword carried in `Adaptation`, so there is no attachment step to miss, and the method reads the
-coefficient back off the built optimiser's first group. That read is the whole point — a keyword that
-never arrived leaves the run training at the inherited value with the flag's value in its config, and
-only asking the optimiser can tell the two apart.
-
-`backbone_rate` is `encoder_rate_decay`'s twin, added with it in 9dcc35c9 and left out of this set, which
-failed the gate on main until 2026-09-05. It reports the ANCHOR the decay is a ratio of, captured off the
-optimiser's groups the moment they are built. Same shape, same reason: `--backbone-lr` is consumed while
-the groups are constructed, so there is no attachment for a builder to make and nothing here to call.
+`encoder_rate_decay`, `weight_decay` and `backbone_rate` were exempted here until 2026-09-12, on the
+argument that each is a WITNESS rather than a switch: all three flags are consumed while the optimiser is
+BUILT, out of `Adaptation`, so there is no method for a builder to call and nothing for it to attach, and
+each reads its value back off the built optimiser's own groups — which is what makes it a witness, since
+a value that never landed cannot report itself. That argument survives; what changed is where they live.
+They are now `OptimiserWitness` in `kneemri.training.witness`, reached as `Trainer.witness`, so they are
+no longer members of `Trainer` and naming them here fails the stale-exemption assert instead of the
+policy sweep. An attribute is not callable, so the sweep never sees `witness` and needs no exemption for
+it. If a witness ever moves back onto `Trainer`, it comes back into this set with it.
 """
 
 

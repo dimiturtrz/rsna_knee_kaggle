@@ -33,7 +33,7 @@ from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import CONFIDENCE_FLOOR, Targets
 from kneemri.models.drop_path import NO_DROP
 from kneemri.models.ema import DECAY, LiveWeights, WeightAverage
-from kneemri.models.model import NO_LAYER_DECAY, StudyModel
+from kneemri.models.model import StudyModel
 from kneemri.models.stochastic_depth import StochasticDepth
 from kneemri.training.accumulation import Accumulation
 from kneemri.training.adaptation import Adaptation
@@ -45,6 +45,7 @@ from kneemri.training.augmentation import (
     Augmentation,
     AugmentConfig,
 )
+from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import Predicted
 from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
@@ -55,6 +56,7 @@ from kneemri.training.sampling import Sampling, Uniform
 from kneemri.training.sharpness import Sharpness
 from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
+from kneemri.training.witness import OptimiserWitness
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +94,6 @@ CERTAINTY_RAMP = "certainty_ramp"
 CORPUS_OVERSAMPLE = "corpus_oversample"
 TARGET_CORPUS = "target_corpus"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
-
-NEEDED_FOR_A_RATIO = 2
-"""Two backbone groups — below that there is no pair for a per-block ratio to be defined between."""
 
 NO_OPEN_BACKBONE = 0.0
 """The anchor of an empty backbone: under LoRA no base block is open, so no rate was asked for one."""
@@ -138,6 +137,7 @@ class Trainer:
         # rate landed. The groups have just been built from `Adaptation`, so this is still a measurement
         # off the optimiser and not a read-back of the flag.
         self.backbone_anchor = cast("float", groups[-1]["lr"]) if len(groups) > 1 else NO_OPEN_BACKBONE
+        self.witness = OptimiserWitness(self.optimiser, self.backbone_anchor)
         # fp16 until a run says otherwise, because that is what every number in the ledger was measured
         # under and a precision change is a numerics change.
         self.autocast_dtype = torch.float16
@@ -225,6 +225,7 @@ class Trainer:
             **self.objective.settings(),
             INTENSITY_AUGMENT: self.augmentation.intensity(),
             SLOT_DROPOUT: self.augmentation.config.slot_dropout,
+            GHOSTING: self.augmentation.config.ghosting,
             SCALE_JITTER: self.augmentation.config.scale_jitter,
             PADDING_MODE: self.augmentation.config.padding_mode,
             AUTOCAST: self.autocast_dtype,
@@ -236,10 +237,10 @@ class Trainer:
             TEACHER: self.teacher is not None,
             FEATURE_TEACHER: self.feature_teacher is not None,
             ACCUMULATION: self.accumulation.every,
-            LAYER_DECAY: self.encoder_rate_decay(),
-            BACKBONE_RATE: self.backbone_rate(),
+            LAYER_DECAY: self.witness.encoder_rate_decay(),
+            BACKBONE_RATE: self.witness.backbone_rate(),
             MIXUP: self.mixup.alpha,
-            OPTIMISER_DECAY: self.weight_decay(),
+            OPTIMISER_DECAY: self.witness.weight_decay(),
             WARMUP: self.warmup,
             CLIPPING: self.clipping.max_norm,
             SHARPNESS: self.sharpness.radius,
@@ -253,54 +254,6 @@ class Trainer:
                 getattr(self.sampling, "target", "") if getattr(self.sampling, "factor", 0.0) > 0.0 else ""
             ),
         }
-
-    def weight_decay(self) -> float:
-        """The decay MEASURED off the optimiser, not read back off the flag that asked for it.
-
-        The positive witness `--weight-decay` would otherwise lack, and the same argument
-        `encoder_rate_decay` makes one line below: a decay that never reached `Adaptation` builds an
-        optimiser at the inherited 0.02, trains perfectly well, and reports the old recipe's number under
-        the new arm's name. Read off the HEAD group, which every configuration has — under LoRA the
-        backbone groups are empty of base blocks, and the head is the one group `parameter_groups` always
-        returns.
-        """
-        return float(self.optimiser.param_groups[0]["weight_decay"])
-
-    def encoder_rate_decay(self) -> float:
-        """The per-block rate ratio MEASURED off the optimiser, not read back off the flag that asked.
-
-        This is the positive witness `--layer-decay` would otherwise lack. Everything else about the
-        flag is silent: a decay that never reached `Adaptation` builds the flat two groups, trains
-        perfectly well, and reports the flat recipe's number under the decayed arm's name — the exact
-        failure shape `landed` exists for. The optimiser's own groups cannot lie about it.
-
-        Read off the TOP TWO backbone groups because they are the pair the decay is defined between,
-        and because `unfreeze_last` is clamped to the trunk's depth: counting groups instead would
-        report a mismatch for `--unfreeze-last 24` that is only this check's own arithmetic.
-        """
-        backbone = self.optimiser.param_groups[1:]
-        if len(backbone) < NEEDED_FOR_A_RATIO:
-            return NO_LAYER_DECAY
-        return float(backbone[-2]["lr"]) / float(backbone[-1]["lr"])
-
-    def backbone_rate(self) -> float:
-        """The ANCHOR the per-block decay is measured FROM, read off the optimiser rather than the flag.
-
-        `encoder_rate_decay` above witnesses the RATIO between two backbone groups, and a ratio is blind
-        to the rate it is a ratio of. A `--backbone-lr` that never reached `Adaptation` builds the groups
-        at the inherited rate, decays them by exactly the 0.7 that was asked for, and reports every
-        switch landed — so the flag with the largest effect on any foreign-trunk arm was the one flag
-        with no positive witness at all.
-
-        That is how `band_deep_matched` floored its training loss 0.189 above its own control with all
-        four recipe flags recorded correct, and why its 0.8487 could not be read as a fact about depth:
-        no number anywhere could say whether the rate compensation arrived (knee-62sol).
-
-        Taken off the LAST backbone group, which `backbone_groups` builds at `layer_decay ** 0` — the
-        anchor itself, and the only group whose rate is the flag rather than a power of it. Captured at
-        construction for the reason spelled where it is captured: a schedule rewrites the live rate.
-        """
-        return self.backbone_anchor
 
     def report_supervision(self, reports: ReportSupervision) -> None:
         """Also supervise the study representation by its report embedding."""

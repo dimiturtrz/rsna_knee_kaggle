@@ -3114,9 +3114,9 @@ submission adds an efficiency candidate rather than displacing the 0.944.
 
 Reading 0.939 as an accuracy result. It is three seats where the champion has seven, and it was built
 to be cheap. The accuracy row stays 0.944, 0.010 behind a 0.954 leader.
-On 2026-08-30 it stood at 45th of 3239; the board read of 2026-09-12T13:28:17Z puts the same score at
-**rank 70 of 3588** — the score did not move, the field did, which is the only thing a remembered rank
-can never tell you. Twenty-five places in thirteen days, TWELVE of them in the three days since the
+On 2026-08-30 it stood at 45th of 3239; the board read of 2026-09-12T16:54:13Z puts the same score at
+**rank 71 of 3602** — the score did not move, the field did, which is the only thing a remembered rank
+can never tell you. Twenty-six places in thirteen days, THIRTEEN of them in the three days since the
 2026-09-09T19:53Z read (58th of 3421), is the drift rate this line exists to make visible, and it is
 accelerating: standing still now costs about a rank every three hours.
 

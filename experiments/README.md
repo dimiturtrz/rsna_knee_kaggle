@@ -15989,3 +15989,135 @@ says the shared-blind-spot thesis made a falsifiable prediction, the prediction 
 and the reading came back on its side at 2.3 sd while the arm built to test the same thesis on a different
 field came back flat. The remaining untested shared field is `padding_mode`, now confounded with the dead
 scale-jitter dose and NOT independently priced by this pass.
+
+## 2026-09-12 -- KMAR pays out on the FIRST reading, and it pays by refuting the operator it was read for
+
+**THE ONE-LINE RESULT.** Two of the three owner-supplied corpora were already in this repo and already
+spent; the third, KMAR-50K, produced the project's first MEASURED motion-artifact statistic, and that
+statistic then refuted the operator built to use it -- for zero card, before a single GPU hour.
+
+**WHAT THE AUDIT FOUND BEFORE ANY CODE WAS WRITTEN, AND IT HALVED THE EPIC.** `core/data/corpus/
+kmar_corpus.py` and `kmar_stats.py` were already on disk, written, unreferenced, never run -- and
+`fastmri_corpus.py` was too, with both its arms already in this ledger (`ortho_fastmri` +0.0023,
+`ortho_fastmri_masked` +0.0012, both declined, NYU's grant making any member fitted on a merge of ours
+unshippable). The fastMRI+ "localized supervision" lane had been filed that morning as the epic's prize;
+it closed without a run (knee-li57h). The lane was priced off a directory listing instead of off the
+repo, which is the exact inversion of this project's own audit rule.
+
+**THE MEASUREMENT.** 120 pairs sampled evenly through 1,339, 109 measured, 11 refused on a shape
+mismatch (9%: the filenames joined and the arrays did not -- counted, not swallowed). Per-pixel
+|artifact - clean| in the [0, 1] space the cache holds images in, windowed on the CLEAN volume's own 1st
+and 99th percentiles; quantiles over PAIRS. Report at `D:/models/rsna_knee_abnormality/kmar_residual.json`.
+
+| statistic | p10 | p50 | p90 |
+|---|---|---|---|
+| `residual` | 0.023 | **0.040** | 0.086 |
+| `residual_p99` | 0.180 | 0.363 | 0.630 |
+| `background_share` | 0.057 | 0.113 | 0.201 |
+
+**THE PLANE INVARIANCE IS A RESULT THAT COSTS A KNOB NOTHING.** Sagittal / coronal / transection medians
+are 0.0406 / 0.0434 / 0.0367 and background shares 0.106 / 0.116 / 0.125 -- spreads far inside the
+p10-p90 spread WITHIN any one plane. The operator therefore takes one parameterisation for all three and
+an arm needs no per-plane term. A knob that does not have to be searched, priced at zero card.
+
+**WHY THE OPERATOR IS PARAMETERISED BY THE MEASURED RESIDUAL AND NOT BY A REPLICA AMPLITUDE.** An
+amplitude maps to a residual through the image's own content, so parameterising by amplitude would put a
+fitted constant between the corpus number and the knob -- wrong for every image whose anatomy fills a
+different fraction of the frame. `kneemri/training/ghosting.py` builds the replicas at unit amplitude,
+measures their mean absolute deviation per image, and scales to the drawn target. The only number
+crossing from KMAR into this repo is a number KMAR itself reports.
+
+**THE FALSIFICATION FIRED ON THE FIRST BUILD.** The operator is handed the MAGNITUDE and must reproduce
+the IMPULSIVENESS from its mechanism alone (`p99/mean`, ~9 in KMAR against ~2.6 for additive Gaussian
+noise, so the number genuinely discriminates). Build one used the textbook ghost spacing -- whole-object
+replicas at FOV/N for N shots -- and came back at **3.39**: a residual far too diffuse to be motion. A
+sweep of displacement against that one number is monotone and settles the parameter:
+
+| displacement px | 2 | 3 | 4 | 6 | 8 | 16 | 32 | 64 | 112 |
+|---|---|---|---|---|---|---|---|---|---|
+| `p99/mean` | 7.87 | **7.95** | 7.73 | 7.19 | 6.67 | 5.40 | 4.34 | 3.81 | 3.62 |
+
+Build two displaces 2-4 px and reads **7.50** against KMAR's ~9, with residual quantiles 0.020 / 0.042 /
+0.071 against the corpus's 0.023 / 0.040 / 0.086. The ghost INTERPRETATION survived; only its scale did
+not. Real motion here leaves residual concentrated on high-gradient edges, which is what an impulsiveness
+of 9 means and what a large displacement cannot make.
+
+**AND ONE OF THE THREE STATISTICS IS NOT A RULER AT ALL -- A DENOMINATOR ERROR, MEASURED.**
+`background_share` is the fraction of residual energy on pixels below `BACKGROUND_PERCENTILE = 40` of the
+clean image. On a KMAR volume that cutoff sits at **0.022** of full scale: air, which is what it was
+meant to select. On this project's 224 px cache it sits at **0.416** -- mid-grey anatomy, **nineteen
+times higher** -- because our cache holds a tight crop and KMAR holds a whole field of view. The same
+statistic names air in one corpus and tissue in the other, so KMAR's 0.113 is not comparable to the 0.43
+the operator produces on our pixels, at any displacement (the sweep floors at 0.29 and never approaches
+0.113). Anyone comparing the two numbers without opening the definition would have read a refutation of
+the operator. It is a refutation of the comparison.
+
+**WHY THIS LANE SURVIVES THE ONE THAT DIED BESIDE IT.** fastMRI died on "data files derived from the
+fastMRI Dataset". This derives no data file: KMAR's pixels never enter a cache, a checkpoint or Kaggle.
+What crosses is a handful of operator parameters fitted to a statistic. The licence must still be
+established before an arm -- no licence file was found at depth 2 -- but the right being claimed is far
+weaker than redistribution.
+
+**WHERE IT SITS AGAINST TODAY'S ONE LIVE RESULT.** `slot_dropout` is the single field of the three shared
+blind spots that survived this date (cross-site toll **-0.0271** against its control `band_dense_s2026`
+at -0.0361, **+0.0090** shallower, 2.4 sd of the eleven-member pool) -- and it is a corruption-robustness
+operator dialled to taste. This is the same mechanism class with the taste removed. That is the argument
+for the arm, and it is an argument about MECHANISM rather than about volume, which is what clears the
+Einstein gate: every previous external-corpus arm pooled foreign studies into our label space, and the
+site-count axis closed negative there (+0.0043, -0.0024). No study of KMAR's is trained on.
+
+**WHAT THIS DOES NOT SAY.** 109 pairs supports a median, not a tail -- `residual_p99` spans 0.18-0.63
+p10-p90, so severity is SAMPLED per study, never fixed. KMAR is Siemens Aera 1.5T `pd_tse_fs` by its own
+cohort table, and whether RSNA's mixed vendors ghost at the same scale cannot be measured without paired
+volumes of ours, which do not exist. That transfer is the assumption an arm built on this operator is
+testing, and it is stated in the module rather than buried in it.
+
+## 2026-09-12 -- slot dropout is a DOSE-RESPONSE: three points, one direction, and a recipe term
+
+`slot_dropout_hi` (`--slot-dropout 0.40`, one variable off `slot_dropout`'s 0.25, matched control
+`band_dense_s2026`) landed and was read by `after_slot_dropout_hi.sh` through one `foreign_readout` pass
+over both checkpoints. The reading was taken in the order the arm's header pre-registered, before any of
+the numbers existed, and every gate in that order passed.
+
+    slot_dropout_hi_s2026.pt: native 0.8551 kept 0.8550 foreign 0.8321 | slots -0.0000 decode -0.0229
+    band_dense_s2026.pt:      native 0.8578 kept 0.8578 foreign 0.8217 | slots +0.0000 decode -0.0361
+
+THE CALIBRATION GATE PASSED FIRST. The arm header pinned the control's value from 2026-09-12 at -0.0361
+and stated that a pass failing to reproduce it to ~0.0001 is a BROKEN PASS whose numbers may not be read
+at all -- neither of them, not just the control's. It reproduced -0.0361 exactly. The `slot_cost` column
+is -0.0000 and +0.0000 against a +/-0.0001 bar, which is the separate claim that the shifted code path
+serves OUR OWN pixels intact: whatever `decode_cost` measures, it is about the foreign pixels and not
+about the path that reads them. And the own-holdout safety floor (>= 0.8500, so a member that ships is
+still a member) is met at 0.8551.
+
+THE DECIDING NUMBER: decode_cost -0.0229 against the control's -0.0361 is **+0.0132 shallower**, clearing
+the arm's TOP pre-registered band (`>= -0.0271`, "DOSE-RESPONSE CONFIRMED") by 0.0042. Against the
+eleven-member pool the toll was calibrated on (mean -0.0336, sd 0.0038) that is **3.5 sd**, up from the
+0.25 dose's 2.4 sd.
+
+    slot dropout dose     0.00      0.25      0.40
+    decode_cost         -0.0361   -0.0271   -0.0229
+    vs control              --     +0.0090   +0.0132
+    sd of the pool          --       2.4       3.5
+
+MONOTONE ACROSS THREE POINTS IS WHAT MAKES THIS A TERM RATHER THAN A MEMBER. A single member reading
++0.0090 is one draw from a pool whose sd is 0.0038; it is a candidate seat and nothing more, which is
+exactly how it was priced when it shipped. Two doses in the same direction with the control at zero is a
+response curve, and a response curve is a statement about the RECIPE: the mechanism transfers to any
+member trained with the term, not just to the one checkpoint that happened to read well. The arm's own
+text pre-committed to that reading before the number existed.
+
+WHAT IT COSTS ON OUR OWN RULER, AND WHY THAT RULER CANNOT PRICE IT. Native 0.8551 against the control's
+0.8578 is -0.0027 -- knob-sized, and inside the scatter this project reports as directional. But
+holdout909 is drawn from the same decode as training, so it is blind to the decode axis BY CONSTRUCTION:
+the ruler that says -0.0027 is structurally incapable of seeing the +0.0132. The two numbers are not in
+tension and must not be traded off against each other; they are measurements on different axes, and only
+the second one is about the thing the real Kaggle test set differs from us in.
+
+WHAT THIS DOES NOT SAY. It does not say 0.40 is the optimum -- monotone through the last measured point
+is precisely the shape that leaves the next dose open, and 0.55 is now a priced question rather than an
+answered one. It does not say the board will move: `board_transfer` saturates, and this is a member-level
+reading, not an entry-level one. And the toll is measured against ONE foreign decode (his corpus, 909
+studies, 6 blocks); a second decode would be a second point on transfer, not a replication of this one.
+
+Bead knee-lhico. Control `band_dense_s2026`. Reading `slot_dropout_hi_decode.npz`.

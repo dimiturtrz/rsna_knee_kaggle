@@ -387,6 +387,18 @@ class FlagVocabulary:
             "inference with slots the model has only ever seen filled. A study is never emptied.",
         )
         parser.add_argument(
+            "--ghosting",
+            type=float,
+            default=0.0,
+            help="add phase-encode motion ghosting to each training image at this TARGET MEDIAN "
+            "per-pixel residual, in [0, 1] image units. 0, the default, is off and is what every ledger "
+            "number was measured under. The only augmentation here whose magnitude is measured rather "
+            "than chosen: KMAR-50K ships the same knee acquired with and without patient motion, and 109 "
+            "of its pairs put the residual at 0.040 of full scale (p10 0.023, p90 0.086), the "
+            "impulsiveness at p99/mean ~ 9 and 11%% of the residual energy outside the anatomy - the "
+            "ghosting signature, which is why this displaces replicas rather than blurring.",
+        )
+        parser.add_argument(
             "--scale-jitter",
             type=float,
             default=0.08,

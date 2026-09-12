@@ -86,6 +86,11 @@ class TrainingOptions:
     on disk was fitted under. The first SUPERVISION-axis regulariser this project has — mixup perturbs
     labels and the intensity block perturbs appearance, and neither changes which acquisitions a study
     is made of. See `kneemri.training.augmentation.AugmentConfig.slot_dropout`."""
+    ghosting: float = 0.0
+    """Target median per-pixel residual for phase-encode motion ghosting; 0 is off and is what every
+    member on disk was fitted under. The only augmentation here whose magnitude was MEASURED rather than
+    chosen: KMAR-50K ships the same knee acquired with and without patient motion, and 109 of its pairs
+    put the residual at 0.040 of full scale. See `kneemri.training.ghosting`."""
     scale_jitter: float = 0.08
     """Half-width of the uniform field-of-view jitter; 0.08 is the public baseline's and was hardcoded
     until knee-su2sw, so it is what every member in the pool was fitted under. The first EXTENT-axis

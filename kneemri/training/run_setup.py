@@ -194,6 +194,7 @@ class RunSetup:
             corpus_oversample=options.corpus_oversample,
             target_corpus=options.target_corpus,
             slot_dropout=options.slot_dropout,
+            ghosting=options.ghosting,
             scale_jitter=options.scale_jitter,
             padding_mode=options.padding_mode,
         )
@@ -639,6 +640,7 @@ class RunSetup:
                 slot_dropout=options.slot_dropout,
                 scale_jitter=options.scale_jitter,
                 padding_mode=options.padding_mode,
+                ghosting=options.ghosting,
             ),
             adaptation=self.adaptation(),
             objective=self.objective(None if features is None else Widths(model.context_width(), features.width())),
