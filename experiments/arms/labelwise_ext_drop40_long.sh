@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# bead: knee-cgt9m
+# reading: labelwise_ext_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `labelwise_extended`'s byte-identical line with the two operators that are MEASURED to pay at the
+#   other pooling corner: `--slot-dropout 0.40` and `--epochs 12 -> 24`. Nothing else moves. The base
+#   is a member of the champion six, so a gain lands in the pinned entry without reseating anything.
+#
+# WHY THE LABELWISE FAMILY AND WHY NOW
+#   It owns the top of the 0.75 ruler -- depth24 0.8998, extended 0.8986, drop 0.8984, dense 0.8964 --
+#   and every one of those is a twelve-epoch run whose peak is at epoch 7 to 10. That is not a budget
+#   wall; a budget wall peaks on the last epoch. Peaking early and then declining for four epochs is
+#   the signature of a MISSING REGULARISER, and the fix is measured: `band_dense` moved from peak-e8
+#   0.8877 to peak-e16 0.8918 (+0.0041 ledger75) when exactly these two flags were added, with the
+#   peak epoch moving out by eight. That pair has only ever run under `--slice-pooling max`.
+#
+# WHY THIS IS NOT labelwise_long24 (knee-pfqtw)
+#   That arm is epochs-only, no regulariser. Its own watcher gate required `labelwise_drop` to clear
+#   0.8663 on the midpoint ruler and it landed 0.8649 -- unmet, inside its own declared noise band. Its
+#   pre-registration predicts null at P(clears +0.010) ~ 0.15. Stretching a budget on a recipe that is
+#   already declining before epoch 12 is the operation this corner has measured NOT to work.
+#
+# WHY IT IS WORTH THE CARD AT ALL
+#   Optimal seat selection over 140 honest members is worth +0.0017 out-of-fold (bf880d89); the CNN
+#   family is -0.0038; ten decision rules span 0.0010. Seating, architecture and aggregation are each
+#   measured flat. knee-0v8yz: only MEMBER QUALITY at count 1 has ever moved this board 0.005+. This
+#   arm is on the one axis that is not closed.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_extended_s2026 0.8986, ledger75)
+#   >= +0.0040   a member at 0.9026 -- the best honest solo the project owns -- dropping into a seat it
+#                already holds. The operator pair generalises off the max corner and the other three
+#                labelwise arms become re-priceable against the same operators.
+#   +0.000..+0.0039
+#                directional. Keep for the pool, spend no slot.
+#   <= 0.0000    the drop40+long pair is a `max`-pooling effect that does not transfer to labelwise
+#                pooling. That closes the operator-transfer question on a matched base.
+#   midpoint     expected >= 0.8623 (its own 12-epoch peak) by the budget argument.
+#   peak         if this arm peaks ON ITS LAST EPOCH the budget is still binding at 24 and NO verdict
+#                may be read. Record it and stop; do not quote the delta.
+#
+# READ PEAK-TO-PEAK ONLY. $RECIPE carries --one-cycle, so the anneal stretches with the budget and the
+#   two runs differ from epoch 1. Epoch-by-epoch comparison against the 12-epoch base is meaningless.
+#
+# deliberate: --slot-dropout 0.40 — imported operating point (knee-yotj8), not a swept knob.
+# deliberate: --epochs 24 — imported from the pair that measured the operator, not a swept knob.
+# deliberate: --calibrated-targets --hold-annotations --batch 4 --accumulate 3 --scheme extended —
+#             all inherited verbatim from labelwise_extended. This arm changes two flags, not three.
+#
+# control  labelwise_extended_s2026 (on disk, 12-epoch, same recipe line). No control run is owed.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+run_train labelwise_ext_drop40_long \
+  $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended \
+  --calibrated-targets --hold-annotations \
+  --batch 4 --accumulate 3 --slot-dropout 0.40 \
+  --labels "$LABELS" --out "$MODELS/labelwise_ext_drop40_long_s2026.pt"
