@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# bead: knee-8c8up
+# reading: mergedk_labelwise_drop40_long_336_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `mergedk_labelwise_drop40_long`'s line with ONE flag moved: `--image-size 224` becomes
+#   `--image-size 336`. Corpus, pooling, slices, band, dose and budget are all inherited.
+#
+# WHY THE RESOLUTION MOVED, AND WHY THAT IS NOT A SECOND VARIABLE
+#   The 224 arm says so itself: "A 336px merge needs ~43 GB of new array and /d holds 23 GB
+#   (knee-rijuv). The 224 array already exists, so this cell costs card and no disk. That is the reason
+#   the resolution is held down, not a judgement that 224 is the right place for labelwise pooling."
+#   `images_336px_12sl_mergedk.npy` was built 2026-09-13 08:13Z (41.6 GB, disk/CPU only, no card), and
+#   its label table is BYTE-IDENTICAL to `mergedk_labels.csv` -- the same 5494 rows in the same order --
+#   so the row identity every mergedk member on disk was fitted against still holds. The disk reason is
+#   spent, so the flag returns to where the champion actually serves.
+#
+# WHY THIS IS THE HIGHEST-VALUE CELL AVAILABLE
+#   Every seat in the champion six is 336px, labelwise-family, drop40, long. This arm is that recipe with
+#   the one lever the champion has never had: a SECOND SITE. The corpus effect is measured and positive
+#   at the 224 corner, matched, all four cells on disk at ledger75:
+#     base224_control_s2026      0.8754   no corpus, no dropout, 12ep
+#     mergedk_corpus_s2026       0.8787   +0.0033 corpus alone
+#     mergedk_drop40_s2026       0.8805   +0.0051 corpus + drop40
+#     mergedk_drop40_long_s2026  0.8853   +0.0099 corpus + drop40 + 24ep, peak e17 of 24
+#   and the 224 ceiling is ~0.88 against ~0.90 for the same family at 336, so the corner was costing
+#   roughly the whole corpus gain back. The two effects are orthogonal in mechanism -- resolution buys
+#   in-plane detail, a second site buys directions in the corpus (measured 2026-09-13: our 4407 studies
+#   carry 17.5 effective dimensions, 62% of between-study variance in 10 directions, and only 0.09% have
+#   a near-twin, so more of OUR data buys density while a second site buys axes).
+#
+# LICENCE. KMAR-50K is CC BY 4.0 (Mendeley DOI 10.17632/xw7mrg7ntg.6) -- attribution and nothing else.
+#   It is the ONLY merge this project owns that is clean through competition rule 2.5's winner-licence
+#   obligation, and it carries no data agreement, which is the axis the host actually ruled on
+#   (discussion 734109, 2nd-place competitor asked, Kaggle staff refused KneeCoT "due to the required
+#   data agreement" -- not for its CC BY-NC licence).
+#
+# NOT AN EINSTEIN REPEAT. `comp/board.jsonl` has never held a mergedk member at any resolution, and no
+#   run on disk puts labelwise pooling on a merged corpus at 336.
+#
+# PRE-REGISTRATION (ledger75)
+#   solo vs mergedk_labelwise_drop40_long (224, running ahead of this one) and vs the labelwise family's
+#   336 members (depth24 0.8998, extended 0.8986, drop 0.8984, dense 0.8964)
+#     >= 0.9000    the corpus lever survives at 336 and this is a seat on member quality alone.
+#     0.8900..0.8999  the corpus lever survives but does not beat the home-corpus family; a diversity
+#                  seat argument only.
+#     <  0.8900    the +0.0099 was a 224-corner effect; the corpus axis closes at the resolution we ship.
+#   ensemble: add to the core six (LogitAverage, full 909, no selection)
+#     >= +0.0040   seats it.
+#     +0.000..+0.0039  directional, no slot.
+#     <= 0.0000    closes the second-site hope on the honest pool (knee-0v8yz).
+#   peak: read under `convergence_check`, NEVER by argmax alone.
+#
+# deliberate: --image-size 336 — the ONLY flag that moves from the 224 arm, and it moves because the
+#             disk constraint that pinned it is gone, not because a knob was swept.
+# deliberate: --slot-dropout 0.40 — imported operating point (knee-yotj8), not a swept knob.
+# deliberate: --epochs 24 — inherited from the mergedk long cell.
+# deliberate: --slices 12 --band-low 0.2 --band-high 0.8 --scheme mergedk — inherited verbatim; they are
+#             what `images_336px_12sl_mergedk.npy` was built as.
+#
+# CARD. 336px at 12 slices is a smaller footprint than the 20-slice extended members that share this
+#   recipe. Nothing else of ours may share the card (`card_check`).
+#
+# control  mergedk_labelwise_drop40_long_s2026 (the same line at 224) and mergedk_drop40_long_s2026 (the
+#   same corpus at `max`). No control run is owed.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+MERGEDK_LABELS="$PROCESSED/labels/mergedk_labels.csv"
+require "$MERGEDK_LABELS"
+require "$LABELS"
+
+run_train mergedk_labelwise_drop40_long_336 \
+  $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --image-size 336 --band-low 0.2 --band-high 0.8 \
+  --scheme mergedk --slot-dropout 0.40 \
+  --labels "$MERGEDK_LABELS" --eval-labels "$LABELS" \
+  --out "$MODELS/mergedk_labelwise_drop40_long_336_s2026.pt"

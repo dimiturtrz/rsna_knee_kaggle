@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
-# after_mergedklw.sh — wait for `labelwise_ext_drop40_long_ff`, then run `mergedk_labelwise_drop40_long`
-# (knee-dl65h). Armed 2026-09-13 08:10Z while the ff arm was on epoch 3.
+# after_mergedklw.sh — wait for `labelwise_ext_drop40_long_ff`, then run
+# `mergedk_labelwise_drop40_long_336` (knee-8c8up). Armed 2026-09-13 08:10Z while the ff arm was on
+# epoch 3, re-armed 08:16Z onto the 336 arm.
+#
+# WHY 336 AND NOT THE 224 CELL IT WAS FIRST ARMED ON. `mergedk_labelwise_drop40_long.sh` (knee-dl65h)
+# holds its resolution at 224 for one stated reason and it is disk, not science: "A 336px merge needs
+# ~43 GB of new array and /d holds 23 GB." `images_336px_12sl_mergedk.npy` was built 08:13Z off caches
+# already on disk -- 41.6 GB, no card, label table byte-identical to the 224 one -- so that reason is
+# spent, and the arm moves to the resolution every champion seat actually serves at.
 #
 # NO GATE. The ff arm fits `--fold -1` and holds nothing out, so there is no number to gate on — its
 # pre-registration is on the BOARD, not on an offline ruler. The mergedk arm is queued as a DIVERSITY
@@ -29,4 +36,4 @@ while true; do
 done
 echo "=== FF ARM RELEASED at $(date -u +%H:%MZ) ==="
 
-bash "$(dirname "$0")/arms/mergedk_labelwise_drop40_long.sh"
+bash "$(dirname "$0")/arms/mergedk_labelwise_drop40_long_336.sh"
