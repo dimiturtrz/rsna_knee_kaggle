@@ -318,3 +318,25 @@ labelwise_depth24_drop40_long_s2026.pt  # 0.8679 mid (l75 0.9053, e18 of 0..23) 
                             # Rostered on QUALITY. No seating for it has been priced against the
                             # champion yet -- its twin at 0.9045 added +0.0017 as a seventh seat, under
                             # the +0.0040 floor, and this member correlates with the same consensus.
+labelwise_dense_drop40_long_s2026.pt    # 0.8672 mid (l75 0.9048, e23 of 0..23) -- THIRD AND LAST
+                            # MATCHED BASE for the slot-dropout-0.40 + doubled-budget operator pair
+                            # (knee-vs06j). labelwise_dense's line with --slot-dropout 0.40 and
+                            # --epochs 24, nothing else. CLEARS ITS BAND BY THE WIDEST MARGIN OF THE
+                            # THREE: +0.0084 ledger75 over labelwise_dense_s2026 0.8964, against a
+                            # pre-registered >= +0.0040. Its base peaked EARLIEST of the family (e7 of
+                            # 12), which is the strongest form of the missing-regulariser signature,
+                            # and it gained the most -- the two agree.
+                            # ITS ARGMAX IS ITS LAST EPOCH, and the header's hand-written veto would
+                            # refuse the verdict. The legislated rule (knee-a21h9) is convergence_check,
+                            # which asks for argmax-last AND a final-three-epoch gain clearing the
+                            # 0.0062 holdout floor. e21 0.8670, e22 0.8670, e23 0.8672: a tail gain of
+                            # +0.0002, a thirtieth of the floor, and the check returns CONVERGED.
+                            # SEATED ON QUALITY AND ON ADDITIVITY. Measured 2026-09-13, full 909,
+                            # LogitAverage, no selection, against the honest core six at 0.9050:
+                            #   + depth_up + ext_up (the eight)      0.9081  +0.0031
+                            #   + all three (the nine)               0.9090  +0.0040
+                            #   swapped core + depth_up + ext_up     0.9089  +0.0039
+                            # The nine CLEARS the +0.0040 seat floor, and the swap of this member for
+                            # its own base buys the same +0.0039 at eight seats rather than nine.
+                            # Additivity is decelerating (+0.0020, +0.0011, +0.0009 per added base),
+                            # which is what knee-fnhbs's fourth base is pre-registered to read.
