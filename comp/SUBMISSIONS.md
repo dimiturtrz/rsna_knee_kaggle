@@ -4123,3 +4123,66 @@ rule at a moment when both of this project's rulers had just been retired as sea
 `run_check` read **loaded 7 of 7 members** before the slot was spent -- the exact census its sibling
 `farseat_v1` failed silently for five days, shipping six of seven under a name that was then written
 into the ledger as closing this very axis.
+
+## `warmchair_v1` -- 0.944, ref 56194153, 2026-09-12 -- the first all-shippable 0.944
+
+Six members, `RankAverage`, `overlap=False`. Pre-registered bands were `0.946+` re-pin /
+`0.9435-0.9455` FLAT / `<=0.943` the all-data confound is the first suspect. It landed **0.944**, so
+the FLAT band fires.
+
+What it is, seat for seat against `stackseat_v1` (the pinned champion, also 0.944):
+
+| seat | stackseat_v1 | warmchair_v1 | ledger75 |
+|---|---|---|---|
+| 1-3 | `final_ws_cf`, `calib_span_ff`, `grade_ladder_cf` | identical | -- |
+| 4 | `stack_increments_ff` | `labelwise_dense_s2026` | 0.8964 |
+| 5 | `lr4e-5_ws_cf` | `warm_calib_lowlr_s2026` | 0.8910 |
+| 6 | `through_dense_cf` | identical | -- |
+
+Two seats moved, both from a DARK foreign member to one of ours with a real holdout number, and the
+score did not move. `stack_increments_ff` is fitted `--fold -1 --ema` and carries no holdout number by
+construction; `lr4e-5_ws_cf` is likewise dark. So this entry replaces the two seats nobody can price
+with the project's third-best solo member and a seated 0.8910, at zero board cost.
+
+**What it does NOT do, stated because the plan said it would.** The pre-registration said a
+licence-clean tie should REPLACE the pin. That argument does not apply here on inspection:
+`champion_check` passes on `stackseat_v1`, and its six members carry no licence tag -- the
+unshippable `merged_blend_cf` sits in `raptorweight_v1`, not in the pin. So the re-pin premise was
+wrong, and the pin stays where it is. What warmchair buys is DARKNESS, not licence: it is the first
+0.944 every one of whose seats has a number the project measured itself.
+
+**And it is a fourth flat at 0.944.** With `hidose_v1`, `slotseat_v1` and `labelseat_v1`, four designed
+seat changes in a row have landed on the same value. The board reports at 0.001, which bounds their
+true spread below that -- it does not license a search inside it.
+
+## the corpus lever closes -- `knee-q1pp0`, the subtraction this project had never taken
+
+`base224_drop40_long` landed: **0.8552 mid / 0.8865 ledger75, peak e17 of 24**, clearing
+`base224_control`'s 0.8451 12-epoch peak by +0.0101 and NOT peaking on its last epoch, so the budget
+is no longer binding and a verdict is readable.
+
+The matched subtraction, both sides converged, one variable (the corpus):
+
+| arm | scheme | epochs | operator | LEDGER | LEDGER75 | peak |
+|---|---|---|---|---|---|---|
+| `mergedk_drop40_long_s2026` | mergedk | 24 | 0.40 | 0.8566 | 0.8853 | e17 |
+| `base224_drop40_long_s2026` | canonical | 24 | 0.40 | 0.8552 | **0.8865** | e17 |
+
+**delta = -0.0012 at ledger75.** The `<= 0.000` band fires: the corpus lever is dead at the dose
+operating point and the second-site axis closes.
+
+**The mechanism, which is the part worth keeping.** At 12 epochs the same pair read
+`mergedk_drop40` 0.8805 vs `base224_control` 0.8754 = **+0.0051 for the merge**. Give both sides the
+full budget and our own corpus gains **+0.0111** while the merged one gains **+0.0048**. The extra
+site was substituting for training budget, not raising a ceiling -- more data made the fit converge
+sooner, and every corpus number this project has quoted (+0.0039 mergedk, +0.0043 merged3) was read
+at the epoch where that head start is still visible. The lever was real and it was not what it looked
+like.
+
+`base224_drop40_long`'s seat against `cleanseat_v1` at ledger75 is **+0.0002 [-0.0006, +0.0010]** --
+no seat, which is expected for a plain recipe and is not what the arm was bought for.
+
+**What this does NOT close.** KMAR-50K remains the only merge whose licence ships, and the axes reading
+on `mergedk_drop40_long` is still DISTINCT (rank 0.8914, js 0.0212, maha 3.390) -- a second hospital
+does produce a genuinely different member. What is now closed is that the difference is worth anything
+on either ruler we own.
