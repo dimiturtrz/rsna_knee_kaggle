@@ -31,14 +31,20 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+from jaxtyping import Float
+from numpy.typing import NDArray
 
 from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
+from kneemri.evaluation.seat_swap import SeatFrame
 from kneemri.runs.holdout_record import SUFFIX, HoldoutReading
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
+
+type Ranks = Float[NDArray[np.float64], "studies targets"]
+"""One member's per-column midranks on a shared frame — the space every block mean here is taken in."""
 
 POOLING = "slice_pooling"
 """The recipe key the rule is stamped under. `pool` and `slot_pooling` are different axes on the same runs."""
@@ -118,14 +124,49 @@ class PoolingByFinding:
         readings = [self.columns(stem) for stem in stems]
         return {target: float(np.nanmean([reading[target] for reading in readings])) for target in TARGETS}
 
-    def contrast(self, left: str, right: str, top: int = DEFAULT_TOP) -> list[PoolingContrast]:
-        """Both families' per-column means, paired by finding, with each finding's pre-assigned split."""
+    def aligned(self, stems: list[str]) -> tuple[Float[NDArray[np.float32], "studies targets"], list[Ranks]]:
+        """The truth and every member's per-column midranks, on the studies all of them hold out.
+
+        Intersected rather than assumed equal: a member fitted on a different fold holds out different
+        studies, and stacking those arrays by position scores one member's rows against another's truth
+        without failing anywhere a reader would look.
+        """
+        readings = [self.read(stem) for stem in stems]
+        common = sorted(set.intersection(*(set(reading.studies) for reading in readings)))
+        if not common:
+            message = f"no study is held out by all {len(stems)} members - these folds share no frame to vote on"
+            raise ValueError(message)
+        index = {study: position for position, study in enumerate(common)}
+        ranks: list[Ranks] = []
+        truth = np.zeros((len(common), len(TARGETS)), dtype=np.float32)
+        for reading in readings:
+            keep = [position for position, study in enumerate(reading.studies) if study in index]
+            order = np.argsort([index[reading.studies[position]] for position in keep])
+            rows = np.asarray(keep, dtype=np.int64)[order]
+            ranks.append(SeatFrame.ranked(np.asarray(reading.predictions, dtype=np.float64)[rows]))
+            truth = np.asarray(reading.truth, dtype=np.float32)[rows]
+        return truth, ranks
+
+    def blended_columns(self, stems: list[str]) -> dict[str, float]:
+        """The family voted as ONE member — a rank average, the rule the kernel's outer vote uses.
+
+        This is the question `family_columns` cannot answer. A mean of twelve per-member AUCs says what
+        a family's members score; an entry is a BLEND, and a family whose members agree gains nothing
+        from being averaged. Routing is only worth a slot if the per-column difference survives here.
+        """
+        truth, ranks = self.aligned(stems)
+        voted = np.mean(np.stack(ranks), axis=0)
+        return self.ruler.scorer().per_label(voted, truth)
+
+    def contrast(self, left: str, right: str, top: int = DEFAULT_TOP, *, blend: bool = False) -> list[PoolingContrast]:
+        """Both families' per-column scores, paired by finding, with each finding's pre-assigned split."""
         grouped = self.families()
         missing = [name for name in (left, right) if name not in grouped]
         if missing:
             message = f"no runs on disk pooled by {missing} - families present: {sorted(grouped)}"
             raise KeyError(message)
-        scores = {name: self.family_columns(self.strongest(grouped[name], top)) for name in (left, right)}
+        read = self.blended_columns if blend else self.family_columns
+        scores = {name: read(self.strongest(grouped[name], top)) for name in (left, right)}
         return [
             PoolingContrast(target, target in FOCAL, scores[left][target], scores[right][target]) for target in TARGETS
         ]
@@ -163,10 +204,13 @@ def main() -> None:
     command.parser.add_argument("--left", default="max", help="the baseline pooling rule")
     command.parser.add_argument("--right", default="labelwise", help="the pooling rule compared against it")
     command.parser.add_argument("--top", type=int, default=DEFAULT_TOP, help="members per family")
+    command.parser.add_argument(
+        "--blend", action="store_true", help="vote each family as one member instead of averaging their AUCs"
+    )
     arguments = command.parsed()
 
     reader = PoolingByFinding(arguments.holdouts)
-    contrasts = reader.contrast(arguments.left, arguments.right, arguments.top)
+    contrasts = reader.contrast(arguments.left, arguments.right, arguments.top, blend=arguments.blend)
     focal, diffuse = reader.sorts(contrasts)
 
     lines = [f"{'finding':20s} {'split':>8s} {arguments.left[:9]:>9s} {arguments.right[:9]:>9s} {'gap':>8s}"]

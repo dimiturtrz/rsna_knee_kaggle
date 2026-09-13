@@ -3159,6 +3159,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.pooling_by_finding",
+      "target": "kneemri.evaluation.seat_swap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pooling_by_finding",
       "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
@@ -19616,6 +19622,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.aligned",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.aligned",
+      "target": "kneemri.evaluation.seat_swap.SeatFrame.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.blended_columns",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.columns",
       "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.read",
       "weight": 1
@@ -19624,12 +19648,6 @@
       "kind": "calls",
       "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
       "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.families",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
-      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.family_columns",
       "weight": 1
     },
     {
@@ -56280,6 +56298,22 @@
       "descendants": 0,
       "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.aligned",
+      "label": "aligned",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.blended_columns",
+      "label": "blended_columns",
       "level": "method",
       "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
       "role": null

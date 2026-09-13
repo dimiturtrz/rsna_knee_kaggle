@@ -85,6 +85,37 @@ def test_family_columns(pool: Path) -> None:
         assert family[target] == pytest.approx(float(np.mean(members)))
 
 
+def test_aligned(pool: Path) -> None:
+    """Members written on one frame come back stacked on it, truth once and ranks per member."""
+    truth, ranks = PoolingByFinding(pool).aligned(["max_a", "max_b"])
+    assert truth.shape == (STUDIES, len(TARGETS))
+    assert len(ranks) == 2
+    assert all(block.shape == (STUDIES, len(TARGETS)) for block in ranks)
+
+
+def test_aligned_refuses_disjoint_frames(tmp_path: Path) -> None:
+    """Two members holding out different studies have no frame to vote on, and that is not a blend."""
+    record(tmp_path, "max_a", "max")
+    generator = np.random.default_rng(7)
+    truth = generator.integers(0, 2, size=(STUDIES, len(TARGETS))).astype(np.float32)
+    predictions = generator.normal(size=(STUDIES, len(TARGETS))).astype(np.float64)
+    HoldoutRecord(tmp_path / "elsewhere.pt").write(
+        [f"other{index:04d}" for index in range(STUDIES)], predictions, truth, epoch=3
+    )
+    RunMetrics(tmp_path / "elsewhere.pt").describe({POOLING: "max"})
+    with pytest.raises(ValueError, match="no study is held out by all"):
+        PoolingByFinding(tmp_path).aligned(["max_a", "elsewhere"])
+
+
+def test_blended_columns(pool: Path) -> None:
+    """A family voted as one member scores twelve columns, none of them a per-member average."""
+    reader = PoolingByFinding(pool)
+    blended = reader.blended_columns(["max_a", "max_b"])
+    assert set(blended) == set(TARGETS)
+    assert all(0.0 <= value <= 1.0 for value in blended.values())
+    assert blended != reader.family_columns(["max_a", "max_b"])
+
+
 def test_contrast(pool: Path) -> None:
     """One row per finding, each carrying the split it was assigned before either family was read."""
     rows = PoolingByFinding(pool).contrast("max", "labelwise", top=2)
