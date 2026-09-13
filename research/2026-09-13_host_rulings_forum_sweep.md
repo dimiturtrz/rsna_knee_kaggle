@@ -112,3 +112,29 @@ Two things follow.
 - **MRNet / fastMRI / SKM-TEA**: still point AGAINST under the KneeCoT reasoning, and the host has
   declined three invitations to say otherwise. Treat them as instruments already cashed
   (`slots.py:341-344`: second site +0.0043, third −0.0024), never as seats.
+
+## THE VERDICT TABLE — the one place (knee-wipvc)
+
+Three columns, because collapsing them into one is the error that produced a wrong table for the
+owner on 2026-09-12. **TRAIN** = may we fit a member on it at all. **REDISTRIBUTE DATA** = may we
+upload the images or a cache of them anywhere. **SHIP MODEL** = may a member fitted on it be packaged,
+mounted and seated in a submitted entry, including as a winner under rule 2.5.
+
+| corpus | gate | licence | TRAIN | REDISTRIBUTE DATA | SHIP MODEL | what decides it |
+|---|---|---|---|---|---|---|
+| **competition data** | none | competition | yes | no | yes | the competition's own terms |
+| **KMAR-50K** | none | CC BY 4.0 | yes | yes, with attribution | **yes** | nothing bars it; attribution only |
+| **Rijeka** | none | CC BY-NC-ND | yes | no (ND) | **open question** | ND vs 2.5 only — NC retired by host 733965 |
+| **raptor / mattiaangeli / pilkwang** | none | CC0-1.0 | yes | yes | **yes** | public domain; already seated in the champion |
+| **MRNet** | Stanford RUA form | non-commercial, no redistribution, no adaptation | yes (internal research) | no | **points against** | KneeCoT reasoning: a required agreement |
+| **fastMRI** | signed DUA + issued credentials | internal research/education only | yes (internal research) | no | **no** | its own text bars distributing a derivative |
+| **SKM-TEA** | AIMI login + agreement | research-use agreement | yes (internal research) | no | **points against** | same shape as KneeCoT |
+| **KneeCoT** | HF gate + hospital ethical-use agreement | CC BY-NC | — | — | **PROHIBITED BY NAME** | Kaggle staff, discussion 734109 |
+
+Two things the table is careful about. **TRAIN is yes almost everywhere** — nothing in any of these
+terms bars fitting a model for internal research, and the repo said otherwise until 2026-09-12.
+**"points against" is not "prohibited"** — under 2.6b only KneeCoT is specifically prohibited; the
+other gated sets are unruled, and the reasoning the host published is what points at them.
+
+`core/data/corpus/slots.py` now CITES this file rather than restating a verdict in a docstring, which
+is what `knee-wipvc` asked for. A verdict changes here, once.
