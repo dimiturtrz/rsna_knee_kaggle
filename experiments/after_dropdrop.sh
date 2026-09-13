@@ -35,4 +35,11 @@ while true; do
 done
 echo "=== FOURTH BASE RELEASED at $(date -u +%H:%MZ) ==="
 
+# THE INSTRUMENT RUNS FIRST, and the ordering is a price decision rather than a preference.
+# `clean_calib_drop40_long` (knee-rpugl) costs ~2.4 h and improves a PROXY pool that has no board anchor
+# — `cleanseat_v1` is not the honest core six, so nothing on the board prices that pool.
+# `stack_increments_drop40_long` (knee-p29bb) costs ~1.6 h and is the gating instrument of knee-289qc:
+# it reads whether the operator pair reaches the CHAMPION's own recipe family, where all six seats'
+# fold-0 twins peak at epoch 6-9 of 12 and decline. Cheaper, and it decides twelve hours of card.
+bash "$(dirname "$0")/arms/stack_increments_drop40_long.sh"
 bash "$(dirname "$0")/arms/clean_calib_drop40_long.sh"
