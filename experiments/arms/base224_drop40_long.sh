@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# bead: knee-q1pp0
+# reading: base224_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `base224_control`'s byte-identical line with two changes, both imported from arms already on disk:
+#   `--slot-dropout 0.40` and `--epochs 12 -> 24`. That makes it the MATCHED TWIN of
+#   mergedk_drop40_long on every axis but the corpus.
+#
+# WHY IT IS NOT A SECOND CONTROL FOR THE SAME THING
+#   base224_control already exists and is already the control for mergedk_corpus. It is 12-epoch and
+#   carries no operator. mergedk_drop40_long is 24-epoch and carries the operator. Subtracting them
+#   gives corpus + operator + budget in one number, which is the exact ambiguity base224_control's own
+#   header says it was run to avoid. This arm restores that property at the other budget.
+#
+# THE READING THIS BUYS, WHICH HAS NEVER BEEN TAKEN
+#   The CORPUS ALONE, at full budget on both sides. Every corpus number this project quotes -- mergedk
+#   +0.0039, merged3 +0.0043 -- was read at 12 epochs, and knee-kiss9 measured twelve epochs to be
+#   binding on two seated recipes (+0.0084 and +0.0088 of holdout from the extra twelve). mergedk's own
+#   long arm moved +0.0036 the same way. So the denominator has to move too, or the subtraction is
+#   between a converged arm and a truncated one.
+#
+# PRE-REGISTRATION (written before the run; the delta is mergedk_drop40_long 0.8853 minus this arm, ledger75)
+#   >= +0.0040   the second site is worth a member at full budget. The corpus axis RE-OPENS, on a
+#                harness that cannot be blamed, and KMAR-50K is the only merge whose licence ships.
+#   +0.000..+0.004
+#                directional, and consistent with the two 12-epoch reads. The site is real and small.
+#   <= 0.000     the corpus lever is dead at the dose operating point and closes for good.
+#   holdout      expected >= 0.8451 (base224_control's own 12-epoch peak) by the budget argument. A read
+#                below refuses the budget story on our own corpus, which would itself be a finding --
+#                it would mean the extra epochs are worth something only where there is more data.
+#
+# deliberate: --slot-dropout 0.40 — imported operating point (knee-yotj8), matched to the mergedk arm.
+# deliberate: --epochs 24 — matched to the mergedk arm. Neither is a knob being swept here.
+# deliberate: --scheme canonical — our own 4,407 studies. This is the whole point of the arm.
+#
+# control  mergedk_drop40_long_s2026 (on disk) is what this is subtracted from; base224_control_s2026
+#          and mergedk_drop40_s2026 give the same subtraction at 12 epochs. Costs no extra run.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+run_train base224_drop40_long \
+  $RECIPE --epochs 24 --slice-pooling max --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --image-size 224 --band-low 0.2 --band-high 0.8 \
+  --scheme canonical --slot-dropout 0.40 \
+  --labels "$LABELS" --eval-labels "$LABELS" --out "$MODELS/base224_drop40_long_s2026.pt"
