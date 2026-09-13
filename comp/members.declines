@@ -1213,3 +1213,13 @@ slot_dropout_max_s2026
 sam_dense_s2026
   0.8213 (l75 0.8498, e6) -- the weakest member in this pool by 0.024 and peaked at epoch 6. Declined on
   quality; nothing about it has ever been argued as diverse enough to buy a seat at that cost.
+
+mergedk_labelwise_drop40_long_336_s2026
+  0.8621 (l75 0.8901, e12) -- the KMAR merge carried to 336, the resolution every champion seat actually
+  serves at. Its own pre-registration asked >= +0.0040 marginal over the honest core six to seat it and
+  it read +0.0005 (0.9050 -> 0.9054, full 909, LogitAverage, no selection): DIRECTIONAL, NO SLOT, by the
+  band the arm declared before the card was spent. The arm's fallback argument was a diversity seat, and
+  that fails too on its own numbers -- rho against the six core seats spans 0.8712 to 0.9167, inside the
+  ordinary range for this pool, so it is not an outlier on the axis it would have had to be one on.
+  Declined as a measured null, not as a bad member: the second-site lever survives at 336 (it did not go
+  negative) but it does not pay at the resolution we ship, and the 224 twin knee-dl65h should not now run.
