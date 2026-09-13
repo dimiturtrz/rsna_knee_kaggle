@@ -4039,3 +4039,87 @@ Fifth independent line to land on 0.944.
 **No offline number BY CONSTRUCTION**, same as `labelseat_v1` and `honestfar_v1`: the raptor blend sits at
 `FOREIGN_WEIGHT` 1/3 and `foreign_overlap` reads its provenance 98.6% in-sample. `scope: excluded` from the
 `board_transfer` fit — the row carries no (offline, board) pair.
+
+## `hidose_v1` -- 0.944, ref 56193747, 2026-09-12 -- the dose PAIR reads NULL, and that closes the family
+
+`slotseat_v1` with ONE line changed. The six champion seats are in the champion's own order, untouched;
+the serving is byte-identical; the seventh seat moves from `slot_dropout_s2026` to
+`slot_dropout_hi_s2026`. Nothing else in the kernel differs.
+
+The two seventh seats are the SAME OPERATOR AT TWO DOSES, and the cross-site ruler separates them
+clearly:
+
+| seventh seat | slot dropout | cross-site gain vs control | own holdout909 | board |
+|---|---|---|---|---|
+| `slot_dropout_s2026` (slotseat_v1) | 0.25 | +0.0090 | -- | 0.944 |
+| `slot_dropout_hi_s2026` (hidose_v1) | 0.40 | +0.0132 | 0.8551 | 0.944 |
+
+### The pre-registration, written into slotseat's own submission message before either score landed
+
+The read was the PAIR, `hidose − slotseat`, not either entry against the champion:
+
+- `>= +0.004` — the cross-site dose difference TRANSFERS to the board.
+- `±0.003` — NULL. ← **fired, at exactly 0.000**
+- `<= -0.004` — the dose OVERSHOOTS and the higher setting costs something the cross-site ruler cannot see.
+
+Both entries read 0.944. The pair is **0.000**.
+
+### What that means, and what it does not
+
+A **+0.0042 measured cross-site difference between the two doses is invisible on the board.** That is
+not a statement about noise swamping a small effect: the cross-site ruler is the instrument this project
+built precisely because "the real Kaggle test dataset is NOT our dataset", and the board is the only
+cross-site measurement that pays. The ruler separated the doses; the thing it was built to predict did
+not.
+
+Taken with `slotseat_v1` -- which was itself flat against the champion -- the **whole `slot_dropout`
+seventh-seat family is inert at board resolution**, and it closes on two points plus a designed contrast
+rather than on a single flat. That is the second half of the retirement `slotseat_v1` began: the offline
+ruler cannot pick a board tick, and now the cross-site ruler cannot rank two doses on one either.
+
+It does NOT say the operator is worthless. `knee-kiss9` separately measured, at full budget on two
+seated recipes, that `slot_dropout 0.40` earns no seat -- which is a different claim on a different
+ruler, and the two agreeing is why the family stops here rather than getting another arm.
+
+### Why there is no offline number
+
+Two-pass raptor serving, `FOREIGN_WEIGHT` 1/3, raptor rows 98.6% in-sample. `scope: excluded` from the
+`board_transfer` fit, for the same reason every raptor entry is.
+
+## `farswap_v1` -- 0.934, ref 56194309, 2026-09-12 -- distance loses to quality, on the third point
+
+Declared an **INSTRUMENT** in its own submission message, with the prior stated as negative before the
+spend. It was not sold as a champion beat and it did not become one.
+
+`kneemri-allfit` scored 0.937 with six dark members plus `band_dense_long_s2026` (0.8587) -- a
+DINOv2-small member on the decode axis, a sibling of four seats already in the room. This entry held all
+six dark seats byte-identical, held the count at seven, held `RankAverage`, held `overlap=False`, and
+moved ONLY who sits seventh: to `lora_r8_v3small_224_s2026` (0.8217), the pool's only non-DINOv2 member.
+One variable, and that variable is architectural distance at fixed count.
+
+| entry | seventh seat | seat solo | board |
+|---|---|---|---|
+| `allfit` | `band_dense_long_s2026` | 0.8587 | 0.937 |
+| `farswap_v1` | `lora_r8_v3small_224_s2026` | 0.8217 | **0.934** |
+
+### The pre-registration
+
+- `>= 0.941` — distance beats quality despite a -0.037 solo gap. A NEW selection rule, re-opening the
+  cross-family diversity axis.
+- `0.935-0.940` — FLAT. The seventh seat is inert at this count, which answers `knee-uco3`.
+- `<= 0.934` — quality dominates distance, consistent with `crossenc` and `maxdiv`. ← **fired**
+
+### The answer, and why it is worth the slot it cost
+
+**-0.003 against allfit.** A -0.037 solo gap is not bought back by being the only non-DINOv2 seat in the
+room. This is the THIRD independent point on the same axis: `crossenc` and `maxdiv` each added a distant
+low-solo member and each lost. An axis that closes on three designed points is closed differently from
+one closed on a suspicion, and this is the one the ledger can now cite.
+
+The instrument also did the thing instruments are supposed to do and rarely do here: it made a
+prediction that could have been wrong in a useful direction. `>= 0.941` would have been a new selection
+rule at a moment when both of this project's rulers had just been retired as seat selectors.
+
+`run_check` read **loaded 7 of 7 members** before the slot was spent -- the exact census its sibling
+`farseat_v1` failed silently for five days, shipping six of seven under a name that was then written
+into the ledger as closing this very axis.
