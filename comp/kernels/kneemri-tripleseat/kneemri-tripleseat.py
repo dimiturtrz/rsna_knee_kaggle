@@ -1,61 +1,26 @@
-"""tripleseat — the champion seven, plus the three best honest solos this project owns.
+"""tripleseat — four champion seats, the three best honest solos, and the raptor seat.
 
-**WHAT IS BEING PRICED. MEMBER QUALITY AT COUNT 1, WHICH IS THE ONLY THING THAT HAS EVER MOVED THIS
-BOARD 0.005+** (knee-0v8yz). Not a reseating: the champion's six sit in the champion's own order, at the
-champion's own `LogitAverage`, with the raptor seat at the champion's own 1/3. Three rows are added and
-nothing else in the file differs.
+Serving is the champion's, untouched: `LogitAverage` over the seven, raptor blended at 1/3.
+What moves is the MEMBER SET — `grade_ladder_cf` and `lr4e-5_ws_cf` out, the `drop40_long` trio in.
 
-**WHERE THE THREE CAME FROM.** Every twelve-epoch member of the `labelwise` family peaks at epoch 7 to 10
-of 12 and then declines -- depth24 0.8998 @e8, extended 0.8986 @e8, drop 0.8984 @e10, dense 0.8964 @e7
-(ledger75). A budget wall peaks on the LAST epoch; peaking at 7 of 12 and declining for five is a missing
-regulariser. Two flags answer it -- `--slot-dropout 0.40` (the operating point legislated in knee-yotj8,
-not a swept knob) and `--epochs 12 -> 24` -- and on three of three bases the pair cleared a
-pre-registered `>= +0.0040`:
+Priced on the champion's fold-0 twins (909 rows, ledger75, `<scratchpad>/twin_twoout.py`): **+0.0074**
+over the twin seating, and every one of the fifteen drop-two pairs beat keeping all six. That number is
+a PROXY — the champion's own seats are `--fold -1` and unscoreable — so at `board_transfer +1.135` it
+projects ~0.0084 of board over 0.944. See knee-me2nv for the pricing and knee-p29bb for why repairing
+the dropped seats instead was refused.
 
-    labelwise_depth24   0.8998 -> labelwise_depth24_drop40_long   0.9053  (+0.0055, knee-9bnkc)
-    labelwise_extended  0.8986 -> labelwise_ext_drop40_long       0.9045  (+0.0059, knee-cgt9m)
-    labelwise_dense     0.8964 -> labelwise_dense_drop40_long     0.9048  (+0.0084, knee-vs06j)
+PRE-REGISTRATION, against the champion's 0.944 and `BOARD_RESOLVABLE = 0.0015`:
 
-All three CONVERGED under `convergence_check`. They are now the three best honest solos the project owns,
-and no member of the champion is within 0.005 of any of them on this ruler.
-
-**AND THEY ARE ADDITIVE, WHICH IS THE PART THAT IS NOT OBVIOUS.** Three upgraded members of one family
-could easily be three copies of one improvement. Measured 2026-09-13 on the full 909, `LogitAverage`, no
-selection, against the honest core six at 0.9050:
-
-    + depth_up                              0.9070   +0.0020
-    + ext_up                                0.9067   +0.0017
-    + depth_up + ext_up                     0.9081   +0.0031
-    + all three                             0.9090   +0.0040
-
-Near-additive at two and still climbing at three, so each upgraded base is a fresh SEAT rather than a
-copy of one already held. `+0.0040` is the seat floor this project has used all along, and it is CLEARED
-by the trio and by no single member of it -- which is precisely why all three ship and not the best one.
-
-**EINSTEIN GATE.** `grep -icE "labelwise_depth24_drop40_long|labelwise_ext_drop40_long|labelwise_dense_drop40_long"`
-over `comp/board.jsonl` returns 0: no submission in the competition's history carries any of the three.
-`submit_check` runs on the set before the slot is counted.
-
-**WHAT THE OFFLINE NUMBER IS AND IS NOT.** The champion's six are `--fold -1` and unscoreable offline, so
-`+0.0040` is measured on the honest core six, a PROXY pool, not on the entry that ships. At
-`board_transfer +1.135` a proxy gain of that size is ~0.0045 of board. That makes this a CHAMPION-BEATER
-by intent rather than an instrument -- but the transfer is the assumption, and the pre-registration below
-is written so that a flat still buys a fact.
-
-PRE-REGISTRATION, written before the number, against the champion's 0.944 and `BOARD_RESOLVABLE = 0.0015`.
-
-- **0.947 and above** -- the proxy transferred and the labelwise budget axis is live. Re-pin
-  `comp/champion.json`; the fourth base (knee-fnhbs, on the card as this ships) and the operator pair on
-  the NON-labelwise families take the next slots ahead of everything else.
-- **0.9455 to 0.9469** -- a real gain, one resolution step clear of the champion. Re-pin, and widen the
-  pair before widening anything else.
-- **0.9425 to 0.9454** -- FLAT. Then the honest pool's best three solos add nothing to a champion whose
-  own members cannot be scored against them, and the reading is about the PROXY, not about the members:
-  it would be the first direct evidence that offline gains on the honest six do not reach the champion's
-  six, which retires the proxy rather than the members. Check `run_check`'s census FIRST -- a dropped
-  member and a null member look identical from the board.
-- **Below 0.9425** -- three seats of one family actively dilute the champion. That closes family-block
-  seating, an axis nothing here has yet tested at count 3.
+- **0.947+** — the proxy transferred. Re-pin `comp/champion.json`; widen the operator pair onto the
+  remaining non-labelwise families before anything else takes a slot.
+- **0.9455–0.9469** — real gain, one resolution step clear. Re-pin; seat the fourth base (n=8, proxy
+  +0.0078) next, which needs `labelwise_drop_drop40_long_s2026` confirmed on the uploaded shelf.
+- **0.9425–0.9454** — FLAT. Check `run_check`'s census FIRST: a dropped member and a null member look
+  identical from the board. A clean 7-of-7 flat is the first direct evidence that TWIN-PROXY SEATING
+  DOES NOT TRANSFER to the real seats, which retires the proxy — every seat number this project holds
+  is measured through it.
+- **Below 0.9425** — the two dropped champion seats were load-bearing and the twin proxy is refuted as
+  a ruler in the same reading.
 """
 
 # >>> KERNEL-BOOTSTRAP
@@ -178,7 +143,7 @@ def main() -> None:
     device = str(VisibleCards().device())
     member = RaptorMember.loaded(RaptorEntry.weights(mounts=mounts), device)
     theirs = RaptorEntry(mounts.one("sample_submission.csv", "competition data"), working=scratch).run(member, device)
-    # The six that follow load onto the same T4. Dropping the reference is not enough on its own —
+    # The seven that follow load onto the same T4. Dropping the reference is not enough on its own —
     # torch keeps the freed blocks in its caching allocator, and a seventh model's worth of them is
     # exactly the margin an OOM would eat, in a kernel whose whole point is running both.
     del member
@@ -188,25 +153,24 @@ def main() -> None:
     chosen = (
         "final_ws_cf",
         "calib_span_ff",
-        "grade_ladder_cf",
         "stack_increments_ff",
-        "lr4e-5_ws_cf",
         "through_dense_cf",
-        # THE ONLY LINES THAT DIFFER FROM THE CHAMPION. They sit last so a diff of the two kernels is
-        # three added rows: the six above are in the champion's own order, unchanged, and nothing about
-        # how they are weighted or joined moves. All three live on the SECOND shelf
-        # (`dimiturnt/kneemri-members-2`), which is why this kernel mounts one dataset the champion does
-        # not. They ship TOGETHER because the +0.0040 seat floor is cleared by the trio and by none of
-        # them alone — shipping the best one would be a different, weaker experiment.
+        # The trio lives on the SECOND shelf (`dimiturnt/kneemri-members-2`) — the one dataset this
+        # kernel mounts that the champion does not. All three ship: the +0.0040 seat floor is cleared
+        # by the trio and by none of them alone.
         "labelwise_depth24_drop40_long_s2026",
         "labelwise_ext_drop40_long_s2026",
         "labelwise_dense_drop40_long_s2026",
     )
-    # What the raptor pass cost, handed to the six so their nine-hour budget is the SESSION's and not
+    # `grade_ladder_cf` and `lr4e-5_ws_cf` are dropped on a priced reading, not trimmed to fit — see
+    # knee-me2nv. The exposure worth carrying here: the twins used to price it are NOT these seats
+    # (both are `--fold -1 --ema` refits, stronger than their 0.8868 / 0.8840 twins), so the entry
+    # reads two things at once — whether it beats 0.944, and whether twin-proxy seating transfers.
+    # What the raptor pass cost, handed to the seven so their nine-hour budget is the SESSION's and not
     # a fresh one. Without it both producers aim at the same ceiling and the kernel is killed at the
     # real one with no submission — a budget defeated by its own assumption that it starts at zero.
     spent = time.time() - started
-    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the six get what is left")
+    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the seven get what is left")
     left = Budget(seconds=max(KERNEL_SECONDS - spent, 0.0))
     KernelRun(names=chosen, overlap=False, serving=Serving(vote=LogitAverage(), budget=left)).run()
     ours = pd.read_csv(WORKING / "submission.csv")

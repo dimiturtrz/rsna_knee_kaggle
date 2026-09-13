@@ -430,3 +430,17 @@ labelwise_drop_drop40_long_s2026.pt      # 0.9051 ledger75 @e18 of 0..23, 909 ro
                             # board that reports at 0.001. Ship it inside a POOL move, never as a
                             # thirteenth reseating (knee-tuzzp, and goldseat_v1's note: twelve seating
                             # entries have now failed to beat 0.944).
+
+stack_increments_drop40_long_s2026.pt   # 0.8951 ledger75 @e16 of 0..23, 909 rows, converged. The
+                            # operator pair (`--slot-dropout 0.40` + `--epochs 12 -> 24`) on
+                            # `stack_increments_s2026` 0.8931 @e9 = +0.0020, against a pre-registered
+                            # +0.0040 floor (knee-p29bb). NINTH base tried and the FIRST to miss: the
+                            # eight before it spanned four recipe families at +0.0041..+0.0084. What is
+                            # different here is the corner -- distillation plus blended labels -- and
+                            # that corner is the champion's own.
+                            # DO NOT SEAT IT AS AN UPGRADE OF ITS BASE. Measured in the same sitting
+                            # (`<scratchpad>/twin_twoout.py`): with this member standing in place of
+                            # `stack_increments_s2026`, the best n=8 twin seating reads 0.9097 against
+                            # 0.9098 with the plain base. -0.0001. It is rostered because it is the
+                            # instrument that closed knee-289qc's twelve-hour blind refit, not because
+                            # a seating wants it. Re-open by pricing it as a marginal, never by a solo.
