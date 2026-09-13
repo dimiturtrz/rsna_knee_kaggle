@@ -340,3 +340,14 @@ labelwise_dense_drop40_long_s2026.pt    # 0.8672 mid (l75 0.9048, e23 of 0..23) 
                             # its own base buys the same +0.0039 at eight seats rather than nine.
                             # Additivity is decelerating (+0.0020, +0.0011, +0.0009 per added base),
                             # which is what knee-fnhbs's fourth base is pre-registered to read.
+labelwise_ext_drop40_long_ff.pt         # DARK BY CONSTRUCTION -- fitted with `--fold -1`, so it holds out
+                            # nothing and no ledger row can ever price it. Rostered anyway, and the
+                            # argument is its TWIN: `labelwise_ext_drop40_long_s2026` is the same recipe
+                            # line on fold 0 and reads 0.9045 ledger75, the second-best honest solo the
+                            # project owns, seated in kneemri-tripleseat. A full-fit refit of a member
+                            # that clears the seat floor is the same shape as every one of the champion's
+                            # six (`final_ws_cf`, `calib_span_ff`, ...), which are all `--fold -1` and all
+                            # unscoreable here -- so this is the project's ordinary way of turning a
+                            # measured recipe into a shippable seat, not an exception to it.
+                            # WHAT IT IS NOT: evidence. It may be seated, and it may never be quoted as a
+                            # number. Any entry carrying it reads on the BOARD or not at all.
