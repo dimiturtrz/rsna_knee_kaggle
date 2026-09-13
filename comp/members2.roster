@@ -303,3 +303,18 @@ labelwise_ext_drop40_long_s2026.pt   # 0.8672 mid (l75 0.9045, e23 of 0..23) -- 
                             # seventh (+0.0017). Both under the +0.0040 floor and the same size as
                             # optimal reseating over 140 honest members. Rostered so it can be shipped,
                             # NOT because a seating for it beats the champion.
+labelwise_depth24_drop40_long_s2026.pt  # 0.8679 mid (l75 0.9053, e18 of 0..23) -- THE BEST HONEST SOLO
+                            # THE PROJECT OWNS, above labelwise_ext_drop40_long's 0.9045.
+                            # labelwise_depth24's line with --slot-dropout 0.40 and --epochs 24, nothing
+                            # else (knee-9bnkc). CLEARS ITS BAND: +0.0055 ledger75 over
+                            # labelwise_depth24_s2026 0.8998, its pre-registered >= +0.0040.
+                            # convergence_check returns CONVERGED and the peak is e18, NOT the last
+                            # epoch, so the header's veto clause never fires; per knee-a21h9 the verdict
+                            # is read from the check either way, never by argmax.
+                            # SECOND MATCHED BASE. With knee-cgt9m (+0.0059 on labelwise_extended) the
+                            # slot-dropout-0.40 + doubled-budget operator pair is established off the
+                            # `max` pooling corner on n=2 bases, not n=1. That is what licenses applying
+                            # the pair to the rest of the labelwise family without re-proving it.
+                            # Rostered on QUALITY. No seating for it has been priced against the
+                            # champion yet -- its twin at 0.9045 added +0.0017 as a seventh seat, under
+                            # the +0.0040 floor, and this member correlates with the same consensus.
