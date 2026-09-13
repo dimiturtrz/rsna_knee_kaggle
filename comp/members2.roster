@@ -444,3 +444,25 @@ stack_increments_drop40_long_s2026.pt   # 0.8951 ledger75 @e16 of 0..23, 909 row
                             # 0.9098 with the plain base. -0.0001. It is rostered because it is the
                             # instrument that closed knee-289qc's twelve-hour blind refit, not because
                             # a seating wants it. Re-open by pricing it as a marginal, never by a solo.
+
+# ---- the operator pair's TENTH base, and the first whose gain is only at the 0.75 cut (2026-09-13) ----
+clean_calib_drop40_long_s2026.pt        # 0.8978 ledger75 @e23 of 0..23, 909 rows, convergence_check
+                            # converged. The operator pair (`--slot-dropout 0.40` + `--epochs 12 -> 24`)
+                            # on `clean_calib_s2026` 0.8940 @e9 = +0.0038, against the family's
+                            # pre-registered +0.0040 floor. TENTH base tried, SECOND to miss it, and it
+                            # misses by 0.0002 -- inside the noise of the floor itself, so read it as the
+                            # band's edge rather than as a refutation of the pair here.
+                            #
+                            # WHAT IS ACTUALLY NEW: THE MIDPOINT IS FLAT TO NEGATIVE. 0.8649 -> 0.8647,
+                            # -0.0002, while ledger75 moves +0.0038. Those are the SAME predictions under
+                            # two binarisations of the same graded truth, so a gain that exists only at
+                            # 0.75 is a gain in how the member ranks the CONFIDENT positives (truth >=
+                            # 0.75) against everything else, with none in the ranking the 0.5 cut sees.
+                            # Every other base for this pair moved both rulers together. This one says
+                            # the pair can buy confident-case discrimination alone, which is the half of
+                            # the graded truth the board is mostly made of -- and it is also why this
+                            # member may not be quoted at midpoint in either direction.
+                            #
+                            # NOT YET SEATED. A solo is not a seat (`stack_increments` read +0.0020 solo
+                            # and -0.0001 seated). Price it as a SWAP for `clean_calib_s2026`, which the
+                            # champion six holds, and an entry carrying it that way must DROP that member.

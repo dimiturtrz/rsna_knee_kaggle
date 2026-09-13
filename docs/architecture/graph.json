@@ -3140,6 +3140,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.pooling_by_finding",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pooling_by_finding",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pooling_by_finding",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pooling_by_finding",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.pooling_by_finding",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.population_split",
       "target": "core.cli",
       "weight": 1
@@ -19558,6 +19588,114 @@
       "kind": "construct",
       "source": "kneemri.evaluation.pool_census.main",
       "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingContrast",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.__init__",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.columns",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.families",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.family_columns",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.strongest",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingContrast",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.families",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.rule",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.family_columns",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.columns",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.rule",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.rule",
+      "target": "kneemri.runs.run_metrics.RunMetrics.recipe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.strongest",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.pooling_by_finding.main",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.main",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.main",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.routed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.pooling_by_finding.main",
+      "target": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.sorts",
       "weight": 1
     },
     {
@@ -38947,7 +39085,7 @@
       "role": null
     },
     {
-      "descendants": 306,
+      "descendants": 307,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39019,7 +39157,7 @@
       "role": null
     },
     {
-      "descendants": 108,
+      "descendants": 109,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -39486,6 +39624,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.pool_census",
       "label": "pool_census",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding",
+      "label": "pooling_by_finding",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -43577,6 +43723,22 @@
       "level": "class",
       "parent": "kneemri.evaluation.pool_census",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "label": "PoolingByFinding",
+      "level": "class",
+      "parent": "kneemri.evaluation.pooling_by_finding",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingContrast",
+      "label": "PoolingContrast",
+      "level": "class",
+      "parent": "kneemri.evaluation.pooling_by_finding",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -56112,6 +56274,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.pool_census",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.columns",
+      "label": "columns",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.contrast",
+      "label": "contrast",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.families",
+      "label": "families",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.family_columns",
+      "label": "family_columns",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.routed",
+      "label": "routed",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.rule",
+      "label": "rule",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.sorts",
+      "label": "sorts",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingByFinding.strongest",
+      "label": "strongest",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingByFinding",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.PoolingContrast.gap",
+      "label": "gap",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding.PoolingContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.pooling_by_finding.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.pooling_by_finding",
       "role": null
     },
     {
