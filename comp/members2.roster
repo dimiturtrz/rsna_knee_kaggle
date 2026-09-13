@@ -404,3 +404,29 @@ blendhold_drop40_long_s2026.pt          # 0.8879 ledger75 @e19 of 0..23, 909 row
                             # duplicates -- the correlated-duplicate signature. Remove the base and the
                             # same member pays. Any entry carrying it must DROP `blendhold_s2026`; seating
                             # both is the +0.0000 reading, and that is the whole finding.
+
+# ---- the fourth base, and the ADD/SWAP correction it forced (2026-09-13) ----
+# `labelwise_drop_drop40_long` is the EIGHTH base to clear the operator pair's +0.0040 floor and the ONLY
+# member of eleven that does not COST when added to the best seating. Priced as a SWAP it is worth more
+# than any add the project has measured. Read the two readings as the two different questions they are.
+labelwise_drop_drop40_long_s2026.pt      # 0.9051 ledger75 @e18 of 0..23, 909 rows, convergence_check
+                            # converged. +0.0067 over `labelwise_drop_s2026` at 0.8984 @e10 -- eighth of
+                            # eight bases for the pair (`--slot-dropout 0.40` + `--epochs 12 -> 24`).
+                            # It is the POOL'S JOINT TOP solo, tied with `labelwise_depth24_drop40_long`
+                            # at 0.9053, and the only member ever measured above `foreign_oof_corpus`.
+                            #
+                            # AS AN ADD it is worth +0.0004 on the n=7 four-swap core + depth_up (0.9093)
+                            # -- directional, knee-fnhbs closed on that band, no slot was spent on it.
+                            # AS A SWAP it is worth +0.0011, replacing `clean_calib_s2026` (solo 0.8940)
+                            # with n held at 7: 0.9093 -> 0.9103, the best seating this project has
+                            # measured. An entry carrying it that way must DROP `clean_calib_s2026`.
+                            # SEATING BOTH IS THE +0.0004 READING, not the +0.0011 one.
+                            #
+                            # THE CAVEAT THAT KEEPS IT OFF A SLOT ON ITS OWN: +0.0011 is the argmax of
+                            # seven swaps chosen on the holdout, and a beam over all 28 priced members
+                            # reaches only 0.9113 with FIVE seatings tied there to four decimals --
+                            # holdout selection, the defect that left `cleanseat_v1` `offline: None,
+                            # scope: excluded`. board_transfer +1.135 puts +0.0011 at ~+0.0012 against a
+                            # board that reports at 0.001. Ship it inside a POOL move, never as a
+                            # thirteenth reseating (knee-tuzzp, and goldseat_v1's note: twelve seating
+                            # entries have now failed to beat 0.944).
