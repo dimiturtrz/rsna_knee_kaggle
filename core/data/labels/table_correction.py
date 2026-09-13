@@ -51,6 +51,9 @@ from typing import Protocol
 import pandas as pd
 
 from core import cli
+from core.data.labels.finding_mentions import FindingMentions
+from core.data.labels.negation_scope import NegationScope
+from core.data.labels.report_language import ReportLanguages
 from core.data.labels.rubric_gap import RUBRIC, RubricGap
 from core.findings import STUDY, TARGETS
 
@@ -138,6 +141,64 @@ class RubricPull:
         return table.reset_index()
 
 
+@dataclass(frozen=True)
+class NegationPull:
+    """Positive cells whose report DENIES the finding everywhere it names it, pulled toward the floor.
+
+    `NegationScope` was built, measured and then consumed by nothing that produces a label: its two parts
+    took the negation category from 18 to 12 on disputed cells and from 16 to 3 on agreed ones, and the
+    only importer is `overcall_audit`. This is the rule that spends it. `report_reader` is a language
+    model, so the detector cannot be wired into the read itself without re-reading 4,407 studies — it
+    acts here instead, as a post-hoc pull over the table the read produced.
+
+    EVERY located mention must be denied, not one of them. A report that names a finding twice and denies
+    it once is describing two things, and the rule declines rather than guessing which. That is also what
+    keeps the rule away from `severity_boundary`'s retired territory: it reads DENIAL, never severity.
+
+    `residual` is the extractor's measured clean-failure rate, the same 0.15 `RubricPull` carries, and it
+    is what makes this a pull rather than the hard flip the rule is not entitled to.
+    """
+
+    residual: float
+
+    def denials(self, sources: LabelSources) -> list[tuple[str, str]]:
+        """The `(study, column)` positive cells every one of whose located mentions is denied."""
+        mentions = FindingMentions()
+        scope = NegationScope(mentions)
+        languages = ReportLanguages()
+        table = sources.table.set_index(STUDY)
+        positive = {column: set(table.index[table[column] > float(table[column].min())]) for column in TARGETS}
+        cells: list[tuple[str, str]] = []
+        for row in sources.reports.itertuples():
+            study, report = str(getattr(row, STUDY)), str(row.Report)
+            if study not in table.index:
+                continue
+            language = languages.language(report)
+            if not mentions.covers(language):
+                continue
+            for column in TARGETS:
+                if study not in positive[column]:
+                    continue
+                spans = mentions.mentions(report, language, column)
+                if spans and all(scope.denied(span, language, column) for span in spans):
+                    cells.append((study, column))
+        return cells
+
+    def applied(self, sources: LabelSources) -> pd.DataFrame:
+        """The table with every denied positive pulled toward its column's floor by `1 - residual`."""
+        table = sources.table.set_index(STUDY)
+        by_column: dict[str, list[str]] = {column: [] for column in TARGETS}
+        for study, column in self.denials(sources):
+            by_column[column].append(study)
+        for column, studies in by_column.items():
+            if not studies:
+                continue
+            floor = float(table[column].min())
+            pulled = floor + self.residual * (table.loc[studies, column] - floor)
+            table.loc[studies, column] = pulled.round(DECIMALS)
+        return table.reset_index()
+
+
 VERDICT = "__verdict"
 CONF = "__conf"
 
@@ -190,6 +251,7 @@ class ColumnGraft:
 FRACTURE_CONTUSION = "fracture_contusion"
 RUBRIC_SUBTHRESHOLD = "rubric_subthreshold"
 EFFUSION_REREAD = "effusion_reread"
+MISSED_NEGATION = "missed_negation"
 
 EFFUSION_LEVELS = {0.08: 0.0, 0.28: 0.265, 0.68: 0.795, 0.82: 0.9, 0.94: 0.98}
 """`report_labels_v4`'s five Effusion levels on `blend_hybrid_fx`'s scale. Only the middle two are
@@ -200,6 +262,7 @@ CORRECTIONS: dict[str, Correction] = {
     FRACTURE_CONTUSION: PartnerLift("Fracture", "Contusion", 0.25),
     RUBRIC_SUBTHRESHOLD: RubricPull(0.15),
     EFFUSION_REREAD: ColumnGraft("Effusion", "report_labels_v4.csv", "report_labels_v2.csv", EFFUSION_LEVELS),
+    MISSED_NEGATION: NegationPull(0.15),
 }
 
 

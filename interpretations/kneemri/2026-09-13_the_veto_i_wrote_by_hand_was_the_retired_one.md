@@ -76,7 +76,7 @@ here and applied at readout with the reasoning in the open.
 
 **`labelwise_ext_drop40_long` clears its band**: +0.0059 ledger75 on a matched, converged control. The
 operator pair — slot dropout at 0.40 plus a doubled budget — **transfers off the `max` pooling corner**,
-where it was measured (`band_dense` e8 0.8877 -> e16 0.8918, +0.0041), onto labelwise pooling. That
+where it was measured (`band_dense` ledger75 e8 0.8877 -> e16 0.8918, +0.0041), onto labelwise pooling. That
 re-prices the other three labelwise arms against the same operators and it is why the second base
 (`labelwise_depth24`) was queued blind.
 

@@ -11,6 +11,7 @@ from core.data.labels.table_correction import (
     ColumnGraft,
     CorrectionSequence,
     LabelSources,
+    NegationPull,
     PartnerLift,
     RubricPull,
 )
@@ -118,3 +119,34 @@ def test_column_graft_applied(tmp_path: Path):
     assert out.loc["s2", "Effusion"] == FLOOR, "both passes agree here, so the base value is carried"
     assert list(out["Effusion__verdict"]) == ["UNK", "YES"]
     assert out.loc["s1", "Medial OA"] == CEILING, "a graft touches one column"
+
+
+DENIED = "There is no anterior cruciate ligament tear. The medial meniscus shows an oblique tear."
+"""One finding denied outright and one asserted, in the same report — the discrimination the rule has to make."""
+
+
+def _negation_sources(labels: Path) -> LabelSources:
+    """Every column called positive, against a report that denies exactly one of them."""
+    reports = pd.DataFrame({STUDY: ["s1", "s2"], "Report": [DENIED, "Unremarkable knee."]})
+    truth = reports.copy()
+    frame = pd.DataFrame({STUDY: ["s1", "s2"]})
+    for column in TARGETS:
+        frame[column] = [CEILING, FLOOR]
+        truth[column] = [0.0, 0.0]
+    return LabelSources(frame, reports, truth, labels)
+
+
+def test_negation_pull_denials(tmp_path: Path):
+    """The denied finding is flagged and the asserted one in the same report is not."""
+    flagged = dict.fromkeys(column for _, column in NegationPull(0.15).denials(_negation_sources(tmp_path)))
+    assert "ACL" in flagged, "the report denies the cruciate outright"
+    assert MEDIAL not in flagged, "the same report asserts a medial tear"
+
+
+def test_negation_pull_applied(tmp_path: Path):
+    """The flagged cell is pulled toward its column's floor and keeps the residual; nothing else moves."""
+    sources = _negation_sources(tmp_path)
+    out = NegationPull(0.15).applied(sources).set_index(STUDY)
+    assert _cell(out, "s1", "ACL") < CEILING, "a denied positive is pulled down"
+    assert _cell(out, "s1", "ACL") > 0.0, "a pull leaves the residual standing rather than flipping the cell"
+    assert _cell(out, "s1", MEDIAL) == CEILING, "an asserted finding is untouched"
