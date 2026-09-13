@@ -145,6 +145,66 @@ need new members. Every entry on this board serves the same way — `LogitAverag
 vote for a foreign seat — and the pool being rank-deficient is an argument about the MEMBERS, not about
 the function that combines them. That has never been varied independently of the seating.
 
+**It was varied, the same night, and it is closed too.** Ten aggregators over the all-ours six span
+0.0010 at `ledger75`, with the incumbent `LogitAverage` effectively optimal (TrimmedMean-logit +0.0007,
+ProbMean +0.0006, both medians +0.0003, RankMean −0.0003, RankMax −0.0034, RankMin −0.0083). The null
+was then attacked on a deliberately heterogeneous 8 (+2 CNNs) and a wide 10 (+aux objectives); the
+spread stayed 0.0010–0.0011 on all three. The unifying quantity is **mean pairwise rank-correlation
+ρ ≈ 0.86–0.88 no matter how the set is diversified** — adding CNNs moves it only 0.884 → 0.860. At that
+ρ every aggregator must coincide, which is the 0.0010. Rank deficiency measured directly *between
+members*, not inferred from the board, and it explains the seating flat, the architecture flat and the
+decision-rule flat with one number.
+
+## The same statement, measured offline out-of-fold rather than read off the board
+
+Everything above is inferred from 129 board rows. The claim it makes — *seat selection inside this pool
+cannot buy the score* — is directly testable offline, and was, the same night. Pool: 140 honest members
+(declines, every `raptor_*`/`foreign_*`/DINOv3 row, and the licence-tainted `merged_*` family all
+removed), each with solo `ledger75` ≥ 0.855 on the 909 shared studies.
+
+**Greedy forward selection reaches 0.9097 at k=8 against the champion six's 0.9050 — +0.0047, which
+clears the +0.0040 floor.** That number is selected and scored on the same 909 studies, so it is an
+upper bound on availability, not a result. Split the holdout in half, select on one half, score on the
+other:
+
+```
+fit A -> eval B:  core six 0.9078   greedy-8 0.9097   +0.0019
+fit B -> eval A:  core six 0.9016   greedy-8 0.9029   +0.0014
+```
+
+**Mean honest gain +0.0017 — under half the floor.** About 65% of the in-sample +0.0047 was selection
+overfit. And the two fitted sets share **2 of 8 members**: the selection is not converging on a better
+seating, it is fitting the half it was shown.
+
+This is the strongest form of the finding available. It is not "we tried several seatings and they were
+flat" — it is *optimal* seating, computed, and it is flat out-of-fold. `knee-gcgbk`'s retirement of
+reseating and the INSTRUMENT rule above now rest on a measurement rather than on a board inference.
+
+## The orthogonal-member search, and why its answer was contamination
+
+The obvious escape is a member outside the pool's span. Scanning all 357 holdouts for mean per-label
+rank-correlation ρ against the six-member consensus finds an apparently perfect candidate tier —
+ρ ≈ 0.75 with solo *above* every core member (`raptor_effv2l480` ρ=0.782/0.9139, `dinov3f0_solo`
+ρ=0.753/0.9021, a dozen `foreign_dinov3_*` at 0.750–0.775) against the core's ρ 0.935–0.967.
+
+**Every one of them is already declined in `comp/members.declines` as in-sample void.** That is not a
+coincidence to note and move past — it is the mechanism. A model that has memorised part of the holdout
+tracks the TRUTH on those rows, and the truth is exactly what the honest consensus fails to track. So
+contamination *presents as orthogonality*: low ρ with high solo is the contamination signature, and it
+is the same reading `foreign_overlap` exists to refuse, arriving by a different door.
+
+Restricted to the 140 honest members, the range is:
+
+```
+honest minimum          rho=0.852  solo=0.8673  vjepa_warm_s2026
+honest low-rho tier     rho 0.852-0.888, solo 0.860-0.884
+the core six            rho 0.935-0.967, solo 0.883-0.899
+```
+
+**No honest member is both off-consensus and strong** — inside the honest pool, low ρ is bought with
+low solo. The 0.10 gap between the honest minimum (0.852) and the contaminated tier (0.750) is wide
+enough to be usable as a screen in its own right.
+
 ## What this does NOT say
 
 It does not say the pool is bad — 0.944 is rank 71 of 3612, and the gap to the leader is 0.011. It
