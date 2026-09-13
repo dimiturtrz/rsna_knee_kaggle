@@ -40,7 +40,9 @@
 #                a final-three-epoch gain over the 0.0062 holdout floor is what refuses a verdict, not
 #                argmax-last alone.
 #
-# PRICE: ~1.6 h. P(clears +0.0040) ~ 0.6 — five of five bases cleared it, but none of them was a
+# PRICE: ~1.6 h. P(clears +0.0040) ~ 0.75 — SEVEN of seven bases have cleared it (band_dense +0.0041 and
+# base224 +0.0070, plus a second base224 seed at +0.0060, were found unpriced on disk after this arm was
+# written), but none of them was a
 # distillation-plus-blended-labels corner, and this one is.
 #
 # deliberate: --slot-dropout 0.40 (the legislated operating point, knee-yotj8)

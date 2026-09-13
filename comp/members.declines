@@ -1223,3 +1223,16 @@ mergedk_labelwise_drop40_long_336_s2026
   ordinary range for this pool, so it is not an outlier on the axis it would have had to be one on.
   Declined as a measured null, not as a bad member: the second-site lever survives at 336 (it did not go
   negative) but it does not pay at the resolution we ship, and the 224 twin knee-dl65h should not now run.
+
+base224_drop40_long_s2026_run1.pt       # DECLINED 2026-09-13: A SECOND RUN OF THE SAME RECIPE. It is
+  `base224_drop40_long_s2026` again, flag for flag, and it reads 0.8855 ledger75 @e17 against that one's
+  0.8865 @e17. Seeds are banned in this project exactly as folds are: a second draw from the same recipe
+  buys no mechanism, and seating both would put two members into an ensemble whose only difference is
+  initialisation noise -- the correlated-duplicate shape that makes `chainfour_up` worth +0.0007 as an
+  added seat and +0.0012 as a swap.
+  WHAT IT IS INSTEAD, AND IT IS NOT NOTHING: it is the operator pair's ONLY REPLICATION. +0.0070 and
+  +0.0060 over the same base, a seed spread of 0.0010 against an effect of ~0.0065 -- an order of magnitude
+  below it. That is the first seed-level error bar the pair has, it is quoted in knee-p29bb as the reason
+  P(clears +0.0040) moved 0.6 -> 0.75, and it is why this run was worth keeping on disk. Declined as a
+  SEAT, kept as EVIDENCE. Re-open only by answering the argument: name a mechanism this run carries that
+  its twin does not.

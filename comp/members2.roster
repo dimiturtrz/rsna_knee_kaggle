@@ -351,3 +351,56 @@ labelwise_ext_drop40_long_ff.pt         # DARK BY CONSTRUCTION -- fitted with `-
                             # measured recipe into a shippable seat, not an exception to it.
                             # WHAT IT IS NOT: evidence. It may be seated, and it may never be quoted as a
                             # number. Any entry carrying it reads on the BOARD or not at all.
+
+# ---- the operator pair, five members found already on disk and priced 2026-09-13 ----
+# `roster_check` named seven undocumented checkpoints and five of them were `drop40_long` runs nobody had
+# priced. So the pair (`--slot-dropout 0.40` + `--epochs 12 -> 24`) had already been run far wider than the
+# five bases the labelwise work knew about. ledger75, 909 rows, `--holdouts D:/models/rsna_knee_abnormality`:
+#
+#   band_dense_drop40_long 0.8918 @e16  vs band_dense 0.8877 @e8   +0.0041
+#   base224_drop40_long    0.8865 @e17  vs base224    0.8795 @e9   +0.0070
+#   base224_drop40_long_run1 0.8855 @e17 same base                 +0.0060   (DECLINED, seed)
+#   severity_drop40_long   0.8899 @e18  base HAS NO LEDGER ROW     UNREAD
+#   mergedk_drop40_long    0.8853 @e17  base HAS NO LEDGER ROW     UNREAD
+#
+# That takes the pair to SEVEN of seven measurable bases clearing +0.0040 -- depth24 +0.0055, ext +0.0059,
+# dense +0.0084, chainfour +0.0070, blendhold +0.0050, band_dense +0.0041, base224 +0.0070 -- across four
+# unrelated recipe families. And base224's two seeds are a FREE REPLICATION of the operator itself: +0.0070
+# and +0.0060, a seed spread of 0.0010 against an effect of ~0.0065. That is the first seed-level error bar
+# this project has on the pair, and it is an order of magnitude below the effect.
+#
+# WHAT THESE FOUR ARE AND ARE NOT. Each is a solo number, not a seat. None of their bases is in the honest
+# core six, so none is a SWAP candidate for that pool -- they are ADD candidates, and the ADD reading is the
+# weak one (measured 2026-09-13: chainfour_up adds +0.0007 as a seventh seat while swapping for +0.0012).
+# None may be seated until it is priced as a marginal over the pool it would join. Rostered so it CAN be.
+band_dense_drop40_long_s2026.pt         # 0.8918 ledger75 @e16 of 0..23, 909 rows. The operator pair on
+                            # `band_dense`, +0.0041 over its base at 0.8877 @e8 -- the base peaks at 8 of
+                            # 12 and declines, the missing-regulariser signature, and the pair closes it.
+                            # The smallest of the seven gains and still at the seat floor.
+severity_drop40_long_s2026.pt           # 0.8899 ledger75 @e18 of 0..23, 909 rows. UNREAD AS A DELTA:
+                            # `severity_s2026` returned NO ROW from ledger75 (requested, silently omitted
+                            # -- the tool prints nothing for a stem it has no holdout record for, so count
+                            # returned rows against requested stems). The +N here is not known and must not
+                            # be quoted. Its SOLO stands on its own and is mid-pool.
+base224_drop40_long_s2026.pt            # 0.8865 ledger75 @e17 of 0..23, 909 rows. +0.0070 over `base224`
+                            # at 0.8795 @e9 -- tied with chainfour as the largest gain the pair has
+                            # produced, on the project's plainest recipe. A second run of this exact
+                            # recipe exists and is DECLINED in comp/members.declines (seeds are banned);
+                            # it read 0.8855, and the pair of them is the operator's only replication.
+mergedk_drop40_long_s2026.pt            # 0.8853 ledger75 @e17 of 0..23, 909 rows. UNREAD AS A DELTA:
+                            # `mergedk_s2026` returned NO ROW from ledger75, same omission as severity.
+                            # READ THE DECLINE ABOVE BEFORE SEATING THIS: the KMAR second-site merge was
+                            # declined 2026-09-13 as a measured null (+0.0005 marginal against a +0.0040
+                            # pre-registration), and this is the same corpus with the pair on top. The
+                            # operator lifting a member does not re-open an axis that was closed on its
+                            # MARGINAL value -- that decline is answered by a marginal, not by a solo.
+blendhold_drop40_long_s2026.pt          # 0.8879 ledger75 @e19 of 0..23, 909 rows. The operator pair on
+                            # `blendhold`, +0.0050 over its base at 0.8829. SEATED AS A SWAP, NOT AS AN
+                            # ADD, and the distinction is measured rather than argued. Against the honest
+                            # core six at 0.9050, full 909, LogitAverage, no selection (2026-09-13):
+                            #   added as a seventh seat                +0.0000
+                            #   swapped for `blendhold_s2026`          +0.0008
+                            # It clears the operator band SOLO and then adds nothing on top of the base it
+                            # duplicates -- the correlated-duplicate signature. Remove the base and the
+                            # same member pays. Any entry carrying it must DROP `blendhold_s2026`; seating
+                            # both is the +0.0000 reading, and that is the whole finding.
