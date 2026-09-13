@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# bead: knee-9bnkc
+# reading: labelwise_depth24_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `labelwise_depth24`'s byte-identical line with the two operators that are MEASURED to pay at the
+#   `max` pooling corner: `--slot-dropout 0.40` and `--epochs 12 -> 24`. Nothing else moves. The base
+#   is the best honest solo the project owns on the 0.75 ruler (0.8998 ledger75).
+#
+# WHY A SECOND LABELWISE BASE, AND WHY BEFORE THE FIRST ONE IS READ
+#   `labelwise_ext_drop40_long` (knee-cgt9m) is the same operator transfer on `labelwise_extended`.
+#   BOTH BRANCHES OF ITS READOUT WANT THIS ARM, which is what makes it safe to queue blind:
+#     * if knee-cgt9m clears +0.0040, the operator pair transfers off the `max` corner and the obvious
+#       next move is the same pair on the family's BEST base -- this arm, already run.
+#     * if knee-cgt9m lands flat or negative, the transfer question would otherwise close on n=1, on a
+#       single base. A matched second base is what makes that closure a fact about the pooling corner
+#       rather than a fact about `labelwise_extended`.
+#   It is therefore not a repeat under the Einstein gate: the variable that moves between the two arms
+#   is the BASE, and the two bases differ in slices (20 vs 24), batch (4x3 vs 10) and scheme.
+#
+# THE FAMILY SIGNATURE THIS TARGETS
+#   Every twelve-epoch labelwise member peaks at epoch 7 to 10 and then declines -- depth24 0.8998 @e8,
+#   extended 0.8986 @e8, drop 0.8984 @e10, dense 0.8964 @e7. A budget wall peaks on the LAST epoch.
+#   Peaking early and declining for four epochs is a missing regulariser, and the fix is measured:
+#   `band_dense` moved peak-e8 0.8877 -> peak-e16 0.8918 (+0.0041 ledger75) when exactly these two
+#   flags were added together.
+#
+# WHY IT IS WORTH THE CARD AT ALL
+#   Optimal seat selection over 140 honest members is worth +0.0017 out-of-fold (bf880d89); the CNN
+#   family is -0.0038; ten decision rules span 0.0010. Seating, architecture and aggregation are each
+#   measured flat. knee-0v8yz: only MEMBER QUALITY at count 1 has ever moved this board 0.005+.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_depth24_s2026 0.8998, ledger75)
+#   >= +0.0040   a member above 0.9038 -- outright the best honest solo the project owns -- and the
+#                operator pair is established off the `max` corner on two bases.
+#   +0.000..+0.0039
+#                directional. Keep for the pool, spend no slot.
+#   <= 0.0000    read TOGETHER with knee-cgt9m. Two matched bases flat closes operator-transfer to
+#                labelwise pooling; one of two keeps it open on the base that moved.
+#   midpoint     expected >= 0.8617 (its own 12-epoch peak) by the budget argument.
+#   peak         if this arm peaks ON ITS LAST EPOCH the budget is still binding at 24 and NO verdict
+#                may be read. Record it and stop; do not quote the delta.
+#
+# READ PEAK-TO-PEAK ONLY. $RECIPE carries --one-cycle, so the anneal stretches with the budget and the
+#   two runs differ from epoch 1. Epoch-by-epoch comparison against the 12-epoch base is meaningless.
+#
+# CARD. The base asks `--vram-gb 28` of a 32 GB card and that is inherited unchanged; slot-dropout adds
+#   no memory. Nothing else of ours may share the card while this runs (`card_check`).
+#
+# deliberate: --slot-dropout 0.40 — imported operating point (knee-yotj8), not a swept knob.
+# deliberate: --epochs 24 — imported from the pair that measured the operator, not a swept knob.
+# deliberate: --slices 24 --batch 10 --vram-gb 28 --calibrated-targets --hold-annotations — inherited
+#             verbatim from labelwise_depth24. This arm changes two flags, not five.
+#
+# control  labelwise_depth24_s2026 (on disk, 12-epoch, same recipe line). No control run is owed.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+run_train labelwise_depth24_drop40_long \
+  $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 28 --band-low 0.1 --band-high 0.9 \
+  --calibrated-targets --hold-annotations --slot-dropout 0.40 \
+  --labels "$LABELS" --out "$MODELS/labelwise_depth24_drop40_long_s2026.pt"
