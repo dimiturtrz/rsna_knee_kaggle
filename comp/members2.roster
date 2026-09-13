@@ -287,3 +287,19 @@ slot_dropout_hi_s2026.pt             # 0.8551 -- the 0.40 dose; seated on decode
 # axis at the dose operating point. Ledger 2026-09-12, beads knee-vrvus / knee-zrcww.
 mergedk_corpus_s2026.pt              # 0.8490 (l75 0.8787, e8)  -- second site, plain supervision
 mergedk_drop40_s2026.pt              # 0.8530 (l75 0.8805, e11) -- second site + slot dropout 0.40
+labelwise_ext_drop40_long_s2026.pt   # 0.8672 mid (l75 0.9045, e23 of 0..23) -- THE BEST HONEST SOLO THE
+                            # PROJECT OWNS, above labelwise_depth24's 0.8998 l75. labelwise_extended's
+                            # line with --slot-dropout 0.40 and --epochs 24, nothing else (knee-cgt9m).
+                            # CLEARS ITS BAND: +0.0059 ledger75 over labelwise_extended, so the
+                            # operator pair transfers off the `max` pooling corner. Its argmax IS its
+                            # last epoch, which the arm header's hand-written veto would refuse -- but
+                            # the legislated rule is convergence_check, which requires the argmax to be
+                            # last AND the final-three-epoch gain to clear the 0.0062 holdout floor.
+                            # The tail gained +0.0006, a tenth of that, and the check returns CONVERGED
+                            # for this run and for its control. See knee-a21h9.
+                            # SEATED ON QUALITY, NOT DIVERSITY, AND IT IS REDUNDANT: rank-corr 0.938
+                            # with the core-six consensus, and on the 909 the core six move 0.9050 ->
+                            # 0.9058 swapping labelwise_extended out (+0.0008) or 0.9067 adding it as a
+                            # seventh (+0.0017). Both under the +0.0040 floor and the same size as
+                            # optimal reseating over 140 honest members. Rostered so it can be shipped,
+                            # NOT because a seating for it beats the champion.
