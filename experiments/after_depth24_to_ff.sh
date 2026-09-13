@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Wait for labelwise_depth24_drop40_long to release the card, then run mergedk_labelwise_drop40_long
-# (knee-dl65h).
+# Wait for labelwise_depth24_drop40_long to release the card, then run labelwise_ext_drop40_long_ff
+# (knee-sexix).
 #
 # THE GATE. `labelwise_depth24_drop40_long` IS a `run_train` arm, so `_mark` fires. The FILE is named
 # for the CHECKPOINT (`labelwise_depth24_drop40_long_s2026.full.log`) while the MARKER TEXT carries the
@@ -14,13 +14,13 @@
 # fires the next arm the instant a crash frees the card. Both, with OR. `ps -W` because the MSYS pid is
 # a different number from the Windows one.
 #
-# WHY THIS ARM IS NEXT, UNCONDITIONALLY. It is matched against `mergedk_drop40_long`, not against
-# anything the depth24 arm produces, so neither branch of that readout changes whether this cell is
-# worth filling. Queuing it blind costs nothing and keeps the card busy across the boundary.
+# WHY THIS ARM IS NEXT. The champion's six seats are all --fold -1 members that saw every study; our
+# best honest solo saw ~3500 of ~4400. A full-corpus refit of the winning recipe is the only operation
+# that puts a better member into a seat the champion already holds. Independent of the depth24 readout.
 set -u
 cd "$(dirname "$0")/.."
 
-PID="${1:?usage: after_depth24_to_mergedk.sh <windows pid of labelwise_depth24_drop40_long>}"
+PID="${1:?usage: after_depth24_to_ff.sh <windows pid of labelwise_depth24_drop40_long>}"
 LOG="D:/models/rsna_knee_abnormality/experiments/labelwise_depth24_drop40_long_s2026.full.log"
 MARK="ARM DONE labelwise_depth24_drop40_long"
 
@@ -32,5 +32,5 @@ while true; do
 done
 
 sleep 30
-echo "launching mergedk_labelwise_drop40_long at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-bash experiments/arms/mergedk_labelwise_drop40_long.sh
+echo "launching labelwise_ext_drop40_long_ff at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+bash experiments/arms/labelwise_ext_drop40_long_ff.sh
