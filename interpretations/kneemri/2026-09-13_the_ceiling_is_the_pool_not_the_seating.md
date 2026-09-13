@@ -96,11 +96,54 @@ spent, but only as a declared INSTRUMENT, and the submission message has to say 
      are in better shape than any of the three attacks assumed; the rung prices are right.
    - *objective* — **OPEN, and running.** `severity_drop40_long` against `band_dense_drop40_long`
      (`knee-evdfd`). This is the owner's third named lever and the only one of the three still live.
-   - *architecture* — OPEN. A CNN family the board has never held is the one structural axis that does
-     not go through the corpus or the label table.
+   - *architecture* — **MEASURED THE SAME NIGHT, AND IT IS NOT A DIRECTION.** See below.
 2. **A different decision rule.** Every entry above serves the same way: `LogitAverage`, or that plus a
    ranked vote for a foreign seat. The pool being rank-deficient says nothing about the DECISION being
    optimal, and that has never been varied independently of the seating.
+
+## The architecture route, priced without spending a slot
+
+The finding above predicts something specific and testable: **seat seven is inert regardless of what is
+in it.** `cnnseat_v1` is the sharpest available test of that, and it was already on the board —
+stackseat's six plus `resnet_224_short_s2026`, the most out-of-family member this project owns, in the
+seventh chair. It read **0.944**, byte-equal to the champion six. Its own pre-registration drew the
+right conclusion at the time: it "closes the single-CNN-seat question but NOT the CNN family."
+
+So the open version of the architecture question was never addition — it was **replacement**: a CNN
+MAJORITY rather than a CNN passenger. The Einstein gate clears that cleanly. Across 129 scored
+submissions the board has held **at most ONE CNN in any entry** (`cnnsolo_v1` 0.915 at count 1,
+`resnetlong_v1` 0.907 at count 1, `cleanseat_v1` 0.942 with 1 of 6, `cnnseat_v1` 0.944 with 1 of 7).
+A CNN majority is genuinely untried.
+
+It is also refuted, offline, for free — four CNN holdouts are on disk, so the ensemble is a numpy
+`LogitAverage` over 909 shared studies and costs no card and no slot. Read under `ledger75` (ten
+columns at 0.75, Medial Meniscus and Baker's at the midpoint):
+
+```
+CNN-4 alone                  0.8867
+CNN-4 + top-3 transformer    0.9012
+transformer-only 6           0.9050
+1 CNN + 6 transformer        0.9056
+```
+
+**The CNN majority is −0.0038 against the transformer-only six**, far under the inherited +0.0040
+offline FLOOR, and adding one CNN to six transformers is +0.0006 — noise, which is the same answer
+`cnnseat_v1` gave on the board.
+
+The mechanism is in the first line, not the third. **Four CNNs together beat their own best solo
+(0.8842) by +0.0025.** A family whose four members are nearly collinear *with each other* cannot be
+supplying a direction the pool lacks. "Different architecture" was being treated as a proxy for
+"different direction", and on this task it is not one: the CNNs are not an unexplored axis, they are a
+worse-conditioned copy of the axis already spanned.
+
+This is written down as a SAVED SLOT. A CNN-majority entry was a well-formed, Einstein-clean,
+mechanism-backed proposal, and it was killed by a computation that cost seconds instead of by a
+submission that would have cost a fifth of a day's board access. That is the shape the owner asked for.
+
+**What it leaves is the DECISION RULE**, which is now the only untested structural route that does not
+need new members. Every entry on this board serves the same way — `LogitAverage`, or that plus a ranked
+vote for a foreign seat — and the pool being rank-deficient is an argument about the MEMBERS, not about
+the function that combines them. That has never been varied independently of the seating.
 
 ## What this does NOT say
 
