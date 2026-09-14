@@ -117,6 +117,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.build_fastmri",
+      "target": "core.data.corpus.fastmri_boxes",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
       "target": "core.data.corpus.fastmri_corpus",
       "weight": 1
     },
@@ -567,6 +573,18 @@
     {
       "kind": "import",
       "source": "core.data.corpus.diagnose_matrix",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.fastmri_boxes",
+      "target": "core.data.corpus.fastmri_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.fastmri_boxes",
       "target": "core.data.corpus.study_cache",
       "weight": 1
     },
@@ -8463,6 +8481,18 @@
     {
       "kind": "construct",
       "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.build_fastmri.main",
       "target": "core.data.corpus.fastmri_corpus.FastmriCorpus",
       "weight": 1
     },
@@ -9508,6 +9538,66 @@
       "kind": "calls",
       "source": "core.data.corpus.diagnose_matrix.main",
       "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "target": "core.data.corpus.fastmri_boxes.BoxFrame",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriVolume",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.frame",
+      "target": "core.data.corpus.fastmri_boxes.BoxFrame",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.frame",
+      "target": "core.data.corpus.study_cache.StudyCache.reader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
+      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.frame",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
+      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.listed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
+      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.native",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
+      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.write",
+      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
       "weight": 1
     },
     {
@@ -38463,7 +38553,7 @@
   ],
   "nodes": [
     {
-      "descendants": 79,
+      "descendants": 80,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -38487,7 +38577,7 @@
       "role": null
     },
     {
-      "descendants": 69,
+      "descendants": 70,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -38495,7 +38585,7 @@
       "role": null
     },
     {
-      "descendants": 42,
+      "descendants": 43,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -38650,6 +38740,14 @@
       "descendants": 0,
       "id": "core.data.corpus.diagnose_matrix",
       "label": "diagnose_matrix",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes",
+      "label": "fastmri_boxes",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -41804,6 +41902,22 @@
       "label": "MatrixAudit",
       "level": "class",
       "parent": "core.data.corpus.diagnose_matrix",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.BoxFrame",
+      "label": "BoxFrame",
+      "level": "class",
+      "parent": "core.data.corpus.fastmri_boxes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "label": "FastmriBoxes",
+      "level": "class",
+      "parent": "core.data.corpus.fastmri_boxes",
       "role": "primary"
     },
     {
@@ -48020,6 +48134,70 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.corpus.diagnose_matrix",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.BoxFrame.place",
+      "label": "place",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.BoxFrame",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.frame",
+      "label": "frame",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.listed",
+      "label": "listed",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.native",
+      "label": "native",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
+      "label": "tables",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.write",
+      "label": "write",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
       "role": null
     },
     {

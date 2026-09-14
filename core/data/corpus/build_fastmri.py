@@ -14,6 +14,7 @@ from pathlib import Path
 
 from core import cli
 from core.data.corpus.cache_flags import CacheFlags
+from core.data.corpus.fastmri_boxes import BOX_TABLE, STUDY_TABLE, FastmriBoxes
 from core.data.corpus.fastmri_corpus import READER_CONFIDENCE, FastmriCorpus
 from core.data.corpus.slots import FASTMRI_SCHEME
 from core.data.corpus.study_metadata import StudyMetadata
@@ -56,6 +57,11 @@ def main() -> None:
         ),
     )
     command.parser.add_argument("--labels-only", action="store_true", help="write the table, skip the decode")
+    command.parser.add_argument(
+        "--boxes",
+        action="store_true",
+        help=f"write only the fastMRI+ box tables ({BOX_TABLE}, {STUDY_TABLE}) in this cache's frame, and exit",
+    )
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     arguments = command.parsed()
 
@@ -73,6 +79,10 @@ def main() -> None:
         cache,
         confidence=arguments.reader_confidence,
     )
+    if arguments.boxes:
+        FastmriBoxes(corpus.annotations, cache).write(corpus.volumes(), root.processed() / "labels")
+        logger.info("FASTMRI BOXES COMPLETE")
+        return
 
     corpus.labels(arguments.labels_out or root.processed() / "labels" / LABELS)
     StudyMetadata.write(corpus.metadata(), root.processed() / "metadata" / METADATA)
