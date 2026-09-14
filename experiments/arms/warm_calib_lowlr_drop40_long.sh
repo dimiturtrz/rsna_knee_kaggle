@@ -43,8 +43,6 @@
 # control  warm_calib_lowlr_s2026 = 0.8910 ledger75 @e4 (declared 2026-09-13 from the ledger75 pool read)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-
 require "$LABELS"
 require "$MODELS/encoders/calib_dense_hold.enc.pt"
 
