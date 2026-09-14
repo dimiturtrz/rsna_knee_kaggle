@@ -758,6 +758,24 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.skmtea_boxes",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.skmtea_boxes",
+      "target": "core.data.corpus.fastmri_boxes",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.skmtea_boxes",
+      "target": "core.data.corpus.fastmri_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.slot_geometry",
       "target": "core.cli",
       "weight": 1
@@ -10570,6 +10588,54 @@
       "kind": "construct",
       "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.volumes",
       "target": "core.data.corpus.rijeka_corpus.RijekaVolume",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_boxes.SkmteaBoxes.tables",
+      "target": "core.data.corpus.skmtea_boxes.SkmteaBoxes.native",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_boxes.SkmteaBoxes.tables",
+      "target": "core.data.corpus.skmtea_boxes.SkmteaBoxes.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_boxes.SkmteaBoxes.tables",
+      "target": "core.data.corpus.skmtea_boxes.TissueMask.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_boxes.SkmteaBoxes.write",
+      "target": "core.data.corpus.skmtea_boxes.SkmteaBoxes.tables",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.skmtea_boxes.TissueMask",
+      "target": "core.data.corpus.skmtea_boxes.TissueMask",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_boxes.TissueMask.regions",
+      "target": "core.data.corpus.skmtea_boxes.TissueMask.centre",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.skmtea_boxes.main",
+      "target": "core.data.corpus.skmtea_boxes.SkmteaBoxes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_boxes.main",
+      "target": "core.data.corpus.skmtea_boxes.SkmteaBoxes.write",
       "weight": 1
     },
     {
@@ -38553,7 +38619,7 @@
   ],
   "nodes": [
     {
-      "descendants": 80,
+      "descendants": 81,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -38577,7 +38643,7 @@
       "role": null
     },
     {
-      "descendants": 70,
+      "descendants": 71,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -38585,7 +38651,7 @@
       "role": null
     },
     {
-      "descendants": 43,
+      "descendants": 44,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -38868,6 +38934,14 @@
       "descendants": 0,
       "id": "core.data.corpus.rijeka_corpus",
       "label": "rijeka_corpus",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes",
+      "label": "skmtea_boxes",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -42158,6 +42232,22 @@
       "label": "RijekaVolume",
       "level": "class",
       "parent": "core.data.corpus.rijeka_corpus",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.SkmteaBoxes",
+      "label": "SkmteaBoxes",
+      "level": "class",
+      "parent": "core.data.corpus.skmtea_boxes",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.TissueMask",
+      "label": "TissueMask",
+      "level": "class",
+      "parent": "core.data.corpus.skmtea_boxes",
       "role": "satellite"
     },
     {
@@ -49142,6 +49232,78 @@
       "label": "level",
       "level": "method",
       "parent": "core.data.corpus.rijeka_corpus.RijekaVolume",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.SkmteaBoxes.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.SkmteaBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.SkmteaBoxes.native",
+      "label": "native",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.SkmteaBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.SkmteaBoxes.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.SkmteaBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.SkmteaBoxes.tables",
+      "label": "tables",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.SkmteaBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.SkmteaBoxes.write",
+      "label": "write",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.SkmteaBoxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.TissueMask.centre",
+      "label": "centre",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.TissueMask",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.TissueMask.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.TissueMask",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.TissueMask.regions",
+      "label": "regions",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes.TissueMask",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_boxes.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_boxes",
       "role": null
     },
     {
