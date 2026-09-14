@@ -776,6 +776,24 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.skmtea_slices",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.skmtea_slices",
+      "target": "core.data.corpus.fastmri_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.skmtea_slices",
+      "target": "core.data.corpus.skmtea_boxes",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.slot_geometry",
       "target": "core.cli",
       "weight": 1
@@ -2686,6 +2704,36 @@
       "kind": "import",
       "source": "kneemri.evaluation.level_calibration",
       "target": "kneemri.evaluation.gold_rows",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.locator_audit",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.locator_audit",
+      "target": "core.data.corpus.skmtea_slices",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.locator_audit",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.locator_audit",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.locator_audit",
+      "target": "kneemri.models.locator",
       "weight": 1
     },
     {
@@ -6704,6 +6752,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.locator",
+      "target": "core.data.corpus.skmtea_slices",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.locator",
+      "target": "kneemri.models.encoder",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.models.medicalnet",
       "target": "core.data.corpus.slots",
       "weight": 1
@@ -7414,6 +7474,30 @@
       "kind": "import",
       "source": "kneemri.training.latent_mim",
       "target": "kneemri.training.masked_objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.locator_fit",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.locator_fit",
+      "target": "core.data.corpus.skmtea_slices",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.locator_fit",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.locator_fit",
+      "target": "kneemri.models.locator",
       "weight": 1
     },
     {
@@ -10636,6 +10720,72 @@
       "kind": "calls",
       "source": "core.data.corpus.skmtea_boxes.main",
       "target": "core.data.corpus.skmtea_boxes.SkmteaBoxes.write",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.skmtea_slices.DicomVolume",
+      "target": "core.data.corpus.skmtea_slices.DicomVolume",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_slices.DicomVolume.read",
+      "target": "core.data.corpus.skmtea_slices.DicomVolume.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_slices.DicomVolume.read",
+      "target": "core.data.corpus.skmtea_slices.DicomVolume.stream",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.skmtea_slices.SkmteaSlices",
+      "target": "core.data.corpus.skmtea_slices.SlicedScan",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_slices.SkmteaSlices.scan",
+      "target": "core.data.corpus.skmtea_slices.DicomVolume.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_slices.SkmteaSlices.scan",
+      "target": "core.data.corpus.skmtea_slices.SlicedScan.cut",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_slices.SkmteaSlices.write",
+      "target": "core.data.corpus.skmtea_slices.SkmteaSlices.splits",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.skmtea_slices.SlicedScan",
+      "target": "core.data.corpus.skmtea_slices.DicomVolume",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.skmtea_slices.SlicedScan",
+      "target": "core.data.corpus.skmtea_slices.SlicedScan",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.skmtea_slices.main",
+      "target": "core.data.corpus.skmtea_slices.SkmteaSlices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.skmtea_slices.main",
+      "target": "core.data.corpus.skmtea_slices.SkmteaSlices.write",
       "weight": 1
     },
     {
@@ -17920,6 +18070,102 @@
       "kind": "calls",
       "source": "kneemri.evaluation.level_calibration.main",
       "target": "kneemri.evaluation.level_calibration.LevelCalibration.vocabulary",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.locator_audit.Landmarks",
+      "target": "kneemri.evaluation.locator_audit.Landmarks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.Landmarks.add",
+      "target": "kneemri.evaluation.locator_audit.Landmarks.centroids",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "target": "kneemri.evaluation.locator_audit.Landmarks",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "target": "kneemri.models.locator.Locator",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "target": "kneemri.models.locator.SliceCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit.landmarks",
+      "target": "kneemri.evaluation.locator_audit.Landmarks.empty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit.landmarks",
+      "target": "kneemri.models.locator.Locator.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit.landmarks",
+      "target": "kneemri.models.locator.SliceCorpus.batch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit.landmarks",
+      "target": "kneemri.models.locator.SliceCorpus.indices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit.rsna_grids",
+      "target": "kneemri.evaluation.locator_audit.LocatorAudit.overlay",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.LocatorAudit.rsna_grids",
+      "target": "kneemri.models.locator.Locator.predict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.locator_audit.main",
+      "target": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.main",
+      "target": "kneemri.evaluation.locator_audit.LocatorAudit.landmarks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.main",
+      "target": "kneemri.evaluation.locator_audit.LocatorAudit.rsna_grids",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.main",
+      "target": "kneemri.models.locator.Locator.pretrained",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.locator_audit.main",
+      "target": "kneemri.models.locator.SliceCorpus.read",
       "weight": 1
     },
     {
@@ -34471,6 +34717,36 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.models.locator.Locator",
+      "target": "kneemri.models.encoder.Encoder",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.locator.Locator",
+      "target": "kneemri.models.locator.Locator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.locator.Locator.pretrained",
+      "target": "kneemri.models.encoder.Encoder.load",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.models.locator.SliceCorpus",
+      "target": "kneemri.models.locator.SliceCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.locator.SliceCorpus.batch",
+      "target": "kneemri.models.locator.Locator.merged",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.models.medicalnet.MedicalNetTrunk.encoded",
       "target": "kneemri.models.medicalnet.MedicalNetTrunk.pooled",
@@ -36532,6 +36808,126 @@
       "kind": "inherits",
       "source": "kneemri.training.latent_mim.LatentMimConfig",
       "target": "kneemri.training.masked_objective.MaskConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorAugment.__call__",
+      "target": "kneemri.training.locator_fit.LocatorAugment.geometry",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorAugment.__call__",
+      "target": "kneemri.training.locator_fit.LocatorAugment.intensity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorAugment.geometry",
+      "target": "kneemri.training.locator_fit.LocatorAugment.uniform",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorAugment.intensity",
+      "target": "kneemri.training.locator_fit.LocatorAugment.uniform",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.locator_fit.LocatorFit",
+      "target": "kneemri.models.locator.Locator",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.locator_fit.LocatorFit",
+      "target": "kneemri.models.locator.SliceCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.dice",
+      "target": "kneemri.models.locator.Locator.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.dice",
+      "target": "kneemri.models.locator.SliceCorpus.batch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.dice",
+      "target": "kneemri.models.locator.SliceCorpus.indices",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.fit",
+      "target": "kneemri.models.locator.Locator.groups",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.fit",
+      "target": "kneemri.models.locator.SliceCorpus.batch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.fit",
+      "target": "kneemri.models.locator.SliceCorpus.indices",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.locator_fit.LocatorFit.fit",
+      "target": "kneemri.training.locator_fit.LocatorAugment",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.fit",
+      "target": "kneemri.training.locator_fit.LocatorFit.dice",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.LocatorFit.fit",
+      "target": "kneemri.training.locator_fit.LocatorFit.loss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.main",
+      "target": "kneemri.models.locator.Locator.pretrained",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.main",
+      "target": "kneemri.models.locator.SliceCorpus.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.locator_fit.main",
+      "target": "kneemri.training.locator_fit.LocatorFit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.main",
+      "target": "kneemri.training.locator_fit.LocatorFit.dice",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.locator_fit.main",
+      "target": "kneemri.training.locator_fit.LocatorFit.fit",
       "weight": 1
     },
     {
@@ -38619,7 +39015,7 @@
   ],
   "nodes": [
     {
-      "descendants": 81,
+      "descendants": 82,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -38643,7 +39039,7 @@
       "role": null
     },
     {
-      "descendants": 71,
+      "descendants": 72,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -38651,7 +39047,7 @@
       "role": null
     },
     {
-      "descendants": 44,
+      "descendants": 45,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -38942,6 +39338,14 @@
       "descendants": 0,
       "id": "core.data.corpus.skmtea_boxes",
       "label": "skmtea_boxes",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices",
+      "label": "skmtea_slices",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -39275,7 +39679,7 @@
       "role": null
     },
     {
-      "descendants": 307,
+      "descendants": 310,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39347,7 +39751,7 @@
       "role": null
     },
     {
-      "descendants": 109,
+      "descendants": 110,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -39670,6 +40074,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.level_calibration",
       "label": "level_calibration",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit",
+      "label": "locator_audit",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -41003,7 +41415,7 @@
       "role": null
     },
     {
-      "descendants": 36,
+      "descendants": 37,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -41110,6 +41522,14 @@
       "descendants": 0,
       "id": "kneemri.models.load_check",
       "label": "load_check",
+      "level": "module",
+      "parent": "kneemri.models",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator",
+      "label": "locator",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -41371,7 +41791,7 @@
       "role": null
     },
     {
-      "descendants": 45,
+      "descendants": 46,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -41542,6 +41962,14 @@
       "descendants": 0,
       "id": "kneemri.training.latent_mim",
       "label": "latent_mim",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit",
+      "label": "locator_fit",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -42248,6 +42676,30 @@
       "label": "TissueMask",
       "level": "class",
       "parent": "core.data.corpus.skmtea_boxes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.DicomVolume",
+      "label": "DicomVolume",
+      "level": "class",
+      "parent": "core.data.corpus.skmtea_slices",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.SkmteaSlices",
+      "label": "SkmteaSlices",
+      "level": "class",
+      "parent": "core.data.corpus.skmtea_slices",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.SlicedScan",
+      "label": "SlicedScan",
+      "level": "class",
+      "parent": "core.data.corpus.skmtea_slices",
       "role": "satellite"
     },
     {
@@ -43656,6 +44108,22 @@
       "label": "LevelRates",
       "level": "class",
       "parent": "kneemri.evaluation.level_calibration",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.Landmarks",
+      "label": "Landmarks",
+      "level": "class",
+      "parent": "kneemri.evaluation.locator_audit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "label": "LocatorAudit",
+      "level": "class",
+      "parent": "kneemri.evaluation.locator_audit",
       "role": "satellite"
     },
     {
@@ -46356,6 +46824,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.locator.Locator",
+      "label": "Locator",
+      "level": "class",
+      "parent": "kneemri.models.locator",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.SliceCorpus",
+      "label": "SliceCorpus",
+      "level": "class",
+      "parent": "kneemri.models.locator",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.lora.LoRALinear",
       "label": "LoRALinear",
       "level": "class",
@@ -47096,6 +47580,22 @@
       "label": "LatentMimConfig",
       "level": "class",
       "parent": "kneemri.training.latent_mim",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorAugment",
+      "label": "LocatorAugment",
+      "level": "class",
+      "parent": "kneemri.training.locator_fit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorFit",
+      "label": "LocatorFit",
+      "level": "class",
+      "parent": "kneemri.training.locator_fit",
       "role": "satellite"
     },
     {
@@ -49304,6 +49804,70 @@
       "label": "main",
       "level": "method",
       "parent": "core.data.corpus.skmtea_boxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.DicomVolume.of",
+      "label": "of",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices.DicomVolume",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.DicomVolume.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices.DicomVolume",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.DicomVolume.stream",
+      "label": "stream",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices.DicomVolume",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.SkmteaSlices.scan",
+      "label": "scan",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices.SkmteaSlices",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.SkmteaSlices.splits",
+      "label": "splits",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices.SkmteaSlices",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.SkmteaSlices.write",
+      "label": "write",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices.SkmteaSlices",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.SlicedScan.cut",
+      "label": "cut",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices.SlicedScan",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.skmtea_slices.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.skmtea_slices",
       "role": null
     },
     {
@@ -55456,6 +56020,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.level_calibration",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.Landmarks.add",
+      "label": "add",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit.Landmarks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.Landmarks.centroids",
+      "label": "centroids",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit.Landmarks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.Landmarks.empty",
+      "label": "empty",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit.Landmarks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.Landmarks.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit.Landmarks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.LocatorAudit.landmarks",
+      "label": "landmarks",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.LocatorAudit.overlay",
+      "label": "overlay",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.LocatorAudit.rsna_grids",
+      "label": "rsna_grids",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit.LocatorAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.locator_audit.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.locator_audit",
       "role": null
     },
     {
@@ -67828,6 +68456,78 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.locator.Locator.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.models.locator.Locator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.Locator.forward",
+      "label": "forward",
+      "level": "method",
+      "parent": "kneemri.models.locator.Locator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.Locator.groups",
+      "label": "groups",
+      "level": "method",
+      "parent": "kneemri.models.locator.Locator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.Locator.merged",
+      "label": "merged",
+      "level": "method",
+      "parent": "kneemri.models.locator.Locator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.Locator.predict",
+      "label": "predict",
+      "level": "method",
+      "parent": "kneemri.models.locator.Locator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.Locator.pretrained",
+      "label": "pretrained",
+      "level": "method",
+      "parent": "kneemri.models.locator.Locator",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.SliceCorpus.batch",
+      "label": "batch",
+      "level": "method",
+      "parent": "kneemri.models.locator.SliceCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.SliceCorpus.indices",
+      "label": "indices",
+      "level": "method",
+      "parent": "kneemri.models.locator.SliceCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.locator.SliceCorpus.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.models.locator.SliceCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.lora.LoRALinear.__init__",
       "label": "__init__",
       "level": "method",
@@ -70472,6 +71172,70 @@
       "label": "term_names",
       "level": "method",
       "parent": "kneemri.training.latent_mim.LatentMim",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorAugment.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit.LocatorAugment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorAugment.geometry",
+      "label": "geometry",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit.LocatorAugment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorAugment.intensity",
+      "label": "intensity",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit.LocatorAugment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorAugment.uniform",
+      "label": "uniform",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit.LocatorAugment",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorFit.dice",
+      "label": "dice",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit.LocatorFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorFit.fit",
+      "label": "fit",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit.LocatorFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.LocatorFit.loss",
+      "label": "loss",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit.LocatorFit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.locator_fit.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.training.locator_fit",
       "role": null
     },
     {
