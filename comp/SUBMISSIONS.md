@@ -4203,3 +4203,16 @@ projected ~+0.0084; about a quarter landed, so the sign transferred and the size
 under the 0.0053 Hanley-McNeil floor and the 1.5% bar, one read. Offline is null by construction (four
 dark seats plus raptor). The pin moves to it; `champion_check` now reads both shelves, since this is the
 first pin seating second-shelf members.
+
+## `doseseat_v1` -- 0.946, ref 56236942, 2026-09-14 -- FLAT: the drop40 dose is saturated at three
+
+INSTRUMENT. `tripleseat_v2` with `through_dense_cf` out and `labelwise_drop_drop40_long_s2026` in (drop40
+seats 3 -> 4); count, kit `c3effa61`, `LogitAverage`, `overlap=False`, raptor at 1/3 held. `run_check`:
+7 of 7 loaded, no drop line. Fold-0-twin proxy +0.0011 [+0.0003, +0.0021] (ledger75, n=6 twin), expected
+board move ~+0.0003 at the observed quarter transfer.
+
+Pre-registered bands vs 0.946: `0.948+` dose unsaturated / `0.947` directional / `0.9455-0.9465` FLAT /
+`0.945` dark seat worth more / below refutes the twin sign for dark seats. It landed **0.946**, FLAT. Pin
+stays on `tripleseat_v2`. `through_dense_cf` is not load-bearing either way. With the next swap also a
+single-seat move, the seat axis reads saturated at board resolution: stop reseating.
+
