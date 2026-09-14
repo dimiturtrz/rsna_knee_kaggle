@@ -4187,3 +4187,19 @@ no seat, which is expected for a plain recipe and is not what the arm was bought
 on `mergedk_drop40_long` is still DISTINCT (rank correlation 0.8914, js 0.0212, maha 3.390) -- a second hospital
 does produce a genuinely different member. What is now closed is that the difference is worth anything
 on either ruler we own.
+
+## `tripleseat_v2` -- 0.946, ref 56232529, 2026-09-14 -- one resolvable step off the 0.944 band, and the pin moves
+
+`stackseat_v1`'s seats with `grade_ladder_cf` and `lr4e-5_ws_cf` out and three labelwise
+`drop40_long` fold-0 bases in (`labelwise_depth24_drop40_long_s2026`, `labelwise_ext_drop40_long_s2026`,
+`labelwise_dense_drop40_long_s2026`, second shelf `kneemri-members-2`); seven of ours under
+`LogitAverage`, `overlap=False`, raptor at 1/3. Kit `c3effa61`. `run_check` on the downloaded log:
+7 of 7 loaded, no drop line.
+
+Pre-registered bands: `0.947+` proxy transferred / `0.9455-0.9469` real gain, re-pin / `0.9425-0.9454`
+flat / below refutes the proxy. It landed **0.946**: +0.002 over 0.944 on a 0.001 board, one step past
+`BOARD_RESOLVABLE = 0.0015`, and the first entry above the flat 0.944 band. The fold-0-twin proxy
+projected ~+0.0084; about a quarter landed, so the sign transferred and the size did not. Directional:
+under the 0.0053 Hanley-McNeil floor and the 1.5% bar, one read. Offline is null by construction (four
+dark seats plus raptor). The pin moves to it; `champion_check` now reads both shelves, since this is the
+first pin seating second-shelf members.

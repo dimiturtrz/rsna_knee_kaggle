@@ -72,14 +72,17 @@ def test_drift(tmp_path: Path):
     kernels = _kernels(tmp_path)
     whole = _roster(tmp_path, ["res392_ws_s2026", "lr4e-5_ws_s2026"])
 
-    assert champion.drift(whole, kernels) == []
+    assert champion.drift((whole,), kernels) == []
 
     short = _roster(tmp_path / "short", ["lr4e-5_ws_s2026"])
-    dropped = champion.drift(short, kernels)
+    dropped = champion.drift((short,), kernels)
 
     assert len(dropped) == 1
     assert "res392_ws_s2026" in dropped[0]
     assert "roster" in dropped[0]
+
+    second = _roster(tmp_path / "second", ["res392_ws_s2026"])
+    assert champion.drift((short, second), kernels) == [], "a pin spanning both shelves is still buildable"
 
 
 def _board(tmp_path: Path) -> Path:
@@ -185,7 +188,7 @@ def test_drift_sees_a_kernel_that_stopped_naming_a_member(tmp_path: Path):
     edited = SCRIPT.replace('("res392_ws_s2026", "lr4e-5_ws_s2026")', '("lr4e-5_ws_s2026",)')
 
     found = champion.drift(
-        _roster(tmp_path, ["res392_ws_s2026", "lr4e-5_ws_s2026"]),
+        (_roster(tmp_path, ["res392_ws_s2026", "lr4e-5_ws_s2026"]),),
         _kernels(tmp_path, edited),
     )
 

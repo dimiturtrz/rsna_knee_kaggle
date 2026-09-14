@@ -44,6 +44,10 @@ KERNELS = Path("comp/kernels")
 CHOSEN = "chosen"
 """The name a kernel binds its member tuple to, which is the only line of it this check reads."""
 
+SHELVES = (Path("comp/members.roster"), Path("comp/members2.roster"))
+"""Every roster a kernel can mount a member from. A pin may seat members off either shelf, so a check
+reading only the first called `tripleseat_v2` unbuildable over three members the second shelf ships."""
+
 PINNABLE = "ensemble"
 """The one scope a pin may hold. An `excluded` row is on the board and disqualified for a stated reason
 (a grafted fusion, a kit failure), and a `member_mean` row is not an entry at all — neither can be a
@@ -166,10 +170,12 @@ class Champion:
             if row.get("scope") == PINNABLE and row.get("board") is not None and float(row["board"]) > self.board
         ]
 
-    def drift(self, roster: Path, kernels: Path = KERNELS) -> list[str]:
+    def drift(self, rosters: tuple[Path, ...], kernels: Path = KERNELS) -> list[str]:
         """Every way the champion can no longer be rebuilt, named. Empty means it still can."""
         named = self.named_by_kernel(kernels)
-        packaged = {pattern.removesuffix(".pt") for pattern in MemberRoster.read(roster).patterns()}
+        packaged = {
+            pattern.removesuffix(".pt") for roster in rosters for pattern in MemberRoster.read(roster).patterns()
+        }
         found = []
         found += [
             f"{self.kernel} no longer names {name!r}, which the {self.board} entry loaded"
@@ -188,7 +194,7 @@ def main() -> None:
     """Assert the champion is still buildable: `python -m kneemri.kaggle.champion_check`."""
     command = cli.Command(Champion.__doc__, logger)
     command.parser.add_argument("--record", type=Path, default=RECORD, help="the pinned champion")
-    command.parser.add_argument("--roster", type=Path, default=Path("comp/members.roster"), help="what ships")
+    command.parser.add_argument("--roster", type=Path, nargs="+", default=list(SHELVES), help="every shelf that ships")
     command.parser.add_argument("--kernels", type=Path, default=KERNELS, help="where kernel scripts live")
     command.parser.add_argument("--board", type=Path, default=BOARD, help="every scored entry")
     command.parser.add_argument(
@@ -201,7 +207,7 @@ def main() -> None:
     # the one thing it exists to make impossible.
     empty = f"{champion.entry} names no member — the record or its kernel did not parse"
     Denominator(len(champion.members), empty).refuse_empty()
-    drift = champion.drift(arguments.roster, arguments.kernels)
+    drift = champion.drift(tuple(arguments.roster), arguments.kernels)
     for complaint in drift:
         logger.error("%s", complaint)
     if drift:
@@ -224,7 +230,11 @@ def main() -> None:
     # `submit_check` — where an entry is about to be sent — and only an exposure here, where the subject
     # is an entry that has already scored. A pin that carries one is still a real result and still the
     # thing to price against; what it cannot be is the entry left standing at the end.
-    exposed = MemberRoster.read(arguments.roster).licence_refusals(set(champion.members))
+    exposed = [
+        complaint
+        for roster in arguments.roster
+        for complaint in MemberRoster.read(roster).licence_refusals(set(champion.members))
+    ]
     for complaint in exposed:
         logger.warning("LICENCE EXPOSURE: the pin seats %s — a clean entry that ties it replaces it", complaint)
     aged = LeaderboardRead.recorded(arguments.leaderboard).stale(LeaderboardRead.now())
