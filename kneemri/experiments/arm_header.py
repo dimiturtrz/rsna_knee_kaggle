@@ -16,7 +16,7 @@ from pathlib import Path
 
 from kneemri.experiments.arm_gate import BOARD, ArmGate
 
-BEAD_LINE = re.compile(r"^#\s*bead:\s*(knee-[a-z0-9]+)\s*$", re.MULTILINE)
+BEAD_LINE = re.compile(r"^#\s*bead:\s*(knee-[a-z0-9]+(?:\.[0-9]+)*)\s*$", re.MULTILINE)
 """How an arm names the issue that priced it. One line, anywhere in the shell's header."""
 
 CONTROL_LINE = re.compile(r"^#\s*control\s+([A-Za-z0-9_][A-Za-z0-9_.-]*)\s*=\s*([01]\.[0-9]+)?", re.MULTILINE)

@@ -51,10 +51,13 @@ def test_beads(tmp_path: Path):
     arms.mkdir()
     (arms / "priced.sh").write_text("#!/bin/bash\n# bead: knee-yuqf\nrun_train priced\n", encoding="utf-8")
     (arms / "bare.sh").write_text("#!/bin/bash\nrun_train bare\n", encoding="utf-8")
+    (arms / "child.sh").write_text("# bead: knee-vgz5b.5\n", encoding="utf-8")
 
-    found = ArmHeader(arms).beads(["priced", "bare", "rung_12"])
+    found = ArmHeader(arms).beads(["priced", "bare", "rung_12", "child"])
 
-    assert found == {"priced": "knee-yuqf", "bare": None}, "a rung with no file of its own is not an unbeaded arm"
+    assert found == {"priced": "knee-yuqf", "bare": None, "child": "knee-vgz5b.5"}, (
+        "a rung with no file of its own is not an unbeaded arm"
+    )
 
 
 def test_controls(tmp_path: Path):
