@@ -50,5 +50,5 @@ run_train warm_calib_lowlr_drop40_long \
   $RECIPE --epochs 24 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 1e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
   --encoder-weights "$MODELS/encoders/calib_dense_hold.enc.pt" \
-  --slot-dropout 0.40 \
+  --slot-dropout 0.40 --vram-gb 20 \
   --labels "$LABELS" --out "$MODELS/warm_calib_lowlr_drop40_long_s2026.pt"
