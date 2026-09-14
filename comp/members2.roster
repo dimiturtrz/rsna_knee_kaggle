@@ -466,3 +466,7 @@ clean_calib_drop40_long_s2026.pt        # 0.8978 ledger75 @e23 of 0..23, 909 row
                             # NOT YET SEATED. A solo is not a seat (`stack_increments` read +0.0020 solo
                             # and -0.0001 seated). Price it as a SWAP for `clean_calib_s2026`, which the
                             # champion six holds, and an entry carrying it that way must DROP that member.
+warm_calib_lowlr_drop40_long_s2026.pt   # 0.9000 ledger75 @e8, 909 rows, convergence_check TRUNCATED (the
+                            # PC shut down mid-run) so the number is a FLOOR. On `warm_calib_lowlr_s2026`
+                            # 0.8910 @e4 that is +0.0090 -- the operator pair's largest gain on any base,
+                            # and a floor. NOT YET SEATED; price as a SWAP for its control, re-run to finish.
