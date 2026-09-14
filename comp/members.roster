@@ -533,6 +533,9 @@ labelwise_dense_s2026.pt    # 0.8613 solo, peak epoch 7 of 12. THIRD-BEST SOLO M
 warm_calib_dense_s2026.pt   # 0.8562 solo, peak epoch 6 of 12. A WARM RESTART FROM A FITTED ENCODER
 # (--encoder-weights encoders/calib_dense_hold.enc.pt), which champion.json records as the lane "0 of 131
 # arms have ever used" — one arm had, and its checkpoint was sitting unrostered. Same dense recipe otherwise.
+warm_calib_lowlr_drop40_long_s2026.pt   # 0.8641 midpoint / 0.8994 ledger75, peak epoch 8 of 24, full run
+# (knee-rkegi). +0.0084 ledger75 over warm_calib_lowlr_s2026 (0.8910), directional. Seat vs cleanseat_v1
+# @ledger75: +0.0018 [+0.0011, +0.0026] added, +0.0022 for blendhold — inside the +0.0040 the ruler can see.
 contrast_dense_s2026.pt     # 0.8547 solo, peak epoch 5 of 12. --contrast-weight 1.0 on the dense recipe.
 focus_mcl_s2026.pt          # 0.5332 solo — and seated deliberately at that number.
 # The --focus-label MCL arm: eleven of twelve heads carry no gradient and collapsed toward chance, so the
