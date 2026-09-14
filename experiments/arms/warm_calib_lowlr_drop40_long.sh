@@ -43,6 +43,8 @@
 # control  warm_calib_lowlr_s2026 = 0.8910 ledger75 @e4 (declared 2026-09-13 from the ledger75 pool read)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 require "$LABELS"
 require "$MODELS/encoders/calib_dense_hold.enc.pt"
 
@@ -50,5 +52,5 @@ run_train warm_calib_lowlr_drop40_long \
   $RECIPE --epochs 24 --slice-pooling max --whole-stack $THROUGHPUT \
   --backbone-lr 1e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
   --encoder-weights "$MODELS/encoders/calib_dense_hold.enc.pt" \
-  --slot-dropout 0.40 --vram-gb 20 \
+  --slot-dropout 0.40 --vram-gb 22 \
   --labels "$LABELS" --out "$MODELS/warm_calib_lowlr_drop40_long_s2026.pt"
