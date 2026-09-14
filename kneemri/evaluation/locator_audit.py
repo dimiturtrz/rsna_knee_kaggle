@@ -25,14 +25,12 @@ from core import cli
 from core.data.corpus.skmtea_slices import LOCATOR, SIZE
 from core.data.corpus.slots import SLOTS
 from kneemri.models.backbone import ENCODERS, SMALL
-from kneemri.models.locator import CLASSES, EVAL_BATCH, Locator, SliceCorpus
+from kneemri.models.locator import CLASSES, EVAL_BATCH, PRESENT, Locator, SliceCorpus
 
 logger = logging.getLogger(__name__)
 
 MILLIMETRES = 0.3125 * 512 / SIZE
 """SKM-TEA's 0.3125 mm pixel on a 512 grid, resized to `SIZE`."""
-PRESENT = 20
-"""Pixels at 336 px a tissue must cover to count as drawn: a 4.6 mm square, below any real cartilage."""
 CACHE = "336px_20sl_0.1-0.9band"
 STUDIES = 50
 PER_GRID = 10

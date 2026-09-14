@@ -386,6 +386,24 @@ site-count flat: the site axis added SPARSE human labels, this adds DENSE distil
 "a different mechanism and untested here".
 """
 
+ROI_SCHEME = "roi"
+"""The canonical six plus each SAGITTAL slot again, cropped to the box a tissue locator drew. OFFLINE ONLY.
+
+The three views are APPENDED, never swapped in: `crop80_tissue` replaced the whole frame with a tight
+one and read about -0.008, and the multi-scale scheme that kept it measured on a max-pooling head, which
+the ledger has since downgraded to unread. What is new here is the CENTRE — learned from cartilage and
+meniscus rather than taken from the image middle or an intensity mass.
+
+`crop_mm` stays None because the crop is not a decode-time extent: the box is drawn per study by
+`kneemri.embeddings.roi_cache` over the canonical cache's own pixels, so this name is FOREIGN to
+`build_cache`. The locator was fitted on SKM-TEA, so a member fitted here is not shipped until the
+licence ruling (knee-vgz5b.7)."""
+
+ROI_SLOTS: tuple[Slot, ...] = (
+    *SLOTS,
+    *(replace(slot, name=f"{slot.name}@{ROI_SCHEME}") for slot in SLOTS if slot.plane is Plane.SAGITTAL),
+)
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
@@ -398,6 +416,7 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     TRIPLE_SCHEME: SLOTS,
     FASTMRI_MERGED_SCHEME: SLOTS,
     KMAR_MERGED_SCHEME: SLOTS,
+    ROI_SCHEME: ROI_SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
@@ -411,6 +430,7 @@ FOREIGN_SCHEMES = (
     TRIPLE_SCHEME,
     FASTMRI_MERGED_SCHEME,
     KMAR_MERGED_SCHEME,
+    ROI_SCHEME,
 )
 """Schemes that name a corpus THIS repo's own decoder cannot produce, each owned by its own builder.
 

@@ -32,6 +32,8 @@ HIDDEN = (256, 128, 64)
 PATCH = 14
 BYTE = 255.0
 EVAL_BATCH = 32
+PRESENT = 20
+"""Pixels at 336 px a tissue must cover to count as drawn: a 4.6 mm square, below any real cartilage."""
 
 
 class Locator(nn.Module):

@@ -1520,6 +1520,54 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "core.data.corpus.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "core.data.corpus.skmtea_slices",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_cache",
+      "target": "kneemri.models.locator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.alignment_damage",
       "target": "core.bootstrap",
       "weight": 1
@@ -13846,6 +13894,156 @@
       "kind": "calls",
       "source": "kneemri.embeddings.report_embeddings.main",
       "target": "kneemri.embeddings.report_embeddings.ReportEmbeddings.reduce",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embeddings.roi_cache.BoxRule",
+      "target": "kneemri.embeddings.roi_cache.BoxRule",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embeddings.roi_cache.BoxRule",
+      "target": "kneemri.embeddings.roi_cache.RoiBox",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.BoxRule.box",
+      "target": "kneemri.embeddings.roi_cache.BoxRule.placed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.roi_cache.BoxRule.box",
+      "target": "kneemri.embeddings.roi_cache.RoiBox",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.embeddings.roi_cache.RoiCache",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embeddings.roi_cache.RoiCache",
+      "target": "kneemri.embeddings.roi_cache.BoxRule",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embeddings.roi_cache.RoiCache",
+      "target": "kneemri.embeddings.roi_cache.RoiBox",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.embeddings.roi_cache.RoiCache",
+      "target": "kneemri.models.locator.Locator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "core.data.corpus.study_cache.StudyCache.prepare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "core.data.corpus.study_cache.StudyCache.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "core.data.corpus.study_cache.StudyCache.recorded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "core.data.corpus.study_cache.StudyCache.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "kneemri.embeddings.roi_cache.BoxRule.at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "kneemri.embeddings.roi_cache.RoiCache.crop",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "kneemri.embeddings.roi_cache.RoiCache.located",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "target": "kneemri.embeddings.roi_cache.RoiCache.write",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.located",
+      "target": "kneemri.embeddings.roi_cache.BoxRule.box",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.RoiCache.located",
+      "target": "kneemri.models.locator.Locator.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.roi_cache.main",
+      "target": "kneemri.embeddings.roi_cache.RoiCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.main",
+      "target": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.main",
+      "target": "kneemri.embeddings.roi_cache.RoiCache.misses",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_cache.main",
+      "target": "kneemri.models.locator.Locator.pretrained",
       "weight": 1
     },
     {
@@ -39679,7 +39877,7 @@
       "role": null
     },
     {
-      "descendants": 310,
+      "descendants": 311,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39703,7 +39901,7 @@
       "role": null
     },
     {
-      "descendants": 5,
+      "descendants": 6,
       "id": "kneemri.embeddings",
       "label": "embeddings",
       "level": "module",
@@ -39746,6 +39944,14 @@
       "descendants": 0,
       "id": "kneemri.embeddings.report_embeddings",
       "label": "report_embeddings",
+      "level": "module",
+      "parent": "kneemri.embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache",
+      "label": "roi_cache",
       "level": "module",
       "parent": "kneemri.embeddings",
       "role": null
@@ -43413,6 +43619,30 @@
       "level": "class",
       "parent": "kneemri.embeddings.report_embeddings",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.BoxRule",
+      "label": "BoxRule",
+      "level": "class",
+      "parent": "kneemri.embeddings.roi_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiBox",
+      "label": "RoiBox",
+      "level": "class",
+      "parent": "kneemri.embeddings.roi_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiCache",
+      "label": "RoiCache",
+      "level": "class",
+      "parent": "kneemri.embeddings.roi_cache",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -53180,6 +53410,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.embeddings.report_embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.BoxRule.at",
+      "label": "at",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.BoxRule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.BoxRule.box",
+      "label": "box",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.BoxRule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.BoxRule.placed",
+      "label": "placed",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.BoxRule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiBox.blank",
+      "label": "blank",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiBox",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiBox.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiBox",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiCache.build",
+      "label": "build",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiCache.crop",
+      "label": "crop",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiCache.located",
+      "label": "located",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiCache.misses",
+      "label": "misses",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiCache.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.RoiCache.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache.RoiCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_cache.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_cache",
       "role": null
     },
     {
