@@ -4216,3 +4216,11 @@ Pre-registered bands vs 0.946: `0.948+` dose unsaturated / `0.947` directional /
 stays on `tripleseat_v2`. `through_dense_cf` is not load-bearing either way. With the next swap also a
 single-seat move, the seat axis reads saturated at board resolution: stop reseating.
 
+## `warmseat_v1` -- 0.945, ref 56238286, 2026-09-14 -- DILUTION: a fourth drop40_long seat subtracts
+
+MECHANISM. `tripleseat_v2` plus `warm_calib_lowlr_drop40_long_s2026` as an extra seat (kernel `kneemri-warmseat`,
+c5419a0a). Fold-0-twin ADD proxy +0.0007 [+0.0001, +0.0012] (ledger75, 909 rows). Pre-registered bands vs 0.946:
+>=0.948 re-pin, 0.947 directional, 0.946 flat, <=0.945 dilution. Read **0.945**: dilution band. With `doseseat_v1`
+flat, the drop40_long family is saturated at three seats, and a positive twin proxy of this size did not transfer in
+sign. Pin stays on `tripleseat_v2`. Further same-family seats are not a slot; the next gains must come from better
+members (full-corpus refit `fullseat_v1`, higher-resolution crops), not from more of them.
