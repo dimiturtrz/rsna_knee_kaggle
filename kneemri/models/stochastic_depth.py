@@ -50,6 +50,7 @@ class StochasticDepth:
 
     def __init__(self, rate: float = NO_DROP) -> None:
         self.rate = rate
+        self.paths: list[DropPath] = []
 
     def applied(self, trunk: nn.Module) -> int:
         """Replace each block's `drop_path` with a ramped `DropPath`; answer how many were reached."""
@@ -62,7 +63,14 @@ class StochasticDepth:
         # schedule. A single-block trunk is the degenerate case and takes the full rate rather than
         # dividing by zero.
         last = max(len(blocks) - 1, 1)
-        for depth, block in enumerate(blocks):
-            block.drop_path = DropPath(self.rate * depth / last)
+        self.paths = [DropPath(self.rate * depth / last) for depth in range(len(blocks))]
+        for block, path in zip(blocks, self.paths, strict=True):
+            block.drop_path = path
         logger.info("stochastic depth ramped to %g across %d blocks", self.rate, len(blocks))
         return len(blocks)
+
+    def strengthen(self, strength: float) -> None:
+        """Re-rate every placed path at this multiple of the ramp; 1.0 restores the applied rates exactly."""
+        last = max(len(self.paths) - 1, 1)
+        for depth, path in enumerate(self.paths):
+            path.rate = self.rate * strength * depth / last

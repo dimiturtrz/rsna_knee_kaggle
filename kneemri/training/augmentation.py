@@ -10,7 +10,7 @@ The RNG order is the one thing this move had to preserve: a member's pixels are 
 of draws, so the transforms stay in their old order, drawing exactly what they drew before.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import torch
@@ -19,6 +19,7 @@ from torch import Tensor, nn
 
 from kneemri.models.slot_dropout import SlotDropout
 from kneemri.training.ghosting import Ghosting
+from kneemri.training.progress_schedule import FULL
 
 SLOT_DROPOUT = "slot_dropout"
 """The key slot dropout answers under when a run checks its switches landed (`kneemri.training.landed`).
@@ -178,6 +179,35 @@ class AugmentConfig:
         """
         return bool(self.gamma_probability or self.blur_probability or self.noise or self.contrast != (1.0, 1.0))
 
+    def scaled(self, strength: float) -> "AugmentConfig":
+        """Every width at this multiple, the one knob a `ProgressSchedule` turns — `self` at exactly 1.0.
+
+        ONE MULTIPLIER FOR EVERY OP, no per-op schedule: widths scale about their identity (0 for a
+        jitter, 1 for a gamma or contrast factor), probabilities and slot dropout clip at 1. Returning
+        `self` at the identity is what keeps the default loop bit-identical, since `1 + (0.7 - 1) * 1`
+        is not the float 0.7.
+        """
+        if strength == FULL:
+            return self
+
+        def about_one(pair: tuple[float, float]) -> tuple[float, float]:
+            return (FULL + (pair[0] - FULL) * strength, FULL + (pair[1] - FULL) * strength)
+
+        return replace(
+            self,
+            rotation_degrees=self.rotation_degrees * strength,
+            scale_jitter=self.scale_jitter * strength,
+            shift_jitter=self.shift_jitter * strength,
+            gain_jitter=self.gain_jitter * strength,
+            gamma=about_one(self.gamma),
+            gamma_probability=min(self.gamma_probability * strength, FULL),
+            blur_probability=min(self.blur_probability * strength, FULL),
+            contrast=about_one(self.contrast),
+            noise=self.noise * strength,
+            slot_dropout=min(self.slot_dropout * strength, FULL),
+            ghosting=self.ghosting * strength,
+        )
+
 
 class Augmentation:
     """The perturbations one config asks for, applied to a batch of images or a batch of slot bags."""
@@ -186,11 +216,18 @@ class Augmentation:
     """A 3x3 Gaussian, normalised so a blur cannot change the image's overall level."""
 
     def __init__(self, config: AugmentConfig | None = None) -> None:
-        self.config = config or AugmentConfig.geometric_only()
+        self.base = config or AugmentConfig.geometric_only()
+        """The config the run ASKED for — what a landed-check compares, whatever strength is current."""
+        self.config = self.base
+        """The config this step applies: `base` scaled by the progress schedule's current strength."""
 
     def intensity(self) -> bool:
-        """Whether this augmentation perturbs intensity, asked of the config it will actually use."""
-        return self.config.intensity()
+        """Whether this augmentation perturbs intensity, asked of the config the run asked for."""
+        return self.base.intensity()
+
+    def strengthen(self, strength: float) -> None:
+        """Apply `base` at this multiple from the next batch on — see `AugmentConfig.scaled`."""
+        self.config = self.base.scaled(strength)
 
     def applied(self, images: Float[Tensor, "n c h w"], generator: torch.Generator) -> Float[Tensor, "n c h w"]:
         """Rigid jitter, then intensity — never a flip, which laterality normalisation forbids.

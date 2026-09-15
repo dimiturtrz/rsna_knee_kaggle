@@ -51,6 +51,7 @@ from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.mixup import Blend, Mixup
 from kneemri.training.objective import Objective
+from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.training.sampling import Sampling, Uniform
 from kneemri.training.sharpness import Sharpness
@@ -91,6 +92,7 @@ NO_SHARPNESS_UNDER_ACCUMULATION = (
 SAMPLING = "sampling_tilt"
 SAMPLING_RAMP = "sampling_ramp"
 CERTAINTY_RAMP = "certainty_ramp"
+AUG_SCHEDULE = "aug_schedule"
 CORPUS_OVERSAMPLE = "corpus_oversample"
 TARGET_CORPUS = "target_corpus"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
@@ -165,6 +167,11 @@ class Trainer:
         self.sharpness = Sharpness()
         self.drop_path_rate = NO_DROP
         self.dropped_paths = 0
+        self.depth = StochasticDepth()
+        # ONE multiplier over run progress for every regulariser, read through `strengthen` alone. The
+        # default is the constant 1.0, at which each consumer returns its configured value exactly.
+        self.progress = ProgressSchedule()
+        self.planned_epochs = 1
         # Attached and null by default for the same reason, and here the default matters more than
         # anywhere else on this list: `Uniform` returns the positions untouched WITHOUT drawing from the
         # generator, so a run that asks for no sampling policy descends on exactly the stream every
@@ -224,10 +231,10 @@ class Trainer:
         return {
             **self.objective.settings(),
             INTENSITY_AUGMENT: self.augmentation.intensity(),
-            SLOT_DROPOUT: self.augmentation.config.slot_dropout,
-            GHOSTING: self.augmentation.config.ghosting,
-            SCALE_JITTER: self.augmentation.config.scale_jitter,
-            PADDING_MODE: self.augmentation.config.padding_mode,
+            SLOT_DROPOUT: self.augmentation.base.slot_dropout,
+            GHOSTING: self.augmentation.base.ghosting,
+            SCALE_JITTER: self.augmentation.base.scale_jitter,
+            PADDING_MODE: self.augmentation.base.padding_mode,
             AUTOCAST: self.autocast_dtype,
             WINDOW: self.window,
             READ_SIZE: self.read_size,
@@ -249,6 +256,7 @@ class Trainer:
             SAMPLING: self.sampling.tilt(),
             SAMPLING_RAMP: self.sampling.ramp(),
             CERTAINTY_RAMP: self.certainty_ramp,
+            AUG_SCHEDULE: self.progress.recorded(),
             CORPUS_OVERSAMPLE: getattr(self.sampling, "factor", 0.0),
             TARGET_CORPUS: (
                 getattr(self.sampling, "target", "") if getattr(self.sampling, "factor", 0.0) > 0.0 else ""
@@ -359,8 +367,20 @@ class Trainer:
 
     def drop_paths(self, rate: float) -> None:
         """Ramp stochastic depth over the built trunk, keeping the COUNT — see `StochasticDepth`."""
-        self.dropped_paths = StochasticDepth(rate).applied(self.model.backbone)
+        self.depth = StochasticDepth(rate)
+        self.dropped_paths = self.depth.applied(self.model.backbone)
         self.drop_path_rate = rate
+
+    def schedule_strength(self, schedule: ProgressSchedule, epochs: int) -> None:
+        """Drive every regulariser's strength by this schedule over a run of `epochs` epochs."""
+        self.progress = schedule
+        self.planned_epochs = max(epochs, 1)
+
+    def _strengthen(self, progress: float) -> float:
+        strength = self.progress.value(progress / self.planned_epochs)
+        for consumer in (self.augmentation, self.mixup, self.depth):
+            consumer.strengthen(strength)
+        return strength
 
     def draw_with(self, sampling: Sampling) -> None:
         """Attach the policy that decides which studies each epoch descends on."""
@@ -515,12 +535,14 @@ class Trainer:
         # identity and the loop is the one every arm in the ledger ran.
         plan = plan[: self.accumulation.whole(len(plan))]
         planned = len(plan)
+        logger.info("aug strength %.3f", self._strengthen(self._epochs_fitted))
         # The gradient is zeroed ONCE per GROUP rather than per micro-batch, and that placement IS the
         # feature: gradients accumulate in the leaves between steps, so zeroing here and again after
         # each optimiser step is what makes a group sum instead of overwrite.
         self.optimiser.zero_grad(set_to_none=True)
         for batch, fetched in Prefetch(corpus, plan, self.window, pin=self.device.type == "cuda"):
             pixels = fetched.to(self.device, non_blocking=True)
+            self._strengthen(self._epochs_fitted + steps / max(planned, 1))
             pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)

@@ -25,6 +25,14 @@ from kneemri.training.mixup import OFF
 from kneemri.training.sharpness import FLAT
 from kneemri.training.trainer import ONE_CYCLE_WARMUP
 
+AUG_KNOBS = (
+    ("start", 1.0, "strength at progress 0"),
+    ("mid", 1.0, "strength on the plateau"),
+    ("end", 1.0, "strength at progress 1"),
+    ("ramp", 0.0, "share of the run climbing start -> mid"),
+    ("tail", 0.0, "share of the run descending mid -> end"),
+)
+
 
 class FlagVocabulary:
     """Every flag one training run accepts, and the defaults argv gives them."""
@@ -614,6 +622,14 @@ class FlagVocabulary:
             "depended on. transformers applies a FLAT rate at every depth, which is not the schedule "
             "the published effect sizes were measured under; this ramps.",
         )
+        for knob, default, role in AUG_KNOBS:
+            parser.add_argument(
+                f"--aug-{knob}",
+                type=float,
+                default=default,
+                help=f"{role} of the ONE progress schedule scaling every regulariser at once (geometric and "
+                "intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); defaults are the ledger",
+            )
         parser.add_argument(
             "--sharpness",
             type=float,

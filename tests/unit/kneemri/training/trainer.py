@@ -15,13 +15,20 @@ from kneemri.models.drop_path import NO_DROP
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
 from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
-from kneemri.training.augmentation import INTENSITY_AUGMENT, PADDING_MODE, SCALE_JITTER, SLOT_DROPOUT
+from kneemri.training.augmentation import (
+    INTENSITY_AUGMENT,
+    PADDING_MODE,
+    SCALE_JITTER,
+    SLOT_DROPOUT,
+    Augmentation,
+    AugmentConfig,
+)
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.label_focus import FOCUS, UNFOCUSED
-from kneemri.training.mixup import OFF
+from kneemri.training.mixup import OFF, UNMIXED
 from kneemri.training.objective import (
     CONTRAST_TERM,
     COUNT_NORMALISED,
@@ -35,6 +42,7 @@ from kneemri.training.objective import (
     Objective,
     RankedObjective,
 )
+from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.sampling import Disagreed
 from kneemri.training.sharpness import FLAT
@@ -43,6 +51,7 @@ from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 from kneemri.training.trainer import (
     ACCUMULATION,
+    AUG_SCHEDULE,
     AUTOCAST,
     AVERAGING,
     BACKBONE_RATE,
@@ -509,6 +518,7 @@ def test_policies():
         SHARPNESS: FLAT,
         DROP_PATH: NO_DROP,
         DROPPED_BLOCKS: 0,
+        AUG_SCHEDULE: (1.0, 1.0, 1.0, 0.0, 0.0),
     }
 
     trainer.bfloat16()
@@ -536,6 +546,7 @@ def test_policies():
         SHARPNESS: FLAT,
         DROP_PATH: NO_DROP,
         DROPPED_BLOCKS: 0,
+        AUG_SCHEDULE: (1.0, 1.0, 1.0, 0.0, 0.0),
     }
 
 
@@ -845,3 +856,19 @@ def test_ramp_certainty():
 
     assert np.allclose(trainer._ramped_weights(weights, 4), weights, atol=1e-6), "full trust at the ramp's end"
     assert np.allclose(trainer._ramped_weights(weights, 99), weights, atol=1e-6), "and it never overshoots"
+
+
+def test_schedule_strength():
+    """One schedule drives every consumer; the default reports the constant schedule the ledger ran."""
+    trainer = _trainer()
+    assert trainer.policies()[AUG_SCHEDULE] == (1.0, 1.0, 1.0, 0.0, 0.0)
+    trainer.augmentation = Augmentation(AugmentConfig(slot_dropout=0.4))
+    trainer.blend(0.2)
+    trainer.schedule_strength(ProgressSchedule(start=0.0, mid=1.0, end=0.0, ramp=0.5, tail=0.5), 4)
+    assert trainer.policies()[AUG_SCHEDULE] == (0.0, 1.0, 0.0, 0.5, 0.5)
+    assert trainer._strengthen(0) == 0.0
+    assert trainer.augmentation.config.slot_dropout == 0.0
+    assert trainer.mixup.draw(3, np.random.default_rng(SEED)).weight == UNMIXED
+    assert trainer._strengthen(2) == pytest.approx(1.0)
+    assert trainer.augmentation.config.slot_dropout == pytest.approx(0.4)
+    assert trainer.policies()[SLOT_DROPOUT] == pytest.approx(0.4), "the landed check reads the asked-for base"

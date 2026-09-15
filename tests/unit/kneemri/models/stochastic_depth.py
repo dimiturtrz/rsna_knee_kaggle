@@ -56,3 +56,17 @@ def test_stochastic_depth_applied_refuses_a_trunk_it_cannot_reach() -> None:
     """
     with pytest.raises(ValueError, match="no block"):
         StochasticDepth(RATE).applied(nn.Sequential(nn.Linear(WIDTH, WIDTH)))
+
+
+def test_stochastic_depth_strengthen() -> None:
+    """Strength scales every placed path; 1.0 restores the applied ramp bit for bit."""
+    trunk = _trunk()
+    depth = StochasticDepth(RATE)
+    depth.applied(trunk)
+    applied = [_rate(block) for block in trunk]
+    depth.strengthen(0.5)
+    assert _rate(trunk[-1]) == pytest.approx(RATE / 2)
+    depth.strengthen(0.0)
+    assert all(_rate(block) == NO_DROP for block in trunk)
+    depth.strengthen(1.0)
+    assert [_rate(block) for block in trunk] == applied

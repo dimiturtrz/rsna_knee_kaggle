@@ -97,7 +97,7 @@ class Blend:
         return (rows * self.weight + rows[self.order] * (UNMIXED - self.weight)).astype(np.float32)
 
 
-@dataclass(frozen=True)
+@dataclass
 class Mixup:
     """The policy: a Beta concentration, drawn once per batch.
 
@@ -112,15 +112,23 @@ class Mixup:
     weight uniformly and blends half the batch near 50/50, which on a corpus this small trades away more
     signal than it buys."""
 
+    strength: float = UNMIXED
+    """The progress schedule's current multiplier on `alpha`; 1.0 draws at `alpha` exactly."""
+
     def enabled(self) -> bool:
         """Is any blending going to happen? The witness asks this, not the trainer's loop."""
         return self.alpha > OFF
 
+    def strengthen(self, strength: float) -> None:
+        """Draw at this multiple of `alpha` from now on; zero is the identity blend with no draw."""
+        self.strength = strength
+
     def draw(self, size: int, generator: np.random.Generator) -> Blend:
         """This step's blend, from the epoch's own generator so a seeded run stays reproducible."""
-        if not self.enabled():
+        alpha = self.alpha * self.strength
+        if alpha <= OFF:
             return Blend(UNMIXED, np.arange(size, dtype=np.int64))
-        drawn = float(generator.beta(self.alpha, self.alpha))
+        drawn = float(generator.beta(alpha, alpha))
         # FOLDED to the dominant half. The blend is symmetric — weight w against a permutation is the same
         # family of examples as 1-w — so the fold costs no diversity and keeps every row recognisably its
         # own study, which is what makes the mixed target a correction rather than a coin flip.

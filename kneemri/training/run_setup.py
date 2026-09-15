@@ -41,6 +41,7 @@ from kneemri.training.objective import (
 )
 from kneemri.training.options import TrainingOptions
 from kneemri.training.pretrained_encoder import PretrainedEncoder
+from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_margin import RememberedMargin
 from kneemri.training.remembered_ranking import RememberedRanking
@@ -191,6 +192,11 @@ class RunSetup:
             sample_alpha=options.sample_alpha,
             certainty_ramp=options.certainty_ramp,
             sample_ramp=options.sample_ramp,
+            aug_start=options.aug_start,
+            aug_mid=options.aug_mid,
+            aug_end=options.aug_end,
+            aug_ramp=options.aug_ramp,
+            aug_tail=options.aug_tail,
             corpus_oversample=options.corpus_oversample,
             target_corpus=options.target_corpus,
             slot_dropout=options.slot_dropout,
@@ -672,6 +678,10 @@ class RunSetup:
         # BEFORE the optimiser groups are read by anything downstream is not a constraint here: stochastic
         # depth registers no parameter, so the groups built in the constructor still name every tensor.
         trainer.drop_paths(options.stochastic_depth)
+        trainer.schedule_strength(
+            ProgressSchedule(options.aug_start, options.aug_mid, options.aug_end, options.aug_ramp, options.aug_tail),
+            options.epochs,
+        )
         # ATTACHED UNCONDITIONALLY, unlike the policies above it, because the null here is an object and
         # not an absence — and because a policy only some runs attach is a policy the options-to-policies
         # walk cannot see. ALIGNED AGAINST `identifiers`, the corpus's own study order, and not against

@@ -7214,6 +7214,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.augmentation",
+      "target": "kneemri.training.progress_schedule",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.device_budget",
       "target": "kneemri.device",
       "weight": 1
@@ -8019,6 +8025,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.progress_schedule",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
       "target": "kneemri.training.remembered_contrast",
       "weight": 1
     },
@@ -8290,6 +8302,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.progress_schedule",
       "weight": 1
     },
     {
@@ -35791,6 +35809,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.models.stochastic_depth.StochasticDepth",
+      "target": "kneemri.models.drop_path.DropPath",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.models.stochastic_depth.StochasticDepth.applied",
       "target": "kneemri.models.drop_path.DropPath",
@@ -37579,12 +37603,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.training.mixup.Mixup.draw",
-      "target": "kneemri.training.mixup.Mixup.enabled",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "kneemri.training.objective.ContrastiveObjective",
       "target": "kneemri.training.grades.Predicted",
@@ -38737,6 +38755,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.run_setup.RunSetup.adaptation",
@@ -38842,6 +38866,12 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.resample_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.schedule_strength",
       "weight": 1
     },
     {
@@ -39177,6 +39207,12 @@
     {
       "kind": "holds",
       "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.models.stochastic_depth.StochasticDepth",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.accumulation.Accumulation",
       "weight": 1
     },
@@ -39220,6 +39256,12 @@
       "kind": "references",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule",
       "weight": 1
     },
     {
@@ -39273,6 +39315,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.models.stochastic_depth.StochasticDepth",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.accumulation.Accumulation",
       "weight": 1
     },
@@ -39315,6 +39363,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.report_supervision.NoReportSupervision",
       "weight": 1
     },
@@ -39334,6 +39388,12 @@
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.witness.OptimiserWitness",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer._strengthen",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule.value",
       "weight": 1
     },
     {
@@ -39495,6 +39555,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.trainer.Trainer._strengthen",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.trainer.Trainer.augment_bag",
       "weight": 1
     },
@@ -39514,6 +39580,12 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.policies",
       "target": "kneemri.training.augmentation.Augmentation.intensity",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.policies",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule.recorded",
       "weight": 1
     },
     {
@@ -40249,7 +40321,7 @@
       "role": null
     },
     {
-      "descendants": 314,
+      "descendants": 315,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -42393,7 +42465,7 @@
       "role": null
     },
     {
-      "descendants": 46,
+      "descendants": 47,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -42644,6 +42716,14 @@
       "descendants": 0,
       "id": "kneemri.training.pretrained_encoder",
       "label": "pretrained_encoder",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule",
+      "label": "progress_schedule",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -48422,6 +48502,22 @@
       "label": "PretrainedEncoder",
       "level": "class",
       "parent": "kneemri.training.pretrained_encoder",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule.ProgressSchedule",
+      "label": "ProgressSchedule",
+      "level": "class",
+      "parent": "kneemri.training.progress_schedule",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule.Scheduled",
+      "label": "Scheduled",
+      "level": "class",
+      "parent": "kneemri.training.progress_schedule",
       "role": "primary"
     },
     {
@@ -70130,6 +70226,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.stochastic_depth.StochasticDepth.strengthen",
+      "label": "strengthen",
+      "level": "method",
+      "parent": "kneemri.models.stochastic_depth.StochasticDepth",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.timm_trunk.TimmChunkedWeights.build",
       "label": "build",
       "level": "method",
@@ -71210,6 +71314,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.augmentation.AugmentConfig.scaled",
+      "label": "scaled",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.AugmentConfig",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.augmentation.Augmentation.__init__",
       "label": "__init__",
       "level": "method",
@@ -71268,6 +71380,14 @@
       "descendants": 0,
       "id": "kneemri.training.augmentation.Augmentation.intensity",
       "label": "intensity",
+      "level": "method",
+      "parent": "kneemri.training.augmentation.Augmentation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.augmentation.Augmentation.strengthen",
+      "label": "strengthen",
       "level": "method",
       "parent": "kneemri.training.augmentation.Augmentation",
       "role": null
@@ -72314,6 +72434,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.mixup.Mixup.strengthen",
+      "label": "strengthen",
+      "level": "method",
+      "parent": "kneemri.training.mixup.Mixup",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.objective.ContrastiveObjective.__call__",
       "label": "__call__",
       "level": "method",
@@ -72846,6 +72974,38 @@
       "label": "variant",
       "level": "method",
       "parent": "kneemri.training.pretrained_encoder.PretrainedEncoder",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule.ProgressSchedule.__post_init__",
+      "label": "__post_init__",
+      "level": "method",
+      "parent": "kneemri.training.progress_schedule.ProgressSchedule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule.ProgressSchedule.recorded",
+      "label": "recorded",
+      "level": "method",
+      "parent": "kneemri.training.progress_schedule.ProgressSchedule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule.ProgressSchedule.value",
+      "label": "value",
+      "level": "method",
+      "parent": "kneemri.training.progress_schedule.ProgressSchedule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule.Scheduled.strengthen",
+      "label": "strengthen",
+      "level": "method",
+      "parent": "kneemri.training.progress_schedule.Scheduled",
       "role": null
     },
     {
@@ -73530,6 +73690,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer._strengthen",
+      "label": "_strengthen",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.accumulate",
       "label": "accumulate",
       "level": "method",
@@ -73684,6 +73852,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.save_partial",
       "label": "save_partial",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.schedule_strength",
+      "label": "schedule_strength",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

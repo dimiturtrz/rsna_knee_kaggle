@@ -69,6 +69,7 @@ from kneemri.training.teacher_features import FEATURE_TEACHER
 from kneemri.training.teacher_targets import TEACHER
 from kneemri.training.trainer import (
     ACCUMULATION,
+    AUG_SCHEDULE,
     AUTOCAST,
     AVERAGING,
     BACKBONE_RATE,
@@ -301,6 +302,11 @@ class Request:
     sample_alpha: float = 0.0
     certainty_ramp: int = 0
     sample_ramp: int = 0
+    aug_start: float = 1.0
+    aug_mid: float = 1.0
+    aug_end: float = 1.0
+    aug_ramp: float = 0.0
+    aug_tail: float = 0.0
     corpus_oversample: float = 0.0
     target_corpus: str = ""
     slot_dropout: float = 0.0
@@ -387,6 +393,7 @@ class Request:
             CORPUS_OVERSAMPLE: self.corpus_oversample,
             TARGET_CORPUS: self.target_corpus if self.corpus_oversample > 0.0 else "",
             CERTAINTY_RAMP: self.certainty_ramp,
+            AUG_SCHEDULE: (self.aug_start, self.aug_mid, self.aug_end, self.aug_ramp, self.aug_tail),
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             # WHERE the window sits, which the count above cannot see: an offset that reached
             # nothing opens the same NUMBER of blocks in the wrong place and reads as a null on

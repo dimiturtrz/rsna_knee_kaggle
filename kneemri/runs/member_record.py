@@ -126,6 +126,13 @@ NOT_IN_CONFIG = {
     "replicas of the training image to itself at a severity measured off KMAR-50K's paired volumes, and "
     "a rebuild serves the unghosted image, so the function is byte-identical for the same reason "
     "`intensity_aug` is",
+    "aug_start": "a progress schedule over fitting-time regularisers only — augmentation, mixup and "
+    "stochastic depth are all identity while serving, so a rebuild serves a byte-identical function; the "
+    "run's recipe block carries the five knobs",
+    "aug_mid": "the plateau of that same fitting-time schedule, same write-off as `aug_start`",
+    "aug_end": "the closing strength of that same fitting-time schedule, same write-off as `aug_start`",
+    "aug_ramp": "where that same fitting-time schedule's plateau begins, same write-off as `aug_start`",
+    "aug_tail": "where that same fitting-time schedule's plateau ends, same write-off as `aug_start`",
     "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
     "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
     "is byte-identical for the same reason `intensity_aug` is",

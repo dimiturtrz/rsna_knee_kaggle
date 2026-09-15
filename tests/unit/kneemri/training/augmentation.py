@@ -1,5 +1,6 @@
 """The perturbations, tested on pixels alone — no model, no optimiser, no card."""
 
+import pytest
 import torch
 
 from kneemri.training.augmentation import Augmentation, AugmentConfig
@@ -155,3 +156,28 @@ def test_intensity_perturbs_and_stays_in_range():
     assert float((out - images).abs().gt(1e-4).float().mean()) > 0.5, "intensity augmentation must perturb"
     assert float(out.min()) >= 0.0
     assert float(out.max()) <= 1.0
+
+
+def test_scaled():
+    """Full strength is the config itself; zero is the identity op; half halves every width about its identity."""
+    config = AugmentConfig(slot_dropout=0.4, ghosting=0.04)
+    assert config.scaled(1.0) is config, "the default schedule must hand back the ledger's config untouched"
+    none = config.scaled(0.0)
+    assert (none.rotation_degrees, none.scale_jitter, none.noise, none.slot_dropout, none.ghosting) == (0, 0, 0, 0, 0)
+    assert none.gamma == (1.0, 1.0)
+    assert none.contrast == (1.0, 1.0)
+    half = config.scaled(0.5)
+    assert half.slot_dropout == pytest.approx(0.2)
+    assert half.gamma[0] == pytest.approx(1.0 + (config.gamma[0] - 1.0) / 2)
+    assert config.scaled(10.0).slot_dropout == 1.0, "a probability clips at one"
+    assert config.scaled(0.5).padding_mode == config.padding_mode
+
+
+def test_strengthen():
+    """The applied config follows the strength; the asked-for `base` never moves."""
+    augmentation = Augmentation(AugmentConfig(slot_dropout=0.4))
+    augmentation.strengthen(0.5)
+    assert augmentation.config.slot_dropout == pytest.approx(0.2)
+    assert augmentation.base.slot_dropout == pytest.approx(0.4)
+    augmentation.strengthen(1.0)
+    assert augmentation.config is augmentation.base

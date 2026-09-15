@@ -171,6 +171,17 @@ class TrainingOptions:
     patience: int = 0
     """Epochs without holdout improvement before stopping; 0 runs the full schedule."""
 
+    aug_start: float = 1.0
+    """Regulariser strength multiplier at progress 0 — see `ProgressSchedule`; 1.0 everywhere is the ledger."""
+    aug_mid: float = 1.0
+    """Strength on the plateau."""
+    aug_end: float = 1.0
+    """Strength at progress 1."""
+    aug_ramp: float = 0.0
+    """Share of the run spent climbing from `aug_start` to `aug_mid`."""
+    aug_tail: float = 0.0
+    """Share of the run spent descending from `aug_mid` to `aug_end`."""
+
     certainty_ramp: int = 0
     """How many epochs it takes for per-cell weights to rise from the confidence floor to their
     full trust. 0 disables the ramp and keeps the table every existing arm trained on."""

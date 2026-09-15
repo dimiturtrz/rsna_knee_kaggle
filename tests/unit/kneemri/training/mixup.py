@@ -83,3 +83,15 @@ def test_draw():
     assert not np.array_equal(drawn[0].order, drawn[2].order), "a different seed must move the partner pool"
     identity = Mixup().draw(3, np.random.default_rng(SEED))
     assert identity.order.tolist() == [0, 1, 2], "the null policy pairs every row with itself"
+
+
+def test_strengthen():
+    """Full strength draws the configured alpha exactly; zero strength is the identity blend."""
+    scaled, plain = Mixup(0.4), Mixup(0.4)
+    scaled.strengthen(1.0)
+    assert scaled.draw(6, np.random.default_rng(SEED)).weight == plain.draw(6, np.random.default_rng(SEED)).weight
+    scaled.strengthen(0.0)
+    identity = scaled.draw(3, np.random.default_rng(SEED))
+    assert identity.weight == UNMIXED
+    assert identity.order.tolist() == [0, 1, 2]
+    assert scaled.enabled(), "the switch reports what the run asked for, not the current strength"
