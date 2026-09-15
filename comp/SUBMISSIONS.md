@@ -4224,3 +4224,12 @@ c5419a0a). Fold-0-twin ADD proxy +0.0007 [+0.0001, +0.0012] (ledger75, 909 rows)
 flat, the drop40_long family is saturated at three seats, and a positive twin proxy of this size did not transfer in
 sign. Pin stays on `tripleseat_v2`. Further same-family seats are not a slot; the next gains must come from better
 members (full-corpus refit `fullseat_v1`, higher-resolution crops), not from more of them.
+
+## `fullseat_v1` -- 0.946, ref 56246750, 2026-09-15 -- FLAT: one whole-corpus refit seat is under board resolution
+
+MECHANISM. `tripleseat_v2` with `labelwise_ext_drop40_long_s2026` swapped for `labelwise_ext_drop40_long_ff`, the same
+recipe fitted `--fold -1 --ema` on the whole corpus (kernel `kneemri-fullseat`, 0ed3d579). No offline number by
+construction. Pre-registered bands vs 0.946: >=0.948 re-pin, 0.947 directional, 0.946 flat, 0.945 tick down, below
+that stop full-fitting. Read **0.946**: flat. One seat's extra fifth of data does not resolve at a 2/3 share over
+seven; this does NOT close full-fit. The dose read is `fullseat2` (ext AND depth24 refits, 7df0eaab), with
+`labelwise_dense_drop40_long_ff` training behind it for the three-seat entry. Pin stays on `tripleseat_v2`.
