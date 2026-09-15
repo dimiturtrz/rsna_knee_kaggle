@@ -4233,3 +4233,12 @@ construction. Pre-registered bands vs 0.946: >=0.948 re-pin, 0.947 directional, 
 that stop full-fitting. Read **0.946**: flat. One seat's extra fifth of data does not resolve at a 2/3 share over
 seven; this does NOT close full-fit. The dose read is `fullseat2` (ext AND depth24 refits, 7df0eaab), with
 `labelwise_dense_drop40_long_ff` training behind it for the three-seat entry. Pin stays on `tripleseat_v2`.
+
+## `fullseat2_v1` -- 0.946, ref 56250751, 2026-09-15 -- FLAT: two whole-corpus refit seats, dose series flat
+
+MECHANISM. `tripleseat_v2` with `labelwise_ext_drop40_long_s2026` AND `labelwise_depth24_drop40_long_s2026` swapped
+for their `--fold -1 --ema` refits (kernel `kneemri-fullseat2`, 7df0eaab). No offline number by construction.
+Pre-registered bands vs 0.946: >=0.948 re-pin, 0.947 directional, 0.946 flat, <=0.945 stop full-fitting. Read
+**0.946**: flat. Dose series 0 / 1 / 2 refit seats = 0.946 / 0.946 / 0.946. The extra fifth of data on the drop40
+seats does not resolve on the board; the third refit (`labelwise_dense_drop40_long_ff`) is not run. Pin stays on
+`tripleseat_v2`.
