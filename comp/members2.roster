@@ -351,6 +351,12 @@ labelwise_ext_drop40_long_ff.pt         # DARK BY CONSTRUCTION -- fitted with `-
                             # measured recipe into a shippable seat, not an exception to it.
                             # WHAT IT IS NOT: evidence. It may be seated, and it may never be quoted as a
                             # number. Any entry carrying it reads on the BOARD or not at all.
+labelwise_depth24_drop40_long_ff.pt     # DARK BY CONSTRUCTION -- `--fold -1 --ema`, holds out nothing, so
+                            # no ledger row can price it. Rostered on its TWIN, exactly as
+                            # `labelwise_ext_drop40_long_ff` above: `labelwise_depth24_drop40_long_s2026`
+                            # is the same recipe on fold 0 at 0.9053 ledger75, the best honest solo owned,
+                            # seated in kneemri-tripleseat. Finished 24 of 24 epochs 2026-09-15. It may be
+                            # seated and never quoted; any entry carrying it reads on the BOARD.
 
 # ---- the operator pair, five members found already on disk and priced 2026-09-13 ----
 # `roster_check` named seven undocumented checkpoints and five of them were `drop40_long` runs nobody had
