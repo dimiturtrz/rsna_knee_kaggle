@@ -236,6 +236,20 @@ caller that can demand the strong one.
 What none of them check is whether a SENTENCE is true. A number can be present and its interpretation
 stale; that still needs a reader.
 
+## Recipes are config layers, not flag lists
+
+The trainer's command line is generated from `kneemri/training/config_tree.py` (`TrainConfig`, one node per
+concern). An arm can state its recipe as nested TOML instead of thirty flags:
+
+```bash
+run_train grand_recipe   --config experiments/recipes/base.toml --config experiments/recipes/grand.toml   --set optim.epochs=24 --labels "$LABELS" --out "$MODELS/x.pt"
+```
+
+Precedence is defaults, then each `--config` in order (later wins), then `--set node.leaf=value`, then flags
+on the line. A key naming no leaf, or a knob under the wrong table, refuses. `base.toml` is `recipe.sh`'s
+RECIPE and THROUGHPUT; `tests/integration/recipe_to_config.py` holds the two equal. Checkpoints still stamp
+the FLAT recipe, so every reader of an old checkpoint is unchanged.
+
 ## Three rules encoded in `lib.sh` rather than remembered
 
 - **`retired "<why>"` refuses a refuted arm.** An arm its gate declined stays committed — it is the
