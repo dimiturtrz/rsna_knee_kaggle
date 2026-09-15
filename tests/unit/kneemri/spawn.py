@@ -1,7 +1,10 @@
 """The spawn retry, over the four things a child process can do to us."""
 
+import os
 import subprocess
+import sys
 from collections.abc import Callable, Iterator
+from pathlib import Path
 
 import pytest
 
@@ -82,3 +85,42 @@ def test_checked() -> None:
     assert Spawn().checked(done, ["git"]).returncode == 1
     with pytest.raises(subprocess.CalledProcessError):
         Spawn().checked(done, ["git"], check=True)
+
+
+def _alive(pid: int) -> bool:
+    """Whether a pid still runs, asked without touching it — `os.kill(pid, 0)` TERMINATES on Windows."""
+    if os.name == "nt":
+        listed = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, check=False)  # noqa: S603, S607
+        return str(pid).encode() in listed.stdout
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    return True
+
+
+def test_bounded() -> None:
+    """A child that finishes in time is returned whole, output included."""
+    done = Spawn().bounded([sys.executable, "-c", "print('hi')"], 60)
+    assert done is not None
+    assert (done.returncode, done.stdout.strip()) == (0, "hi")
+
+
+def test_bounded_kills_the_grandchild_on_overrun(tmp_path: Path) -> None:
+    """Overrun answers None AND leaves no descendant computing — the orphaned GPU pretrain of knee-u2aet."""
+    marker = tmp_path / "grandchild.pid"
+    body = (
+        "import pathlib, subprocess, sys\n"
+        "child = subprocess.Popen([sys.executable, '-c', 'import threading; threading.Event().wait()'])\n"
+        f"pathlib.Path({str(marker)!r}).write_text(str(child.pid))\n"
+        "child.wait()\n"
+    )
+    assert Spawn().bounded([sys.executable, "-c", body], 5) is None
+    assert not _alive(int(marker.read_text())), "the tree has to go, not just its root"
+
+
+def test_killed() -> None:
+    """A killed process is gone."""
+    child = subprocess.Popen([sys.executable, "-c", "input()"], stdin=subprocess.PIPE, start_new_session=True)
+    Spawn.killed(child.pid)
+    assert child.wait(timeout=30) != 0

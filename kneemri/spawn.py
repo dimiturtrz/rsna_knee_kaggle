@@ -7,9 +7,10 @@ the machine, which is when Windows starts refusing to *create* processes at all.
 """
 
 import logging
+import os
 import subprocess
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,8 @@ Windows declined to start git is worse than one that reports nothing.
 
 SPAWN_RETRIES = 3
 SPAWN_BACKOFF_S = 2.0
+POSIX_SIGKILL = 9
+"""`signal.SIGKILL`, spelled out because the name does not exist on Windows, where `killed` never reaches it."""
 
 
 @dataclass(frozen=True)
@@ -67,6 +70,39 @@ class Spawn:
     def attempted(self, command: Sequence[str], **options: object) -> subprocess.CompletedProcess[str]:
         """One try, with `check` withheld — a raise here would hide the returncode this dispatches on."""
         return subprocess.run(command, **{**options, "check": False})  # type: ignore[call-overload]  # noqa: S603 - callers pass a resolved executable and a fixed argv; no shell anywhere
+
+    def bounded(
+        self, command: Sequence[str], timeout_s: float, env: Mapping[str, str] | None = None
+    ) -> subprocess.CompletedProcess[str] | None:
+        """Run `command` for at most `timeout_s`; on overrun kill its WHOLE tree and answer None.
+
+        `subprocess.run(timeout=...)` kills the direct child only. An arm read through bash that launched
+        a GPU job leaves that grandchild computing, orphaned, beside a live training arm — six of them on
+        2026-09-08 from three `arm_check --only` calls (knee-u2aet). The tree goes, not just its root.
+        """
+        for _attempt in range(self.retries):
+            child = subprocess.Popen(  # noqa: S603 - callers pass a resolved executable and a fixed argv; no shell anywhere
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True, env=env
+            )
+            try:
+                stdout, stderr = child.communicate(timeout=timeout_s)
+            except subprocess.TimeoutExpired:
+                self.killed(child.pid)
+                child.communicate()
+                return None
+            if child.returncode != STATUS_DLL_INIT_FAILED:
+                return subprocess.CompletedProcess(list(command), child.returncode, stdout, stderr)
+            time.sleep(self.backoff_s)
+        message = f"{command[0]} could not be started {self.retries} times; the machine is too loaded to spawn"
+        raise OSError(message)
+
+    @staticmethod
+    def killed(pid: int) -> None:
+        """Kill a process and every descendant it started."""
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True, check=False)  # noqa: S603, S607 - fixed argv, a Windows system binary
+            return
+        os.kill(-pid, POSIX_SIGKILL)
 
     def checked(
         self, done: subprocess.CompletedProcess[str], command: Sequence[str], **options: object

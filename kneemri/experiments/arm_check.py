@@ -23,7 +23,6 @@ import io
 import logging
 import os
 import shlex
-import subprocess
 import sys
 from collections.abc import Mapping
 from concurrent.futures import ThreadPoolExecutor
@@ -227,22 +226,15 @@ class ArmCheck:
 
     def _spawned(self, command: list[str]) -> str:
         """One arm's stdout, or empty when it hung past `TIMEOUT_SECONDS`."""
-        try:
-            # fixed argv, our own files, no shell
-            done = Spawn().ran(
-                [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
-                capture_output=True,
-                text=True,
-                timeout=TIMEOUT_SECONDS,
-                # The INHERITED environment plus ARM_LIB. Replacing it outright leaves Git Bash
-                # without the PATH it needs to find its own coreutils, and every arm then produces
-                # nothing - which this lint reports as "0 arms checked", a clean pass over nothing.
-                env=self._environment(),
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            return ""
-        return done.stdout
+        done = Spawn().bounded(
+            [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
+            TIMEOUT_SECONDS,
+            # The INHERITED environment plus ARM_LIB. Replacing it outright leaves Git Bash
+            # without the PATH it needs to find its own coreutils, and every arm then produces
+            # nothing - which this lint reports as "0 arms checked", a clean pass over nothing.
+            env=self._environment(),
+        )
+        return "" if done is None else done.stdout
 
     def _printed(self, commands: list[list[str]]) -> dict[str, str]:
         """Run each arm command against the stub lib and collect the `name<TAB>flags` lines it prints.
