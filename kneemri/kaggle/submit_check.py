@@ -18,8 +18,10 @@ silent pass there would be the very defect this file exists to close — the ans
 to read differently from "I looked and it is new".
 """
 
+import json
 import logging
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
@@ -41,6 +43,45 @@ OVERLAP_FLOOR = 0.5
 Advisory only. Two ensembles drawn from a pool of a hundred members share seats constantly, and a
 report that names every one of them is a report nobody reads to the end.
 """
+
+PROSE_SHOWN = 160
+"""How much of a matched row's `what` a line quotes: enough to recognise the idea, short enough to read."""
+
+
+@dataclass(frozen=True)
+class TriedIdea:
+    """A recorded entry whose prose names every mechanism word of a candidate — the same IDEA, other seats.
+
+    SET EQUALITY CANNOT SEE AN IDEA. `goldseat`, `twoshape` and `deepseat` each passed with a new member set
+    while all three were "choose seats on a non-v2 ruler", which the board already held 0-for-3 under the
+    champion (knee-b1h8y). Advisory, never a refusal: a repeated idea may still work, but the slot has to
+    be spent knowing what the earlier rows concluded.
+    """
+
+    identifier: str
+    board: float | None
+    what: str
+
+    @classmethod
+    def matched(cls, record: Path, words: list[str]) -> list["TriedIdea"]:
+        """Every recorded entry whose prose holds ALL `words`, case-folded, in the record's own order."""
+        wanted = [word.casefold() for word in words]
+        rows = [json.loads(line) for line in record.read_text(encoding="utf-8").splitlines() if line]
+        return [
+            cls(str(row["id"]), None if row.get("board") is None else float(row["board"]), str(row.get("what", "")))
+            for row in rows
+            if "id" in row and all(word in cls.prose(row) for word in wanted)
+        ]
+
+    @staticmethod
+    def prose(row: dict[str, object]) -> str:
+        """Every string a row carries, joined and case-folded — `what`, `why` and each scope note alike."""
+        return " ".join(value for value in row.values() if isinstance(value, str)).casefold()
+
+    def described(self) -> str:
+        """The line a reader needs: which entry, what the board said, and the start of what it tried."""
+        board = "unscored" if self.board is None else f"{self.board:.3f}"
+        return f"{self.identifier} (board {board}): {self.what[:PROSE_SHOWN]}"
 
 
 class SubmitCheck:
@@ -96,6 +137,9 @@ def main() -> None:
     command.parser.add_argument("--kernels", type=Path, default=KERNELS, help="where bare kernel names live")
     command.parser.add_argument("--anyway", default="", help="ship a known repeat, stating WHY in one line")
     command.parser.add_argument("--roster", type=Path, default=ROSTER, help="what may ship, and its licence tags")
+    command.parser.add_argument(
+        "--idea", action="append", default=[], help="a mechanism word of this entry; repeat it, every one must match"
+    )
     arguments = command.parsed()
 
     kernel = SubmitCheck.resolved(arguments.kernel, arguments.kernels)
@@ -118,6 +162,12 @@ def main() -> None:
 
     for row, part in shipped.overlaps(named):
         logger.info("overlaps %.0f%% of %s", 100 * part, shipped.described(row))
+    if not arguments.idea:
+        logger.warning(
+            "IDEA NOT CHECKED %s: pass --idea <mechanism word> to read what the board already tried", kernel.name
+        )
+    for tried in TriedIdea.matched(arguments.record, arguments.idea) if arguments.idea else []:
+        logger.warning("TRIED %s", tried.described())
     repeats = shipped.repeats(named)
     for row in repeats:
         logger.info("SAME %d members as %s", len(named), shipped.described(row))

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from kneemri.kaggle.board_check import BoardRow
-from kneemri.kaggle.submit_check import SubmitCheck
+from kneemri.kaggle.submit_check import SubmitCheck, TriedIdea
 
 PEAK8 = ("a", "b", "c")
 
@@ -36,10 +36,16 @@ def test_overlaps():
     assert [(row.identifier, part) for row, part in near] == [("half_v1", 0.5)], "an exact match is not an overlap"
 
 
-def test_described():
+def test_submit_check_described():
     """The line carries the ref and the score, which is what decides whether to spend the slot anyway."""
     assert "ref 55751365" in SubmitCheck([]).described(_row("peak8_v1", PEAK8))
     assert "unscored" in SubmitCheck([]).described(_row("pending_v1", PEAK8, board=None))
+
+
+def test_tried_idea_described():
+    """A scored and an unscored try both read as one line, the prose cut to what a reader scans."""
+    assert TriedIdea("a_v1", 0.9421, "x" * 500).described() == f"a_v1 (board 0.942): {'x' * 160}"
+    assert TriedIdea("b_v1", None, "short").described() == "b_v1 (board unscored): short"
 
 
 def test_seats(tmp_path: Path):
@@ -66,3 +72,33 @@ def test_rows_without_names(tmp_path: Path):
     (tmp_path / "board.jsonl").write_text(json.dumps({"ref": "1", "id": "old_v1"}) + "\n", encoding="utf-8")
     shipped = SubmitCheck([BoardRow.parsed({"ref": "1", "id": "old_v1"})])
     assert shipped.rows == [], "silence about seats is not a claim about them"
+
+
+def _record(tmp_path: Path) -> Path:
+    rows = [
+        {"note": "commentary names a ruler too, and is no entry"},
+        {"id": "cleanseat_v1", "board": 0.942, "what": "Greedy seats on the corrected RULER", "why": "clean pool"},
+        {"id": "l75seat_v1", "board": 0.939, "what": "seats chosen on ledger75", "offline_scope": "greedy, ruler T1"},
+        {"id": "peak8_v1", "board": None, "what": "the eight strongest members"},
+    ]
+    record = tmp_path / "board.jsonl"
+    record.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    return record
+
+
+def _tried(record: Path, *words: str) -> list[str]:
+    return [idea.identifier for idea in TriedIdea.matched(record, list(words))]
+
+
+def test_matched(tmp_path: Path):
+    """Every word must appear, in any prose field, any case; a note line and a partial match are not tries."""
+    record = _record(tmp_path)
+    assert _tried(record, "ruler", "greedy") == ["cleanseat_v1", "l75seat_v1"], "any field, any case"
+    assert _tried(record, "ruler", "strongest") == [], "ALL words, not any"
+    assert _tried(record, "commentary") == [], "a note is no entry"
+
+
+def test_prose():
+    """Only strings are prose: a score or a member list never matches a word."""
+    row = {"what": "Greedy", "why": "Ruler", "board": 0.9, "members_named": ["ruler"]}
+    assert TriedIdea.prose(row) == "greedy ruler"
