@@ -13,6 +13,13 @@ def test_values():
     assert parsed == {"--epochs": "8", "--one-cycle": "", "--out": "run.pt"}
 
 
+def test_values_keeps_every_recipe_layer():
+    """Stacked `--config` layers are one value in line order; a single-valued flag still keeps its last."""
+    parsed = ArmDiff.values("--config base.toml --config grand.toml --epochs 8 --epochs 12")
+
+    assert parsed == {"--config": "base.toml grand.toml", "--epochs": "12"}
+
+
 def test_mismatched(tmp_path: Path):
     """The defect that cost 75 minutes of card, and the three ways an arm is allowed to differ anyway.
 

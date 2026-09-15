@@ -14,6 +14,9 @@ import shlex
 from collections.abc import Mapping
 
 from kneemri.experiments.arm_header import ArmHeader
+from kneemri.training.recipe_layers import CONFIG, SET
+
+REPEATABLE = (CONFIG, SET)
 
 INCIDENTAL_FLAGS = frozenset({"--out", "--labels", "--paths"})
 """Flags every arm sets differently by construction, so a diff on them is not a difference of RECIPE."""
@@ -31,6 +34,9 @@ class ArmDiff:
 
         Values are normalised through `float` where both sides are numbers, because `4e-5` and `4e-05`
         are the same learning rate and a diff that reports them is a diff nobody reads twice.
+
+        A repeatable flag (`--config`, `--set`) keeps every value in line order: its layers stack, so two
+        arms sharing only the LAST recipe file are two recipes, not a twin.
         """
         tokens = shlex.split(flags)
         parsed: dict[str, str] = {}
@@ -38,7 +44,8 @@ class ArmDiff:
             if not token.startswith("--"):
                 continue
             following = tokens[index + 1] if index + 1 < len(tokens) else ""
-            parsed[token] = "" if following.startswith("--") else following
+            value = "" if following.startswith("--") else following
+            parsed[token] = f"{parsed[token]} {value}" if token in REPEATABLE and token in parsed else value
         return parsed
 
     @staticmethod
