@@ -48,6 +48,10 @@ def test_seats(tmp_path: Path):
     ranked = _kernel(tmp_path, "kneemri-ranked", "KernelRun(members=2).run()\n")
     assert SubmitCheck.seats(named) == {"a", "b"}
     assert SubmitCheck.seats(ranked) is None, "unknown seats must not read as a new entry"
+    blended = _kernel(
+        tmp_path, "kneemri-blended", 'KernelRun(names=("a",)).run()\nRaptorEntry.weights(mounts=mounts)\n'
+    )
+    assert SubmitCheck.seats(blended) == {"a", "raptor_v4_swa"}, "a seat outside `names` is still a seat"
 
 
 def test_resolved(tmp_path: Path):

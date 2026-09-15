@@ -9,8 +9,16 @@ free and no Kaggle session — the whole point is to make it cheap enough to run
 import ast
 from pathlib import Path
 
+from kneemri.kaggle.raptor_run import DEFAULT_WEIGHTS
+
 KERNEL_RUN = "KernelRun"
 """The call every entry that runs OUR package makes, and the only place its member selection appears."""
+
+RAPTOR_WEIGHTS = "weights"
+"""`RaptorEntry.weights(...)`, the one call a foreign seat is loaded through, outside the `KernelRun` selection."""
+
+BOARD_NAMES = {"raptor_ft_coatnet_v4_full_swa": "raptor_v4_swa"}
+"""A checkpoint stem the board records under another name; every other stem is its own board name."""
 
 SELECTION = "names"
 """Its one keyword whose value resolves statically. `members=N` is `strongest(N)`, a ranking over
@@ -55,6 +63,49 @@ class KernelScript:
             return None
         selected = next((keyword.value for keyword in call.keywords if keyword.arg == SELECTION), None)
         return None if selected is None else self._strings(selected)
+
+    def foreign_seats(self) -> set[str]:
+        """The foreign checkpoints the script loads, by the name `comp/board.jsonl` records them under.
+
+        A raptor seat is blended in beside `KernelRun`, never through its `names`, so a check that reads
+        only the selection sees seven of eight seats and calls a re-ship new (`tripleseatclean` against
+        `tripleseat_v2`, ref 56232529). A call with no filename loads `DEFAULT_WEIGHTS`.
+        """
+        stems = {
+            Path(filename).stem
+            for call in ast.walk(self.tree)
+            if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == RAPTOR_WEIGHTS
+            for filename in self._filenames(call)
+        }
+        return {BOARD_NAMES.get(stem, stem) for stem in stems}
+
+    def _filenames(self, call: ast.Call) -> list[str]:
+        """The checkpoint filenames one `weights(...)` call can open, through a variable or a loop over one."""
+        given = next((keyword.value for keyword in call.keywords if keyword.arg == "filename"), None)
+        argument = call.args[0] if call.args else given
+        if argument is None:
+            return [DEFAULT_WEIGHTS]
+        if isinstance(argument, ast.Constant) and isinstance(argument.value, str):
+            return [argument.value]
+        if not isinstance(argument, ast.Name):
+            return []
+        assigned = self._assigned(argument.id)
+        if isinstance(assigned, ast.Constant) and isinstance(assigned.value, str):
+            return [assigned.value]
+        source = self._looped(call, argument.id) or assigned
+        return [] if source is None else self._strings(source) or []
+
+    def _looped(self, call: ast.Call, name: str) -> ast.expr | None:
+        """What the comprehension or `for` loop AROUND `call` iterates over when it binds `name`."""
+        loops = [
+            loop.iter
+            for node in ast.walk(self.tree)
+            if isinstance(node, ast.ListComp | ast.SetComp | ast.DictComp | ast.GeneratorExp | ast.For)
+            and any(inner is call for inner in ast.walk(node))
+            for loop in (node.generators if not isinstance(node, ast.For) else [node])
+            if isinstance(loop.target, ast.Name) and loop.target.id == name
+        ]
+        return loops[-1] if loops else None
 
     def _strings(self, value: ast.expr) -> list[str] | None:
         """A literal sequence of names, following one level of variable, or None if it is not literal."""

@@ -71,7 +71,7 @@ class SubmitCheck:
 
     @staticmethod
     def seats(kernel: Path) -> set[str] | None:
-        """The members a kernel names, or None when its source does not say — see the module note."""
+        """The members a kernel names plus the foreign seats it blends in, or None when its source does not say."""
         scripts = sorted(kernel.glob("*.py"))
         if not scripts:
             return None
@@ -79,7 +79,7 @@ class SubmitCheck:
         if script.call() is None:
             return None
         names = script.member_names()
-        return set(names) if names else None
+        return set(names) | script.foreign_seats() if names else None
 
     @staticmethod
     def resolved(given: str, kernels: Path) -> Path:

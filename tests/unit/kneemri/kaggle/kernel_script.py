@@ -33,3 +33,27 @@ def test_member_names(tmp_path: Path):
     assert _script(tmp_path, "KernelRun(members=2).run()\n").member_names() is None
     assert _script(tmp_path, "KernelRun().run()\n").member_names() is None
     assert _script(tmp_path, "KernelRun(names=picked()).run()\n").member_names() is None, "not a literal"
+
+
+def test_foreign_seats(tmp_path: Path):
+    """Every way a kernel names its raptor checkpoint resolves to the board's name for it; no call is no seat."""
+    default = "RaptorMember.loaded(RaptorEntry.weights(mounts=mounts), device)\n"
+    assert _script(tmp_path, default).foreign_seats() == {"raptor_v4_swa"}, "no filename is DEFAULT_WEIGHTS"
+
+    literal = 'RaptorEntry.weights("raptor_ft_effv2l480.pt", mounts)\n'
+    assert _script(tmp_path, literal).foreign_seats() == {"raptor_ft_effv2l480"}
+
+    variable = 'WEIGHTS = "raptor_ft_repl2x2_a_swa.pt"\nRaptorEntry.weights(WEIGHTS, mounts)\n'
+    assert _script(tmp_path, variable).foreign_seats() == {"raptor_ft_repl2x2_a_swa"}
+
+    looped = (
+        'FOREIGN = ("raptor_ft_coatnet_v4_full_swa.pt", "raptor_ft_effv2l480.pt")\n'
+        "kept = [name for name in directories]\n"
+        "members = {name: RaptorEntry.weights(name, mounts=mounts) for name in FOREIGN}\n"
+    )
+    assert _script(tmp_path, looped).foreign_seats() == {"raptor_v4_swa", "raptor_ft_effv2l480"}, (
+        "the loop AROUND the call binds the name, not another loop reusing it"
+    )
+
+    assert _script(tmp_path, "KernelRun(names=('a',)).run()\n").foreign_seats() == set()
+    assert _script(tmp_path, "RaptorEntry.weights(picked(), mounts)\n").foreign_seats() == set(), "not a literal"
