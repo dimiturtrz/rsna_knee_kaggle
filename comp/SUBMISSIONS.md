@@ -4242,3 +4242,10 @@ Pre-registered bands vs 0.946: >=0.948 re-pin, 0.947 directional, 0.946 flat, <=
 **0.946**: flat. Dose series 0 / 1 / 2 refit seats = 0.946 / 0.946 / 0.946. The extra fifth of data on the drop40
 seats does not resolve on the board; the third refit (`labelwise_dense_drop40_long_ff`) is not run. Pin stays on
 `tripleseat_v2`.
+
+## `tripleseatclean_v1` -- 0.946, ref 56259030, 2026-09-15 -- INSTRUMENT: licence-clean mount reproduces the champion
+
+MECHANISM. None; an instrument. `tripleseat_v2` byte-for-byte with the mounts trimmed to what the eight seats load
+(dinov2-small, members, raptor, kit; DINOv3/resnet50d/dinov2-base removed; kernel `kneemri-tripleseatclean`,
+38eae2f4, knee-z76qf). Pre-registered: must read 0.946. Read **0.946**: the champion is rebuildable from
+licence-clean mounts alone. Pin stays on `tripleseat_v2`.
