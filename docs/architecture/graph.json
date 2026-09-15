@@ -71784,6 +71784,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.flag_vocabulary.FlagVocabulary._file_arguments",
+      "label": "_file_arguments",
+      "level": "method",
+      "parent": "kneemri.training.flag_vocabulary.FlagVocabulary",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.flag_vocabulary.FlagVocabulary._focus_arguments",
       "label": "_focus_arguments",
       "level": "method",
@@ -72778,6 +72786,14 @@
       "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.of",
       "label": "of",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions.of_file",
+      "label": "of_file",
       "level": "method",
       "parent": "kneemri.training.options.TrainingOptions",
       "role": null

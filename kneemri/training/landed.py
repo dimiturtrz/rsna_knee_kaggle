@@ -102,6 +102,7 @@ NOT_A_SWITCH = {
     "labels": "the label table, an input rather than a policy",
     "eval_labels": "the holdout table, same",
     "out": "where the run writes, set per invocation",
+    "config": "the recipe file; every value it sets lands in its own field, which is what gets compared",
     "init_scope": "which of `--init`'s tensors are taken, and the load ANSWERS it: a name outside "
     "`INIT_SCOPES` raises at parse, and every tensor the scope carries is still shape-checked into the "
     "parameter it names. A scope that dropped the wrong thing shows up as an absent key, not as a switch "

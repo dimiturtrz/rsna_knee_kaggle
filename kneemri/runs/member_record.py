@@ -35,6 +35,7 @@ NOT_IN_CONFIG = {
     "labels": "the label table, an input rather than a property of the weights",
     "eval_labels": "the holdout table, same",
     "out": "where the run wrote, which the file's own location already answers",
+    "config": "the recipe file; each value it set is recorded under its own field name",
     "epochs": "run length — `epochs_done` records what was actually reached, beside the kept epoch",
     "patience": "when the run stopped, which the kept epoch already states",
     "studies": "corpus truncation for a smoke; `cache_studies` records WHICH cache was read",

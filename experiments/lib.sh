@@ -417,6 +417,11 @@ run_snapshot() {
   rm -rf "$ARM_SRC"; mkdir -p "$ARM_SRC"
   cp -r "$REPO/kneemri" "$REPO/core" "$ARM_SRC/"
   cp "$REPO/paths.yaml" "$ARM_SRC/"
+  # A `--config experiments/recipes/<name>.toml` resolves against the working directory, which is this
+  # one, and the recipe is frozen with the package for the same reason the package is.
+  if [ -d "$REPO/experiments/recipes" ]; then
+    mkdir -p "$ARM_SRC/experiments" && cp -r "$REPO/experiments/recipes" "$ARM_SRC/experiments/"
+  fi
   # THE CARD IS NOT TAKEN HERE. It is taken by `run_train`, which is the one point EVERY path that
   # spends GPU crosses — see the note there. Gating the snapshot instead left the documented smoke
   # procedure ungated, and copying the package spends no GPU, so there is nothing to protect until the

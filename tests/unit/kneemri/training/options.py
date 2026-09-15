@@ -207,3 +207,33 @@ def test_of():
     assert options.slices == 12, "the list is read, not the process's own argv"
     assert options.image_size == 224
     assert str(options.labels) == "l.csv"
+
+
+def test_of_reads_a_recipe_file_under_the_flags(tmp_path: Path):
+    """The file fills what the line leaves unsaid, and a flag on the line beats the file."""
+    recipe = tmp_path / "grand.toml"
+    recipe.write_text("epochs = 36\nema = true\nmixup = 0.2\n", encoding="utf-8")
+
+    options = TrainingOptions.of(["--labels", "l.csv", "--config", str(recipe), "--epochs", "4"])
+
+    assert options.epochs == 4, "an explicit flag overrides the recipe file"
+    assert options.ema is True
+    assert options.mixup == pytest.approx(0.2)
+    assert options.config == recipe, "the file travels to the stamp beside the values it set"
+
+
+def test_of_file(tmp_path: Path):
+    """Values arrive typed as their fields; no file is no values; a misspelt key refuses."""
+    recipe = tmp_path / "r.toml"
+    recipe.write_text('warmup = 0.25\nslices = 20\npadding_mode = "reflection"\nunread_targets = "u.npz"\n', "utf-8")
+
+    assert TrainingOptions.of_file(recipe) == {
+        "warmup": 0.25,
+        "slices": 20,
+        "padding_mode": "reflection",
+        "unread_targets": Path("u.npz"),
+    }
+    assert TrainingOptions.of_file(None) == {}
+    recipe.write_text("stochastic_dept = 0.05\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="stochastic_dept"):
+        TrainingOptions.of_file(recipe)

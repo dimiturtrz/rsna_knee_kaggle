@@ -372,9 +372,15 @@ class FlagVocabulary:
             "this cuts one side only, so the score is comparable to every full-data row in the ledger.",
         )
         parser.add_argument("--report-vectors", type=Path, default=None, help="npz from report_embeddings")
+        cls._file_arguments(parser)
+        return parser
+
+    @staticmethod
+    def _file_arguments(parser: argparse.ArgumentParser) -> None:
+        """Where a run reads its roots and recipe from, and where it writes."""
         parser.add_argument("--out", type=Path, default=None)
         parser.add_argument("--paths", type=Path, default=Path("paths.yaml"))
-        return parser
+        parser.add_argument("--config", type=Path, default=None, help="a recipe TOML; flags on the line override it")
 
     @staticmethod
     def _augmentation_arguments(parser: argparse.ArgumentParser) -> None:

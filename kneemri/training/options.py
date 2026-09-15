@@ -8,6 +8,7 @@ and with it `transformers`, to read a dataclass.
 """
 
 import sys
+import tomllib
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -243,6 +244,7 @@ class TrainingOptions:
     eval_labels: Path | None = None
     out: Path | None = None
     paths: Path = Path("paths.yaml")
+    config: Path | None = None
 
     @property
     def recipe(self) -> dict[str, str]:
@@ -366,7 +368,29 @@ class TrainingOptions:
         card already holding 16.24 GB of a live run: it could not allocate, sat the full ten-minute
         bound, and cost the run beside it 734 s for an epoch that had taken 248 s and 255 s.
         """
-        return cls(**vars(FlagVocabulary.parser().parse_args(argv)))
+        parser = FlagVocabulary.parser()
+        parser.set_defaults(**cls.of_file(parser.parse_known_args(argv)[0].config))
+        return cls(**vars(parser.parse_args(argv)))
+
+    @classmethod
+    def of_file(cls, config: Path | None) -> dict[str, object]:
+        """A recipe file's values, typed as the fields they name — the layer an explicit flag overrides.
+
+        Flat TOML keyed by field name (`epochs = 36`), so a recipe is written once and an arm names it
+        with `--config` instead of re-typing thirty flags. They land as PARSER DEFAULTS, which is what
+        makes every flag on the same line win over the file. An unknown key REFUSES rather than drops:
+        a misspelt `stochastic_dept = 0.05` read as nothing is a run under a recipe nobody wrote.
+        """
+        if config is None:
+            return {}
+        with config.open("rb") as handle:
+            table = tomllib.load(handle)
+        hints = get_type_hints(cls)
+        unknown = sorted(set(table) - set(hints))
+        if unknown:
+            message = f"{config} names no training option: {', '.join(unknown)}"
+            raise ValueError(message)
+        return {name: cls._value(hints[name], str(value)) for name, value in table.items()}
 
     @classmethod
     def parse(cls) -> "TrainingOptions":

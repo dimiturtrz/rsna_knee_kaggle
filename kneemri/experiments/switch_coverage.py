@@ -28,6 +28,7 @@ NOT_A_RECIPE = {
     "paths": "the data root, machine-specific and gitignored",
     "labels": "the label table every arm passes through lib.sh",
     "out": "where a run writes, set per invocation",
+    "config": "a recipe file, whose keys are the fields it sets and are accounted for under their own names",
     "epochs": "run length, overridden to 1 by every smoke",
     "studies": "corpus truncation, which IS the smoke",
     "cache_studies": "the truncated cache the smoke decodes, set by the checker not by a recipe",

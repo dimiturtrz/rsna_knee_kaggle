@@ -452,7 +452,7 @@ class _WatchedOptions(TrainingOptions):
         return super().__getattribute__(name)
 
 
-STAMPED_ONLY: set[str] = set()
+STAMPED_ONLY: set[str] = {"config"}
 """Fields whose whole job is to travel to the record; no consumer reads them, by design."""
 
 ADAPT_DEPTH = 2
