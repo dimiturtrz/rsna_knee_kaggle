@@ -17,6 +17,7 @@ import torch
 from jaxtyping import Float, UInt8
 from torch import Tensor, nn
 
+from kneemri.models.slot_dropout import SlotDropout
 from kneemri.training.ghosting import Ghosting
 
 SLOT_DROPOUT = "slot_dropout"
@@ -284,31 +285,8 @@ class Augmentation:
         presence: Float[Tensor, "b n"],
         generator: torch.Generator,
     ) -> tuple[UInt8[Tensor, "b n g h w"], Float[Tensor, "b n"]]:
-        """Withhold present slots at random, moving the PIXELS and the PRESENCE MASK together.
-
-        Both, always. Zeroing pixels while the mask still calls the slot acquired is the exact defect
-        `SlotReader._stacked` records paying for once — the head then attends to a slot that carries
-        nothing, which teaches it that a present slot may be empty rather than that a slot may be
-        absent. Clearing the mask alone would leave real pixels behind a zero flag, which is the value
-        `SlotHead` is documented to refuse to trust.
-
-        NO STUDY IS EMPTIED. A draw that would withhold every present slot is cancelled for that study
-        rather than clamped to one survivor: cancelling keeps the marginal drop rate per slot equal
-        across studies, where keeping a random one would make the effective rate depend on how many
-        slots a study happens to have — and slot count correlates with the acquisition protocol, which
-        is the covariate this whole change exists to stop the model reading.
-
-        An ABSENT slot is never selected, so the rate is a rate over what was actually acquired.
-        """
-        if self.config.slot_dropout <= 0:
-            return images, presence
-        acquired = presence > 0
-        draw = torch.rand(presence.shape, generator=generator, device=presence.device)
-        dropping = (draw < self.config.slot_dropout) & acquired
-        survives = dropping.sum(dim=1) < acquired.sum(dim=1)
-        dropping = dropping & survives.unsqueeze(1)
-        kept = (~dropping).to(presence.dtype)
-        return images * kept.view(*kept.shape, 1, 1, 1).to(images.dtype), presence * kept
+        """Withhold present slots at random — the rule `SlotDropout` owns, at this config's rate."""
+        return SlotDropout(self.config.slot_dropout).dropped(images, presence, generator)
 
     def bagged(self, images: UInt8[Tensor, "b n g h w"], generator: torch.Generator) -> UInt8[Tensor, "b n g h w"]:
         """Augment a batch of slot bags, staying in uint8 so the model's own forward is untouched.
