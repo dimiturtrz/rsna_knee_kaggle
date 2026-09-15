@@ -114,3 +114,4 @@
 {"leader": 0.955, "frontier": 0.9544, "ours": 0.944, "gap": 0.011, "rank": 71, "field": 3612, "tied": 16, "taken": "2026-09-12T19:28:59+00:00"}
 {"leader": 0.956, "frontier": 0.9548, "ours": 0.944, "gap": 0.012, "rank": 74, "field": 3638, "tied": 14, "taken": "2026-09-13T06:59:20+00:00"}
 {"leader": 0.956, "frontier": 0.9548, "ours": 0.944, "gap": 0.012, "rank": 77, "field": 3646, "tied": 15, "taken": "2026-09-13T11:27:46+00:00"}
+{"leader": 0.957, "frontier": 0.955, "ours": 0.946, "gap": 0.011, "rank": 65, "field": 3774, "tied": 5, "taken": "2026-09-15T11:32:04+00:00"}

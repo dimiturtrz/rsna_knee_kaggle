@@ -3114,8 +3114,8 @@ submission adds an efficiency candidate rather than displacing the 0.944.
 
 Reading 0.939 as an accuracy result. It is three seats where the champion has seven, and it was built
 to be cheap. The accuracy row stays 0.944, 0.010 behind a 0.954 leader.
-On 2026-08-30 it stood at 45th of 3239; the board read of 2026-09-13T11:27:46Z puts the same score at
-**rank 77 of 3646** — the score did not move, the field did, which is the only thing a remembered rank
+On 2026-08-30 it stood at 45th of 3239; the board puts the same score at
+**rank 77 of 3646** (read 2026-09-13T11:27:46Z) — the score did not move, the field did, which is the only thing a remembered rank
 can never tell you. Thirty-two places in fourteen days, NINETEEN of them in the four days since the
 2026-09-09T19:53Z read (58th of 3421), is the drift rate this line exists to make visible, and it is
 holding: six more ranks in the nineteen hours since the 2026-09-12T16:54Z read (71st of 3602) is still
@@ -4220,8 +4220,8 @@ single-seat move, the seat axis reads saturated at board resolution: stop reseat
 
 MECHANISM. `tripleseat_v2` plus `warm_calib_lowlr_drop40_long_s2026` as an extra seat (kernel `kneemri-warmseat`,
 c5419a0a). Fold-0-twin ADD proxy +0.0007 [+0.0001, +0.0012] (ledger75, 909 rows). Pre-registered bands vs 0.946:
->=0.948 re-pin, 0.947 directional, 0.946 flat, <=0.945 dilution. Read **0.945**: dilution band. With `doseseat_v1`
-flat, the drop40_long family is saturated at three seats, and a positive twin proxy of this size did not transfer in
+>=0.948 re-pin, 0.947 directional, 0.946 flat, <=0.945 dilution. Read **0.945**: dilution band. With
+`doseseat_v1` flat, the drop40_long family is saturated at three seats, and a positive twin proxy of this size did not transfer in
 sign. Pin stays on `tripleseat_v2`. Further same-family seats are not a slot; the next gains must come from better
 members (full-corpus refit `fullseat_v1`, higher-resolution crops), not from more of them.
 
