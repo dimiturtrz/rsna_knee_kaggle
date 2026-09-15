@@ -55,3 +55,26 @@ Miss rate at study level is 0 / 110 read against the bead's <=10% bar, so `.4` p
 - Coronal and axial planes (stage B: fastMRI+ boxes; stage C: cross-plane via DICOM geometry).
 - Medial/lateral separation from slice position in the stack.
 - A per-study ROI box table, which `.5` needs to consume.
+
+## 2026-09-15 addendum — the first ROI arm read two confounds, not the idea (knee-vgz5b.10)
+
+`roi_labelwise_drop40_long_s2026` read 0.8984 at ledger75 against its no-ROI control `drop` 0.9051
+(909 rows). The per-label deltas pointed at the small structures the crop existed for: Fracture -0.023,
+MCL -0.024, ACL -0.012, PF OA -0.010, Lateral OA +0.013. Before calling the thread dead, two harness defects:
+
+- **Resolution (DATA).** The `roi` crops were upsampled from the 336 cache at 0.387 mm/px. RSNA sagittal
+  PixelSpacing is p10/p50/p90 0.212/0.312/0.494 mm over 200 series, 73% finer than the cache, so an 87 mm
+  median box discarded ~1.24x linear detail and interpolated blur replaced it. Header spacing may itself be
+  interpolated; the figure is an upper bound on real detail.
+- **Centring (TEST, for the older multiscale verdict).** The Otsu tissue centre `crop80_tissue` cropped
+  about sits a median 15.6 mm (p90 29.3) from the locator box centre over 400 sagittal slots; overlays show
+  80 mm tissue-centred crops clipping the patella and anterior joint. The multiscale retirement of
+  2026-08-16 was read on that centre.
+
+Also measured: locator Dice 0.365 test / 0.483 train on SKM-TEA — boundaries underfit, placement fine
+(0 / 110 study-level misses above). The box, not the mask, is what the ROI views consume.
+
+`roi_native` fixes the resolution axis alone: the same boxes cut from the stack decoded at 672 px (0.193
+mm/px) and resized down. Built 4407 studies, 0 decode failures; canonical slots byte-identical to `roi`;
+sagittal crops correlate p5 0.9987 / p50 0.9995 with the upsampled ones over 40 studies — so the
+difference is fine detail only, and a flat reading will say detail was not what the arm lacked.
