@@ -17,10 +17,9 @@ has, and `decode_smoke_caches` builds the sixty-study one for it without knowing
 """
 
 import re
-from dataclasses import fields
 from pathlib import Path
 
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
 SCRIPTS = Path("experiments")
 
@@ -90,11 +89,11 @@ class SwitchCoverage:
         """
         text = "\n".join(path.read_text(encoding="utf-8") for path in self.scripts.rglob("*.sh"))
         passed = {flag.removeprefix("--").replace("-", "_") for flag in re.findall(r"--[a-z0-9-]+", text)}
-        return {field.name for field in fields(TrainingOptions) if field.name in passed}
+        return {leaf.name for leaf, _ in TrainConfig.leaves() if leaf.name in passed}
 
     def unaccounted(self) -> set[str]:
         """Options no arm passes, no recipe here covers, and nobody has written off. Must stay empty."""
-        return {field.name for field in fields(TrainingOptions)} - self.armed() - set(COVERAGE) - set(NOT_A_RECIPE)
+        return {leaf.name for leaf, _ in TrainConfig.leaves()} - self.armed() - set(COVERAGE) - set(NOT_A_RECIPE)
 
     @staticmethod
     def labels(printed: dict[str, str]) -> str:
