@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,9 @@ from core.data.corpus.slots import Routing
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.training.flag_vocabulary import FlagVocabulary
 from kneemri.training.options import TrainingOptions
+
+ARM_RECIPES = Path(__file__).parent / "fixtures" / "arm_recipes.json"
+REPO = Path(__file__).parents[4]
 
 
 def test_parse(monkeypatch: pytest.MonkeyPatch):
@@ -25,6 +29,27 @@ def test_parse(monkeypatch: pytest.MonkeyPatch):
     assert options.intensity_aug
     assert options.labels == Path("labels.csv")
     assert options.eval_labels is None, "no ruler given means score on what you trained on"
+
+
+def _frozen_keys(recipe: dict[str, str], frozen: dict[str, str]) -> dict[str, str]:
+    """The recipe on the keys the fixture froze, POSIX-separated; a field added since is not its business."""
+    return {name: recipe[name].replace(chr(92), "/") for name in frozen}
+
+
+def test_every_arm_parses_to_its_frozen_recipe(monkeypatch: pytest.MonkeyPatch):
+    """Every run_train arm's line gives the recipe the flat parser gave it before the config tree.
+
+    Frozen once from the OLD parser (knee-feb62.6 step 2), so a rewrite of the options surface is proven
+    byte-identical over the real arm corpus rather than over the handful of cases a test author thought of.
+    The hazard it exists for is an argparse default that disagrees with its dataclass default.
+    """
+    frozen = json.loads(ARM_RECIPES.read_text(encoding="utf-8"))
+    monkeypatch.chdir(REPO)
+
+    defaults = frozen["defaults"]
+    assert _frozen_keys(TrainingOptions().recipe, defaults) == defaults
+    for name, arm in frozen["arms"].items():
+        assert _frozen_keys(TrainingOptions.of(arm["argv"]).recipe, defaults) == defaults | arm["recipe"], name
 
 
 def test_recipe():
