@@ -103,3 +103,78 @@ Two cheaper, better-posed steps come first:
   ruler. Validate it on a fresh blind tear-column pack (~60 cells, zero card) before any card hour.
 
 Script: session scratchpad `blind_ruler.py`, seed 20260915. Per-cell CSV not committed (data out of repo).
+
+## Follow-up: blind re-adjudication under the host rubric (2026-09-15, knee-wko44)
+
+**Protocol.** Two fresh packs were drawn with seed 20260916 from 3265 eligible studies. Eligible means present in
+all five builder tables and in qwen_v3, and outside gold-58 and every existing audit400 pack.
+Each pack oversamples discordant cells (D), so every column is re-weighted by its own eligible-corpus unanimous share.
+
+- **blind_effmcl40:** Effusion and MCL, 12 U + 8 D each, n=40.
+- **blind_tear60:** ACL, Lateral Meniscus, Medial Meniscus and Contusion, 9 U + 6 D each, n=60.
+
+The adjudicator read report text only and graded it under the host rubric quoted in `core/findings.py` CRITERIA
+(topic 733343):
+
+- Effusion: "A moderate or large amount of fluid distending the joint".
+- MCL: "A high-grade partial or complete acute tear ... Low-grade sprains and chronic or remote stress changes are
+  graded negative".
+- ACL: ">50 percent of fibers disrupted ... Mild signal change, degeneration, or thickening without discontinuity
+  is graded negative".
+- Menisci: "Intrasubstance degeneration that does not reach the surface is negative".
+
+Verdicts went to `answers_blind.csv` (17:33Z) before either label table or the key was opened.
+
+**Convention.** An unsized "joint effusion" was graded 0 (low confidence). None of those cells is a
+disagreement between the tables, so the convention does not move the delta.
+
+Accuracy is stratum-weighted with per-column U share. The 95% CI is a stratified bootstrap with 4000 draws.
+
+| Pack | n | v2 | qwen_v3 | qwen − v2 |
+|---|---|---|---|---|
+| Effusion+MCL | 40 | 0.647 | 0.816 | **+0.169 [+0.052, +0.309]** |
+| Tear block (ACL/LM/MM/Contusion) | 60 | 0.838 | 0.884 | **+0.045 [+0.017, +0.076]** |
+| All six columns | 100 | 0.775 | 0.861 | +0.087 [+0.042, +0.136] |
+| Hybrid (qwen on the tear block) − v2, all six | 100 | | | +0.030 [+0.014, +0.051] |
+
+Per column, counted as ok v2 / ok qwen out of n:
+
+| Column | n | ok v2 | ok qwen |
+|---|---|---|---|
+| Effusion | 20 | 12 | 16 |
+| MCL | 20 | 16 | 19 |
+| ACL | 15 | 11 | 13 |
+| LM | 15 | 11 | 14 |
+| MM | 15 | 14 | 15 |
+| Contusion | 15 | 12 | 12 |
+
+All 13 disagreement cells favour qwen; there are zero v2-only-right cells. Every one of them is v2 calling a
+positive on text the rubric grades negative: "small/mild effusion", "grade I sprain", "mucoid degeneration,
+continuity maintained" and "grade 2 intrasubstance not to surface".
+
+**Reading.**
+
+1. **The root402 Effusion/MCL loss was the ruler's rubric, not the labeler.** Under the host rubric the sign
+   flips, from −0.241 and −0.178 to +0.169 pooled over the two columns. Suspicion 2 above is confirmed as a
+   faulty TEST.
+2. **The tear-block gain replicates on a ruler it was not selected on.** It reads +0.045 here, smaller than
+   root402's +0.07 to +0.19, and its interval excludes zero.
+3. **Limits.**
+   - There is one adjudicator, and it reads the same rubric qwen was prompted with. Agreement on the criterion
+     is therefore partly by construction. The rubric is the host's, so that is the right target, but it is not
+     radiologist image truth.
+   - Positives are scarce (7 of 100 cells), so these packs price false-positive suppression only. **Sensitivity
+     is untested.** A qwen that under-calls true high-grade tears would not show here.
+   - Gold-58 (radiologist) is the only ruler with positives, and it favoured v3 (+0.028).
+
+**Verdict.** A **whole-table v3 arm is licensed** on label accuracy, since it wins every column blind under the
+host rubric. The tear-only hybrid is now dominated: +0.030 against the whole table's +0.087 on the same cells.
+
+- **PRICE:** ~4 h card (bead estimate).
+- **P(clears +0.015 on holdout/gold):** ~0.25, UNVERIFIED. This is a judgement: a ~9-point label-accuracy gain
+  on six of twelve columns, discounted for unknown label-to-model transfer and for untested sensitivity.
+- **Cheap guard before the card hour:** count qwen_v3 versus v2 positive rates per column over the full table.
+  A collapse far below the gold-58 prevalence would mean under-calling.
+
+Packs, verdicts, the scoring script and `scores.txt` live under `processed/rsna_knee_abnormality/audit400/`
+(`blind_effmcl40`, `blind_tear60`). The root `manifest.json` has a `followup_packs` entry.
