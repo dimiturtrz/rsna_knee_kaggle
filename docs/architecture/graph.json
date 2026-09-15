@@ -1568,6 +1568,48 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.embeddings.roi_native",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_native",
+      "target": "core.data.corpus.cache_flags",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_native",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_native",
+      "target": "core.data.corpus.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_native",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_native",
+      "target": "kneemri.embeddings.roi_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.roi_native",
+      "target": "kneemri.models.locator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.alignment_damage",
       "target": "core.bootstrap",
       "weight": 1
@@ -14044,6 +14086,96 @@
       "kind": "calls",
       "source": "kneemri.embeddings.roi_cache.main",
       "target": "kneemri.models.locator.Locator.pretrained",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embeddings.roi_native.NativeBox",
+      "target": "kneemri.embeddings.roi_native.NativeBox",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_native.NativeBox.recut",
+      "target": "kneemri.embeddings.roi_native.NativeBox.scaled",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.embeddings.roi_native.NativeJob",
+      "target": "core.data.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.embeddings.roi_native.NativeJob",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.embeddings.roi_native.NativeJob",
+      "target": "kneemri.embeddings.roi_native.NativeBox",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embeddings.roi_native.NativeJob",
+      "target": "kneemri.embeddings.roi_native.NativeJob",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_native.NativeJob.pooled",
+      "target": "kneemri.embeddings.roi_native.NativeJob.run",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.roi_native.NativeJob.run",
+      "target": "core.data.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_native.NativeJob.run",
+      "target": "core.data.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_native.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_native.main",
+      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.roi_native.main",
+      "target": "core.data.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_native.main",
+      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.roi_native.main",
+      "target": "kneemri.embeddings.roi_native.NativeBox.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.embeddings.roi_native.main",
+      "target": "kneemri.embeddings.roi_native.NativeJob",
       "weight": 1
     },
     {
@@ -39877,7 +40009,7 @@
       "role": null
     },
     {
-      "descendants": 311,
+      "descendants": 312,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39901,7 +40033,7 @@
       "role": null
     },
     {
-      "descendants": 6,
+      "descendants": 7,
       "id": "kneemri.embeddings",
       "label": "embeddings",
       "level": "module",
@@ -39952,6 +40084,14 @@
       "descendants": 0,
       "id": "kneemri.embeddings.roi_cache",
       "label": "roi_cache",
+      "level": "module",
+      "parent": "kneemri.embeddings",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native",
+      "label": "roi_native",
       "level": "module",
       "parent": "kneemri.embeddings",
       "role": null
@@ -43642,6 +43782,22 @@
       "label": "RoiCache",
       "level": "class",
       "parent": "kneemri.embeddings.roi_cache",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeBox",
+      "label": "NativeBox",
+      "level": "class",
+      "parent": "kneemri.embeddings.roi_native",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeJob",
+      "label": "NativeJob",
+      "level": "class",
+      "parent": "kneemri.embeddings.roi_native",
       "role": "satellite"
     },
     {
@@ -53506,6 +53662,62 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.embeddings.roi_cache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeBox.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_native.NativeBox",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeBox.recut",
+      "label": "recut",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_native.NativeBox",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeBox.scaled",
+      "label": "scaled",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_native.NativeBox",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeJob.planted",
+      "label": "planted",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_native.NativeJob",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeJob.pooled",
+      "label": "pooled",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_native.NativeJob",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.NativeJob.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_native.NativeJob",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.roi_native.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.embeddings.roi_native",
       "role": null
     },
     {

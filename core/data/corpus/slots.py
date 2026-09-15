@@ -404,6 +404,13 @@ ROI_SLOTS: tuple[Slot, ...] = (
     *(replace(slot, name=f"{slot.name}@{ROI_SCHEME}") for slot in SLOTS if slot.plane is Plane.SAGITTAL),
 )
 
+ROI_NATIVE_SCHEME = "roinative"
+"""The `roi` slots with each box re-cut from the DICOM decoded at twice the cache grid, not upsampled from it.
+
+Same boxes, same frame, same slot order — only the pixels inside a box change. 73% of RSNA sagittal
+series are acquired finer than the cache's 0.387 mm/px (PixelSpacing p50 0.312), so an 87 mm box holds
+about 1.24x the linear detail the `roi` crop threw away. OFFLINE ONLY, for the same licence reason."""
+
 SCHEMES: dict[str, tuple[Slot, ...]] = {
     CANONICAL_SCHEME: SLOTS,
     "extended": EXTENDED_SLOTS,
@@ -417,6 +424,7 @@ SCHEMES: dict[str, tuple[Slot, ...]] = {
     FASTMRI_MERGED_SCHEME: SLOTS,
     KMAR_MERGED_SCHEME: SLOTS,
     ROI_SCHEME: ROI_SLOTS,
+    ROI_NATIVE_SCHEME: ROI_SLOTS,
 }
 """Selectable slot schemes. The canonical one is not merely a default: the 20 published members we
 grafted are six-slot by construction, so it has to remain expressible for the graft to keep loading."""
@@ -431,6 +439,7 @@ FOREIGN_SCHEMES = (
     FASTMRI_MERGED_SCHEME,
     KMAR_MERGED_SCHEME,
     ROI_SCHEME,
+    ROI_NATIVE_SCHEME,
 )
 """Schemes that name a corpus THIS repo's own decoder cannot produce, each owned by its own builder.
 
