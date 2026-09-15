@@ -7,12 +7,12 @@ because the three are different jobs and only this one is imported by things tha
 and with it `transformers`, to read a dataclass.
 """
 
+import argparse
 import sys
-import tomllib
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import cast, get_args, get_type_hints
+from typing import get_type_hints
 
 from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from core.data.corpus.folds import FitPositions
@@ -27,28 +27,12 @@ from kneemri.models.slice_pooling import CHANNELS
 from kneemri.models.slot_head import ATTENDED
 from kneemri.models.token_pooling import CLS_MEAN
 from kneemri.training.adaptation import Adaptation
-from kneemri.training.flag_vocabulary import FlagVocabulary
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.mixup import OFF
 from kneemri.training.pretrained_encoder import ALL_BLOCKS
 from kneemri.training.sharpness import FLAT
 from kneemri.training.trainer import ONE_CYCLE_WARMUP
-
-NOT_STATED = "None"
-"""How `recipe` spells a field that was never given — `str(None)`, since it stringifies every value.
-
-It is ambiguous for the two `str | None` fields, where the literal text and the absent value have the
-same spelling, and unambiguous for every other field: no int, float, Path or bool stringifies to this."""
-
-_READERS: dict[type, Callable[[str], object]] = {
-    int: int,
-    float: float,
-    str: str,
-    Path: Path,
-    bool: lambda text: text == str(True),
-}
-"""How each field type reads back off the string `recipe` wrote — `bool` being the one that cannot use
-its own constructor, since `bool("False")` is True and would silently arm every switch a run left off."""
 
 
 @dataclass(frozen=True)
@@ -284,16 +268,8 @@ class TrainingOptions:
         offers for exactly that.
         """
         hints = get_type_hints(cls)
-        stated = {name: cls._value(hints[name], text) for name, text in recipe.items() if name in hints}
+        stated = {name: TrainConfig.typed(hints[name], text) for name, text in recipe.items() if name in hints}
         return replace(cls(), **stated)
-
-    @staticmethod
-    def _value(hint: object, text: str) -> object:
-        """One recipe field as the type its dataclass declares, with `X | None` read as its stated half."""
-        if text == NOT_STATED:
-            return None
-        stated = next((argument for argument in get_args(hint) if argument is not type(None)), hint)
-        return _READERS[cast("type", stated)](text)
 
     @property
     def routing(self) -> Routing:
@@ -370,9 +346,7 @@ class TrainingOptions:
         card already holding 16.24 GB of a live run: it could not allocate, sat the full ten-minute
         bound, and cost the run beside it 734 s for an epoch that had taken 248 s and 255 s.
         """
-        parser = FlagVocabulary.parser()
-        parser.set_defaults(**cls.of_file(parser.parse_known_args(argv)[0].config))
-        return cls(**vars(parser.parse_args(argv)))
+        return cls(**vars(argparse.Namespace(**TrainConfig.of(argv).flat)))
 
     @classmethod
     def spelled(cls, argv: list[str]) -> list[str]:
@@ -382,33 +356,13 @@ class TrainingOptions:
         is written down exactly as a flag on the line is, and must not read as silence.
         """
         config = Path(argv[argv.index("--config") + 1]) if "--config" in argv else None
-        return [f"--{name.replace('_', '-')}" for name in cls.of_file(config)] + argv
-
-    @classmethod
-    def of_file(cls, config: Path | None) -> dict[str, object]:
-        """A recipe file's values, typed as the fields they name — the layer an explicit flag overrides.
-
-        Flat TOML keyed by field name (`epochs = 36`), so a recipe is written once and an arm names it
-        with `--config` instead of re-typing thirty flags. They land as PARSER DEFAULTS, which is what
-        makes every flag on the same line win over the file. An unknown key REFUSES rather than drops:
-        a misspelt `stochastic_dept = 0.05` read as nothing is a run under a recipe nobody wrote.
-        """
-        if config is None:
-            return {}
-        with config.open("rb") as handle:
-            table = tomllib.load(handle)
-        hints = get_type_hints(cls)
-        unknown = sorted(set(table) - set(hints))
-        if unknown:
-            message = f"{config} names no training option: {', '.join(unknown)}"
-            raise ValueError(message)
-        return {name: cls._value(hints[name], str(value)) for name, value in table.items()}
+        return [f"--{name.replace('_', '-')}" for name in TrainConfig.of_file(config)] + argv
 
     @classmethod
     def parse(cls) -> "TrainingOptions":
         """Read the command line into an options object.
 
-        The VOCABULARY is `FlagVocabulary`'s and this is the only reach for it, which is the split: a
+        The VOCABULARY is `TrainConfig`'s and this is the only reach for it, which is the split: a
         field here has a default in two homes, the dataclass and the flag, and every test that asserts
         they agree goes through the parser directly rather than through this.
         """

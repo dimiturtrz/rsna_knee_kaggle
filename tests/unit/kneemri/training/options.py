@@ -9,7 +9,7 @@ from core.data.corpus.folds import FitPositions
 from core.data.corpus.slot_reader import Band, Reading
 from core.data.corpus.slots import Routing
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
-from kneemri.training.flag_vocabulary import FlagVocabulary
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.options import TrainingOptions
 
 ARM_RECIPES = Path(__file__).parent / "fixtures" / "arm_recipes.json"
@@ -206,7 +206,7 @@ def test_cache():
     assert TrainingOptions(cache_studies=60).cache(Path(".")).key.endswith("_first60"), (
         "the smoke truncation is an axis of the NAME, so a partial decode cannot overwrite the full one"
     )
-    argv = FlagVocabulary.parser().parse_args(["--labels", "labels.csv"])
+    argv = TrainConfig.parser().parse_args(["--labels", "labels.csv"])
 
     assert TrainingOptions().cache(Path(".")).key == CacheFlags.cache(argv, Path(".")).key, (
         "the dataclass half and the namespace half of one rule, pinned equal on the reading every "
@@ -260,20 +260,3 @@ def test_spelled(tmp_path: Path):
         "--ema",
     ]
     assert TrainingOptions.spelled(["--ema"]) == ["--ema"]
-
-
-def test_of_file(tmp_path: Path):
-    """Values arrive typed as their fields; no file is no values; a misspelt key refuses."""
-    recipe = tmp_path / "r.toml"
-    recipe.write_text('warmup = 0.25\nslices = 20\npadding_mode = "reflection"\nunread_targets = "u.npz"\n', "utf-8")
-
-    assert TrainingOptions.of_file(recipe) == {
-        "warmup": 0.25,
-        "slices": 20,
-        "padding_mode": "reflection",
-        "unread_targets": Path("u.npz"),
-    }
-    assert TrainingOptions.of_file(None) == {}
-    recipe.write_text("stochastic_dept = 0.05\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="stochastic_dept"):
-        TrainingOptions.of_file(recipe)

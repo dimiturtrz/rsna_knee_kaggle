@@ -17,8 +17,11 @@ import torch
 from jaxtyping import Float, UInt8
 from torch import Tensor, nn
 
+from kneemri.models.drop_path import NO_DROP
 from kneemri.models.slot_dropout import SlotDropout
+from kneemri.training.config_leaf import ConfigLeaf
 from kneemri.training.ghosting import Ghosting
+from kneemri.training.mixup import OFF
 from kneemri.training.progress_schedule import FULL
 
 SLOT_DROPOUT = "slot_dropout"
@@ -342,3 +345,131 @@ class Augmentation:
         flat = images.reshape(batch * slots, *images.shape[2:]).float().div(255.0)
         warped = self.applied(flat, generator)
         return (warped * 255).round().clamp(0, 255).to(torch.uint8).reshape(images.shape)
+
+
+PADDING_MODES = ("zeros", "border", "reflection")
+"""What `grid_sample` fills outside the cached crop with."""
+
+
+@dataclass(frozen=True)
+class RegularisationConfig:
+    """The regularisers a run arms and the progress schedule that scales them."""
+
+    mixup: float = ConfigLeaf.of(
+        default=OFF,
+        says=(
+            "blend each batch with a permutation of itself, pixels and TARGETS together, at a weight drawn "
+            "from Beta(a, a). 0.1-0.4 is the usual range; 0, the default, is off and is what every ledger "
+            "number was measured under. This is the first label-space regulariser here: --intensity-aug "
+            "changes how a study looks and leaves its label alone, which is why it fired and the overfitting "
+            "did not care - band_dense_long peaked at epoch 6 and lost 0.0182 over eighteen more while its "
+            "train loss halved."
+        ),
+    )
+    slot_dropout: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "withhold each PRESENT slot from a training study with this probability, pixels and presence mask"
+            " together. 0, the default, is off and is what every ledger number was measured under. The first "
+            "SUPERVISION-space regulariser here: --mixup perturbs the label and --intensity-aug perturbs the "
+            "appearance, and neither changes which acquisitions a study is made of. This corpus varies on "
+            "exactly that axis - the axial fluid slot fills 100%% of studies while both T1 slots fill 55-60%%"
+            " - so nearly half of all studies reach inference with slots the model has only ever seen filled."
+            " A study is never emptied."
+        ),
+    )
+    ghosting: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "add phase-encode motion ghosting to each training image at this TARGET MEDIAN per-pixel "
+            "residual, in [0, 1] image units. 0, the default, is off and is what every ledger number was "
+            "measured under. The only augmentation here whose magnitude is measured rather than chosen: "
+            "KMAR-50K ships the same knee acquired with and without patient motion, and 109 of its pairs put "
+            "the residual at 0.040 of full scale (p10 0.023, p90 0.086), the impulsiveness at p99/mean ~ 9 "
+            "and 11%% of the residual energy outside the anatomy - the ghosting signature, which is why this "
+            "displaces replicas rather than blurring."
+        ),
+    )
+    scale_jitter: float = ConfigLeaf.of(
+        default=0.08,
+        says=(
+            "half-width of the uniform FIELD-OF-VIEW jitter: each training study is resampled at a scale "
+            "drawn from 1 +/- this. 0.08, the default, is the public baseline's and is what every ledger "
+            "number was measured under - it was hardcoded until knee-su2sw, so no member on disk has ever "
+            "seen the extent vary by more. The foreign corpus's span runs 20-50%% wider (D206), and the "
+            "11-member readout of 2026-09-09 measured the generalisation toll FLAT across the pool at -0.0336"
+            " +/- 0.0038 with the single widened-field member paying least - a blind spot every member shares"
+            " cannot appear as variance between them. Above 1 the grid runs past the cached crop and border "
+            "pixels are replicated, so a wide jitter wants a wide --crop-mm under it or half its draws "
+            "fabricate margin instead of revealing tissue."
+        ),
+    )
+    padding_mode: str = ConfigLeaf.of(
+        default="border",
+        says=(
+            "what the augmentation resample reads where its grid leaves the image. 'border', the default, "
+            "replicates the edge row and is what every ledger number was measured under - it was hardcoded "
+            "until knee-10f10. Its reason was ROTATION (a turned knee should run out into tissue-like values,"
+            " not a black wedge that says how far it was turned), which is sound for 8 degrees and was never "
+            "an argument about EXTENT: above scale 1 the entire margin is out of frame, so a zoom-out "
+            "fabricates tissue from one replicated row. The literature declines the choice instead of making "
+            "it - MAE and DINO crop INSIDE the image, nnU-Net oversamples its patch by the scale envelope so "
+            "a zoomed-out sample is real tissue - and no medical-imaging paper reports reflection beating "
+            "crop-inside, so this is a first read rather than a replication (D258)."
+        ),
+        choices=PADDING_MODES,
+    )
+    intensity_aug: bool = ConfigLeaf.of(default=False, says="gamma/blur/contrast/noise too")
+    stochastic_depth: float = ConfigLeaf.of(
+        default=NO_DROP,
+        says=(
+            "rate at which the trunk's DEEPEST block drops its whole residual branch for a sample during "
+            "training, ramped linearly from zero at the first block (0 = the intact trunk every number in the"
+            " ledger was measured under). It costs nothing -- no second forward, no parameter, no buffer -- "
+            "and it is identity in eval(), so a member trained under it serves byte-identically. Same axis as"
+            " --sharpness and a different mechanism: that one flattens the minimum the walk settles in, this "
+            "one stops any single block's branch from being depended on. transformers applies a FLAT rate at "
+            "every depth, which is not the schedule the published effect sizes were measured under; this "
+            "ramps."
+        ),
+    )
+    aug_start: float = ConfigLeaf.of(
+        default=1.0,
+        says=(
+            "strength at progress 0 of the ONE progress schedule scaling every regulariser at once (geometric"
+            " and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); defaults are the "
+            "ledger"
+        ),
+    )
+    aug_mid: float = ConfigLeaf.of(
+        default=1.0,
+        says=(
+            "strength on the plateau of the ONE progress schedule scaling every regulariser at once "
+            "(geometric and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); "
+            "defaults are the ledger"
+        ),
+    )
+    aug_end: float = ConfigLeaf.of(
+        default=1.0,
+        says=(
+            "strength at progress 1 of the ONE progress schedule scaling every regulariser at once (geometric"
+            " and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); defaults are the "
+            "ledger"
+        ),
+    )
+    aug_ramp: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "share of the run climbing start -> mid of the ONE progress schedule scaling every regulariser at"
+            " once (geometric and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); "
+            "defaults are the ledger"
+        ),
+    )
+    aug_tail: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "share of the run descending mid -> end of the ONE progress schedule scaling every regulariser at"
+            " once (geometric and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); "
+            "defaults are the ledger"
+        ),
+    )

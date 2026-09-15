@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from kneemri.experiments.switch_coverage import COVERAGE, NOT_A_RECIPE, SwitchCoverage
-from kneemri.training.flag_vocabulary import FlagVocabulary
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.options import TrainingOptions
 
 
@@ -28,7 +28,7 @@ def test_unaccounted():
 def test_coverage_recipes_are_flags_the_trainer_accepts():
     """A recipe that the parser refuses would report itself as a broken switch, blaming the knob."""
     for name, flags in COVERAGE.items():
-        parsed = FlagVocabulary.parser().parse_args(["--labels", "x.csv", *flags.split()])
+        parsed = TrainConfig.parser().parse_args(["--labels", "x.csv", *flags.split()])
         options = TrainingOptions(**vars(parsed))
         assert getattr(options, name) != getattr(TrainingOptions(), name), f"{name} recipe leaves the default"
 

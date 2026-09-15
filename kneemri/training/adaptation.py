@@ -7,9 +7,14 @@ numbers with no behaviour, it is CONSTRUCTED by five modules that have no other 
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 
+from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.encoder_surgery import NO_OFFSET
-from kneemri.models.model import NO_LAYER_DECAY
+from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
+from kneemri.training.config_leaf import ConfigLeaf
+from kneemri.training.init_scope import INIT_SCOPES
+from kneemri.training.pretrained_encoder import ALL_BLOCKS
 
 WEIGHT_DECAY = 0.02
 
@@ -58,3 +63,170 @@ class Adaptation:
     than beside the schedule because it is the term that makes the OTHER two separable: at one flat rate
     a depth result and a rate result are the same measurement read twice.
     """
+
+
+@dataclass(frozen=True)
+class EncoderConfig:
+    """Which trunk a run builds, what it starts from, and how much of it moves."""
+
+    encoder_layer: int = ConfigLeaf.of(
+        default=-1,
+        says=(
+            "which encoder block the head reads. -1 is the last, which is what every member so far was fitted"
+            " on. The final block of a self-supervised ViT is the most specialised toward its PRETRAINING "
+            "objective, and our findings are 1-3 mm - both DINOv2 and DINOv3 ship get_intermediate_layers for"
+            " dense work. Costs no extra forward pass."
+        ),
+    )
+    through_plane: bool = ConfigLeaf.of(
+        default=StudyDesign().through_plane,
+        says=(
+            "give each slice its two depth neighbours as the encoder's other two input channels instead of "
+            "three copies of itself. Same slice axis, same pooling, same token / parameter / FLOP count as "
+            "the control — the only change is what the three channels hold, so it is the one arm that puts "
+            "through-plane information INTO a slice's feature vector rather than mixing depth after the "
+            "encoder has already reduced each slice to one."
+        ),
+    )
+    anatomical_prior: bool = ConfigLeaf.of(
+        default=False, says="start each diagnosis's slot attention from how the finding is actually read"
+    )
+    variant: str = ConfigLeaf.of(
+        default=SMALL,
+        says=(
+            "which pretrained encoder. DINOv2-small is the committed default: DINOv3 is refuted as an "
+            "improvement at -0.038 and retained only as a diversity member (see "
+            "interpretations/kneemri/2026-08-13_dinov2-stays-and-why-dinov3-loses-the-focal-findings.md)."
+        ),
+        choices=tuple(ENCODERS),
+    )
+    unfreeze_last: int = ConfigLeaf.of(
+        default=Adaptation().unfreeze_last,
+        says=(
+            "how many of the encoder's trailing blocks train. The restraint is a HYPOTHESIS, not a "
+            "measurement: with 58 image-read labels the early generic blocks may have too little supervision "
+            "to improve and enough to damage. Capacity is the only axis that has ever cleared our noise "
+            "floor, so the hypothesis is worth testing rather than inheriting."
+        ),
+    )
+    unfreeze_offset: int = ConfigLeaf.of(
+        default=Adaptation().unfreeze_offset,
+        says=(
+            "how many blocks at the TOP of the trunk stay FROZEN, which turns --unfreeze-last from a suffix "
+            "into a window. Zero is every run before 2026-09-05. Lee et al. (ICLR 2023) choose the block by "
+            "the KIND of shift, and the input-level case - natural images to greyscale MRI - wants EARLY "
+            "blocks, which a suffix cannot express."
+        ),
+    )
+    init: Path | None = ConfigLeaf.of(
+        default=None,
+        says=(
+            "start from a member already on disk instead of from the encoder's published weights plus a fresh"
+            " head. The one flag LP-FT needs: stage one trains a head over a FROZEN trunk (--unfreeze-last "
+            "0), stage two points --init at that checkpoint and unfreezes at a low backbone rate. Kumar et "
+            "al. (arXiv:2202.10054) measure fine-tuning from a fresh head distorting pretrained features ~20x"
+            " more than fine-tuning from a fitted one, which is the shape radnet_family produced here: 0.8197"
+            " frozen, 0.6716 fine-tuned, same weights. The checkpoint's DESIGN is not read back - this loads "
+            "weights into the model these flags describe, so a mismatched architecture raises here rather "
+            "than training something else."
+        ),
+    )
+    init_scope: str = ConfigLeaf.of(
+        default="all",
+        says=(
+            "how much of --init is taken. 'all' is LP-FT's case, where stage one's head IS the head stage two"
+            " wants. 'trunk' is the CROSS-CORPUS case: a checkpoint fitted on MRNet has three series slots "
+            "against this corpus's six, so head.slot_emb is (3, 256) against (6, 256) and a whole-model load "
+            "raises - after stage one has already spent its card. The head is not the part that transfers "
+            "anyway; feature reuse in the early and middle blocks is (Yosinski 2014, Raghu 2019, Matsoukas "
+            "2022). Everything the scope does take is still shape-checked."
+        ),
+        choices=sorted(INIT_SCOPES),
+    )
+    head_lr: float = ConfigLeaf.of(default=Adaptation().head_lr)
+    backbone_lr: float = ConfigLeaf.of(
+        default=Adaptation().backbone_lr,
+        says=(
+            "how fast the ENCODER adapts. The 125:1 ratio to the head was inherited, never measured, and at "
+            "8e-6 the encoder barely moves - which is why our depth bracket came out neutral: unfreezing more"
+            " blocks cannot help at a rate where no block moves."
+        ),
+    )
+    layer_decay: float = ConfigLeaf.of(
+        default=Adaptation().layer_decay,
+        says=(
+            "scale the encoder rate DOWN by this factor per block below the top one (0.65-0.75 is the usual "
+            "range; 1.0, the default, is the flat rate every ledger number was measured at). Without it depth"
+            " and rate can only move together: --unfreeze-last 12 at the rate that makes the top blocks move "
+            "applies that same rate to the encoder's most general layers, so a deeper arm is not a deeper "
+            "version of the shallow one, it is a different perturbation."
+        ),
+    )
+    weight_decay: float = ConfigLeaf.of(
+        default=Adaptation().weight_decay,
+        says=(
+            "AdamW's decoupled weight decay, applied to every parameter group. 0.02 is the inherited default "
+            "and was never re-derived: it was chosen beside a backbone rate of 8e-6, and the rate sweep has "
+            "since moved the trunk 5x to 4e-5, so the same decay now competes with steps five times larger. "
+            "Decay and rate are not independent — the equilibrium norm a weight settles at is set by their "
+            "ratio — so a rate change with the decay held fixed has already changed the regularisation, in a "
+            "direction nobody chose."
+        ),
+    )
+    whole_stack: bool = ConfigLeaf.of(
+        default=False,
+        says=(
+            "read EVERY cached slice each step instead of one sampled 3-slice window. Needs a per-slice "
+            "pooling or a tubelet trunk, and for a tubelet trunk it is the only path that reaches a window "
+            "wider than 3 at all. A step currently sees 18 of a study's ~180 slices, while averaging ten "
+            "windows at INFERENCE is worth +0.0156 - the largest single effect measured here - so training "
+            "was discarding information it already had. Costs about 4x a step."
+        ),
+    )
+    report_weight: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "also predict each study's REPORT embedding, at this weight (0 = off). Our supervision is twelve "
+            "numbers where the report has a median of 129 words in twelve languages; this term supervises the"
+            " representation with the rest of it. Training-only - test.csv has no Report column, so inference"
+            " is unchanged."
+        ),
+    )
+    encoder_weights: Path | None = ConfigLeaf.of(
+        default=None,
+        says=(
+            "start the encoder from a domain-adapted checkpoint written by kneemri.training.pretrain instead "
+            "of the stock natural-image weights. Everything else in the recipe is unchanged, so a run with "
+            "this flag and its matched control differ in one variable: what the encoder knew before "
+            "supervision began."
+        ),
+    )
+    encoder_adapt_depth: int = ConfigLeaf.of(
+        default=ALL_BLOCKS,
+        says=(
+            "take only the patch embedding and the first N blocks from --encoder-weights, leaving the rest "
+            "stock. 0 takes the whole adaptation. The argument for on-domain pretraining only ever concerned "
+            "the blocks --unfreeze-last leaves frozen, which supervision cannot write into and so cannot "
+            "repair; the top blocks the head reads are the ones a reconstruction objective rewrites hardest, "
+            "and two full loads measured on 2026-08-20 lost 0.17 with block 11 moved 55%% and 21%% of its own"
+            " norm."
+        ),
+    )
+    lora_rank: int = ConfigLeaf.of(
+        default=0,
+        says=(
+            "adapt every block along a rank-r subspace with the pretrained weights FROZEN, instead of "
+            "rewriting the last few blocks. 0 disables it. The base weight stays bit-identical, so what a "
+            "small noisy dataset can do to a 1.7B-image representation is bounded by the rank rather than by "
+            "the learning rate."
+        ),
+    )
+    recompute_activations: bool = ConfigLeaf.of(
+        default=False,
+        says=(
+            "gradient checkpointing: 19%% less throughput (measured here) for nearly all of the encoder's "
+            "activation memory. Needed once a step puts many images through the encoder - whole-stack reading"
+            " and higher resolutions both overflow 32 GB, and an overflow THRASHES rather than failing, which"
+            " looks like 100%% utilisation at a quarter of the power budget."
+        ),
+    )

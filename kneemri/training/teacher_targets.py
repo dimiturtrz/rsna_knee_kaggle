@@ -20,6 +20,8 @@ including fold 0, so they CANNOT teach an arm that is scored on fold 0. The prod
 """
 
 import os
+from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 from jaxtyping import Float
@@ -27,6 +29,7 @@ from numpy.typing import NDArray
 
 from core.findings import TARGETS
 from kneemri.teacher_file import TeacherFile
+from kneemri.training.config_leaf import ConfigLeaf
 
 TEACHER = "teacher_targets"
 """The landing witness: whether readings ARRIVED, which is a separate fact from the term's weight.
@@ -75,3 +78,61 @@ class TeacherTargets:
             )
             raise ValueError(message)
         return rows
+
+
+@dataclass(frozen=True)
+class TeacherConfig:
+    """Which teacher a run distils from and how hard each of its signals pulls."""
+
+    teacher_targets: Path | None = ConfigLeaf.of(
+        default=None,
+        says=(
+            "npz of an ensemble's scores for the TRAINING studies, read by --distill-weight and by --dissent-"
+            "weight. Its members must not have seen the holdout this arm is scored on: a --fold -1 member saw"
+            " every study, so teaching from one leaks the evaluation labels into the student."
+        ),
+    )
+    teacher_features: Path | None = ConfigLeaf.of(
+        default=None,
+        says=(
+            "npz of a teacher's pooled REPRESENTATIONS of the TRAINING studies, read by --feature-weight. A "
+            "different file from --teacher-targets and under a different array name, so handing one where the"
+            " other belongs raises before the card is touched. Its members must not have seen the holdout "
+            "this arm is scored on: a --fold -1 member saw every study, so teaching from one leaks the "
+            "evaluation labels into the student."
+        ),
+    )
+    distill_weight: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "add a pairwise term at this strength asking the student to reproduce an ENSEMBLE's ordering of "
+            "these studies (0 = off). Not the usual KL on softened probabilities, which targets calibration "
+            "the metric discards. The reader emits five levels, so a pair of studies on the SAME level "
+            "teaches the label term nothing — and a finding present in 7%% of studies strands roughly 87%% of"
+            " its pairs that way. A continuous teacher orders all of them, so the gain should concentrate on "
+            "the rarest findings. Requires --teacher-targets."
+        ),
+    )
+    feature_weight: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "add a cosine term at this strength pulling what the student READ from a study onto what a "
+            "TEACHER read from it, through a learned projection between the two widths (0 = off). "
+            "Distillation at the representation rather than at the verdict: --distill-weight teaches the "
+            "teacher's twelve-way ORDERING, which is its head, and swin_distill_fit measured that at -0.0077 "
+            "against a cold control. A large value here makes the label term a probe rather than a target, "
+            "which is what turns a stage into a PRETRAIN whose product is an encoder. Requires --teacher-"
+            "features."
+        ),
+    )
+    dissent_weight: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "add a pairwise ranking term at this strength whose pairs are re-weighted toward the ones an "
+            "ENSEMBLE orders WRONG (0 = off). The same teacher file --distill-weight reads, for the opposite "
+            "purpose: not to reproduce the pool's ordering but to spend the member's capacity where that "
+            "ordering fails, which is the one way to raise ensemble ambiguity without raising member error. "
+            "Anchored to the labels throughout — a pair is only ever paid for in the direction the reports "
+            "order it. Requires --teacher-targets."
+        ),
+    )

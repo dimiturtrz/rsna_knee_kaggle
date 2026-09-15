@@ -24,12 +24,15 @@ measuring.
 
 import logging
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from pathlib import Path
 from typing import override
 
 import numpy as np
 from jaxtyping import Float, Int
 from numpy.typing import NDArray
+
+from kneemri.training.config_leaf import ConfigLeaf
 
 logger = logging.getLogger(__name__)
 
@@ -285,3 +288,100 @@ class MixedCorpus(Sampling):
             f"mixed-corpus oversampling: {self.target} at 1.0, others at {self.factor:.2f} "
             f"over {len(self.corpus)} studies"
         )
+
+
+@dataclass(frozen=True)
+class SamplingConfig:
+    """How positions are drawn: disagreement weighting, corpus mix, hard-example schedule."""
+
+    sample_spread: Path | None = ConfigLeaf.of(
+        default=None,
+        says=(
+            "draw each epoch's studies in proportion to how much a reference pool DISAGREED about them, from "
+            "a file written by kneemri.evaluation.train_disagreement. Every arm on the ledger draws a uniform"
+            " permutation instead; residual_split put ~70%% of the pool's errors in the band the family "
+            "splits on, and this is the only lever aimed at it. Loss-ranked mining is the conventional "
+            "alternative and is wrong here: ~87%% of the residual is aleatoric, so it mines label noise. The "
+            "epoch keeps its length, so the compute is matched."
+        ),
+    )
+    sample_alpha: float = ConfigLeaf.of(
+        default=0.5,
+        says=(
+            "the share of the draw --sample-spread controls; the rest is a uniform floor. 0.0 is flat weights"
+            " and is how the arm runs its own matched control — NOT the ledger's uniform policy, since the "
+            "draw is with replacement at every alpha."
+        ),
+    )
+    sample_ramp: int = ConfigLeaf.of(
+        default=0,
+        says=(
+            "SUPERSEDED by --hard-*, kept for ledger comparability. Reach --sample-alpha over this many "
+            "epochs instead of at the first step, which turns the tilt into a curriculum: the epoch starts "
+            "near-uniform and spends its later passes on the studies the reference pool could not resolve. 0 "
+            "is the immediate tilt every sampled arm so far ran. The static tilt COSTS on this corpus "
+            "(disagreed_full 0.8471 against its own alpha-zero control at 0.8507) while a schedule over label"
+            " trust PAYS (certainty_ramp 0.8584), which is the contrast this flag exists to test on the "
+            "disagreement signal."
+        ),
+    )
+    corpus_oversample: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "up-weight non-target corpora by this factor when drawing each epoch (0 = uniform draw). Requires"
+            " the labels table to carry a `corpus` column, as written by build_merged. Mutually exclusive "
+            "with --sample-spread: both are epoch-level draw policies and cannot both steer the same batch."
+        ),
+    )
+    target_corpus: str = ConfigLeaf.of(
+        default="canonical",
+        says=(
+            "the corpus tag that mixed-corpus sampling treats as the target domain. Default matches the "
+            "scheme name build_merged uses for the RSNA competition corpus."
+        ),
+    )
+    hard_start: float = ConfigLeaf.of(
+        default=1.0,
+        says=(
+            "strength at progress 0 of the same progress schedule over EXAMPLE HARDNESS: label trust (0 = "
+            "every weighted cell at the confidence floor, 1 = the certainty table) and the --sample-spread "
+            "tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes --certainty-ramp and "
+            "--sample-ramp, which cannot be combined with it"
+        ),
+    )
+    hard_mid: float = ConfigLeaf.of(
+        default=1.0,
+        says=(
+            "strength on the plateau of the same progress schedule over EXAMPLE HARDNESS: label trust (0 = "
+            "every weighted cell at the confidence floor, 1 = the certainty table) and the --sample-spread "
+            "tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes --certainty-ramp and "
+            "--sample-ramp, which cannot be combined with it"
+        ),
+    )
+    hard_end: float = ConfigLeaf.of(
+        default=1.0,
+        says=(
+            "strength at progress 1 of the same progress schedule over EXAMPLE HARDNESS: label trust (0 = "
+            "every weighted cell at the confidence floor, 1 = the certainty table) and the --sample-spread "
+            "tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes --certainty-ramp and "
+            "--sample-ramp, which cannot be combined with it"
+        ),
+    )
+    hard_ramp: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "share of the run climbing start -> mid of the same progress schedule over EXAMPLE HARDNESS: "
+            "label trust (0 = every weighted cell at the confidence floor, 1 = the certainty table) and the "
+            "--sample-spread tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes "
+            "--certainty-ramp and --sample-ramp, which cannot be combined with it"
+        ),
+    )
+    hard_tail: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "share of the run descending mid -> end of the same progress schedule over EXAMPLE HARDNESS: "
+            "label trust (0 = every weighted cell at the confidence floor, 1 = the certainty table) and the "
+            "--sample-spread tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes "
+            "--certainty-ramp and --sample-ramp, which cannot be combined with it"
+        ),
+    )
