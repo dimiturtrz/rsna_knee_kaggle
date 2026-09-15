@@ -4249,3 +4249,11 @@ MECHANISM. None; an instrument. `tripleseat_v2` byte-for-byte with the mounts tr
 (dinov2-small, members, raptor, kit; DINOv3/resnet50d/dinov2-base removed; kernel `kneemri-tripleseatclean`,
 38eae2f4, knee-z76qf). Pre-registered: must read 0.946. Read **0.946**: the champion is rebuildable from
 licence-clean mounts alone. Pin stays on `tripleseat_v2`.
+
+## `noraptor_v1` -- 0.945, ref 56263073, 2026-09-15 -- INSTRUMENT: the foreign seat's share, bounded not measured
+
+MECHANISM. None; an instrument. `tripleseat_v2`'s eight seats minus `raptor_v4_swa`, the one foreign member, leaving
+seven all-ours seats and the same blend (kernel `kneemri-noraptor`). Pre-registered: >=0.945 the foreign seat carries
+nothing; 0.944 directional; <=0.943 a real share. Read **0.945** against the champion's 0.946 -- one tick, which IS
+the board's resolution, so this bounds raptor's contribution below 0.001 rather than measuring it. Pin stays on
+`tripleseat_v2`. Its pair `nolabelwise_v1` asks the same question of the labelwise trio.
