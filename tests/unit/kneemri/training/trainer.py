@@ -60,6 +60,7 @@ from kneemri.training.trainer import (
     CORPUS_OVERSAMPLE,
     DROP_PATH,
     DROPPED_BLOCKS,
+    HARD_SCHEDULE,
     LAYER_DECAY,
     LOSS_QUANTILES,
     MIXUP,
@@ -519,6 +520,7 @@ def test_policies():
         DROP_PATH: NO_DROP,
         DROPPED_BLOCKS: 0,
         AUG_SCHEDULE: (1.0, 1.0, 1.0, 0.0, 0.0),
+        HARD_SCHEDULE: (1.0, 1.0, 1.0, 0.0, 0.0),
     }
 
     trainer.bfloat16()
@@ -547,6 +549,7 @@ def test_policies():
         DROP_PATH: NO_DROP,
         DROPPED_BLOCKS: 0,
         AUG_SCHEDULE: (1.0, 1.0, 1.0, 0.0, 0.0),
+        HARD_SCHEDULE: (1.0, 1.0, 1.0, 0.0, 0.0),
     }
 
 
@@ -856,6 +859,58 @@ def test_ramp_certainty():
 
     assert np.allclose(trainer._ramped_weights(weights, 4), weights, atol=1e-6), "full trust at the ramp's end"
     assert np.allclose(trainer._ramped_weights(weights, 99), weights, atol=1e-6), "and it never overshoots"
+
+
+def test_harden():
+    """Hardness is the same progress schedule as augmentation, applied to label trust and the draw's tilt.
+
+    Classes: the default schedule (the ledger's recipe, weights returned as the very same array), a
+    schedule at zero (every weighted cell at the floor, held cells still zero), a schedule mid-ramp, and
+    the legacy whole-epoch ramp expressed as a schedule (equal to float rounding at every epoch boundary).
+    """
+    trainer = _trainer()
+    weights = np.array([[1.0, 0.5, 0.25, 0.0]], dtype=np.float32)
+    assert trainer.policies()[HARD_SCHEDULE] == (1.0, 1.0, 1.0, 0.0, 0.0)
+    assert trainer._ramped_weights(weights, 0.0) is weights, "the default touches nothing"
+    assert trainer._harden(0.0) == 1.0
+
+    trainer.harden(ProgressSchedule(start=0.0, mid=1.0, end=0.5, ramp=0.5, tail=0.25), 4)
+    assert trainer.policies()[HARD_SCHEDULE] == (0.0, 1.0, 0.5, 0.5, 0.25)
+    assert trainer._harden(0.0) == 0.0
+    assert trainer._harden(1.0) == pytest.approx(0.5)
+    assert trainer._harden(2.0) == pytest.approx(1.0)
+    assert trainer._harden(4.0) == pytest.approx(0.5)
+
+    floored = trainer._ramped_weights(weights, 0.0)
+    assert floored[0, 3] == 0.0, "a held cell is not an uncertain one and must stay out of the loss"
+    assert np.allclose(floored[0, :3], floored[0, 0]), "at zero trust every weighted cell pulls equally"
+    assert floored.sum() == pytest.approx(weights.sum(), rel=1e-5)
+    assert np.allclose(trainer._ramped_weights(weights, 2.0), weights, atol=1e-6)
+
+    legacy = _trainer()
+    legacy.ramp_certainty(4)
+    scheduled = _trainer()
+    scheduled.harden(ProgressSchedule(start=0.0, mid=1.0, end=1.0, ramp=1.0, tail=0.0), 4)
+    for epoch in range(5):
+        assert np.allclose(
+            legacy._ramped_weights(weights, epoch), scheduled._ramped_weights(weights, epoch), atol=1e-6
+        ), "the schedule reproduces the superseded ramp at each epoch it was defined on"
+
+
+def test_harden_leaves_the_draw_unchanged_by_default():
+    """The default schedule draws exactly today's studies under the same seed; zero strength draws flat."""
+    spread = np.linspace(0.01, 0.30, 40)
+    positions = np.arange(40, dtype=np.int64)
+    today = Disagreed(spread, alpha=0.5).drawn(positions, np.random.default_rng(7))
+    trainer = _trainer()
+    trainer.draw_with(Disagreed(spread, alpha=0.5))
+    trainer._harden(0.0)
+    assert np.array_equal(trainer.sampling.drawn(positions, np.random.default_rng(7)), today)
+
+    trainer.harden(ProgressSchedule(start=0.0, ramp=0.5), 4)
+    trainer._harden(0.0)
+    assert trainer.sampling.alpha == 0.0
+    assert trainer.sampling.tilt() == 0.5, "the switch check still reads the configured tilt"
 
 
 def test_schedule_strength():

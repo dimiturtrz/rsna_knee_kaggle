@@ -62,6 +62,10 @@ class Sampling(ABC):
         """
         return 0
 
+    def strengthen(self, strength: float) -> None:
+        """Take this share of the configured tilt for the next draw; a policy with no tilt ignores it."""
+        return
+
     @abstractmethod
     def described(self) -> str:
         """What this policy is, for the run's own record."""
@@ -106,7 +110,13 @@ class Disagreed(Sampling):
 
     def __init__(self, spread: Float[NDArray[np.float64], " studies"], alpha: float) -> None:
         self.spread = spread
+        self.base = alpha
         self.alpha = alpha
+
+    @override
+    def strengthen(self, strength: float) -> None:
+        """The hardness schedule's share of the configured tilt; 1.0 leaves `alpha` bit-identical."""
+        self.alpha = self.base * strength
 
     @classmethod
     def loaded(cls, weights: Path, identifiers: list[str], alpha: float) -> "Disagreed":
@@ -153,8 +163,8 @@ class Disagreed(Sampling):
 
     @override
     def tilt(self) -> float:
-        """The share of the draw the disagreement weight controls."""
-        return self.alpha
+        """The share of the draw the disagreement weight controls, as configured rather than as scheduled."""
+        return self.base
 
     @override
     def described(self) -> str:

@@ -498,8 +498,9 @@ class FlagVocabulary:
             "--certainty-ramp",
             type=int,
             default=0,
-            help="epochs over which per-cell weights rise from the confidence floor to their full trust "
-            "(0 = off). Early epochs therefore treat every cell as equally uncertain, and later epochs "
+            help="SUPERSEDED by --hard-*, kept for ledger comparability. Epochs over which per-cell weights "
+            "rise from the confidence floor to their full trust (0 = off). Early epochs therefore treat "
+            "every cell as equally uncertain, and later epochs "
             "recover the full certainty-weighted table. The total weight mass is held constant so the "
             "loss scale matches the un-ramped control.",
         )
@@ -563,7 +564,8 @@ class FlagVocabulary:
             "--sample-ramp",
             type=int,
             default=0,
-            help="reach --sample-alpha over this many epochs instead of at the first step, which turns "
+            help="SUPERSEDED by --hard-*, kept for ledger comparability. Reach --sample-alpha over this "
+            "many epochs instead of at the first step, which turns "
             "the tilt into a curriculum: the epoch starts near-uniform and spends its later passes on "
             "the studies the reference pool could not resolve. 0 is the immediate tilt every sampled arm "
             "so far ran. The static tilt COSTS on this corpus (disagreed_full 0.8471 against its own "
@@ -629,6 +631,16 @@ class FlagVocabulary:
                 default=default,
                 help=f"{role} of the ONE progress schedule scaling every regulariser at once (geometric and "
                 "intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); defaults are the ledger",
+            )
+        for knob, default, role in AUG_KNOBS:
+            parser.add_argument(
+                f"--hard-{knob}",
+                type=float,
+                default=default,
+                help=f"{role} of the same progress schedule over EXAMPLE HARDNESS: label trust (0 = every "
+                "weighted cell at the confidence floor, 1 = the certainty table) and the --sample-spread tilt "
+                "(0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes --certainty-ramp and "
+                "--sample-ramp, which cannot be combined with it",
             )
         parser.add_argument(
             "--sharpness",

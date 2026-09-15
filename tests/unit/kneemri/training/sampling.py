@@ -75,6 +75,30 @@ def test_disagreed_loaded_unnamed_study_draws_at_the_mean(tmp_path: Path) -> Non
     assert policy.spread[2] == pytest.approx(0.15)
 
 
+def test_disagreed_strengthen() -> None:
+    """Full strength is today's draw bit for bit; zero is the flat bootstrap."""
+    positions = _positions()
+    today = _rising().drawn(positions, np.random.default_rng(3))
+    policy = _rising()
+    policy.strengthen(1.0)
+    assert policy.alpha == 0.5
+    assert np.array_equal(policy.drawn(positions, np.random.default_rng(3)), today)
+
+    policy.strengthen(0.0)
+    assert np.allclose(policy.weights(positions), 1.0 / STUDIES)
+    assert policy.tilt() == 0.5, "the record keeps the configured tilt"
+    policy.strengthen(0.5)
+    assert policy.alpha == pytest.approx(0.25)
+
+
+def test_sampling_strengthen() -> None:
+    """A policy with no tilt ignores the schedule and keeps its once-per-epoch draw."""
+    positions = _positions()
+    uniform = Uniform()
+    uniform.strengthen(0.0)
+    assert np.array_equal(uniform.drawn(positions, np.random.default_rng(0)), positions)
+
+
 def _ramped(epochs: int = 4) -> Ramped:
     """The same rising disagreement, but reached over `epochs` epochs rather than at the first step."""
     return Ramped(np.linspace(0.01, 0.30, STUDIES), alpha=0.5, epochs=epochs)

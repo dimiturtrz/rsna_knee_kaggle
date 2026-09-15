@@ -133,6 +133,13 @@ NOT_IN_CONFIG = {
     "aug_end": "the closing strength of that same fitting-time schedule, same write-off as `aug_start`",
     "aug_ramp": "where that same fitting-time schedule's plateau begins, same write-off as `aug_start`",
     "aug_tail": "where that same fitting-time schedule's plateau ends, same write-off as `aug_start`",
+    "hard_start": "a progress schedule over EXAMPLE HARDNESS — label trust and the draw's tilt, both of which "
+    "live in the training table and the sampler rather than in the member, the same write-off as "
+    "`certainty_ramp`; the run's recipe block carries the five knobs",
+    "hard_mid": "the plateau of that same hardness schedule, same write-off as `hard_start`",
+    "hard_end": "the closing hardness of that same schedule, same write-off as `hard_start`",
+    "hard_ramp": "where that same hardness schedule's plateau begins, same write-off as `hard_start`",
+    "hard_tail": "where that same hardness schedule's plateau ends, same write-off as `hard_start`",
     "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
     "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
     "is byte-identical for the same reason `intensity_aug` is",

@@ -182,6 +182,17 @@ class TrainingOptions:
     aug_tail: float = 0.0
     """Share of the run spent descending from `aug_mid` to `aug_end`."""
 
+    hard_start: float = 1.0
+    """Example-hardness multiplier at progress 0 — label trust and the disagreement tilt; 1.0 is the ledger."""
+    hard_mid: float = 1.0
+    """Hardness on the plateau."""
+    hard_end: float = 1.0
+    """Hardness at progress 1."""
+    hard_ramp: float = 0.0
+    """Share of the run spent climbing from `hard_start` to `hard_mid`."""
+    hard_tail: float = 0.0
+    """Share of the run spent descending from `hard_mid` to `hard_end`."""
+
     certainty_ramp: int = 0
     """How many epochs it takes for per-cell weights to rise from the confidence floor to their
     full trust. 0 disables the ramp and keeps the table every existing arm trained on."""

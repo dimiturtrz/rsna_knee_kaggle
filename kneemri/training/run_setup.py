@@ -61,6 +61,11 @@ Under LoRA `unfreeze_last` describes BASE weights, which are frozen, while the a
 about sit in every block and retain their activations. So the honest trainable count is the whole trunk,
 and this is how the clamp says that without naming a depth that would go stale."""
 
+HARD_AND_RAMP = (
+    "--hard-* and --certainty-ramp/--sample-ramp both schedule example hardness; the integer ramps are "
+    "kept only to reproduce recorded arms, so pick one"
+)
+
 LONE_BATCH = 1
 """The micro-batch at which every comparison term in `objective.py` is STRUCTURALLY zero.
 
@@ -197,6 +202,11 @@ class RunSetup:
             aug_end=options.aug_end,
             aug_ramp=options.aug_ramp,
             aug_tail=options.aug_tail,
+            hard_start=options.hard_start,
+            hard_mid=options.hard_mid,
+            hard_end=options.hard_end,
+            hard_ramp=options.hard_ramp,
+            hard_tail=options.hard_tail,
             corpus_oversample=options.corpus_oversample,
             target_corpus=options.target_corpus,
             slot_dropout=options.slot_dropout,
@@ -204,6 +214,19 @@ class RunSetup:
             scale_jitter=options.scale_jitter,
             padding_mode=options.padding_mode,
         )
+
+    def hardness(self) -> ProgressSchedule:
+        """The example-hardness schedule these flags ask for, refusing one beside a legacy integer ramp.
+
+        Two schedules over the same weights would multiply, and the recorded ramps would stop reproducing.
+        """
+        options = self.options
+        schedule = ProgressSchedule(
+            options.hard_start, options.hard_mid, options.hard_end, options.hard_ramp, options.hard_tail
+        )
+        if schedule != ProgressSchedule() and (options.certainty_ramp or options.sample_ramp):
+            raise ValueError(HARD_AND_RAMP)
+        return schedule
 
     def drawing(self, identifiers: list[str], corpus: NDArray[np.str_] | None = None) -> Sampling:
         """The draw policy these flags ask for, off the command line and without a card.
@@ -692,6 +715,7 @@ class RunSetup:
         # reads again and the run would anneal on 0.15 while its config recorded the value asked for.
         trainer.warm_up(options.warmup)
         trainer.ramp_certainty(options.certainty_ramp)
+        trainer.harden(self.hardness(), options.epochs)
         if options.one_cycle:
             # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
             # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR

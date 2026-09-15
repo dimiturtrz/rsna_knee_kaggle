@@ -77,6 +77,7 @@ from kneemri.training.trainer import (
     CLIPPING,
     CORPUS_OVERSAMPLE,
     DROP_PATH,
+    HARD_SCHEDULE,
     LAYER_DECAY,
     MIXUP,
     OPTIMISER_DECAY,
@@ -307,6 +308,11 @@ class Request:
     aug_end: float = 1.0
     aug_ramp: float = 0.0
     aug_tail: float = 0.0
+    hard_start: float = 1.0
+    hard_mid: float = 1.0
+    hard_end: float = 1.0
+    hard_ramp: float = 0.0
+    hard_tail: float = 0.0
     corpus_oversample: float = 0.0
     target_corpus: str = ""
     slot_dropout: float = 0.0
@@ -394,6 +400,7 @@ class Request:
             TARGET_CORPUS: self.target_corpus if self.corpus_oversample > 0.0 else "",
             CERTAINTY_RAMP: self.certainty_ramp,
             AUG_SCHEDULE: (self.aug_start, self.aug_mid, self.aug_end, self.aug_ramp, self.aug_tail),
+            HARD_SCHEDULE: (self.hard_start, self.hard_mid, self.hard_end, self.hard_ramp, self.hard_tail),
             OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
             # WHERE the window sits, which the count above cannot see: an offset that reached
             # nothing opens the same NUMBER of blocks in the wrong place and reads as a null on

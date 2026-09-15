@@ -38457,6 +38457,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.report_supervision.ReportSupervision",
       "weight": 1
     },
@@ -38566,6 +38572,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.drawing",
       "target": "kneemri.training.sampling.Uniform",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.hardness",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule",
       "weight": 1
     },
     {
@@ -38775,6 +38787,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.run_setup.RunSetup.hardness",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.run_setup.RunSetup.objective",
       "weight": 1
     },
@@ -38842,6 +38860,12 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.exponential_average",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.harden",
       "weight": 1
     },
     {
@@ -39392,7 +39416,31 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer._harden",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule.value",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer._harden",
+      "target": "kneemri.training.sampling.Sampling.strengthen",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer._ramped_weights",
+      "target": "kneemri.training.trainer.Trainer._trust",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.training.trainer.Trainer._strengthen",
+      "target": "kneemri.training.progress_schedule.ProgressSchedule.value",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer._trust",
       "target": "kneemri.training.progress_schedule.ProgressSchedule.value",
       "weight": 1
     },
@@ -39538,6 +39586,12 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.teacher_targets.TeacherTargets.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.trainer.Trainer._harden",
       "weight": 1
     },
     {
@@ -73226,6 +73280,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup.hardness",
+      "label": "hardness",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup.model",
       "label": "model",
       "level": "method",
@@ -73308,6 +73370,14 @@
       "descendants": 0,
       "id": "kneemri.training.sampling.Disagreed.loaded",
       "label": "loaded",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Disagreed",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Disagreed.strengthen",
+      "label": "strengthen",
       "level": "method",
       "parent": "kneemri.training.sampling.Disagreed",
       "role": null
@@ -73428,6 +73498,14 @@
       "descendants": 0,
       "id": "kneemri.training.sampling.Sampling.ramp",
       "label": "ramp",
+      "level": "method",
+      "parent": "kneemri.training.sampling.Sampling",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.sampling.Sampling.strengthen",
+      "label": "strengthen",
       "level": "method",
       "parent": "kneemri.training.sampling.Sampling",
       "role": null
@@ -73674,6 +73752,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer._harden",
+      "label": "_harden",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer._quantiles_of",
       "label": "_quantiles_of",
       "level": "method",
@@ -73692,6 +73778,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer._strengthen",
       "label": "_strengthen",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer._trust",
+      "label": "_trust",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
@@ -73780,6 +73874,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.fit_epoch",
       "label": "fit_epoch",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.harden",
+      "label": "harden",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

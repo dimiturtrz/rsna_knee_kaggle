@@ -22,6 +22,7 @@ from kneemri.training.objective import (
     RankedObjective,
 )
 from kneemri.training.options import TrainingOptions
+from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_margin import RememberedMargin
 from kneemri.training.remembered_ranking import RememberedRanking
@@ -408,7 +409,7 @@ def test_requested():
         field.name for field in dataclasses.fields(TrainingOptions)
     }
 
-    assert len(shared) == 56, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 61, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):
@@ -485,6 +486,18 @@ def test_drawing(tmp_path: Path):
     assert isinstance(ramped, Ramped)
     assert ramped.epochs == 6
     assert ramped.tilt() == pytest.approx(0.5), "the destination is what the switch check reads"
+
+
+def test_hardness() -> None:
+    """The five flags become one schedule; the default is the constant one; mixing with a legacy ramp refuses."""
+    assert _setup().hardness() == ProgressSchedule()
+    schedule = _setup(hard_start=0.0, hard_end=0.5, hard_ramp=0.3, hard_tail=0.15).hardness()
+    assert schedule == ProgressSchedule(start=0.0, mid=1.0, end=0.5, ramp=0.3, tail=0.15)
+    assert _setup(certainty_ramp=6).hardness() == ProgressSchedule(), "a legacy ramp alone is still allowed"
+    with pytest.raises(ValueError, match="hard"):
+        _setup(hard_start=0.0, certainty_ramp=6).hardness()
+    with pytest.raises(ValueError, match="hard"):
+        _setup(hard_start=0.0, sample_ramp=6).hardness()
 
 
 def test_drawing_mixed_corpus() -> None:

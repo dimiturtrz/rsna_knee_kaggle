@@ -51,7 +51,7 @@ from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
 from kneemri.training.mixup import Blend, Mixup
 from kneemri.training.objective import Objective
-from kneemri.training.progress_schedule import ProgressSchedule
+from kneemri.training.progress_schedule import FULL, ProgressSchedule
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.training.sampling import Sampling, Uniform
 from kneemri.training.sharpness import Sharpness
@@ -93,6 +93,7 @@ SAMPLING = "sampling_tilt"
 SAMPLING_RAMP = "sampling_ramp"
 CERTAINTY_RAMP = "certainty_ramp"
 AUG_SCHEDULE = "aug_schedule"
+HARD_SCHEDULE = "hard_schedule"
 CORPUS_OVERSAMPLE = "corpus_oversample"
 TARGET_CORPUS = "target_corpus"
 """The keys `Trainer.policies` reports under — named here because the trainer is what they describe."""
@@ -171,6 +172,8 @@ class Trainer:
         # ONE multiplier over run progress for every regulariser, read through `strengthen` alone. The
         # default is the constant 1.0, at which each consumer returns its configured value exactly.
         self.progress = ProgressSchedule()
+        # The same schedule over example hardness (label trust, draw tilt); constant 1.0 is the ledger's recipe.
+        self.hardness = ProgressSchedule()
         self.planned_epochs = 1
         # Attached and null by default for the same reason, and here the default matters more than
         # anywhere else on this list: `Uniform` returns the positions untouched WITHOUT drawing from the
@@ -257,6 +260,7 @@ class Trainer:
             SAMPLING_RAMP: self.sampling.ramp(),
             CERTAINTY_RAMP: self.certainty_ramp,
             AUG_SCHEDULE: self.progress.recorded(),
+            HARD_SCHEDULE: self.hardness.recorded(),
             CORPUS_OVERSAMPLE: getattr(self.sampling, "factor", 0.0),
             TARGET_CORPUS: (
                 getattr(self.sampling, "target", "") if getattr(self.sampling, "factor", 0.0) > 0.0 else ""
@@ -382,6 +386,16 @@ class Trainer:
             consumer.strengthen(strength)
         return strength
 
+    def harden(self, schedule: ProgressSchedule, epochs: int) -> None:
+        """Drive example hardness — label trust and the draw's tilt — by this schedule over `epochs` epochs."""
+        self.hardness = schedule
+        self.planned_epochs = max(epochs, 1)
+
+    def _harden(self, progress: float) -> float:
+        strength = self.hardness.value(progress / self.planned_epochs)
+        self.sampling.strengthen(strength)
+        return strength
+
     def draw_with(self, sampling: Sampling) -> None:
         """Attach the policy that decides which studies each epoch descends on."""
         self.sampling = sampling
@@ -396,7 +410,7 @@ class Trainer:
         self.warmup = fraction
 
     def ramp_certainty(self, epochs: int) -> None:
-        """Spend this many epochs raising every cell's weight from the floor to its full trust."""
+        """SUPERSEDED by `harden` (its float translation is not bit-equal): whole epochs from floor to full trust."""
         self.certainty_ramp = epochs
 
     @staticmethod
@@ -415,19 +429,24 @@ class Trainer:
         levels = (0.25, 0.50, 0.75, 0.90, 0.95)
         return {name: float(level) for name, level in zip(LOSS_QUANTILES, np.quantile(values, levels), strict=True)}
 
-    def _ramped_weights(self, weights: NDArray[np.float32], epoch: int) -> NDArray[np.float32]:
-        """Blend cell weights from the confidence floor toward their full values.
+    def _trust(self, progress: float) -> float:
+        if self.certainty_ramp > 0:
+            return min(int(progress), self.certainty_ramp) / self.certainty_ramp
+        return self.hardness.value(progress / self.planned_epochs)
 
-        At epoch 0 every cell pulls with the floor; by epoch `certainty_ramp` the table is unchanged.
-        The total mass is re-normalised to the full table's sum so the loss scale matches the un-ramped
-        control — the objective's own divide-by-sum then sees the same denominator it would have seen.
+    def _ramped_weights(self, weights: NDArray[np.float32], progress: float) -> NDArray[np.float32]:
+        """Blend cell weights from the confidence floor toward their full values by this point's trust.
+
+        Trust is `certainty_ramp`'s ramp when set, else the hardness schedule; at 1.0 the table is untouched. A
+        ZERO cell stays zero — a held annotation is not an uncertain one, and flooring it trained on the gold
+        studies. The mass is re-normalised to the full table's sum so the loss scale matches the control.
         """
-        if self.certainty_ramp <= 0:
+        trust = self._trust(progress)
+        if trust == FULL:
             return weights
-        alpha = min(epoch, self.certainty_ramp) / self.certainty_ramp
         full = weights.astype(np.float64)
-        ramped = CONFIDENCE_FLOOR + (full - CONFIDENCE_FLOOR) * alpha
-        # A batch can be all-floor at epoch 0, so the sum is never zero; clamp defensively.
+        ramped = np.where(full > 0.0, CONFIDENCE_FLOOR + (full - CONFIDENCE_FLOOR) * trust, 0.0)
+        # A batch can be all-floor, or all-held, so the sum can be tiny; clamp defensively.
         ramped = ramped * (full.sum() / max(ramped.sum(), 1e-12))
         return ramped.astype(np.float32)
 
@@ -528,6 +547,7 @@ class Trainer:
         # THE DRAW COMES BEFORE THE SHUFFLE, and the two are different jobs: `sampling` decides WHICH
         # positions this epoch descends on, `batches` decides in what order. Under the default policy the
         # first is the identity and this line is the one every arm in the ledger ran.
+        logger.info("aug %.3f hard %.3f", self._strengthen(self._epochs_fitted), self._harden(self._epochs_fitted))
         drawn = self.sampling.drawn(positions, generator)
         plan = self.plan(corpus, self.batches(drawn, size, generator, shuffle=True), generator)
         # TRUNCATED TO COMPLETE GROUPS before the reader is started, so the prefetch never reads a
@@ -535,7 +555,6 @@ class Trainer:
         # identity and the loop is the one every arm in the ledger ran.
         plan = plan[: self.accumulation.whole(len(plan))]
         planned = len(plan)
-        logger.info("aug strength %.3f", self._strengthen(self._epochs_fitted))
         # The gradient is zeroed ONCE per GROUP rather than per micro-batch, and that placement IS the
         # feature: gradients accumulate in the leaves between steps, so zeroing here and again after
         # each optimiser step is what makes a group sum instead of overwrite.
@@ -546,7 +565,7 @@ class Trainer:
             pixels = self.augment_bag(pixels)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
-            weight = self._ramped_weights(weight, self._epochs_fitted)
+            weight = self._ramped_weights(weight, self._epochs_fitted + steps / max(planned, 1))
             # AFTER the augmenter and over all four tensors at once. Blending the raw read instead would
             # hand two studies the same warp and the same gain, which is a cheaper draw than it looks:
             # the pair would differ only in anatomy, not in appearance. Under the null policy every one
