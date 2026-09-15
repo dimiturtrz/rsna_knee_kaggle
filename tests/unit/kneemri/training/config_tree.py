@@ -14,6 +14,7 @@ from core.data.corpus.slots import Routing
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.training.augmentation import RegularisationConfig
 from kneemri.training.config_tree import NOT_STATED, TrainConfig
+from kneemri.training.recipe_layers import RecipeLayers
 
 ARM_RECIPES = Path(__file__).parent / "fixtures" / "arm_recipes.json"
 REPO = Path(__file__).parents[4]
@@ -122,15 +123,22 @@ def test_parse_compiles_the_encoder_unless_the_run_asks_for_eager(monkeypatch: p
 
 
 def test_of(tmp_path: Path):
-    """Flags come from a LIST and land in their node, and a flag on the line beats the recipe file."""
+    """Flags come from a LIST and land in their node; a later file beats an earlier, `--set` both, a flag all."""
+    base = tmp_path / "base.toml"
+    base.write_text("[optim]\nepochs = 36\nema = true\n[regularisation]\nmixup = 0.1\n", encoding="utf-8")
     recipe = tmp_path / "r.toml"
-    recipe.write_text("epochs = 36\nema = true\nmixup = 0.2\n", encoding="utf-8")
+    recipe.write_text("[regularisation]\nmixup = 0.2\nghosting = 0.04\n", encoding="utf-8")
+    layers = ["--config", str(base), "--config", str(recipe), "--set", "regularisation.ghosting=0.08"]
 
-    tree = TrainConfig.of(["--labels", "l.csv", "--config", str(recipe), "--epochs", "4", "--eager-encoder"])
+    tree = TrainConfig.of(
+        ["--labels", "l.csv", *layers, "--set", "optim.warmup=0.3", "--epochs", "4", "--eager-encoder"]
+    )
 
-    assert tree.optim.epochs == 4, "an explicit flag overrides the recipe file"
-    assert tree.optim.ema is True
-    assert tree.regularisation.mixup == pytest.approx(0.2)
+    assert tree.optim.epochs == 4, "an explicit flag overrides every recipe layer"
+    assert tree.optim.ema is True, "a key only the first file sets survives the second"
+    assert tree.regularisation.mixup == pytest.approx(0.2), "the later file wins"
+    assert tree.regularisation.ghosting == pytest.approx(0.08), "--set wins over every file"
+    assert tree.optim.warmup == pytest.approx(0.3)
     assert tree.run.compile_encoder is False, "a renamed flag still lands on its field"
     assert tree.run.config == recipe, "the file travels to the stamp beside the values it set"
     assert str(tree.run.labels) == "l.csv", "the list is read, not the process's own argv"
@@ -220,33 +228,46 @@ def test_of_recipe():
 def test_spelled(tmp_path: Path):
     """A recipe file's keys read as stated flags ahead of the line; a line with no file is unchanged."""
     recipe = tmp_path / "r.toml"
-    recipe.write_text("band_low = 0.1\nslices = 20\n", encoding="utf-8")
+    recipe.write_text("[data]\nband_low = 0.1\nslices = 20\n", encoding="utf-8")
 
-    assert TrainConfig.spelled(["--config", str(recipe), "--ema"]) == [
+    assert TrainConfig.spelled(["--config", str(recipe), "--set", "optim.ema=true"]) == [
         "--band-low",
         "--slices",
+        "--ema",
         "--config",
         str(recipe),
-        "--ema",
+        "--set",
+        "optim.ema=true",
     ]
     assert TrainConfig.spelled(["--ema"]) == ["--ema"]
 
 
-def test_of_file(tmp_path: Path):
-    """Values arrive typed as their fields; no file is no values; a misspelt key refuses."""
+def test_of_layers(tmp_path: Path):
+    """Values arrive typed as their leaves, from a file and `--set` alike; no layer is no values."""
     recipe = tmp_path / "r.toml"
-    recipe.write_text('warmup = 0.25\nslices = 20\npadding_mode = "reflection"\nunread_targets = "u.npz"\n', "utf-8")
+    recipe.write_text('[optim]\nwarmup = 0.25\n[regularisation]\npadding_mode = "reflection"\n', "utf-8")
+    assignments = ("data.slices=20", "targets.unread_targets=u.npz", "optim.ema=true")
 
-    assert TrainConfig.of_file(recipe) == {
+    assert TrainConfig.of_layers(RecipeLayers((recipe,), assignments)) == {
         "warmup": 0.25,
-        "slices": 20,
         "padding_mode": "reflection",
+        "slices": 20,
         "unread_targets": Path("u.npz"),
+        "ema": True,
     }
-    assert TrainConfig.of_file(None) == {}
-    recipe.write_text("stochastic_dept = 0.05\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="stochastic_dept"):
-        TrainConfig.of_file(recipe)
+    assert TrainConfig.of_layers(RecipeLayers()) == {}
+    with pytest.raises(ValueError, match=r"optim\.slices"):
+        TrainConfig.of_layers(RecipeLayers(assignments=("optim.slices=20",)))
+
+
+def test_addresses():
+    """Every leaf has one dotted path through the node that holds it, and a flat name is no address."""
+    addresses = TrainConfig.addresses()
+
+    assert addresses["optim.epochs"] == "epochs"
+    assert addresses["regularisation.mixup"] == "mixup"
+    assert "epochs" not in addresses
+    assert sorted(addresses.values()) == sorted(leaf.name for leaf, _ in TrainConfig.leaves())
 
 
 def test_typed():

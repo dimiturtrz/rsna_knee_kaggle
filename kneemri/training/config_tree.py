@@ -10,7 +10,6 @@ exception to generation: `CacheFlags` already serves `build_cache` and seven oth
 
 import argparse
 import sys
-import tomllib
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import Field, dataclass, field, fields, is_dataclass
 from pathlib import Path
@@ -32,6 +31,7 @@ from kneemri.training.adaptation import EncoderConfig
 from kneemri.training.augmentation import RegularisationConfig
 from kneemri.training.config_leaf import FLAG, ConfigLeaf, Spelling
 from kneemri.training.gradient_clip import UNCLIPPED
+from kneemri.training.recipe_layers import SET, RecipeLayers
 from kneemri.training.sampling import SamplingConfig
 from kneemri.training.sharpness import FLAT
 from kneemri.training.teacher_targets import TeacherConfig
@@ -551,23 +551,35 @@ class TrainConfig:
     @classmethod
     def leaves(cls) -> Iterator[tuple[Field[object], object]]:
         """Every knob under the root with its declared type, depth-first — the walk every reader shares."""
-        return TrainConfig._under(cls)
+        return ((leaf, hint) for _, leaf, hint in TrainConfig._under(cls, ""))
+
+    @classmethod
+    def addresses(cls) -> dict[str, str]:
+        """Every leaf's dotted path to its name (`optim.epochs` to `epochs`) — how a recipe layer names it."""
+        return {path: leaf.name for path, leaf, _ in TrainConfig._under(cls, "")}
 
     @staticmethod
-    def _under(kind: type) -> Iterator[tuple[Field[object], object]]:
+    def _under(kind: type, prefix: str) -> Iterator[tuple[str, Field[object], object]]:
         hints = get_type_hints(kind)
         for leaf in fields(kind):
             hint = hints[leaf.name]
             if is_dataclass(hint):
-                yield from TrainConfig._under(cast("type", hint))
+                yield from TrainConfig._under(cast("type", hint), f"{prefix}{leaf.name}.")
             else:
-                yield leaf, hint
+                yield f"{prefix}{leaf.name}", leaf, hint
 
     @classmethod
     def parser(cls) -> argparse.ArgumentParser:
         """The training command line, generated: one flag per leaf that declares a `Spelling`."""
         parser = argparse.ArgumentParser()
         CacheFlags.add_to(parser)
+        parser.add_argument(
+            SET,
+            action="append",
+            default=argparse.SUPPRESS,
+            metavar="PATH=VALUE",
+            help="one leaf by dotted path, over every --config",
+        )
         for leaf, hint in cls.leaves():
             if FLAG in leaf.metadata:
                 TrainConfig._declare(parser, leaf, hint)
@@ -590,14 +602,14 @@ class TrainConfig:
 
     @classmethod
     def of(cls, argv: list[str]) -> "TrainConfig":
-        """The tree an arm's flags describe, its `--config` file read first so every flag on the line wins.
+        """The tree an arm's flags describe: defaults, then each `--config`, then `--set`, then the flags.
 
         From a LIST, so a caller can price a recipe it is not itself running: `arm_smoke` holds thirty-four
         arms' lines in one process, and a 28.26 GB smoke once went onto a card holding a live run because
         nothing could ask what an arm that was not the process would reserve.
         """
         parser = cls.parser()
-        parser.set_defaults(**cls.of_file(parser.parse_known_args(argv)[0].config))
+        parser.set_defaults(**cls.of_layers(RecipeLayers.of(argv)))
         return cls.of_flat(vars(parser.parse_args(argv)))
 
     @classmethod
@@ -679,13 +691,12 @@ class TrainConfig:
 
     @classmethod
     def spelled(cls, argv: list[str]) -> list[str]:
-        """The line with its `--config` file's keys spelled as the flags they stand for, ahead of it.
+        """The line with every leaf its recipe layers set spelled as the flag it stands for, ahead of it.
 
-        For checks that read what an arm STATED rather than what it parsed to: a key in the recipe file
+        For checks that read what an arm STATED rather than what it parsed to: a key in a recipe file
         is written down exactly as a flag on the line is, and must not read as silence.
         """
-        config = Path(argv[argv.index("--config") + 1]) if "--config" in argv else None
-        return [f"--{name.replace('_', '-')}" for name in cls.of_file(config)] + argv
+        return [f"--{name.replace('_', '-')}" for name in cls.of_layers(RecipeLayers.of(argv))] + argv
 
     @staticmethod
     def _values(node: object) -> Iterator[tuple[str, object]]:
@@ -697,24 +708,15 @@ class TrainConfig:
                 yield leaf.name, value
 
     @classmethod
-    def of_file(cls, config: Path | None) -> dict[str, object]:
-        """A recipe file's values, typed as the leaves they name — the layer an explicit flag overrides.
+    def of_layers(cls, layers: RecipeLayers) -> dict[str, object]:
+        """The values a line's recipe layers state, typed as the leaves they name — what its flags override.
 
-        Flat TOML keyed by leaf name (`epochs = 36`), so a recipe is written once and an arm names it
-        with `--config` instead of re-typing thirty flags. They land as PARSER DEFAULTS, which is what
-        makes every flag on the same line win over the file. An unknown key REFUSES rather than drops:
-        a misspelt `stochastic_dept = 0.05` read as nothing is a run under a recipe nobody wrote.
+        NESTED TOML keyed by node (`[optim]` then `epochs = 36`), so a recipe is written once and an arm
+        names it with `--config` instead of re-typing thirty flags; `--set optim.epochs=4` is the same
+        address on the line.
         """
-        if config is None:
-            return {}
-        with config.open("rb") as handle:
-            table = tomllib.load(handle)
         hints = {leaf.name: hint for leaf, hint in cls.leaves()}
-        unknown = sorted(set(table) - set(hints))
-        if unknown:
-            message = f"{config} names no training option: {', '.join(unknown)}"
-            raise ValueError(message)
-        return {name: cls.typed(hints[name], str(value)) for name, value in table.items()}
+        return {name: cls.typed(hints[name], str(value)) for name, value in layers.values(cls.addresses()).items()}
 
     @staticmethod
     def typed(hint: object, text: str) -> object:

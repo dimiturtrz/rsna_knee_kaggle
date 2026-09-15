@@ -1,0 +1,18 @@
+# The fitting recipe every arm shares, as a recipe layer: RECIPE and THROUGHPUT from experiments/recipe.sh,
+# whose comments carry the measurement behind each value. An arm stacks it first and its own file after:
+#   --config experiments/recipes/base.toml --config experiments/recipes/<arm>.toml
+# PATIENCE is not here, for the reason recipe.sh gives: an arm whose question is the schedule must not stop.
+# tests/integration/recipe_to_config.py holds this file equal to the shell variables.
+
+[run]
+fold = 0
+
+[optim]
+one_cycle = true
+
+[targets]
+weight_floor = true
+rank_weight = 1.0
+
+[encoder]
+recompute_activations = true

@@ -86,7 +86,7 @@ def test_overstated():
 def test_unstated_reads_a_recipe_file_as_stated(tmp_path: Path):
     """A `--config` file naming the operating point is a statement, not silence."""
     recipe = tmp_path / "r.toml"
-    recipe.write_text("slices = 20\nband_low = 0.1\n", encoding="utf-8")
+    recipe.write_text("[data]\nslices = 20\nband_low = 0.1\n", encoding="utf-8")
 
     unstated = ArmCheck().unstated({"recipe": f"{GOOD} --config {recipe.as_posix()}"})
 
