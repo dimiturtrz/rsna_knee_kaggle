@@ -290,6 +290,15 @@ def test_warm_up():
     ), "a longer warmup must still be climbing where a brief one has already turned down"
 
 
+def test_shortest_cycle():
+    """A one-epoch smoke under a quarter warmup is four steps, and OneCycleLR divided by zero on it."""
+    trainer = _trainer()
+    trainer.warm_up(0.25)
+    assert trainer.shortest_cycle() == 5
+    rates = _rate_after(trainer, warmup_steps=4, total_steps=4)
+    assert all(rate > 0 for rate in rates)
+
+
 def _rate_after(trainer: Trainer, warmup_steps: int, total_steps: int) -> list[float]:
     """The group rates a few steps into a freshly attached cycle."""
     trainer.one_cycle(total_steps=total_steps)

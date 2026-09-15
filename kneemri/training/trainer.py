@@ -16,6 +16,7 @@ lateral one and teaching the model that the distinction is noise.
 """
 
 import logging
+import math
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -468,9 +469,13 @@ class Trainer:
         self.schedule = torch.optim.lr_scheduler.OneCycleLR(
             self.optimiser,
             max_lr=[group["lr"] for group in self.optimiser.param_groups],
-            total_steps=max(total_steps, 1),
+            total_steps=max(total_steps, self.shortest_cycle()),
             pct_start=self.warmup,
         )
+
+    def shortest_cycle(self) -> int:
+        """Fewest steps whose warm phase, `warmup * steps - 1`, OneCycleLR does not divide by zero on."""
+        return math.floor(1 / self.warmup) + 1 if self.warmup > 0 else 1
 
     def augment_bag(self, images: UInt8[Tensor, "b n g h w"]) -> UInt8[Tensor, "b n g h w"]:
         """Perturb a batch of slot bags with this run's own generator — see `Augmentation`."""
