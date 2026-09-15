@@ -2336,12 +2336,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.evaluation.foreign_gate",
-      "target": "kneemri.inference.study_reading",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.evaluation.foreign_holdout",
       "target": "core.cli",
       "weight": 1
@@ -2426,12 +2420,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.evaluation.foreign_price",
-      "target": "kneemri.teacher_file",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.evaluation.foreign_readout",
       "target": "core.cli",
       "weight": 1
@@ -2506,12 +2494,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.foreign_readout",
       "target": "kneemri.inference.members",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.foreign_readout",
-      "target": "kneemri.inference.norm_adaptation",
       "weight": 1
     },
     {
@@ -2974,12 +2956,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.member_distance",
       "target": "kneemri.evaluation.pool",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.member_distance",
-      "target": "kneemri.evaluation.scores",
       "weight": 1
     },
     {
@@ -5205,7 +5181,7 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.switch_coverage",
-      "target": "kneemri.training.options",
+      "target": "kneemri.training.config_tree",
       "weight": 1
     },
     {
@@ -5338,12 +5314,6 @@
       "kind": "import",
       "source": "kneemri.inference.foreign_holdout",
       "target": "kneemri.inference.foreign_member",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.foreign_holdout",
-      "target": "kneemri.inference.study_reading",
       "weight": 1
     },
     {
@@ -5487,12 +5457,6 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_predictions",
-      "target": "kneemri.inference.norm_adaptation",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.holdout_predictions",
       "target": "kneemri.inference.prediction_cache",
       "weight": 1
     },
@@ -5614,12 +5578,6 @@
       "kind": "import",
       "source": "kneemri.inference.pillar_member",
       "target": "core.findings",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.pillar_member",
-      "target": "kneemri.inference.atlas_import",
       "weight": 1
     },
     {
@@ -5812,12 +5770,6 @@
       "kind": "import",
       "source": "kneemri.inference.teacher_readings",
       "target": "kneemri.teacher_file",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.inference.test_time",
-      "target": "core.findings",
       "weight": 1
     },
     {
@@ -6248,6 +6200,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.kernel_script",
+      "target": "kneemri.kaggle.raptor_run",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.kit_check",
       "target": "core.cli",
       "weight": 1
@@ -6352,12 +6310,6 @@
       "kind": "import",
       "source": "kneemri.kaggle.package_members",
       "target": "kneemri.models.backbone",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.kaggle.pool_ceiling",
-      "target": "core.bootstrap",
       "weight": 1
     },
     {
@@ -6699,12 +6651,6 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.seat_value",
-      "target": "kneemri.evaluation.ledger75",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.kaggle.seat_value",
       "target": "kneemri.evaluation.member_axes",
       "weight": 1
     },
@@ -6886,7 +6832,7 @@
       "kind": "import",
       "source": "kneemri.models.backbone",
       "target": "kneemri.models.variants",
-      "weight": 32
+      "weight": 30
     },
     {
       "kind": "import",
@@ -7138,18 +7084,6 @@
       "kind": "import",
       "source": "kneemri.models.stochastic_depth",
       "target": "kneemri.models.drop_path",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.timm_trunk",
-      "target": "core.cli",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.timm_trunk",
-      "target": "core.paths",
       "weight": 1
     },
     {
@@ -8482,12 +8416,6 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.witness",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.warm_start",
-      "target": "kneemri.training.init_scope",
       "weight": 1
     },
     {
@@ -26715,7 +26643,7 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck._spawned",
-      "target": "kneemri.spawn.Spawn.ran",
+      "target": "kneemri.spawn.Spawn.bounded",
       "weight": 1
     },
     {
@@ -32816,8 +32744,32 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._filenames",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._assigned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._filenames",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._looped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._filenames",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._strings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript._strings",
       "target": "kneemri.kaggle.kernel_script.KernelScript._assigned",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript.foreign_seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._filenames",
       "weight": 1
     },
     {
@@ -35055,7 +35007,19 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.SubmitCheck.seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.foreign_seats",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.SubmitCheck.seats",
       "target": "kneemri.kaggle.kernel_script.KernelScript.member_names",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.submit_check.TriedIdea",
+      "target": "kneemri.kaggle.submit_check.TriedIdea",
       "weight": 1
     },
     {
@@ -35122,6 +35086,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
       "target": "kneemri.kaggle.submit_check.SubmitCheck.seats",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.submit_check.main",
+      "target": "kneemri.kaggle.submit_check.TriedIdea.matched",
       "weight": 1
     },
     {
@@ -36502,6 +36472,12 @@
       "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.stalls",
       "target": "kneemri.runs.run_metrics.RunMetrics.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.spawn.Spawn.bounded",
+      "target": "kneemri.spawn.Spawn.killed",
       "weight": 1
     },
     {
@@ -47725,6 +47701,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.submit_check",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.TriedIdea",
+      "label": "TriedIdea",
+      "level": "class",
+      "parent": "kneemri.kaggle.submit_check",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -67624,6 +67608,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._filenames",
+      "label": "_filenames",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._looped",
+      "label": "_looped",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_script.KernelScript._strings",
       "label": "_strings",
       "level": "method",
@@ -67634,6 +67634,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.kernel_script.KernelScript.call",
       "label": "call",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript.foreign_seats",
+      "label": "foreign_seats",
       "level": "method",
       "parent": "kneemri.kaggle.kernel_script.KernelScript",
       "role": null
@@ -69308,6 +69316,30 @@
       "label": "seats",
       "level": "method",
       "parent": "kneemri.kaggle.submit_check.SubmitCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.TriedIdea.described",
+      "label": "described",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.TriedIdea",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.TriedIdea.matched",
+      "label": "matched",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.TriedIdea",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.submit_check.TriedIdea.prose",
+      "label": "prose",
+      "level": "method",
+      "parent": "kneemri.kaggle.submit_check.TriedIdea",
       "role": null
     },
     {
@@ -71448,8 +71480,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.spawn.Spawn.bounded",
+      "label": "bounded",
+      "level": "method",
+      "parent": "kneemri.spawn.Spawn",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.spawn.Spawn.checked",
       "label": "checked",
+      "level": "method",
+      "parent": "kneemri.spawn.Spawn",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.spawn.Spawn.killed",
+      "label": "killed",
       "level": "method",
       "parent": "kneemri.spawn.Spawn",
       "role": null
