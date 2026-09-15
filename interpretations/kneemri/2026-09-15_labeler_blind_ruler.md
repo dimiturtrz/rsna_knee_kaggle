@@ -178,3 +178,20 @@ host rubric. The tear-only hybrid is now dominated: +0.030 against the whole tab
 
 Packs, verdicts, the scoring script and `scores.txt` live under `processed/rsna_knee_abnormality/audit400/`
 (`blind_effmcl40`, `blind_tear60`). The root `manifest.json` has a `followup_packs` entry.
+
+## Correction (2026-09-15 17:45Z): the "licensed" whole-table arm already ran, and read negative
+
+The scratch sweep `.agent-runtime/scratch/report_labels_v3.csv` is **cell-identical** to the installed
+`labels/report_labels_v5reader.csv`: agreement 1.0000 over 4406 studies x 12 columns (census run
+2026-09-15, `pos.log` in the session scratchpad). So the table these blind packs favour is v5reader, and
+v5reader was trained as `oof_reader_fold[0-4]_s2026` — a five-fold PAIRED gold@58 read against
+`oof_fold[0-4]_s2026` — and read rankpooled -0.0112 (sd 0.0122), macro -0.0170 (sd 0.0135)
+(`experiments/README.md:13021`). The arm is not licensed by these packs; it is already priced, null-to-negative.
+
+Why the two readings do not contradict each other: the blind packs hold 7 positives in 100 cells and so
+measure false-positive suppression only. The census shows what v5reader pays for that — per-column positive
+rate against v2: Effusion 0.605 -> 0.259, MCL 0.174 -> 0.050, Medial OA 0.367 -> 0.179, PF OA 0.452 -> 0.247,
+ACL 0.278 -> 0.173. It halves the positives. Whether the removed positives are the host rubric's negatives
+(these packs say mostly yes) or real findings the grader counts (gold@58 says the model got worse) is exactly
+the sensitivity axis these packs cannot see. What survives: the audit400 root402 Effusion/MCL losses were a
+rubric artefact. What does not: any claim that the v3/v5reader table is a better training target.
