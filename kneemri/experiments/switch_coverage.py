@@ -1,7 +1,7 @@
 """Every training switch is armed, smoke-covered, or declared not a recipe: `arm_check --switches`.
 
 `arm_check --smoke` proves that every committed recipe survives a real epoch — which is only true of
-the paths the ARMS take. Measured 2026-08-18 by diffing `TrainingOptions` against every `--flag` under
+the paths the ARMS take. Measured 2026-08-18 by diffing `TrainConfig` against every `--flag` under
 `experiments/**.sh`: five real switches were landed-checked, stamped, and never once RUN (`--pool`
 focal, `--anatomical-prior`, `--normalise-by-count`, `--tie`, `--head-lr`). A break in one of those
 surfaces at the queue, after the card is held, which is the failure the whole check family exists to

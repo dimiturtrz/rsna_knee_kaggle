@@ -13,7 +13,6 @@ commit that adds it, rather than on a 70-minute arm that reports a plausible num
 """
 
 from collections.abc import Callable, Mapping
-from dataclasses import replace
 from pathlib import Path
 from typing import cast
 
@@ -26,7 +25,7 @@ from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.models.slice_pooling import SLICE_POOLINGS
 from kneemri.models.slot_head import SLOT_POOLINGS
 from kneemri.training import run_setup as build_module
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.run_setup import RunSetup
 from kneemri.training.trainer import Trainer
 
@@ -114,9 +113,9 @@ it. If a witness ever moves back onto `Trainer`, it comes back into this set wit
 """
 
 
-def _options() -> TrainingOptions:
+def _options() -> TrainConfig:
     """A run asking for EVERY optional policy at once, which is what makes one missing wire visible."""
-    return TrainingOptions(
+    return TrainConfig().with_leaves(
         slices=SLICES,
         image_size=SIZE,
         train_size=TRAIN_SIZE,
@@ -144,10 +143,9 @@ class _FakeFeatures:
         return DIM
 
 
-def _features_arm() -> TrainingOptions:
+def _features_arm() -> TrainConfig:
     """The same run with the REPRESENTATION teacher instead of the logit one, the terms it excludes off."""
-    return replace(
-        _options(),
+    return _options().with_leaves(
         distill_weight=0.0,
         teacher_targets=None,
         feature_weight=1.0,
@@ -200,12 +198,12 @@ def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.
     assert set(policies) == called, f"{sorted(set(policies) - called)} is a policy no run can turn on"
 
 
-def _slice_arm(name: str) -> tuple[TrainingOptions, StudyDesign]:
-    return replace(_options(), slice_pooling=name), StudyDesign(slice_pooling=name)
+def _slice_arm(name: str) -> tuple[TrainConfig, StudyDesign]:
+    return _options().with_leaves(slice_pooling=name), StudyDesign(slice_pooling=name)
 
 
-def _slot_arm(name: str) -> tuple[TrainingOptions, StudyDesign]:
-    return replace(_options(), slot_pooling=name), StudyDesign(slot_pooling=name)
+def _slot_arm(name: str) -> tuple[TrainConfig, StudyDesign]:
+    return _options().with_leaves(slot_pooling=name), StudyDesign(slot_pooling=name)
 
 
 READOUT_VOCABULARIES = {"slice_pooling": (SLICE_POOLINGS, _slice_arm), "slot_pooling": (SLOT_POOLINGS, _slot_arm)}
@@ -220,7 +218,7 @@ catches; a mis-build here leaves a tensor that no optimiser moves, which nothing
 @pytest.mark.parametrize(("axis", "vocabulary_and_arm"), READOUT_VOCABULARIES.items())
 def test_every_readout_a_run_can_ask_for_reaches_the_optimiser(
     axis: str,
-    vocabulary_and_arm: tuple[Mapping[str, object], Callable[[str], tuple[TrainingOptions, StudyDesign]]],
+    vocabulary_and_arm: tuple[Mapping[str, object], Callable[[str], tuple[TrainConfig, StudyDesign]]],
     monkeypatch: pytest.MonkeyPatch,
 ):
     """A pooling a run can NAME must arrive as a module whose weights an optimiser will actually move.

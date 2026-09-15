@@ -8,7 +8,7 @@ arm invoked with no arguments iterated zero times and exited 0 with an empty log
 
 A flag typo belongs to that family: it costs a queue slot to discover, and it discovers it after the
 card has been held. So each arm is sourced against `experiments/stub_lib.sh`, whose `run_train` prints
-its arguments instead of training, and the resulting line is handed to the REAL `TrainingOptions.parse`.
+its arguments instead of training, and the resulting line is handed to the REAL `TrainConfig.parse`.
 
 Sourcing rather than parsing the file, because the shell is what runs it: an arm that dies on a quoting
 error is one this project has already lost two hours to, and only bash finds that.
@@ -41,8 +41,8 @@ from kneemri.experiments.arm_smoke import SMOKE_STUDIES, ArmSmoke
 from kneemri.experiments.arm_verdict import ArmVerdict
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.spawn import Spawn
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import GB_PER_SLICE
-from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ OPERATING_POINT_FLAGS = ("--slices", "--band-low", "--band-high")
 """The flags whose PARSER DEFAULTS are the pre-settlement operating point, so silence about them is a
 recipe rather than an omission.
 
-`TrainingOptions` defaults to 12 slices and `SLICE_BAND` 0.20-0.80. That is not a neutral starting
+`TrainConfig` defaults to 12 slices and `SLICE_BAND` 0.20-0.80. That is not a neutral starting
 point — it is the operating point every arm was read at BEFORE the span and density work settled on 20
 slices and 0.10-0.90, and knee-aixw is the bead recording that a lever's sign is a property of the
 operating point it was measured at. calib_span is the proof: `calibrated_targets` measured +0.0038 at
@@ -285,7 +285,7 @@ class ArmCheck:
             raise ValueError(message)
         return {name: flags for name, flags in invocations.items() if name in names}
 
-    def _parsed(self, flags: str) -> tuple[TrainingOptions | None, str]:
+    def _parsed(self, flags: str) -> tuple[TrainConfig | None, str]:
         """The options an arm's flags produce, or the parser's own complaint about them.
 
         One place that drives the real parser, because both halves of the check need it: whether the
@@ -298,7 +298,7 @@ class ArmCheck:
         complaint = io.StringIO()
         try:
             with contextlib.redirect_stderr(complaint):
-                return TrainingOptions.parse(), ""
+                return TrainConfig.parse(), ""
         except SystemExit as exit_code:
             if not exit_code.code:
                 return None, ""
@@ -516,10 +516,10 @@ class ArmCheck:
         readings: dict[str, ArmReading] = {}
         for name, flags in invocations.items():
             options = self._parsed(flags)[0]
-            if options is None or not options.paths.is_file():
+            if options is None or not (paths := options.run.paths).is_file():
                 continue
-            root = DataRoot.from_config(options.paths)
-            readings[name] = ArmReading(root, options.cache(root.processed()))
+            root = DataRoot.from_config(paths)
+            readings[name] = ArmReading(root, options.data.cache(root.processed()))
         return readings
 
     def uncached(self, invocations: dict[str, str]) -> dict[str, str]:
@@ -562,11 +562,11 @@ class ArmCheck:
         asked: dict[str, float] = {}
         for name, flags in invocations.items():
             options = self._parsed(flags)[0]
-            if options is None or not options.vram_gb:
+            if options is None or not options.run.vram_gb:
                 continue
             needed = RunSetup(options).budget().needed()
-            if options.vram_gb > needed + GB_PER_SLICE:
-                asked[name] = round(options.vram_gb - needed, 2)
+            if options.run.vram_gb > needed + GB_PER_SLICE:
+                asked[name] = round(options.run.vram_gb - needed, 2)
         return asked
 
     @staticmethod
@@ -584,7 +584,7 @@ class ArmCheck:
         read against anything later — see `OPERATING_POINT_FLAGS` for the case that cost a champion seat.
         """
         silent = {
-            name: [flag for flag in OPERATING_POINT_FLAGS if flag not in TrainingOptions.spelled(shlex.split(flags))]
+            name: [flag for flag in OPERATING_POINT_FLAGS if flag not in TrainConfig.spelled(shlex.split(flags))]
             for name, flags in invocations.items()
         }
         return {name: missing for name, missing in silent.items() if missing}

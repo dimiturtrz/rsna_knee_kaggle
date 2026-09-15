@@ -8,30 +8,30 @@ from core.data.corpus.slot_reader import ADJACENT
 from core.data.corpus.slots import LAST_MAXIMAL
 from kneemri.models.backbone import Encoder
 from kneemri.runs.member_record import NOT_IN_CONFIG, RECORDED_AS, MemberRecord, StampedRun
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
 from ..models.model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
 
 DIM = 8
-OPTIONS = TrainingOptions(slice_pooling="max", whole_stack=True, backbone_lr=4e-5)
+OPTIONS = TrainConfig().with_leaves(slice_pooling="max", whole_stack=True, backbone_lr=4e-5)
 """The REAL options object, because a stand-in copy of it is a copy that drifts.
 
-This was 19 hand-written fields mirroring `TrainingOptions`. A field added to the run and read by
+This was 19 hand-written fields mirroring `TrainConfig`. A field added to the run and read by
 `MemberRecord` would have been recorded by every real run and by nothing here — and what this file
 asserts is precisely that the checkpoint stamps the values the RUN used.
 """
 
 
-def _record(options: TrainingOptions = OPTIONS) -> MemberRecord:
+def _record(options: TrainConfig = OPTIONS) -> MemberRecord:
     from kneemri.models.model import StudyModel  # noqa: PLC0415 - keeps the fake backbone import local
 
     torch.manual_seed(2026)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
     encoder = Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM)
-    return MemberRecord(options, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
+    return MemberRecord(options.stamp, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
 
 
-def _config(options: TrainingOptions) -> dict[str, object]:
+def _config(options: TrainConfig) -> dict[str, object]:
     """The config block a run with these options stamps into its checkpoint."""
     config = _record(options).payload({"w": torch.zeros(1)}, holdout=0.0, epoch=0)["config"]
     assert isinstance(config, dict)
@@ -46,7 +46,7 @@ def test_recipe():
     """
     recipe = _record().recipe
 
-    assert recipe.keys() == vars(OPTIONS).keys(), "every option, not a chosen few"
+    assert recipe.keys() == OPTIONS.flat.keys(), "every option, not a chosen few"
     assert recipe["backbone_lr"] == "4e-05", "as strings, because a recipe is read and diffed, not run"
     assert recipe["whole_stack"] == "True"
 
@@ -70,8 +70,8 @@ def test_payload():
     # The objective's own fields, because a member fitted on cross-step pairs and one fitted on
     # batch-local pairs are otherwise indistinguishable on disk — and an arm that cannot prove which
     # loss produced it cannot be read against a control.
-    assert config["rank_weight"] == OPTIONS.rank_weight
-    assert config["pair_memory"] == OPTIONS.pair_memory
+    assert config["rank_weight"] == OPTIONS.targets.rank_weight
+    assert config["pair_memory"] == OPTIONS.targets.pair_memory
     assert payload["fingerprint"], "without this the member cannot be verified, so it cannot be submitted"
     assert payload["fingerprint_config"]["n_slot"] == SLOTS
 
@@ -119,14 +119,14 @@ def test_payload_takes_each_config_field_from_the_option_of_its_own_name():
     Spot-checks cannot see that. Only moving one option at a time and demanding that exactly one
     stamped field follow can.
     """
-    shared = {name for name in _config(OPTIONS) if name in vars(OPTIONS)} - DERIVED_ELSEWHERE
+    shared = {name for name in _config(OPTIONS) if name in OPTIONS.flat} - DERIVED_ELSEWHERE
 
     assert len(shared) == 26, "pinned, so a renamed option cannot drop silently out of the walk"
 
     plain = _config(OPTIONS)
     for name in sorted(shared):
-        probe = _probe(getattr(OPTIONS, name), name)
-        stamped = _config(replace(OPTIONS, **{name: probe}))
+        probe = _probe(OPTIONS.flat[name], name)
+        stamped = _config(OPTIONS.with_leaves(**{name: probe}))
 
         assert stamped[name] == probe, f"--{name} does not reach the config field of its own name"
         followed = {other for other in shared if stamped[other] != plain[other]}
@@ -143,13 +143,13 @@ def test_every_option_is_recorded_or_written_off():
     it is absent from the config, so the serve gate has nothing to hold, and the name walk above
     intersects the two sets and drops it.
 
-    Made total here: a new field on `TrainingOptions` lands in exactly one of three places — stamped
+    Made total here: a new field on `TrainConfig` lands in exactly one of three places — stamped
     under its own name, stamped under another (`RECORDED_AS`), or written off with a reason
     (`NOT_IN_CONFIG`) — or this fails. Nine defects in this project are a value recorded here and a
     consumer reading a default, and the fingerprint cannot catch that class because it is checked
     against the member's OWN reading: a member rebuilt as the wrong function verifies perfectly.
     """
-    options = set(vars(OPTIONS))
+    options = set(OPTIONS.flat)
     recorded = set(_config(OPTIONS))
     by_own_name = options & recorded
 
@@ -176,7 +176,7 @@ def test_read_size():
     assert record.read_size == 336, "train_size 0 means the model read the cache as decoded"
     assert record.payload({}, 0.8, 0)["config"]["train_size"] == 336
 
-    resampled = replace(record, options=replace(OPTIONS, train_size=392))
+    resampled = replace(record, options=OPTIONS.with_leaves(train_size=392).stamp)
     assert resampled.read_size == 392
     assert resampled.payload({}, 0.8, 0)["fingerprint_config"]["img"] == 392
 
@@ -212,7 +212,7 @@ def test_payload_records_the_runs_own_crop():
     the tissue — and the serve path reads this field, so the member would then be fed pixels it was
     never fitted on, with every fingerprint still passing against its own reading.
     """
-    record = replace(_record(), options=replace(OPTIONS, crop_mm=80.0, centre="tissue"))
+    record = replace(_record(), options=OPTIONS.with_leaves(crop_mm=80.0, centre="tissue").stamp)
 
     config = record.payload({}, holdout=0.8, epoch=1)["config"]
 
@@ -228,7 +228,7 @@ def test_payload_records_the_runs_own_router():
     series in every contested slot - fitted on one set of images and shown another, with the fingerprint
     still passing because it is checked against the member's own reading.
     """
-    record = replace(_record(), options=replace(OPTIONS, tie="last"))
+    record = replace(_record(), options=OPTIONS.with_leaves(tie="last").stamp)
 
     assert record.payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "last"
     assert _record().payload({}, holdout=0.8, epoch=1)["config"]["tie"] == "first"

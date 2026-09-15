@@ -9,6 +9,7 @@ exception to generation: `CacheFlags` already serves `build_cache` and seven oth
 """
 
 import argparse
+import sys
 import tomllib
 from collections.abc import Callable, Iterator, Mapping
 from dataclasses import Field, dataclass, field, fields, is_dataclass
@@ -16,13 +17,17 @@ from pathlib import Path
 from typing import cast, get_args, get_type_hints
 
 from core.data.corpus.cache_flags import CacheFlags
-from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE
-from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, SPREAD
-from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL
+from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
+from core.data.corpus.folds import FitPositions
+from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, SPREAD, Band, Reading
+from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
+from core.data.corpus.study_cache import StudyCache
+from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
+from kneemri.runs.member_record import RunStamp
 from kneemri.training.adaptation import EncoderConfig
 from kneemri.training.augmentation import RegularisationConfig
 from kneemri.training.config_leaf import FLAG, ConfigLeaf, Spelling
@@ -150,6 +155,15 @@ class RunConfig:
     paths: Path = ConfigLeaf.of(default=Path("paths.yaml"))
     config: Path | None = ConfigLeaf.of(default=None, says="a recipe TOML; flags on the line override it")
 
+    @property
+    def positions(self) -> FitPositions:
+        """How much of the fold's split this run fits on — the smoke cap and the scaling fraction.
+
+        The MODEL seed is not in it, as with the fold: only `split_seed` moves which studies exist. The
+        rules live beside `ReportFolds`, whose split they cut.
+        """
+        return FitPositions(studies=self.studies, train_fraction=self.train_fraction, split_seed=self.split_seed)
+
 
 @dataclass(frozen=True)
 class DataConfig:
@@ -173,6 +187,34 @@ class DataConfig:
             " build, and without changing the batch or the slice count to afford it."
         ),
     )
+
+    @property
+    def routing(self) -> Routing:
+        """How this run turns series into slots — the scheme it reads and the tie rule it reads under."""
+        return Routing(scheme=self.scheme, tie=self.tie)
+
+    @property
+    def crop(self) -> Crop:
+        """The physical crop this run reads — what `member_record` stamps rather than a module constant."""
+        return Crop(mm=self.crop_mm, centre=self.centre)
+
+    @property
+    def band(self) -> Band:
+        """The fraction of each series' depth this run's slices are drawn from, as the stamped pair."""
+        return Band(low=self.band_low, high=self.band_high)
+
+    @property
+    def reading(self) -> Reading:
+        """The geometry this run decodes under — its crop and its band, which together name its cache."""
+        return Reading(crop=self.crop, band=self.band, spacing=self.spacing)
+
+    def cache(self, directory: Path) -> StudyCache:
+        """The arrays this run reads, resolved through `StudyCache.of` — the axis list the serve side shares.
+
+        `main` and `arm_check` each spelled this constructor out once. A seventh axis forgotten in one of
+        them is not a crash: it is an arm training on pixels its recorded config does not describe.
+        """
+        return StudyCache.of(self, directory)
 
 
 @dataclass(frozen=True)
@@ -472,10 +514,29 @@ class TargetConfig:
         ),
     )
 
+    @property
+    def supervision(self) -> Supervision:
+        """What the label switches mean, as the value `Targets.pair` takes.
+
+        These change what the model is FITTED ON while every recorded config keeps agreeing with itself,
+        and they map to a data argument rather than a policy object, so `options_to_policies` cannot see
+        them — this property is where a test reaches them.
+        """
+        return Supervision(
+            floor=CONFIDENCE_FLOOR if self.weight_floor else 0.0,
+            calibrated=self.calibrated_targets,
+            finding=self.finding_calibration,
+            severity=self.severity_weight,
+            annotations=not self.hold_annotations,
+            withheld=self.hold_annotation_studies,
+            suspect=self.label_errors,
+            unread=self.unread_targets,
+        )
+
 
 @dataclass(frozen=True)
 class TrainConfig:
-    """Everything one run varies, as a tree; `TrainingOptions` is its flat reading until the consumers move."""
+    """Everything one run varies, as a tree — built from argv, a recipe file or a checkpoint's recipe."""
 
     run: RunConfig = field(default_factory=RunConfig)
     data: DataConfig = field(default_factory=DataConfig)
@@ -523,8 +584,18 @@ class TrainConfig:
         parser.add_argument(flag, dest=leaf.name, type=TrainConfig._reader(hint), default=leaf.default, **spelling)
 
     @classmethod
+    def parse(cls) -> "TrainConfig":
+        """The process's own command line as a tree."""
+        return cls.of(sys.argv[1:])
+
+    @classmethod
     def of(cls, argv: list[str]) -> "TrainConfig":
-        """The tree an arm's flags describe, its `--config` file read first so every flag on the line wins."""
+        """The tree an arm's flags describe, its `--config` file read first so every flag on the line wins.
+
+        From a LIST, so a caller can price a recipe it is not itself running: `arm_smoke` holds thirty-four
+        arms' lines in one process, and a 28.26 GB smoke once went onto a card holding a live run because
+        nothing could ask what an arm that was not the process would reserve.
+        """
         parser = cls.parser()
         parser.set_defaults(**cls.of_file(parser.parse_known_args(argv)[0].config))
         return cls.of_flat(vars(parser.parse_args(argv)))
@@ -541,15 +612,85 @@ class TrainConfig:
         stated = {name: TrainConfig._built(node, values) for name, node in nodes.items()}
         return kind(**stated, **{leaf.name: values[leaf.name] for leaf in fields(kind) if leaf.name in values})
 
+    def with_leaves(self, **values: object) -> "TrainConfig":
+        """This tree with the named leaves changed, wherever in the tree they hang."""
+        return self.of_flat({**self.flat, **values})
+
     @property
     def flat(self) -> dict[str, object]:
-        """Every leaf by name — the tree read back as the flat options `TrainingOptions` holds."""
+        """Every leaf by name — the tree read back flat, the shape recipes and checkpoints are keyed by."""
         return dict(TrainConfig._values(self))
+
+    @property
+    def recipe(self) -> dict[str, str]:
+        """Every leaf as strings — the one account of what the process parsed, logged at start and stamped.
+
+        FLAT, as it was before the tree, so every checkpoint and metrics line on disk reads the way it
+        always did. Strings because a checkpoint is loaded with `weights_only=True`, which refuses to
+        unpickle a `Path`, and because the other consumer is a JSONL line that must survive `json.dumps`.
+        """
+        return {name: str(value) for name, value in self.flat.items()}
+
+    @property
+    def stamp(self) -> RunStamp:
+        """What a checkpoint records about this run beyond its recipe — the values a rebuild must know."""
+        data, model, encoder = self.data, self.model, self.encoder
+        return RunStamp(
+            recipe=self.recipe,
+            image_size=data.image_size,
+            crop=data.crop,
+            band=data.band,
+            spacing=data.spacing,
+            routing=data.routing,
+            train_size=data.train_size,
+            cache_studies=data.cache_studies,
+            slices=data.slices,
+            pool=model.pool,
+            slice_pooling=model.slice_pooling,
+            slice_regions=model.slice_regions,
+            slot_pooling=model.slot_pooling,
+            encoder_layer=encoder.encoder_layer,
+            through_plane=encoder.through_plane,
+            anatomical_prior=encoder.anatomical_prior,
+            lora_rank=encoder.lora_rank,
+            report_weight=encoder.report_weight,
+            whole_stack=encoder.whole_stack,
+            unfreeze_last=encoder.unfreeze_last,
+            unfreeze_offset=encoder.unfreeze_offset,
+            head_lr=encoder.head_lr,
+            backbone_lr=encoder.backbone_lr,
+            layer_decay=encoder.layer_decay,
+            ema=self.optim.ema,
+            bf16=self.run.bf16,
+            rank_weight=self.targets.rank_weight,
+            pair_memory=self.targets.pair_memory,
+        )
+
+    @classmethod
+    def of_recipe(cls, recipe: Mapping[str, str]) -> "TrainConfig":
+        """The run those strings describe — the inverse of `recipe`.
+
+        A key naming no leaf is DROPPED rather than raising: the ledger spans renamed flags (`band` became
+        `band_low`/`band_high`), and a reader refusing an old recipe could price none of the runs before
+        the rename. A leaf the recipe does not mention keeps its default, which the run that wrote it got.
+        """
+        hints = {leaf.name: hint for leaf, hint in cls.leaves()}
+        return cls.of_flat({name: cls.typed(hints[name], text) for name, text in recipe.items() if name in hints})
+
+    @classmethod
+    def spelled(cls, argv: list[str]) -> list[str]:
+        """The line with its `--config` file's keys spelled as the flags they stand for, ahead of it.
+
+        For checks that read what an arm STATED rather than what it parsed to: a key in the recipe file
+        is written down exactly as a flag on the line is, and must not read as silence.
+        """
+        config = Path(argv[argv.index("--config") + 1]) if "--config" in argv else None
+        return [f"--{name.replace('_', '-')}" for name in cls.of_file(config)] + argv
 
     @staticmethod
     def _values(node: object) -> Iterator[tuple[str, object]]:
         for leaf in fields(cast("type", node)):
-            value = getattr(node, leaf.name)
+            value = vars(node)[leaf.name]
             if is_dataclass(value):
                 yield from TrainConfig._values(value)
             else:

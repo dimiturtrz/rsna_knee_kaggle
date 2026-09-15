@@ -22,7 +22,6 @@ import torch
 
 from kneemri.experiments.vram_need import MIB_PER_GB
 from kneemri.spawn import Spawn
-from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
 
 logger = logging.getLogger(__name__)
@@ -152,10 +151,10 @@ class ArmSmoke:
         the wrong place to re-raise somebody else's argument error.
         """
         try:
-            options = TrainingOptions.of(shlex.split(flags))
+            setup = RunSetup.of(shlex.split(flags))
         except SystemExit:
             return 0
-        return math.ceil(RunSetup(options).budget().needed() * MIB_PER_GB)
+        return math.ceil(setup.budget().needed() * MIB_PER_GB)
 
     @staticmethod
     def room(need: int) -> str:

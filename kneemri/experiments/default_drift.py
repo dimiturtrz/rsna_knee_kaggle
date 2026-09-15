@@ -10,7 +10,7 @@ changes is invisible in both scripts by construction: neither one mentions it, s
 scripts is silent and the arm reads as clean right up until its own recorded row is compared to its
 parent's, which happens after the card has been spent.
 
-WHAT IT COMPARES, and the reason it is the recorded row and not the other script. `TrainingOptions`
+WHAT IT COMPARES, and the reason it is the recorded row and not the other script. `TrainConfig`
 holds the defaults the trainer would apply TODAY; the parent's `metrics.jsonl` row 0 holds the values it
 actually parsed. Every key where those two disagree is a key the child will silently receive at the new
 value unless its arm passes it explicitly at the parent's. That is the pin list, and it is computable on
@@ -32,7 +32,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from core import cli
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class DefaultDrift:
     def __init__(self, recipe: Mapping[str, str], incidental: frozenset[str] = INCIDENTAL) -> None:
         self.recipe = recipe
         self.incidental = incidental
-        self.current = TrainingOptions().recipe
+        self.current = TrainConfig().recipe
 
     @classmethod
     def of_metrics(cls, metrics: Path) -> "DefaultDrift":

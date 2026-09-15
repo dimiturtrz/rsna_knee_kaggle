@@ -34,7 +34,7 @@ from kneemri.inference.vote import RankAverage
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.runs.member_record import MemberRecord
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
 DIM = 12
 SLOTS = 6
@@ -83,14 +83,16 @@ def _save(tmp_path: Path, design: StudyDesign, name: str) -> tuple[Path, StudyMo
     """
     torch.manual_seed(SEED)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS, design).eval()
-    options = TrainingOptions(
+    options = TrainConfig().with_leaves(
         slice_pooling=design.slice_pooling,
         anatomical_prior=design.anatomical_prior,
         image_size=SIZE,
         slices=GROUP + 3,
     )
     encoder = replace(ENCODERS[SMALL], dim=DIM)
-    record = MemberRecord(options, encoder, model, torch.device("cpu"), [f"slot{index}" for index in range(SLOTS)])
+    record = MemberRecord(
+        options.stamp, encoder, model, torch.device("cpu"), [f"slot{index}" for index in range(SLOTS)]
+    )
     path = tmp_path / name
     torch.save(record.payload(model.state_dict(), holdout=0.83, epoch=0), path)
     return path, model

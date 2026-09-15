@@ -35,7 +35,7 @@ from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.patience import Patience
 from kneemri.training.trainer import Trainer
 
@@ -90,15 +90,15 @@ class RunPlan:
     """Data ORDER only — the model's own initialisation is seeded by the caller before it is built."""
 
     @classmethod
-    def of(cls, options: TrainingOptions, destination: Path) -> "RunPlan":
+    def of(cls, options: TrainConfig, destination: Path) -> "RunPlan":
         """The plan a parsed run asked for — one place, so a stopping field cannot be parsed and dropped."""
         return cls(
             destination=destination,
-            epochs=options.epochs,
-            batch=options.batch,
-            patience=options.patience,
-            patience_from=options.patience_from_progress,
-            seed=options.seed,
+            epochs=options.optim.epochs,
+            batch=options.optim.batch,
+            patience=options.optim.patience,
+            patience_from=options.optim.patience_from_progress,
+            seed=options.run.seed,
         )
 
 

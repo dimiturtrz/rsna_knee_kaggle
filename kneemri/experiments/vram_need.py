@@ -19,7 +19,6 @@ on rather than a failure it has to parse.
 import math
 import sys
 
-from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
 
 MIB_PER_GB = 1024
@@ -27,7 +26,7 @@ MIB_PER_GB = 1024
 
 
 def main() -> None:
-    need = RunSetup(TrainingOptions.parse()).budget().needed()
+    need = RunSetup.of(sys.argv[1:]).budget().needed()
     # CEILING, because this number is compared against free VRAM and the comparison is one-sided: a MiB
     # rounded down is a MiB the arm will ask the allocator for and the gate did not require.
     sys.stdout.write(f"{math.ceil(need * MIB_PER_GB)}\n")

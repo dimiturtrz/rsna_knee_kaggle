@@ -1,16 +1,9 @@
 """What a run's flags BUILD, separated from what they say.
 
-`TrainingOptions` answered two different questions and was measured doing it: LCOM4 = 5, the lowest
+`TrainConfig` answered two different questions and was measured doing it: LCOM4 = 5, the lowest
 cohesion of any class here, and the one cluster that never touched the others was this — the seven
 methods that turn flags into the objects a fit runs on. The other clusters read a flag pair as a value
 (`crop`, `band`, `reading`) or read the corpus (`cache`, `sampled`); none of them constructs anything.
-
-Splitting them also puts train.py back under the god-file ceiling it had crept to within 44 lines of,
-which is the honest reason the cluster kept growing there: every new switch is one more `if self.x:`
-in setup, and setup was living in the module whose job is the command line.
-
-WHAT DOES NOT MOVE: `supervision` reads two flags into a value the LABEL table takes, which is the
-`crop`/`band` shape, not this one.
 """
 
 import logging
@@ -24,6 +17,7 @@ from kneemri.models.backbone import ENCODERS, Encoder
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import AugmentConfig
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.grades import Grades, OrdinalGrades
@@ -39,7 +33,6 @@ from kneemri.training.objective import (
     RankedObjective,
     Shaping,
 )
-from kneemri.training.options import TrainingOptions
 from kneemri.training.pretrained_encoder import PretrainedEncoder
 from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.remembered_contrast import RememberedContrast
@@ -86,17 +79,22 @@ class RunSetup:
     methods exists because a run once trained the plain recipe under an arm's name.
     """
 
-    options: TrainingOptions
+    options: TrainConfig
+
+    @classmethod
+    def of(cls, argv: list[str]) -> "RunSetup":
+        """The setup a command line asks for — what the queue's memory gate and the smoke both price."""
+        return cls(TrainConfig.of(argv))
 
     def adaptation(self) -> Adaptation:
         """How the encoder adapts: which blocks move and how fast, which are one decision."""
         return Adaptation(
-            head_lr=self.options.head_lr,
-            backbone_lr=self.options.backbone_lr,
-            unfreeze_last=self.options.unfreeze_last,
-            unfreeze_offset=self.options.unfreeze_offset,
-            layer_decay=self.options.layer_decay,
-            weight_decay=self.options.weight_decay,
+            head_lr=self.options.encoder.head_lr,
+            backbone_lr=self.options.encoder.backbone_lr,
+            unfreeze_last=self.options.encoder.unfreeze_last,
+            unfreeze_offset=self.options.encoder.unfreeze_offset,
+            layer_decay=self.options.encoder.layer_decay,
+            weight_decay=self.options.encoder.weight_decay,
         )
 
     def budget(self) -> DeviceBudget:
@@ -115,14 +113,14 @@ class RunSetup:
         understate it by the full depth. The CLAMP against the trunk's real block count is the
         encoder's, not this method's: `depth` is 12 on a trunk that runs 36.
         """
-        encoder = ENCODERS[self.options.variant]
-        size = self.options.train_size or self.options.image_size
-        opened = ENCODER_FULLY_OPEN if self.options.lora_rank else self.options.unfreeze_last
+        encoder = ENCODERS[self.options.encoder.variant]
+        size = self.options.data.train_size or self.options.data.image_size
+        opened = ENCODER_FULLY_OPEN if self.options.encoder.lora_rank else self.options.encoder.unfreeze_last
         return DeviceBudget(
-            self.options.vram_gb,
-            self.options.slices,
+            self.options.run.vram_gb,
+            self.options.data.slices,
             encoder.activation_units(size),
-            self.options.batch,
+            self.options.optim.batch,
             retained=encoder.retained_units(size, opened),
             params_m=encoder.params_m,
         )
@@ -143,76 +141,76 @@ class RunSetup:
         """
         options = self.options
         return Request(
-            lora_rank=options.lora_rank,
-            slice_regions=options.slice_regions,
-            recompute=options.recompute_activations,
-            compiling=options.compile_encoder and device.type == "cuda",
-            bf16=options.bf16,
-            whole_stack=options.whole_stack,
-            slices=options.slices,
-            train_size=options.train_size,
-            ema=options.ema,
-            one_cycle=options.one_cycle,
-            accumulate=options.accumulate,
-            reports=options.report_vectors is not None,
-            rank_weight=options.rank_weight,
-            distill_weight=options.distill_weight,
-            feature_weight=options.feature_weight,
-            dissent_weight=options.dissent_weight,
-            contrast_weight=options.contrast_weight,
-            auc_margin=options.auc_margin,
-            teaching=options.teacher_targets is not None,
-            teaching_features=options.teacher_features is not None,
-            pair_memory=options.pair_memory,
-            per_label_loss=options.per_label_loss,
-            normalise_by_count=options.normalise_by_count,
-            intensity_aug=options.intensity_aug,
-            weight_floor=options.weight_floor,
-            calibrated_targets=options.calibrated_targets,
-            finding_calibration=options.finding_calibration,
-            severity_weight=options.severity_weight,
-            hold_annotations=options.hold_annotations,
-            hold_annotation_studies=options.hold_annotation_studies,
-            grade_ladder=options.grade_ladder,
+            lora_rank=options.encoder.lora_rank,
+            slice_regions=options.model.slice_regions,
+            recompute=options.encoder.recompute_activations,
+            compiling=options.run.compile_encoder and device.type == "cuda",
+            bf16=options.run.bf16,
+            whole_stack=options.encoder.whole_stack,
+            slices=options.data.slices,
+            train_size=options.data.train_size,
+            ema=options.optim.ema,
+            one_cycle=options.optim.one_cycle,
+            accumulate=options.optim.accumulate,
+            reports=options.run.report_vectors is not None,
+            rank_weight=options.targets.rank_weight,
+            distill_weight=options.teacher.distill_weight,
+            feature_weight=options.teacher.feature_weight,
+            dissent_weight=options.teacher.dissent_weight,
+            contrast_weight=options.targets.contrast_weight,
+            auc_margin=options.targets.auc_margin,
+            teaching=options.teacher.teacher_targets is not None,
+            teaching_features=options.teacher.teacher_features is not None,
+            pair_memory=options.targets.pair_memory,
+            per_label_loss=options.targets.per_label_loss,
+            normalise_by_count=options.targets.normalise_by_count,
+            intensity_aug=options.regularisation.intensity_aug,
+            weight_floor=options.targets.weight_floor,
+            calibrated_targets=options.targets.calibrated_targets,
+            finding_calibration=options.targets.finding_calibration,
+            severity_weight=options.targets.severity_weight,
+            hold_annotations=options.targets.hold_annotations,
+            hold_annotation_studies=options.targets.hold_annotation_studies,
+            grade_ladder=options.targets.grade_ladder,
             # The path as a STRING, and the empty string for the null case, because `Targets.supervised`
             # reports it that way and this comparison is a strict equality against exactly that report.
-            label_errors=str(options.label_errors) if options.label_errors else "",
-            unread_targets=str(options.unread_targets) if options.unread_targets else "",
-            side_weight=options.side_weight,
+            label_errors=str(options.targets.label_errors) if options.targets.label_errors else "",
+            unread_targets=str(options.targets.unread_targets) if options.targets.unread_targets else "",
+            side_weight=options.targets.side_weight,
             # The EMPTY STRING and not None, because that is what `LabelFocus.settings()` reports for
             # the null policy, and this comparison is a strict equality against exactly that report.
-            focus_label=options.focus_label or "",
-            unfocused_weight=options.unfocused_weight,
-            unfreeze_last=options.unfreeze_last,
-            unfreeze_offset=options.unfreeze_offset,
-            layer_decay=options.layer_decay,
-            mixup=options.mixup,
-            weight_decay=options.weight_decay,
-            warmup=options.warmup,
-            grad_clip=options.grad_clip,
-            sharpness=options.sharpness,
-            stochastic_depth=options.stochastic_depth,
-            backbone_lr=options.backbone_lr,
-            sample_spread=options.sample_spread,
-            sample_alpha=options.sample_alpha,
-            certainty_ramp=options.certainty_ramp,
-            sample_ramp=options.sample_ramp,
-            aug_start=options.aug_start,
-            aug_mid=options.aug_mid,
-            aug_end=options.aug_end,
-            aug_ramp=options.aug_ramp,
-            aug_tail=options.aug_tail,
-            hard_start=options.hard_start,
-            hard_mid=options.hard_mid,
-            hard_end=options.hard_end,
-            hard_ramp=options.hard_ramp,
-            hard_tail=options.hard_tail,
-            corpus_oversample=options.corpus_oversample,
-            target_corpus=options.target_corpus,
-            slot_dropout=options.slot_dropout,
-            ghosting=options.ghosting,
-            scale_jitter=options.scale_jitter,
-            padding_mode=options.padding_mode,
+            focus_label=options.targets.focus_label or "",
+            unfocused_weight=options.targets.unfocused_weight,
+            unfreeze_last=options.encoder.unfreeze_last,
+            unfreeze_offset=options.encoder.unfreeze_offset,
+            layer_decay=options.encoder.layer_decay,
+            mixup=options.regularisation.mixup,
+            weight_decay=options.encoder.weight_decay,
+            warmup=options.optim.warmup,
+            grad_clip=options.optim.grad_clip,
+            sharpness=options.optim.sharpness,
+            stochastic_depth=options.regularisation.stochastic_depth,
+            backbone_lr=options.encoder.backbone_lr,
+            sample_spread=options.sampling.sample_spread,
+            sample_alpha=options.sampling.sample_alpha,
+            certainty_ramp=options.optim.certainty_ramp,
+            sample_ramp=options.sampling.sample_ramp,
+            aug_start=options.regularisation.aug_start,
+            aug_mid=options.regularisation.aug_mid,
+            aug_end=options.regularisation.aug_end,
+            aug_ramp=options.regularisation.aug_ramp,
+            aug_tail=options.regularisation.aug_tail,
+            hard_start=options.sampling.hard_start,
+            hard_mid=options.sampling.hard_mid,
+            hard_end=options.sampling.hard_end,
+            hard_ramp=options.sampling.hard_ramp,
+            hard_tail=options.sampling.hard_tail,
+            corpus_oversample=options.sampling.corpus_oversample,
+            target_corpus=options.sampling.target_corpus,
+            slot_dropout=options.regularisation.slot_dropout,
+            ghosting=options.regularisation.ghosting,
+            scale_jitter=options.regularisation.scale_jitter,
+            padding_mode=options.regularisation.padding_mode,
         )
 
     def hardness(self) -> ProgressSchedule:
@@ -222,9 +220,13 @@ class RunSetup:
         """
         options = self.options
         schedule = ProgressSchedule(
-            options.hard_start, options.hard_mid, options.hard_end, options.hard_ramp, options.hard_tail
+            options.sampling.hard_start,
+            options.sampling.hard_mid,
+            options.sampling.hard_end,
+            options.sampling.hard_ramp,
+            options.sampling.hard_tail,
         )
-        if schedule != ProgressSchedule() and (options.certainty_ramp or options.sample_ramp):
+        if schedule != ProgressSchedule() and (options.optim.certainty_ramp or options.sampling.sample_ramp):
             raise ValueError(HARD_AND_RAMP)
         return schedule
 
@@ -241,25 +243,27 @@ class RunSetup:
         epoch-level draw policies.
         """
         options = self.options
-        if options.corpus_oversample > 0.0 and options.sample_spread is not None:
+        if options.sampling.corpus_oversample > 0.0 and options.sampling.sample_spread is not None:
             message = (
-                f"--corpus-oversample {options.corpus_oversample} and --sample-spread cannot both steer "
+                f"--corpus-oversample {options.sampling.corpus_oversample} and --sample-spread cannot both steer "
                 "the epoch draw; pick one sampling policy"
             )
             raise ValueError(message)
-        if options.corpus_oversample > 0.0:
+        if options.sampling.corpus_oversample > 0.0:
             if corpus is None:
                 message = (
-                    f"--corpus-oversample {options.corpus_oversample} needs a `corpus` column in the "
+                    f"--corpus-oversample {options.sampling.corpus_oversample} needs a `corpus` column in the "
                     "labels table, which this one does not carry"
                 )
                 raise ValueError(message)
-            return MixedCorpus(corpus, options.target_corpus, options.corpus_oversample)
-        if options.sample_spread is None:
+            return MixedCorpus(corpus, options.sampling.target_corpus, options.sampling.corpus_oversample)
+        if options.sampling.sample_spread is None:
             return Uniform()
-        if options.sample_ramp > 0:
-            return Ramped.loaded(options.sample_spread, identifiers, options.sample_alpha, options.sample_ramp)
-        return Disagreed.loaded(options.sample_spread, identifiers, options.sample_alpha)
+        if options.sampling.sample_ramp > 0:
+            return Ramped.loaded(
+                options.sampling.sample_spread, identifiers, options.sampling.sample_alpha, options.sampling.sample_ramp
+            )
+        return Disagreed.loaded(options.sampling.sample_spread, identifiers, options.sampling.sample_alpha)
 
     def objective(self, widths: Widths | None = None) -> Objective:
         """The loss policy these flags ask for.
@@ -276,34 +280,34 @@ class RunSetup:
         options = self.options
         self._check_composed()
         structure = LabelStructure(
-            grades=OrdinalGrades() if options.grade_ladder else Grades(),
-            sides=PairedSides(options.side_weight) if options.side_weight else SideRanking(),
-            focus=LabelFocus.parse(options.focus_label, options.unfocused_weight),
+            grades=OrdinalGrades() if options.targets.grade_ladder else Grades(),
+            sides=PairedSides(options.targets.side_weight) if options.targets.side_weight else SideRanking(),
+            focus=LabelFocus.parse(options.targets.focus_label, options.targets.unfocused_weight),
         )
         shaping = Shaping(
-            normalise_by_count=options.normalise_by_count,
-            per_label=options.per_label_loss,
+            normalise_by_count=options.targets.normalise_by_count,
+            per_label=options.targets.per_label_loss,
             structure=structure,
         )
-        if options.auc_margin:
-            if options.pair_memory:
-                return RememberedMargin(options.auc_margin, shaping, capacity=options.pair_memory)
-            return MarginObjective(options.auc_margin, shaping)
-        if options.dissent_weight:
-            return DecorrelatedObjective(options.dissent_weight, shaping)
-        if options.distill_weight:
+        if options.targets.auc_margin:
+            if options.targets.pair_memory:
+                return RememberedMargin(options.targets.auc_margin, shaping, capacity=options.targets.pair_memory)
+            return MarginObjective(options.targets.auc_margin, shaping)
+        if options.teacher.dissent_weight:
+            return DecorrelatedObjective(options.teacher.dissent_weight, shaping)
+        if options.teacher.distill_weight:
             # BEFORE the ranking branch, and carrying `rank_weight` through rather than excluding it:
             # the owner's design is one training that runs both terms, so this is the composed objective
             # rather than a third alternative to the other two.
-            return DistilledObjective(options.distill_weight, shaping, rank_weight=options.rank_weight)
-        if options.feature_weight:
+            return DistilledObjective(options.teacher.distill_weight, shaping, rank_weight=options.targets.rank_weight)
+        if options.teacher.feature_weight:
             return self._features(shaping, widths)
-        if options.contrast_weight:
+        if options.targets.contrast_weight:
             return self._contrastive(shaping)
-        if options.pair_memory:
-            return RememberedRanking(options.rank_weight, shaping, capacity=options.pair_memory)
-        if options.rank_weight:
-            return RankedObjective(options.rank_weight, shaping)
+        if options.targets.pair_memory:
+            return RememberedRanking(options.targets.rank_weight, shaping, capacity=options.targets.pair_memory)
+        if options.targets.rank_weight:
+            return RankedObjective(options.targets.rank_weight, shaping)
         return Objective(shaping)
 
     def _features(self, shaping: Shaping, widths: Widths | None) -> FeatureDistilledObjective:
@@ -323,12 +327,14 @@ class RunSetup:
         options = self.options
         if widths is None:
             message = (
-                f"--feature-weight {options.feature_weight} builds a projection from the student's "
+                f"--feature-weight {options.teacher.feature_weight} builds a projection from the student's "
                 "context width to the teacher's, and neither was supplied — this call cannot know "
                 "either number, so it must not guess one"
             )
             raise ValueError(message)
-        return FeatureDistilledObjective(widths, options.feature_weight, shaping, rank_weight=options.rank_weight)
+        return FeatureDistilledObjective(
+            widths, options.teacher.feature_weight, shaping, rank_weight=options.targets.rank_weight
+        )
 
     def _contrastive(self, shaping: Shaping) -> ContrastiveObjective:
         """The contrastive objective these flags ask for, widened by a remembered pool or not.
@@ -342,14 +348,14 @@ class RunSetup:
         against the control it is measured on.
         """
         options = self.options
-        if options.pair_memory:
+        if options.targets.pair_memory:
             return RememberedContrast(
-                options.contrast_weight,
+                options.targets.contrast_weight,
                 shaping,
-                rank_weight=options.rank_weight,
-                capacity=options.pair_memory,
+                rank_weight=options.targets.rank_weight,
+                capacity=options.targets.pair_memory,
             )
-        return ContrastiveObjective(options.contrast_weight, shaping, rank_weight=options.rank_weight)
+        return ContrastiveObjective(options.targets.contrast_weight, shaping, rank_weight=options.targets.rank_weight)
 
     def _check_composed(self) -> None:
         """Every way the loss flags fail to compose, raised before the card is touched.
@@ -362,41 +368,43 @@ class RunSetup:
         # FIRST of the guards, ahead of the dissent one for its own reason: this flag replaces the term
         # every other objective here is built on, so a composition it cannot honour has to be named
         # against THIS flag rather than against whichever term was stacked on top of it.
-        if options.auc_margin:
+        if options.targets.auc_margin:
             self._check_margin_alone()
         # A dissenting arm that also passed `--pair-memory` would otherwise be told about a missing
         # `--rank-weight` it never intended to give, which sends the reader to the wrong flag entirely.
-        if options.dissent_weight:
+        if options.teacher.dissent_weight:
             self._check_dissent_alone()
-        if options.contrast_weight:
+        if options.targets.contrast_weight:
             self._check_contrast_alone()
         # BEFORE the pair-memory rule below, so `--feature-weight --pair-memory` is answered by the flag
         # that would have been silently dropped rather than by one about an unfed pool.
-        if options.feature_weight:
+        if options.teacher.feature_weight:
             self._check_feature_alone()
-        if options.pair_memory and not (options.rank_weight or options.contrast_weight or options.auc_margin):
+        if options.targets.pair_memory and not (
+            options.targets.rank_weight or options.targets.contrast_weight or options.targets.auc_margin
+        ):
             # LOUD, for the reason `reports` gives below: a memory with no term to feed is a silent
             # no-op that trains the plain recipe under the arm's name, and would be read as a
             # refutation of the mechanism rather than of the invocation.
             message = (
-                f"--pair-memory {options.pair_memory} widens the pool of a ranking, contrastive, or "
+                f"--pair-memory {options.targets.pair_memory} widens the pool of a ranking, contrastive, or "
                 "margin term and none of --rank-weight, --contrast-weight, or --auc-margin was given, "
                 "so there is nothing for it to widen"
             )
             raise ValueError(message)
-        if options.distill_weight and options.pair_memory:
+        if options.teacher.distill_weight and options.targets.pair_memory:
             # LOUD for the same reason as above. `RememberedRanking` widens the LABEL term's pair pool
             # and knows nothing about a teacher, so the two together would train a distilling arm whose
             # remembered pairs silently carry no teacher at all — half the mechanism, under its name.
             message = (
-                f"--distill-weight {options.distill_weight} and --pair-memory {options.pair_memory} are "
-                "not composed: the remembered pool widens the label term only, so the teacher would be "
+                f"--distill-weight {options.teacher.distill_weight} and --pair-memory {options.targets.pair_memory} "
+                "are not composed: the remembered pool widens the label term only, so the teacher would be "
                 "dropped for every remembered step"
             )
             raise ValueError(message)
         # LAST, because it is about the BATCH rather than about the flags, and every message above names
         # a flag the reader can drop. This one names a flag they must ADD.
-        if options.batch <= LONE_BATCH and not options.pair_memory:
+        if options.optim.batch <= LONE_BATCH and not options.targets.pair_memory:
             self._check_pairs_can_form()
 
     def _check_pairs_can_form(self) -> None:
@@ -420,16 +428,16 @@ class RunSetup:
         """
         options = self.options
         silenced = {
-            "--rank-weight": options.rank_weight,
-            "--auc-margin": options.auc_margin,
-            "--contrast-weight": options.contrast_weight,
-            "--dissent-weight": options.dissent_weight,
+            "--rank-weight": options.targets.rank_weight,
+            "--auc-margin": options.targets.auc_margin,
+            "--contrast-weight": options.targets.contrast_weight,
+            "--dissent-weight": options.teacher.dissent_weight,
         }
         named = [f"{flag} {value}" for flag, value in silenced.items() if value]
         if not named:
             return
         message = (
-            f"--batch {options.batch} forms no pairs, so {', '.join(named)} would contribute exactly zero "
+            f"--batch {options.optim.batch} forms no pairs, so {', '.join(named)} would contribute exactly zero "
             "and the run would descend the plain recipe under the arm's name — pass --pair-memory to form "
             "pairs across steps, or raise --batch (--accumulate cannot repair this: it sums the gradients "
             "of micro-batch losses each computed alone)"
@@ -446,16 +454,16 @@ class RunSetup:
         """
         options = self.options
         conflicts = {
-            "--rank-weight": options.rank_weight,
-            "--distill-weight": options.distill_weight,
-            "--feature-weight": options.feature_weight,
-            "--dissent-weight": options.dissent_weight,
-            "--contrast-weight": options.contrast_weight,
+            "--rank-weight": options.targets.rank_weight,
+            "--distill-weight": options.teacher.distill_weight,
+            "--feature-weight": options.teacher.feature_weight,
+            "--dissent-weight": options.teacher.dissent_weight,
+            "--contrast-weight": options.targets.contrast_weight,
         }
         named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
         if named:
             message = (
-                f"--auc-margin {options.auc_margin} is not composed with {', '.join(named)}: it REPLACES "
+                f"--auc-margin {options.targets.auc_margin} is not composed with {', '.join(named)}: it REPLACES "
                 "the cross-entropy term those all add themselves to, so what ran would be neither the "
                 "margin objective nor the ranking one"
             )
@@ -474,14 +482,14 @@ class RunSetup:
         """
         options = self.options
         conflicts = {
-            "--distill-weight": options.distill_weight,
-            "--rank-weight": options.rank_weight,
-            "--pair-memory": options.pair_memory,
+            "--distill-weight": options.teacher.distill_weight,
+            "--rank-weight": options.targets.rank_weight,
+            "--pair-memory": options.targets.pair_memory,
         }
         named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
         if named:
             message = (
-                f"--dissent-weight {options.dissent_weight} is not composed with {', '.join(named)}: it "
+                f"--dissent-weight {options.teacher.dissent_weight} is not composed with {', '.join(named)}: it "
                 "IS the label ranking term at a re-weighted pair mass, and each of those either "
                 "descends that same ordering a second time or feeds it pairs with no teacher"
             )
@@ -505,13 +513,13 @@ class RunSetup:
         """
         options = self.options
         conflicts = {
-            "--distill-weight": options.distill_weight,
-            "--dissent-weight": options.dissent_weight,
+            "--distill-weight": options.teacher.distill_weight,
+            "--dissent-weight": options.teacher.dissent_weight,
         }
         named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
         if named:
             message = (
-                f"--contrast-weight {options.contrast_weight} is not composed with {', '.join(named)}: "
+                f"--contrast-weight {options.targets.contrast_weight} is not composed with {', '.join(named)}: "
                 "the objective chain returns ONE class, so this branch would win and the term those "
                 "flags asked for would never be built"
             )
@@ -529,15 +537,15 @@ class RunSetup:
         """
         options = self.options
         conflicts = {
-            "--distill-weight": options.distill_weight,
-            "--dissent-weight": options.dissent_weight,
-            "--contrast-weight": options.contrast_weight,
-            "--pair-memory": options.pair_memory,
+            "--distill-weight": options.teacher.distill_weight,
+            "--dissent-weight": options.teacher.dissent_weight,
+            "--contrast-weight": options.targets.contrast_weight,
+            "--pair-memory": options.targets.pair_memory,
         }
         named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
         if named:
             message = (
-                f"--feature-weight {options.feature_weight} is not composed with {', '.join(named)}: the "
+                f"--feature-weight {options.teacher.feature_weight} is not composed with {', '.join(named)}: the "
                 "objective chain returns ONE class, so only one of these terms would be built and the "
                 "run would report the other's recipe under this arm's name"
             )
@@ -552,15 +560,15 @@ class RunSetup:
         as a refutation of the mechanism rather than of the invocation.
         """
         options = self.options
-        if not options.report_weight:
+        if not options.encoder.report_weight:
             return None
-        if options.report_vectors is None:
+        if options.run.report_vectors is None:
             message = (
-                f"--report-weight {options.report_weight} asks for report supervision and no "
+                f"--report-weight {options.encoder.report_weight} asks for report supervision and no "
                 "--report-vectors was given, so the run would train the plain recipe under that name"
             )
             raise ValueError(message)
-        return ReportSupervision.from_file(options.report_vectors, identifiers, options.report_weight)
+        return ReportSupervision.from_file(options.run.report_vectors, identifiers, options.encoder.report_weight)
 
     def teacher(self, identifiers: list[str], training: NDArray[np.int64]) -> TeacherTargets | None:
         """The ensemble readings this run asked for, or None — and never half of it, for `reports`' reason.
@@ -573,17 +581,18 @@ class RunSetup:
         options = self.options
         # EITHER consumer of the file, because the halves that must arrive together are "a term that
         # reads a teacher" and "a teacher", not "distillation" specifically.
-        wants_teacher = options.distill_weight or options.dissent_weight
-        if not wants_teacher and options.teacher_targets is None:
+        wants_teacher = options.teacher.distill_weight or options.teacher.dissent_weight
+        if not wants_teacher and options.teacher.teacher_targets is None:
             return None
-        if options.teacher_targets is None or not wants_teacher:
+        if options.teacher.teacher_targets is None or not wants_teacher:
             message = (
-                f"--distill-weight {options.distill_weight} / --dissent-weight {options.dissent_weight} "
-                f"and --teacher-targets {options.teacher_targets} are two halves of one mechanism, and "
+                f"--distill-weight {options.teacher.distill_weight} "
+                f"/ --dissent-weight {options.teacher.dissent_weight} "
+                f"and --teacher-targets {options.teacher.teacher_targets} are two halves of one mechanism, and "
                 "only one was given"
             )
             raise ValueError(message)
-        return TeacherTargets.from_file(options.teacher_targets, identifiers, training)
+        return TeacherTargets.from_file(options.teacher.teacher_targets, identifiers, training)
 
     def teacher_embeddings(self, identifiers: list[str], training: NDArray[np.int64]) -> TeacherFeatures | None:
         """The teacher REPRESENTATIONS this run asked for, or None — never half, for `teacher`'s reason.
@@ -593,15 +602,15 @@ class RunSetup:
         card is touched, rather than on the first batch.
         """
         options = self.options
-        if not options.feature_weight and options.teacher_features is None:
+        if not options.teacher.feature_weight and options.teacher.teacher_features is None:
             return None
-        if options.teacher_features is None or not options.feature_weight:
+        if options.teacher.teacher_features is None or not options.teacher.feature_weight:
             message = (
-                f"--feature-weight {options.feature_weight} and --teacher-features "
-                f"{options.teacher_features} are two halves of one mechanism, and only one was given"
+                f"--feature-weight {options.teacher.feature_weight} and --teacher-features "
+                f"{options.teacher.teacher_features} are two halves of one mechanism, and only one was given"
             )
             raise ValueError(message)
-        return TeacherFeatures.from_file(options.teacher_features, identifiers, training)
+        return TeacherFeatures.from_file(options.teacher.teacher_features, identifiers, training)
 
     def model(self, encoder: Encoder, slots: int, design: StudyDesign, device: torch.device) -> StudyModel:
         """The model this run asked for, with every wrapper applied IN ORDER.
@@ -619,21 +628,23 @@ class RunSetup:
         """
         options = self.options
         backbone = encoder.load()
-        if options.encoder_weights is not None:
+        if options.encoder.encoder_weights is not None:
             # BEFORE every wrapper, and that is the same argument the rest of this method makes: weights
             # written into a compiled or adapted backbone land under prefixed keys that the stock
             # reference does not name, which is how a load that matched nothing once reported success.
-            backbone = PretrainedEncoder(options.encoder_weights).into(
-                backbone, options.variant, options.encoder_adapt_depth
+            backbone = PretrainedEncoder(options.encoder.encoder_weights).into(
+                backbone, options.encoder.variant, options.encoder.encoder_adapt_depth
             )
         model = StudyModel(backbone, encoder.dim, slots, design, encoder.normalization)
-        if options.lora_rank:
+        if options.encoder.lora_rank:
             logger.info(
-                "low-rank adaptation: %d layers at rank %d", model.low_rank(options.lora_rank), options.lora_rank
+                "low-rank adaptation: %d layers at rank %d",
+                model.low_rank(options.encoder.lora_rank),
+                options.encoder.lora_rank,
             )
-        if options.recompute_activations:
+        if options.encoder.recompute_activations:
             model.recompute_activations()
-        if options.compile_encoder and device.type == "cuda":
+        if options.run.compile_encoder and device.type == "cuda":
             model.compile_encoder()
         return model
 
@@ -665,21 +676,21 @@ class RunSetup:
             # drift by one edit. `geometric_only` carries the same 0.08 scale as the full config, so the
             # override is the identity at the default and every ledger number keeps its meaning.
             augment_config=replace(
-                AugmentConfig() if options.intensity_aug else AugmentConfig.geometric_only(),
-                slot_dropout=options.slot_dropout,
-                scale_jitter=options.scale_jitter,
-                padding_mode=options.padding_mode,
-                ghosting=options.ghosting,
+                AugmentConfig() if options.regularisation.intensity_aug else AugmentConfig.geometric_only(),
+                slot_dropout=options.regularisation.slot_dropout,
+                scale_jitter=options.regularisation.scale_jitter,
+                padding_mode=options.regularisation.padding_mode,
+                ghosting=options.regularisation.ghosting,
             ),
             adaptation=self.adaptation(),
             objective=self.objective(None if features is None else Widths(model.context_width(), features.width())),
         )
-        if options.bf16:
+        if options.run.bf16:
             trainer.bfloat16()
-        if options.whole_stack:
-            trainer.whole_stack(options.slices)
-        if options.train_size:
-            trainer.resample_to(options.train_size)
+        if options.encoder.whole_stack:
+            trainer.whole_stack(options.data.slices)
+        if options.data.train_size:
+            trainer.resample_to(options.data.train_size)
         reports = self.reports(identifiers)
         if reports is not None:
             trainer.report_supervision(reports)
@@ -688,22 +699,28 @@ class RunSetup:
             trainer.teach_from(teacher)
         if features is not None:
             trainer.teach_features_from(features)
-        if options.ema:
+        if options.optim.ema:
             trainer.exponential_average()
         # BEFORE the schedule, which is not cosmetic: the schedule's total is counted in OPTIMISER steps
         # and the trainer's own accumulation is what converts micro-batches into them.
-        trainer.accumulate(options.accumulate)
-        trainer.blend(options.mixup)
-        trainer.clip_gradients(options.grad_clip)
+        trainer.accumulate(options.optim.accumulate)
+        trainer.blend(options.regularisation.mixup)
+        trainer.clip_gradients(options.optim.grad_clip)
         # AFTER `accumulate` above, and that order is forced: `sharpen` refuses a radius under a group
         # larger than one micro-batch, and it can only see the group if the group is already attached.
-        trainer.sharpen(options.sharpness)
+        trainer.sharpen(options.optim.sharpness)
         # BEFORE the optimiser groups are read by anything downstream is not a constraint here: stochastic
         # depth registers no parameter, so the groups built in the constructor still name every tensor.
-        trainer.drop_paths(options.stochastic_depth)
+        trainer.drop_paths(options.regularisation.stochastic_depth)
         trainer.schedule_strength(
-            ProgressSchedule(options.aug_start, options.aug_mid, options.aug_end, options.aug_ramp, options.aug_tail),
-            options.epochs,
+            ProgressSchedule(
+                options.regularisation.aug_start,
+                options.regularisation.aug_mid,
+                options.regularisation.aug_end,
+                options.regularisation.aug_ramp,
+                options.regularisation.aug_tail,
+            ),
+            options.optim.epochs,
         )
         # ATTACHED UNCONDITIONALLY, unlike the policies above it, because the null here is an object and
         # not an absence — and because a policy only some runs attach is a policy the options-to-policies
@@ -713,10 +730,10 @@ class RunSetup:
         # BEFORE the schedule too, and for a sharper reason than accumulation's: `one_cycle` reads the
         # warmup fraction when it BUILDS OneCycleLR, so a warm_up after it would set a field nothing
         # reads again and the run would anneal on 0.15 while its config recorded the value asked for.
-        trainer.warm_up(options.warmup)
-        trainer.ramp_certainty(options.certainty_ramp)
-        trainer.harden(self.hardness(), options.epochs)
-        if options.one_cycle:
+        trainer.warm_up(options.optim.warmup)
+        trainer.ramp_certainty(options.optim.certainty_ramp)
+        trainer.harden(self.hardness(), options.optim.epochs)
+        if options.optim.one_cycle:
             # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
             # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR
             # raised on the very last step of the run — after every epoch had been logged and before the
@@ -726,7 +743,7 @@ class RunSetup:
             # group, so counting micro-batches would size the cycle `accumulate` times too long and the
             # run would end mid-warmup-and-decay having never reached the low rate the schedule exists
             # to finish at. Same class of failure as the ceil above, opposite sign.
-            micro_batches = max(len(training) // options.batch, 1)
+            micro_batches = max(len(training) // options.optim.batch, 1)
             steps_per_epoch = trainer.accumulation.groups(micro_batches)
-            trainer.one_cycle(options.epochs * max(steps_per_epoch, 1))
+            trainer.one_cycle(options.optim.epochs * max(steps_per_epoch, 1))
         return trainer

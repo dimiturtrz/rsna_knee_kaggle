@@ -28,11 +28,11 @@ from kneemri.models.model import (
 )
 from kneemri.models.slice_pooling import ATTEND, CHANNELS, MAXIMUM
 from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.mixup import OFF
 from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
-from kneemri.training.options import TrainingOptions
 from kneemri.training.remembered_ranking import RememberedRanking
 from kneemri.training.trainer import (
     AUTOCAST,
@@ -243,7 +243,7 @@ def test_agrees() -> None:
 def test_missing_loss() -> None:
     """A ranking arm whose objective is plain cross-entropy — the loss half of the same failure.
 
-    The chain of `if`s in `TrainingOptions.objective` has a working objective on every branch, so a
+    The chain of `if`s in `RunSetup.objective` has a working objective on every branch, so a
     `--rank-weight` that never reached the constructor trains the plain recipe under the arm's name.
     """
     model = _model()
@@ -359,16 +359,16 @@ def test_not_a_switch() -> None:
     landed-checked, stamped and never RUN until `switch_coverage` made that partition total too.
 
     Both directions, because a stale write-off is the quieter failure: a name that leaves
-    `TrainingOptions` and stays here reads as a considered decision about a flag that no longer exists.
+    `TrainConfig` and stays here reads as a considered decision about a flag that no longer exists.
     """
-    options = {field.name for field in fields(TrainingOptions)}
+    options = {leaf.name for leaf, _ in TrainConfig.leaves()}
     compared = {field.name for field in fields(Request)} & options
 
     assert options - compared - set(NOT_A_SWITCH) == set(), (
         "a training option that neither Landed compares nor NOT_A_SWITCH writes off — decide which, "
         "because a switch nothing asks the model about is forty minutes of card under a recipe nobody ran"
     )
-    assert set(NOT_A_SWITCH) - options == set(), "a write-off for a flag TrainingOptions no longer has"
+    assert set(NOT_A_SWITCH) - options == set(), "a write-off for a flag TrainConfig no longer has"
     assert compared & set(NOT_A_SWITCH) == set(), "a switch cannot be both compared and written off"
 
 

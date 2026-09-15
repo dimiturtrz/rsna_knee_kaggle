@@ -169,7 +169,7 @@ NOT_A_SWITCH = {
     "written off above rather than a second behaviour — and it is equally loud: the loader reports how "
     "many tensors it left stock, and a depth past the last block simply loads everything",
 }
-"""Every `TrainingOptions` field this check does NOT compare, each with WHY — a decision record.
+"""Every `TrainConfig` field this check does NOT compare, each with WHY — a decision record.
 
 The partition is made TOTAL and asserted at the unit gate, because 'no `Request` field names it' is
 true both of a knob that cannot land silently and of one nobody has checked yet, and only the second
@@ -177,7 +177,7 @@ is a hole. `switch_coverage.NOT_A_RECIPE` does the same for the arms; this is th
 the axis that matters at the card: a switch added to the trainer now decides here whether it can fail
 silently, rather than being discovered as forty minutes trained under a recipe nobody ran.
 
-Named by their `TrainingOptions` field, but SPELLED HERE rather than imported from it — that dataclass
+Named by their `TrainConfig` field, but SPELLED HERE rather than imported from it — that dataclass
 builds the model and the trainer this module compares, so importing it would close the import cycle
 `Request`'s primitive fields exist to keep open.
 """
@@ -244,7 +244,7 @@ class Request:
     on CUDA only, so on CPU the honest request is False and a check reading the flag would fail every
     smoke run on this machine.
 
-    Primitive fields rather than the options object: `TrainingOptions` builds both the model and the
+    Primitive fields rather than the options object: `TrainConfig` builds both the model and the
     trainer, so a `Landed` that imported it would close an import cycle around the module it exists to
     protect.
     """
@@ -341,7 +341,7 @@ class Request:
         life of the flag while splitting nothing, so the ledger carried a fact about an arm that did not
         run. Here it is a plain equality that fails before the card is spent.
 
-        THE ONE DELIBERATE EXCEPTION is the weight floor, whose bool-to-value rule `TrainingOptions`
+        THE ONE DELIBERATE EXCEPTION is the weight floor, whose bool-to-value rule `TrainConfig`
         also spells. Taking the resolved `supervision.floor` instead would compare that property's
         output against itself and pass on any value it produced; re-deriving from the FLAG is what
         makes a broken `supervision` property visible here rather than only in the loss.

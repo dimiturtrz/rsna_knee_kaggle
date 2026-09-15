@@ -323,7 +323,7 @@ ignore_names = [
   "KernelRun",
   "KitWheels",
   # Read only by the unit gate that exists to keep a wire total. Each is a written-off or renamed set that
-  # a test differences against `TrainingOptions`' fields, so a flag added without a decision fails there;
+  # a test differences against `TrainConfig`' fields, so a flag added without a decision fails there;
   # `unaccounted` is the same shape for the switch table. Their being unused in the package IS the design.
   "RECORDED_AS",
   "NOT_IN_CONFIG",

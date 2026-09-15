@@ -19,10 +19,10 @@ from core.paths import DataRoot
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign
 from kneemri.runs.member_record import MemberRecord
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.init_scope import InitScope
 from kneemri.training.landed import Landed
-from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
 from kneemri.training.warm_start import WarmStart
 
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    arguments = TrainingOptions.parse()
+    arguments = TrainConfig.parse()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     # THE FIRST LINE OF THE LOG, before the cache is mapped and long before the card is taken. The
     # recipe was stamped only into the CHECKPOINT, which is written at run END — so for the whole 84
@@ -42,13 +42,13 @@ def main() -> None:
 
     # The MODEL's initialisation. The data order is seeded from the same value inside `Fitting`, which
     # is where the only consumer of it lives.
-    torch.manual_seed(arguments.seed)
+    torch.manual_seed(arguments.run.seed)
 
     # THE CACHE BEFORE THE CARD. A reading nothing has decoded is a `FileNotFoundError` on a memory map,
     # and taking the device first meant an arm held the GPU to discover it — the queue slot is spent
     # either way, but the card need not be. Mapping is cheap: no pixels are read here.
-    root = DataRoot.from_config(arguments.paths)
-    cache = arguments.cache(root.processed())
+    root = DataRoot.from_config(arguments.run.paths)
+    cache = arguments.data.cache(root.processed())
     corpus, identifiers = cache.load()
     # The slice count as well as the flag: the reserved peak is a function of it, so an arm that names
     # no --vram-gb still gets a cap fitted to what it will actually hold (knee-ylp0). The SIZE too, or
@@ -65,23 +65,23 @@ def main() -> None:
     setup = RunSetup(arguments)
     device = setup.budget().select()
     targets, evaluation = Targets.pair(
-        arguments.labels,
-        arguments.eval_labels,
+        arguments.run.labels,
+        arguments.run.eval_labels,
         root.raw() / "train.csv",
         identifiers,
-        arguments.supervision,
+        arguments.targets.supervision,
     )
     # The split is a property of the CORPUS, not of this run: it must not move when the model seed
     # does. Deriving it from --seed gave seed 7 a fold-0 holdout sharing only 192 of 909 studies with
     # seed 2026's, so their holdout numbers were never comparable and scoring one on the other's split
     # was scoring a model on 717 studies it had trained on.
-    folds = ReportFolds(arguments.folds, arguments.split_seed)
+    folds = ReportFolds(arguments.run.folds, arguments.run.split_seed)
     training, holdout = folds.holdout(
-        folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold, arguments.exclude_fold
+        folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.run.fold, arguments.run.exclude_fold
     )
-    if arguments.exclude_fold != EXCLUDE_NONE:
-        logger.warning("fold %d excluded from training: %d studies fit", arguments.exclude_fold, len(training))
-    positions = arguments.positions
+    if arguments.run.exclude_fold != EXCLUDE_NONE:
+        logger.warning("fold %d excluded from training: %d studies fit", arguments.run.exclude_fold, len(training))
+    positions = arguments.run.positions
     training, holdout = positions.sampled(training, holdout)
     training = positions.thinned(training)
     for caveat in positions.caveats(training):
@@ -94,29 +94,31 @@ def main() -> None:
         len(identifiers),
         len(training),
         len(holdout),
-        arguments.fold,
+        arguments.run.fold,
         {k: round(v, 3) for k, v in targets.coverage().items()},
     )
 
     design = StudyDesign(
-        pool=arguments.pool,
-        slice_pooling=arguments.slice_pooling,
-        slice_regions=arguments.slice_regions,
-        through_plane=arguments.through_plane,
-        slot_pooling=arguments.slot_pooling,
-        anatomical_prior=arguments.anatomical_prior,
-        layer=arguments.encoder_layer,
+        pool=arguments.model.pool,
+        slice_pooling=arguments.model.slice_pooling,
+        slice_regions=arguments.model.slice_regions,
+        through_plane=arguments.encoder.through_plane,
+        slot_pooling=arguments.model.slot_pooling,
+        anatomical_prior=arguments.encoder.anatomical_prior,
+        layer=arguments.encoder.encoder_layer,
     )
-    encoder = ENCODERS[arguments.variant]
+    encoder = ENCODERS[arguments.encoder.variant]
     # Before the weights are fetched and the cache is mapped: a read size the patch grid cannot tile is
     # a configuration mistake, and the failure without this is either a crash deep in the encoder or a
     # silent interpolation of the position embeddings onto a grid the weights never saw.
-    encoder.require_tiling(arguments.train_size or arguments.image_size)
-    model = setup.model(encoder, len(SCHEMES[arguments.scheme]), design, device)
+    encoder.require_tiling(arguments.data.train_size or arguments.data.image_size)
+    model = setup.model(encoder, len(SCHEMES[arguments.data.scheme]), design, device)
     # BEFORE the trainer, because the optimiser is assembled against this model's parameters and a
     # warm start must be the thing it starts optimising, not a load that lands after the first step.
-    if arguments.init is not None:
-        logger.info("%s", WarmStart(arguments.init, InitScope.named(arguments.init_scope)).applied(model))
+    if arguments.encoder.init is not None:
+        logger.info(
+            "%s", WarmStart(arguments.encoder.init, InitScope.named(arguments.encoder.init_scope)).applied(model)
+        )
     trainer = setup.trainer(model, device, identifiers, training, targets.corpus)
     # BEFORE THE CARD IS SPENT, and this is the last moment it can be asked: from here on the only
     # evidence that a switch was wanted is the config, and the config records the ASK. `low_rank` once
@@ -127,8 +129,10 @@ def main() -> None:
         message = "the run asked for switches the built model does not show: " + "; ".join(unlanded)
         raise ValueError(message)
 
-    destination = arguments.out or (root.models() / f"member_fold{arguments.fold}.pt")
-    record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])
+    destination = arguments.run.out or (root.models() / f"member_fold{arguments.run.fold}.pt")
+    record = MemberRecord(
+        arguments.stamp, encoder, model, device, [slot.name for slot in SCHEMES[arguments.data.scheme]]
+    )
     plan = RunPlan.of(arguments, destination)
     kept = Fitting(trainer, record, plan).run(
         Fold(corpus=corpus, targets=targets, evaluation=evaluation, training=training, holdout=holdout)
@@ -143,7 +147,7 @@ def main() -> None:
         "best holdout mean AUC %.4f -> %s | %s",
         kept.holdout,
         destination,
-        json.dumps({"fold": arguments.fold, "holdout": kept.holdout}),
+        json.dumps({"fold": arguments.run.fold, "holdout": kept.holdout}),
     )
 
 

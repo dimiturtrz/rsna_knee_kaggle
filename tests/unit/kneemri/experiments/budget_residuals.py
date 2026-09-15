@@ -7,16 +7,16 @@ import pytest
 from core.paths import COMPETITION
 from kneemri.experiments.budget_residuals import ALLOCATED, RESERVED, PricedRun, main
 from kneemri.runs.run_metrics import METRICS_RECORD, RunMetrics
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
-SETTLED = TrainingOptions(slices=12, batch=12, variant="small", unfreeze_last=6)
+SETTLED = TrainConfig().with_leaves(slices=12, batch=12, variant="small", unfreeze_last=6)
 """The recipe `GB_PER_SLICE` was fitted on, whose recorded arms all measured 16.24 GB reserved."""
 
 FITTED_PEAK = 16.24
 """What every arm at that recipe recorded — the point the model reproduces by construction."""
 
 
-def _recorded(root: Path, name: str, options: TrainingOptions, peaks: list[dict[str, float]]) -> RunMetrics:
+def _recorded(root: Path, name: str, options: TrainConfig, peaks: list[dict[str, float]]) -> RunMetrics:
     """A metrics file as a finished run leaves one: a recipe line, then a row an epoch."""
     path = root / "models" / COMPETITION / f"{name}{METRICS_RECORD}"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -46,7 +46,7 @@ def test_of(root: Path) -> None:
     priced = PricedRun.of(corrected)
     assert priced is not None
     assert priced.measured == FITTED_PEAK
-    assert priced.budget.slices == SETTLED.slices, "the recipe's own flags, not the model's defaults"
+    assert priced.budget.slices == SETTLED.data.slices, "the recipe's own flags, not the model's defaults"
 
     old = _recorded(root, "old", SETTLED, [{RESERVED: 15.11}])
     assert PricedRun.of(old) is None, "a row from the era when that name meant ALLOCATED cannot grade it"
@@ -69,7 +69,7 @@ def test_slack(root: Path) -> None:
     """The margin is ONE SLICE of this recipe — asked of the model, never respelt from its constants."""
     priced = PricedRun.of(_recorded(root, "settled", SETTLED, [{RESERVED: FITTED_PEAK, ALLOCATED: 15.11}]))
     wider = PricedRun.of(
-        _recorded(root, "wider", TrainingOptions(slices=20, batch=12), [{RESERVED: 26.92, ALLOCATED: 25.01}])
+        _recorded(root, "wider", TrainConfig().with_leaves(slices=20, batch=12), [{RESERVED: 26.92, ALLOCATED: 25.01}])
     )
     assert priced is not None
     assert wider is not None

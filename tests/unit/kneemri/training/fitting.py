@@ -17,8 +17,8 @@ from core.findings import TARGETS
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyModel
 from kneemri.runs.member_record import MemberRecord
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.fitting import Fitted, Fitting, Fold, RunPlan
-from kneemri.training.options import TrainingOptions
 from kneemri.training.trainer import Trainer
 
 from ..models.model import DIM, SLOTS, _FakeBackbone
@@ -54,7 +54,7 @@ def _fitting(destination: Path, epochs: int = 1, patience: int = 0, patience_fro
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
     trainer = Trainer(model, torch.device("cpu"))
     encoder = Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM)
-    record = MemberRecord(OPTIONS, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
+    record = MemberRecord(OPTIONS.stamp, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
     plan = RunPlan(
         destination=destination, epochs=epochs, batch=BATCH, patience=patience, patience_from=patience_from, seed=SEED
     )
@@ -69,7 +69,7 @@ def test_a_run_states_its_recipe_before_it_has_a_single_score(tmp_path: Path):
     """
     fitting = _fitting(tmp_path / "member.pt")
 
-    assert fitting.metrics.recipe() == {name: str(value) for name, value in vars(OPTIONS).items()}
+    assert fitting.metrics.recipe() == {name: str(value) for name, value in OPTIONS.flat.items()}
     assert not fitting.metrics.rows(), "and it is not an epoch"
 
 
@@ -220,13 +220,13 @@ def test_no_epoch_inside_the_ramp_is_kept_or_counts_toward_patience(tmp_path: Pa
 
 def test_of():
     """Every stopping field the command line parsed LANDS in the plan the loop obeys."""
-    options = TrainingOptions(epochs=36, batch=6, patience=4, patience_from_progress=0.25, seed=7)
+    options = TrainConfig().with_leaves(epochs=36, batch=6, patience=4, patience_from_progress=0.25, seed=7)
 
     plan = RunPlan.of(options, Path("member.pt"))
 
     assert (plan.epochs, plan.batch, plan.patience, plan.patience_from, plan.seed) == (36, 6, 4, 0.25, 7)
     assert plan.destination == Path("member.pt")
-    assert RunPlan.of(TrainingOptions(), Path("member.pt")).patience_from == 0.0, "default settles every epoch"
+    assert RunPlan.of(TrainConfig(), Path("member.pt")).patience_from == 0.0, "default settles every epoch"
 
 
 def test_the_full_schedule_runs_when_patience_is_off(tmp_path: Path):

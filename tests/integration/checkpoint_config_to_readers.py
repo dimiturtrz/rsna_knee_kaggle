@@ -16,7 +16,7 @@ import torch
 
 from kneemri.models.backbone import Encoder
 from kneemri.runs.member_record import MemberRecord
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
 from ..unit.kneemri.models.model import SLOTS, _FakeBackbone  # the stand-in encoder this suite already trusts
 
@@ -57,7 +57,7 @@ def _stamped() -> set[str]:
 
     torch.manual_seed(2026)
     record = MemberRecord(
-        TrainingOptions(),
+        TrainConfig().stamp,
         Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM),
         StudyModel(_FakeBackbone(), DIM, SLOTS),
         torch.device("cpu"),

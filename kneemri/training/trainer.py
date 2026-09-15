@@ -229,7 +229,7 @@ class Trainer:
 
         The LOSS switches come from the objective's own `settings()` rather than being re-derived here:
         which objective a run got is the objective's fact, and a trainer that inspected its type would
-        be a second copy of the rule that chose it, free to disagree with `TrainingOptions.objective`.
+        be a second copy of the rule that chose it, free to disagree with `RunSetup.objective`.
         """
         return {
             **self.objective.settings(),

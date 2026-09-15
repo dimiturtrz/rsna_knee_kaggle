@@ -9,6 +9,7 @@ from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
 from kneemri.training.adaptation import Adaptation
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
 from kneemri.training.landed import Request
 from kneemri.training.objective import (
@@ -21,7 +22,6 @@ from kneemri.training.objective import (
     Objective,
     RankedObjective,
 )
-from kneemri.training.options import TrainingOptions
 from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.remembered_contrast import RememberedContrast
 from kneemri.training.remembered_margin import RememberedMargin
@@ -32,7 +32,14 @@ from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Uniform
 
 def _setup(**asked: object) -> RunSetup:
     """A run's flags and the builder over them, which is the pair every test here is about."""
-    return RunSetup(TrainingOptions(**asked))  # type: ignore[arg-type]
+    return RunSetup(TrainConfig().with_leaves(**asked))  # type: ignore[arg-type]
+
+
+def test_of():
+    """A command line reads to the setup its parsed tree builds, so the gate and the fit price one run."""
+    assert RunSetup.of(["--labels", "l.csv", "--slices", "20"]) == RunSetup(
+        TrainConfig().with_leaves(labels=Path("l.csv"), slices=20)
+    )
 
 
 def test_objective():
@@ -347,7 +354,7 @@ def test_model(monkeypatch: pytest.MonkeyPatch):
         "sys.argv",
         ["train", "--labels", "a.csv", "--lora-rank", "4", "--recompute-activations"],
     )
-    options = TrainingOptions.parse()
+    options = TrainConfig.parse()
     order: list[str] = []
 
     class _Model:
@@ -405,15 +412,13 @@ def test_requested():
     flag at a time and demanding that exactly one field follow can see that.
     """
     cpu = torch.device("cpu")
-    shared = {field.name for field in dataclasses.fields(Request)} & {
-        field.name for field in dataclasses.fields(TrainingOptions)
-    }
+    shared = {field.name for field in dataclasses.fields(Request)} & {leaf.name for leaf, _ in TrainConfig.leaves()}
 
     assert len(shared) == 61, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):
-        probe = _probe(getattr(TrainingOptions(), name))
+        probe = _probe(TrainConfig().flat[name])
         moved = _setup(**{name: probe}).requested(cpu)
 
         assert getattr(moved, name) == probe, f"--{name} does not reach the request field of its own name"

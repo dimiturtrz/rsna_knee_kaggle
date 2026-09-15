@@ -2,7 +2,6 @@ from pathlib import Path
 
 from kneemri.experiments.switch_coverage import COVERAGE, NOT_A_RECIPE, SwitchCoverage
 from kneemri.training.config_tree import TrainConfig
-from kneemri.training.options import TrainingOptions
 
 
 def test_armed(tmp_path: Path):
@@ -29,8 +28,8 @@ def test_coverage_recipes_are_flags_the_trainer_accepts():
     """A recipe that the parser refuses would report itself as a broken switch, blaming the knob."""
     for name, flags in COVERAGE.items():
         parsed = TrainConfig.parser().parse_args(["--labels", "x.csv", *flags.split()])
-        options = TrainingOptions(**vars(parsed))
-        assert getattr(options, name) != getattr(TrainingOptions(), name), f"{name} recipe leaves the default"
+        options = TrainConfig().with_leaves(**vars(parsed))
+        assert options.flat[name] != TrainConfig().flat[name], f"{name} recipe leaves the default"
 
 
 def test_nothing_is_both_covered_and_written_off():
@@ -44,7 +43,7 @@ def test_no_entry_names_an_option_that_no_longer_exists():
     The partition would still come out total — the stale name subtracts nothing — so the RENAMED option
     lands in the hole silently, which is the state this module was built to make impossible.
     """
-    options = set(vars(TrainingOptions()))
+    options = set(TrainConfig().flat)
 
     assert not (set(COVERAGE) | set(NOT_A_RECIPE)) - options
 

@@ -115,11 +115,10 @@ def test_axes_name_options_that_still_exist():
     module was fixed for twice on 2026-08-17. `img` is the one deliberate exception — the view axes are
     spelled as the checkpoint's CONFIG spells them, and that record has no flag of the same name.
     """
-    import dataclasses  # noqa: PLC0415 - the field list is this test's whole subject
 
-    from kneemri.training.options import TrainingOptions  # noqa: PLC0415 - a test-only reach across layers
+    from kneemri.training.config_tree import TrainConfig  # noqa: PLC0415 - a test-only reach across layers
 
-    recorded = {field.name for field in dataclasses.fields(TrainingOptions)}
+    recorded = {leaf.name for leaf, _ in TrainConfig.leaves()}
 
     assert SUPERVISION_AXES.issubset(recorded), "a supervision axis no run records is one no arm can be judged on"
     assert (VIEW_AXES - {"img"}).issubset(recorded), "the view axes are option names too, apart from the config's own"

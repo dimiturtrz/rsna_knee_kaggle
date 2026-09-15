@@ -25,7 +25,7 @@ class CacheFlags:
     That is the serve-side mismatch `Member.cache` closed for member-driven loads, arriving through
     argparse instead.
 
-    The dest names are the fields of `TrainingOptions`, because that dataclass is built straight from
+    The dest names are the fields of `TrainConfig`, because that dataclass is built straight from
     the namespace; a flag added here therefore lands on the run's recorded config rather than needing to
     be remembered twice.
     """
@@ -109,7 +109,7 @@ class CacheFlags:
     def cache(arguments: argparse.Namespace, directory: Path) -> StudyCache:
         """The cache those flags name, with no axis left for the caller to remember.
 
-        The namespace-shaped half of one rule; `TrainingOptions.cache` is the dataclass-shaped half, and
+        The namespace-shaped half of one rule; `TrainConfig.data.cache` is the dataclass-shaped half, and
         `Member.cache` the serve-side one. The two argv halves are pinned equal on real argv by
         `tests/integration/argv_to_cache_key.py`, since a namespace and a frozen dataclass cannot share
         an accessor without a structural type this repo's fitness gate reads as a second subject.

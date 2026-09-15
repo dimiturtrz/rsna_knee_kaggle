@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
 
 import numpy as np
 import torch
@@ -204,120 +203,49 @@ Made TOTAL and asserted at the unit gate, next to `Landed.NOT_A_SWITCH` and
 from one nobody has thought about yet, and the second is how a member gets rebuilt as a different
 function with every fingerprint still passing against its own reading.
 
-SPELLED HERE rather than imported from `TrainingOptions`, for the reason `RunOptions` is structural:
+SPELLED HERE rather than imported from `TrainConfig`, for the reason `RunStamp` is a value:
 train.py imports this module, so naming its dataclass would close the cycle.
 """
 
 
-class RunOptions(Protocol):
-    """The run settings a checkpoint has to record, as a shape rather than a named class.
+@dataclass(frozen=True)
+class RunStamp:
+    """The run settings a checkpoint has to record, typed, and nothing a rebuild does not need.
 
-    Structural, so this module does not import the CLI that produces it — train.py imports this one,
-    and a concrete type here would make that a cycle. It also lets a test construct the fields without
-    a parsed command line.
+    A value rather than the config tree itself, so this module does not import the CLI that produces it:
+    train.py imports this one, and serving reads `StampedRun` from here without ever touching training.
+    `TrainConfig.stamp` is the one place that fills it, so a knob a rebuild must know is added there
+    and here together or the constructor refuses. It also lets a test build one without a command line.
     """
 
-    @property
-    def recipe(self) -> dict[str, str]:
-        """Every flag the run was given, as strings — stamped whole, never re-derived here."""
-        ...
-
-    @property
-    def image_size(self) -> int: ...
-
-    @property
-    def crop(self) -> Crop:
-        """The physical crop the RUN read, which the checkpoint must record rather than assume."""
-        ...
-
-    @property
-    def band(self) -> Band:
-        """The slice band the RUN sampled over — recorded, and read by the serve path to build a reader."""
-        ...
-
-    @property
-    def spacing(self) -> str:
-        """How the RUN laid its slices inside that band — the axis the band's own pair cannot express.
-
-        A read-only property and not a bare field, like every neighbour here: `TrainingOptions` is frozen,
-        so a read-write member of this protocol is not satisfiable by the one class that implements it.
-        """
-        ...
-
-    @property
-    def routing(self) -> Routing:
-        """The router the RUN used, for the same reason: a member served under another sees other series."""
-        ...
-
-    @property
-    def encoder_layer(self) -> int: ...
-
-    @property
-    def train_size(self) -> int: ...
-
-    @property
-    def cache_studies(self) -> int:
-        """How many studies the cache the RUN read held — which cache, not just its shape."""
-        ...
-
-    @property
-    def slices(self) -> int: ...
-
-    @property
-    def pool(self) -> str:
-        """How a slice's patch tokens become one vector, which fixes the head's width when it is rebuilt."""
-        ...
-
-    @property
-    def slice_pooling(self) -> str: ...
-
-    @property
-    def slice_regions(self) -> int: ...
-
-    @property
-    def through_plane(self) -> bool: ...
-
-    @property
-    def slot_pooling(self) -> str: ...
-
-    @property
-    def anatomical_prior(self) -> bool: ...
-
-    @property
-    def ema(self) -> bool: ...
-
-    @property
-    def bf16(self) -> bool: ...
-
-    @property
-    def lora_rank(self) -> int: ...
-
-    @property
-    def rank_weight(self) -> float: ...
-
-    @property
-    def pair_memory(self) -> int: ...
-
-    @property
-    def report_weight(self) -> float: ...
-
-    @property
-    def whole_stack(self) -> bool: ...
-
-    @property
-    def unfreeze_last(self) -> int: ...
-
-    @property
-    def unfreeze_offset(self) -> int: ...
-
-    @property
-    def head_lr(self) -> float: ...
-
-    @property
-    def backbone_lr(self) -> float: ...
-
-    @property
-    def layer_decay(self) -> float: ...
+    recipe: dict[str, str]
+    image_size: int
+    crop: Crop
+    band: Band
+    spacing: str
+    routing: Routing
+    train_size: int
+    cache_studies: int
+    slices: int
+    pool: str
+    slice_pooling: str
+    slice_regions: int
+    slot_pooling: str
+    encoder_layer: int
+    through_plane: bool
+    anatomical_prior: bool
+    lora_rank: int
+    report_weight: float
+    whole_stack: bool
+    unfreeze_last: int
+    unfreeze_offset: int
+    head_lr: float
+    backbone_lr: float
+    layer_decay: float
+    ema: bool
+    bf16: bool
+    rank_weight: float
+    pair_memory: int
 
 
 WITNESS_STUDIES = 8
@@ -343,7 +271,7 @@ class MemberRecord:
     hand would trip the argument-count gate for no benefit.
     """
 
-    options: RunOptions
+    options: RunStamp
     encoder: Encoder
     model: StudyModel
     device: torch.device
@@ -550,7 +478,7 @@ class StampedRun:
     config: dict[str, str]
     """The reading and architecture block, which records the FIELD OF VIEW for every era of the ledger.
 
-    Separate from `options` because the two disagree about what exists: `options` is `vars(RunOptions)`
+    Separate from `options` because the two disagree about what exists: `options` is `RunStamp.recipe`
     at the time of the run, so `wsfold0_e6` — the whole-stack control — carries no `crop_mm` key at all,
     while its config records `crop_mm 130.0` because the saver derived it from a nested `crop` object.
     A reader that asks only `options` therefore cannot say what view the control read at, and has to

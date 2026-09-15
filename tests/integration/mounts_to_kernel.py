@@ -30,7 +30,7 @@ from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.models.backbone import ENCODERS, SMALL
 from kneemri.models.model import StudyModel
 from kneemri.runs.member_record import MemberRecord
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
 from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
 
@@ -65,9 +65,9 @@ def _member(root: Path, identifier: str, holdout: float) -> PackagedMember:
     """One checkpoint, written by the same assembler a run writes with."""
     torch.manual_seed(SEED)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
-    options = TrainingOptions(image_size=SIZE, slices=SLICES)
+    options = TrainConfig().with_leaves(image_size=SIZE, slices=SLICES)
     encoder = replace(ENCODERS[SMALL], dim=DIM)
-    record = MemberRecord(options, encoder, model, torch.device("cpu"), [f"S{index}" for index in range(SLOTS)])
+    record = MemberRecord(options.stamp, encoder, model, torch.device("cpu"), [f"S{index}" for index in range(SLOTS)])
     payload = record.payload(model.state_dict(), holdout=holdout, epoch=0)
     path = root / f"member_{identifier}.pt"
     torch.save(payload, path)

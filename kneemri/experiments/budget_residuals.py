@@ -31,8 +31,8 @@ from dataclasses import dataclass, replace
 from core import cli
 from kneemri.models.backbone import ENCODERS
 from kneemri.runs.run_metrics import METRICS_RECORD, RunMetrics
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import DeviceBudget
-from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
 
 logger = logging.getLogger(__name__)
@@ -67,8 +67,8 @@ class PricedRun:
         peaks = [row[RESERVED] for row in metrics.rows() if RESERVED in row and ALLOCATED in row]
         if recipe is None or not peaks:
             return None
-        options = TrainingOptions.of_recipe(recipe)
-        if options.variant not in ENCODERS:
+        options = TrainConfig.of_recipe(recipe)
+        if options.encoder.variant not in ENCODERS:
             return None
         return cls(metrics.name(), RunSetup(options).budget(), max(peaks))
 

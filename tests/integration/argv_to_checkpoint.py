@@ -14,9 +14,10 @@ reading it was not fitted under is the defect that reached the leaderboard.
 """
 
 import json
+from collections.abc import Callable
 from dataclasses import fields, replace
 from pathlib import Path
-from typing import ClassVar, cast
+from typing import cast, get_type_hints
 
 import numpy as np
 import pandas as pd
@@ -37,8 +38,8 @@ from kneemri.models.slice_pooling import MAXIMUM
 from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
 from kneemri.models.token_pooling import CLS_MEAN, CLS_MEAN_FOCAL, POOL_PARTS
 from kneemri.training import train as train_module
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import DeviceBudget
-from kneemri.training.options import TrainingOptions
 
 from ..unit.kneemri.models.model import DIM, _BlockedBackbone, _FakeBackbone
 
@@ -436,20 +437,25 @@ def test_a_full_fit_holds_nothing_back(corpus: Path, monkeypatch: pytest.MonkeyP
     assert np.isnan(cast("float", payload["holdout"])), "and still no score, because it held nothing back"
 
 
-class _WatchedOptions(TrainingOptions):
-    """`TrainingOptions` that records which fields the run actually READ.
+def _watch_reads(monkeypatch: pytest.MonkeyPatch) -> set[str]:
+    """The leaf names the run actually READ off its config tree, gathered as it runs.
 
-    Not which it stamped. `metrics.recipe()` walks `vars(options)`, which reads `__dict__` directly and
-    so never reaches here — exactly the discrimination this needs, because a field that appears in every
-    ledger row and reaches no consumer is the shape of nine defects this repo has already paid for.
+    Not which it stamped. `TrainConfig.flat` walks each node's `vars()`, which reads `__dict__` directly
+    and so never reaches the watch — exactly the discrimination this needs, because a field that appears
+    in every ledger row and reaches no consumer is the shape of nine defects this repo has already paid for.
     """
+    reads: set[str] = set()
+    hints = get_type_hints(TrainConfig)
+    for node in fields(TrainConfig):
+        kind = cast("type", hints[node.name])
+        read = cast("Callable[[object, str], object]", kind.__getattribute__)
 
-    reads: ClassVar[set[str]] = set()
+        def watched(self: object, name: str, read: Callable[[object, str], object] = read) -> object:
+            reads.add(name)
+            return read(self, name)
 
-    def __getattribute__(self, name: str) -> object:
-        if not name.startswith("_"):
-            _WatchedOptions.reads.add(name)
-        return super().__getattribute__(name)
+        monkeypatch.setattr(kind, "__getattribute__", watched)
+    return reads
 
 
 STAMPED_ONLY: set[str] = {"config"}
@@ -509,12 +515,11 @@ def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatc
     _run(corpus, monkeypatch, *shaping)
     seed = corpus / "seed.pt"
     seed.write_bytes((corpus / "member.pt").read_bytes())
-    _WatchedOptions.reads.clear()
-    monkeypatch.setattr(train_module, "TrainingOptions", _WatchedOptions)
+    reads = _watch_reads(monkeypatch)
 
     _run(corpus, monkeypatch, *shaping, "--init", str(seed), "--init-scope", "trunk")
 
-    declared = {field.name for field in fields(TrainingOptions)}
+    declared = {leaf.name for leaf, _ in TrainConfig.leaves()}
     assert declared > STAMPED_ONLY, "a name exempted here is not a field any more — stale exemption"
-    unread = declared - _WatchedOptions.reads - STAMPED_ONLY
+    unread = declared - reads - STAMPED_ONLY
     assert not unread, f"{sorted(unread)} is parsed and recorded and read by nothing"

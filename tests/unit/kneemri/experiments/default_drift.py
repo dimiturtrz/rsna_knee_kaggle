@@ -4,12 +4,12 @@ import json
 from pathlib import Path
 
 from kneemri.experiments.default_drift import DefaultDrift
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 
 
 def _recipe() -> dict[str, str]:
     """The defaults exactly as a run that started this second would record them."""
-    return dict(TrainingOptions().recipe)
+    return dict(TrainConfig().recipe)
 
 
 def test_drifted() -> None:
@@ -21,7 +21,7 @@ def test_drifted_names_the_moved_key_with_both_values() -> None:
     """The pin list is the pair: what the parent got, and what its child would get instead."""
     recipe = _recipe()
     recipe["weight_decay"] = "0.99"
-    assert DefaultDrift(recipe).drifted() == {"weight_decay": ("0.99", TrainingOptions().recipe["weight_decay"])}
+    assert DefaultDrift(recipe).drifted() == {"weight_decay": ("0.99", TrainConfig().recipe["weight_decay"])}
 
 
 def test_drifted_skips_an_incidental_key() -> None:

@@ -4,7 +4,7 @@ import sys
 import pytest
 
 from kneemri.experiments.vram_need import MIB_PER_GB, main
-from kneemri.training.options import TrainingOptions
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.run_setup import RunSetup
 
 THAWED = ["--slices", "20", "--batch", "2", "--unfreeze-last", "12"]
@@ -27,7 +27,7 @@ def test_main(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str
     assert thawed.isdigit(), "a shell substitution has to read it without parsing prose"
 
     monkeypatch.setattr(sys, "argv", ["vram_need", "--labels", "labels.csv", *THAWED])
-    expected = RunSetup(TrainingOptions.parse()).budget().needed()
+    expected = RunSetup(TrainConfig.parse()).budget().needed()
     assert int(thawed) == math.ceil(expected * MIB_PER_GB), (
         "the gate and the trainer must answer from the SAME cost model, or the constant is back"
     )

@@ -91,7 +91,7 @@ class FitPositions:
 
     Beside `ReportFolds` rather than on the options object these three flags are parsed into, because
     both operations take exactly the tuple `holdout` above returns and hand back the same tuple — they
-    are the next two steps of the split, not a statement about a recipe. On `TrainingOptions` they were
+    are the next two steps of the split, not a statement about a recipe. On `TrainConfig` they were
     the only methods touching numpy and two of its six disjoint cohesion components; the flags stay
     scalar fields there, so the parser's dest names still map one-to-one onto that dataclass and every
     guard walking it flat keeps working.

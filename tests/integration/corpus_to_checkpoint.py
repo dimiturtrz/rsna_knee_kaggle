@@ -31,8 +31,8 @@ from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.runs.member_record import MemberRecord
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.fitting import Fitting, Fold, RunPlan
-from kneemri.training.options import TrainingOptions
 from kneemri.training.run_setup import RunSetup
 
 from ..unit.kneemri.models.model import DIM, SLOTS, _FakeBackbone
@@ -93,10 +93,10 @@ def _trained(destination: Path) -> _Checkpoint:
     # Attached through the SETUP method `train.main` calls: hand-wiring `Trainer(...).whole_stack(...)`
     # here shared no code with the run it claims to reproduce, so a policy that stopped being attached
     # in `main` would leave this chain green.
-    options = TrainingOptions(image_size=SIZE, slices=SLICES, whole_stack=True, slice_pooling="max")
+    options = TrainConfig().with_leaves(image_size=SIZE, slices=SLICES, whole_stack=True, slice_pooling="max")
     trainer = RunSetup(options).trainer(model, DEVICE, [], np.arange(STUDIES))
     record = MemberRecord(
-        options,
+        options.stamp,
         Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM),
         model,
         DEVICE,

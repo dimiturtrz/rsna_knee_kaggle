@@ -79,8 +79,8 @@ def band_of(name, recipe):
 
 def main() -> None:
     print("TASK 0 — the default: SLICE_BAND = (0.20, 0.80), "
-          "core/data/corpus/slot_reader.py:35; TrainingOptions.band_low/band_high "
-          "default to it (kneemri/training/options.py:104-105). The default is "
+          "core/data/corpus/slot_reader.py:35; TrainConfig band_low/band_high "
+          "default to it (kneemri/training/config_tree.py). The default is "
           "NOT full-stack, and the slot_reader docstring records the axis as "
           "closed at 12 slices: 0.2-0.8 = 0.8525, 0.1-0.9 = 0.8565, "
           "0.0-1.0 = 0.8427 (interior optimum; full stack REFUTED). Every "
