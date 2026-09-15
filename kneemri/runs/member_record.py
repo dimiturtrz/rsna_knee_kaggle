@@ -38,6 +38,7 @@ NOT_IN_CONFIG = {
     "config": "the recipe file; each value it set is recorded under its own field name",
     "epochs": "run length — `epochs_done` records what was actually reached, beside the kept epoch",
     "patience": "when the run stopped, which the kept epoch already states",
+    "patience_from_progress": "when keeping could begin, which the kept epoch likewise already states",
     "studies": "corpus truncation for a smoke; `cache_studies` records WHICH cache was read",
     "train_fraction": "how much of the TRAINING half was fitted on — a property of the run's data, not "
     "of the function a rebuild reconstructs, exactly as `fold` and `studies` are. The recipe block "

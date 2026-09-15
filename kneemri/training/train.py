@@ -129,13 +129,7 @@ def main() -> None:
 
     destination = arguments.out or (root.models() / f"member_fold{arguments.fold}.pt")
     record = MemberRecord(arguments, encoder, model, device, [slot.name for slot in SCHEMES[arguments.scheme]])
-    plan = RunPlan(
-        destination=destination,
-        epochs=arguments.epochs,
-        batch=arguments.batch,
-        patience=arguments.patience,
-        seed=arguments.seed,
-    )
+    plan = RunPlan.of(arguments, destination)
     kept = Fitting(trainer, record, plan).run(
         Fold(corpus=corpus, targets=targets, evaluation=evaluation, training=training, holdout=holdout)
     )

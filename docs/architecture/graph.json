@@ -4833,6 +4833,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.experiments.arm_shadow",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
       "target": "kneemri.experiments.arm_smoke",
       "weight": 1
     },
@@ -7348,6 +7354,12 @@
       "kind": "import",
       "source": "kneemri.training.fitting",
       "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.fitting",
+      "target": "kneemri.training.options",
       "weight": 1
     },
     {
@@ -26684,6 +26696,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.unstated",
+      "target": "kneemri.training.options.TrainingOptions.spelled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
       "target": "kneemri.experiments.arm_check.ArmCheck.carriage_returns",
       "weight": 1
@@ -36903,6 +36921,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.patience.Patience.settled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
       "target": "kneemri.training.trainer.Trainer.evaluated",
       "weight": 1
     },
@@ -36994,6 +37018,18 @@
       "kind": "holds",
       "source": "kneemri.training.fitting.Fold",
       "target": "core.data.labels.targets.Targets",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.fitting.RunPlan",
+      "target": "kneemri.training.fitting.RunPlan",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.fitting.RunPlan",
+      "target": "kneemri.training.options.TrainingOptions",
       "weight": 1
     },
     {
@@ -39133,9 +39169,9 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.training.train.main",
-      "target": "kneemri.training.fitting.RunPlan",
+      "target": "kneemri.training.fitting.RunPlan.of",
       "weight": 1
     },
     {
@@ -71768,6 +71804,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.fitting.RunPlan.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.training.fitting.RunPlan",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.flag_vocabulary.FlagVocabulary._augmentation_arguments",
       "label": "_augmentation_arguments",
       "level": "method",
@@ -72848,6 +72892,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.options.TrainingOptions.spelled",
+      "label": "spelled",
+      "level": "method",
+      "parent": "kneemri.training.options.TrainingOptions",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.options.TrainingOptions.supervision",
       "label": "supervision",
       "level": "method",
@@ -72898,6 +72950,14 @@
       "descendants": 0,
       "id": "kneemri.training.patience.Patience.exhausted",
       "label": "exhausted",
+      "level": "method",
+      "parent": "kneemri.training.patience.Patience",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.patience.Patience.settled",
+      "label": "settled",
       "level": "method",
       "parent": "kneemri.training.patience.Patience",
       "role": null

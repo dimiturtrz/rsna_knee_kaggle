@@ -35,6 +35,7 @@ from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.training.options import TrainingOptions
 from kneemri.training.patience import Patience
 from kneemri.training.trainer import Trainer
 
@@ -82,9 +83,23 @@ class RunPlan:
     batch: int = 12
     patience: int = 0
     """Epochs without improvement before stopping; 0 runs the full schedule."""
+    patience_from: float = 0.0
+    """Share of the run before which no epoch is kept and none counts toward patience; 0 settles all."""
 
     seed: int = 2026
     """Data ORDER only — the model's own initialisation is seeded by the caller before it is built."""
+
+    @classmethod
+    def of(cls, options: TrainingOptions, destination: Path) -> "RunPlan":
+        """The plan a parsed run asked for — one place, so a stopping field cannot be parsed and dropped."""
+        return cls(
+            destination=destination,
+            epochs=options.epochs,
+            batch=options.batch,
+            patience=options.patience,
+            patience_from=options.patience_from_progress,
+            seed=options.seed,
+        )
 
 
 @dataclass(frozen=True)
@@ -114,7 +129,7 @@ class Fitting:
         # Built here rather than passed in: `main` seeded one generator and handed it to nothing else,
         # so owning it costs no behaviour and removes an argument that could be seeded twice.
         self.generator = np.random.default_rng(plan.seed)
-        self.patience = Patience(plan.patience)
+        self.patience = Patience(plan.patience, plan.patience_from)
 
     @staticmethod
     def _calibration_error(predicted: NDArray[np.float64], truth: NDArray[np.float32]) -> float:
@@ -229,7 +244,8 @@ class Fitting:
             # epoch is measured on exactly the weights that epoch would write.
             with self.trainer.evaluated():
                 ranked, per_label, predicted = self.ranked(fold, epoch)
-                improved = ranked > best
+                settled = self.patience.settled(epoch, self.plan.epochs)
+                improved = settled and ranked > best
                 if improved:
                     best, kept = ranked, self.keep(fold, epoch, ranked, predicted)
             seconds = round(time.time() - started)
@@ -271,7 +287,7 @@ class Fitting:
                     started=round(started),
                 )
             )
-            if self.patience.exhausted(improved=improved):
+            if settled and self.patience.exhausted(improved=improved):
                 logger.info(
                     "stopping at epoch %d: %d epochs without improving on %.4f", epoch, self.patience.epochs, best
                 )

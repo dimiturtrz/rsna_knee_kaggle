@@ -118,6 +118,7 @@ NOT_A_SWITCH = {
     "the same split line. No model, trainer or targets object holds it, so there is nothing here to "
     "compare it against; what a landed-check would want is the study COUNT, and the run logs that",
     "patience": "when to stop, read by the stopper each epoch rather than applied once",
+    "patience_from_progress": "when keeping and stopping may begin, read by the same stopper each epoch",
     "batch": "how many studies a step holds, a resource knob the loader obeys or raises on",
     "vram_gb": "a memory cap set by the queue against the card it runs on",
     "seed": "a seed is not a method; folds and seeds are banned as arms here",

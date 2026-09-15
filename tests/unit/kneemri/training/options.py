@@ -222,6 +222,21 @@ def test_of_reads_a_recipe_file_under_the_flags(tmp_path: Path):
     assert options.config == recipe, "the file travels to the stamp beside the values it set"
 
 
+def test_spelled(tmp_path: Path):
+    """A recipe file's keys read as stated flags ahead of the line; a line with no file is unchanged."""
+    recipe = tmp_path / "r.toml"
+    recipe.write_text("band_low = 0.1\nslices = 20\n", encoding="utf-8")
+
+    assert TrainingOptions.spelled(["--config", str(recipe), "--ema"]) == [
+        "--band-low",
+        "--slices",
+        "--config",
+        str(recipe),
+        "--ema",
+    ]
+    assert TrainingOptions.spelled(["--ema"]) == ["--ema"]
+
+
 def test_of_file(tmp_path: Path):
     """Values arrive typed as their fields; no file is no values; a misspelt key refuses."""
     recipe = tmp_path / "r.toml"

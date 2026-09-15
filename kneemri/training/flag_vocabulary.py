@@ -500,6 +500,7 @@ class FlagVocabulary:
             "whose weights are kept, so the tail produces checkpoints that are discarded. The SCHEDULE "
             "is still built for the full count - this ends the loop, it does not compress the anneal.",
         )
+        parser.add_argument("--patience-from-progress", type=float, default=0.0, help="share before keeping starts")
         parser.add_argument(
             "--certainty-ramp",
             type=int,

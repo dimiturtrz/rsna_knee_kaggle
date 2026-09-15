@@ -50,9 +50,24 @@ stopping after it only removes epochs that would have been discarded.
 class Patience:
     """How many epochs a run may go without improving before it stops."""
 
-    def __init__(self, epochs: int = 0) -> None:
+    def __init__(self, epochs: int = 0, from_progress: float = 0.0) -> None:
+        if not 0.0 <= from_progress < 1.0:
+            message = f"patience from progress {from_progress} leaves no epoch that may be kept"
+            raise ValueError(message)
         self.epochs = epochs
+        self.from_progress = from_progress
         self.stale = 0
+
+    def settled(self, epoch: int, total: int) -> bool:
+        """Whether this epoch may be KEPT and may COUNT toward stopping: it starts at or past `from_progress`.
+
+        A curriculum ramps its augmentation and hardness over the first share of the run, and the holdout
+        of a model still inside that ramp is read under an easier fit than the one the run is heading
+        for. An early peak there is the curriculum's shape, not the model's best, so neither the kept
+        epoch nor the stale count may be decided on it. 0.0 settles every epoch, which is every run
+        before this existed. The last epoch always settles, so a run can never end with nothing kept.
+        """
+        return epoch >= min(self.from_progress * total, total - 1)
 
     def exhausted(self, *, improved: bool) -> bool:
         """Whether the run should stop now, counting the epochs since the holdout last improved.

@@ -171,6 +171,8 @@ class TrainingOptions:
     report_vectors: Path | None = None
     patience: int = 0
     """Epochs without holdout improvement before stopping; 0 runs the full schedule."""
+    patience_from_progress: float = 0.0
+    """Run share before which no epoch is kept or counts toward patience — the curriculum's ramp end."""
 
     aug_start: float = 1.0
     """Regulariser strength multiplier at progress 0 — see `ProgressSchedule`; 1.0 everywhere is the ledger."""
@@ -371,6 +373,16 @@ class TrainingOptions:
         parser = FlagVocabulary.parser()
         parser.set_defaults(**cls.of_file(parser.parse_known_args(argv)[0].config))
         return cls(**vars(parser.parse_args(argv)))
+
+    @classmethod
+    def spelled(cls, argv: list[str]) -> list[str]:
+        """The line with its `--config` file's keys spelled as the flags they stand for, ahead of it.
+
+        For checks that read what an arm STATED rather than what it parsed to: a key in the recipe file
+        is written down exactly as a flag on the line is, and must not read as silence.
+        """
+        config = Path(argv[argv.index("--config") + 1]) if "--config" in argv else None
+        return [f"--{name.replace('_', '-')}" for name in cls.of_file(config)] + argv
 
     @classmethod
     def of_file(cls, config: Path | None) -> dict[str, object]:

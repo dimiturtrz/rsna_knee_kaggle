@@ -18,6 +18,7 @@ from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyModel
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.fitting import Fitted, Fitting, Fold, RunPlan
+from kneemri.training.options import TrainingOptions
 from kneemri.training.trainer import Trainer
 
 from ..models.model import DIM, SLOTS, _FakeBackbone
@@ -48,13 +49,15 @@ def _fold(*, holdout: bool = True) -> Fold:
     )
 
 
-def _fitting(destination: Path, epochs: int = 1, patience: int = 0) -> Fitting:
+def _fitting(destination: Path, epochs: int = 1, patience: int = 0, patience_from: float = 0.0) -> Fitting:
     torch.manual_seed(SEED)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
     trainer = Trainer(model, torch.device("cpu"))
     encoder = Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM)
     record = MemberRecord(OPTIONS, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
-    plan = RunPlan(destination=destination, epochs=epochs, batch=BATCH, patience=patience, seed=SEED)
+    plan = RunPlan(
+        destination=destination, epochs=epochs, batch=BATCH, patience=patience, patience_from=patience_from, seed=SEED
+    )
     return Fitting(trainer, record, plan)
 
 
@@ -198,6 +201,32 @@ def test_patience_ends_the_loop_after_stale_epochs(tmp_path: Path):
 
     assert kept.epoch == 0
     assert len(fitting.metrics.rows()) == 3, "epoch 0, then two stale ones, then stop"
+
+
+def test_no_epoch_inside_the_ramp_is_kept_or_counts_toward_patience(tmp_path: Path):
+    """A peak inside the curriculum's ramp is neither kept nor a reason to stop (owner steer, knee-feb62.2).
+
+    Ungated, epoch 0's 0.95 would be kept and patience 1 would stop the run at epoch 1 on its 0.10.
+    """
+    fitting = _fitting(tmp_path / "member.pt", epochs=4, patience=1, patience_from=0.5)
+    ranked = iter([0.95, 0.10, 0.60, 0.50])
+    fitting.ranked = lambda fold, epoch: (next(ranked), {}, None)  # type: ignore[method-assign]
+
+    kept = fitting.run(_fold())
+
+    assert kept.epoch == 2, "the best SETTLED epoch is kept, not the ramp's early peak"
+    assert len(fitting.metrics.rows()) == 4, "the ramp's stale epoch did not spend the patience"
+
+
+def test_of():
+    """Every stopping field the command line parsed LANDS in the plan the loop obeys."""
+    options = TrainingOptions(epochs=36, batch=6, patience=4, patience_from_progress=0.25, seed=7)
+
+    plan = RunPlan.of(options, Path("member.pt"))
+
+    assert (plan.epochs, plan.batch, plan.patience, plan.patience_from, plan.seed) == (36, 6, 4, 0.25, 7)
+    assert plan.destination == Path("member.pt")
+    assert RunPlan.of(TrainingOptions(), Path("member.pt")).patience_from == 0.0, "default settles every epoch"
 
 
 def test_the_full_schedule_runs_when_patience_is_off(tmp_path: Path):

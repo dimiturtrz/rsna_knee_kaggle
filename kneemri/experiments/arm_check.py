@@ -581,8 +581,8 @@ class ArmCheck:
     def unstated(invocations: dict[str, str]) -> dict[str, list[str]]:
         """The arms that never say what operating point they run at, by which flags they leave silent.
 
-        IT ASKS THE FLAG LINE, NOT THE PARSED OPTIONS, and that is the whole check. After parsing, an
-        arm that asked for 12 slices and an arm that asked for nothing are the same object — which is
+        IT ASKS THE FLAG LINE AND ITS RECIPE FILE, NOT THE PARSED OPTIONS, and that is the whole check.
+        After parsing, an arm that asked for 12 slices and an arm that asked for nothing are the same object — which is
         exactly why this defect survives every gate the project already runs. Only the text distinguishes
         a stated operating point from an inherited one.
 
@@ -592,7 +592,8 @@ class ArmCheck:
         read against anything later — see `OPERATING_POINT_FLAGS` for the case that cost a champion seat.
         """
         silent = {
-            name: [flag for flag in OPERATING_POINT_FLAGS if flag not in flags] for name, flags in invocations.items()
+            name: [flag for flag in OPERATING_POINT_FLAGS if flag not in TrainingOptions.spelled(shlex.split(flags))]
+            for name, flags in invocations.items()
         }
         return {name: missing for name, missing in silent.items() if missing}
 

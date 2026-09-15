@@ -1,0 +1,48 @@
+# knee-feb62.2 grand recipe: labelwise_dense_drop40_long + RECIPE, long horizon, one progress curve.
+# Values derived in interpretations/kneemri/2026-09-15_lost_fragments_census.md (Horizon section).
+# Left out: through_plane (census: composable, untested with labelwise) and unread_targets (label
+# side composable, -0.0065 on l75 in one arm) - neither verified. No flips.
+
+# RECIPE
+fold = 0
+one_cycle = true
+weight_floor = true
+rank_weight = 1.0
+
+# base: labelwise_dense_drop40_long, horizon 24 -> 36
+epochs = 36
+slice_pooling = "labelwise"
+whole_stack = true
+recompute_activations = true
+backbone_lr = 4e-5
+slices = 20
+band_low = 0.1
+band_high = 0.9
+calibrated_targets = true
+hold_annotations = true
+slot_dropout = 0.40
+
+# composable fragments
+ema = true
+stochastic_depth = 0.05
+ghosting = 0.04
+intensity_aug = true
+mixup = 0.2
+scale_jitter = 0.25
+padding_mode = "reflection"
+warmup = 0.25
+
+# augmentation and hardness on one progress curve, both ramps end at 0.25
+aug_start = 0.25
+aug_mid = 1.0
+aug_end = 0.5
+aug_ramp = 0.25
+aug_tail = 0.2
+hard_start = 0.0
+hard_mid = 1.0
+hard_end = 1.0
+hard_ramp = 0.25
+hard_tail = 0.0
+
+# owner steer: no epoch inside the ramps is kept or counts toward patience
+patience_from_progress = 0.25

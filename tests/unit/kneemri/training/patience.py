@@ -1,3 +1,5 @@
+import pytest
+
 from kneemri.training.patience import Patience
 
 PATIENCE = 3
@@ -32,3 +34,25 @@ def test_exhausted_resets_on_an_improvement():
     assert not patience.exhausted(improved=False)
     assert not patience.exhausted(improved=False)
     assert patience.exhausted(improved=False)
+
+
+RAMP_END = 0.25
+EPOCHS = 36
+
+
+def test_settled():
+    """Classes: off settles all, a ramp splits at its end, near-one keeps the last, out of range raises."""
+    assert all(Patience().settled(epoch, EPOCHS) for epoch in range(EPOCHS)), "0.0 is today's behaviour"
+
+    ramped = Patience(PATIENCE, RAMP_END)
+    assert not ramped.settled(0, EPOCHS)
+    assert not ramped.settled(8, EPOCHS), "epoch 8 still trains inside the ramp, which ends at 9/36"
+    assert ramped.settled(9, EPOCHS), "the first epoch starting at the ramp end is settled"
+
+    late = Patience(PATIENCE, 0.99)
+    assert not late.settled(EPOCHS - 2, EPOCHS)
+    assert late.settled(EPOCHS - 1, EPOCHS), "the last epoch always settles, so a run keeps something"
+
+    for outside in (-0.1, 1.0):
+        with pytest.raises(ValueError, match="no epoch"):
+            Patience(PATIENCE, outside)

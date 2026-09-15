@@ -83,6 +83,16 @@ def test_overstated():
     assert "no_cap" not in overstated, "an arm that names no cap gets the derived one and says nothing"
 
 
+def test_unstated_reads_a_recipe_file_as_stated(tmp_path: Path):
+    """A `--config` file naming the operating point is a statement, not silence."""
+    recipe = tmp_path / "r.toml"
+    recipe.write_text("slices = 20\nband_low = 0.1\n", encoding="utf-8")
+
+    unstated = ArmCheck().unstated({"recipe": f"{GOOD} --config {recipe.as_posix()}"})
+
+    assert unstated["recipe"] == ["--band-high"], "only the key the file left out"
+
+
 def test_unstated():
     """An arm that names its operating point passes whatever the values are; one that is silent is named.
 

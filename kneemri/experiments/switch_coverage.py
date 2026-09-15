@@ -64,6 +64,7 @@ COVERAGE = {
     "hard_tail": "--hard-end 0 --hard-tail 0.25",
     "corpus_oversample": "--corpus-oversample 3.0 --target-corpus canonical",
     "padding_mode": "--padding-mode reflection",
+    "patience_from_progress": "--patience 2 --patience-from-progress 0.5",
     "hold_annotation_studies": "--hold-annotations --hold-annotation-studies",
 }
 """One smoke recipe per switch no arm selects, holding every other flag at its default.
