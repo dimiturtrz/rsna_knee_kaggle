@@ -38,3 +38,12 @@ def test_forward_is_identity_at_zero() -> None:
     path = DropPath(NO_DROP)
     path.train()
     assert torch.equal(path.forward(branch), branch)
+
+
+def test_rate() -> None:
+    path = DropPath(0.1)
+    path.rate = 0.0
+    assert path.rate == 0.0
+    path.rate = 0.25
+    assert path.rate == pytest.approx(0.25)
+    assert path.state_dict() == {}
