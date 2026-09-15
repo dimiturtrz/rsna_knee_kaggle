@@ -94,4 +94,99 @@ Sources:
 - **Two of the fragments carry their signal on the CROSS-SITE ruler, which the own-holdout cannot see:** ghosting and intensity aug. That is the reason to read the arm on the decode toll too.
 - **The +0.0077 curriculum number is retracted as a lever size.** Quote +0.0008 ledger75 vs band_dense.
 
-Beads: everything-on seat knee-p0m58 (depends on knee-p28we, knee-amem9); decode-toll readout knee-amem9; padding rule knee-g5end. Closed-bead scan used bd list default limit 50, so it is partial.
+Beads: everything-on seat knee-p0m58, now superseded by epic knee-feb62 (depends on knee-p28we, knee-amem9); decode-toll readout knee-amem9; padding rule knee-g5end.
+
+## Closed-bead rescan — all 681 (knee-feb62.1)
+
+The first pass read `bd list` at its default limit of 50. This one read
+`bd list --status=closed --limit 0` (681 rows), and then the notes of every candidate. `comp/members.declines`
+was already complete (393 of 393). New rows only; the classification rule is the same as above.
+
+| fragment | source | measured delta (cut, source) | class | note |
+|---|---|---|---|---|
+| tissue-centre crop | knee-yrf, knee-2zbi | tissue kept +0.0294 [+0.0276, +0.0312] at 130 mm (knee-2zbi). `tissue224` −0.0011 mid vs native224 (README:317), −0.0004 as a seat add (README:11040) | COMPOSABLE (data geometry) | switching it needs the tissue-mask cache at 336 px, and nothing in the 336 px cache has one (UNVERIFIED) |
+| 140 mm FOV | knee-n3yx, band140 | −0.0022 mid vs band_dense, MCL −0.016..−0.021 (README:2007-2020). −0.0003 as a seat add (README:11036) | COMPOSABLE (weak) | the periphery hypothesis read the wrong sign on its own label. Low priority |
+| layer-wise LR decay + unfreeze 12 | knee-a2q7, `band_dense_llrd` | −0.0004 seat add (README:11042). ~580 s an epoch, 2x the base (README:2093) | COMPOSABLE (knob), costly | this is the `--layer-decay` row above. Unfreeze 12 is 2x wall |
+| unfreeze depth 12 at the winning rate | knee-3om | −0.0007 vs depth 6 (bead notes) | COMPOSABLE (knob) | noise |
+| one_cycle off | knee-fkw5, `nocycle224_long` | −0.0061 best, peak e9→e17, identical finish 0.8326 vs 0.8325 (README:4082-4095) | DEAD for the peak | keep one_cycle. The slide is overfitting, not the schedule, and that is the case for regularising a long run |
+| resolution 392 | knee-dft, knee-wnkv | +0.0002 at a matched rate (bead notes). 28.4 GB VRAM | COMPOSABLE (knob), costly | not worth the VRAM against the 50-70% cap |
+| cls_mean_focal pooling | knee-66c | −0.0025 vs whole_stack, seat −0.0012 (bead notes) | CONFLICTS | replaces labelwise pooling |
+| order-aware depth aggregator | knee-tqn, `depth_true` | 0.8461, seat −0.0002 (bead notes) | CONFLICTS | replaces labelwise pooling |
+| per-slice max + CNN | knee-wif | +0.0018 for 3x encoder cost (bead notes) | CONFLICTS | pooling and trunk change |
+| loss divided by element count | knee-sbr | −0.0022 (bead notes) | COMPOSABLE (knob), no reason to | the weight floor already measured better |
+| registered reformats | knee-vigl | never trained | not composable now | a data build, not a flag |
+| overlap TTA | knee-36y | +0.0025 (bead notes) | already ON | inference, in both kernels |
+| member count 20 | knee-uxg | best solo beats a 3-member ensemble (bead notes) | out of scope | folds and seeds are banned |
+
+Net: the rescan adds no composable training flag beyond the table above. The two new composable ones,
+tissue centre and 140 mm, are data geometry that needs a cache the 336 px recipe does not have. The one
+mechanism it adds is the `nocycle` result. The late slide is overfitting, and one_cycle stays. That is
+the input to the horizon section below.
+
+## Horizon and curriculum shape — derived, not swept (knee-feb62.3)
+
+### Evidence
+
+| # | fact | source |
+|---|---|---|
+| E1 | Base `labelwise_dense_drop40_long` epoch trajectory: e6 0.8491, e9 0.8534, e12 0.8623, e17 0.8658, e18 0.8669, e23 0.8672. The last six epochs span 0.0010. Train loss still falls (0.5965 → 0.5587), so the plateau is holdout-side | `$MODELS/experiments/labelwise_dense_drop40_long_s2026.full.log` |
+| E2 | 185 s an epoch at steady state (224 s for e0), so 24 epochs = 1.25 h | same log |
+| E3 | drop40 at 12 → 24 epochs is +0.0059 l75, peak on the last epoch, CONVERGED | knee-cgt9m, knee-a21h9 |
+| E4 | Without a regulariser the budget is not a lever. `dropstack_long` 24 ep 0.8641 vs 12 ep 0.8654. `labelwise_long24` retired unrun on that | README:15445-15447, 15684-15689 |
+| E5 | Unregularised 224 at 24 epochs slides 14 epochs after e9 (0.8490 → 0.8325). Removing one_cycle only moves the peak (e17) and leaves the finish identical | README:4082-4095 |
+| E6 | Regularisers move the peak later: aug_long e6 → e9; mixup_dense peaks at its last epoch; dropstack_light peaks at its last epoch while its control peaked at e6 | knee-gawj, knee-x580, README:15439-15456 |
+| E7 | 8 → 24 epochs +0.0068 on the windowed recipe | knee-pxa |
+| E8 | EMA +0.0010 mid / −0.0020 l75 where a holdout picks the epoch; +0.0013 on the last epoch | knee-xzr, knee-56w5, README:592 |
+| E9 | The certainty ramp was measured over 6 of 12 epochs (share 0.5) | options.py:196, README:6695 |
+| E10 | No SWA flag in `kneemri/training/options.py`; `ema` is the only weight average (options.py:131) | grep, 2026-09-15 |
+
+### Derivation
+
+**Epochs: 36.**
+- E3 and E4 together say budget pays only when a regulariser holds off overfitting. The grand recipe stacks
+  more regularisers than drop40 alone. E6 says each one moves the peak later.
+- E1 says drop40 by itself reached its plateau at about e18, 75% of its budget.
+- Under the ramp below, the first quarter runs at reduced dose and the last fifth tapers. That leaves
+  about 20 epochs at full dose, which is roughly the 18 epochs drop40 needed to plateau at its own full dose.
+  That is the argument for 1.5x.
+- 48 is not chosen. E5 shows what a surplus budget does when regularisation falls short: 14 epochs of slide.
+  The anneal does not rescue it, so the extra third would buy risk, not signal. It would also cost 2.5 h.
+- 30 is not chosen: it would squeeze the full-dose plateau under the 18 epochs E1 measured.
+
+**Augmentation schedule** (`--aug-start 0.25 --aug-mid 1.0 --aug-end 0.5 --aug-ramp 0.25 --aug-tail 0.2`).
+- ramp 0.25 = 9 epochs. That covers the fast-fit phase, which E1 puts at e0–e9 (0.7305 → 0.8534). Holding
+  heavy operators off there is the owner's mechanism, and dropstack_light's failure mode (README:15439-15456).
+- start 0.25, not 0: a clean start and then a dose shock makes the ramp itself a distribution shift.
+  A quarter dose keeps the operators live from step one. This is a judgment call with no measurement behind
+  it, stated as such.
+- tail 0.2 = 7 epochs, the length of drop40's flat top (E1, e17–e23). The low-LR anneal then consolidates
+  on inputs closer to the test distribution.
+- end 0.5, not 0: ghosting and intensity carry their signal on the cross-site ruler (the census above).
+  Annealing them to zero would train that axis out in the final epochs.
+
+**Hardness schedule** (`--hard-start 0 --hard-mid 1.0 --hard-end 1.0 --hard-ramp 0.25 --hard-tail 0`).
+- start 0: easy, trusted cells first. That is the certainty-ramp direction, E9.
+- ramp 0.25 = 9 epochs, at least the 6 epochs the ramp was measured over.
+- The ramp is shared with aug. Hardness and augmentation both reach full at e9, so the model meets full
+  dose and full labels in the same phase. Staggering them would need a measurement nobody has.
+- end 1.0, no tail: hardness 1.0 is the ledger's label weighting, and the ruler scores every cell.
+  Annealing back toward easy cells would fit the final epochs to a label distribution the holdout does not
+  have. The asymmetry with aug is deliberate: aug is an input corruption, and toning it down moves toward
+  test inputs; hardness is the target itself.
+- The +0.0077 curriculum number is not the reason for any of this (retracted above, +0.0008 l75).
+
+**EMA: ON.** SWA: no flag exists (E10), so it is not in the recipe, and adding one is code the preset does
+not need. EMA is flat to −0.0020 when a holdout picks the epoch (E8), but in a 36-epoch run with a tapered tail
+the pick should land in the last few epochs, where EMA read +0.0013. It is also the only protection a
+fold −1 fit gets. The risk is the l75 −0.0020, which sits inside the floor.
+
+**Stop rule, not a sweep.** Run `trajectory_check` live against the pre-registered target. Run
+`convergence_check` after. UNDERTRAINED, meaning a peak at e35 with a still-rising tail, is the one outcome
+that re-opens the horizon; everything else is read as-is.
+
+### Card-hours for knee-feb62.4
+
+36 x 185 s = 6660 s = **1.85 h** at the base's measured step (E2). The heavier operators add unmeasured
+per-step cost (mixup, ghosting, intensity, stochastic depth), so budget **2.0–2.5 h**; the overhead is
+UNVERIFIED until the knee-feb62.2 smoke reports s/epoch. The ~280 s an epoch in knee-ffku5 and knee-pfqtw
+belongs to other recipes, not this one.
