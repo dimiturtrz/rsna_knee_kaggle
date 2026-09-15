@@ -69406,6 +69406,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.drop_path.DropPath.rate",
+      "label": "rate",
+      "level": "method",
+      "parent": "kneemri.models.drop_path.DropPath",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.drop_path.DropPath.rate",
+      "label": "rate",
+      "level": "method",
+      "parent": "kneemri.models.drop_path.DropPath",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.ema.LiveWeights.applied",
       "label": "applied",
       "level": "method",
