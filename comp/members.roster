@@ -859,26 +859,24 @@ labelwise_depth24_negpull_s2026.pt  # 0.8666 @holdout909 midpoint / 0.9044 ledge
 labelwise_depth20_b10_s2026.pt # 0.8607 @holdout909 midpoint, ep 8. Depth-20 labelwise. The slice-depth axis
                             # is closed as a source of gain (saturated), which is a statement about what
                             # to RUN next, not about what may ship.
-# SEAT RETIRED 2026-09-16 -- it was a DUPLICATE of line 65, wearing a name no file has ever carried.
-                            # The line read `band_dense_s2026_n24b0.1-0.9`, which is the `band_dense_s2026`
-                            # stem with a READING SPEC glued on (n24, b0.1-0.9). It therefore matched nothing,
-                            # and since patterns() globs the line literally, package_members raised on it --
-                            # so THIS ROSTER COULD NOT BUILD A PACKAGE AT ALL, and had not been able to for as
-                            # long as the line existed. Correcting the name only moved the failure: the stem
-                            # it resolves to is already seated at line 65, and two checkpoints under one id
-                            # is refused.
-                            # The number was borrowed too. 0.8598 is `small_batch6_s2026`'s peak (the batch-6
-                            # variant of this same recipe), not this member's; re-priced on 909 rows,
-                            # band_dense reads 0.8578 midpoint / 0.8877 ledger75 and small_batch6
-                            # 0.8598 / 0.8895. Nothing on disk answers to "24-slice at the 0.1-0.9 band".
+# SEAT RETIRED 2026-09-16 -- it names a READING, and a reading cannot be packaged.
+                            # The line read `band_dense_s2026_n24b0.1-0.9`: the `band_dense_s2026` stem with a
+                            # serving spec glued on (24 slices, the 0.1-0.9 band). `patterns()` globs a line
+                            # literally, and no FILE carries that name, so package_members raised on it -- and
+                            # THIS ROSTER COULD NOT BUILD A PACKAGE AT ALL for as long as the line existed.
+                            #
+                            # CORRECTED 2026-09-16, same day, against my own first reading of it. It is NOT a
+                            # duplicate of line 65 and its number was NOT borrowed. `band_dense_s2026_n24b0.1-0.9.holdout.npz`
+                            # is on disk (written 2026-09-11) and prices out on the same 909 rows at
+                            # 0.8598 midpoint / 0.8888 ledger75, epoch 8 -- against band_dense_s2026's own
+                            # 0.8578 / 0.8877. So the roster's 0.8598 was this reading's real number, and the
+                            # collision with `small_batch6_s2026`'s 0.8598 is a coincidence at the midpoint's
+                            # resolution. What it has no more of is a CHECKPOINT: the same weights re-read
+                            # through a different decode. package_members ships `.pt` files, so this seat can
+                            # never be reached by adding a file to the shelf -- it is reached by changing the
+                            # kernel's decode over the line-65 seat's weights. Declined in writing on exactly
+                            # that ground; the +0.0011 it buys is directional and below the bar either way.
                             # The M390 flag below is a real open question and it belongs to the line-65 seat.
-                            # ORIGINAL LINE, for the record:
-                            # `band_dense_s2026_n24b0.1-0.9`, which is the stem with a READING SPEC glued on
-                            # (n24, b0.1-0.9) and matches no file, so package_members raised on it and this
-                            # roster could not build a package at all. The quoted 0.8598 was not this member's
-                            # either -- it is `small_batch6_s2026`'s peak, the batch-6 variant of this same
-                            # recipe; re-priced here on 909 rows, band_dense reads 0.8578/0.8877 and
-                            # small_batch6 0.8598/0.8895.
                             # Rostered with a flag on it: M390 asks whether the 0.1-0.9 band is itself
                             # the cause of the class-B column holes, and if that comes back positive this
                             # member is evidence in the experiment, not just a seat.

@@ -1377,3 +1377,13 @@ ctl_slowbb_s2026
   as the control, so this null is not budget-bound. With ctl_fastbb's -0.0215 at 2.5x it puts 4e-5 at the
   optimum and shows the optimum is asymmetric: a plateau on the slow side, a cliff on the fast side.
   Declined as a seat; it closes the last open fragment of the control recipe (knee-lm2ol).
+
+band_dense_s2026_n24b0.1-0.9
+  A READING, not a member. `band_dense_s2026_n24b0.1-0.9.holdout.npz` (2026-09-11) is the line-65 seat's
+  own weights re-read through a 24-slice / 0.1-0.9 decode; there is no checkpoint of that name and there
+  never was one. Priced on the same 909 rows it reads 0.8598 midpoint / 0.8888 ledger75 at epoch 8,
+  against band_dense_s2026's 0.8578 / 0.8877 -- a real +0.0011 at the 75 cut, directional and below the
+  1.5% bar. It sat on the roster as a seat until 2026-09-16, where it matched no file and therefore made
+  the whole roster unable to build a package (knee-aqppc). Declined on the mechanism rather than the
+  number: package_members ships `.pt` files, so nothing added to the shelf can reach this. Re-open it by
+  changing the KERNEL's decode over the line-65 seat, or by training the spec into its own checkpoint.
