@@ -87,9 +87,12 @@ does not read this entry.
 **EVERYTHING ELSE IS THE CHAMPION, UNCHANGED.** Same seven, same order, same `overlap=False`, same
 `LogitAverage`, same raptor member at `FOREIGN_WEIGHT` 1/3, same budget hand-off. One line differs, and
 it names a member that appears in 0 of 130 board rows -- so this is a SOURCE change, not a reseating.
-`slot_dropout_s2026` is on the FIRST shelf (`dimiturnt/kneemri-members`, live, verified by asking Kaggle
-for the file list at page_size 1000 -- the client's default page_size of 20 reports a 136-file dataset as
-20 files and will tell you a live member is absent).
+THE NINE SIT ON TWO SHELVES AND THE METADATA MUST DECLARE BOTH. `slot_dropout_s2026` and the four
+`*_cf`/`*_ff` seats are on `dimiturnt/kneemri-members`; the three `labelwise_*_drop40_long_s2026` seats --
+the ones that carry the champion's 0.946 -- are on `dimiturnt/kneemri-members-2` and nowhere else. A pack
+the kernel does not mount is a member `KernelRun` drops without a word, which reads from the board as a
+re-ship of the seven. `mount_check --live` is what asks Kaggle rather than the file; ask it at page_size
+1000, since the client's default of 20 reports a 136-file dataset as 20 and calls a live member absent.
 
 **WHAT THIS ENTRY DOES NOT CLAIM.** It does not claim slot dropout raises the board; nothing has measured
 that, which is what the slot is for. It does not claim the cross-site number is a board predictor -- that
@@ -234,8 +237,8 @@ def main() -> None:
         "labelwise_dense_drop40_long_s2026",
         # THE ONLY LINE THAT DIFFERS FROM THE CHAMPION. The seven above are in the champion's own order,
         # unchanged; nothing about how they are weighted or joined moves. This member lives on the FIRST
-        # shelf (`dimiturnt/kneemri-members`), which the champion already mounts, so this kernel mounts
-        # no dataset the champion does not and no new encoder enters with it. It is named in 0 of 130
+        # shelf, the three `labelwise_*` seats above live on the SECOND, and the metadata declares both
+        # or they are dropped in silence. No new encoder enters with it. It is named in 0 of 130
         # board rows. The offline ruler prices it -0.0001; the cross-site ruler prices it +0.0090 against
         # its own matched control. The docstring says which of those two this entry is betting on.
         "slot_dropout_s2026",

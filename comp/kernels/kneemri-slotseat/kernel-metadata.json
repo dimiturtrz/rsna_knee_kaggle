@@ -11,6 +11,7 @@
  "dataset_sources": [
   "dimiturnt/kneemri-kit",
   "dimiturnt/kneemri-members",
+  "dimiturnt/kneemri-members-2",
   "dimiturnt/dinov3-hf",
   "dreaddevelopment/raptor-knee-widedense"
  ],
