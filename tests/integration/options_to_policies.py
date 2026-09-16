@@ -45,9 +45,16 @@ THE_LOOP = {
     "plan",
     "predict",
     "save_partial",
+    "shortest_cycle",
 }
 """`Trainer` methods the FITTING calls, not the setup — they run per batch or per epoch, so no run
-chooses them and no builder attaches them."""
+chooses them and no builder attaches them.
+
+`shortest_cycle` is the odd one: it is arithmetic, not a phase. It returns the fewest steps whose warm
+phase OneCycleLR will not divide by zero on, and its ONLY caller is `one_cycle` — which is itself a
+policy, so this test replaces it with a recorder and its body never runs. The helper therefore reads as
+a policy no run can turn on while being reachable from every one_cycle run there is. Exempt on the same
+ground as the rest of this set: nothing attaches it, because it is not a thing to attach."""
 
 NOT_A_WRAPPER = {
     "check_whole_stack",

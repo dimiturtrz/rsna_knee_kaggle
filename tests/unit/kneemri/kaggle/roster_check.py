@@ -203,6 +203,22 @@ def test_phantom(tmp_path: Path):
     assert drift.phantom() == ["typo_s2026.pt"], "the typo matches no checkpoint on disk"
 
 
+def test_duplicated(tmp_path: Path):
+    """A seat named on two shelves is a WeightsError at serve time, and a set would hide it."""
+    for name in (SHIPPED, SMOKE, BARE, FORGOTTEN):
+        _member(tmp_path, name, scoreable=True)
+    first = tmp_path / "members.roster"
+    second = tmp_path / "members2.roster"
+    first.write_text(f"{SHIPPED}.pt\n{SMOKE}.pt\n", encoding="utf-8")
+    second.write_text(f"{SMOKE}.pt\n", encoding="utf-8")
+    declines = tmp_path / "members.declines"
+    declines.write_text("", encoding="utf-8")
+    drift = RosterDrift(tmp_path, [first, second], declines)
+
+    assert drift.duplicated() == [f"{SMOKE}.pt on members.roster, members2.roster"], "one name, two shelves"
+    assert drift.packaged() == {SHIPPED, SMOKE}, "the set still merges them, which is why duplicated exists"
+
+
 def _pixels(root: Path) -> Path:
     """Write the arrays the fixture's packaged member names, so its cache resolves on disk."""
     cache = Member.from_checkpoint(root / f"{SHIPPED}.pt").cache(root)

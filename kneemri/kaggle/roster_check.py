@@ -58,8 +58,9 @@ There are two because the shipped package is ~10 GB: adding one member to it mea
 it, so members trained after the last big push live in a SECOND dataset mounted beside the first
 (`MemberPackage.spanning`). That is a second shelf, never a second standard — this check reads both and
 holds every member on either to the same rule, so moving a line between them changes what gets pushed
-and nothing about what is documented. A name on BOTH shelves is a duplicate the mount refuses, which is
-why `packaged` is a set and the duplicate is caught there rather than being silently merged."""
+and nothing about what is documented. A name on BOTH shelves is a duplicate the MOUNT refuses, and
+`duplicated` is what names it here — this docstring used to claim `packaged` caught it "because it is a
+set", which is backwards: a set is how the two names quietly become one. See knee-hcu3k."""
 DECLINES = Path("comp/members.declines")
 CHECKPOINT_SUFFIX = ".pt"
 CHECKPOINT_GLOB = f"*{CHECKPOINT_SUFFIX}"
@@ -160,6 +161,25 @@ class RosterDrift:
     def patterns(self) -> list[str]:
         return [pattern for roster in self.rosters for pattern in MemberRoster.read(roster).patterns()]
 
+    def duplicated(self) -> list[str]:
+        """Each pattern named on more than one shelf, with the shelves that name it.
+
+        The docstring on ROSTERS claimed this was already caught, "because `packaged` is a set". It was
+        the opposite: flattening both shelves into one list and then collecting a SET is exactly how a
+        name on two shelves collapses to one healthy-looking entry, and nothing compared the shelves at
+        all. Three seats (`final_ws_df`, `calib_span_df`, `warm_calib_lowlr_drop40_long_s2026`) sat on
+        both rosters for weeks with this check green, harmless only by accident: shelf 1 was STALE, so
+        the live mounts stayed disjoint. Re-pushing shelf 1 at its full 147 members made the duplicate
+        live, and `MemberPackage.absorb` refuses a name two mounts both hold — so a kernel mounting both
+        shelves DIES rather than losing a seat, which is the louder half of the failure and the half no
+        gate here was watching. `mount_check` caught it one step before the board (knee-hcu3k).
+        """
+        seen: dict[str, list[str]] = {}
+        for roster in self.rosters:
+            for pattern in MemberRoster.read(roster).patterns():
+                seen.setdefault(pattern, []).append(roster.name)
+        return [f"{pattern} on {', '.join(shelves)}" for pattern, shelves in sorted(seen.items()) if len(shelves) > 1]
+
     def packaged(self) -> set[str]:
         """The scoreable members the roster's globs actually reach."""
         names = self.scoreable()
@@ -230,6 +250,11 @@ class RosterDrift:
         found += [
             f"roster names {pattern!r}, which matches no checkpoint under {self.processed}"
             for pattern in self.phantom()
+        ]
+        found += [
+            f"{named} — two mounts holding one name is a WeightsError at serve time, not a dropped seat; "
+            f"leave it on one shelf"
+            for named in self.duplicated()
         ]
         return found
 

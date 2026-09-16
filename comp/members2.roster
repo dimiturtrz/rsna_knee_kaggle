@@ -63,13 +63,25 @@ seat_oof5_distill_s2026.pt           # no offline number by construction, --fold
 # 909 under LEDGER75 is the best price this seat can be given — an approximate one, and it is what
 # licences seating it. `arm_check` refused a second name for this exact recipe (clean_calib_cf,
 # knee-7uoq) and saved 75 minutes of card by doing it.
-final_ws_df.pt                       # no offline number by construction, --fold -1
+# MOVED TO SHELF 1, 2026-09-16 -- named on BOTH rosters, and once shelf 1 was re-pushed with its
+# full 147 members that duplicate became LIVE: MemberPackage.absorb refuses a name held by two
+# mounts, so a kernel mounting both shelves would have died on WeightsError rather than dropping
+# a seat. It is served from `dimiturnt/kneemri-members` now; the seat is unchanged, only its
+# shelf. The roster-level duplicate predates the push -- roster_check's `packaged` is a SET, so
+# it merged the two names silently instead of naming them, and only mount_check saw it (knee-aqppc).
+# final_ws_df.pt                       # no offline number by construction, --fold -1
 
 # The narrow-span twin of the seat above — 12 slices at band 0.1-0.9 against final_ws_df's 20 at the
 # same band — so the pair prices SPAN at the calibrated-distill corner and nothing else. Its stand-in
 # has not been named: the researcher owes which fold-0 member differs from it in the teacher file alone.
 # Until then it may be packaged but not seated on a number.
-calib_span_df.pt                     # no offline number by construction, --fold -1
+# MOVED TO SHELF 1, 2026-09-16 -- named on BOTH rosters, and once shelf 1 was re-pushed with its
+# full 147 members that duplicate became LIVE: MemberPackage.absorb refuses a name held by two
+# mounts, so a kernel mounting both shelves would have died on WeightsError rather than dropping
+# a seat. It is served from `dimiturnt/kneemri-members` now; the seat is unchanged, only its
+# shelf. The roster-level duplicate predates the push -- roster_check's `packaged` is a SET, so
+# it merged the two names silently instead of naming them, and only mount_check saw it (knee-aqppc).
+# calib_span_df.pt                     # no offline number by construction, --fold -1
 
 # Added 2026-09-07 17:55Z, out of comp/members.declines (see the re-opening written there). 0.8577 solo,
 # CONVERGED (twelve of twelve, peak epoch 4, then eight declining epochs) -- a WORSE solo than every
@@ -472,7 +484,13 @@ clean_calib_drop40_long_s2026.pt        # 0.8978 ledger75 @e23 of 0..23, 909 row
                             # NOT YET SEATED. A solo is not a seat (`stack_increments` read +0.0020 solo
                             # and -0.0001 seated). Price it as a SWAP for `clean_calib_s2026`, which the
                             # champion six holds, and an entry carrying it that way must DROP that member.
-warm_calib_lowlr_drop40_long_s2026.pt   # 0.9000 ledger75 @e8, 909 rows, convergence_check TRUNCATED (the
+# MOVED TO SHELF 1, 2026-09-16 -- named on BOTH rosters, and once shelf 1 was re-pushed with its
+# full 147 members that duplicate became LIVE: MemberPackage.absorb refuses a name held by two
+# mounts, so a kernel mounting both shelves would have died on WeightsError rather than dropping
+# a seat. It is served from `dimiturnt/kneemri-members` now; the seat is unchanged, only its
+# shelf. The roster-level duplicate predates the push -- roster_check's `packaged` is a SET, so
+# it merged the two names silently instead of naming them, and only mount_check saw it (knee-aqppc).
+# warm_calib_lowlr_drop40_long_s2026.pt   # 0.9000 ledger75 @e8, 909 rows, convergence_check TRUNCATED (the
                             # PC shut down mid-run) so the number is a FLOOR. On `warm_calib_lowlr_s2026`
                             # 0.8910 @e4 that is +0.0090 -- the operator pair's largest gain on any base,
                             # and a floor. NOT YET SEATED; price as a SWAP for its control, re-run to finish.

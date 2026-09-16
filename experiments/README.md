@@ -16438,12 +16438,12 @@ $MODELS`, 909 rows, midpoint first.
 | `reader_through_s2026` | 0.7137 | *0.7509* | 0 | **TRUNCATED** |
 
 `clean_calib_drop40_long_s2026` is the one that matters: 0.8978 at ledger75 is pool strength, within
-0.007 of the champion-family seat `labelwise_dense_drop40_long_s2026` (0.9048), and it was sitting
+0.007 of the champion-family seat `labelwise_dense_drop40_long_s2026` (0.9048 ledger75), and it was sitting
 unquotable. It is the `drop40_long` treatment on the clean-teacher + calibration cell that this file
 already records at 0.8649 for `clean_calib_s2026` — so the long schedule is worth about +0.033 at the
 midpoint ruler on that cell, which is a fact the ledger could not state until now.
 
-`reader_through_s2026`'s 0.7509 is a **FLOOR and not a score** — `convergence_check` calls it TRUNCATED,
+`reader_through_s2026`'s 0.7509 ledger75 is a **FLOOR and not a score** — `convergence_check` calls it TRUNCATED,
 peak at epoch 0, so the anneal never ran. It is recorded to stop the number being re-quoted as the
 recipe's, which is exactly what that check exists to prevent.
 
@@ -16484,7 +16484,7 @@ the control sits on the fast side of its own optimum. `ctl_slowbb` (knee-lm2ol) 
 
 The honest summary of the sweep: fragment-level search on this family is closed except for `backbone_lr`.
 
-**`backbone_lr` closed the same night (knee-lm2ol).** `ctl_slowbb` at 2e-5 reads **0.8904, −0.0010**, and
+**`backbone_lr` closed the same night (knee-lm2ol).** `ctl_slowbb` at 2e-5 reads **0.8904 ledger75, −0.0010**, and
 converges on e10 — the *same* peak epoch as the control, so the obvious objection (a slower backbone starved
 by a 12-epoch `one_cycle` budget) is answered rather than assumed. 4e-5 is at its optimum, and the optimum is
 **asymmetric**: 0.5× costs 0.0010, 2.5× costs 0.0215. Err slow. That closes the last open fragment, so
