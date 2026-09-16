@@ -28760,6 +28760,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.ran",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.arm_names",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.reading_check.ReadingDrift.report",
       "target": "kneemri.experiments.reading_check.ReadingDrift.complaints",
       "weight": 1
@@ -64320,6 +64326,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.reading_check.ReadingDrift.__init__",
       "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.reading_check.ReadingDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.reading_check.ReadingDrift.arm_names",
+      "label": "arm_names",
       "level": "method",
       "parent": "kneemri.experiments.reading_check.ReadingDrift",
       "role": null
