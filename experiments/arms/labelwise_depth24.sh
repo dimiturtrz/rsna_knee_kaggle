@@ -28,7 +28,9 @@
 # Dump the checkpoint and assert `slices.pool.gate.3.weight` is non-zero before any number here is
 # written down.
 #
-# reading: holdout909
+# reading: labelwise_depth24_s2026.holdout.npz
+#   (`holdout909` until 2026-09-16 — the name of the RULER, not of an artefact, so the check could
+#   never see the reading that was in fact taken. The 909-row cut is read off this array.)
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 

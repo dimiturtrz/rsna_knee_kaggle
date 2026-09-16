@@ -62,6 +62,24 @@ def test_ran(tmp_path: Path) -> None:
     assert drift.ran(arm)
 
 
+def test_arm_names(tmp_path: Path) -> None:
+    drift = _drift(tmp_path)
+    _arm(drift.arms, "one", "x\n")
+    _arm(drift.arms, "one_336", "x\n")
+    assert drift.arm_names() == frozenset({"one", "one_336"})
+
+
+def test_ran_ignores_a_longer_named_sibling(tmp_path: Path) -> None:
+    """`one_336` writes `one_336_s2026.pt`; that is not evidence that `one` ran."""
+    drift = _drift(tmp_path)
+    arm = ArmDeclaration.read(_arm(drift.arms, "one", "x\n"))
+    _arm(drift.arms, "one_336", "x\n")
+    (drift.models / "one_336_s2026.pt").write_bytes(b"")
+    assert not drift.ran(arm)
+    (drift.models / "one_s2026.pt").write_bytes(b"")
+    assert drift.ran(arm)
+
+
 def test_found(tmp_path: Path) -> None:
     drift = _drift(tmp_path)
     assert not drift.found("gold/one*")

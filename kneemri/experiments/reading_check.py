@@ -107,14 +107,29 @@ class ReadingDrift:
         """Every arm script, in name order."""
         return [ArmDeclaration.read(path) for path in sorted(self.arms.glob(ARM_GLOB))]
 
+    def arm_names(self) -> frozenset[str]:
+        """Every arm's stem, so a checkpoint can be attributed to the LONGEST name that prefixes it."""
+        return frozenset(path.stem for path in self.arms.glob(ARM_GLOB))
+
     def ran(self, arm: ArmDeclaration) -> bool:
-        """Whether any checkpoint on disk carries this arm's name.
+        """Whether any checkpoint on disk carries this arm's name AND belongs to no longer-named sibling.
 
         The prefix rather than an exact stem, because a run appends its seed (`recal_dense_s2026`) and
         an arm that takes an argument writes several. An arm that has not run yet is not a finding: its
         reading cannot be missing before there is anything to read.
+
+        A SIBLING WHOSE NAME EXTENDS THIS ONE OWNS ITS OWN CHECKPOINTS. Arms are named by extension here —
+        `mergedk_labelwise_drop40_long` and `mergedk_labelwise_drop40_long_336` are two arms, one 224px and
+        one 336px — so a bare prefix glob credits the 336 run to the arm that never ran and then refuses it
+        for not leaving the 224 artefact it declared. That is the check accusing an arm of a run it did not
+        make, and it stood as a standing false positive until 2026-09-16. A checkpoint belongs to the
+        longest arm name that prefixes it.
         """
-        return any(self.models.glob(f"{arm.name}{CHECKPOINT_GLOB_SUFFIX}"))
+        longer = [name for name in self.arm_names() if name != arm.name and name.startswith(arm.name)]
+        return any(
+            not any(checkpoint.name.startswith(name) for name in longer)
+            for checkpoint in self.models.glob(f"{arm.name}{CHECKPOINT_GLOB_SUFFIX}")
+        )
 
     def found(self, glob: str) -> bool:
         """Whether a declared glob matches anything, under the models or processed root, or under the repo.
