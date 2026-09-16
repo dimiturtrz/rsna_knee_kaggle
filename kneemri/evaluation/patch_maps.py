@@ -236,6 +236,8 @@ def main() -> None:
     command.parser.add_argument("--out", type=Path, required=True)
     command.parser.add_argument("--grid", type=int, default=GRID)
     command.parser.add_argument("--studies", type=int, default=STUDIES)
+    command.parser.add_argument("--split", choices=("holdout", "train"), default="holdout")
+    command.parser.add_argument("--offset", type=int, default=0)
     command.parser.add_argument("--fold", type=int, default=0)
     command.parser.add_argument("--folds", type=int, default=5)
     command.parser.add_argument("--split-seed", type=int, default=2026)
@@ -250,8 +252,11 @@ def main() -> None:
     member = Member.from_checkpoint(arguments.checkpoint)
     corpus, identifiers = member.cache(root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
-    holdout = holdout[: arguments.studies]
+    train, held = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    # The TRAIN side is what an augmentation consumes, and it does not fit in memory whole - 3636 studies
+    # of (6, 20, 336, 336) is 49 GB - so it is swept in blocks and the blocks are concatenated.
+    chosen = train if arguments.split == "train" else held
+    holdout = chosen[arguments.offset : arguments.offset + arguments.studies]
 
     truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores[holdout]
     saved = torch.load(arguments.checkpoint, map_location="cpu", weights_only=True)
@@ -270,7 +275,8 @@ def main() -> None:
         maps = Attribution(predictions).patch_importance(model, data, grid=arguments.grid)
 
     arguments.out.mkdir(parents=True, exist_ok=True)
-    destination = arguments.out / f"{arguments.checkpoint.stem}_g{arguments.grid}.patches.npz"
+    block = "" if arguments.split == "holdout" else f"_{arguments.split}{arguments.offset}"
+    destination = arguments.out / f"{arguments.checkpoint.stem}_g{arguments.grid}{block}.patches.npz"
     tissue = TissueNull.of(data.images, arguments.grid)
     np.savez_compressed(destination, maps=maps, studies=np.asarray(holdout), truth=truth, tissue=tissue.shares)
     logger.info("wrote %s", destination)
