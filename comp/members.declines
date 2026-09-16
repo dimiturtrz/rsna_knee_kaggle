@@ -1365,3 +1365,15 @@ ctl_fastbb_s2026
   1.5% bar. Unlike the other six this one moves a CONTINUOUS knob rather than removing a piece, so it carries
   a derivative sign: the control sits on the fast side of its own optimum. convergence_check UNDERTRAINED
   (best e11 of 12). Declined as a seat; kept as the sweep's one actionable direction, followed up in knee-lm2ol.
+
+ctl_stripall_s2026
+  The knee-jmct4 composition test: the control with all five small knobs stripped at once, 0.8645 @ledger75,
+  -0.0269 against 0.8914. Existed to test whether the five separate arms' +0.0253 composes, and it does
+  (predicted 0.8661, landed 0.0016 under, inside the pre-registered band). Converged, e9 of 12.
+  Declined as a seat; kept as the measurement that turned a summed number into a measured one.
+
+ctl_slowbb_s2026
+  Control with backbone_lr 4e-5 -> 2e-5: 0.8904 @ledger75, -0.0010, converged at e10 -- the same peak epoch
+  as the control, so this null is not budget-bound. With ctl_fastbb's -0.0215 at 2.5x it puts 4e-5 at the
+  optimum and shows the optimum is asymmetric: a plateau on the slow side, a cliff on the fast side.
+  Declined as a seat; it closes the last open fragment of the control recipe (knee-lm2ol).

@@ -16446,3 +16446,46 @@ midpoint ruler on that cell, which is a fact the ledger could not state until no
 `reader_through_s2026`'s 0.7509 is a **FLOOR and not a score** — `convergence_check` calls it TRUNCATED,
 peak at epoch 0, so the anneal never ran. It is recorded to stop the number being re-quoted as the
 recipe's, which is exactly what that check exists to prevent.
+
+## the control recipe, taken apart: seven fragments and a composition test, 2026-09-16
+
+`probe224_control` = `base.toml + probe224.toml` IS the champion family's recipe at 224px/12sl/12ep,
+band 0.2–0.8 — labelwise pooling, whole_stack, slot_dropout 0.40, calibrated_targets, hold_annotations,
+backbone_lr 4e-5, rank_weight 1.0, weight_floor. knee-rn9py removed one fragment at a time and priced each
+on the same 909-row `ledger75` cut against the intact control at **0.8914**.
+
+| arm | fragment removed | ledger75 | Δ vs control | convergence |
+|---|---|---|---|---|
+| `ctl_nodrop_s2026` | slot_dropout 0.40 → 0.0 | 0.8909 | −0.0005 | converged |
+| `ctl_nofloor_s2026` | weight_floor | 0.8883 | −0.0031 | converged |
+| `ctl_norank_s2026` | rank_weight 1.0 → 0.0 | 0.8860 | −0.0054 | converged |
+| `ctl_maxpool_s2026` | labelwise pooling → max | 0.8851 | −0.0063 | converged |
+| `ctl_nocalib_s2026` | calibrated_targets | 0.8814 | −0.0100 | converged |
+| `ctl_fastbb_s2026` | backbone_lr 4e-5 → 1e-4 | 0.8699 | **−0.0215** | UNDERTRAINED e11/12 |
+| `ctl_nowhole_s2026` | whole_stack | 0.8523 | **−0.0391** | UNDERTRAINED e11/12 |
+| `ctl_stripall_s2026` | the top five together | 0.8645 | −0.0269 | converged e9/12 |
+
+**The sign is unanimous across all seven.** No fragment of this recipe is dead weight, which is not what a
+leave-one-out usually finds and is the first direct evidence that the champion family is tuned rather than
+accumulated.
+
+**Composition is additive, measured rather than assumed (knee-jmct4).** The five small fragments sum to
++0.0253; `ctl_stripall` removes all five at once and reads +0.0269 — 0.0016 outside the summed prediction,
+inside the pre-registered 0.8630–0.8690 band. So the +0.0253 account of what separates this recipe from the
+.903 reference is a measured quantity, not arithmetic over five separate arms. This arm existed only to
+falsify a number already written down; it did not.
+
+**Two fragments clear the +0.0050 gate and only one is actionable.** `nowhole` is confirmation —
+`whole_stack` is already on in the champion, so there is nothing to turn on — and its number is a floor
+regardless: it ran at 13 s/epoch against the control's ~60 s and peaked on e11 of 12, so the recipe is tuned
+for a stack that arm does not have. `fastbb` is the exception, because it moves a **continuous** knob
+instead of removing a piece and therefore carries a derivative sign: 2.5× the backbone LR costs 0.0215, so
+the control sits on the fast side of its own optimum. `ctl_slowbb` (knee-lm2ol) tests the other side.
+
+The honest summary of the sweep: fragment-level search on this family is closed except for `backbone_lr`.
+
+**`backbone_lr` closed the same night (knee-lm2ol).** `ctl_slowbb` at 2e-5 reads **0.8904, −0.0010**, and
+converges on e10 — the *same* peak epoch as the control, so the obvious objection (a slower backbone starved
+by a 12-epoch `one_cycle` budget) is answered rather than assumed. 4e-5 is at its optimum, and the optimum is
+**asymmetric**: 0.5× costs 0.0010, 2.5× costs 0.0215. Err slow. That closes the last open fragment, so
+fragment-level search on this family is now closed entirely, in favour of the data and architecture axes.
