@@ -664,13 +664,20 @@ run_train() {
     # `--out` carries a seat the arm's name does not: grand_recipe died pointing readers at
     # `grand_recipe.full.log` while its log was `grand_recipe_s2026.full.log`, and a path that does not
     # exist reads as a lost log rather than a failed arm.
-    _mark "$name" "ARM FAILED $name (trainer exit $status)${cause:+ - $cause} - see $(_arm_log "$name")"
+    local verdict="ARM FAILED $name (trainer exit $status)${cause:+ - $cause} - see $(_arm_log "$name")"
+    _mark "$name" "$verdict"
+    # An arm death is the one event with a deadline attached: the card is free NOW and the queue behind
+    # it is spending wall-clock on nothing. grand_recipe died eleven steps into a reserved six-hour
+    # window and the line sat unread until the window was over.
+    _post "FAILED-$name" "$verdict"
     return "$status"
   fi
   # A trainer can also exit 0 having produced nothing useful. The best-score line is the artefact the
   # ledger quotes, so its absence is a failure whatever the exit code says.
   if ! grep -q "best holdout" "$(_arm_log "$name")"; then
-    _mark "$name" "ARM FAILED $name (exit 0 but no 'best holdout' line) - see $(_arm_log "$name")"
+    local verdict="ARM FAILED $name (exit 0 but no 'best holdout' line) - see $(_arm_log "$name")"
+    _mark "$name" "$verdict"
+    _post "FAILED-$name" "$verdict"
     return 1
   fi
   # The completion marker is emitted HERE, on success only, rather than by each arm. An arm that
@@ -705,6 +712,7 @@ _seat_value() {
   checkpoint="${checkpoint%% |*}"
   if [ ! -f "$checkpoint" ]; then
     _mark "$name" "SEAT VALUE skipped: no checkpoint at '$checkpoint'"
+    _post "DONE-$name" "ARM DONE $name - UNPRICED: no checkpoint at '$checkpoint'"
     return 0
   fi
   # --no-sync for the same reason run_train uses it: another chain may already be training, and a
@@ -712,10 +720,28 @@ _seat_value() {
   local report
   if ! report="$(uv run --no-sync --project "$REPO" python -m kneemri.kaggle.seat_value \
       --candidates "$checkpoint" 2>&1)"; then
-    _mark "$name" "SEAT VALUE unavailable for $name: $report"
-    return 0
+    report="SEAT VALUE unavailable for $name: $report"
   fi
   _mark "$name" "$report"
+  # THE CUT IS TAKEN HERE, NOT REMEMBERED. `seat_value` answers "does this earn a seat"; it does not
+  # print the score the ledger quotes, and a number in this repo is MIDPOINT unless it says otherwise
+  # (knee-f9aao) - so a finished arm used to leave no `ledger75` reading at all, and taking one was a
+  # second command nobody ran. Nineteen arms finished that way on 2026-09-15.
+  local stem priced
+  stem="$(basename "$checkpoint" .pt)"
+  if ! priced="$(uv run --no-sync --project "$REPO" python -m kneemri.evaluation.ledger75 \
+      --holdouts "$MODELS" --only "$stem" 2>&1)"; then
+    priced="LEDGER75 unavailable for $stem: $priced"
+  fi
+  _mark "$name" "$priced"
+  # Both readings, one letter, one interrupt. The point of posting the DONE rather than only the FAILED
+  # is that an arm that SUCCEEDS is the one whose result has to be read before the next arm is chosen -
+  # and success is exactly the case that looks like it needs no attention.
+  _post "DONE-$name" "ARM DONE $name -> $checkpoint
+
+$report
+
+$priced"
 }
 
 _arm_log() {
@@ -734,6 +760,35 @@ _mark() {
   # have gone idle with nothing reporting an error.
   local name="$1" message="$2"
   echo "$message" | tee -a "$(_arm_log "$name")"
+}
+
+_post() {
+  # Deliver an arm's verdict to `inbox/main/`, which is the only channel in this repo that INTERRUPTS.
+  #
+  # `_mark` and `_seat_value` were both already correct and both already useless on the night that
+  # mattered: on 2026-09-15 twenty arms wrote DONE markers and priced seats into their own logs, and
+  # nineteen finished checkpoints then sat unread for six hours, `labelwise_dense_drop40_long36` among
+  # them - first priced only because the owner asked. A log is a PULL channel. Every one of this repo's
+  # sixteen checks is a pull channel. They all work; the operator is what fails, and writing a
+  # seventeenth thing for the same operator to remember to read is the same defect with more prose.
+  #
+  # A letter is the one PUSH: the box's listener prints the body and exits, which the harness delivers
+  # as a task notification that arrives mid-turn whether or not anyone thought to look. So the verdict
+  # a human must react to goes here as well as to the log, and reacting no longer requires remembering.
+  #
+  # The letter SURVIVES an unarmed listener - it sits in the box and delivers on the next arm - which
+  # is strictly better than a log line that must be sought by name. `--box main` is the execution
+  # lane's own box (`inbox/agents.csv`); an arm writes into it and never watches it.
+  #
+  # The stamp is READ, never estimated: an estimated stamp drifts with session length and breaks the
+  # cross-side sort (measured +4 h after three hours, D338). Atomic `.part` then `mv`, so the listener
+  # can never print half a letter it caught mid-write.
+  local subject="$1" body="$2"
+  local box="$REPO/inbox/main" stamp
+  [ -d "$box" ] || return 0
+  stamp="$(date -u +%Y%m%dT%H%MZ)"
+  local letter="$box/$stamp-arm-$subject.txt"
+  printf '%s\n' "$body" > "$letter.part" && mv "$letter.part" "$letter"
 }
 
 wait_for() {
