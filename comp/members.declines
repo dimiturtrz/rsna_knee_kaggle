@@ -1252,6 +1252,10 @@ labelwise_dense_drop40_long36_s2026
   36-epoch run peaked at 17.
 
 probe224_control_s2026
+  The control half of the knee-feb62.10 probe pair. 12 epochs at 224px is a gate-reading recipe, not a
+  pool recipe: ledger75 0.8914 at epoch 10 against a rostered drop40_long floor of ~0.905. Declined as a
+  SEAT, kept as the reference every knee-feb62.11 fragment probe is read against.
+
 probe224_grand_s2026
   The knee-feb62.10 probe pair, built as an INSTRUMENT and never as seats: 12 epochs at 224px, which is
   a gate-reading recipe, not a pool recipe. ledger75 0.8914 (control, epoch 10) and 0.8776 (grand, epoch
@@ -1267,3 +1271,38 @@ probe224_grand_s2026
 # (0.9000) and roi_labelwise_drop40_long_s2026 (0.8984). They are at pool strength -- negpull ties the
 # champion-family seat's 0.9048 on a different mechanism -- so a decline written to make roster_check
 # go green would be a lie about the evidence. They need a PACKAGING decision: knee-dd37n.
+
+probe224_grand_nomixup_s2026
+  A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: grand minus mixup, 0.8806 (+0.0030 over grand).
+  12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
+  decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.
+
+probe224_grand_nohard_s2026
+  A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: grand minus the hardness ramp, 0.8789 (+0.0013, and UNDERTRAINED, so that is a floor).
+  12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
+  decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.
+
+probe224_grand_noema_s2026
+  A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: grand minus EMA, 0.8808 (+0.0032).
+  12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
+  decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.
+
+probe224_grand_noaug_s2026
+  A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: grand minus the augmentation block, 0.8726 (-0.0050 -- the one fragment that PAYS).
+  12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
+  decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.
+
+probe224_grand_trim_s2026
+  A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: grand minus mixup and hardness together, 0.8811 (+0.0035 against +0.0043 predicted by adding them, which is how additivity was measured).
+  12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
+  decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.
+
+probe224_grand_norest_s2026
+  A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: grand minus the four structural fragments, 0.8825 (+0.0049).
+  12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
+  decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.
+
+probe224_control_aug_s2026
+  A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: the control plus the aug block alone, the one composition in this family that could beat the control (knee-1a4gm).
+  12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
+  decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.

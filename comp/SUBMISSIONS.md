@@ -4257,3 +4257,17 @@ seven all-ours seats and the same blend (kernel `kneemri-noraptor`). Pre-registe
 nothing; 0.944 directional; <=0.943 a real share. Read **0.945** against the champion's 0.946 -- one tick, which IS
 the board's resolution, so this bounds raptor's contribution below 0.001 rather than measuring it. Pin stays on
 `tripleseat_v2`. Its pair `nolabelwise_v1` asks the same question of the labelwise trio.
+
+## `nolabelwise_v1` -- 0.943, ref 56264081, 2026-09-15 -- INSTRUMENT: the labelwise trio's share, measured
+
+MECHANISM. None; an instrument, the pair to `noraptor_v1`. `tripleseat_v2`'s eight seats minus the three
+`labelwise_*_drop40_long_s2026` seats, leaving five (kernel `kneemri-nolabelwise`). Pre-registered: >=0.945 the
+trio carries nothing; 0.944 directional; <=0.943 a real share. Read **0.943** against the champion's 0.946 --
+**-0.003, three board ticks**, so the <=0.943 branch fired and the trio's share is MEASURED rather than bounded.
+
+Read as a pair, the two instruments say where this champion's load sits. Dropping the ONE foreign seat costs under
+a tick (0.945); dropping the THREE labelwise seats costs three (0.943). Per seat that is roughly 0.001 each for the
+labelwise trio against under 0.001 for raptor, so the labelwise family is what the entry is made of and the foreign
+seat is nearly free. Consequence for the licence axis: a licence-clean entry gives up about one board tick, not the
+entry -- which is what `tripleseatclean_v1` (0.946, same eight seats on licence-clean mounts) already showed from
+the other side. Pin stays on `tripleseat_v2`.
