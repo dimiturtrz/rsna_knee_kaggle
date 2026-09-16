@@ -18,6 +18,21 @@ arithmetic.
 Every number in that paragraph is HIS board on HIS pipeline (CoAtNet384, 94 windows), UNVERIFIED against our
 ruler and on a different denominator to our seven-member ensemble.
 
+**And the series ENDS at 0.932.** Our pinned champion is 0.946 (`comp/champion.json`, `tripleseat_v2`) —
+fourteen board ticks above the best row he reports, and above every row in it. That is the context the P1
+filing dropped, and it is what makes the filing wrong on its face before any corpus measurement: a lever
+fitted across 0.917 → 0.932 is being read as a prescription for a stack that already sits above where the
+series stops. Whatever carries +0.015 from 0.917 to 0.932 may be entirely spent by 0.946 — our own square
+says it is, at 10× smaller slope — and a monotone curve says nothing about the regime past its last point.
+This is the same shape as `board_transfer`'s top band: a slope fitted below the region you want to spend it
+in. The general rule this instance buys: **an external result is priced against OUR distance to the top and
+our own history of closed axes, never adopted on its internal monotonicity.** We are above most of that
+forum; a recipe from below our floor is a hypothesis, and a weak one, not advice.
+
+The one forum datapoint that is NOT below us is topic 735304 (Scott Willis, 0.949 public from a single small
+ResNet, single fold, 5-minute scoring). That one outranks our champion and is worth its own reading; it is
+unrelated to density.
+
 ## What the ledger already held
 
 `interpretations/kneemri/2026-08-19_density-inside-the-band-trades-centre-for-edge.md` had priced this square
