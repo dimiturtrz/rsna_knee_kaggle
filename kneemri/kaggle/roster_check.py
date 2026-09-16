@@ -1,9 +1,11 @@
 """Is every scoreable member either packaged or explicitly declined? `python -m kneemri.kaggle.roster_check`.
 
-`comp/members.roster` is the package's ONLY definition: a member absent from it cannot be shipped no
-matter what any other file says. Nothing writes it. A run that finishes writes a checkpoint, a holdout
-record and usually a ledger section, and then the roster is edited BY HAND — so every member in it is
-there because somebody remembered.
+The rosters are the packages' ONLY definition: a member absent from ALL of them cannot be shipped no
+matter what any other file says. There are two, one per member shelf — `comp/members.roster` and
+`comp/members2.roster` — and a member on either is shippable, so a grep of one file answers nothing.
+Nothing writes them. A run that finishes writes a checkpoint, a holdout record and usually a ledger
+section, and then the roster is edited BY HAND — so every member in it is there because somebody
+remembered.
 
 WHAT THAT COST, measured 2026-08-29 while building a sixteen-seat entry: five of its sixteen best seats
 were not in the roster, `labelwise_dense_s2026` among them — the third-best solo checkpoint the project
