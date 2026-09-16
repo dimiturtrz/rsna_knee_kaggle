@@ -29192,6 +29192,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.already_taken",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.declarations",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.already_taken",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.matches",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.already_taken",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.taken",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.reading_check.ReadingDrift.complaints",
       "target": "kneemri.experiments.reading_check.ReadingDrift.missing",
       "weight": 1
@@ -29206,6 +29224,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.reading_check.ReadingDrift.declarations",
       "target": "kneemri.experiments.reading_check.ArmDeclaration.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.matches",
+      "target": "kneemri.experiments.reading_check.ReadingDrift._stamped",
       "weight": 1
     },
     {
@@ -29258,6 +29282,24 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.taken",
+      "target": "kneemri.experiments.reading_check.ArmDeclaration.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.taken",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.found",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.taken",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.ran",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.reading_check.ReadingDrift.undeclared",
       "target": "kneemri.experiments.reading_check.ReadingDrift.declarations",
       "weight": 1
@@ -29266,6 +29308,12 @@
       "kind": "construct",
       "source": "kneemri.experiments.reading_check.main",
       "target": "kneemri.experiments.reading_check.ReadingDrift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.reading_check.main",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.already_taken",
       "weight": 1
     },
     {
@@ -65406,6 +65454,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.reading_check.ReadingDrift._stamped",
+      "label": "_stamped",
+      "level": "method",
+      "parent": "kneemri.experiments.reading_check.ReadingDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.reading_check.ReadingDrift.already_taken",
+      "label": "already_taken",
+      "level": "method",
+      "parent": "kneemri.experiments.reading_check.ReadingDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.reading_check.ReadingDrift.arm_names",
       "label": "arm_names",
       "level": "method",
@@ -65438,6 +65502,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.reading_check.ReadingDrift.matches",
+      "label": "matches",
+      "level": "method",
+      "parent": "kneemri.experiments.reading_check.ReadingDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.reading_check.ReadingDrift.missing",
       "label": "missing",
       "level": "method",
@@ -65456,6 +65528,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.reading_check.ReadingDrift.report",
       "label": "report",
+      "level": "method",
+      "parent": "kneemri.experiments.reading_check.ReadingDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.reading_check.ReadingDrift.taken",
+      "label": "taken",
       "level": "method",
       "parent": "kneemri.experiments.reading_check.ReadingDrift",
       "role": null
