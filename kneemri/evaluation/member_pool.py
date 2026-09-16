@@ -1,7 +1,7 @@
 """Which holdout records on disk may be READ — the pool every pooled reading starts from.
 
 A directory of `.holdout.npz` is not a pool. 438 records sit beside each other under the models root and
-19 of them carry a reading that is VOID: `dinov3f0_solo`, `raptor_v4_swa` and the DINOv3 decode family
+18 of them carry a reading that is VOID: `dinov3f0_solo`, `raptor_v4_swa` and the DINOv3 decode family
 were fitted on weights served to the competition, in-sample on 703 of the 909 holdout studies
 (`comp/members.declines`). They are also the HIGHEST-scoring records there — `raptor_v4_swa` reads
 LEDGER75 0.9425, above the champion — so any statistic a pooled reading takes over the default glob is
@@ -12,8 +12,8 @@ plus eleven of fifteen apparent ruler inversions, and all of it was in-sample.
 ONLY A VOID DECLINE IS EXCLUDED, and the distinction is the whole rule. Most declines are about SHIPPING
 - a smoke run, an older label table, a member below the floor - and `roster_check` states that such a
 member's "recorded holdout number is still quotable". A void decline is the other kind: it says the
-number itself was never a reading of held-out studies. So 277 of the records here are declined and stay
-in the pool; 19 leave it.
+number itself was never a reading of held-out studies. 277 of the 438 records carry a decline; 259 of
+those stay in the pool and 18 leave it.
 """
 
 import logging
