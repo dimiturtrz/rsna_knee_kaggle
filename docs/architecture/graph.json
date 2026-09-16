@@ -8967,6 +8967,12 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.build_fastmri.main",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.build_fastmri.main",
       "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
       "weight": 1
     },
@@ -9903,6 +9909,12 @@
     {
       "kind": "references",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "target": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus",
       "target": "core.data.corpus.fastmri_corpus.FastmriVolume",
       "weight": 1
     },
@@ -9927,7 +9939,7 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
-      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
       "weight": 1
     },
     {
@@ -9969,13 +9981,13 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
-      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.metadata",
-      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
       "weight": 1
     },
     {
@@ -9992,6 +10004,18 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
+      "target": "core.data.corpus.fastmri_corpus.FastmriStudy.grouped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
       "target": "core.data.corpus.fastmri_corpus.FastmriCorpus._geometry",
       "weight": 1
@@ -9999,12 +10023,24 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
-      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus._slot",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus._routed",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
+      "target": "core.data.corpus.fastmri_corpus.FastmriVolume",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "target": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.fastmri_corpus.FastmriStudy",
       "target": "core.data.corpus.fastmri_corpus.FastmriVolume",
       "weight": 1
     },
@@ -43556,6 +43592,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "label": "FastmriStudy",
+      "level": "class",
+      "parent": "core.data.corpus.fastmri_corpus",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fastmri_corpus.FastmriVolume",
       "label": "FastmriVolume",
       "level": "class",
@@ -50212,8 +50256,8 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus._slot",
-      "label": "_slot",
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus._routed",
+      "label": "_routed",
       "level": "method",
       "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
       "role": null
@@ -50268,10 +50312,58 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
+      "label": "studies",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.volumes",
       "label": "volumes",
       "level": "method",
       "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriStudy.fat_suppressed",
+      "label": "fat_suppressed",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriStudy.files",
+      "label": "files",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriStudy.geometry",
+      "label": "geometry",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriStudy.grouped",
+      "label": "grouped",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriStudy.identifier",
+      "label": "identifier",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriStudy",
       "role": null
     },
     {
