@@ -1236,3 +1236,17 @@ base224_drop40_long_s2026_run1.pt       # DECLINED 2026-09-13: A SECOND RUN OF T
   P(clears +0.0040) moved 0.6 -> 0.75, and it is why this run was worth keeping on disk. Declined as a
   SEAT, kept as EVIDENCE. Re-open only by answering the argument: name a mechanism this run carries that
   its twin does not.
+
+labelwise_dense_drop40_long36_s2026
+  The 36-epoch horizon control for labelwise_dense_drop40_long_s2026, and it answers its own question NO.
+  ledger75 0.9030 (LEDGER 0.8678, best epoch 17 of 36, 909 rows) against the 24-epoch seat's ledger75
+  0.9048 (LEDGER 0.8672, epoch 23): -0.0018 against the +0.003 bar knee-pqfbs pre-registered. It is
+  declined as a SEAT for the plain reason that its own 24-epoch twin is already rostered and scores
+  higher; a strictly-worse duplicate of a seat in the pool adds correlated error, not diversity.
+  What it is as EVIDENCE: the peak at epoch 17 of 36 is the finding. The 24-epoch seat peaked at 23 of 24,
+  which reads like a budget-bound run and was the whole argument for extending the horizon -- but given
+  twelve more epochs the family peaks EARLIER, not later, so epoch 23 was the one_cycle anneal landing,
+  not a ceiling being pushed against. The horizon lever is closed for the labelwise_*_drop40 family; the
+  ext twin was killed at 00:41Z rather than spend 2 h re-measuring the same knob (knee-feb62.10).
+  Re-open only by answering that: name a mechanism that makes >24 epochs pay for THIS family when its own
+  36-epoch run peaked at 17.
