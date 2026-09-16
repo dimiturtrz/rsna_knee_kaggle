@@ -69,20 +69,22 @@ A better solo therefore cannot clear the board's own 0.001 reporting resolution,
 eleven distinct kernels sitting at exactly 0.944 with reseating retired. The one axis left is a term the
 in-distribution ruler cannot price, on a test set the owner has stated plainly is NOT our dataset.
 
-**PRE-REGISTERED BANDS, WRITTEN BEFORE THE SLOT IS SPENT.**
+**PRE-REGISTERED BANDS, WRITTEN BEFORE THE SLOT IS SPENT.** The base is the champion pinned in
+`comp/champion.json` -- `tripleseat_v2`, the seven, board 0.946. A band quoted against any other base
+does not read this entry.
 
-    >= 0.947    the cross-site ruler PICKED A BOARD TICK the offline ruler scored at zero. That is a new
-                selection instrument, and it re-opens the shared-field axis (padding_mode is still
-                unpriced, and slot_dropout has been run at exactly one dose).
-    0.9455-0.9469  a real gain, smaller than the ruler's own scale. Seat kept, axis opened cautiously.
-    0.9425-0.9455  FLAT. The cross-site ruler joins the offline ruler as a thing that cannot pick a board
-                tick at this magnitude, and the shared-blind-spot thesis is retired as a SHIPPING
-                argument -- it survives only as an explanation of why offline flats are uninformative.
-    <  0.9425   the seat is actively harmful, which would say the cross-site toll measures robustness to
-                a shift the competition test set does NOT contain, and the foreign decode retires as a
-                selector entirely.
+    >= 0.949       the cross-site ruler PICKED A BOARD TICK the offline ruler scored at zero. That is a
+                   new selection instrument, and it re-opens the shared-field axis (padding_mode is still
+                   unpriced, and slot_dropout has been run at exactly one dose).
+    0.9475-0.9489  a real gain, smaller than the ruler's own scale. Seat kept, axis opened cautiously.
+    0.9445-0.9474  FLAT. The cross-site ruler joins the offline ruler as a thing that cannot pick a board
+                   tick at this magnitude, and the shared-blind-spot thesis is retired as a SHIPPING
+                   argument -- it survives only as an explanation of why offline flats are uninformative.
+    <  0.9445      the seat is actively harmful, which would say the cross-site toll measures robustness
+                   to a shift the competition test set does NOT contain, and the foreign decode retires
+                   as a selector entirely.
 
-**EVERYTHING ELSE IS THE CHAMPION, UNCHANGED.** Same six, same order, same `overlap=False`, same
+**EVERYTHING ELSE IS THE CHAMPION, UNCHANGED.** Same seven, same order, same `overlap=False`, same
 `LogitAverage`, same raptor member at `FOREIGN_WEIGHT` 1/3, same budget hand-off. One line differs, and
 it names a member that appears in 0 of 130 board rows -- so this is a SOURCE change, not a reseating.
 `slot_dropout_s2026` is on the FIRST shelf (`dimiturnt/kneemri-members`, live, verified by asking Kaggle
@@ -225,11 +227,12 @@ def main() -> None:
     chosen = (
         "final_ws_cf",
         "calib_span_ff",
-        "grade_ladder_cf",
         "stack_increments_ff",
-        "lr4e-5_ws_cf",
         "through_dense_cf",
-        # THE ONLY LINE THAT DIFFERS FROM THE CHAMPION. The six above are in the champion's own order,
+        "labelwise_depth24_drop40_long_s2026",
+        "labelwise_ext_drop40_long_s2026",
+        "labelwise_dense_drop40_long_s2026",
+        # THE ONLY LINE THAT DIFFERS FROM THE CHAMPION. The seven above are in the champion's own order,
         # unchanged; nothing about how they are weighted or joined moves. This member lives on the FIRST
         # shelf (`dimiturnt/kneemri-members`), which the champion already mounts, so this kernel mounts
         # no dataset the champion does not and no new encoder enters with it. It is named in 0 of 130
