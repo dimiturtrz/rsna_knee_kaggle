@@ -8,15 +8,18 @@ import torch
 from torch import Tensor, nn
 
 from kneemri.models.backbone import IMAGENET, RAD_DINO
-from kneemri.models.encoder_surgery import BlockWindow
+from kneemri.models.encoder_surgery import (
+    ADAPTERS,
+    FROZEN_TOP,
+    OPENED_BLOCKS,
+    STEM_OPEN,
+    BlockWindow,
+)
 from kneemri.models.lora import LoRALinear
 from kneemri.models.model import (
-    ADAPTERS,
     COMPILED_ENCODER,
     COMPILED_PREFIX,
     DEPTH_REGIONS,
-    FROZEN_TOP,
-    OPENED_BLOCKS,
     RECOMPUTING,
     TARGETS,
     StudyDesign,
@@ -835,8 +838,12 @@ def test_applied():
         COMPILED_ENCODER: False,
         OPENED_BLOCKS: 12,
         FROZEN_TOP: 0,
+        STEM_OPEN: True,
         DEPTH_REGIONS: 1,
-    }
+    }, (
+        "a model nothing has frozen yet carries a stock-trainable stem — the key answers what the tree "
+        "SHOWS, and only parameter_groups makes it answer what a run asked for"
+    )
 
     model.low_rank(rank=2)
     model.recompute_activations()
@@ -847,6 +854,7 @@ def test_applied():
         COMPILED_ENCODER: False,
         OPENED_BLOCKS: 0,
         FROZEN_TOP: 0,
+        STEM_OPEN: False,
         DEPTH_REGIONS: 1,
     }, (
         "adaptation freezes every base weight, so no block is open on the axis unfreeze_last moves — "

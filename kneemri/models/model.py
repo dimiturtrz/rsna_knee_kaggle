@@ -39,13 +39,10 @@ matches nothing and reports a drift of 0.000, which is the most reassuring possi
 "measured nothing at all" and is exactly how that module's copy was found the first time.
 """
 
-ADAPTERS = "lora_adapters"
 RECOMPUTING = "recompute_activations"
 COMPILED_ENCODER = "compile_encoder"
-OPENED_BLOCKS = "opened_blocks"
-FROZEN_TOP = "frozen_top_blocks"
 DEPTH_REGIONS = "depth_regions"
-"""The keys `applied` reports under — named beside the model because the model is what they describe."""
+"""The keys only a MODEL can answer; the encoder's own live beside `EncoderSurgery.applied`."""
 
 DEFAULT_VARIANT = SMALL
 """What a config that names no encoder was fitted on — every member published before `variant` was
@@ -522,12 +519,9 @@ class StudyModel(nn.Module):
         `landed` refuse the combination before the card is spent instead of after.
         """
         aggregated_elsewhere = self.slices is not None or not self.per_slice
-        return {
-            ADAPTERS: self.surgery.adapters(),
+        return self.surgery.applied() | {
             RECOMPUTING: bool(getattr(self.backbone, "is_gradient_checkpointing", False)),
             COMPILED_ENCODER: self.backbone._compiled_call_impl is not None,  # noqa: SLF001 - see above
-            OPENED_BLOCKS: self.surgery.opened_blocks(),
-            FROZEN_TOP: self.surgery.frozen_top(),
             DEPTH_REGIONS: 1 if aggregated_elsewhere else self.design.slice_regions,
         }
 
@@ -570,14 +564,16 @@ class StudyModel(nn.Module):
         head: dict[str, object] = {"params": [*self._readout_parameters(), *(attached or [])], "lr": head_lr}
         return [head, *self.surgery.backbone_groups(backbone_lr, window, layer_decay)]
 
-    def window(self, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET) -> BlockWindow:
+    def window(
+        self, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET, *, unfreeze_stem: bool = False
+    ) -> BlockWindow:
         """Which contiguous run of blocks a run opens, resolved against THIS model's encoder depth.
 
         The caller states the recipe in the two numbers an arm script carries; only the encoder knows how
         many blocks there are to count them against, which is why the resolution happens here and the
         window rather than the pair is what `parameter_groups` takes.
         """
-        return self.surgery.window(unfreeze_last, unfreeze_offset)
+        return self.surgery.window(unfreeze_last, unfreeze_offset, unfreeze_stem=unfreeze_stem)
 
     def _readout_parameters(self) -> list[torch.nn.Parameter]:
         """Every parameter OUTSIDE the encoder — the slot head, and whatever pools the slice axis.

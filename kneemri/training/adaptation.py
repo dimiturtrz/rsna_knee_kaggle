@@ -56,6 +56,19 @@ class Adaptation:
     is — wants EARLY blocks, the one thing `unfreeze_last` alone cannot express. See `BlockWindow`.
     """
 
+    unfreeze_stem: bool = False
+    """Whether the encoder's pre-block parameters — patch embedding, cls token, position table — train.
+
+    False for every run this project has made, `--unfreeze-last 12` included: `last_blocks` builds its
+    trainable set out of the window's BLOCKS, so the stem freezes at every depth, and `encoder_drift`
+    reads it at 0.000000 across all fifteen supervised members swept (knee-p6fr8). It is a separate
+    switch from the depth because it is a different KIND of layer: the blocks read tokens, and the stem
+    is the only place the trunk reads pixels, which is where natural-image RGB against 336 px greyscale
+    MRI is a difference in the data rather than in a representation of it. The position table is
+    resampled 37x37 to 24x24 on every forward by `Dinov2Embeddings`, so at this read size the stem is
+    both frozen and interpolated. See `BlockWindow.stem`.
+    """
+
     layer_decay: float = NO_LAYER_DECAY
     """How much slower each block below the top one moves — the third member of the entangled triple.
 
@@ -116,6 +129,17 @@ class EncoderConfig:
             "into a window. Zero is every run before 2026-09-05. Lee et al. (ICLR 2023) choose the block by "
             "the KIND of shift, and the input-level case - natural images to greyscale MRI - wants EARLY "
             "blocks, which a suffix cannot express."
+        ),
+    )
+    unfreeze_stem: bool = ConfigLeaf.of(
+        default=Adaptation().unfreeze_stem,
+        says=(
+            "train the encoder's patch embedding, cls token and position table, which --unfreeze-last "
+            "cannot reach at any depth: the trainable set is built out of the window's BLOCKS, so the stem "
+            "freezes at 12 as it does at 6. It is the only layer whose input is PIXELS, so it is where "
+            "ImageNet RGB against 336 px greyscale MRI is a difference in the DATA. The position table is "
+            "additionally resampled 37x37 to 24x24 every forward at this read size, and has never been "
+            "allowed to adapt to the grid it is resampled onto (knee-p6fr8)."
         ),
     )
     init: Path | None = ConfigLeaf.of(

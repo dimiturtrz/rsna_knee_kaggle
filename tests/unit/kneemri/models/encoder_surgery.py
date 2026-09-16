@@ -4,7 +4,15 @@ import pytest
 import torch
 from torch import nn
 
-from kneemri.models.encoder_surgery import NO_OFFSET, BlockWindow, EncoderSurgery
+from kneemri.models.encoder_surgery import (
+    ADAPTERS,
+    FROZEN_TOP,
+    NO_OFFSET,
+    OPENED_BLOCKS,
+    STEM_OPEN,
+    BlockWindow,
+    EncoderSurgery,
+)
 from kneemri.models.lora import LoRALinear
 
 DIM = 8
@@ -343,3 +351,40 @@ def test_backbone_groups_anchor_at_the_top_of_the_window():
     surgery = _surgery()
     graded = surgery.backbone_groups(backbone_lr=8e-6, window=surgery.window(3, 4), layer_decay=0.5)
     assert [group["lr"] for group in graded] == [2e-6, 4e-6, 8e-6], "the same ladder, one rung per opened block"
+
+
+def test_stem_parameters():
+    """The COMPLEMENT of the block set, so a mis-identified trunk fails loudly rather than opening nothing."""
+    surgery = _surgery()
+    inside = {id(parameter) for block in surgery.blocks() for parameter in block.parameters()}
+    stem = surgery.stem_parameters()
+
+    assert stem, "a ViT reads pixels somewhere, and that somewhere is not a block"
+    assert not any(id(parameter) in inside for parameter in stem), "nothing in the window is in the stem"
+    assert len(stem) + len(inside) == len(list(surgery.backbone.parameters())), "the two partition the trunk"
+
+
+def test_stem_open():
+    """Whether a BASE pre-block weight trains — the axis neither block count nor offset can express."""
+    frozen = _surgery()
+    frozen.last_blocks(frozen.window(3))
+    assert not frozen.stem_open(), "every arm before 2026-09-16: the trainable set is built out of blocks"
+
+    opened = _surgery()
+    opened.last_blocks(opened.window(3, unfreeze_stem=True))
+    assert opened.stem_open(), "and the switch is what reaches it"
+
+    adapted = _surgery()
+    adapted.low_rank(rank=2)
+    assert not adapted.stem_open(), "adapters never wrap the stem, and low_rank freezes every base weight"
+
+
+def test_applied():
+    """Every key is a fact about the same freezing, so they are read together rather than one by one."""
+    surgery = _surgery()
+    surgery.last_blocks(surgery.window(3, 4, unfreeze_stem=True))
+    assert surgery.applied() == {ADAPTERS: 0, OPENED_BLOCKS: 3, FROZEN_TOP: 4, STEM_OPEN: True}
+
+    adapted = _surgery()
+    adapted.low_rank(rank=2)
+    assert adapted.applied() == {ADAPTERS: 36, OPENED_BLOCKS: 0, FROZEN_TOP: NO_OFFSET, STEM_OPEN: False}

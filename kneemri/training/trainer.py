@@ -129,7 +129,11 @@ class Trainer:
         groups = self.model.parameter_groups(
             self.adaptation.head_lr,
             self.adaptation.backbone_lr,
-            self.model.window(self.adaptation.unfreeze_last, self.adaptation.unfreeze_offset),
+            self.model.window(
+                self.adaptation.unfreeze_last,
+                self.adaptation.unfreeze_offset,
+                unfreeze_stem=self.adaptation.unfreeze_stem,
+            ),
             self.adaptation.layer_decay,
             self.objective.attached(device),
         )

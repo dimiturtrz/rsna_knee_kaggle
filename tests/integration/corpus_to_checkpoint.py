@@ -236,6 +236,7 @@ PROVENANCE_ONLY = {
     "report_weight",
     "unfreeze_last",
     "unfreeze_offset",
+    "unfreeze_stem",
     "witness",
 }
 """Keys serving is right not to consult, each for its own reason.

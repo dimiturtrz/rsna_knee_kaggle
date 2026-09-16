@@ -414,7 +414,7 @@ def test_requested():
     cpu = torch.device("cpu")
     shared = {field.name for field in dataclasses.fields(Request)} & {leaf.name for leaf, _ in TrainConfig.leaves()}
 
-    assert len(shared) == 62, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 63, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):

@@ -33,6 +33,12 @@ out afterwards. So the flat case returns the old single group untouched and the 
 """
 
 
+ADAPTERS = "lora_adapters"
+OPENED_BLOCKS = "opened_blocks"
+FROZEN_TOP = "frozen_top_blocks"
+STEM_OPEN = "stem_open"
+"""The keys `applied` reports under, beside the surgery that produces every one of them."""
+
 NO_OFFSET = 0
 """The offset that means "the window ends at the encoder's last block" — every run before 2026-09-05."""
 
@@ -54,9 +60,22 @@ class BlockWindow:
 
     lo: int
     hi: int
+    stem: bool = False
+    """Whether the encoder's pre-block parameters train alongside the blocks in the window.
+
+    THE STEM IS NOT A BLOCK, and it rides here anyway because the window is the single value every
+    consumer already takes: a second argument beside it would be free to disagree with it at each of the
+    three call sites it would have to cross. It is the same move `of` makes for the suffix — one way to
+    say what opens, rather than two knobs racing through an `if`.
+
+    False is every run this project has made. `--unfreeze-last 12` included: `last_blocks` builds its
+    trainable set out of the window's BLOCKS, so everything outside them freezes at every depth.
+    """
 
     @classmethod
-    def of(cls, depth: int, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET) -> "BlockWindow":
+    def of(
+        cls, depth: int, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET, *, unfreeze_stem: bool = False
+    ) -> "BlockWindow":
         """`unfreeze_last` blocks ending `unfreeze_offset` blocks below the top, clamped to the encoder.
 
         COUNTED FROM THE FRONT, and that is the whole point of the arithmetic. `blocks[-n:]` reads as
@@ -71,7 +90,7 @@ class BlockWindow:
         depth leaves the window EMPTY rather than wrapping around to the top of the trunk.
         """
         hi = max(depth - max(unfreeze_offset, 0), 0)
-        return cls(lo=max(hi - max(unfreeze_last, 0), 0), hi=hi)
+        return cls(lo=max(hi - max(unfreeze_last, 0), 0), hi=hi, stem=unfreeze_stem)
 
     def count(self) -> int:
         """How many blocks the window holds, which is what `landed` compares against the recipe."""
@@ -291,9 +310,11 @@ class EncoderSurgery:
             parameter for parameter in block.parameters() if parameter.requires_grad and id(parameter) not in adapted
         )
 
-    def window(self, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET) -> "BlockWindow":
+    def window(
+        self, unfreeze_last: int, unfreeze_offset: int = NO_OFFSET, *, unfreeze_stem: bool = False
+    ) -> "BlockWindow":
         """Which contiguous run of blocks this run opens, resolved against THIS encoder's depth."""
-        return BlockWindow.of(len(self.blocks()), unfreeze_last, unfreeze_offset)
+        return BlockWindow.of(len(self.blocks()), unfreeze_last, unfreeze_offset, unfreeze_stem=unfreeze_stem)
 
     def open_blocks(self, window: "BlockWindow") -> list[nn.Module]:
         """The blocks inside the window, which is a SLICE and so needs no negative-index arithmetic."""
@@ -318,11 +339,53 @@ class EncoderSurgery:
         """
         opened = self.open_blocks(window)
         trainable = {id(parameter) for block in opened for parameter in block.parameters()}
+        if window.stem:
+            trainable |= {id(parameter) for parameter in self.stem_parameters()}
         for parameter in self.backbone.parameters():
             if id(parameter) not in trainable:
                 # torch takes this positionally; ruff's boolean-trap rule and the C signature disagree.
                 parameter.requires_grad_(False)  # noqa: FBT003
         return [parameter for parameter in self.backbone.parameters() if id(parameter) in trainable]
+
+    def stem_parameters(self) -> list[torch.nn.Parameter]:
+        """Every backbone parameter that is not inside a block — read by EXCLUSION, never by name.
+
+        On a ViT that is the patch embedding, the cls token and the position table: the layers whose
+        input is PIXELS rather than tokens, and therefore the only place ImageNet-RGB against greyscale
+        MRI is a difference in the DATA rather than in a representation of it.
+
+        Exclusion for the reason `_readout_parameters` uses it and for the reason this module's
+        docstring gives: `patch_embed` on a timm ViT is `patch_embeddings` on a HuggingFace DINOv2 and
+        `embeddings` on a DINOv3, and a name list that matched none of them would open nothing while the
+        arm reported a clean number. The block set is already found structurally, so its complement is
+        too, and an encoder whose blocks were mis-identified fails LOUDLY here rather than quietly:
+        every parameter lands in the stem instead of a plausible few.
+        """
+        inside = {id(parameter) for block in self.blocks() for parameter in block.parameters()}
+        return [parameter for parameter in self.backbone.parameters() if id(parameter) not in inside]
+
+    def applied(self) -> dict[str, object]:
+        """WHAT THIS SURGERY DID, read off the module tree rather than off the request that asked for it.
+
+        Together rather than four calls at the consumer: every key is a fact about the same freezing, and
+        a caller assembling them one at a time reaches through a field four times to build one answer.
+        `StudyModel.applied` merges this with the keys only a MODEL can answer.
+        """
+        return {
+            ADAPTERS: self.adapters(),
+            OPENED_BLOCKS: self.opened_blocks(),
+            FROZEN_TOP: self.frozen_top(),
+            STEM_OPEN: self.stem_open(),
+        }
+
+    def stem_open(self) -> bool:
+        """Whether any pre-block parameter holds a trainable BASE weight — what `unfreeze_stem` did.
+
+        BASE, and the same LoRA argument `opened_blocks` makes: adapters never wrap the stem, so the
+        exclusion costs nothing there and keeps this answering ONE question. Read AFTER the freezing,
+        which `parameter_groups` ordering already guarantees.
+        """
+        return any(parameter.requires_grad for parameter in self.stem_parameters())
 
     def backbone_groups(
         self, backbone_lr: float, window: "BlockWindow", layer_decay: float = NO_LAYER_DECAY
@@ -369,10 +432,16 @@ class EncoderSurgery:
         # INTERIOR window the top opened block is no longer the encoder's last, and the ladder still
         # anchors at the top of the WINDOW — otherwise an early-block arm would run every one of its
         # blocks at a rate the ledger has never seen.
-        return [
+        ladder: list[dict[str, object]] = [
             {"params": list(block.parameters()), "lr": backbone_lr * layer_decay ** (len(opened) - 1 - depth)}
             for depth, block in enumerate(opened)
         ]
+        # THE STEM IS ONE RUNG BELOW THE LOWEST OPEN BLOCK, which is where it sits in the forward pass.
+        # Folding it into that block's group instead would step the pixel-reading layer at a rate chosen
+        # for a block, and dropping it would hand the optimiser a parameter this window unfroze.
+        if window.stem:
+            ladder.append({"params": self.stem_parameters(), "lr": backbone_lr * layer_decay ** len(opened)})
+        return ladder
 
     def compile_encoder(self) -> None:
         """Fuse the encoder's kernels. The ENCODER only, and SHAPE-SPECIALISED, both measured.

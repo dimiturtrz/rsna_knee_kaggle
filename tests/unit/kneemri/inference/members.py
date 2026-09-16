@@ -606,6 +606,7 @@ PROVENANCE_ONLY = {
     "report_weight",
     "unfreeze_last",
     "unfreeze_offset",
+    "unfreeze_stem",
     "head_lr",
     "backbone_lr",
     "layer_decay",

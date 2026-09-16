@@ -41,6 +41,7 @@ NOT_A_RECIPE = {
     "bf16": "the default precision every current arm trains under",
     "vram_gb": "a memory cap, set by the queue against the card it runs on",
     "target_corpus": "the companion to --corpus-oversample: it is exercised by the same coverage recipe",
+    "unfreeze_stem": "no arm opens the pre-block layers yet; delete this line with the first one that does",
 }
 """Options that cannot be exercised as a recipe, each with WHY — a decision record, not an exemption list.
 

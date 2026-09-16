@@ -16,12 +16,11 @@ from core.data.labels.targets import (
     Supervision,
     Targets,
 )
+from kneemri.models.encoder_surgery import ADAPTERS, OPENED_BLOCKS
 from kneemri.models.model import (
-    ADAPTERS,
     COMPILED_ENCODER,
     DEPTH_REGIONS,
     NO_LAYER_DECAY,
-    OPENED_BLOCKS,
     RECOMPUTING,
     StudyDesign,
     StudyModel,

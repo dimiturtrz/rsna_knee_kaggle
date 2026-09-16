@@ -245,6 +245,7 @@ class RunStamp:
     whole_stack: bool
     unfreeze_last: int
     unfreeze_offset: int
+    unfreeze_stem: bool
     head_lr: float
     backbone_lr: float
     layer_decay: float
@@ -449,6 +450,10 @@ class MemberRecord:
                 # WHERE that many blocks sat. The count alone cannot tell an early-block fit from the
                 # suffix every run before 2026-09-05 opened, and the loader has to rebuild the recipe.
                 "unfreeze_offset": options.unfreeze_offset,
+                # WHETHER THE PIXEL-READING LAYERS MOVED, which neither number above can express: the
+                # trainable set is built out of blocks, so the stem is frozen at every depth unless this
+                # is set, and a rebuild that defaulted it would fit a different trunk (knee-p6fr8).
+                "unfreeze_stem": options.unfreeze_stem,
                 "head_lr": options.head_lr,
                 "backbone_lr": options.backbone_lr,
                 "layer_decay": options.layer_decay,

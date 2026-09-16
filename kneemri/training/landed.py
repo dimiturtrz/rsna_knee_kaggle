@@ -38,13 +38,16 @@ from core.data.labels.targets import (
     Targets,
 )
 from kneemri.models.drop_path import NO_DROP
-from kneemri.models.encoder_surgery import NO_OFFSET
-from kneemri.models.model import (
+from kneemri.models.encoder_surgery import (
     ADAPTERS,
+    FROZEN_TOP,
+    NO_OFFSET,
+    OPENED_BLOCKS,
+    STEM_OPEN,
+)
+from kneemri.models.model import (
     COMPILED_ENCODER,
     DEPTH_REGIONS,
-    FROZEN_TOP,
-    OPENED_BLOCKS,
     RECOMPUTING,
     StudyModel,
 )
@@ -303,6 +306,9 @@ class Request:
     unfreeze_offset: int = NO_OFFSET
     """How many blocks at the TOP the request left frozen — zero for every arm before 2026-09-05."""
 
+    unfreeze_stem: bool = False
+    """Whether the request opened the pre-block layers — False for every arm before 2026-09-16."""
+
     sharpness: float = FLAT
     """Radius of the SAM ball — zero, the ordinary step, for every arm before 2026-09-12."""
 
@@ -417,6 +423,11 @@ class Request:
             # nothing opens the same NUMBER of blocks in the wrong place and reads as a null on
             # a mechanism that never ran. Zero whenever no base block is open at all.
             FROZEN_TOP: 0 if self.lora_rank or not self.unfreeze_last else self.unfreeze_offset,
+            # WHETHER THE PIXEL-READING LAYERS OPENED, which neither key above can see: both count
+            # BLOCKS, and the stem is not one. Under LoRA the honest request is False for the reason
+            # OPENED_BLOCKS asks zero there — `backbone_groups` takes the adapter branch, which opens
+            # exactly the adapters and never reaches the freezing this switch rides on.
+            STEM_OPEN: False if self.lora_rank else self.unfreeze_stem,
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,
             MIXUP: self.mixup,

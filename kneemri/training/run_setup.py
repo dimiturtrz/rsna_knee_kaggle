@@ -85,6 +85,7 @@ class RunSetup:
             backbone_lr=self.options.encoder.backbone_lr,
             unfreeze_last=self.options.encoder.unfreeze_last,
             unfreeze_offset=self.options.encoder.unfreeze_offset,
+            unfreeze_stem=self.options.encoder.unfreeze_stem,
             layer_decay=self.options.encoder.layer_decay,
             weight_decay=self.options.encoder.weight_decay,
         )
@@ -175,6 +176,7 @@ class RunSetup:
             unfocused_weight=options.targets.unfocused_weight,
             unfreeze_last=options.encoder.unfreeze_last,
             unfreeze_offset=options.encoder.unfreeze_offset,
+            unfreeze_stem=options.encoder.unfreeze_stem,
             layer_decay=options.encoder.layer_decay,
             mixup=options.regularisation.mixup,
             weight_decay=options.encoder.weight_decay,

@@ -669,6 +669,7 @@ class TrainConfig:
             whole_stack=encoder.whole_stack,
             unfreeze_last=encoder.unfreeze_last,
             unfreeze_offset=encoder.unfreeze_offset,
+            unfreeze_stem=encoder.unfreeze_stem,
             head_lr=encoder.head_lr,
             backbone_lr=encoder.backbone_lr,
             layer_decay=encoder.layer_decay,
