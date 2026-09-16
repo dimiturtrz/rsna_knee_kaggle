@@ -4301,3 +4301,36 @@ the other side.~~ Pin stays on `tripleseat_v2`.
 > is unmeasured.
 >
 > What survives the pair: the labelwise trio carries more than the foreign seat. The direction, and only that.
+
+## `pricetop_v1` — ref 56275593, board 0.938, 2026-09-16
+
+INSTRUMENT (knee-hr499), slot 1 of 5. Six priceable seats chosen by an offline blend SEARCH over the
+909-study holdout: `margin_seat_s2026`, `warm_calib_lowlr_drop40_long_s2026`, `blendhold_s2026`,
+`labelwise_drop_drop40_long_s2026`, `oof_teacher_s2026`, `labelwise_depth24_drop40_long_s2026`.
+Pre-registered `>=0.943` / `0.940-0.941` / `<=0.938`, centre 0.940. **The `<=0.938` branch fired.**
+
+**The branch's written cause is wrong, and the error is one this file already documented.** That branch
+reads *"compression at the top is lower or the curve has gone flat, 0.955 needs MORE than +0.011
+offline."* It does not follow, because the prediction was fed the **raw** offline 0.8785 and this is a
+SEARCH entry. `greedyseat_v1` recorded the same mistake and its fix (knee-jsgb): a searched blend enters
+`comp/board.jsonl` bias-corrected. At the measured greedy bias +0.0028 the honest offline is **0.8757**,
+and the two fold-0 search anchors read:
+
+| entry | offline (corrected) | board |
+|-------|--------------------|-------|
+| `greedyseat_v1` | 0.8740 | 0.936 |
+| `pricetop_v1`   | 0.8757 | 0.938 |
+
+At the top band's +0.8 the corrected value predicts 0.937 and the board read 0.938 — one tick, inside
+the board's own 0.001 resolution. The raw value predicted 0.940 and missed by two. So the instrument did
+not find flat compression; it priced the search bias **on the board**, independently of the offline
+measurement, for the second time. The slope between the two anchors is +1.18, above the fitted +0.8, on
+n=2 — an anchor pair, not a refit.
+
+**The second reading is the one that matters for 0.955.** Every board row at or above 0.943 carries
+`offline: null` **by construction** — the pinned `tripleseat_v2` 0.946 included — because their seats are
+fitted `--fold -1`/cf and hold nothing out. The entire offline-priceable population tops out at 0.938.
+That is not a saturated ruler; it is two **disjoint** populations. No maximisation of the 909-study blend
+reaches the champion from inside the priceable set, and the all-data dose — not the search — is what
+separates them. A further slot spent searching that holdout harder is a slot spent inside the capped
+population.
