@@ -1250,3 +1250,20 @@ labelwise_dense_drop40_long36_s2026
   ext twin was killed at 00:41Z rather than spend 2 h re-measuring the same knob (knee-feb62.10).
   Re-open only by answering that: name a mechanism that makes >24 epochs pay for THIS family when its own
   36-epoch run peaked at 17.
+
+probe224_control_s2026
+probe224_grand_s2026
+  The knee-feb62.10 probe pair, built as an INSTRUMENT and never as seats: 12 epochs at 224px, which is
+  a gate-reading recipe, not a pool recipe. ledger75 0.8914 (control, epoch 10) and 0.8776 (grand, epoch
+  11) -- the pool's rostered drop40_long seats sit at ~0.905, so both are ~0.014-0.027 below the floor
+  and would add nothing but correlated error to any ensemble. Their VALUE is the comparison between
+  them: grand - control = -0.0138, which is what stopped grand_recipe from being run as a full retrain
+  and what the four leave-one-out probes of knee-feb62.11 are now decomposing. Declined as SEATS, kept
+  as EVIDENCE. Re-open only by answering that: name a reason a 12-epoch 224px probe belongs in a pool
+  whose floor it misses by more than a board tick.
+
+# Four further scoreable members are deliberately in NEITHER file: labelwise_depth24_negpull_s2026
+# (0.9044), roinative_labelwise_drop40_long_s2026 (0.9018), warm_calib_lowlr_drop40_long_s2026_run1
+# (0.9000) and roi_labelwise_drop40_long_s2026 (0.8984). They are at pool strength -- negpull ties the
+# champion-family seat's 0.9048 on a different mechanism -- so a decline written to make roster_check
+# go green would be a lie about the evidence. They need a PACKAGING decision: knee-dd37n.
