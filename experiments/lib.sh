@@ -659,13 +659,18 @@ run_train() {
     local cause
     cause="$(grep -E "^[A-Za-z_.]*(Error|Exception):" "$(_arm_log "$name")" | tail -1)"
     [ -n "$cause" ] || cause="$(grep -vE "^(LIB |ARM )" "$(_arm_log "$name")" | tail -1)"
-    _mark "$name" "ARM FAILED $name (trainer exit $status)${cause:+ - $cause} - see $LOGS/$name.full.log"
+    # The hint must name the file the two greps above just READ, not `$name`. `_arm_log` spells the log
+    # for the CHECKPOINT while `$name` is the run_train name (knee-tkyy), so the two differ whenever
+    # `--out` carries a seat the arm's name does not: grand_recipe died pointing readers at
+    # `grand_recipe.full.log` while its log was `grand_recipe_s2026.full.log`, and a path that does not
+    # exist reads as a lost log rather than a failed arm.
+    _mark "$name" "ARM FAILED $name (trainer exit $status)${cause:+ - $cause} - see $(_arm_log "$name")"
     return "$status"
   fi
   # A trainer can also exit 0 having produced nothing useful. The best-score line is the artefact the
   # ledger quotes, so its absence is a failure whatever the exit code says.
   if ! grep -q "best holdout" "$(_arm_log "$name")"; then
-    _mark "$name" "ARM FAILED $name (exit 0 but no 'best holdout' line) - see $LOGS/$name.full.log"
+    _mark "$name" "ARM FAILED $name (exit 0 but no 'best holdout' line) - see $(_arm_log "$name")"
     return 1
   fi
   # The completion marker is emitted HERE, on success only, rather than by each arm. An arm that
