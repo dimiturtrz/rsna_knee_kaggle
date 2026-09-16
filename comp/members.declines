@@ -1327,3 +1327,41 @@ probe224_control_aug_s2026
   A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: the control plus the aug block alone, the one composition in this family that could beat the control (knee-1a4gm).
   12 epochs at 224px, ~0.014-0.027 under the pool floor, declined as a SEAT and kept as EVIDENCE for the
   decomposition. Re-open only by answering why a gate-reading probe belongs in a pool it misses.
+
+# knee-rn9py -- the control-recipe leave-one-out at 224px. Every one of these is the CHAMPION FAMILY'S
+# OWN RECIPE with one fragment removed, so each is by construction weaker than probe224_control_s2026
+# (0.8914 @ledger75, 909 rows). They are declined as SEATS and kept as EVIDENCE: together they are the
+# honest account of what separates this recipe from the .903 reference. Re-open any one of them only by
+# answering why a deliberately-crippled control belongs in a pool its own parent misses.
+
+ctl_nodrop_s2026
+  Control minus slot_dropout (0.40 -> 0.0): 0.8909 @ledger75, -0.0005. The knob the drop40_long family is
+  NAMED for, and it is flat. Declined as a seat; the null is the finding.
+
+ctl_maxpool_s2026
+  Control with labelwise pooling swapped for max: 0.8851 @ledger75, -0.0063. Labelwise pays about 1.5 board
+  ticks over max. Declined as a seat.
+
+ctl_nocalib_s2026
+  Control minus calibrated_targets: 0.8814 @ledger75, -0.0100. The largest single-knob payer in the sweep.
+  Declined as a seat.
+
+ctl_norank_s2026
+  Control minus the ranked objective (rank_weight 1.0 -> 0.0): 0.8860 @ledger75, -0.0054. Declined as a seat.
+
+ctl_nofloor_s2026
+  Control minus weight_floor, so an unmentioned finding stops pulling at 0.25: 0.8883 @ledger75, -0.0031.
+  Declined as a seat.
+
+ctl_nowhole_s2026
+  Control minus whole_stack: 0.8523 @ledger75, -0.0391 -- eight times the next largest fragment and past the
+  1.5% bar on its own. whole_stack is the recipe's spine, not a knob. CAVEAT carried with the number:
+  convergence_check reads UNDERTRAINED (best e11 of 12) and the arm ran at 13s/epoch against the control's
+  ~60s, so the recipe is tuned for a stack this arm does not have -- 0.8523 is a FLOOR for the variant.
+  Declined as a seat; kept as the sweep's one gate-clearing reading.
+
+ctl_fastbb_s2026
+  Control with backbone_lr 4e-5 -> 1e-4: 0.8699 @ledger75, -0.0215, the second-largest fragment and past the
+  1.5% bar. Unlike the other six this one moves a CONTINUOUS knob rather than removing a piece, so it carries
+  a derivative sign: the control sits on the fast side of its own optimum. convergence_check UNDERTRAINED
+  (best e11 of 12). Declined as a seat; kept as the sweep's one actionable direction, followed up in knee-lm2ol.
