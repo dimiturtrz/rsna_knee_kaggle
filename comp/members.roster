@@ -848,6 +848,14 @@ oof_gen2_fold0_s2026        # 0.8609 @holdout909 midpoint, ep 7. The ONLY gen2 f
                             # exactly that. Admissible on the same grounds oof_band_fold0 was.
 hold_clean_distill_s2026    # 0.8607 @holdout909 midpoint, ep 8. Mid-pool. Note its _run1 twin is
                             # declined, not rostered: same recipe, died at epoch 1.
+labelwise_depth24_negpull_s2026.pt  # 0.8666 @holdout909 midpoint / 0.9044 ledger75, ep 19 of 24. A TIE
+                            # with the champion-family seat labelwise_dense_drop40_long_s2026 (0.9048) on
+                            # a DIFFERENT mechanism -- depth-24 slices plus the negative-pull term, where
+                            # the family seat is dense-12 without it. Rostered 2026-09-16 (knee-dd37n) for
+                            # exactly that: nolabelwise_v1 (ref 56264081, 0.943 vs the champion's 0.946)
+                            # showed the labelwise family carries the entry, so a seat that MATCHES the
+                            # family's best on another mechanism is the one kind of addition that can pay.
+                            # Its three within-family neighbours are declined in writing, same bead.
 labelwise_depth20_b10_s2026 # 0.8607 @holdout909 midpoint, ep 8. Depth-20 labelwise. The slice-depth axis
                             # is closed as a source of gain (saturated), which is a statement about what
                             # to RUN next, not about what may ship.

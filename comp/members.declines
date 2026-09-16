@@ -1266,11 +1266,32 @@ probe224_grand_s2026
   as EVIDENCE. Re-open only by answering that: name a reason a 12-epoch 224px probe belongs in a pool
   whose floor it misses by more than a board tick.
 
-# Four further scoreable members are deliberately in NEITHER file: labelwise_depth24_negpull_s2026
-# (0.9044), roinative_labelwise_drop40_long_s2026 (0.9018), warm_calib_lowlr_drop40_long_s2026_run1
-# (0.9000) and roi_labelwise_drop40_long_s2026 (0.8984). They are at pool strength -- negpull ties the
-# champion-family seat's 0.9048 on a different mechanism -- so a decline written to make roster_check
-# go green would be a lie about the evidence. They need a PACKAGING decision: knee-dd37n.
+# knee-dd37n DECIDED 2026-09-16. Four pool-strength members sat in neither file pending a PACKAGING
+# decision. labelwise_depth24_negpull_s2026 (0.9044) goes to the ROSTER; the other three are declined
+# below, each on a mechanism argument and none of them to make a check go green.
+
+warm_calib_lowlr_drop40_long_s2026_run1
+  A SECOND RUN of a recipe this project already ships: warm_calib_lowlr_drop40_long_s2026 is on the
+  roster at line 536, ledger75 0.8994, and this run reads 0.9000. Same recipe, same everything, +0.0006
+  apart -- that is seed scatter, and a seed is not a member. Seating both would buy the entry a pair of
+  maximally correlated errors at the cost of a packaged checkpoint. Re-open only by naming a flag that
+  differs between the two lines; if none does, this is closed by construction.
+
+roi_labelwise_drop40_long_s2026
+  0.8984 ledger75, 0.0064 BELOW the champion-family seat labelwise_dense_drop40_long_s2026 (0.9048), and
+  a within-family variant of it: the same labelwise drop40_long recipe on an ROI crop. nolabelwise_v1
+  (ref 56264081, board 0.943 against the champion's 0.946) measured what the whole labelwise trio is
+  worth INSIDE an entry -- about one board tick for three seats. A fourth near-duplicate of a family that
+  totals one tick cannot pay for its own seat, least of all the weakest one. Re-open by MEASURING the
+  distance rather than asserting it: a `member_distance` reading over the pool that puts this member far
+  from the seated labelwise members would make it diversity rather than a copy, and that argument would
+  stand on its own.
+
+roinative_labelwise_drop40_long_s2026
+  0.9018 ledger75, 0.0030 below the champion-family seat, and the same within-family case as
+  roi_labelwise_drop40_long_s2026 above: the labelwise drop40_long recipe on the native-resolution ROI
+  crop. Declined on the same nolabelwise_v1 measurement and re-opened the same way -- a measured distance
+  from the seated labelwise members, not a solo number.
 
 probe224_grand_nomixup_s2026
   A knee-feb62.11 leave-one-out INSTRUMENT on the probe224 recipe: grand minus mixup, 0.8806 (+0.0030 over grand).

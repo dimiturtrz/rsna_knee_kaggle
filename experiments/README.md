@@ -16423,3 +16423,26 @@ an arm that STILL peaks last at 24 licenses no seat verdict at all.
 number the card sat idle from 21:37:50Z. Earlier the same day 224 px arms were priced at 30 min and cost
 13. The rule: **read the epoch time off the arm that is actually running, not off an older log of the
 same recipe** — a recipe's cost is a fact about the machine's current load, not about the recipe.
+
+## three finished runs whose numbers lived nowhere, 2026-09-16
+
+`ledger_check` reported them UNRECORDED — a best epoch on disk that appears in neither this file nor
+`interpretations/`. That is the `recal_dense` shape one step later: the run happened, the number exists,
+and nothing can cite it. Priced here so they stop being orphans. All three: `ledger75 --holdouts
+$MODELS`, 909 rows, midpoint first.
+
+| run | LEDGER | LEDGER75 | peak epoch | convergence |
+|---|---|---|---|---|
+| `clean_calib_drop40_long_s2026` | 0.8647 | **0.8978** | 23 of 24 | converged |
+| `v7nontear_span_s2026` | 0.8160 | 0.8612 | 6 | converged |
+| `reader_through_s2026` | 0.7137 | *0.7509* | 0 | **TRUNCATED** |
+
+`clean_calib_drop40_long_s2026` is the one that matters: 0.8978 at ledger75 is pool strength, within
+0.007 of the champion-family seat `labelwise_dense_drop40_long_s2026` (0.9048), and it was sitting
+unquotable. It is the `drop40_long` treatment on the clean-teacher + calibration cell that this file
+already records at 0.8649 for `clean_calib_s2026` — so the long schedule is worth about +0.033 at the
+midpoint ruler on that cell, which is a fact the ledger could not state until now.
+
+`reader_through_s2026`'s 0.7509 is a **FLOOR and not a score** — `convergence_check` calls it TRUNCATED,
+peak at epoch 0, so the anneal never ran. It is recorded to stop the number being re-quoted as the
+recipe's, which is exactly what that check exists to prevent.
