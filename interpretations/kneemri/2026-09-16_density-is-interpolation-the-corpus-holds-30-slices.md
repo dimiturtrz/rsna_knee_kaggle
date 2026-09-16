@@ -29,9 +29,18 @@ in. The general rule this instance buys: **an external result is priced against 
 our own history of closed axes, never adopted on its internal monotonicity.** We are above most of that
 forum; a recipe from below our floor is a hypothesis, and a weak one, not advice.
 
-The one forum datapoint that is NOT below us is topic 735304 (Scott Willis, 0.949 public from a single small
-ResNet, single fold, 5-minute scoring). That one outranks our champion and is worth its own reading; it is
-unrelated to density.
+An earlier draft of this file claimed one forum datapoint was NOT below us — "0.949 public from a single
+small ResNet" on topic 735304. **That number is not in the source.** Re-read live the same day
+(`python -m kneemri.kaggle.discussion_read --live --topic 735304`, no slot): 16 messages, highest single-model
+claim 0.943 ("0.942 raw, 0.943 with TTA at 288x288"; "0.934 @ 224px … 0.943 with some tweaks"). The nearest
+real rows are 0.936 ("small resnet model, 224x224", single fold) and a separate "0.930 in 46 minutes" — two
+posts that got merged into one number that nobody wrote. It was filed as a P1 (knee-k1d9v) before anyone
+re-opened the source, and is withdrawn.
+
+So the correct statement is stronger, not weaker: **every visible claim on that forum is below the pinned
+0.946**, the Raptor author's own best included (0.936–0.938 with one un-blended model, topic 737696, same
+day). The lesson is the rule itself — a cited number that is never re-opened is indistinguishable from an
+invented one, and this one survived long enough to set a priority.
 
 ## What the ledger already held
 

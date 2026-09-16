@@ -124,3 +124,37 @@ to sort by projection onto the slice normal, then keeps 9. What they tried and w
 We have no runtime constraint and no efficiency-board entry, so none of this is actionable today. It is
 worth keeping for the one case where it becomes load-bearing: if we ever ship a wide ensemble under the
 9-hour limit, the ordering pass — not the GPU — is what will bind.
+
+---
+
+## Re-read 2026-09-16 10:14Z — the gap closed from our side, and the mechanism they name is one we never tested
+
+Same tool, same topic, no slot. Three weeks on, the forum's single-model claims have barely moved while our
+ensemble has: highest single claim is now **0.943** ("0.942 raw, 0.943 with TTA at 288x288"; separately
+"0.934 @ 224px … Update: 0.943 with some tweaks, still @ 224px"), against 0.942 when this file was written.
+Below it: 0.938 single fold · 0.937 CoAtNet 384 single fold · 0.936 small ResNet 224 · 0.930 in 46 minutes ·
+0.929 and 0.926 five-fold on LLM output labels only · 0.92 · 0.915 DINOv2. Topic 737696 the same day has the
+Raptor author at **0.936–0.938 with one un-blended model**.
+
+Our pinned champion is **0.946** (`comp/champion.json`, `tripleseat_v2`, seven members). **Nothing visible on
+that forum is above it** — which is the standing rule, now re-measured rather than remembered: an external
+result is priced against our distance to the top, and a series that tops out below our champion is a
+hypothesis, not advice.
+
+**What still bites, for the third independent time.** Their ONE model reads 0.943 against our SEVEN-member
+0.946. Three ticks is what the entire mix buys us over a rival's single part. The gap is per-member quality,
+not mixing — stated here on 2026-08-26, in `research/2026-08-25_competitor-single-model-scores.md` the day
+before, and again now with the spread unchanged.
+
+**The mechanism they name is not the one this repo closed.** Unprompted and repeatedly: *"labels are still my
+greatest lever, especially pseudo labeling and blending different labels"*, plus two entries trained on **LLM
+output labels only** reaching 0.926–0.929 five-fold. That is NOT the label-correction axis 735304 closed
+earlier (correcting thousands of verified extraction failures moved no LB). Correcting wrong labels and
+*manufacturing more* labels are different mechanisms, and only the first was tested — here or there. Given
+the supervision bottleneck this project has measured from the inside (58 of 4,407 studies), pseudo-labeling
+is the untested axis with the largest claimed carry on the board.
+
+**One correction to the record, made the same session.** A "0.949 from a single small ResNet" was quoted into
+bead knee-3kpv9 against this topic and then promoted to a P1 (knee-k1d9v). It is not in the thread; the
+nearest real rows are 0.936 ("small resnet model, 224x224") and a separate "0.930 in 46 minutes". Both beads
+carry the withdrawal. A cited number nobody re-opens is indistinguishable from an invented one.
