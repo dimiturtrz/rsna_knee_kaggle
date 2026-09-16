@@ -6,8 +6,9 @@ import numpy as np
 import pydicom
 
 from core.data.corpus.acquisition import Acquisition
-from core.data.corpus.crop_coverage import CoverageRequest
+from core.data.corpus.audit import AuditRequest
 from core.data.corpus.slot_geometry import SlotFrame, SlotGeometry
+from core.data.corpus.study_cache import CorpusSample
 
 SAGITTAL = (0.0, 1.0, 0.0, 0.0, 0.0, -1.0)
 CORONAL = (1.0, 0.0, 0.0, 0.0, 0.0, -1.0)
@@ -125,9 +126,9 @@ def test_report():
         SlotFrame("cor", (0.0, 3.0, 4.0), (0.0, 1.0, 0.0), 120.0),
     ]
 
-    lines = SlotGeometry().report([study], sampled=2, corpus=4407)
+    lines = SlotGeometry().report([study], CorpusSample(["a", "b"], 4407))
 
-    assert lines[0].startswith("1 studies placed of 2 sampled, from 4407 in the corpus")
+    assert lines[0].startswith("1 studies with geometry measured, from 2 studies sampled of 4407 in the corpus")
     assert "2 slots with geometry, 1 within-study slot pairs" in lines[0]
     assert any("normal angle between slots:   p50 90.0 deg" in line for line in lines)
     assert any("centre distance" in line and "p50 5.0 mm" in line for line in lines)
@@ -136,7 +137,7 @@ def test_report():
     assert any("orthogonal" in line and "1/1 (100.0%)" in line for line in lines)
     assert any("IMAGED the second's centre: 2/2 (100.0%)" in line for line in lines), "ordered, so both ways"
 
-    assert len(SlotGeometry().report([], sampled=1, corpus=2)) == 1, "no pairs, no distributions"
+    assert len(SlotGeometry().report([], CorpusSample(["a"], 2))) == 1, "no pairs, no distributions"
 
 
 def test_covers():
@@ -161,4 +162,4 @@ def test_coverage():
 
 def test_measure_study(tmp_path: Path):
     """A study that will not route is silent about geometry rather than counted as aligned."""
-    assert SlotGeometry.measure_study(CoverageRequest(identifier="absent", source=str(tmp_path), planes={})) == []
+    assert SlotGeometry.measure_study(AuditRequest(identifier="absent", source=str(tmp_path), planes={})) == []

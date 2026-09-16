@@ -24,28 +24,19 @@ tissue at 80 mm cannot be the one keeping more joint, and that is the direction 
 """
 
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
-from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
 from core.bootstrap import RESAMPLE_SEED, Bootstrap
+from core.data.corpus.audit import UNCROPPED, AuditRequest, CorpusAudit, Reading
 from core.data.corpus.crop_centre import CENTRES, CROP_MM, TissueCentre
 from core.data.corpus.slot_reader import SlotReader
-from core.data.corpus.slots import Routing
-from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSample, CorpusSplit
+from core.data.corpus.study_cache import CorpusSample
 
 logger = logging.getLogger(__name__)
-
-UNCROPPED = 1.0e9
-"""A crop wider than any acquisition, so `SlotReader.cropped` decodes and hands back the FULL frame.
-
-The denominator this measurement needs is the tissue in the whole acquisition, and a stack that has
-already been cropped cannot supply it — whatever the crop discarded is exactly what is being counted."""
 
 TIGHT_MM = 80.0
 """The extent knee-1nn's multi-scale reading is gated on, and the one with no margin to spare."""
@@ -55,23 +46,15 @@ EXTENTS = (CROP_MM, TIGHT_MM)
 SLICES = 12
 """What the cache keeps per series, so the stack measured here is the stack a member would read."""
 
-SAMPLE = 400
-"""Studies to decode. The 60 of knee-yrf's original measurement carry a sampling error near a tenth of
-the effect they were used to argue for; 400 series-level observations put it near a hundredth, and the
-decode is the whole cost so a larger sample buys nothing this decision can use."""
-
 PERCENTILE_LOW = 10
 
+AUDIT = CorpusAudit(reading=Reading(crop_mm=UNCROPPED), unit="series", slices=SLICES)
+"""Read UNCROPPED, because the denominator is the tissue in the whole acquisition.
 
-@dataclass(frozen=True)
-class CoverageRequest:
-    """One study's measurement job, as the pool receives it."""
-
-    identifier: str
-    source: str
-    planes: dict[str, str]
-    slices: int = SLICES
-    extents: tuple[float, ...] = EXTENTS
+The default sample is the harness's 400, which is what `crop_alignment` and `slot_geometry` also draw —
+the three readings compose only because all three take the same every-k-th studies. knee-yrf's original
+60 carried a sampling error near a tenth of the effect it was used to argue for.
+"""
 
 
 @dataclass(frozen=True)
@@ -153,54 +136,35 @@ class CropCoverage:
             )
         return lines + self.paired(measured)
 
-    @staticmethod
-    def measure_study(request: CoverageRequest) -> list[dict[str, float]]:
-        """Every routed slot of one study, measured. A staticmethod so a process pool can pickle it.
+    def measure_study(self, request: AuditRequest) -> list[dict[str, float]]:
+        """Every routed slot of one study, scored at THIS instance's extents.
 
-        A study that will not decode contributes NOTHING rather than a zero: an unreadable series is
-        silent about centring, and counting it as retaining none would charge both centres for the
-        DICOM library.
+        An instance method because the extents are what the pool has to carry, and a frozen dataclass of
+        one tuple pickles. A study that will not decode contributes NOTHING rather than a zero: an
+        unreadable series is silent about centring, and counting it as retaining none would charge both
+        centres for the DICOM library.
         """
-        reader = SlotReader(crop_mm=UNCROPPED)
-        pipeline = SlotPipeline(scheme=Routing().built(), reader=reader)
-        coverage = CropCoverage(request.extents)
-        try:
-            study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
-            routed = list(pipeline.route(study.acquisitions, study.planes).values())
-            read = [(reader.cropped(acquisition, request.slices), acquisition.pixel_spacing) for acquisition in routed]
-        except (OSError, ValueError, RuntimeError, IndexError) as failure:
-            logger.info(f"  {request.identifier} did not decode: {type(failure).__name__}: {failure}")
-            return []
-        measured = [coverage.series(stack, spacing) for stack, spacing in read if stack is not None]
+        measured = [
+            self.series(stack, acquisition.pixel_spacing)
+            for _, acquisition, stack in request.routed().decoded(request.slices)
+            if stack is not None
+        ]
         return [kept for kept in measured if kept]
 
 
 def main() -> None:
     """Decode a spread sample of studies uncropped and score both centres at both extents."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
+    AUDIT.flags(command)
     command.parser.add_argument("--slices", type=int, default=SLICES)
     command.parser.add_argument("--tight-mm", type=float, default=TIGHT_MM, help="the extent with no margin")
-    command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
     arguments = command.parsed()
 
-    split = CorpusSplit(command.rooted(arguments).raw())
-    planes = split.planes()
-    sample = split.sample(arguments.sample)
-
-    extents = (CROP_MM, arguments.tight_mm)
-    requests = [
-        CoverageRequest(
-            identifier=name, source=str(split.source), planes=planes, slices=arguments.slices, extents=extents
-        )
-        for name in sample.chosen
-    ]
-    measured: list[dict[str, float]] = []
-    with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
-        for kept in pool.map(CropCoverage.measure_study, requests, chunksize=4):
-            measured.extend(kept)
-    command.report(CropCoverage(extents).report(measured, sample))
-    sample.denominator(len(measured), "series").refuse_empty()
+    audit = AUDIT.with_slices(arguments.slices)
+    coverage = CropCoverage((CROP_MM, arguments.tight_mm))
+    sample, requests = audit.drawn(command, arguments)
+    measured = audit.mapped(coverage.measure_study, requests, arguments.workers)
+    audit.reported(command, coverage.report(measured, sample), sample, len(measured))
 
 
 if __name__ == "__main__":

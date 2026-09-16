@@ -31,7 +31,6 @@ mechanism is not available here at any price.
 """
 
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
@@ -40,14 +39,18 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
+from core.data.corpus.audit import UNCROPPED, AuditRequest, CorpusAudit, Reading
 from core.data.corpus.crop_centre import ImageCentre, TissueCentre
-from core.data.corpus.crop_coverage import SAMPLE, SLICES, UNCROPPED, CoverageRequest
-from core.data.corpus.slot_reader import SlotReader
-from core.data.corpus.slots import Routing
-from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSample, CorpusSplit
+from core.data.corpus.crop_coverage import SLICES
+from core.data.corpus.study_cache import CorpusSample
 
 logger = logging.getLogger(__name__)
+
+AUDIT = CorpusAudit(reading=Reading(crop_mm=UNCROPPED), unit="studies", slices=SLICES)
+"""Read UNCROPPED, because the displacement measured is the one the crop WOULD apply.
+
+Taken from an already-cropped stack it would measure what is left after the error rather than the error.
+"""
 
 MIN_SLOTS_FOR_SPREAD = 2
 """A study with one routed slot has nothing to disagree with, so it abstains rather than scoring zero."""
@@ -166,36 +169,29 @@ class CropAlignment:
         )
 
     @staticmethod
-    def measure_study(request: CoverageRequest) -> "StudyOffsets":
-        """Every routed slot of one study, offset. A staticmethod so a process pool can pickle it.
+    def measure_study(request: AuditRequest) -> list["StudyOffsets"]:
+        """Every routed slot of one study, offset — STILL NAMED where none of them placed.
 
-        Read UNCROPPED, because the displacement being measured is the one the crop would apply — taking
-        it from an already-cropped stack would measure what is left after the error rather than the error.
+        A LIST of exactly one study, because the pool flattens and a bare object cannot be extended into
+        the result. A study that placed nothing stays in it rather than vanishing: `dump` writes an
+        abstention as nan precisely so a join can tell a study that did not measure from one that was
+        never drawn, and a worker that dropped it would take that distinction with it.
         """
-        reader = SlotReader(crop_mm=UNCROPPED)
-        pipeline = SlotPipeline(scheme=Routing().built(), reader=reader)
         alignment = CropAlignment()
-        try:
-            study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
-            routed = pipeline.route(study.acquisitions, study.planes)
-            read = [
-                (name, reader.cropped(acquisition, request.slices), acquisition.pixel_spacing)
-                for name, acquisition in routed.items()
-            ]
-        except (OSError, ValueError, RuntimeError, IndexError) as failure:
-            logger.info(f"  {request.identifier} did not decode: {type(failure).__name__}: {failure}")
-            return StudyOffsets(request.identifier, [])
-        found = [alignment.offset(stack, spacing, name) for name, stack, spacing in read if stack is not None]
-        return StudyOffsets(request.identifier, [offset for offset in found if offset is not None])
+        found = [
+            alignment.offset(stack, acquisition.pixel_spacing, slot)
+            for slot, acquisition, stack in request.routed().decoded(request.slices)
+            if stack is not None
+        ]
+        return [StudyOffsets(request.identifier, [offset for offset in found if offset is not None])]
 
 
 def main() -> None:
     """Decode a spread sample of studies uncropped and report how far each slot's knee sits off centre."""
     command = cli.Command(__doc__, logger)
+    AUDIT.flags(command)
     parser = command.parser
-    parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
     parser.add_argument("--slices", type=int, default=SLICES)
-    parser.add_argument("--workers", type=int, default=20, help="decode processes")
     parser.add_argument(
         "--studies",
         type=Path,
@@ -212,20 +208,14 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    split = CorpusSplit(command.rooted(arguments).raw())
-    planes = split.planes()
+    audit = AUDIT.with_slices(arguments.slices)
     alignment = CropAlignment()
-    sample = split.named(arguments.studies) if arguments.studies else split.sample(arguments.sample)
-
-    requests = [
-        CoverageRequest(identifier=name, source=str(split.source), planes=planes, slices=arguments.slices)
-        for name in sample.chosen
-    ]
-    with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
-        read = list(pool.map(CropAlignment.measure_study, requests, chunksize=4))
-    decoded = [study for study in read if study.offsets]
-    command.report(alignment.report([study.offsets for study in decoded], sample))
-    sample.denominator(len(decoded), "studies").refuse_empty()
+    sample, requests = audit.drawn(command, arguments, studies=arguments.studies)
+    decoded = audit.mapped(CropAlignment.measure_study, requests, arguments.workers)
+    # The report is over the studies that PLACED; the dump keeps the abstentions, which is what a join
+    # needs to tell a study that did not measure from one that was never drawn.
+    placed = [study for study in decoded if study.offsets]
+    audit.reported(command, alignment.report([study.offsets for study in placed], sample), sample, len(placed))
     if arguments.dump:
         alignment.dump(arguments.dump, decoded)
         logger.info(f"per-study spread written to {arguments.dump}")

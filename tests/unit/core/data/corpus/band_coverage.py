@@ -4,7 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-from core.data.corpus.band_coverage import BandCoverage, BandRequest, SlotShares
+from core.data.corpus.audit import AuditRequest
+from core.data.corpus.band_coverage import BandCoverage, SlotShares
 from core.data.corpus.slot_reader import Band
 from core.data.corpus.study_cache import CorpusSample
 
@@ -120,6 +121,6 @@ def test_report():
 
 def test_measure_study(tmp_path: Path):
     """A study that will not decode is silent about the band rather than counted as discarding none."""
-    request = BandRequest(identifier="absent", source=str(tmp_path), planes={})
+    request = AuditRequest(identifier="absent", source=str(tmp_path), planes={})
 
-    assert BandCoverage.measure_study(request) == []
+    assert BandCoverage().measure_study(request) == []

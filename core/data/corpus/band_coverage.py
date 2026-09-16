@@ -36,20 +36,17 @@ reason to build the cache, not a result.
 """
 
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
 from core.bootstrap import RESAMPLE_SEED, Bootstrap
+from core.data.corpus.audit import AuditRequest, CorpusAudit, Reading
 from core.data.corpus.crop_centre import TissueCentre
-from core.data.corpus.slot_reader import SLICE_BAND, Band, SlotReader
-from core.data.corpus.slots import Routing
-from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSample, CorpusSplit
+from core.data.corpus.slot_reader import SLICE_BAND, Band
+from core.data.corpus.study_cache import CorpusSample
 
 logger = logging.getLogger(__name__)
 
@@ -68,20 +65,14 @@ not the twelve a cache happens to keep. Twenty-four puts each end of the 20% tai
 which is enough for the tail's mass to be a mean rather than one slice's luck.
 """
 
-SAMPLE = 400
-"""Studies to decode, matching `crop_coverage` — a sampling error near a hundredth of the effect."""
-
 PERCENTILE_HIGH = 90
 
+AUDIT = CorpusAudit(reading=Reading(band=FULL_BAND), unit="series", slices=DEPTH)
+"""Read over the WHOLE series, which is the only denominator that can price what a band removes.
 
-@dataclass(frozen=True)
-class BandRequest:
-    """One study's measurement job, as the pool receives it."""
-
-    identifier: str
-    source: str
-    planes: dict[str, str]
-    depth: int = DEPTH
+The geometry is declared here rather than passed inside the worker, so the report can state it: this
+tool printed discarded-tissue shares for a month without ever saying they were read at the full band.
+"""
 
 
 @dataclass(frozen=True)
@@ -195,30 +186,18 @@ class BandCoverage:
         slots = sorted({name for name, _ in measured})
         return header + [SlotShares.of(slot, measured).row(self) for slot in slots]
 
-    @staticmethod
-    def measure_study(request: BandRequest) -> list[tuple[str, dict[str, float]]]:
-        """Every routed slot of one study, read over the FULL series and scored against the band.
+    def measure_study(self, request: AuditRequest) -> list[tuple[str, dict[str, float]]]:
+        """Every routed slot of one study, read over the FULL series and scored against THIS band.
 
-        A study that will not decode contributes NOTHING rather than a zero, as in `crop_coverage`: an
-        unreadable series is silent about the band, and counting it as discarding none would charge the
-        rule for the DICOM library.
+        An instance method rather than a staticmethod, which is a FIX and not a tidy-up: the worker used
+        to build a bare `BandCoverage()` and score against the default 0.20-0.80, so `--band-low` and
+        `--band-high` moved the header and the `cut/end` column and never the discarded share they
+        name. A flag recorded where the consumer reads a constant — the failure this repo already has a
+        rule about. A frozen dataclass of one `Band` pickles, so the cut can simply travel.
         """
-        reader = SlotReader(band=FULL_BAND)
-        pipeline = SlotPipeline(scheme=Routing().built(), reader=reader)
-        coverage = BandCoverage()
-        try:
-            study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
-            routed = pipeline.route(study.acquisitions, study.planes)
-            read = [
-                (slot, (acquisition, reader.cropped(acquisition, request.depth)))
-                for slot, acquisition in routed.items()
-            ]
-        except (OSError, ValueError, RuntimeError, IndexError) as failure:
-            logger.info(f"  {request.identifier} did not decode: {type(failure).__name__}: {failure}")
-            return []
         scored = [
-            (slot, coverage.discarded(stack) | {"span_mm": acquisition.through_plane_mm or 0.0})
-            for slot, (acquisition, stack) in read
+            (slot, self.discarded(stack) | {"span_mm": acquisition.through_plane_mm or 0.0})
+            for slot, acquisition, stack in request.routed().decoded(request.slices)
             if stack is not None
         ]
         return [(slot, one) for slot, one in scored if len(one) > 1]
@@ -227,28 +206,19 @@ class BandCoverage:
 def main() -> None:
     """Decode a spread sample of studies over the whole series and price what the band removes."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
+    AUDIT.flags(command)
     command.parser.add_argument("--depth", type=int, default=DEPTH, help="slices read along the through-plane axis")
     command.parser.add_argument("--band-low", type=float, default=SLICE_BAND[0])
     command.parser.add_argument("--band-high", type=float, default=SLICE_BAND[1])
-    command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
     arguments = command.parsed()
 
-    split = CorpusSplit(command.rooted(arguments).raw())
-    planes = split.planes()
-    sample = split.sample(arguments.sample)
-
-    requests = [
-        BandRequest(identifier=name, source=str(split.source), planes=planes, depth=arguments.depth)
-        for name in sample.chosen
-    ]
-    measured: list[tuple[str, dict[str, float]]] = []
-    with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
-        for scored in pool.map(BandCoverage.measure_study, requests, chunksize=4):
-            measured.extend(scored)
-    band = Band(low=arguments.band_low, high=arguments.band_high)
-    command.report(BandCoverage(band).report(measured, sample))
-    sample.denominator(len(measured), "series").refuse_empty()
+    # The band flags price the CUT; they never move the READ, which has to stay the whole series or the
+    # discarded share would be measured on a stack the band had already removed it from.
+    audit = AUDIT.with_slices(arguments.depth)
+    coverage = BandCoverage(Band(low=arguments.band_low, high=arguments.band_high))
+    sample, requests = audit.drawn(command, arguments)
+    measured = audit.mapped(coverage.measure_study, requests, arguments.workers)
+    audit.reported(command, coverage.report(measured, sample), sample, len(measured))
 
 
 if __name__ == "__main__":

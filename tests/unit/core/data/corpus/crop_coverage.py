@@ -4,7 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-from core.data.corpus.crop_coverage import CoverageRequest, CropCoverage
+from core.data.corpus.audit import AuditRequest
+from core.data.corpus.crop_coverage import CropCoverage
 from core.data.corpus.study_cache import CorpusSample
 
 EXTENTS = (130.0, 80.0)
@@ -68,6 +69,6 @@ def test_report():
 
 def test_measure_study(tmp_path: Path):
     """A study that will not decode is silent about centring rather than counted as retaining none."""
-    request = CoverageRequest(identifier="absent", source=str(tmp_path), planes={})
+    request = AuditRequest(identifier="absent", source=str(tmp_path), planes={})
 
-    assert CropCoverage.measure_study(request) == []
+    assert CropCoverage(EXTENTS).measure_study(request) == []

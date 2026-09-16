@@ -14,6 +14,48 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.audit",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.audit",
+      "target": "core.data.corpus.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.audit",
+      "target": "core.data.corpus.crop_centre",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.audit",
+      "target": "core.data.corpus.slot_reader",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.audit",
+      "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.audit",
+      "target": "core.data.corpus.study",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.audit",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.band_coverage",
       "target": "core.bootstrap",
       "weight": 1
@@ -730,6 +772,24 @@
       "kind": "import",
       "source": "core.data.corpus.mrnet_corpus",
       "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.native_depth",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.native_depth",
+      "target": "core.data.corpus.audit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.native_depth",
+      "target": "core.data.corpus.study_cache",
       "weight": 1
     },
     {
@@ -8467,9 +8527,177 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "core.data.corpus.audit.AuditRequest",
+      "target": "core.data.corpus.audit.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.audit.AuditRequest",
+      "target": "core.data.corpus.audit.RoutedStudy",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.AuditRequest.routed",
+      "target": "core.data.corpus.audit.Reading.reader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.audit.AuditRequest.routed",
+      "target": "core.data.corpus.audit.RoutedStudy",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.audit.AuditRequest.routed",
+      "target": "core.data.corpus.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.AuditRequest.routed",
+      "target": "core.data.corpus.slots.Routing.built",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.audit.AuditRequest.routed",
+      "target": "core.data.corpus.study.SlotPipeline",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.AuditRequest.routed",
+      "target": "core.data.corpus.study.Study.from_directory",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.audit.CorpusAudit",
+      "target": "core.data.corpus.audit.AuditRequest",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.audit.CorpusAudit",
+      "target": "core.data.corpus.audit.CorpusAudit",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.audit.CorpusAudit",
+      "target": "core.data.corpus.audit.Reading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.audit.CorpusAudit",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.audit.CorpusAudit.drawn",
+      "target": "core.data.corpus.audit.AuditRequest",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.audit.CorpusAudit.drawn",
+      "target": "core.data.corpus.study_cache.CorpusSplit",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.CorpusAudit.drawn",
+      "target": "core.data.corpus.study_cache.CorpusSplit.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.CorpusAudit.drawn",
+      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.CorpusAudit.drawn",
+      "target": "core.data.corpus.study_cache.CorpusSplit.sample",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.CorpusAudit.reported",
+      "target": "core.data.corpus.audit.Reading.line",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.CorpusAudit.reported",
+      "target": "core.data.corpus.study_cache.CorpusSample.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.audit.Reading",
+      "target": "core.data.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.audit.Reading",
+      "target": "core.data.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.audit.Reading.reader",
+      "target": "core.data.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.audit.RoutedStudy",
+      "target": "core.data.corpus.acquisition.Acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.audit.RoutedStudy",
+      "target": "core.data.corpus.audit.RoutedStudy",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.audit.RoutedStudy",
+      "target": "core.data.corpus.slot_reader.SlotReader",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.audit.RoutedStudy",
+      "target": "core.data.corpus.study.Study",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.RoutedStudy.decoded",
+      "target": "core.data.corpus.slot_reader.SlotReader.cropped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.audit.RoutedStudy.side",
+      "target": "core.data.corpus.study.Study.side",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.data.corpus.band_coverage.BandCoverage",
-      "target": "core.data.corpus.band_coverage.BandRequest",
+      "target": "core.data.corpus.audit.AuditRequest",
       "weight": 1
     },
     {
@@ -8499,49 +8727,13 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
+      "target": "core.data.corpus.audit.AuditRequest.routed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
       "target": "core.data.corpus.band_coverage.BandCoverage.discarded",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader.cropped",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
-      "target": "core.data.corpus.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
-      "target": "core.data.corpus.slots.Routing.built",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline.route",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
-      "target": "core.data.corpus.study.Study.from_directory",
       "weight": 1
     },
     {
@@ -8607,31 +8799,7 @@
     {
       "kind": "construct",
       "source": "core.data.corpus.band_coverage.main",
-      "target": "core.data.corpus.band_coverage.BandRequest",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.band_coverage.main",
       "target": "core.data.corpus.slot_reader.Band",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.band_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.band_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.band_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.sample",
       "weight": 1
     },
     {
@@ -9063,6 +9231,12 @@
     {
       "kind": "references",
       "source": "core.data.corpus.crop_alignment.CropAlignment",
+      "target": "core.data.corpus.audit.AuditRequest",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.crop_alignment.CropAlignment",
       "target": "core.data.corpus.crop_alignment.SlotOffset",
       "weight": 1
     },
@@ -9070,12 +9244,6 @@
       "kind": "references",
       "source": "core.data.corpus.crop_alignment.CropAlignment",
       "target": "core.data.corpus.crop_alignment.StudyOffsets",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "core.data.corpus.crop_alignment.CropAlignment",
-      "target": "core.data.corpus.crop_coverage.CoverageRequest",
       "weight": 1
     },
     {
@@ -9093,6 +9261,12 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
+      "target": "core.data.corpus.audit.AuditRequest.routed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
       "target": "core.data.corpus.crop_alignment.CropAlignment.offset",
       "weight": 1
     },
@@ -9100,48 +9274,6 @@
       "kind": "construct",
       "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
       "target": "core.data.corpus.crop_alignment.StudyOffsets",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader.cropped",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
-      "target": "core.data.corpus.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
-      "target": "core.data.corpus.slots.Routing.built",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline.route",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.measure_study",
-      "target": "core.data.corpus.study.Study.from_directory",
       "weight": 1
     },
     {
@@ -9217,36 +9349,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.crop_coverage.CoverageRequest",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.named",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.sample",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "core.data.corpus.crop_centre.Crop",
       "target": "core.data.corpus.crop_centre.CropCentre",
@@ -9279,7 +9381,7 @@
     {
       "kind": "references",
       "source": "core.data.corpus.crop_coverage.CropCoverage",
-      "target": "core.data.corpus.crop_coverage.CoverageRequest",
+      "target": "core.data.corpus.audit.AuditRequest",
       "weight": 1
     },
     {
@@ -9291,49 +9393,13 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
+      "target": "core.data.corpus.audit.AuditRequest.routed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
       "target": "core.data.corpus.crop_coverage.CropCoverage.series",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader.cropped",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
-      "target": "core.data.corpus.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
-      "target": "core.data.corpus.slots.Routing.built",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline.route",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_coverage.CropCoverage.measure_study",
-      "target": "core.data.corpus.study.Study.from_directory",
       "weight": 1
     },
     {
@@ -9387,12 +9453,6 @@
     {
       "kind": "construct",
       "source": "core.data.corpus.crop_coverage.main",
-      "target": "core.data.corpus.crop_coverage.CoverageRequest",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_coverage.main",
       "target": "core.data.corpus.crop_coverage.CropCoverage",
       "weight": 1
     },
@@ -9400,24 +9460,6 @@
       "kind": "calls",
       "source": "core.data.corpus.crop_coverage.main",
       "target": "core.data.corpus.crop_coverage.CropCoverage.report",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_coverage.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.sample",
       "weight": 1
     },
     {
@@ -9429,7 +9471,7 @@
     {
       "kind": "references",
       "source": "core.data.corpus.crop_laterality.CropLaterality",
-      "target": "core.data.corpus.crop_laterality.ClipRequest",
+      "target": "core.data.corpus.audit.AuditRequest",
       "weight": 1
     },
     {
@@ -9469,9 +9511,33 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "core.data.corpus.crop_laterality.CropLaterality.in_plane",
+      "target": "core.data.corpus.slots.Routing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_laterality.CropLaterality.in_plane",
+      "target": "core.data.corpus.slots.Routing.built",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "core.data.corpus.audit.AuditRequest.routed",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
       "target": "core.data.corpus.crop_laterality.CropLaterality.clipped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
+      "target": "core.data.corpus.crop_laterality.CropLaterality.in_plane",
       "weight": 1
     },
     {
@@ -9481,51 +9547,15 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader.cropped",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
-      "target": "core.data.corpus.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
-      "target": "core.data.corpus.slots.Routing.built",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline.route",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_laterality.CropLaterality.measure_study",
-      "target": "core.data.corpus.study.Study.from_directory",
+      "kind": "holds",
+      "source": "core.data.corpus.crop_laterality.CropLateralityReport",
+      "target": "core.data.corpus.crop_laterality.SideClip",
       "weight": 1
     },
     {
       "kind": "holds",
       "source": "core.data.corpus.crop_laterality.CropLateralityReport",
-      "target": "core.data.corpus.crop_laterality.SideClip",
+      "target": "core.data.corpus.study_cache.CorpusSample",
       "weight": 1
     },
     {
@@ -9535,9 +9565,15 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_laterality.CropLateralityReport.lines",
+      "target": "core.data.corpus.study_cache.CorpusSample.line",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.corpus.crop_laterality.main",
-      "target": "core.data.corpus.crop_laterality.ClipRequest",
+      "target": "core.data.corpus.crop_laterality.CropLaterality",
       "weight": 1
     },
     {
@@ -9550,24 +9586,6 @@
       "kind": "calls",
       "source": "core.data.corpus.crop_laterality.main",
       "target": "core.data.corpus.crop_laterality.CropLateralityReport.lines",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.crop_laterality.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_laterality.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_laterality.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -10699,6 +10717,60 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.native_depth.NativeDepth",
+      "target": "core.data.corpus.audit.AuditRequest",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.native_depth.NativeDepth",
+      "target": "core.data.corpus.native_depth.SlotDepth",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.native_depth.NativeDepth",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.native_depth.NativeDepth.measure_study",
+      "target": "core.data.corpus.audit.AuditRequest.routed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.native_depth.NativeDepth.measure_study",
+      "target": "core.data.corpus.native_depth.SlotDepth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.native_depth.NativeDepth.report",
+      "target": "core.data.corpus.native_depth.NativeDepth.row",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.native_depth.NativeDepth.report",
+      "target": "core.data.corpus.study_cache.CorpusSample.line",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.native_depth.main",
+      "target": "core.data.corpus.native_depth.NativeDepth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.native_depth.main",
+      "target": "core.data.corpus.native_depth.NativeDepth.report",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "core.data.corpus.prefetch.Prefetch",
       "target": "core.data.corpus.study_cache.CachedCorpus",
@@ -10959,13 +11031,19 @@
     {
       "kind": "references",
       "source": "core.data.corpus.slot_geometry.SlotGeometry",
-      "target": "core.data.corpus.crop_coverage.CoverageRequest",
+      "target": "core.data.corpus.audit.AuditRequest",
       "weight": 1
     },
     {
       "kind": "references",
       "source": "core.data.corpus.slot_geometry.SlotGeometry",
       "target": "core.data.corpus.slot_geometry.SlotFrame",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.slot_geometry.SlotGeometry",
+      "target": "core.data.corpus.study_cache.CorpusSample",
       "weight": 1
     },
     {
@@ -10977,43 +11055,13 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
+      "target": "core.data.corpus.audit.AuditRequest.routed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
       "target": "core.data.corpus.slot_geometry.SlotGeometry.frame",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
-      "target": "core.data.corpus.slot_reader.SlotReader",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
-      "target": "core.data.corpus.slots.Routing",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
-      "target": "core.data.corpus.slots.Routing.built",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
-      "target": "core.data.corpus.study.SlotPipeline.route",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.measure_study",
-      "target": "core.data.corpus.study.Study.from_directory",
       "weight": 1
     },
     {
@@ -11041,9 +11089,9 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "core.data.corpus.slot_geometry.main",
-      "target": "core.data.corpus.crop_coverage.CoverageRequest",
+      "kind": "calls",
+      "source": "core.data.corpus.slot_geometry.SlotGeometry.report",
+      "target": "core.data.corpus.study_cache.CorpusSample.line",
       "weight": 1
     },
     {
@@ -11056,24 +11104,6 @@
       "kind": "calls",
       "source": "core.data.corpus.slot_geometry.main",
       "target": "core.data.corpus.slot_geometry.SlotGeometry.report",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.corpus.slot_geometry.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.identifiers",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.main",
-      "target": "core.data.corpus.study_cache.CorpusSplit.planes",
       "weight": 1
     },
     {
@@ -39903,7 +39933,7 @@
   ],
   "nodes": [
     {
-      "descendants": 82,
+      "descendants": 84,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -39927,7 +39957,7 @@
       "role": null
     },
     {
-      "descendants": 72,
+      "descendants": 74,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -39935,7 +39965,7 @@
       "role": null
     },
     {
-      "descendants": 45,
+      "descendants": 47,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -39954,6 +39984,14 @@
       "descendants": 0,
       "id": "core.data.corpus.anatomy",
       "label": "anatomy",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit",
+      "label": "audit",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -40202,6 +40240,14 @@
       "descendants": 0,
       "id": "core.data.corpus.mrnet_source",
       "label": "mrnet_source",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth",
+      "label": "native_depth",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -43176,16 +43222,40 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.band_coverage.BandCoverage",
-      "label": "BandCoverage",
+      "id": "core.data.corpus.audit.AuditRequest",
+      "label": "AuditRequest",
       "level": "class",
-      "parent": "core.data.corpus.band_coverage",
+      "parent": "core.data.corpus.audit",
       "role": "satellite"
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.band_coverage.BandRequest",
-      "label": "BandRequest",
+      "id": "core.data.corpus.audit.CorpusAudit",
+      "label": "CorpusAudit",
+      "level": "class",
+      "parent": "core.data.corpus.audit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.Reading",
+      "label": "Reading",
+      "level": "class",
+      "parent": "core.data.corpus.audit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.RoutedStudy",
+      "label": "RoutedStudy",
+      "level": "class",
+      "parent": "core.data.corpus.audit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.band_coverage.BandCoverage",
+      "label": "BandCoverage",
       "level": "class",
       "parent": "core.data.corpus.band_coverage",
       "role": "satellite"
@@ -43272,14 +43342,6 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.crop_coverage.CoverageRequest",
-      "label": "CoverageRequest",
-      "level": "class",
-      "parent": "core.data.corpus.crop_coverage",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.crop_coverage.CropCoverage",
       "label": "CropCoverage",
       "level": "class",
@@ -43288,19 +43350,11 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.crop_laterality.ClipRequest",
-      "label": "ClipRequest",
-      "level": "class",
-      "parent": "core.data.corpus.crop_laterality",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.crop_laterality.CropLaterality",
       "label": "CropLaterality",
       "level": "class",
       "parent": "core.data.corpus.crop_laterality",
-      "role": "primary"
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -43572,6 +43626,22 @@
       "label": "ZippedSource",
       "level": "class",
       "parent": "core.data.corpus.mrnet_source",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth.NativeDepth",
+      "label": "NativeDepth",
+      "level": "class",
+      "parent": "core.data.corpus.native_depth",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth.SlotDepth",
+      "label": "SlotDepth",
+      "level": "class",
+      "parent": "core.data.corpus.native_depth",
       "role": "satellite"
     },
     {
@@ -49344,6 +49414,94 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.audit.AuditRequest.routed",
+      "label": "routed",
+      "level": "method",
+      "parent": "core.data.corpus.audit.AuditRequest",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.CorpusAudit.drawn",
+      "label": "drawn",
+      "level": "method",
+      "parent": "core.data.corpus.audit.CorpusAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.CorpusAudit.flags",
+      "label": "flags",
+      "level": "method",
+      "parent": "core.data.corpus.audit.CorpusAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.CorpusAudit.mapped",
+      "label": "mapped",
+      "level": "method",
+      "parent": "core.data.corpus.audit.CorpusAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.CorpusAudit.reported",
+      "label": "reported",
+      "level": "method",
+      "parent": "core.data.corpus.audit.CorpusAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.CorpusAudit.with_slices",
+      "label": "with_slices",
+      "level": "method",
+      "parent": "core.data.corpus.audit.CorpusAudit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.Reading.line",
+      "label": "line",
+      "level": "method",
+      "parent": "core.data.corpus.audit.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.Reading.reader",
+      "label": "reader",
+      "level": "method",
+      "parent": "core.data.corpus.audit.Reading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.RoutedStudy.decoded",
+      "label": "decoded",
+      "level": "method",
+      "parent": "core.data.corpus.audit.RoutedStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.RoutedStudy.only",
+      "label": "only",
+      "level": "method",
+      "parent": "core.data.corpus.audit.RoutedStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.audit.RoutedStudy.side",
+      "label": "side",
+      "level": "method",
+      "parent": "core.data.corpus.audit.RoutedStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.band_coverage.BandCoverage.discarded",
       "label": "discarded",
       "level": "method",
@@ -49672,16 +49830,16 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.crop_laterality.CropLaterality.__init__",
-      "label": "__init__",
+      "id": "core.data.corpus.crop_laterality.CropLaterality.clipped",
+      "label": "clipped",
       "level": "method",
       "parent": "core.data.corpus.crop_laterality.CropLaterality",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.crop_laterality.CropLaterality.clipped",
-      "label": "clipped",
+      "id": "core.data.corpus.crop_laterality.CropLaterality.in_plane",
+      "label": "in_plane",
       "level": "method",
       "parent": "core.data.corpus.crop_laterality.CropLaterality",
       "role": null
@@ -50732,6 +50890,46 @@
       "label": "read",
       "level": "method",
       "parent": "core.data.corpus.mrnet_source.ZippedSource",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth.NativeDepth.measure_study",
+      "label": "measure_study",
+      "level": "method",
+      "parent": "core.data.corpus.native_depth.NativeDepth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth.NativeDepth.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.corpus.native_depth.NativeDepth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth.NativeDepth.row",
+      "label": "row",
+      "level": "method",
+      "parent": "core.data.corpus.native_depth.NativeDepth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth.SlotDepth.span_mm",
+      "label": "span_mm",
+      "level": "method",
+      "parent": "core.data.corpus.native_depth.SlotDepth",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.native_depth.main",
+      "label": "main",
+      "level": "method",
+      "parent": "core.data.corpus.native_depth",
       "role": null
     },
     {

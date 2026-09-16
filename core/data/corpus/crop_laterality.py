@@ -25,9 +25,7 @@ harder is a reason to rebuild a cache, not a result.
 """
 
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
@@ -35,12 +33,12 @@ from numpy.typing import NDArray
 from core import cli
 from core.bootstrap import RESAMPLE_SEED, Bootstrap
 from core.data.corpus.acquisition import Acquisition
+from core.data.corpus.audit import UNCROPPED, AuditRequest, CorpusAudit, Reading
 from core.data.corpus.crop_centre import CROP_MM
-from core.data.corpus.crop_coverage import UNCROPPED, CropCoverage
+from core.data.corpus.crop_coverage import CropCoverage
 from core.data.corpus.slot_reader import SlotReader
 from core.data.corpus.slots import Plane, Routing
-from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSplit
+from core.data.corpus.study_cache import CorpusSample
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +56,13 @@ past that the axis is a different axis, and the series is declined rather than g
 SLICES = 12
 """What the cache keeps per series, so the stack measured is the stack a member would read."""
 
-SAMPLE = 400
-"""Studies to decode, matching `crop_coverage` and `band_coverage` — the same sampling error, and the
-same reason: the decode is the whole cost and a larger sample buys nothing this decision can use."""
+AUDIT = CorpusAudit(reading=Reading(crop_mm=UNCROPPED), unit="coronal/axial series", slices=SLICES)
+"""Read UNCROPPED, because the crop being priced is exactly what must not already be applied.
+
+The draw is the harness's every-k-th 400, matching `crop_coverage` and `band_coverage` — the same
+sampling error and the same reason: the decode is the whole cost and a larger sample buys nothing this
+decision can use. It was spelled by hand here, under a comment claiming it matched `crop_coverage`.
+"""
 
 
 @dataclass(frozen=True)
@@ -76,21 +78,24 @@ class SideClip:
 
 
 @dataclass(frozen=True)
-class ClipRequest:
-    """One study's measurement job, as the pool receives it."""
+class CropLaterality:
+    """Which side of the knee the in-plane crop discards, per series and then over a sample.
 
-    identifier: str
-    source: str
-    planes: dict[str, str]
-    slices: int = SLICES
+    Frozen rather than a plain class so the pool can carry it: `--crop-mm` has to reach the worker, and
+    the alternative is the defect `band_coverage` was carrying — a flag recorded where the worker builds
+    a default and reads the constant instead.
+    """
+
     crop_mm: float = CROP_MM
 
+    def in_plane(self) -> tuple[str, ...]:
+        """The slot names whose COLUMN axis is medial-lateral, so a sagittal slot is never decoded.
 
-class CropLaterality:
-    """Which side of the knee the in-plane crop discards, per series and then over a sample."""
-
-    def __init__(self, crop_mm: float = CROP_MM) -> None:
-        self.crop_mm = crop_mm
+        Named before the decode rather than filtered after it: the decode is this audit's whole runtime,
+        and a sagittal series that will not read would otherwise take its study's coronal measurement
+        down with it.
+        """
+        return tuple(slot.name for slot in Routing().built().slots if slot.plane in IN_PLANE_AXES)
 
     def lateral_column(self, acquisition: Acquisition, side: str | None) -> int | None:
         """+1 when the LAST column is lateral, -1 when the FIRST is, None when the series cannot say.
@@ -132,38 +137,20 @@ class CropLaterality:
         after = float(mask[:, :, columns.stop :].sum()) / total
         return SideClip(lateral=after, medial=before) if lateral > 0 else SideClip(lateral=before, medial=after)
 
-    @staticmethod
-    def measure_study(request: ClipRequest) -> list[SideClip]:
-        """Every coronal or axial slot of one study, measured. A staticmethod so a pool can pickle it.
+    def measure_study(self, request: AuditRequest) -> list[SideClip]:
+        """Every coronal or axial slot of one study, measured against THIS instance's crop.
 
         A study that will not decode contributes NOTHING rather than a zero, for the same reason
         `crop_coverage` gives: an unreadable series is silent about the crop, and a zero would charge the
-        crop for the DICOM library.
+        crop for the DICOM library. A study whose side cannot be resolved is declined the same way —
+        `RoutedStudy.side` returns None, `lateral_column` refuses it, and no coin-flip sign enters the mean.
         """
-        reader = SlotReader(crop_mm=UNCROPPED)
-        pipeline = SlotPipeline(scheme=Routing().built(), reader=reader)
-        planes = {slot.name: slot.plane for slot in pipeline.scheme.slots}
-        measurement = CropLaterality(request.crop_mm)
-        try:
-            study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
-            side = study.side()
-            routed = pipeline.route(study.acquisitions, study.planes)
-            read = [
-                (
-                    reader.cropped(acquisition, request.slices),
-                    acquisition,
-                    measurement.lateral_column(acquisition, side),
-                )
-                for name, acquisition in routed.items()
-                if planes.get(name) in IN_PLANE_AXES
-            ]
-        except (OSError, ValueError, RuntimeError, IndexError) as failure:
-            logger.info(f"  {request.identifier} did not decode: {type(failure).__name__}: {failure}")
-            return []
+        routed = request.routed()
+        side = routed.side()
         clips = [
-            measurement.clipped(stack, acquisition.pixel_spacing, lateral)
-            for stack, acquisition, lateral in read
-            if stack is not None and lateral is not None
+            self.clipped(stack, acquisition.pixel_spacing, lateral)
+            for _, acquisition, stack in routed.only(self.in_plane()).decoded(request.slices)
+            if stack is not None and (lateral := self.lateral_column(acquisition, side)) is not None
         ]
         return [clip for clip in clips if clip is not None]
 
@@ -178,8 +165,7 @@ class CropLateralityReport:
     """
 
     measured: list[SideClip]
-    sampled: int
-    corpus: int
+    sample: CorpusSample
     seed: int = RESAMPLE_SEED
 
     def lines(self) -> list[str]:
@@ -194,10 +180,7 @@ class CropLateralityReport:
         corpus.
         """
         measured = self.measured
-        lines = [
-            f"{len(measured)} coronal/axial series measured, "
-            f"from {self.sampled} studies sampled of {self.corpus} in the corpus"
-        ]
+        lines = [self.sample.line(len(measured), "coronal/axial series")]
         if not measured:
             return lines
         deltas = np.array([clip.asymmetry() for clip in measured])
@@ -214,26 +197,16 @@ class CropLateralityReport:
 def main() -> None:
     """Decode a spread sample uncropped and price the crop's two edges against the knee's two sides."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to decode")
+    AUDIT.flags(command)
     command.parser.add_argument("--slices", type=int, default=SLICES)
     command.parser.add_argument("--crop-mm", type=float, default=CROP_MM, help="the extent every member reads at")
-    command.parser.add_argument("--workers", type=int, default=20, help="decode processes")
     arguments = command.parsed()
 
-    split = CorpusSplit(command.rooted(arguments).raw())
-    identifiers = split.identifiers()
-    planes = split.planes()
-    # Every k-th rather than a random draw, matching `crop_coverage`: the sample is then a property of
-    # the corpus order rather than of a seed, and repeating cannot quietly answer with other studies.
-    stride = max(1, len(identifiers) // arguments.sample)
-    sampled = identifiers[::stride][: arguments.sample]
-    requests = [
-        ClipRequest(identifier, str(split.source), planes, arguments.slices, arguments.crop_mm)
-        for identifier in sampled
-    ]
-    with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
-        measured = [clip for study in pool.map(CropLaterality.measure_study, requests) for clip in study]
-    command.report(CropLateralityReport(measured, len(sampled), len(identifiers)).lines())
+    audit = AUDIT.with_slices(arguments.slices)
+    laterality = CropLaterality(arguments.crop_mm)
+    sample, requests = audit.drawn(command, arguments)
+    measured = audit.mapped(laterality.measure_study, requests, arguments.workers)
+    audit.reported(command, CropLateralityReport(measured, sample).lines(), sample, len(measured))
 
 
 if __name__ == "__main__":

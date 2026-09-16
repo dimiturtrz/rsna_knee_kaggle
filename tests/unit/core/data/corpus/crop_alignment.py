@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from core.data.corpus.audit import AuditRequest
 from core.data.corpus.crop_alignment import CropAlignment, SlotOffset, StudyOffsets
-from core.data.corpus.crop_coverage import CoverageRequest
 from core.data.corpus.study_cache import CorpusSample
 
 SPACING = 2.0
@@ -82,10 +82,11 @@ def test_plane_line():
 
 def test_measure_study(tmp_path: Path):
     """A study that will not decode is silent about alignment rather than counted as aligned."""
-    read = CropAlignment.measure_study(CoverageRequest(identifier="absent", source=str(tmp_path), planes={}))
+    read = CropAlignment.measure_study(AuditRequest(identifier="absent", source=str(tmp_path), planes={}))
 
-    assert read.offsets == []
-    assert read.identifier == "absent", "the failure still names itself, or the join cannot tell which study abstained"
+    assert len(read) == 1, "one study in, one study out — the pool flattens what a worker returns"
+    assert read[0].offsets == []
+    assert read[0].identifier == "absent", "the failure still names itself, or the join cannot tell who abstained"
 
 
 def test_dump(tmp_path: Path):

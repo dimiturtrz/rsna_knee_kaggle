@@ -29,10 +29,8 @@ a large one localises it but still needs the anatomy checked before a shift is b
 """
 
 import logging
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from itertools import combinations, permutations
-from pathlib import Path
 
 import numpy as np
 import pydicom
@@ -40,13 +38,18 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.corpus.acquisition import Acquisition
-from core.data.corpus.crop_coverage import SAMPLE, UNCROPPED, CoverageRequest
-from core.data.corpus.slot_reader import SlotReader
-from core.data.corpus.slots import Routing
-from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.study_cache import CorpusSplit
+from core.data.corpus.audit import UNCROPPED, AuditRequest, CorpusAudit, Reading
+from core.data.corpus.study_cache import CorpusSample
 
 logger = logging.getLogger(__name__)
+
+AUDIT = CorpusAudit(reading=Reading(crop_mm=UNCROPPED), unit="studies with geometry", workers=8)
+"""Headers only — no pixel is decoded, so the crop never applies and eight processes are plenty.
+
+The draw is the harness's every-k-th 400, which is what makes this the same studies `crop_coverage` and
+`crop_alignment` measured: the three readings compose only under one sampler. It was spelled by hand
+here, under a comment claiming exactly that — which is the drift `CorpusSample` was written to end.
+"""
 
 GEOMETRY_TAGS = ["ImagePositionPatient", "ImageOrientationPatient", "PixelSpacing", "Rows", "Columns"]
 """The five tags that place a slice in the patient frame. Read with `specific_tags` because this is the
@@ -193,16 +196,18 @@ class SlotGeometry:
         """
         return [covered for first, second in permutations(frames, 2) if (covered := first.covers(second)) is not None]
 
-    def report(self, measured: list[list[SlotFrame]], sampled: int, corpus: int) -> list[str]:
+    def report(self, measured: list[list[SlotFrame]], sample: CorpusSample) -> list[str]:
         """The pair distributions, then how many pairs are the orthogonal set a reformat assumes.
 
         The denominators lead because a share over the studies whose headers carried geometry is not a
-        share over the corpus, and this project has read one as the other before.
+        share over the corpus, and this project has read one as the other before. Through
+        `CorpusSample.line` rather than spelled here, so the sentence cannot drift from the draw that
+        produced it — which is the other half of the drift this module carried.
         """
         frames = [frame for study in measured for frame in study]
         pairs = [pair for study in measured for pair in self.pairs(study)]
         lines = [
-            f"{len(measured)} studies placed of {sampled} sampled, from {corpus} in the corpus; "
+            f"{sample.line(len(measured), 'studies with geometry')}; "
             f"{len(frames)} slots with geometry, {len(pairs)} within-study slot pairs"
         ]
         if not pairs:
@@ -229,38 +234,28 @@ class SlotGeometry:
         return lines
 
     @staticmethod
-    def measure_study(request: CoverageRequest) -> list[SlotFrame]:
-        """Every routed slot of one study, placed. A staticmethod so a process pool can pickle it."""
-        pipeline = SlotPipeline(scheme=Routing().built(), reader=SlotReader(crop_mm=UNCROPPED))
+    def measure_study(request: AuditRequest) -> list[list[SlotFrame]]:
+        """Every routed slot of one study, placed — as ONE group, because the pairs are within-study.
+
+        A list of at most one study rather than a flat list of frames: the pool flattens what a worker
+        returns, and a frame that has lost which study it came from cannot be paired with anything.
+        """
         geometry = SlotGeometry()
-        try:
-            study = Study.from_directory(Path(request.source) / request.identifier, request.planes, pipeline)
-            routed = pipeline.route(study.acquisitions, study.planes)
-        except (OSError, ValueError, RuntimeError, IndexError) as failure:
-            logger.info(f"  {request.identifier} did not route: {type(failure).__name__}: {failure}")
-            return []
-        placed = [geometry.frame(acquisition, name) for name, acquisition in routed.items()]
-        return [frame for frame in placed if frame is not None]
+        routed = request.routed()
+        placed = [geometry.frame(acquisition, name) for name, acquisition in routed.slots.items()]
+        frames = [frame for frame in placed if frame is not None]
+        return [frames] if frames else []
 
 
 def main() -> None:
     """Place every routed slot of a sample of studies in patient space and report the pairwise geometry."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--sample", type=int, default=SAMPLE, help="studies to place")
-    command.parser.add_argument("--workers", type=int, default=8, help="header-reading processes")
+    AUDIT.flags(command)
     arguments = command.parsed()
 
-    split = CorpusSplit(command.rooted(arguments).raw())
-    identifiers = split.identifiers()
-    planes = split.planes()
-    # Every k-th rather than a random draw, so this sample is the same studies `crop_coverage` and
-    # `crop_alignment` measured and the three readings compose.
-    chosen = identifiers[:: max(1, len(identifiers) // arguments.sample)][: arguments.sample]
-
-    requests = [CoverageRequest(identifier=name, source=str(split.source), planes=planes) for name in chosen]
-    with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
-        read = list(pool.map(SlotGeometry.measure_study, requests, chunksize=4))
-    command.report(SlotGeometry().report([frames for frames in read if frames], len(chosen), len(identifiers)))
+    sample, requests = AUDIT.drawn(command, arguments)
+    measured = AUDIT.mapped(SlotGeometry.measure_study, requests, arguments.workers)
+    AUDIT.reported(command, SlotGeometry().report(measured, sample), sample, len(measured))
 
 
 if __name__ == "__main__":

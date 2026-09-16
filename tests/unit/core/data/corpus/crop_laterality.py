@@ -5,7 +5,9 @@ from pathlib import Path
 import numpy as np
 
 from core.data.corpus.acquisition import Acquisition
-from core.data.corpus.crop_laterality import ClipRequest, CropLaterality, CropLateralityReport, SideClip
+from core.data.corpus.audit import AuditRequest
+from core.data.corpus.crop_laterality import CropLaterality, CropLateralityReport, SideClip
+from core.data.corpus.study_cache import CorpusSample
 
 SPACING = 1.0
 CROP_MM = 40.0
@@ -77,8 +79,8 @@ def test_asymmetry() -> None:
 
 def test_lines() -> None:
     """The denominators lead, and the verdict names symmetric as a refutation."""
-    even = CropLateralityReport([SideClip(0.2, 0.2), SideClip(0.1, 0.1)], sampled=2, corpus=4407).lines()
-    skewed = CropLateralityReport([SideClip(0.3, 0.05)] * 8, sampled=8, corpus=4407).lines()
+    even = CropLateralityReport([SideClip(0.2, 0.2), SideClip(0.1, 0.1)], CorpusSample(["a", "b"], 4407)).lines()
+    skewed = CropLateralityReport([SideClip(0.3, 0.05)] * 8, CorpusSample(["a"] * 8, 4407)).lines()
 
     assert even[0].startswith("2 coronal/axial series measured, from 2 studies sampled of 4407")
     assert "SYMMETRIC" in even[1]
@@ -87,11 +89,21 @@ def test_lines() -> None:
 
 def test_lines_without_a_measurable_series_say_so_rather_than_dividing() -> None:
     """An empty sample is a denominator of zero, not a mean."""
-    assert CropLateralityReport([], sampled=0, corpus=4407).lines() == [
+    assert CropLateralityReport([], CorpusSample([], 4407)).lines() == [
         "0 coronal/axial series measured, from 0 studies sampled of 4407 in the corpus"
     ]
 
 
-def test_measure_study() -> None:
+def test_measure_study(tmp_path: Path) -> None:
     """A study that will not decode contributes nothing rather than a zero-zero clip."""
-    assert CropLaterality.measure_study(ClipRequest("missing", ".", {})) == []
+    request = AuditRequest(identifier="absent", source=str(tmp_path), planes={})
+
+    assert CropLaterality(CROP_MM).measure_study(request) == []
+
+
+def test_in_plane() -> None:
+    """Only the planes whose column axis is medial-lateral; a sagittal slot is never named."""
+    named = CropLaterality(CROP_MM).in_plane()
+
+    assert named, "the routing scheme has coronal and axial slots"
+    assert not [name for name in named if "SAG" in name], "sagittal carries the axis through-plane"
