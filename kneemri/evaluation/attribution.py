@@ -256,11 +256,19 @@ class Attribution:
         base = self._probabilities(model, holdout)
         maps = np.zeros((*base.shape, grid, grid), dtype=np.float32)
         edges = np.linspace(0, holdout.images.shape[-1], grid + 1).astype(int)
+        images = holdout.images
         for row in range(grid):
             for col in range(grid):
-                occluded = holdout.images.copy()
-                occluded[..., edges[row] : edges[row + 1], edges[col] : edges[col + 1]] = 0
-                maps[..., row, col] = base - self._probabilities(model, replace(holdout, images=occluded))
+                rows, columns = slice(edges[row], edges[row + 1]), slice(edges[col], edges[col + 1])
+                # The cell is blanked IN PLACE and put back, because the alternative copies the whole
+                # corpus once per cell: the full 909-study holdout is 12 GB, and an eight-cell grid
+                # would move it sixty-four times to change a sixty-fourth of it.
+                kept = images[..., rows, columns].copy()
+                images[..., rows, columns] = 0
+                try:
+                    maps[..., row, col] = base - self._probabilities(model, holdout)
+                finally:
+                    images[..., rows, columns] = kept
         return maps
 
     def averaged(self, by_label: dict[str, dict[str, float]]) -> dict[str, float]:
