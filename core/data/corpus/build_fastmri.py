@@ -22,7 +22,14 @@ from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
-LABELS = "fastmri_findings.csv"
+LABELS = "fastmri_paired_findings.csv"
+"""The knee-level table, named apart from the per-file `fastmri_findings.csv` it replaces.
+
+Not a rename: the file-level table is what the members on disk were fitted against, and its rows are
+keyed by an exam identifier this build no longer emits. Overwriting it would leave those members
+unreproducible with every gate still green — the rule `--labels-out` states, applied to a change of
+IDENTITY rather than of reading.
+"""
 METADATA = "fastmri_metadata.csv"
 ANNOTATIONS = "labels/Annotations"
 
@@ -90,7 +97,7 @@ def main() -> None:
         logger.info("FASTMRI LABELS COMPLETE (no decode requested)")
         return
 
-    logger.info(f"building {cache.shape(len(corpus.volumes()))} uint8 -> {cache.images_path}")
+    logger.info(f"building {cache.shape(len(corpus.studies()))} uint8 -> {cache.images_path}")
     # The decode runs unattended for minutes and the idle timer counts INPUT rather than load (knee-wyzj).
     with Wakelock():
         corpus.build()

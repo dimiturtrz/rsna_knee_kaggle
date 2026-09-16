@@ -15,12 +15,15 @@ from core.data.corpus.fastmri_corpus import (
     FAT_SUPPRESSED_ACQUISITION,
     HEADER,
     NEGATIVE_LEVEL,
+    PATIENT,
     PLAIN_ACQUISITION,
     POSITIVE_LEVEL,
     READER_CONFIDENCE,
     READINGS,
     RECONSTRUCTION,
     FastmriCorpus,
+    FastmriStudy,
+    FastmriVolume,
     Reading,
 )
 from core.data.corpus.slots import FASTMRI_SCHEME, SLOTS, Routing
@@ -28,6 +31,7 @@ from core.data.corpus.study_cache import StudyCache
 from core.findings import STUDY
 
 DEPTH, MATRIX = 6, 32
+KNEE_A, KNEE_B = "knee_a", "knee_b"
 RECON_MATRIX, RECON_FOV = 320, 140.0
 SPACING = RECON_FOV / RECON_MATRIX
 
@@ -48,30 +52,38 @@ ordering a pattern written the intuitive way round silently fails to match.
 """
 
 
-def _volume(root: Path, name: str, acquisition: str) -> Path:
-    """One exam in the shape the corpus reads it: recon volume, header, acquisition attribute."""
+def _volume(root: Path, name: str, acquisition: str, patient: str) -> Path:
+    """One exam in the shape the corpus reads it: recon volume, header, acquisition AND patient attributes."""
     root.mkdir(parents=True, exist_ok=True)
     path = root / f"{name}.h5"
     pixels = np.arange(DEPTH * MATRIX * MATRIX, dtype=np.float32).reshape(DEPTH, MATRIX, MATRIX)
     with h5py.File(path, "w") as handle:
         handle.attrs[ACQUISITION] = acquisition
+        handle.attrs[PATIENT] = patient
         handle.create_dataset(HEADER, data=np.bytes_(HEADER_XML.encode()))
         handle.create_dataset(RECONSTRUCTION, data=pixels * 1e-8)
     return path
 
 
 def _root(tmp_path: Path) -> Path:
-    """Three exams: one fat-suppressed, one not, one on an acquisition this scheme does not route."""
+    """Four exams over TWO knees, plus one acquisition this scheme does not route.
+
+    `knee_a` is the corpus's own majority case — the same joint scanned with fat suppression and without,
+    which is 547 of its 556 knees — and `knee_b` is the single-exam minority. A fixture with only the
+    first would pass a build that silently kept one slot per knee, and one with only the second would
+    pass the per-file build this module replaced.
+    """
     root = tmp_path / "fastmri"
-    _volume(root / "singlecoil_train", "file100", FAT_SUPPRESSED_ACQUISITION)
-    _volume(root / "singlecoil_train", "file101", PLAIN_ACQUISITION)
-    _volume(root / "singlecoil_train", "file102", "AXT2")
+    _volume(root / "singlecoil_train", "file100", FAT_SUPPRESSED_ACQUISITION, KNEE_A)
+    _volume(root / "singlecoil_train", "file101", PLAIN_ACQUISITION, KNEE_A)
+    _volume(root / "singlecoil_train", "file102", "AXT2", KNEE_A)
+    _volume(root / "singlecoil_train", "file103", PLAIN_ACQUISITION, KNEE_B)
     return root
 
 
 def _annotations(
     tmp_path: Path,
-    listed: tuple[str, ...] = ("file100", "file101", "file102"),
+    listed: tuple[str, ...] = ("file100", "file101", "file102", "file103"),
     boxed: tuple[str, ...] = ("file100", "file101"),
 ) -> Path:
     """A miniature fastMRI+ pair: the box table, and the FILE LIST that is the real denominator.
@@ -137,8 +149,9 @@ def test_volumes(tmp_path: Path):
     """
     volumes = _corpus(tmp_path).volumes()
 
-    assert [volume.identifier for volume in volumes] == ["file100", "file101"]
-    assert [volume.slot for volume in volumes] == [0, 1], "fat-suppressed and plain fill DIFFERENT slots"
+    assert [volume.identifier for volume in volumes] == ["file100", "file101", "file103"]
+    assert [volume.slot for volume in volumes] == [0, 1, 1], "fat-suppressed and plain fill DIFFERENT slots"
+    assert [volume.patient for volume in volumes] == [KNEE_A, KNEE_A, KNEE_B], "the exam carries the knee it is of"
 
 
 def test_spacing(tmp_path: Path):
@@ -154,17 +167,18 @@ def test_spacing(tmp_path: Path):
 
 
 def test_metadata(tmp_path: Path):
-    """Both routed exams get a row, and fat suppression follows the SLOT the acquisition string routed to.
+    """Each KNEE gets a row, and fat suppression follows the SLOTS its exams routed to.
 
-    The unrouted third file has no row: `volumes` dropped it, so an acquisition nobody recognised never
-    becomes a metadata cell.
+    The unrouted file has no row: `volumes` dropped it, so an acquisition nobody recognised never becomes
+    a metadata cell. And a knee holding both acquisitions answers `None` rather than picking one of its
+    two exams to speak for it.
     """
     rows = _corpus(tmp_path).metadata()
 
-    assert [row.identifier for row in rows] == ["file100", "file101"]
+    assert [row.identifier for row in rows] == [KNEE_A, KNEE_B]
     assert {row.corpus for row in rows} == {FASTMRI_CORPUS}
     assert (rows[0].plane, rows[0].sequence) == (FASTMRI_PLANE, FASTMRI_SEQUENCE)
-    assert rows[0].fat_suppressed is True
+    assert rows[0].fat_suppressed is None, "scanned BOTH ways; no bool is true of this knee, and the mask says which"
     assert rows[1].fat_suppressed is False, "read back off the slot, not assumed for the corpus"
     assert rows[0].fluid_sensitive is True and rows[1].fluid_sensitive is True, "coronal PD either way"
 
@@ -219,22 +233,24 @@ def test_build(tmp_path: Path):
     corpus.build()
 
     images, identifiers = cache.load()
-    assert images.images.shape == (2, 2, 4, 8, 8), "two exams, two slots"
-    assert identifiers == ["file100", "file101"]
+    assert images.images.shape == (2, 2, 4, 8, 8), "two KNEES, two slots — three routed exams over two rows"
+    assert identifiers == [KNEE_A, KNEE_B]
     assert json.loads(cache.index_path.read_text(encoding="utf-8")) == identifiers
 
 
 def test_build_writes_a_mask_that_is_not_all_ones(tmp_path: Path):
-    """Exactly one slot fills per exam, because a knee is acquired with fat suppression or without.
+    """A knee fills the slots its own exams routed to — BOTH when it was scanned both ways, one when not.
 
     This is the presence mask doing the job it exists for, and it is why this corpus can tell a foreign
-    study apart from a degenerate one — a corpus that fills every slot it has cannot.
+    study apart from a degenerate one — a corpus that fills every slot it has cannot. It is also the
+    assertion the per-file build passed wrongly: there, every row read `[1, 0]` or `[0, 1]`, so a corpus
+    of 547 two-slot knees looked exactly like a corpus of 1,172 half-knees.
     """
     cache = _cache(tmp_path)
     FastmriCorpus(_root(tmp_path), _annotations(tmp_path), cache).build()
 
     images, _ = cache.load()
-    assert images.mask.tolist() == [[1.0, 0.0], [0.0, 1.0]]
+    assert images.mask.tolist() == [[1.0, 1.0], [0.0, 1.0]]
 
 
 def test_build_writes_under_a_key_that_cannot_hit_our_own_corpus(tmp_path: Path):
@@ -259,7 +275,7 @@ def test_read(tmp_path: Path):
     """
     seen = FastmriCorpus(_root(tmp_path), _annotations(tmp_path), _cache(tmp_path)).read()
 
-    assert set(seen) == {"file100", "file101", "file102"}
+    assert set(seen) == {"file100", "file101", "file102", "file103"}
     assert seen["file100"] == frozenset({"Ligament - ACL High Grade Sprain", "Meniscus Tear"})
     assert seen["file102"] == frozenset(), "read and clean, not unread"
 
@@ -273,7 +289,7 @@ def test_read_keeps_the_first_study_out_of_the_column_name(tmp_path: Path):
     seen = FastmriCorpus(_root(tmp_path), _annotations(tmp_path), _cache(tmp_path)).read()
 
     assert "file100" in seen, "the first listed study is a study, not a column name"
-    assert len(seen) == 3
+    assert len(seen) == 4
 
 
 def test_labels(tmp_path: Path):
@@ -288,12 +304,15 @@ def test_labels(tmp_path: Path):
     corpus.labels(destination)
 
     table = pd.read_csv(destination).set_index(STUDY)
-    assert table.index.tolist() == ["file100", "file101"]
-    assert table.loc["file100", "ACL"] == POSITIVE_LEVEL
-    assert table.loc["file101", "ACL"] == NEGATIVE_LEVEL, "a low-grade sprain is below our threshold"
-    assert table.loc["file100", "Medial Meniscus"] == POSITIVE_LEVEL, "boxed in both compartments, so in this one"
-    assert table.loc["file100", "Lateral Meniscus"] == POSITIVE_LEVEL, "and in the other one, symmetrically"
-    assert table.loc["file101", "Medial Meniscus"] == NEGATIVE_LEVEL
+    assert table.index.tolist() == [KNEE_A, KNEE_B]
+    assert table.loc[KNEE_A, "ACL"] == POSITIVE_LEVEL, (
+        "the UNION over the knee's two exams: one reader boxed a high-grade sprain and the other, reading "
+        "the other acquisition of the same joint, wrote a low-grade one. The joint has the tear."
+    )
+    assert table.loc[KNEE_B, "ACL"] == NEGATIVE_LEVEL, "read and clean is an assessed absence"
+    assert table.loc[KNEE_A, "Medial Meniscus"] == POSITIVE_LEVEL, "boxed in both compartments, so in this one"
+    assert table.loc[KNEE_A, "Lateral Meniscus"] == POSITIVE_LEVEL, "and in the other one, symmetrically"
+    assert table.loc[KNEE_B, "Medial Meniscus"] == NEGATIVE_LEVEL
     assert "Synovitis" not in table.columns, "the vocabulary has no synovial term; the readers were never asked"
     assert set(table["ACL__conf"]) == {READER_CONFIDENCE}
 
@@ -306,7 +325,7 @@ def test_straddled(tmp_path: Path):
     """
     straddling = FastmriCorpus(_root(tmp_path), _annotations(tmp_path), _cache(tmp_path)).straddled()
 
-    assert set(straddling) == {"file100", "file101", "file102"}
+    assert set(straddling) == {"file100", "file101", "file102", "file103"}
     assert straddling["file100"] == frozenset({"Meniscus Tear"}), "boxed at 90 and at 240, either side of 165"
     assert straddling["file101"] == frozenset(), "one box cannot straddle"
     assert straddling["file102"] == frozenset(), "listed, never boxed"
@@ -350,4 +369,72 @@ def test_labels_skips_a_volume_that_was_never_read(tmp_path: Path):
 
     corpus.labels(destination)
 
-    assert pd.read_csv(destination)[STUDY].tolist() == ["file100"]
+    assert pd.read_csv(destination)[STUDY].tolist() == [KNEE_A], "knee_b's only exam was never read"
+
+
+def _exam(name: str, slot: int, patient: str) -> FastmriVolume:
+    """A volume with no file behind it — these tests are about the GROUPING, not the decode."""
+    return FastmriVolume(name, Path(name), slot, RECON_MATRIX, RECON_FOV, patient)
+
+
+def test_studies(tmp_path: Path):
+    """The routed exams as knees: three files, two rows, and the paired one holding both slots."""
+    studies = _corpus(tmp_path).studies()
+
+    assert [study.patient for study in studies] == [KNEE_A, KNEE_B]
+    assert [len(study.volumes) for study in studies] == [2, 1]
+
+
+def test_grouped():
+    """Exams sharing a `patient_id` become one knee, and a second exam on a taken slot goes to `spare`.
+
+    The repeat is kept rather than dropped because it is 36 of this corpus's exams and it is EVIDENCE —
+    a second read of a joint already read. The cache has one channel for it, so it cannot be decoded; a
+    label can still take it, which is why it stays addressable instead of vanishing at the group.
+    """
+    repeat = _exam("file104", 1, KNEE_A)
+    studies = FastmriStudy.grouped([_exam("file100", 0, KNEE_A), _exam("file101", 1, KNEE_A), repeat])
+
+    assert len(studies) == 1, "one knee, not three"
+    assert [volume.identifier for volume in studies[0].volumes] == ["file100", "file101"]
+    assert studies[0].spare == (repeat,), "the third exam collided on a filled slot and was kept beside it"
+
+
+def test_grouped_keeps_an_exam_that_names_no_patient():
+    """An exam with an empty `patient_id` falls back to its own filename, so it is its own knee.
+
+    Never a shared empty key: that would fuse every unidentified exam in the corpus into one row whose
+    two slots came from two different people, and nothing downstream could see it.
+    """
+    studies = FastmriStudy.grouped([_exam("file100", 0, ""), _exam("file101", 1, "")])
+
+    assert [study.identifier for study in studies] == ["file100", "file101"]
+
+
+def test_identifier():
+    """A knee is addressed by its `patient_id`, which is what the cache index and the labels table hold."""
+    assert FastmriStudy(KNEE_A, (_exam("file100", 0, KNEE_A),)).identifier == KNEE_A
+
+
+def test_files():
+    """Every exam the knee is made of, repeats included — the join back to the per-file reader tables."""
+    study = FastmriStudy(KNEE_A, (_exam("file100", 0, KNEE_A),), (_exam("file104", 0, KNEE_A),))
+
+    assert study.files() == ("file100", "file104"), "a spare exam was still read, so its boxes still count"
+
+
+def test_fat_suppressed():
+    """One slot answers a bool; two answer `None`, because no single bool is true of a knee scanned both ways."""
+    plain = FastmriStudy(KNEE_B, (_exam("file103", 1, KNEE_B),))
+    both = FastmriStudy(KNEE_A, (_exam("file100", 0, KNEE_A), _exam("file101", 1, KNEE_A)))
+
+    assert plain.fat_suppressed() is False
+    assert both.fat_suppressed() is None, "the per-slot truth lives in the presence mask, not in this cell"
+
+
+def test_geometry():
+    """The geometry row is taken from ONE exam, and it is the same exam every time this knee is read."""
+    study = FastmriStudy(KNEE_A, (_exam("file100", 0, KNEE_A), _exam("file101", 1, KNEE_A)))
+
+    assert study.geometry().identifier == "file100"
+    assert study.geometry().spacing == SPACING

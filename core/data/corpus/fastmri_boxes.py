@@ -27,6 +27,7 @@ from jaxtyping import Float
 from core.data.corpus.fastmri_corpus import (
     FILE_COLUMN,
     LABEL_COLUMN,
+    PATIENT,
     PROGRESS_EVERY,
     RECONSTRUCTION,
     SLICE_COLUMN,
@@ -130,6 +131,11 @@ class FastmriBoxes:
 
         The study rows are where the negatives live: a box table alone cannot say that a reader opened a
         study and found nothing, and those are a sixth of the corpus.
+
+        A row is still one EXAM, because that is what a reader read, and it carries `patient_id` so it can
+        reach the cache row it lives in — which since knee-0i7v5 is one KNEE holding up to two exams. The
+        full address of a box is therefore `patient_id` (the row), `slot` (the channel) and `cache_slice`;
+        joining on the filename alone lands on nothing.
         """
         boxes = self.read()
         grouped = dict(tuple(boxes.groupby(FILE_COLUMN)))
@@ -145,6 +151,7 @@ class FastmriBoxes:
             studies.append(
                 {
                     FILE_COLUMN: volume.identifier,
+                    PATIENT: volume.patient,
                     "slot": volume.slot,
                     "boxes": len(own),
                     "depth": len(pixels),

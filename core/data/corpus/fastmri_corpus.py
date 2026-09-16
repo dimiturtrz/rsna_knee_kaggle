@@ -13,6 +13,13 @@ KIND, not from study count. Our own dose curve prices count directly (`half_data
 `quarter_data` 0.7907, concave), and 1,172 studies against our 4,407 is a quarter-doubling worth roughly
 +0.002. So this corpus is worth building for what its labels ARE, and it should not be sold as volume.
 
+A ROW IS A KNEE, AND IT WAS A FILE UNTIL 2026-09-16 (knee-0i7v5). The corpus ships 1,172 routed h5 over
+556 `patient_id`, 547 of which carry BOTH acquisitions — so a cache built per file held 1,172 rows with
+exactly one of two slots filled, where 547 two-slot studies existed. `FastmriStudy` is that grouping, and
+it is also what any fold over this corpus must be taken on: by file, the same knee lands on both sides of
+every split. EVERY RATE IN THE PARAGRAPHS BELOW IS STILL PER FILE — they are rates over what the READERS
+read, which is files, and re-denominating them onto knees is a measurement nobody has taken.
+
 EVERY RATE BELOW IS OVER 1,173 READ STUDIES. That number was 1,172 in the first draft of this file,
 because `knee_file_list.csv` ships WITHOUT A HEADER and a default `read_csv` silently promotes
 `file1000000` — a real study — into the column name. One row, and it is the difference between a rate
@@ -88,6 +95,15 @@ put the labels on images they were not drawn against.
 
 HEADER = "ismrmrd_header"
 ACQUISITION = "acquisition"
+
+PATIENT = "patient_id"
+"""The h5 ATTRIBUTE that says which knee an exam belongs to — not a header field.
+
+`<patientID>` does not appear in the ISMRMRD header of any of the 1,172 routed files; the identity lives
+beside `acquisition` in `h5py.File(...).attrs` as a 64-hex hash. A reader that looks for it in the XML
+finds nothing on every file and reads that as "the corpus has no patient identity", which is how this
+corpus spent its first build being 1,172 half-knees.
+"""
 
 FAT_SUPPRESSED_ACQUISITION = "CORPDFS_FBK"
 """Coronal proton-density with fat suppression — the corpus's own name for it, matched exactly.
@@ -343,11 +359,93 @@ class FastmriVolume:
     slot: int
     matrix_px: int
     field_of_view_mm: float
+    patient: str = ""
 
     @property
     def spacing(self) -> float:
         """Millimetres per pixel in plane — the stated field of view over the stated matrix."""
         return self.field_of_view_mm / self.matrix_px
+
+
+@dataclass(frozen=True)
+class FastmriStudy:
+    """One KNEE: every routed exam sharing a `patient_id`, at most one per slot.
+
+    THE CORPUS IS 556 KNEES, NOT 1,172 EXAMS, and the difference is the whole reason this class exists.
+    Measured over the routed files: 556 distinct `patient_id`, of which **547 carry BOTH `CORPD_FBK` and
+    `CORPDFS_FBK`** — files per patient {1: 8, 2: 513, 3: 5, 4: 28, 5: 1, 6: 1}, and no patient spans
+    `singlecoil_train` and `singlecoil_val`. Built one row per FILE, every cache row has exactly one of
+    two slots filled and the corpus reads as 1,172 half-studies where 547 two-slot studies exist — the
+    same shape our own corpus has, thrown away at the last step.
+
+    Two consequences beyond the input. A split or holdout taken over fastMRI BY FILE puts the same knee
+    on both sides — grouping is the fix and it is this key. And the 36 patients carrying a REPEATED
+    acquisition are two reads of one knee: the second is kept in `spare` and counted rather than dropped
+    silently, because an exam nobody can see is an exam nobody can price.
+    """
+
+    patient: str
+    volumes: tuple[FastmriVolume, ...]
+    spare: tuple[FastmriVolume, ...] = ()
+
+    @property
+    def identifier(self) -> str:
+        """What the cache index and the labels table call this study — the knee, not one of its files."""
+        return self.patient
+
+    @staticmethod
+    def grouped(volumes: list[FastmriVolume]) -> list["FastmriStudy"]:
+        """Routed exams folded into knees, in first-appearance order, one volume per slot.
+
+        The KEPT volume for a slot is the first in the order `volumes` produced, which is filename order —
+        deterministic, and the same choice on every rebuild. A patient with no `patient_id` at all would
+        collapse the whole corpus into one study, so an empty key keeps the file's own identifier.
+        """
+        held: dict[str, dict[int, FastmriVolume]] = {}
+        spare: dict[str, list[FastmriVolume]] = {}
+        for volume in volumes:
+            key = volume.patient or volume.identifier
+            slots = held.setdefault(key, {})
+            if volume.slot in slots:
+                spare.setdefault(key, []).append(volume)
+                continue
+            slots[volume.slot] = volume
+        studies = [
+            FastmriStudy(key, tuple(slots[slot] for slot in sorted(slots)), tuple(spare.get(key, ())))
+            for key, slots in held.items()
+        ]
+        paired = sum(1 for study in studies if len(study.volumes) > 1)
+        repeated = sum(len(study.spare) for study in studies)
+        logger.info(
+            f"{len(volumes)} exams -> {len(studies)} knees, {paired} filling both slots, {repeated} repeat reads"
+        )
+        return studies
+
+    def files(self) -> tuple[str, ...]:
+        """The identifiers of the exams this knee was built from, kept and spare alike.
+
+        The fastMRI+ annotations are per FILE and stay that way, so this is the join between a box table
+        that reads exams and a cache row that holds a knee.
+        """
+        return tuple(volume.identifier for volume in (*self.volumes, *self.spare))
+
+    def fat_suppressed(self) -> bool | None:
+        """Whether one word describes this knee's fat suppression, or None when both answers are true.
+
+        A paired knee is acquired BOTH ways, and `StudyMetadata` has no set spelling for a bool — so the
+        honest cell is absent, and the per-slot truth lives where it is now representable: the presence
+        mask, whose two slots are fat-suppressed and plain by construction.
+        """
+        answers = {volume.slot == FAT_SUPPRESSED_SLOT for volume in self.volumes}
+        return answers.pop() if len(answers) == 1 else None
+
+    def geometry(self) -> FastmriVolume:
+        """The exam whose stated geometry describes this row — the lowest filled slot.
+
+        Every volume is resized with its OWN spacing before it reaches the cache, so this cell is
+        descriptive rather than load-bearing; naming which exam it came from is what keeps it readable.
+        """
+        return self.volumes[0]
 
 
 class FastmriCorpus:
@@ -379,23 +477,34 @@ class FastmriCorpus:
         volumes = []
         skipped = 0
         for path in found:
-            slot = self._slot(path)
-            if slot is None:
+            routed = self._routed(path)
+            if routed is None:
                 skipped += 1
                 continue
+            slot, patient = routed
             matrix, field_of_view = self._geometry(path)
-            volumes.append(FastmriVolume(path.stem, path, slot, matrix, field_of_view))
+            volumes.append(FastmriVolume(path.stem, path, slot, matrix, field_of_view, patient))
         logger.info(f"{len(volumes)} of {len(found)} exams routed, {skipped} on an unknown acquisition")
         return volumes
 
-    def _slot(self, path: Path) -> int | None:
-        """Which of the scheme's two slots this exam fills, or None if its acquisition is not one we route."""
+    def studies(self) -> list[FastmriStudy]:
+        """The routed exams as KNEES — what a cache row, a labels row and a fold assignment are each about."""
+        return FastmriStudy.grouped(self.volumes())
+
+    def _routed(self, path: Path) -> tuple[int, str] | None:
+        """This exam's slot and the knee it belongs to, or None if its acquisition is not one we route.
+
+        Both come out of ONE open. They are two attributes of the same file and the geometry read below
+        already costs a second one; asking three times for what one handle holds is three times the
+        filesystem for the same corpus.
+        """
         with h5py.File(path, "r") as handle:
             acquisition = str(handle.attrs.get(ACQUISITION, ""))
+            patient = str(handle.attrs.get(PATIENT, ""))
         if acquisition == FAT_SUPPRESSED_ACQUISITION:
-            return FAT_SUPPRESSED_SLOT
+            return FAT_SUPPRESSED_SLOT, patient
         if acquisition == PLAIN_ACQUISITION:
-            return PLAIN_SLOT
+            return PLAIN_SLOT, patient
         return None
 
     def _geometry(self, path: Path) -> tuple[int, float]:
@@ -436,30 +545,34 @@ class FastmriCorpus:
         arrays beside it are complete, so a build that dies half way leaves a cache that reads as unbuilt
         rather than as a corpus with black studies in it.
 
-        UNLIKE RIJEKA'S, THIS MASK IS NOT ALL ONES. An exam is acquired with fat suppression or without,
-        never both, so exactly one of the two slots is filled and the other is genuinely absent. That is
-        the presence mask doing the job it exists for, and it is also why this corpus can tell a foreign
-        study apart from a degenerate one: a Rijeka exam fills one of six slots and leaves five zero, so
-        "a foreign corpus reads flat" and "an empty input reads flat" are the same measurement there.
+        UNLIKE RIJEKA'S, THIS MASK IS NOT ALL ONES, AND UNLIKE THIS BUILD'S OWN FIRST VERSION IT IS NOT
+        ONE SLOT EITHER. An EXAM is acquired with fat suppression or without, never both — but a KNEE is
+        usually scanned both ways in the same sitting, and 547 of the 556 patients here carry both
+        acquisitions. A row per file left every mask one-hot and the corpus reading as 1,172 half-studies;
+        a row per knee fills both slots on 547 of them, which is the same shape our own corpus has. The
+        nine that stay one-hot are the ones genuinely acquired one way, which is what the mask is for: a
+        Rijeka exam fills one of six slots and leaves five zero, so "a foreign corpus reads flat" and "an
+        empty input reads flat" are the same measurement there and are two different ones here.
         """
-        volumes = self.volumes()
+        studies = self.studies()
         self.cache.prepare()
         images = np.lib.format.open_memmap(
-            self.cache.images_path, mode="w+", dtype=np.uint8, shape=self.cache.shape(len(volumes))
+            self.cache.images_path, mode="w+", dtype=np.uint8, shape=self.cache.shape(len(studies))
         )
-        mask = np.zeros((len(volumes), self.cache.slots), dtype=np.float32)
-        for index, volume in enumerate(volumes):
-            with h5py.File(volume.path, "r") as handle:
-                pixels = np.asarray(handle[RECONSTRUCTION][:], dtype=np.float32)
-            images[index, volume.slot] = self.stack(pixels, volume.spacing, self.cache.slices).numpy()
-            mask[index, volume.slot] = 1.0
+        mask = np.zeros((len(studies), self.cache.slots), dtype=np.float32)
+        for index, study in enumerate(studies):
+            for volume in study.volumes:
+                with h5py.File(volume.path, "r") as handle:
+                    pixels = np.asarray(handle[RECONSTRUCTION][:], dtype=np.float32)
+                images[index, volume.slot] = self.stack(pixels, volume.spacing, self.cache.slices).numpy()
+                mask[index, volume.slot] = 1.0
             if index % PROGRESS_EVERY == 0:
-                logger.info(f"{index}/{len(volumes)} decoded")
+                logger.info(f"{index}/{len(studies)} decoded")
         images.flush()
-        self.cache.record([volume.identifier for volume in volumes])
+        self.cache.record([study.identifier for study in studies])
         self.cache.report(mask)
         np.save(self.cache.mask_path, mask)
-        logger.info(f"wrote {self.cache.shape(len(volumes))} uint8 -> {self.cache.images_path}")
+        logger.info(f"wrote {self.cache.shape(len(studies))} uint8 -> {self.cache.images_path}")
 
     def read(self) -> dict[str, frozenset[str]]:
         """Per study that was READ, the set of vocabulary terms boxed anywhere in it.
@@ -511,7 +624,8 @@ class FastmriCorpus:
         Fat suppression is read back off the routed slot, which is read off the acquisition string, which
         is matched by equality. So a filled `fat_suppressed` cell here traces to a word the corpus wrote
         about itself, and an exam on an unrecognised acquisition has no row at all rather than a guessed
-        one — `volumes` has already dropped it.
+        one — `volumes` has already dropped it. A knee scanned BOTH ways leaves the cell absent rather
+        than picking one of its two true answers; `FastmriStudy.fat_suppressed` argues that case.
 
         Both acquisitions are `fluid_sensitive`: coronal PD without fat suppression is a standard meniscus
         sequence, which is the same reading `PLAIN_ACQUISITION` records and the reason it does not land in
@@ -521,35 +635,47 @@ class FastmriCorpus:
         """
         return [
             StudyMetadata(
-                identifier=volume.identifier,
+                identifier=study.identifier,
                 corpus=FASTMRI_CORPUS,
                 plane=FASTMRI_PLANE,
                 sequence=FASTMRI_SEQUENCE,
-                fat_suppressed=volume.slot == FAT_SUPPRESSED_SLOT,
+                fat_suppressed=study.fat_suppressed(),
                 fluid_sensitive=True,
-                pixel_spacing_mm=volume.spacing,
-                matrix_px=volume.matrix_px,
-                field_of_view_mm=volume.field_of_view_mm,
+                pixel_spacing_mm=study.geometry().spacing,
+                matrix_px=study.geometry().matrix_px,
+                field_of_view_mm=study.geometry().field_of_view_mm,
             )
-            for volume in self.volumes()
+            for study in self.studies()
         ]
 
     def labels(self, destination: Path) -> None:
         """The labels table: eleven of our twelve findings, most of them carrying absence.
 
-        A study on disk but absent from the file list gets NO ROW. It was never read, so every column
-        would be a guess, and `Targets.pair` already handles an absent study the way it handles an absent
-        column.
+        A KNEE on disk with no READ exam gets NO ROW. It was never read, so every column would be a
+        guess, and `Targets.pair` already handles an absent study the way it handles an absent column.
+
+        THE UNION OVER A KNEE'S EXAMS, AND IT IS A DECISION RATHER THAN AN ARITHMETIC. fastMRI+ readers
+        read each FILE independently, so a knee's two exams are two reads of one joint — and they
+        disagree: the count this method logs is how often one exam of a pair is boxed while the other is
+        clean. A box is positive evidence a finding is there, and silence under a protocol that disclaims
+        exhaustiveness is weak evidence it is not, so the union is the reading that treats each as what it
+        is. The intersection would let the weaker read veto the stronger one; it is the other arm of this
+        experiment and this method does not hide that it was not taken.
         """
         seen = self.read()
         straddling = self.straddled()
         rows = []
-        for volume in self.volumes():
-            terms = seen.get(volume.identifier)
-            if terms is None:
+        disagreeing = 0
+        for study in self.studies():
+            read_files = [name for name in study.files() if name in seen]
+            if not read_files:
                 continue
-            located = straddling.get(volume.identifier, frozenset())
-            row: dict[str, str | float] = {STUDY: volume.identifier}
+            boxed = [name for name in read_files if seen[name]]
+            if len(read_files) > 1 and 0 < len(boxed) < len(read_files):
+                disagreeing += 1
+            terms = frozenset().union(*(seen[name] for name in read_files))
+            located = frozenset().union(*(straddling.get(name, frozenset()) for name in read_files))
+            row: dict[str, str | float] = {STUDY: study.identifier}
             for target in TARGETS:
                 reading = READINGS.get(target)
                 level = None if reading is None else reading.verdict(terms, located)
@@ -561,6 +687,7 @@ class FastmriCorpus:
         destination.parent.mkdir(parents=True, exist_ok=True)
         table.to_csv(destination, index=False)
         logger.info(f"{len(table)} rows -> {destination}")
+        logger.info(f"{disagreeing} knees where one exam was boxed and another read clean")
         for target in TARGETS:
             if target in table:
                 logger.info(f"{target}: {table[target].value_counts().sort_index().to_dict()}")
