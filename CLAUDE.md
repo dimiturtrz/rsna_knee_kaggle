@@ -259,7 +259,13 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   or a transfer constant — the check that guards the RECORD. `comp/board.jsonl` held 34 of the competition's 58
   submissions until 2026-08-25: fifteen scored all-ours entries were absent, `basedense_v1` and `votefit_v1`
   (the entry `comp/champion.json` now pins) among them, and the compression
-  constant `board_transfer` fits from that file read +1.82 against a complete set's +1.55. It joins on the Kaggle
+  constant `board_transfer` fits from that file read +1.82 against a completed set's +1.55 — and BOTH of those
+  are stale, because a fit moves every time the record gains a row. Neither is a number to use: read the tool.
+  On 2026-09-16 +1.55 was quoted from this line to price the gap to 0.955 and was wrong by 1.6x, the constant's
+  third time (after +4.67 and +2.14) and the third time it was quoted rather than read. What the tool actually
+  reports is a CURVE that saturates — near +1 over the whole record, near +0.8 in the top band — so a single
+  slope is the wrong SHAPE for it whatever its value, and the only correct use of a number in this sentence is
+  as evidence that the record's completeness moves the fit. It joins on the Kaggle
   submission REF, never a name — asking Kaggle for the list spends no slot — so every submission carries a row,
   the ones this file will not price included (`scope: excluded` plus the reason). A row's `offline` must be a number
   read on studies the entry did NOT train on: on 2026-08-29 `raptor_solo`'s 0.8938 was voided because
