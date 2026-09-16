@@ -4321,11 +4321,13 @@ and the two fold-0 search anchors read:
 | `greedyseat_v1` | 0.8740 | 0.936 |
 | `pricetop_v1`   | 0.8757 | 0.938 |
 
-At the top band's +0.8 the corrected value predicts 0.937 and the board read 0.938 — one tick, inside
-the board's own 0.001 resolution. The raw value predicted 0.940 and missed by two. So the instrument did
-not find flat compression; it priced the search bias **on the board**, independently of the offline
-measurement, for the second time. The slope between the two anchors is +1.18, above the fitted +0.8, on
-n=2 — an anchor pair, not a refit.
+This paragraph read "at the top band's +0.8" until 2026-09-16 23:0xZ, a constant quoted from prose and
+never from the tool. `board_transfer` read live at 22:33Z reports the ≥0.8679 band at **+1.07 over 65
+pairs** against a whole-record **+1.09** — flat, not saturating — and the ≥0.8711 band at +1.71 over TWO
+pairs, `DIRECTION ONLY`. At +1.07 the corrected value predicts 0.938 and the board read 0.938. So the
+instrument did not find flat compression; it priced the search bias **on the board**, independently of
+the offline measurement, for the second time. The slope between the two anchors is +1.18 on n=2 — an
+anchor pair, not a refit, and indistinguishable from the fitted +1.07 at that n.
 
 **The second reading is the one that matters for 0.955.** Every board row at or above 0.943 carries
 `offline: null` **by construction** — the pinned `tripleseat_v2` 0.946 included — because their seats are
@@ -4334,3 +4336,33 @@ That is not a saturated ruler; it is two **disjoint** populations. No maximisati
 reaches the champion from inside the priceable set, and the all-data dose — not the search — is what
 separates them. A further slot spent searching that holdout harder is a slot spent inside the capped
 population.
+
+## `foldseven_v1` — ref 56287691, board 0.944, 2026-09-16 — and the three-entry decomposition it forced
+
+Seven seats, `kneemri-foldseven`, offline 0.8767, `selection: designed`.
+
+**The blocker it created.** `pricetop_v1` reads 0.8757 → 0.938; `foldseven_v1` reads 0.8767 → 0.944.
+**One offline point, six board points.** That residual is 3x the 0.0020 blur `board_transfer` reports and
+wider than the entire offline span its top stratum is fitted over, and it survives the recut: in Q5,
+`foldseven` 0.8167 → 0.944 over `pricetop` 0.8189 → 0.938, an inversion in the ruler. Until it is
+assigned, no arm in this band can be priced through the transfer curve at all — which is every arm we
+now run.
+
+The difficulty axis is **closed** and is not the explanation: split at the median hard-share over the
+same 714 resolved pairs, gain made HARD transfers +0.75 and EASY +0.72. Flat. There is no difficulty
+correction to make between our holdout and the board.
+
+Fitting a slope through 0.006 of scatter needs ~10 more pair points at one slot each — a bad ratio, so
+the pair-point instrument was abandoned mid-plan and the three remaining slots of 2026-09-16 went to a
+decomposition instead. Each entry varies exactly ONE thing and holds the ruler still:
+
+| entry | what moves | what it measures |
+|-------|-----------|------------------|
+| `kneemri-foldseven-rerun` | nothing — same seats, same reading | pipeline run-to-run scatter, NEVER measured |
+| `kneemri-eightseat` | +1 seat, +0.0005 ledger75 | board response to a sub-blur ruler move |
+| `kneemri-swapseat` | different seats, +0.0001 ledger75 | seat identity at a fixed reading |
+
+All three are labelled INSTRUMENT in their submission messages; none is a rank attempt, and a move in
+our favour on any of them must not be pinned. **The rerun is read FIRST** — it is the error bar, and the
+other two are unreadable without it. If the rerun does not return exactly 0.944, every closure in this
+file priced on a 0.002-0.004 board delta is retired, including several that read as settled.

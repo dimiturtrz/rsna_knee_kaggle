@@ -1,0 +1,8 @@
+{"id": "dimiturnt/kneemri-foldseven-rerun", "title": "kneemri-foldseven-rerun",
+ "code_file": "kneemri-foldseven-rerun.py", "language": "python", "kernel_type": "script",
+ "is_private": true, "enable_gpu": true, "enable_internet": false,
+ "machine_shape": "NvidiaTeslaT4",
+ "dataset_sources": ["dimiturnt/kneemri-kit", "dimiturnt/kneemri-members", "dimiturnt/kneemri-members-2"],
+ "competition_sources": ["rsna-knee-abnormality-detection"],
+ "kernel_sources": [],
+ "model_sources": ["metaresearch/dinov2/PyTorch/small/1"]}
