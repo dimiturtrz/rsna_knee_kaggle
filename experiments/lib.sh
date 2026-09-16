@@ -734,14 +734,23 @@ _seat_value() {
     priced="LEDGER75 unavailable for $stem: $priced"
   fi
   _mark "$name" "$priced"
-  # Both readings, one letter, one interrupt. The point of posting the DONE rather than only the FAILED
-  # is that an arm that SUCCEEDS is the one whose result has to be read before the next arm is chosen -
-  # and success is exactly the case that looks like it needs no attention.
-  _post "DONE-$name" "ARM DONE $name -> $checkpoint
-
-$report
-
-$priced"
+  # A SUCCESSFUL ARM DOES NOT POST, AND THE FIRST VERSION OF THIS FUNCTION DID.
+  #
+  # An arm finishing at roughly the hour it was priced for is a foreseeable event, and recording a
+  # foreseeable event at its foreseeable time carries no information - so an interrupt on ARM DONE is
+  # noise, and twenty of them in a window is the unread-log problem again with a louder channel. The
+  # owner's objection, 2026-09-16: "you are guaranteed to have those logs generated. whats the point
+  # of recording a certain event at a known time?"
+  #
+  # What was missing at 05:12Z on 2026-09-15 was never twenty notifications. It was ONE table of
+  # twenty rows. Nineteen priced arms existed, each in its own log, and the aggregate existed nowhere -
+  # so reading the window cost nineteen greps nobody was going to run, and the cheap thing to do
+  # instead was always to read something else. So the row is appended HERE, to one file per window,
+  # and the reading becomes a single `cat` whose cost does not grow with the number of arms.
+  #
+  # `>>` rather than a rewrite: arms in a chain finish one at a time by construction (they serialise on
+  # the card), and a partial window is exactly as readable as a finished one.
+  printf '%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%MZ)" "$stem" "${priced//$'\n'/ | }" >> "$LOGS/window.ledger"
 }
 
 _arm_log() {
@@ -775,6 +784,13 @@ _post() {
   # A letter is the one PUSH: the box's listener prints the body and exits, which the harness delivers
   # as a task notification that arrives mid-turn whether or not anyone thought to look. So the verdict
   # a human must react to goes here as well as to the log, and reacting no longer requires remembering.
+  #
+  # ONLY THE UNFORESEEABLE IS POSTED. An arm finishing on time is a certainty, and a notification of a
+  # certainty is noise that trains its own reader to dismiss the channel - so ARM DONE does NOT come
+  # here; it appends a row to `$LOGS/window.ledger` and is read as a table. What posts is a DEATH (the
+  # card is free now and the queue behind it is spending wall-clock on nothing) and an arm that
+  # finished without leaving a priceable checkpoint. Both are deviations, and a deviation is the only
+  # thing an interrupt can be worth.
   #
   # The letter SURVIVES an unarmed listener - it sits in the box and delivers on the next arm - which
   # is strictly better than a log line that must be sought by name. `--box main` is the execution

@@ -188,11 +188,16 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   verdict and `_seat_value` priced every seat into the arm's own log. **Every check in this file is a
   PULL channel** — it reports when invoked, and all sixteen worked. So the failure mode this rule
   guards is not a missing check and can never be fixed by adding one; a seventeenth thing to remember
-  to read is the same defect with more prose. Two consequences. **Mechanically:** a verdict a human
-  must react to is POSTED, not logged — `experiments/lib.sh:_post` delivers ARM DONE and both ARM
-  FAILED into `inbox/main/`, whose listener turns it into a task notification that arrives mid-turn.
-  Arm that listener BEFORE leaving anything unattended; unarmed, the letters queue in the box and
-  deliver late rather than never, which is still better than a log line nobody seeks. **By judgment:**
+  to read is the same defect with more prose. Two consequences. **Mechanically, and only for the
+  UNFORESEEABLE:** `experiments/lib.sh:_post` delivers an arm DEATH into `inbox/main/`, whose listener
+  turns it into a task notification arriving mid-turn — arm that listener before leaving anything
+  unattended. An arm FINISHING is not posted, because an arm finishing at roughly the hour it was
+  priced for is a certainty, and a notification of a certainty is noise that teaches its reader to
+  dismiss the channel ("you are guaranteed to have those logs generated. whats the point of recording
+  a certain event at a known time?" — owner, 2026-09-16). A finished arm instead appends its
+  `ledger75` row to `$LOGS/window.ledger`, because what was missing was never twenty notifications but
+  ONE table of twenty rows: the aggregate existed nowhere, so reading a window cost nineteen greps and
+  the cheap thing to do was always something else. **By judgment:**
   while a card is running, results are read and priced the moment they land, and bookkeeping waits —
   a result changes what the NEXT arm should be, and reading it late spends the window on questions the
   first result had already answered. The owner's standing verdict on the habit: *"not reacting to
