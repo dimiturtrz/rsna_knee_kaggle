@@ -836,17 +836,17 @@ oof_reader_fold0_s2026.pt   # 0.7998 midpoint on the 909 — 0.052 under the poo
 # --- 2026-09-11, the roster_check sweep that followed D381/D382. Scores are macro AUC over 12
 # columns, midpoint, @holdout909, read off each member's own holdout npz (n=909 asserted, which is
 # what separates this block from the oof_gen2 folds declined tonight).
-calib_hold_clean_distill_s2026  # 0.8641 @holdout909 midpoint, ep 8. Sits in the pool's top ten and was
+calib_hold_clean_distill_s2026.pt  # 0.8641 @holdout909 midpoint, ep 8. Sits in the pool's top ten and was
                             # in NEITHER file for days — nobody declined it, nobody rostered it. It is
                             # a distillate, so D381 prices it at or below zero as a SEVENTH seat against
                             # the current six (which already carry distill four times over); rostered
                             # because shippability is not seat value and the six can change.
-seat_distill_gen2_s2026     # 0.8640 @holdout909 midpoint, ep 8. Same block, same reasoning: top-ten
+seat_distill_gen2_s2026.pt     # 0.8640 @holdout909 midpoint, ep 8. Same block, same reasoning: top-ten
                             # solo, distill-carrying, rostered to be available rather than to be seated.
-oof_gen2_fold0_s2026        # 0.8609 @holdout909 midpoint, ep 7. The ONLY gen2 fold whose studies vector
+oof_gen2_fold0_s2026.pt        # 0.8609 @holdout909 midpoint, ep 7. The ONLY gen2 fold whose studies vector
                             # is the canonical 909 — its four siblings read 849-890 and are declined for
                             # exactly that. Admissible on the same grounds oof_band_fold0 was.
-hold_clean_distill_s2026    # 0.8607 @holdout909 midpoint, ep 8. Mid-pool. Note its _run1 twin is
+hold_clean_distill_s2026.pt    # 0.8607 @holdout909 midpoint, ep 8. Mid-pool. Note its _run1 twin is
                             # declined, not rostered: same recipe, died at epoch 1.
 labelwise_depth24_negpull_s2026.pt  # 0.8666 @holdout909 midpoint / 0.9044 ledger75, ep 19 of 24. A TIE
                             # with the champion-family seat labelwise_dense_drop40_long_s2026 (0.9048) on
@@ -856,17 +856,36 @@ labelwise_depth24_negpull_s2026.pt  # 0.8666 @holdout909 midpoint / 0.9044 ledge
                             # showed the labelwise family carries the entry, so a seat that MATCHES the
                             # family's best on another mechanism is the one kind of addition that can pay.
                             # Its three within-family neighbours are declined in writing, same bead.
-labelwise_depth20_b10_s2026 # 0.8607 @holdout909 midpoint, ep 8. Depth-20 labelwise. The slice-depth axis
+labelwise_depth20_b10_s2026.pt # 0.8607 @holdout909 midpoint, ep 8. Depth-20 labelwise. The slice-depth axis
                             # is closed as a source of gain (saturated), which is a statement about what
                             # to RUN next, not about what may ship.
-band_dense_s2026_n24b0.1-0.9  # 0.8598 @holdout909 midpoint, ep 8. Dense 24-slice at the 0.1-0.9 band.
+# SEAT RETIRED 2026-09-16 -- it was a DUPLICATE of line 65, wearing a name no file has ever carried.
+                            # The line read `band_dense_s2026_n24b0.1-0.9`, which is the `band_dense_s2026`
+                            # stem with a READING SPEC glued on (n24, b0.1-0.9). It therefore matched nothing,
+                            # and since patterns() globs the line literally, package_members raised on it --
+                            # so THIS ROSTER COULD NOT BUILD A PACKAGE AT ALL, and had not been able to for as
+                            # long as the line existed. Correcting the name only moved the failure: the stem
+                            # it resolves to is already seated at line 65, and two checkpoints under one id
+                            # is refused.
+                            # The number was borrowed too. 0.8598 is `small_batch6_s2026`'s peak (the batch-6
+                            # variant of this same recipe), not this member's; re-priced on 909 rows,
+                            # band_dense reads 0.8578 midpoint / 0.8877 ledger75 and small_batch6
+                            # 0.8598 / 0.8895. Nothing on disk answers to "24-slice at the 0.1-0.9 band".
+                            # The M390 flag below is a real open question and it belongs to the line-65 seat.
+                            # ORIGINAL LINE, for the record:
+                            # `band_dense_s2026_n24b0.1-0.9`, which is the stem with a READING SPEC glued on
+                            # (n24, b0.1-0.9) and matches no file, so package_members raised on it and this
+                            # roster could not build a package at all. The quoted 0.8598 was not this member's
+                            # either -- it is `small_batch6_s2026`'s peak, the batch-6 variant of this same
+                            # recipe; re-priced here on 909 rows, band_dense reads 0.8578/0.8877 and
+                            # small_batch6 0.8598/0.8895.
                             # Rostered with a flag on it: M390 asks whether the 0.1-0.9 band is itself
                             # the cause of the class-B column holes, and if that comes back positive this
                             # member is evidence in the experiment, not just a seat.
-seat_distill_clean_s2026    # 0.8581 @holdout909 midpoint, ep 8. Below the others in this block and
+seat_distill_clean_s2026.pt    # 0.8581 @holdout909 midpoint, ep 8. Below the others in this block and
                             # rostered anyway — the honest pool is what it is, and a member that cannot
                             # be shipped cannot be measured in an entry.
-distill_stack_clean_s2026   # 0.8645 @holdout909 midpoint, ep 12 of 12, converged (convergence_check:
+distill_stack_clean_s2026.pt   # 0.8645 @holdout909 midpoint, ep 12 of 12, converged (convergence_check:
                             # 1 runs, 1 converged). The CLEAN twin of distill_stack_max_s2026 (0.8634,
                             # ~80% teacher exposure) on a matched recipe, and it reads +0.0011 ABOVE it.
                             # That is the fourth honesty filter priced at the member level for the first
