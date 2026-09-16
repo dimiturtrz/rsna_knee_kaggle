@@ -7461,6 +7461,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.config_tree",
+      "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
       "target": "core.data.corpus.slot_reader",
       "weight": 1
     },
@@ -7468,6 +7474,18 @@
       "kind": "import",
       "source": "kneemri.training.config_tree",
       "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
+      "target": "core.data.labels.targets",
       "weight": 1
     },
     {
@@ -7497,6 +7515,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.config_tree",
+      "target": "kneemri.runs.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
       "target": "kneemri.training.adaptation",
       "weight": 1
     },
@@ -7516,6 +7540,12 @@
       "kind": "import",
       "source": "kneemri.training.config_tree",
       "target": "kneemri.training.gradient_clip",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
+      "target": "kneemri.training.recipe_layers",
       "weight": 1
     },
     {
@@ -35606,6 +35636,30 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.applied",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.adapters",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.applied",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.frozen_top",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.applied",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.opened_blocks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.applied",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.stem_open",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.models.encoder_surgery.EncoderSurgery.backbone_groups",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery.adapters",
       "weight": 1
@@ -35630,6 +35684,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.backbone_groups",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.stem_parameters",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.models.encoder_surgery.EncoderSurgery.blocks",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery._repeated",
       "weight": 1
@@ -35650,6 +35710,12 @@
       "kind": "calls",
       "source": "kneemri.models.encoder_surgery.EncoderSurgery.last_blocks",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery.open_blocks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.last_blocks",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.stem_parameters",
       "weight": 1
     },
     {
@@ -35691,6 +35757,18 @@
     {
       "kind": "calls",
       "source": "kneemri.models.encoder_surgery.EncoderSurgery.opened_blocks",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.blocks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.stem_open",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.stem_parameters",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.encoder_surgery.EncoderSurgery.stem_parameters",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery.blocks",
       "weight": 1
     },
@@ -35889,19 +35967,7 @@
     {
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.applied",
-      "target": "kneemri.models.encoder_surgery.EncoderSurgery.adapters",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.model.StudyModel.applied",
-      "target": "kneemri.models.encoder_surgery.EncoderSurgery.frozen_top",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.model.StudyModel.applied",
-      "target": "kneemri.models.encoder_surgery.EncoderSurgery.opened_blocks",
+      "target": "kneemri.models.encoder_surgery.EncoderSurgery.applied",
       "weight": 1
     },
     {
@@ -70660,6 +70726,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.models.encoder_surgery.EncoderSurgery.applied",
+      "label": "applied",
+      "level": "method",
+      "parent": "kneemri.models.encoder_surgery.EncoderSurgery",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.models.encoder_surgery.EncoderSurgery.backbone_groups",
       "label": "backbone_groups",
       "level": "method",
@@ -70742,6 +70816,22 @@
       "descendants": 0,
       "id": "kneemri.models.encoder_surgery.EncoderSurgery.recompute_activations",
       "label": "recompute_activations",
+      "level": "method",
+      "parent": "kneemri.models.encoder_surgery.EncoderSurgery",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.encoder_surgery.EncoderSurgery.stem_open",
+      "label": "stem_open",
+      "level": "method",
+      "parent": "kneemri.models.encoder_surgery.EncoderSurgery",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.encoder_surgery.EncoderSurgery.stem_parameters",
+      "label": "stem_parameters",
       "level": "method",
       "parent": "kneemri.models.encoder_surgery.EncoderSurgery",
       "role": null

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# bead: knee-p6fr8
+# reading: labelwise_dense_stem_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `labelwise_dense_drop40_long`'s byte-identical line plus `--unfreeze-stem`. One flag moves.
+#
+# WHY THE AXIS IS NOT A KNOB
+#   `last_blocks` builds its trainable set out of the window's BLOCKS, so the patch embedding, the cls
+#   token and the position table are outside it at EVERY depth -- `--unfreeze-last 12` freezes them
+#   exactly as 6 does. `encoder_drift` reads stem 0.000000 on all fifteen supervised members swept,
+#   so across 296 arms not one bit has been written into the only layer whose input is PIXELS rather
+#   than tokens. That is the modality interface: the one place ImageNet RGB against 336 px greyscale
+#   MRI is a difference in the DATA rather than in a representation of it. At this read size
+#   `Dinov2Embeddings` additionally resamples the table 37x37 -> 24x24 on every forward, so the grid it
+#   is interpolated onto is one it has never been allowed to fit.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_dense_drop40_long_s2026 0.9048, ledger75)
+#   >= +0.0040   the stem is a live axis. Re-open it on the other seats rather than sweeping it here.
+#   +0.000..+0.0039
+#                directional. Keep for the pool, spend no slot.
+#   <= 0.0000    a REAL CLOSURE of an architecture-sized axis with zero prior measurement: the ImageNet
+#                stem is adequate for greyscale MRI at this rate, and the 0.011 does not live here.
+#                Worth the card to own either way.
+#   peak         if this arm peaks ON ITS LAST EPOCH the budget is binding and no verdict may be read.
+#
+# THE FAILURE MODE TO WATCH
+#   The stem is the widest-fan-out tensor in the trunk: a step there moves every token every block
+#   sees. If the loss curve diverges from the control's inside the first two epochs the rate is the
+#   suspect, not the axis -- the honest follow-up is layer_decay, which already puts the stem one rung
+#   below the lowest open block, not a smaller global backbone_lr.
+#
+# deliberate: every other flag inherited VERBATIM from labelwise_dense_drop40_long. This arm changes
+#             one flag, so a delta is attributable to one thing.
+#
+# PRICE: ~0.8 h. P(clears +0.0040) ~ 0.35.
+#
+# control  labelwise_dense_drop40_long_s2026 = 0.9048 ledger75 (on disk, same recipe line, same seed).
+#          No control run is owed.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+run_train labelwise_dense_stem \
+  $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
+  --slot-dropout 0.40 --unfreeze-stem \
+  --labels "$LABELS" --out "$MODELS/labelwise_dense_stem_s2026.pt"
