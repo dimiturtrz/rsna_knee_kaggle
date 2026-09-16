@@ -253,8 +253,8 @@ def main() -> None:
     corpus, identifiers = member.cache(root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
     train, held = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
-    # The TRAIN side is what an augmentation consumes, and it does not fit in memory whole - 3636 studies
-    # of (6, 20, 336, 336) is 49 GB - so it is swept in blocks and the blocks are concatenated.
+    # Blocking bounds the SUBSET COPY below, not the cache load, which is the whole corpus either way:
+    # all 3636 train studies of (6, 20, 336, 336) copy 49 GB on top of it and do not fit.
     chosen = train if arguments.split == "train" else held
     holdout = chosen[arguments.offset : arguments.offset + arguments.studies]
 

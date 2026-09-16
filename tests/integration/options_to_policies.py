@@ -139,6 +139,8 @@ def _options() -> TrainConfig:
         distill_weight=0.3,
         teacher_targets=Path("teacher.npz"),
         certainty_ramp=6,
+        patch_maps=Path("patches.npz"),
+        patch_erase=0.25,
     )
 
 
@@ -192,6 +194,7 @@ def test_every_trainer_policy_a_run_can_ask_for_is_attached(monkeypatch: pytest.
     monkeypatch.setattr(build_module.ReportSupervision, "from_file", lambda *arguments: object())
     monkeypatch.setattr(build_module.TeacherTargets, "from_file", lambda *arguments: object())
     monkeypatch.setattr(build_module.TeacherFeatures, "from_file", lambda *arguments: _FakeFeatures())
+    monkeypatch.setattr(build_module.PatchErasing, "loaded", lambda *arguments: object())
     policies = _policies(Trainer, THE_LOOP | TRAINER_REPORTER)
     called = _recorded(monkeypatch, Trainer, policies)
 

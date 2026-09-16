@@ -414,7 +414,7 @@ def test_requested():
     cpu = torch.device("cpu")
     shared = {field.name for field in dataclasses.fields(Request)} & {leaf.name for leaf, _ in TrainConfig.leaves()}
 
-    assert len(shared) == 61, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 62, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):
@@ -503,6 +503,23 @@ def test_hardness() -> None:
         _setup(hard_start=0.0, certainty_ramp=6).hardness()
     with pytest.raises(ValueError, match="hard"):
         _setup(hard_start=0.0, sample_ramp=6).hardness()
+
+
+def test_erasing(tmp_path: Path):
+    """Erasing is all-or-nothing: a rate with no maps is refused, and the default attaches nothing.
+
+    Zeroing it instead would train the ledger's unerased recipe and report it under the erased arm's name.
+    """
+    assert _setup().erasing(["a"]) is None, "no maps, no rate, nothing attached"
+
+    with pytest.raises(ValueError, match="--patch-erase"):
+        _setup(patch_erase=0.25).erasing(["a"])
+
+    maps = tmp_path / "maps.npz"
+    np.savez(maps, studies=np.array(["a", "b"]), maps=np.ones((2, 3, 4, 4), dtype=np.float32))
+    attached = _setup(patch_maps=maps, patch_erase=0.25).erasing(["a", "b"])
+    assert attached is not None
+    assert attached.rate == pytest.approx(0.25)
 
 
 def test_drawing_mixed_corpus() -> None:

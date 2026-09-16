@@ -18,6 +18,7 @@ from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
 from kneemri.training.augmentation import (
     INTENSITY_AUGMENT,
     PADDING_MODE,
+    PATCH_ERASE,
     SCALE_JITTER,
     SLOT_DROPOUT,
     Augmentation,
@@ -28,6 +29,7 @@ from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.label_focus import FOCUS, UNFOCUSED
+from kneemri.training.loss_quantiles import LOSS_QUANTILES
 from kneemri.training.mixup import OFF, UNMIXED
 from kneemri.training.objective import (
     CONTRAST_TERM,
@@ -42,6 +44,7 @@ from kneemri.training.objective import (
     Objective,
     RankedObjective,
 )
+from kneemri.training.patch_erasing import PatchErasing
 from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.sampling import Disagreed
@@ -62,7 +65,6 @@ from kneemri.training.trainer import (
     DROPPED_BLOCKS,
     HARD_SCHEDULE,
     LAYER_DECAY,
-    LOSS_QUANTILES,
     MIXUP,
     ONE_CYCLE_WARMUP,
     OPTIMISER_DECAY,
@@ -205,6 +207,19 @@ def test_draw_with():
     assert trainer.policies()[SAMPLING] == OFF, "every ledger number was measured on a uniform draw"
     trainer.draw_with(Disagreed(np.linspace(0.01, 0.3, 8), alpha=0.5))
     assert trainer.policies()[SAMPLING] == pytest.approx(0.5)
+
+
+def test_erase_with():
+    """Attaching the patch maps is visible in the trainer's own account of itself, and defaults to off.
+
+    The POSITIVE WITNESS for `--patch-erase`: an unattached erasing holds a zero rate and returns the
+    pixels untouched, so a rate that never reached the trainer trains exactly the ledger's unerased run
+    and reports it under the erased arm's name.
+    """
+    trainer = _trainer()
+    assert trainer.policies()[PATCH_ERASE] == OFF, "every ledger number was measured without erasing"
+    trainer.erase_with(PatchErasing(np.zeros((1, 4, 4)), 0.25))
+    assert trainer.policies()[PATCH_ERASE] == pytest.approx(0.25)
 
 
 def test_clip_gradients():
@@ -494,6 +509,7 @@ def test_policies():
         UNFOCUSED: 0.0,
         INTENSITY_AUGMENT: False,
         SLOT_DROPOUT: 0.0,
+        PATCH_ERASE: 0.0,
         GHOSTING: 0.0,
         SCALE_JITTER: 0.08,
         PADDING_MODE: "border",

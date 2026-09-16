@@ -3326,6 +3326,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.patch_map_blocks",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.patch_maps",
       "target": "core.cli",
       "weight": 1
@@ -7940,6 +7946,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.objective_checks",
+      "target": "kneemri.training.config_tree",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.pair_memory",
       "target": "kneemri.training.grades",
       "weight": 1
@@ -8091,6 +8103,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.config_tree",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
       "target": "kneemri.training.device_budget",
       "weight": 1
     },
@@ -8127,7 +8145,13 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
-      "target": "kneemri.training.options",
+      "target": "kneemri.training.objective_checks",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.patch_erasing",
       "weight": 1
     },
     {
@@ -8421,6 +8445,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.trainer",
+      "target": "kneemri.training.loss_quantiles",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
       "target": "kneemri.training.mixup",
       "weight": 1
     },
@@ -8428,6 +8458,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.objective",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.patch_erasing",
       "weight": 1
     },
     {
@@ -20449,6 +20485,18 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.patch_map_blocks.main",
+      "target": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_blocks.main",
+      "target": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks.joined",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.patch_maps.PatchMaps.lines",
       "target": "kneemri.evaluation.patch_maps.PatchMaps.centre_mass",
@@ -20464,6 +20512,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.patch_maps.PatchMaps.lines",
       "target": "kneemri.evaluation.patch_maps.PatchMaps.label_contrast",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.patch_maps.TissueNull",
+      "target": "kneemri.evaluation.patch_maps.TissueNull",
       "weight": 1
     },
     {
@@ -20536,6 +20590,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.patch_maps.main",
       "target": "kneemri.evaluation.patch_maps.PatchMaps.lines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_maps.main",
+      "target": "kneemri.evaluation.patch_maps.TissueNull.of",
       "weight": 1
     },
     {
@@ -38462,6 +38522,42 @@
     },
     {
       "kind": "holds",
+      "source": "kneemri.training.objective_checks.ObjectiveChecks",
+      "target": "kneemri.training.config_tree.TrainConfig",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective_checks.ObjectiveChecks.composed",
+      "target": "kneemri.training.objective_checks.ObjectiveChecks._check_contrast_alone",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective_checks.ObjectiveChecks.composed",
+      "target": "kneemri.training.objective_checks.ObjectiveChecks._check_dissent_alone",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective_checks.ObjectiveChecks.composed",
+      "target": "kneemri.training.objective_checks.ObjectiveChecks._check_feature_alone",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective_checks.ObjectiveChecks.composed",
+      "target": "kneemri.training.objective_checks.ObjectiveChecks._check_margin_alone",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.objective_checks.ObjectiveChecks.composed",
+      "target": "kneemri.training.objective_checks.ObjectiveChecks._check_pairs_can_form",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
       "source": "kneemri.training.pair_memory.PairMemory",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
@@ -38476,6 +38572,12 @@
       "kind": "construct",
       "source": "kneemri.training.pair_memory.PairMemory.remember",
       "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.patch_erasing.PatchErasing",
+      "target": "kneemri.training.patch_erasing.PatchErasing",
       "weight": 1
     },
     {
@@ -39003,6 +39105,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.patch_erasing.PatchErasing",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.progress_schedule.ProgressSchedule",
       "weight": 1
     },
@@ -39040,36 +39148,6 @@
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.trainer.Trainer",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup._check_composed",
-      "target": "kneemri.training.run_setup.RunSetup._check_contrast_alone",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup._check_composed",
-      "target": "kneemri.training.run_setup.RunSetup._check_dissent_alone",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup._check_composed",
-      "target": "kneemri.training.run_setup.RunSetup._check_feature_alone",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup._check_composed",
-      "target": "kneemri.training.run_setup.RunSetup._check_margin_alone",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup._check_composed",
-      "target": "kneemri.training.run_setup.RunSetup._check_pairs_can_form",
       "weight": 1
     },
     {
@@ -39124,6 +39202,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.drawing",
       "target": "kneemri.training.sampling.Uniform",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.erasing",
+      "target": "kneemri.training.patch_erasing.PatchErasing.loaded",
       "weight": 1
     },
     {
@@ -39231,6 +39315,18 @@
     {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.objective_checks.ObjectiveChecks",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
+      "target": "kneemri.training.objective_checks.ObjectiveChecks.composed",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.remembered_margin.RememberedMargin",
       "weight": 1
     },
@@ -39238,12 +39334,6 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.remembered_ranking.RememberedRanking",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.run_setup.RunSetup._check_composed",
       "weight": 1
     },
     {
@@ -39345,6 +39435,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.run_setup.RunSetup.erasing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.run_setup.RunSetup.hardness",
       "weight": 1
     },
@@ -39412,6 +39508,12 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.drop_paths",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.erase_with",
       "weight": 1
     },
     {
@@ -39831,6 +39933,12 @@
     {
       "kind": "holds",
       "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.loss_quantiles.EpochLosses",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.mixup.Mixup",
       "weight": 1
     },
@@ -39838,6 +39946,12 @@
       "kind": "references",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.patch_erasing.PatchErasing",
       "weight": 1
     },
     {
@@ -39933,6 +40047,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.loss_quantiles.EpochLosses",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.mixup.Mixup",
       "weight": 1
     },
@@ -39940,6 +40060,12 @@
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.objective.Objective",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.patch_erasing.PatchErasing",
       "weight": 1
     },
     {
@@ -40111,9 +40237,33 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.loss_quantiles.EpochLosses",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.loss_quantiles.EpochLosses.collect",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.loss_quantiles.EpochLosses.quantiles",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.mixup.Mixup.draw",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.patch_erasing.PatchErasing.erased",
       "weight": 1
     },
     {
@@ -40150,12 +40300,6 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.trainer.Trainer._harden",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.Trainer.fit_epoch",
-      "target": "kneemri.training.trainer.Trainer._quantiles_of",
       "weight": 1
     },
     {
@@ -40955,7 +41099,7 @@
       "role": null
     },
     {
-      "descendants": 318,
+      "descendants": 322,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -41043,7 +41187,7 @@
       "role": null
     },
     {
-      "descendants": 113,
+      "descendants": 114,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -41502,6 +41646,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.paired_floor",
       "label": "paired_floor",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_blocks",
+      "label": "patch_map_blocks",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -43115,7 +43267,7 @@
       "role": null
     },
     {
-      "descendants": 48,
+      "descendants": 51,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -43300,6 +43452,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.loss_quantiles",
+      "label": "loss_quantiles",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.masked_objective",
       "label": "masked_objective",
       "level": "module",
@@ -43332,6 +43492,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective_checks",
+      "label": "objective_checks",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.options",
       "label": "options",
       "level": "module",
@@ -43342,6 +43510,14 @@
       "descendants": 0,
       "id": "kneemri.training.pair_memory",
       "label": "pair_memory",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.patch_erasing",
+      "label": "patch_erasing",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -45820,8 +45996,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks",
+      "label": "PatchMapBlocks",
+      "level": "class",
+      "parent": "kneemri.evaluation.patch_map_blocks",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.patch_maps.PatchMaps",
       "label": "PatchMaps",
+      "level": "class",
+      "parent": "kneemri.evaluation.patch_maps",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_maps.TissueNull",
+      "label": "TissueNull",
       "level": "class",
       "parent": "kneemri.evaluation.patch_maps",
       "role": "satellite"
@@ -49124,6 +49316,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.loss_quantiles.EpochLosses",
+      "label": "EpochLosses",
+      "level": "class",
+      "parent": "kneemri.training.loss_quantiles",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.masked_objective.MaskConfig",
       "label": "MaskConfig",
       "level": "class",
@@ -49228,10 +49428,26 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective_checks.ObjectiveChecks",
+      "label": "ObjectiveChecks",
+      "level": "class",
+      "parent": "kneemri.training.objective_checks",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.pair_memory.PairMemory",
       "label": "PairMemory",
       "level": "class",
       "parent": "kneemri.training.pair_memory",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.patch_erasing.PatchErasing",
+      "label": "PatchErasing",
+      "level": "class",
+      "parent": "kneemri.training.patch_erasing",
       "role": "primary"
     },
     {
@@ -59068,6 +59284,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks.joined",
+      "label": "joined",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_blocks.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_blocks",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.patch_maps.PatchMaps.centre_mass",
       "label": "centre_mass",
       "level": "method",
@@ -59096,6 +59336,22 @@
       "label": "lines",
       "level": "method",
       "parent": "kneemri.evaluation.patch_maps.PatchMaps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_maps.TissueNull.centre_share",
+      "label": "centre_share",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_maps.TissueNull",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_maps.TissueNull.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_maps.TissueNull",
       "role": null
     },
     {
@@ -73340,6 +73596,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.loss_quantiles.EpochLosses.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.loss_quantiles.EpochLosses",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.loss_quantiles.EpochLosses.collect",
+      "label": "collect",
+      "level": "method",
+      "parent": "kneemri.training.loss_quantiles.EpochLosses",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.loss_quantiles.EpochLosses.quantiles",
+      "label": "quantiles",
+      "level": "method",
+      "parent": "kneemri.training.loss_quantiles.EpochLosses",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.masked_objective.MaskedObjective.__init__",
       "label": "__init__",
       "level": "method",
@@ -73772,6 +74052,54 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.objective_checks.ObjectiveChecks._check_contrast_alone",
+      "label": "_check_contrast_alone",
+      "level": "method",
+      "parent": "kneemri.training.objective_checks.ObjectiveChecks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective_checks.ObjectiveChecks._check_dissent_alone",
+      "label": "_check_dissent_alone",
+      "level": "method",
+      "parent": "kneemri.training.objective_checks.ObjectiveChecks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective_checks.ObjectiveChecks._check_feature_alone",
+      "label": "_check_feature_alone",
+      "level": "method",
+      "parent": "kneemri.training.objective_checks.ObjectiveChecks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective_checks.ObjectiveChecks._check_margin_alone",
+      "label": "_check_margin_alone",
+      "level": "method",
+      "parent": "kneemri.training.objective_checks.ObjectiveChecks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective_checks.ObjectiveChecks._check_pairs_can_form",
+      "label": "_check_pairs_can_form",
+      "level": "method",
+      "parent": "kneemri.training.objective_checks.ObjectiveChecks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.objective_checks.ObjectiveChecks.composed",
+      "label": "composed",
+      "level": "method",
+      "parent": "kneemri.training.objective_checks.ObjectiveChecks",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.pair_memory.PairMemory.__init__",
       "label": "__init__",
       "level": "method",
@@ -73800,6 +74128,30 @@
       "label": "remember",
       "level": "method",
       "parent": "kneemri.training.pair_memory.PairMemory",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.patch_erasing.PatchErasing.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.patch_erasing.PatchErasing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.patch_erasing.PatchErasing.erased",
+      "label": "erased",
+      "level": "method",
+      "parent": "kneemri.training.patch_erasing.PatchErasing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.patch_erasing.PatchErasing.loaded",
+      "label": "loaded",
+      "level": "method",
+      "parent": "kneemri.training.patch_erasing.PatchErasing",
       "role": null
     },
     {
@@ -74180,54 +74532,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._check_composed",
-      "label": "_check_composed",
-      "level": "method",
-      "parent": "kneemri.training.run_setup.RunSetup",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._check_contrast_alone",
-      "label": "_check_contrast_alone",
-      "level": "method",
-      "parent": "kneemri.training.run_setup.RunSetup",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._check_dissent_alone",
-      "label": "_check_dissent_alone",
-      "level": "method",
-      "parent": "kneemri.training.run_setup.RunSetup",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._check_feature_alone",
-      "label": "_check_feature_alone",
-      "level": "method",
-      "parent": "kneemri.training.run_setup.RunSetup",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._check_margin_alone",
-      "label": "_check_margin_alone",
-      "level": "method",
-      "parent": "kneemri.training.run_setup.RunSetup",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._check_pairs_can_form",
-      "label": "_check_pairs_can_form",
-      "level": "method",
-      "parent": "kneemri.training.run_setup.RunSetup",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup._contrastive",
       "label": "_contrastive",
       "level": "method",
@@ -74262,6 +74566,14 @@
       "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup.drawing",
       "label": "drawing",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup.erasing",
+      "label": "erasing",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
@@ -74756,14 +75068,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer._quantiles_of",
-      "label": "_quantiles_of",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer._ramped_weights",
       "label": "_ramped_weights",
       "level": "method",
@@ -74846,6 +75150,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.drop_paths",
       "label": "drop_paths",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.erase_with",
+      "label": "erase_with",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

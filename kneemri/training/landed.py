@@ -48,7 +48,13 @@ from kneemri.models.model import (
     RECOMPUTING,
     StudyModel,
 )
-from kneemri.training.augmentation import INTENSITY_AUGMENT, PADDING_MODE, SCALE_JITTER, SLOT_DROPOUT
+from kneemri.training.augmentation import (
+    INTENSITY_AUGMENT,
+    PADDING_MODE,
+    PATCH_ERASE,
+    SCALE_JITTER,
+    SLOT_DROPOUT,
+)
 from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS, UNFOCUSED
@@ -117,6 +123,8 @@ NOT_A_SWITCH = {
     "train_fraction": "which TRAINING studies were fitted on — the same kind of thing, and visible in "
     "the same split line. No model, trainer or targets object holds it, so there is nothing here to "
     "compare it against; what a landed-check would want is the study COUNT, and the run logs that",
+    "patch_maps": "the occlusion maps a run erases from, an input file rather than a policy; "
+    "`patch_erase` is the switch and is compared",
     "patience": "when to stop, read by the stopper each epoch rather than applied once",
     "patience_from_progress": "when keeping and stopping may begin, read by the same stopper each epoch",
     "batch": "how many studies a step holds, a resource knob the loader obeys or raises on",
@@ -318,6 +326,7 @@ class Request:
     corpus_oversample: float = 0.0
     target_corpus: str = ""
     slot_dropout: float = 0.0
+    patch_erase: float = 0.0
     ghosting: float = 0.0
     scale_jitter: float = 0.08
     padding_mode: str = "border"
@@ -412,6 +421,7 @@ class Request:
             LAYER_DECAY: self.layer_decay,
             MIXUP: self.mixup,
             SLOT_DROPOUT: self.slot_dropout,
+            PATCH_ERASE: self.patch_erase,
             GHOSTING: self.ghosting,
             SCALE_JITTER: self.scale_jitter,
             PADDING_MODE: self.padding_mode,

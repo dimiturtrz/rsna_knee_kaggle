@@ -33,6 +33,8 @@ from kneemri.training.objective import (
     RankedObjective,
     Shaping,
 )
+from kneemri.training.objective_checks import ObjectiveChecks
+from kneemri.training.patch_erasing import PatchErasing
 from kneemri.training.pretrained_encoder import PretrainedEncoder
 from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.remembered_contrast import RememberedContrast
@@ -58,16 +60,6 @@ HARD_AND_RAMP = (
     "--hard-* and --certainty-ramp/--sample-ramp both schedule example hardness; the integer ramps are "
     "kept only to reproduce recorded arms, so pick one"
 )
-
-LONE_BATCH = 1
-"""The micro-batch at which every comparison term in `objective.py` is STRUCTURALLY zero.
-
-Not a threshold and not a floor picked for comfort: at two studies a label still forms one pair, and one
-thin pair is a recipe judgement. At ONE study there is no second study to compare against, so the term is
-absent rather than weak — `RankedObjective.pairs(batch, batch)` forms only the self-pair, which carries
-`s_i - s_j = 0` and drops out, and `MarginObjective.auc_margin` finds no label holding both a positive and
-a negative and returns its zero. `--accumulate` does not repair it: accumulation sums the gradients of
-micro-batch losses each computed alone, so it never forms a cross-micro-batch pair."""
 
 
 @dataclass(frozen=True)
@@ -208,10 +200,30 @@ class RunSetup:
             corpus_oversample=options.sampling.corpus_oversample,
             target_corpus=options.sampling.target_corpus,
             slot_dropout=options.regularisation.slot_dropout,
+            patch_erase=options.regularisation.patch_erase,
             ghosting=options.regularisation.ghosting,
             scale_jitter=options.regularisation.scale_jitter,
             padding_mode=options.regularisation.padding_mode,
         )
+
+    def erasing(self, identifiers: list[str]) -> PatchErasing | None:
+        """The occlusion maps this run erases from, joined to its own study order, or None for no erasing.
+
+        A rate with no maps has nothing to price a cell by, and erasing nothing IS the control: such a run
+        would train the unerased recipe and report it under the erased arm's name, so it is refused rather
+        than quietly zeroed.
+        """
+        options = self.options
+        if options.regularisation.patch_maps is not None:
+            return PatchErasing.loaded(
+                options.regularisation.patch_maps, identifiers, options.regularisation.patch_erase
+            )
+        if options.regularisation.patch_erase > 0.0:
+            message = (
+                f"--patch-erase {options.regularisation.patch_erase} needs --patch-maps; drop the rate or name the maps"
+            )
+            raise ValueError(message)
+        return None
 
     def hardness(self) -> ProgressSchedule:
         """The example-hardness schedule these flags ask for, refusing one beside a legacy integer ramp.
@@ -278,7 +290,7 @@ class RunSetup:
         wants to know WHICH objective a recipe asks for keeps working without either.
         """
         options = self.options
-        self._check_composed()
+        ObjectiveChecks(options).composed()
         structure = LabelStructure(
             grades=OrdinalGrades() if options.targets.grade_ladder else Grades(),
             sides=PairedSides(options.targets.side_weight) if options.targets.side_weight else SideRanking(),
@@ -356,200 +368,6 @@ class RunSetup:
                 capacity=options.targets.pair_memory,
             )
         return ContrastiveObjective(options.targets.contrast_weight, shaping, rank_weight=options.targets.rank_weight)
-
-    def _check_composed(self) -> None:
-        """Every way the loss flags fail to compose, raised before the card is touched.
-
-        SEPARATE from `objective` because the two answer different questions — which objective, and
-        whether the flags asking for it can be honoured together — and because holding both put the
-        dispatch over the complexity ceiling, which is the gate saying the same thing.
-        """
-        options = self.options
-        # FIRST of the guards, ahead of the dissent one for its own reason: this flag replaces the term
-        # every other objective here is built on, so a composition it cannot honour has to be named
-        # against THIS flag rather than against whichever term was stacked on top of it.
-        if options.targets.auc_margin:
-            self._check_margin_alone()
-        # A dissenting arm that also passed `--pair-memory` would otherwise be told about a missing
-        # `--rank-weight` it never intended to give, which sends the reader to the wrong flag entirely.
-        if options.teacher.dissent_weight:
-            self._check_dissent_alone()
-        if options.targets.contrast_weight:
-            self._check_contrast_alone()
-        # BEFORE the pair-memory rule below, so `--feature-weight --pair-memory` is answered by the flag
-        # that would have been silently dropped rather than by one about an unfed pool.
-        if options.teacher.feature_weight:
-            self._check_feature_alone()
-        if options.targets.pair_memory and not (
-            options.targets.rank_weight or options.targets.contrast_weight or options.targets.auc_margin
-        ):
-            # LOUD, for the reason `reports` gives below: a memory with no term to feed is a silent
-            # no-op that trains the plain recipe under the arm's name, and would be read as a
-            # refutation of the mechanism rather than of the invocation.
-            message = (
-                f"--pair-memory {options.targets.pair_memory} widens the pool of a ranking, contrastive, or "
-                "margin term and none of --rank-weight, --contrast-weight, or --auc-margin was given, "
-                "so there is nothing for it to widen"
-            )
-            raise ValueError(message)
-        if options.teacher.distill_weight and options.targets.pair_memory:
-            # LOUD for the same reason as above. `RememberedRanking` widens the LABEL term's pair pool
-            # and knows nothing about a teacher, so the two together would train a distilling arm whose
-            # remembered pairs silently carry no teacher at all — half the mechanism, under its name.
-            message = (
-                f"--distill-weight {options.teacher.distill_weight} and --pair-memory {options.targets.pair_memory} "
-                "are not composed: the remembered pool widens the label term only, so the teacher would be "
-                "dropped for every remembered step"
-            )
-            raise ValueError(message)
-        # LAST, because it is about the BATCH rather than about the flags, and every message above names
-        # a flag the reader can drop. This one names a flag they must ADD.
-        if options.optim.batch <= LONE_BATCH and not options.targets.pair_memory:
-            self._check_pairs_can_form()
-
-    def _check_pairs_can_form(self) -> None:
-        """The comparison terms that are silently OFF at a batch of one, raised before the card is touched.
-
-        MEASURED 2026-09-03, and this guard exists because nothing caught it. `ortho_stack` ran nine
-        hundred steps of `--rank-weight 1.0 --batch 1 --accumulate 12` with the ranking term contributing
-        exactly zero: its epoch-0 loss read 0.6281 where the same recipe at batch 12 read 1.2266, and the
-        recipe line recorded `rank_weight: 1.0` throughout, because `Objective.settings` reports the
-        CONSTRUCTOR's weight and the constructor was reached. The arm was a two-variable change — the
-        trunk AND the objective — against a control that trained the term, and its pre-registered middle
-        branch would have CLOSED the project's only open lever on that comparison.
-
-        This is the failure `objective.py` already warns about ("a --rank-weight that never reached the
-        constructor trains plain cross-entropy under a ranking arm's name and reports a number that reads
-        as a refutation of the mechanism"), arriving by batch size rather than by dispatch, which is why
-        the warning did not cover it.
-
-        `--auc-margin` is the worst of the four and is named the same way: it REPLACES cross-entropy, so a
-        lone batch leaves the side term as the entire loss.
-        """
-        options = self.options
-        silenced = {
-            "--rank-weight": options.targets.rank_weight,
-            "--auc-margin": options.targets.auc_margin,
-            "--contrast-weight": options.targets.contrast_weight,
-            "--dissent-weight": options.teacher.dissent_weight,
-        }
-        named = [f"{flag} {value}" for flag, value in silenced.items() if value]
-        if not named:
-            return
-        message = (
-            f"--batch {options.optim.batch} forms no pairs, so {', '.join(named)} would contribute exactly zero "
-            "and the run would descend the plain recipe under the arm's name — pass --pair-memory to form "
-            "pairs across steps, or raise --batch (--accumulate cannot repair this: it sums the gradients "
-            "of micro-batch losses each computed alone)"
-        )
-        raise ValueError(message)
-
-    def _check_margin_alone(self) -> None:
-        """The four flags `--auc-margin` cannot be composed with, each LOUD for `objective`'s reason.
-
-        Every other objective in this file's chain is cross-entropy PLUS a term, and this one removes
-        cross-entropy. So each of those flags would ask for a term to be added to a loss that is no
-        longer there, and the sum would descend fine while meaning nothing: the run would report both
-        switches landed and no number afterwards would say which objective it actually was.
-        """
-        options = self.options
-        conflicts = {
-            "--rank-weight": options.targets.rank_weight,
-            "--distill-weight": options.teacher.distill_weight,
-            "--feature-weight": options.teacher.feature_weight,
-            "--dissent-weight": options.teacher.dissent_weight,
-            "--contrast-weight": options.targets.contrast_weight,
-        }
-        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
-        if named:
-            message = (
-                f"--auc-margin {options.targets.auc_margin} is not composed with {', '.join(named)}: it REPLACES "
-                "the cross-entropy term those all add themselves to, so what ran would be neither the "
-                "margin objective nor the ranking one"
-            )
-            raise ValueError(message)
-
-    def _check_dissent_alone(self) -> None:
-        """The three flags `--dissent-weight` cannot be composed with, each LOUD for `objective`'s reason.
-
-        `--distill-weight` reads the same teacher to pull the member TOWARD the pool's ordering, which is
-        the opposite of what this term spends the member on; running both descends a sum whose result
-        says nothing about either. `--rank-weight` is the same label ordering at a flat pair mass, and
-        `DecorrelatedObjective` deliberately holds it at zero — passing it would be silently ignored,
-        which is the exact failure the whole flag vocabulary here exists to prevent. `--pair-memory`
-        widens the label term's pool with remembered readouts that carry no teacher, so every remembered
-        pair would enter at an emphasis this term cannot compute.
-        """
-        options = self.options
-        conflicts = {
-            "--distill-weight": options.teacher.distill_weight,
-            "--rank-weight": options.targets.rank_weight,
-            "--pair-memory": options.targets.pair_memory,
-        }
-        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
-        if named:
-            message = (
-                f"--dissent-weight {options.teacher.dissent_weight} is not composed with {', '.join(named)}: it "
-                "IS the label ranking term at a re-weighted pair mass, and each of those either "
-                "descends that same ordering a second time or feeds it pairs with no teacher"
-            )
-            raise ValueError(message)
-
-    def _check_contrast_alone(self) -> None:
-        """The two flags `--contrast-weight` cannot be composed with, each LOUD for `objective`'s reason.
-
-        Not because the terms disagree — a representation term and a pairwise ordering term compose fine,
-        and `--rank-weight` is deliberately absent from this list because `ContrastiveObjective` extends
-        `RankedObjective` and carries it — but because the DISPATCH here is a single chain returning one
-        class, and each of these two returns a different subclass that this branch would silently lose.
-        A run passing both would train the other term's recipe under this arm's name and report a number
-        about the wrong mechanism, which is the failure every guard in this file exists to prevent.
-
-        `--pair-memory` WAS on this list and is not any more, and it was never a rejected idea: the pool
-        is the named fix for this term's small-batch weakness — `contrast_dense` pre-registered exactly
-        that suspect against its own -0.0087 — and it was refused only because the chain returned before
-        reaching `RememberedRanking`. `contrastive` now dispatches on the pair, so the composition the
-        ledger asked for is the one that runs.
-        """
-        options = self.options
-        conflicts = {
-            "--distill-weight": options.teacher.distill_weight,
-            "--dissent-weight": options.teacher.dissent_weight,
-        }
-        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
-        if named:
-            message = (
-                f"--contrast-weight {options.targets.contrast_weight} is not composed with {', '.join(named)}: "
-                "the objective chain returns ONE class, so this branch would win and the term those "
-                "flags asked for would never be built"
-            )
-            raise ValueError(message)
-
-    def _check_feature_alone(self) -> None:
-        """The four flags `--feature-weight` cannot be composed with, each LOUD for `objective`'s reason.
-
-        Not because a representation target and a pairwise one disagree — `--rank-weight` is deliberately
-        absent from this list, since `FeatureDistilledObjective` extends `RankedObjective` and carries it
-        — but because the DISPATCH is a single chain returning one class. `--distill-weight` and
-        `--dissent-weight` are ahead of this branch and would win; `--contrast-weight` and `--pair-memory`
-        are behind it and would be lost. Either way a run would train one mechanism under the other's
-        name, which is what every guard in this file exists to prevent.
-        """
-        options = self.options
-        conflicts = {
-            "--distill-weight": options.teacher.distill_weight,
-            "--dissent-weight": options.teacher.dissent_weight,
-            "--contrast-weight": options.targets.contrast_weight,
-            "--pair-memory": options.targets.pair_memory,
-        }
-        named = [f"{flag} {value}" for flag, value in conflicts.items() if value]
-        if named:
-            message = (
-                f"--feature-weight {options.teacher.feature_weight} is not composed with {', '.join(named)}: the "
-                "objective chain returns ONE class, so only one of these terms would be built and the "
-                "run would report the other's recipe under this arm's name"
-            )
-            raise ValueError(message)
 
     def reports(self, identifiers: list[str]) -> ReportSupervision | None:
         """The report-embedding supervision this run asked for, or None — and never half of it.
@@ -701,6 +519,9 @@ class RunSetup:
             trainer.teach_features_from(features)
         if options.optim.ema:
             trainer.exponential_average()
+        erasing = self.erasing(identifiers)
+        if erasing is not None:
+            trainer.erase_with(erasing)
         # BEFORE the schedule, which is not cosmetic: the schedule's total is counted in OPTIMISER steps
         # and the trainer's own accumulation is what converts micro-batches into them.
         trainer.accumulate(options.optim.accumulate)

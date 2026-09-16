@@ -144,6 +144,12 @@ NOT_IN_CONFIG = {
     "slot_dropout": "an input augmentation applied while fitting, never while serving — it drops whole "
     "SLOTS from the six-slot list during training, and a rebuild serves the full list, so the function "
     "is byte-identical for the same reason `intensity_aug` is",
+    "patch_erase": "an input augmentation applied while fitting, never while serving — it blanks one grid "
+    "cell of a study during training, and a rebuild serves the unblanked image, so the function is "
+    "byte-identical for the same reason `slot_dropout` is",
+    "patch_maps": "the occlusion sweep `patch_erase` draws that cell from — a fact about which cells the "
+    "epochs saw blanked, like `sample_spread`, and the witness that it landed is the run's own recipe "
+    "block, never the checkpoint",
     "label_errors": "a SUPERVISION policy — it zeroes the loss weight of the cells a flag table names "
     "and touches no module, no parameter and no loss term, so the twelve-logit head a rebuild serves is "
     "byte-identical. The file it names is a fact about which cells the epochs descended on, like "

@@ -41,6 +41,7 @@ from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import (
     INTENSITY_AUGMENT,
     PADDING_MODE,
+    PATCH_ERASE,
     SCALE_JITTER,
     SLOT_DROPOUT,
     Augmentation,
@@ -50,8 +51,10 @@ from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import Predicted
 from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
+from kneemri.training.loss_quantiles import EpochLosses
 from kneemri.training.mixup import Blend, Mixup
 from kneemri.training.objective import Objective
+from kneemri.training.patch_erasing import PatchErasing
 from kneemri.training.progress_schedule import FULL, ProgressSchedule
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.training.sampling import Sampling, Uniform
@@ -101,10 +104,6 @@ TARGET_CORPUS = "target_corpus"
 
 NO_OPEN_BACKBONE = 0.0
 """The anchor of an empty backbone: under LoRA no base block is open, so no rate was asked for one."""
-
-
-LOSS_QUANTILES = ("q25", "q50", "q75", "q90", "q95")
-"""Which per-study loss quantiles the epoch record carries."""
 
 
 class Trainer:
@@ -181,6 +180,7 @@ class Trainer:
         # generator, so a run that asks for no sampling policy descends on exactly the stream every
         # number in the ledger was measured under.
         self.sampling: Sampling = Uniform()
+        self.erasing = PatchErasing(np.zeros((1, 1, 1)), 0.0)
         # A VALUE rather than a policy object, because there is nothing to dispatch on: the fraction is
         # read once, by `one_cycle`, as OneCycleLR's `pct_start`. It is a field rather than an argument
         # to that method so the request can be transcribed the same way every other switch is.
@@ -208,7 +208,7 @@ class Trainer:
         # Per-study losses for the CURRENT epoch; reset at the start of `fit_epoch` and turned into
         # quantiles at the end. Kept here rather than returned, so `fit_epoch`'s contract stays a scalar
         # and every existing caller is untouched.
-        self._epoch_losses: list[NDArray[np.float64]] = []
+        self._epoch_losses = EpochLosses()
         self._loss_quantiles: dict[str, float] = {}
 
     @property
@@ -236,6 +236,7 @@ class Trainer:
             **self.objective.settings(),
             INTENSITY_AUGMENT: self.augmentation.intensity(),
             SLOT_DROPOUT: self.augmentation.base.slot_dropout,
+            PATCH_ERASE: self.erasing.rate,
             GHOSTING: self.augmentation.base.ghosting,
             SCALE_JITTER: self.augmentation.base.scale_jitter,
             PADDING_MODE: self.augmentation.base.padding_mode,
@@ -401,6 +402,10 @@ class Trainer:
         """Attach the policy that decides which studies each epoch descends on."""
         self.sampling = sampling
 
+    def erase_with(self, erasing: PatchErasing) -> None:
+        """Attach the per-study patch maps each epoch erases from; the default rate is zero."""
+        self.erasing = erasing
+
     def warm_up(self, fraction: float) -> None:
         """Spend this share of the one-cycle schedule warming up, instead of the inherited 0.15.
 
@@ -413,22 +418,6 @@ class Trainer:
     def ramp_certainty(self, epochs: int) -> None:
         """SUPERSEDED by `harden` (its float translation is not bit-equal): whole epochs from floor to full trust."""
         self.certainty_ramp = epochs
-
-    @staticmethod
-    def _quantiles_of(batches: list[NDArray[np.float64]]) -> dict[str, float]:
-        """Quantiles of the per-study losses collected across an epoch.
-
-        NaN when no study contributed, so callers always get the same key shape. The quantiles are
-        computed on CPU after the epoch, because the list is small and this keeps the training loop on
-        the device.
-        """
-        if not batches:
-            return {name: float("nan") for name in LOSS_QUANTILES}
-        values = np.concatenate(batches)
-        if len(values) == 0:
-            return {name: float("nan") for name in LOSS_QUANTILES}
-        levels = (0.25, 0.50, 0.75, 0.90, 0.95)
-        return {name: float(level) for name, level in zip(LOSS_QUANTILES, np.quantile(values, levels), strict=True)}
 
     def _trust(self, progress: float) -> float:
         if self.certainty_ramp > 0:
@@ -540,7 +529,7 @@ class Trainer:
         # quarters of them: measured 35 ms against 3.3 ms, ten seconds of every forty-second epoch.
         self.model.train()
         # A fresh epoch's quantiles start empty; the list is populated per batch and reduced at the end.
-        self._epoch_losses = []
+        self._epoch_losses = EpochLosses()
         # THE RUNNING TOTAL STAYS ON THE DEVICE. Reading a loss back with float() synchronises: the host
         # blocks until the backward that produced it has finished, so it cannot queue the next step while
         # the card works on this one — which is most of what the prefetch in front of the loop just bought.
@@ -567,7 +556,9 @@ class Trainer:
         for batch, fetched in Prefetch(corpus, plan, self.window, pin=self.device.type == "cuda"):
             pixels = fetched.to(self.device, non_blocking=True)
             self._strengthen(self._epochs_fitted + steps / max(planned, 1))
-            pixels = self.augment_bag(pixels)
+            # Erasing BEFORE the blend: a map prices one study's cells, and after blending the pixels
+            # under a cell belong to two studies. Under the null rate it is the identity.
+            pixels = self.erasing.erased(self.augment_bag(pixels), batch, self.torch_generator)
             flags = torch.from_numpy(corpus.mask[batch]).to(self.device)
             score, weight = targets.rows(batch)
             weight = self._ramped_weights(weight, self._epochs_fitted + steps / max(planned, 1))
@@ -640,7 +631,7 @@ class Trainer:
                 )
                 weighted = elementwise * judged.weights
                 per_study = weighted.sum(dim=1) / judged.weights.sum(dim=1).clamp(min=1e-6)
-                self._epoch_losses.append(per_study.cpu().numpy().astype(np.float64))
+                self._epoch_losses.collect(per_study.cpu().numpy().astype(np.float64))
             self.scaler.scale(self.accumulation.share(loss)).backward()
             steps += 1
             # THE SCHEDULE AND THE WEIGHT AVERAGE MOVE WITH THE OPTIMISER, not with the reader. Stepping
@@ -685,7 +676,7 @@ class Trainer:
                 lambda accumulated=total, count=steps: float(accumulated) / count,
                 int(pixels.shape[0] * pixels.shape[1] * pixels.shape[2]),
             )
-        self._loss_quantiles = self._quantiles_of(self._epoch_losses)
+        self._loss_quantiles = self._epoch_losses.quantiles()
         self._epochs_fitted += 1
         return float(total) / max(steps, 1)
 

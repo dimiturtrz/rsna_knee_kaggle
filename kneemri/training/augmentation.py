@@ -11,6 +11,7 @@ of draws, so the transforms stay in their old order, drawing exactly what they d
 """
 
 from dataclasses import dataclass, replace
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -23,6 +24,14 @@ from kneemri.training.config_leaf import ConfigLeaf
 from kneemri.training.ghosting import Ghosting
 from kneemri.training.mixup import OFF
 from kneemri.training.progress_schedule import FULL
+
+PATCH_ERASE = "patch_erase"
+"""The key patch erasing answers under when a run checks its switches landed (`kneemri.training.landed`).
+
+A rate, and it is read off the `PatchErasing` the loop calls rather than off the config: the maps are
+loaded from a file that may name none of this corpus's studies, and a rate that reached no map is the
+failure this key exists to show.
+"""
 
 SLOT_DROPOUT = "slot_dropout"
 """The key slot dropout answers under when a run checks its switches landed (`kneemri.training.landed`).
@@ -376,6 +385,24 @@ class RegularisationConfig:
             "exactly that axis - the axial fluid slot fills 100%% of studies while both T1 slots fill 55-60%%"
             " - so nearly half of all studies reach inference with slots the model has only ever seen filled."
             " A study is never emptied."
+        ),
+    )
+    patch_maps: Path | None = ConfigLeaf.of(
+        default=None,
+        says=(
+            "npz of an occlusion sweep over the TRAINING studies (keys 'studies' and 'maps'), written by "
+            "kneemri.evaluation.patch_maps --split train. Read by --patch-erase and by nothing else."
+        ),
+    )
+    patch_erase: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "blank one patch of each training study with this probability, the patch drawn in proportion to "
+            "what --patch-maps priced that study's cells at. 0, the default, is off. It removes the evidence "
+            "the swept member actually leaned on, so the head has to reach the redundant evidence instead - "
+            "centre-only and border-only readouts of one member sit at 0.8021 and 0.8006, so that redundancy "
+            "is there to reach. The map's ANATOMY is not relied on and is known to be wrong (knee-j19z1): a "
+            "map marks what a model reads, which is all an augmentation consumes."
         ),
     )
     ghosting: float = ConfigLeaf.of(
