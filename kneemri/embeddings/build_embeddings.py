@@ -49,6 +49,12 @@ def main() -> None:
         "produce arrays of different rank from the same pixels.",
     )
     command.parser.add_argument("--batch", type=int, default=8, help="studies per forward")
+    command.parser.add_argument(
+        "--anyway",
+        default=None,
+        help="spend the encode even though a byte-identical cache is already built, and say why. The "
+        "refusal it lifts is not a safety rail — five of the six slice readings encode the SAME array.",
+    )
     arguments = command.parsed()
 
     encoder = ENCODERS[arguments.variant]
@@ -89,6 +95,16 @@ def main() -> None:
         slice_read=arguments.slice_read,
     )
     cache = EmbeddingCache(root, spec)
+    twin = None if cache.exists() or arguments.anyway else cache.duplicate()
+    if twin is not None:
+        message = (
+            f"{cache.features_path.name} would be BYTE-IDENTICAL to {twin.features_path.name}, which is "
+            f"already built: {arguments.slice_read!r} and {twin.spec.slice_read!r} both encode each slice "
+            "alone, so the encoder writes the same array and only the filename differs. Read that cache "
+            "and pick the reduction at probe time with feature_probe's --slice-readout "
+            "(kneemri.evaluation.slice_readout). Spend the hour deliberately with --anyway '<why>'."
+        )
+        raise SystemExit(message)
     logger.info(f"encoding {len(identifiers)} studies -> {cache.features_path}")
     # The encode pass is the same unattended hour-scale job the decode is, and suspends the same way.
     with torch.no_grad(), Wakelock():

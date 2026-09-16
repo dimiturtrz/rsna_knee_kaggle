@@ -1568,6 +1568,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.embeddings.embedding_cache",
+      "target": "kneemri.models.slice_pooling",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.embeddings.report_embeddings",
       "target": "core.cli",
       "weight": 1
@@ -13807,6 +13813,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_embeddings.main",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache.duplicate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.build_embeddings.main",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache.exists",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.embeddings.build_embeddings.main",
       "target": "kneemri.embeddings.embedding_cache.EmbeddingSpec",
@@ -13957,6 +13975,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.embeddings.embedding_cache.EmbeddingCache",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.embeddings.embedding_cache.EmbeddingCache",
       "target": "kneemri.embeddings.embedding_cache.EmbeddingSpec",
@@ -13975,6 +13999,18 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.embeddings.embedding_cache.EmbeddingCache.duplicate",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.embeddings.embedding_cache.EmbeddingCache.duplicate",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingSpec.equivalent",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.embeddings.embedding_cache.EmbeddingCache.load",
       "target": "kneemri.embeddings.embedding_cache.EmbeddedCorpus",
@@ -13984,6 +14020,12 @@
       "kind": "calls",
       "source": "kneemri.embeddings.embedding_cache.EmbeddingCache.load",
       "target": "kneemri.embeddings.embedding_cache.EmbeddingCache.exists",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.embeddings.embedding_cache.EmbeddingSpec",
+      "target": "kneemri.embeddings.embedding_cache.EmbeddingSpec",
       "weight": 1
     },
     {
@@ -54406,6 +54448,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.embeddings.embedding_cache.EmbeddingCache.duplicate",
+      "label": "duplicate",
+      "level": "method",
+      "parent": "kneemri.embeddings.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.embeddings.embedding_cache.EmbeddingCache.exists",
       "label": "exists",
       "level": "method",
@@ -54450,6 +54500,14 @@
       "label": "mask_path",
       "level": "method",
       "parent": "kneemri.embeddings.embedding_cache.EmbeddingCache",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.embeddings.embedding_cache.EmbeddingSpec.equivalent",
+      "label": "equivalent",
+      "level": "method",
+      "parent": "kneemri.embeddings.embedding_cache.EmbeddingSpec",
       "role": null
     },
     {

@@ -24,7 +24,7 @@ tensor, at the cost of a factor of `slices` in size — which the arithmetic abo
 import json
 import logging
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +35,7 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from core.data.corpus.study_cache import CachedCorpus
+from kneemri.models.slice_pooling import SLICE_POOLINGS
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +114,26 @@ class EmbeddingSpec:
     would have silently written over the per-slice one.
     """
 
+    def equivalent(self) -> list["EmbeddingSpec"]:
+        """Every other spec whose encoded bytes would be identical to this one's.
+
+        `slice_read` is in the key to record the SHAPE the encoder produced, and shape is a TWO-valued
+        question carried here by a SIX-valued name. `slice_pooling.SLICE_POOLINGS` has one whole-stack
+        reading and five per-slice ones, so five names encode the same array and differ only in a token
+        of the filename. That is not hypothetical: `..._cls_mean_focal_max.npy` and
+        `..._cls_mean_focal_attend.npy` are byte-identical across four trunks, 7.8 GB of duplicates and
+        four encode passes whose 96 matching AUCs read as a perfect null (knee-z03yv, knee-n647).
+
+        The reduction those names describe is a READ-time choice over the stored slice axis
+        (`kneemri.evaluation.slice_readout`), which is why nothing is lost by refusing the second build.
+        """
+        per_slice = SLICE_POOLINGS[self.slice_read].per_slice
+        return [
+            replace(self, slice_read=name)
+            for name, pooling in SLICE_POOLINGS.items()
+            if pooling.per_slice == per_slice and name != self.slice_read
+        ]
+
 
 class EmbeddingCache:
     """One encoded corpus on disk: built once from a pixel cache, read by every head experiment."""
@@ -179,6 +200,18 @@ class EmbeddingCache:
         if not all(path.exists() for path in (self.features_path, self.mask_path, self.index_path)):
             return False
         return self.index_path.stat().st_mtime >= self.features_path.stat().st_mtime
+
+    def duplicate(self) -> "EmbeddingCache | None":
+        """A FINISHED cache already holding exactly these bytes under another pooling's name.
+
+        `exists()` rather than presence, so a dead build is never offered as a substitute for an hour
+        of card time — that is the one way this shortcut could cost more than it saves.
+        """
+        for spec in self.spec.equivalent():
+            other = EmbeddingCache(self.directory, spec)
+            if other.exists():
+                return other
+        return None
 
     def build(
         self,

@@ -112,6 +112,35 @@ def test_exists(tmp_path: Path):
     assert not cache.exists(), "an index older than its features is a build that died mid-encode"
 
 
+def test_equivalent():
+    """Shape is a two-valued question, so the five per-slice names are one another's duplicates."""
+    names = {spec.slice_read for spec in SPEC.equivalent()}
+
+    assert "max" not in names, "a spec does not duplicate itself"
+    assert "attend" in names, "the pair that actually collided on disk"
+    assert "channels" not in names, "the whole-stack reading consumes the slices and stores another rank"
+
+    volume = EmbeddingSpec("small", f"336px_{SLICES}sl", 336, "cls_mean", "channels")
+    assert volume.equivalent() == [], "the only whole-stack reading has nothing to collide with"
+
+    assert all(spec.pool == SPEC.pool and spec.source == SPEC.source for spec in SPEC.equivalent())
+
+
+def test_duplicate(tmp_path: Path):
+    """A FINISHED twin on disk, so a dead build is never offered in place of an hour of card time."""
+    cache = EmbeddingCache(tmp_path, SPEC)
+    assert cache.duplicate() is None, "an empty directory holds no twin"
+
+    twin = EmbeddingCache(tmp_path, EmbeddingSpec("small", f"336px_{SLICES}sl", 336, "cls_mean", "attend"))
+    twin.build(_FakeEncoder().slice_features, _corpus(), _identifiers(), torch.device("cpu"), batch=2)
+
+    found = cache.duplicate()
+    assert found is not None and found.spec.slice_read == "attend"
+
+    twin.index_path.unlink()
+    assert cache.duplicate() is None, "a build that died is not bytes anyone may substitute"
+
+
 def test_build(tmp_path: Path):
     """What is written is what the encoder produced, for the right study, in the right place.
 
