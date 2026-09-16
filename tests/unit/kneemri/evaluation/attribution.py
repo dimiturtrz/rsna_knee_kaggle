@@ -98,6 +98,21 @@ def test_region_importance():
     assert regions["border_only"] < regions["centre_only"], "the border holds no signal in this fixture"
 
 
+def test_patch_importance():
+    """The map has to put its mass where the fixture wrote the signal, not spread it over the field.
+
+    The fixture's carrier writes into `4:12` of a 16 px field, which on a four-cell grid is exactly the
+    inner two-by-two. The stand-in reads nothing else, so blanking an outer cell must cost precisely
+    nothing — that zero is what separates a real localisation from a map that merely looks peaked.
+    """
+    maps = _attribution().patch_importance(cast(StudyModel, _SlotReader()), _holdout(), grid=4)
+
+    assert maps.shape == (STUDIES, len(TARGETS), 4, 4)
+    total = np.abs(maps).sum()
+    centre = np.abs(maps[..., 1:3, 1:3]).sum()
+    assert centre / total > 0.9, "a diffuse read would leave a quarter of the mass in the centre cells"
+
+
 def test_averaged():
     """The profile is the per-label table meaned over labels, not a second pass over the model."""
     averaged = _attribution().averaged({"0": {"ACL": 0.80, "MCL": 0.90}, "3": {"ACL": 0.70, "MCL": 0.70}})

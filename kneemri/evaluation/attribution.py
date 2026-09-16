@@ -58,6 +58,13 @@ the earlier number only ever said the signal is spread out.
 CHANCE = 0.5
 """ROC AUC of a model that knows nothing — the value a ring holding no anatomy should approach."""
 
+GRID = 4
+"""Cells per side for the patch sweep. Four is 84 px on a 336 px crop — coarse, and deliberately so.
+
+The sweep costs `grid ** 2` full inference passes, so the side is the price. Four asks the question the
+existing centre/border pair asks, resolved sixteen ways instead of two, and a centre-and-spread is a
+coarse quantity to begin with. On a card, eight is affordable and says more."""
+
 CONCENTRATED = 0.5
 """Share of the total slice cost one slice must carry before depth counts as concentrated.
 
@@ -116,14 +123,27 @@ class Attribution:
         self.predictions = predictions
         self.scores = scores or LabelScores()
 
+    def _probabilities(
+        self,
+        model: StudyModel,
+        holdout: Holdout,
+    ) -> Float[NDArray[np.float64], "b o"]:
+        """Every study's probability for every label, under whatever occlusion the caller applied.
+
+        The sweeps above all reduce this to an AUC over the whole holdout, which is the right reading
+        for "what does the model use" and the wrong one for "where does THIS study's signal sit": an
+        aggregate has no per-study coordinate to hand anything downstream. `patch_importance` is the
+        one diagnostic that needs the array itself.
+        """
+        return self.predictions.predict(model, HoldoutSlab.of(holdout.images, holdout.mask), holdout.window)
+
     def _labels(
         self,
         model: StudyModel,
         holdout: Holdout,
     ) -> dict[str, float]:
         """Per-label held-out AUC under whatever occlusion the caller has already applied."""
-        scored = self.predictions.predict(model, HoldoutSlab.of(holdout.images, holdout.mask), holdout.window)
-        return self.scores.per_label(scored, holdout.truth)
+        return self.scores.per_label(self._probabilities(model, holdout), holdout.truth)
 
     def _mean(
         self,
@@ -212,6 +232,36 @@ class Attribution:
             ring[..., kept : pixels - kept, kept : pixels - kept] = 0
             scores[f"{width:.2f}"] = self._mean(model, replace(holdout, images=ring))
         return scores
+
+    def patch_importance(
+        self,
+        model: StudyModel,
+        holdout: Holdout,
+        grid: int = GRID,
+    ) -> Float[NDArray[np.float32], "b o g g"]:
+        """How much each cell of a `grid` x `grid` tiling is worth to each study, for each label.
+
+        The one sweep here that does not return a score. Every other diagnostic answers "what does the
+        model use" with a delta on the held-out AUC, which is a fact about the model; this answers
+        "where did THIS study's evidence sit", which is a fact about a study and is the only shape a
+        locator could ever be fitted on. A cell's value is the drop in that study's own probability when
+        the cell is blanked across every slot and every slice — negative where the model does better
+        without it.
+
+        It is a weak label by construction and is meant to be: the supervision never says where a
+        finding is, so this is the model's own opinion, error included. The gate that decides whether
+        the opinion is worth anything is the share of the map's mass sitting in the central cells,
+        against the `1 / grid ** 2` per cell a diffuse read would give.
+        """
+        base = self._probabilities(model, holdout)
+        maps = np.zeros((*base.shape, grid, grid), dtype=np.float32)
+        edges = np.linspace(0, holdout.images.shape[-1], grid + 1).astype(int)
+        for row in range(grid):
+            for col in range(grid):
+                occluded = holdout.images.copy()
+                occluded[..., edges[row] : edges[row + 1], edges[col] : edges[col + 1]] = 0
+                maps[..., row, col] = base - self._probabilities(model, replace(holdout, images=occluded))
+        return maps
 
     def averaged(self, by_label: dict[str, dict[str, float]]) -> dict[str, float]:
         """Mean over labels at each depth — the profile, derived rather than measured a second time.
