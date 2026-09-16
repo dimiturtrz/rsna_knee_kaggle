@@ -21,6 +21,7 @@ from numpy.typing import NDArray
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.stacked import PENALTIES, STACK_PENALTY, StackedLogit
 from kneemri.inference.vote import LogitAverage, RankAverage, Vote
+from kneemri.runs.holdout_record import SUFFIX
 
 FIT_SHARE = 0.5
 """Half the holdout fits, half scores. Half rather than a larger fitting share because the scoring half is
@@ -45,7 +46,8 @@ class MemberHoldout:
         """Read a `<name>.holdout.npz`, binarising truth at the project's midpoint."""
         held = np.load(path, allow_pickle=False)
         return cls(
-            name=path.name.split(".")[0],
+            # The suffix, not the first dot: a member named for a band carries one (`n12b0.1-0.9`).
+            name=path.name.removesuffix(SUFFIX),
             studies=held["studies"],
             predictions=held["predictions"].astype(np.float64),
             truth=(held["truth"] >= MIDPOINT).astype(np.int64),

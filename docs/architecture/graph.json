@@ -2073,6 +2073,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.column_headroom",
+      "target": "kneemri.evaluation.member_pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_headroom",
       "target": "kneemri.evaluation.scores",
       "weight": 1
     },
@@ -2086,6 +2092,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.column_mixing",
       "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.column_mixing",
+      "target": "kneemri.evaluation.member_pool",
       "weight": 1
     },
     {
@@ -3052,6 +3064,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.member_mahalanobis",
       "target": "kneemri.evaluation.record_mix",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_pool",
+      "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
     {
@@ -4132,6 +4150,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.stack_fit",
       "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_fit",
+      "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
     {
@@ -6592,6 +6616,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.roster_check",
       "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.roster_check",
+      "target": "kneemri.evaluation.member_pool",
       "weight": 1
     },
     {
@@ -15687,6 +15717,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.column_headroom.main",
+      "target": "kneemri.evaluation.member_pool.MemberPool.at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_headroom.main",
       "target": "kneemri.evaluation.stack_fit.MemberHoldout.aligned",
       "weight": 1
     },
@@ -15766,6 +15802,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.column_mixing.main",
       "target": "kneemri.evaluation.column_mixing.ColumnMixing.scored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.column_mixing.main",
+      "target": "kneemri.evaluation.member_pool.MemberPool.at",
       "weight": 1
     },
     {
@@ -19390,6 +19432,42 @@
       "kind": "calls",
       "source": "kneemri.evaluation.member_mahalanobis.main",
       "target": "kneemri.evaluation.record_mix.RecordMix.per_member",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.member_pool.MemberDeclines",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_pool.MemberDeclines.void",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.reasons",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.member_pool.MemberPool",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.member_pool.MemberPool",
+      "target": "kneemri.evaluation.member_pool.MemberPool",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_pool.MemberPool.at",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.member_pool.MemberPool.names",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.void",
       "weight": 1
     },
     {
@@ -33961,12 +34039,6 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.kaggle.roster_check.MemberDeclines",
-      "target": "kneemri.kaggle.roster_check.MemberDeclines",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
       "target": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
@@ -33999,7 +34071,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
-      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.read",
       "weight": 1
     },
     {
@@ -34053,13 +34125,13 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.reasonless",
-      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.read",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.report",
-      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.read",
       "weight": 1
     },
     {
@@ -34107,7 +34179,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
-      "target": "kneemri.kaggle.roster_check.MemberDeclines.read",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.read",
       "weight": 1
     },
     {
@@ -40655,7 +40727,7 @@
       "role": null
     },
     {
-      "descendants": 316,
+      "descendants": 317,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -40743,7 +40815,7 @@
       "role": null
     },
     {
-      "descendants": 111,
+      "descendants": 112,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -41114,6 +41186,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.member_mahalanobis",
       "label": "member_mahalanobis",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_pool",
+      "label": "member_pool",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -45264,6 +45344,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.member_pool.MemberDeclines",
+      "label": "MemberDeclines",
+      "level": "class",
+      "parent": "kneemri.evaluation.member_pool",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_pool.MemberPool",
+      "label": "MemberPool",
+      "level": "class",
+      "parent": "kneemri.evaluation.member_pool",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.member_space.MemberSpace",
       "label": "MemberSpace",
       "level": "class",
@@ -47644,14 +47740,6 @@
       "label": "TeacherPass",
       "level": "class",
       "parent": "kneemri.kaggle.raptor_teacher",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.roster_check.MemberDeclines",
-      "label": "MemberDeclines",
-      "level": "class",
-      "parent": "kneemri.kaggle.roster_check",
       "role": "satellite"
     },
     {
@@ -57988,6 +58076,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.member_mahalanobis",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_pool.MemberDeclines.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_pool.MemberDeclines",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_pool.MemberDeclines.reasons",
+      "label": "reasons",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_pool.MemberDeclines",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_pool.MemberDeclines.void",
+      "label": "void",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_pool.MemberDeclines",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_pool.MemberPool.at",
+      "label": "at",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_pool.MemberPool",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.member_pool.MemberPool.names",
+      "label": "names",
+      "level": "method",
+      "parent": "kneemri.evaluation.member_pool.MemberPool",
       "role": null
     },
     {
@@ -68756,22 +68884,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.raptor_teacher",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.roster_check.MemberDeclines.read",
-      "label": "read",
-      "level": "method",
-      "parent": "kneemri.kaggle.roster_check.MemberDeclines",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.roster_check.MemberDeclines.reasons",
-      "label": "reasons",
-      "level": "method",
-      "parent": "kneemri.kaggle.roster_check.MemberDeclines",
       "role": null
     },
     {

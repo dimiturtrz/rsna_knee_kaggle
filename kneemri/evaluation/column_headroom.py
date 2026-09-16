@@ -32,6 +32,7 @@ from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
 from core.findings import TARGETS
+from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.stack_fit import MemberHoldout
 
@@ -141,7 +142,7 @@ def main() -> None:
     parser.add_argument("--only", nargs="+", default=None, help="member names; every recorded member by default")
     parser.add_argument("--target", type=float, default=DEFAULT_TARGET)
     parsed = parser.parse_args()
-    names = parsed.only or [path.name.split(".")[0] for path in sorted(parsed.holdouts.glob("*.holdout.npz"))]
+    names = MemberPool.at(parsed.holdouts).names(parsed.only)
     members = MemberHoldout.aligned([MemberHoldout.loaded(parsed.holdouts / f"{name}.holdout.npz") for name in names])
     headroom = ColumnHeadroom(parsed.target)
     rows = headroom.scored(headroom.pooled(members), members[0].truth)

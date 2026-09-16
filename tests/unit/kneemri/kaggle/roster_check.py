@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 from kneemri.inference.members import Member
-from kneemri.kaggle.roster_check import MemberDeclines, RosterDrift
+from kneemri.kaggle.roster_check import RosterDrift
 from kneemri.runs.holdout_record import HoldoutRecord
 
 LABELS = 3
@@ -111,15 +111,6 @@ def test_holdout_only(tmp_path: Path):
     assert FOREIGN in drift.undocumented(), "and it is in neither file, which is the defect"
 
 
-def test_read(tmp_path: Path):
-    """A declines file that does not exist yet reads as no declines, not as a crash."""
-    written = tmp_path / "members.declines"
-    written.write_text("a.pt # smoke\n", encoding="utf-8")
-
-    assert MemberDeclines.read(written).reasons() == {"a": "smoke"}, "the file on disk"
-    assert MemberDeclines.read(tmp_path / "absent").reasons() == {}, "a repo before anything was declined"
-
-
 def test_patterns(tmp_path: Path):
     """The roster's lines are read through the packager's own reader, so both see one spelling."""
     drift = _drift(tmp_path, f"# what ships\n{SHIPPED}.pt   # the member\n", "")
@@ -149,23 +140,6 @@ def test_patterns_spans_every_shelf_and_skips_one_that_is_not_there(tmp_path: Pa
 
     alone = RosterDrift(tmp_path, [first, tmp_path / "absent.roster"], declines)
     assert alone.packaged() == {SHIPPED}, "a shelf that does not exist is skipped, not read as empty prose"
-
-
-def test_reasons(tmp_path: Path):
-    """The declines file keeps the prose, which is the whole point of it existing."""
-    declines = MemberDeclines("a.pt  # a smoke run\nb.pt\n\n# a whole-line comment\n")
-
-    assert declines.reasons() == {"a": "a smoke run", "b": ""}, "a whole-line comment names no member"
-
-
-def test_reasons_folds_a_wrapped_argument_into_the_entry_above_it(tmp_path: Path):
-    """A decline is an argument, and an argument wraps. Each wrapped line is prose, never a member."""
-    declines = MemberDeclines("a.pt  # declined because the delta is under the floor\nand the sign is wrong.\nb.pt\n")
-
-    assert declines.reasons() == {
-        "a": "declined because the delta is under the floor and the sign is wrong.",
-        "b": "",
-    }, "the continuation joins its entry, and the bare name after it is still a finding"
 
 
 def test_packaged(tmp_path: Path):

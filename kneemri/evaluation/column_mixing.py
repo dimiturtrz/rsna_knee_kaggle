@@ -66,6 +66,7 @@ from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
 from core.findings import TARGETS
+from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.mixing_rules import RULES, MixingRule, RidgeShrink
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.stack_fit import MemberHoldout
@@ -202,7 +203,7 @@ def main() -> None:
         help="price every fixed penalty instead of choosing one nested; the honest number is the nested run",
     )
     parsed = parser.parse_args()
-    names = parsed.only or [path.name.split(".")[0] for path in sorted(parsed.holdouts.glob("*.holdout.npz"))]
+    names = MemberPool.at(parsed.holdouts).names(parsed.only)
     members = MemberHoldout.aligned([MemberHoldout.loaded(parsed.holdouts / f"{name}.holdout.npz") for name in names])
     table = np.mean([ColumnMixing.ranks(member.predictions) for member in members], axis=0)
     rule = RULES[parsed.rule]

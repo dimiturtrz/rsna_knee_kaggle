@@ -40,10 +40,10 @@ gate people learn to skip.
 import fnmatch
 import logging
 from collections.abc import Sequence
-from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.evaluation.member_pool import DECLINES, MemberDeclines
 from kneemri.inference.members import Member
 from kneemri.kaggle.package_members import MemberRoster
 from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
@@ -61,55 +61,8 @@ holds every member on either to the same rule, so moving a line between them cha
 and nothing about what is documented. A name on BOTH shelves is a duplicate the MOUNT refuses, and
 `duplicated` is what names it here — this docstring used to claim `packaged` caught it "because it is a
 set", which is backwards: a set is how the two names quietly become one. See knee-hcu3k."""
-DECLINES = Path("comp/members.declines")
 CHECKPOINT_SUFFIX = ".pt"
 CHECKPOINT_GLOB = f"*{CHECKPOINT_SUFFIX}"
-COMMENT = "#"
-
-
-@dataclass(frozen=True)
-class MemberDeclines:
-    """The committed statement of which scoreable members deliberately do NOT ship, and why each.
-
-    Beside `RosterDrift` rather than beside `MemberRoster`, because the roster is read by the thing that
-    PACKAGES and this is read only by the thing that CHECKS: a decline never affects what ships, it
-    affects whether an absence is a finding.
-    """
-
-    text: str
-
-    @classmethod
-    def read(cls, path: Path) -> "MemberDeclines":
-        return cls(path.read_text(encoding="utf-8") if path.exists() else "")
-
-    def reasons(self) -> dict[str, str]:
-        """Each declined member's name, mapped to the prose that says why it does not ship.
-
-        Keyed WITHOUT the `.pt` suffix, so the file may be written in the roster's spelling — the two
-        live side by side and a member named one way in one and another way in the other would read as
-        undocumented and declined at once.
-        """
-        declined: dict[str, str] = {}
-        latest = ""
-        for line in self.text.splitlines():
-            name, separator, reason = line.partition(COMMENT)
-            subject = name.strip()
-            if not subject:
-                continue
-            # A CONTINUATION, not an entry. A decline is an argument, and an argument runs past eighty
-            # columns — so the arguments in this file are written as wrapped paragraphs. Every wrapped
-            # line carries no separator, which read as a fresh bare name: eight of the nine findings in
-            # this check's 2026-09-02 run were sentences out of the middle of well-written declines,
-            # and a genuinely bare name would have been indistinguishable among them. A name is one
-            # token; prose has spaces. That is the whole discriminator, and it keeps the bare-name
-            # finding alive rather than trading one hole for another.
-            if not separator and " " in subject:
-                if latest:
-                    declined[latest] = f"{declined[latest]} {subject}".strip()
-                continue
-            latest = subject.removesuffix(CHECKPOINT_SUFFIX)
-            declined[latest] = reason.strip()
-        return declined
 
 
 class RosterDrift:
