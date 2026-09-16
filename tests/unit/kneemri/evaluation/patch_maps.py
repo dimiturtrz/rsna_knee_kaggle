@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.patch_maps import CENTRE_SHARE_NULL, PatchMaps
+from kneemri.evaluation.patch_maps import CENTRE_SHARE_NULL, FINEST_GRID, PatchMaps
 
 STUDIES = 4
 GRID = 4
@@ -28,6 +28,18 @@ def test_centre_mass():
     """A flat map holds the null share in the centre; a map peaked inside it holds more."""
     assert _diffuse().centre_mass()["ACL"] == pytest.approx(CENTRE_SHARE_NULL)
     assert _peaked().centre_mass()["ACL"] > CENTRE_SHARE_NULL
+
+
+def test_centre_mass_refuses_a_grid_with_no_centre():
+    """Two cells have no central half, and the degenerate share is 1.000 — a pass that was never asked.
+
+    Measured 2026-09-16 on a `--grid 2` smoke: every one of the twelve labels read `centre 1.000` and
+    the report said twelve of twelve were above the diffuse null.
+    """
+    coarse = np.full((STUDIES, len(TARGETS), FINEST_GRID // 2, FINEST_GRID // 2), FLOOR, dtype=np.float32)
+
+    with pytest.raises(ValueError, match="no central half"):
+        PatchMaps(coarse).centre_mass()
 
 
 def test_centroids():

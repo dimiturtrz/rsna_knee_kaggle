@@ -48,6 +48,14 @@ logger = logging.getLogger(__name__)
 CENTRE_SHARE_NULL = 0.25
 """Share of the mass the central half of the side holds when a map is diffuse — it is a quarter of the area."""
 
+FINEST_GRID = 4
+"""Coarsest grid that HAS a central half.
+
+`centre_mass` takes the middle `grid - 2 * (grid // 4)` cells of the side, and at `grid = 2` that
+floor is zero: the centre becomes the whole map and every label reads a share of exactly 1.000. That
+is not a pass, it is the question failing to be asked — and it printed as twelve of twelve labels
+above the null on 2026-09-16 before anything caught it."""
+
 POSITIVE = 0.5
 """Truth above this counts the study as carrying the finding, for `label_contrast` alone.
 
@@ -79,6 +87,9 @@ class PatchMaps:
         on its own, and the null is what makes it a measurement.
         """
         grid = self.maps.shape[-1]
+        if grid < FINEST_GRID:
+            message = f"a {grid}x{grid} grid has no central half to measure; use {FINEST_GRID} or finer"
+            raise ValueError(message)
         low, high = grid // 4, grid - grid // 4
         mass = np.abs(self.maps).sum(axis=0)
         centre = mass[:, low:high, low:high].sum(axis=(1, 2))
@@ -182,6 +193,10 @@ def main() -> None:
     command.parser.add_argument("--split-seed", type=int, default=2026)
     command.parser.add_argument("--device", choices=("auto", "cpu"), default="auto")
     arguments = command.parsed()
+    if arguments.grid < FINEST_GRID:
+        # Refused HERE rather than in the reading, because the reading runs after the sweep and the
+        # sweep is the hours.
+        command.parser.error(f"--grid {arguments.grid} has no central half; {FINEST_GRID} is the coarsest gate")
 
     root = command.rooted(arguments)
     member = Member.from_checkpoint(arguments.checkpoint)
