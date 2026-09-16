@@ -29,7 +29,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from jaxtyping import Float
+from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 
 from core import cli
@@ -72,6 +72,46 @@ cells is sixty-nine, which is a card's question rather than a processor's."""
 
 
 @dataclass(frozen=True)
+class TissueNull:
+    """What a centre share reads when nothing has been learned — the denominator `CENTRE_SHARE_NULL` is not.
+
+    `CENTRE_SHARE_NULL` is the share a map holds if every cell is worth the SAME, and no map over a knee
+    can be, because the cells are not the same: a middle cell is joint and a corner is air, coil and
+    skin. Blanking the middle therefore removes more signal than blanking a corner for a model that
+    learned nothing at all, so a centre share above 0.25 is the expected reading rather than a finding.
+    Measured against the pixels instead, the question becomes the one worth asking — does the model
+    concentrate MORE than the anatomy already does.
+
+    This is a PROXY and is not sold as anything else: it is the share of image intensity a cell holds,
+    not the share of held-out score, and those coincide only if the model's reliance on a region is
+    linear in how much tissue is there. The exact control is the same sweep under a randomly initialised
+    head, which costs a second run of the hours this one cost. The proxy is free — it touches no model
+    and runs no forward pass — and it is strictly better than comparing against a flat field.
+    """
+
+    shares: Float[NDArray[np.float64], "g g"]
+
+    @classmethod
+    def of(cls, images: UInt8[NDArray[np.uint8], "b s d h w"], grid: int) -> "TissueNull":
+        """The share of total image intensity lying in each cell of a `grid` x `grid` tiling."""
+        edges = np.linspace(0, images.shape[-1], grid + 1).astype(int)
+
+        # Summed per cell rather than per study: the confound is a property of where tissue sits in the
+        # field of view, which is the same question for every study in a registered crop.
+        def cell(row: int, col: int) -> float:
+            return float(images[..., edges[row] : edges[row + 1], edges[col] : edges[col + 1]].sum())
+
+        mass = np.asarray([[cell(row, col) for col in range(grid)] for row in range(grid)], dtype=np.float64)
+        return cls(mass / mass.sum())
+
+    def centre_share(self) -> float:
+        """The share the central half of the side holds — the number a label's centre share must BEAT."""
+        grid = self.shares.shape[-1]
+        low, high = grid // 4, grid - grid // 4
+        return float(self.shares[low:high, low:high].sum())
+
+
+@dataclass(frozen=True)
 class PatchMaps:
     """A patch sweep's output, read four ways: mass, place, spread, and whether the label matters."""
 
@@ -79,12 +119,19 @@ class PatchMaps:
     truth: Float[NDArray[np.float32], "b o"] | None = None
     """The holdout labels, for `label_contrast` alone — the other three readings never need them."""
 
+    null: float = CENTRE_SHARE_NULL
+    """The centre share to read the labels against.
+
+    Defaults to the flat-field value, which is the WEAK reading and says so in `TissueNull`: pass that
+    class's `centre_share` to compare the model against the anatomy rather than against a uniform field.
+    """
+
     def centre_mass(self) -> dict[str, float]:
         """Per label, the share of the map's mass in the central half of the side.
 
         Absolute value, because a cell the model does BETTER without is still a cell it was using. The
-        number is compared against `CENTRE_SHARE_NULL` and nothing else: an absolute share means little
-        on its own, and the null is what makes it a measurement.
+        number is compared against `self.null` and nothing else: an absolute share means little on its
+        own, and the null is what makes it a measurement.
         """
         grid = self.maps.shape[-1]
         if grid < FINEST_GRID:
@@ -160,22 +207,23 @@ class PatchMaps:
         grid = self.maps.shape[-1]
         lines = [
             f"grid {grid}x{grid} over {self.maps.shape[0]} studies",
-            f"centre share of a diffuse map is {CENTRE_SHARE_NULL:.2f} — that is what these are read against",
+            f"centre share of the null is {self.null:.3f} — that is what these are read against"
+            + ("" if self.null != CENTRE_SHARE_NULL else " (FLAT FIELD, not the tissue null — the weak reading)"),
             "'moved' is positive-minus-negative centroid separation, the reading the centre share cannot do",
             "",
         ]
         for label in TARGETS:
             row, column, spread = places[label]
-            verdict = "concentrated" if shares[label] > CENTRE_SHARE_NULL else "DIFFUSE"
+            verdict = "concentrated" if shares[label] > self.null else "DIFFUSE"
             carries = "label-driven" if moved[label] > spread else "not over the scatter"
             lines.append(
                 f"  {label:<18} centre {shares[label]:.3f}  centroid ({row:.2f}, {column:.2f})  "
                 f"scatter {spread:.2f}  moved {moved[label]:.2f}  {verdict}, {carries}"
             )
-        cleared = sum(1 for label in TARGETS if shares[label] > CENTRE_SHARE_NULL)
+        cleared = sum(1 for label in TARGETS if shares[label] > self.null)
         over = sum(1 for label in TARGETS if moved[label] > places[label][2])
         lines.append("")
-        lines.append(f"{cleared} of {len(TARGETS)} labels above the diffuse null")
+        lines.append(f"{cleared} of {len(TARGETS)} labels above the null")
         lines.append(f"{over} of {len(TARGETS)} labels separate positives from negatives by more than their scatter")
         return lines
 
@@ -223,9 +271,10 @@ def main() -> None:
 
     arguments.out.mkdir(parents=True, exist_ok=True)
     destination = arguments.out / f"{arguments.checkpoint.stem}_g{arguments.grid}.patches.npz"
-    np.savez_compressed(destination, maps=maps, studies=np.asarray(holdout), truth=truth)
+    tissue = TissueNull.of(data.images, arguments.grid)
+    np.savez_compressed(destination, maps=maps, studies=np.asarray(holdout), truth=truth, tissue=tissue.shares)
     logger.info("wrote %s", destination)
-    for line in PatchMaps(maps, truth).lines():
+    for line in PatchMaps(maps, truth, tissue.centre_share()).lines():
         logger.info("%s", line)
 
 

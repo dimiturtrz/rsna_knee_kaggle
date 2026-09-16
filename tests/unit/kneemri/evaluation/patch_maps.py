@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.patch_maps import CENTRE_SHARE_NULL, FINEST_GRID, PatchMaps
+from kneemri.evaluation.patch_maps import CENTRE_SHARE_NULL, FINEST_GRID, PatchMaps, TissueNull
 
 STUDIES = 4
 GRID = 4
@@ -77,4 +77,29 @@ def test_lines():
 
     assert any(label in line for label in TARGETS for line in lines)
     assert any("DIFFUSE" in line for line in lines)
-    assert f"0 of {len(TARGETS)} labels above the diffuse null" in lines[-2]
+    assert f"0 of {len(TARGETS)} labels above the null" in lines[-2]
+    assert "FLAT FIELD" in lines[1], "a report read against 0.25 has to say that is the weak null"
+
+
+def test_of():
+    """The tissue null is the share of image intensity each cell holds, not an assumed constant.
+
+    One bright quadrant against a dark field is the case the flat null gets wrong: `CENTRE_SHARE_NULL`
+    would call that quadrant's share a finding, and the measured null puts the mass where the pixels are.
+    """
+    images = np.zeros((STUDIES, 1, 1, GRID, GRID), dtype=np.uint8)
+    images[..., :2, :2] = 200
+
+    shares = TissueNull.of(images, GRID).shares
+
+    assert shares.shape == (GRID, GRID)
+    assert shares.sum() == pytest.approx(1.0)
+    assert shares[:2, :2].sum() == pytest.approx(1.0), "every lit pixel sits in the corner quadrant"
+
+
+def test_centre_share():
+    """A field lit only in its central half reads a centre share of one, whatever the flat null says."""
+    images = np.zeros((STUDIES, 1, 1, GRID, GRID), dtype=np.uint8)
+    images[..., 1:3, 1:3] = 200
+
+    assert TissueNull.of(images, GRID).centre_share() == pytest.approx(1.0)
