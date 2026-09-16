@@ -11,6 +11,7 @@ and reported that the gain doubled with pool size; under honest selection that c
 """
 
 import argparse
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +19,7 @@ import numpy as np
 from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
+from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.stacked import PENALTIES, STACK_PENALTY, StackedLogit
 from kneemri.inference.vote import LogitAverage, RankAverage, Vote
@@ -173,6 +175,7 @@ class StackFit:
 
 def main() -> None:
     """Score the learned combiner against the fixed rules over a directory of holdout records."""
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--holdouts", type=Path, required=True)
     parser.add_argument("--members", type=int, default=0)
@@ -180,11 +183,10 @@ def main() -> None:
     parser.add_argument("--only", nargs="+", default=None, help="member names, in the order a kernel seats them")
     parser.add_argument("--emit-weights", action="store_true", help="print shippable weights instead of a score")
     parsed = parser.parse_args()
-    if parsed.only:
-        loaded = [MemberHoldout.loaded(parsed.holdouts / f"{name}.holdout.npz") for name in parsed.only]
-    else:
-        found = sorted(parsed.holdouts.glob("*.holdout.npz"))
-        loaded = [MemberHoldout.loaded(path) for path in found[: parsed.members or len(found)]]
+    names = MemberPool.at(parsed.holdouts).names(parsed.only)
+    loaded = [
+        MemberHoldout.loaded(parsed.holdouts / f"{name}{SUFFIX}") for name in names[: parsed.members or len(names)]
+    ]
     if parsed.emit_weights:
         for name, row in zip([member.name for member in loaded], StackFit().shipped_weights(loaded), strict=True):
             print(f"    ({', '.join(f'{value:.6f}' for value in row)}),  # {name}")  # noqa: T201 - the output
