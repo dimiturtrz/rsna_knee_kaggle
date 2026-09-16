@@ -142,3 +142,43 @@ def test_report(tmp_path: Path) -> None:
     lines = drift.report()
     assert "dark fits --fold -1" in lines[0]
     assert "2 arms: 1 declare a reading, 1 are dark with none declared" in lines[-1]
+
+
+def test_taken(tmp_path: Path) -> None:
+    drift = _drift(tmp_path)
+    arm = ArmDeclaration.read(_arm(drift.arms, "one", "# reading: one*.npz\n"))
+    assert drift.taken(arm) == []
+
+    (drift.models / "one_lr3.npz").write_bytes(b"")
+    assert drift.taken(arm) == ["one*.npz"]
+
+
+def test_taken_is_silent_once_the_arm_has_run(tmp_path: Path) -> None:
+    drift = _drift(tmp_path)
+    arm = ArmDeclaration.read(_arm(drift.arms, "one", "# reading: one*.npz\n"))
+    (drift.models / "one_lr3.npz").write_bytes(b"")
+    (drift.models / "one_s2026.pt").write_bytes(b"")
+    assert drift.taken(arm) == []
+
+
+def test_already_taken(tmp_path: Path) -> None:
+    drift = _drift(tmp_path)
+    _arm(drift.arms, "one", "# reading: one*.npz\n")
+    _arm(drift.arms, "two", "# reading: two*.npz\n")
+    (drift.models / "one_lr3.npz").write_bytes(b"")
+    assert drift.already_taken("two") == []
+
+    lines = drift.already_taken("one")
+    assert len(lines) == 1
+    assert "one declared 'one*.npz' and it ALREADY matches" in lines[0]
+    assert "one_lr3.npz" in lines[0]
+
+
+def test_matches(tmp_path: Path) -> None:
+    drift = _drift(tmp_path)
+    assert drift.matches("nothing*.npz") == ""
+
+    (drift.models / "one_lr3.npz").write_bytes(b"")
+    resolved = drift.matches("one*.npz")
+    assert "one_lr3.npz" in resolved
+    assert "Z)" in resolved

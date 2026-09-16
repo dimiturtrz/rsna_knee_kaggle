@@ -34,6 +34,7 @@ on its first run is a gate people learn to skip. All thirteen were written on 20
 arm is a new one, and a new one is the defect (knee-h1k0y).
 """
 
+import datetime as dt
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -161,6 +162,46 @@ class ReadingDrift:
             if not self.found(glob)
         ]
 
+    def taken(self, arm: ArmDeclaration) -> list[str]:
+        """Declared readings that are ALREADY on disk for an arm that has not run — the complement rule.
+
+        `missing` asserts ran => the artefact exists. This asserts the other direction: not-yet-run => the
+        artefact must NOT exist, because an arm whose reading is already there is about to re-take a number
+        the project owns. Both halves are the same two predicates, and only this one can be checked BEFORE
+        the card is spent.
+
+        A re-read is often legitimate — a member changed, a ruler was recut — so the rule refuses rather
+        than forbids, and `--anyway` releases it. The constraint is that the re-reader has to say so: the
+        cost is never a bad decision, it is a decision taken without knowing the number exists.
+
+        It keys on the DECLARED reading only, never on what the arm `require`s. An input the arm consumes
+        is supposed to be on disk; conflating the two would refuse every arm that reads a built cache.
+        """
+        return [] if self.ran(arm) else [glob for glob in arm.readings() if self.found(glob)]
+
+    def already_taken(self, only: str) -> list[str]:
+        """The refusal lines for ONE named arm, with the matching artefacts named so they can be read."""
+        return [
+            f"{arm.name} declared {glob!r} and it ALREADY matches: {self.matches(glob)}"
+            for arm in self.declarations()
+            if arm.name == only
+            for glob in self.taken(arm)
+        ]
+
+    def matches(self, glob: str) -> str:
+        """What a declared glob resolves to, with mtimes, so the refusal names the number that exists."""
+        candidate = Path(glob)
+        absolute = candidate.is_absolute()
+        roots = [candidate.parent] if absolute else [self.models, self.processed, Path()]
+        pattern = candidate.name if absolute else glob
+        found = [hit for root in roots for hit in sorted(root.glob(pattern))]
+        return ", ".join(f"{hit} ({self._stamped(hit)})" for hit in found)
+
+    @staticmethod
+    def _stamped(hit: Path) -> str:
+        """A match's mtime in UTC, because the refusal has to say HOW OLD the number that exists is."""
+        return f"{dt.datetime.fromtimestamp(hit.stat().st_mtime, tz=dt.UTC):%Y-%m-%dT%H:%MZ}"
+
     def undeclared(self) -> list[str]:
         """Dark arms with no ruler written down. GRADUATED 2026-09-04: this refuses now (knee-h1k0y)."""
         return [arm.name for arm in self.declarations() if arm.dark() and not arm.readings() and not arm.unmeasurable()]
@@ -196,10 +237,21 @@ def main() -> None:
     """Assert every reading an arm pre-registered has left an artefact on disk."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--arms", type=Path, default=ARMS, help="where the arm scripts live")
+    command.parser.add_argument(
+        "--only", help="check ONE arm before it is armed: refuse if its declared reading is already on disk"
+    )
+    command.parser.add_argument("--anyway", help="why this reading is being re-taken although it exists")
     arguments = command.parsed()
 
     root = command.rooted(arguments)
     drift = ReadingDrift(root.models(), root.processed(), arguments.arms)
+    if arguments.only:
+        taken = drift.already_taken(arguments.only)
+        command.report(taken or [f"{arguments.only}: no declared reading is on disk yet"])
+        if taken and not arguments.anyway:
+            raise SystemExit(f"{len(taken)} reading(s) already taken — re-read with --anyway '<why>'")
+        return
+
     command.report(drift.report())
     if drift.complaints():
         message = f"{len(drift.complaints())} pre-registered reading(s) never taken"

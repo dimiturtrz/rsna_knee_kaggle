@@ -262,10 +262,17 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   constant `board_transfer` fits from that file read +1.82 against a completed set's +1.55 — and BOTH of those
   are stale, because a fit moves every time the record gains a row. Neither is a number to use: read the tool.
   On 2026-09-16 +1.55 was quoted from this line to price the gap to 0.955 and was wrong by 1.6x, the constant's
-  third time (after +4.67 and +2.14) and the third time it was quoted rather than read. What the tool actually
-  reports is a CURVE that saturates — near +1 over the whole record, near +0.8 in the top band — so a single
-  slope is the wrong SHAPE for it whatever its value, and the only correct use of a number in this sentence is
-  as evidence that the record's completeness moves the fit. It joins on the Kaggle
+  third time (after +4.67 and +2.14) and the third time it was quoted rather than read. This line ALSO said the
+  curve "saturates — near +0.8 in the top band", and that was a fourth wrong quote: read 2026-09-16 22:33Z the
+  tool reports whole-record median **+1.09**, the ≥0.8679 band **+1.07 over 65 pairs**, and the ≥0.8711 band
+  **+1.71 over TWO pairs, marked DIRECTION ONLY**. The top band is FLAT against the whole record, not lower, and
+  the band we actually ship in is the one the tool refuses to price. So a single slope is the wrong SHAPE for it
+  whatever its value, and the only correct use of a number in this sentence is as evidence that a quoted constant
+  is wrong again. The reason it keeps coming out different is arithmetic, not instability: `sd(board) = 0.0091`
+  in EVERY stratum, because the board is one number per entry — only the denominator moves. "Compression" is
+  therefore a statement about the SPREAD OF WHICHEVER RULER SITS IN THE DENOMINATOR, never a property of the
+  board, and a per-stratum slope is `compression@Qk/offline_Qk`, which may not be substituted into a term fitted
+  on the full ruler (knee-f9aao). It joins on the Kaggle
   submission REF, never a name — asking Kaggle for the list spends no slot — so every submission carries a row,
   the ones this file will not price included (`scope: excluded` plus the reason). A row's `offline` must be a number
   read on studies the entry did NOT train on: on 2026-08-29 `raptor_solo`'s 0.8938 was voided because
@@ -307,6 +314,18 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   `rampsix` spent 4.2 h of card on a gate unreadable by construction, knee-s8kim) REPORTS until the twenty
   dark arms each carry a `# reading:` or an `# unmeasurable:`, then it graduates. A declared glob is ONE
   token: prose has spaces, which is what kept the check's own first run from being a false positive.
+  **And run it with `--only <arm>` BEFORE arming that arm, which is the half that can still save a card.**
+  Declared-and-missing asserts `ran => the artefact exists`; `--only` asserts the other direction, that an
+  arm which has NOT run must not already have its reading on disk, and it REFUSES with the matching files
+  and their UTC mtimes named. It keys on the `# reading:` declaration alone and never on what the arm
+  `require`s — an input the arm consumes is supposed to be there. A re-read is often legitimate (a member
+  changed, a ruler was recut), so `--anyway '<why>'` releases it; the constraint is only that the
+  re-reader has to say so. It exists because on 2026-09-16 knee-18c5r was ranked first among every open
+  lever and handed a night's card to re-take a reading that had been on disk for seven days
+  (`carve_budget_*.npz`, knee-2sqyb, `experiments/README.md:11858`), with every other gate green — because
+  every other gate guards whether an arm WILL leave its artefact, never whether the artefact is already
+  there. `experiments/lib.sh` has refused a `foreign_run` whose `--tag` artefacts exist for exactly this
+  reason; this is that rule on the other launcher.
  **`arm_check` reads PRICE and P(clears) out of the BEAD on the `# bead:` line, never out of the arm's own comments.** An arm carrying both strings in prose still refuses with `UNPRICED <arm>: <bead> states no PRICE / P(clears ...) — a cost, no gain (knee-qxse)`, because a comment is written by the same hand that wants the run and a bead is the queue everyone reads. Put `PRICE: ~N h` and `P(clears <band>) ~ 0.NN` in the bead's DESCRIPTION, then name that bead in the arm.
 - **`ledger75` is the two-ruler pricer — `python -m kneemri.evaluation.ledger75 --holdouts <dir> --only <stem> [<stem> …]`.** It prints LEDGER (midpoint), LEDGER75, the move between them, the epoch and the row count, side by side, which is the cheapest way to satisfy the rule that a number carries its CUT. Reaching into `LabelScores` by hand for this does not work — there is no `.macro`; the surface is `area_under_curve` / `mean_of` / `per_label` / `paired_mean_interval`, and `area_under_curve(predictions, truth)` is STATIC with an int truth.
 - **The Kaggle python client is snake_case, and the board reports at 0.001.** `from kaggle.api.kaggle_api_extended import KaggleApi; a = KaggleApi(); a.authenticate()` — then `s.ref`, `s.status`, `s.public_score`, `s.private_score`; `publicScore` raises `AttributeError`. A hand-rolled Basic-auth GET against `/api/v1/competitions/submissions/list/` 401s, so use the client rather than urllib. And `public_score` arrives as the STRING `'0.941'`: all 43 distinct scores in `comp/board.jsonl` are exact multiples of 0.001, so three decimals is the COMPETITION's own resolution and our record is faithful to it. Consequence worth writing down: an N-way tie at one value is real, but it BOUNDS those entries' true spread below 0.001 rather than licensing a reseating search between them.
