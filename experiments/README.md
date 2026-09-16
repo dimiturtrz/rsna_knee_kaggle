@@ -14343,10 +14343,22 @@ sentence rested on.
 **THE CONSEQUENCE, WHICH IS MUCH LARGER THAN THE REFIT.** β ≈ 0.22 prices the owner's standing
 *"use more data"* directive for the first time:
 
-| operation | N factor | predicted delta offline | at board transfer x1.55 |
+| operation | N factor | predicted delta offline | at board transfer x1.55 — WITHDRAWN, see below |
 |---|---|---|---|
-| refit fold-0 member on all our studies | 1.26x | +0.0070 | +0.011 |
-| **double the corpus** | 2.0x | **+0.0201** | **+0.031** |
+| refit fold-0 member on all our studies | 1.26x | +0.0070 | ~~+0.011~~ |
+| **double the corpus** | 2.0x | **+0.0201** | ~~**+0.031**~~ |
+
+> **THE BOARD COLUMN IS WITHDRAWN (2026-09-16). x1.55 was quoted from prose, which is the one thing
+> `comp/champion.json:55` forbids about this constant** — *"Read it from `python -m
+> kneemri.evaluation.board_transfer`, and if the two disagree the record is stale, not the tool."* The
+> tool, run 2026-09-16 over 46 ensemble entries and 867 orderable pairs, reads a **curve that saturates**,
+> not a multiplier: median **+1.05** over the whole record, **+0.98 [+0.94, +1.01]** among entries at or
+> above 0.8670 (42 pairs), **+0.82 [+0.71, +0.93]** at or above 0.8695 (4 pairs, DIRECTION ONLY). At the
+> operating point the compression is about **1:1**, so every board figure in the table above is inflated
+> by roughly 1.6x. This constant has now been wrong three times — +4.67, +2.14, x1.55 — and all three
+> times because a value was quoted instead of read. **Do not write a transfer number into this file
+> again; name the tool.** See the P1 bead filed 2026-09-16. Related: board blur is **0.0020**, so a
+> one-tick board difference certifies nothing on its own.
 
 Nothing on the knob axis has produced anything of that size. The whole calibration/hold/distill factorial
 this ledger has spent weeks on moves members by 0.002-0.007, and the replicated calib x hold interaction —
@@ -14365,9 +14377,39 @@ Two honest caveats, both of which sharpen the target rather than blunt it:
    in-distribution one. That is the question, and it is now the highest-value open question this project
    has (M322 to the researcher).
 
-**THIS RE-RANKS THE BLOCKERS.** The foreign corpora are blocked on LICENCE, not on availability, value, or
+> **CAVEAT 2 IS NOW ANSWERED, AND THE ANSWER IS NULL (2026-09-16).** An out-of-distribution study is
+> worth nothing here. KMAR-50K supplied 1,088 pseudo-labelled cross-site studies — a 1.247x corpus, for
+> which β=0.22 predicts **+0.0068** — and the measurement reads zero or worse on three independent
+> denominators:
+>
+> | contrast | geometry | corpus delta @ledger75 |
+> |---|---|---|
+> | `base224_drop40_long` vs `mergedk_drop40_long` | 224 px, 12 sl | **−0.0012** (matched, corpus alone; +0.0014 at midpoint — the sign flips with the cut) |
+> | the mergedk 2x2 seat deltas (README below, `mergedk` sections) | 224 px | **−0.0006** / **−0.0011** |
+> | `labelwise_dense` vs `mergedk_labelwise_drop40_long_336` | 336 px, 12 sl, labelwise | **−0.0063**, and that is *against* a drop40 + double-horizon tailwind worth ~+0.0084 |
+>
+> All three are at or inside the 0.0010 seed spread except the third, which is six times it and negative.
+> **β is not transferable across SITES**: it was fitted on rows that were all RSNA knee MRI, and it
+> predicts nothing about studies from another scanner population carrying pseudo-labels. The
+> `+0.0099` once attributed to "corpus" was corpus **+ slot_dropout 0.40 + 24 epochs**, three changes
+> read as one; the matched pair isolating corpus reads null.
+>
+> **What this does NOT close.** The ruler here is holdout909, which is blind to the decode toll by
+> construction — KMAR subjects are new patients, so the corpus shift and the decode shift are not
+> separated. `foreign_readout` is the ruler that would separate them and **no `foreign_readout` artefact
+> exists on disk** (2026-09-16 sweep). KMAR as a *training corpus* is spent; KMAR read through a
+> cross-site decode ruler has never been measured.
+
+**THIS RE-RANK IS REVERSED (2026-09-16) — see the two corrections above.** The lever it promoted was
+priced at +0.0201 offline / +0.031 board and measures null on three denominators, at a compression that is
+1:1 rather than x1.55. The licence thread is hygiene again, not the front of the queue: it gates access to
+corpora whose *measured* worth as training rows is zero. What it still gates is the cross-site DECODE
+question, which is a different and much smaller claim than "double the corpus". The original text follows,
+superseded, because the reasoning is worth keeping and the re-rank it performed is not.
+
+~~**THIS RE-RANKS THE BLOCKERS.** The foreign corpora are blocked on LICENCE, not on availability, value, or
 card. As of this measurement the licence thread is no longer hygiene — it gates the largest priced lever on
-the board. The P0 licence bead and the SKM-TEA RUA question to the owner move to the front of the queue.
+the board. The P0 licence bead and the SKM-TEA RUA question to the owner move to the front of the queue.~~
 
 ## 2026-09-11 — the HEAD gates whether an INPUT change reaches the score: a matched 2x2 (M325)
 
