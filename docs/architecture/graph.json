@@ -4137,6 +4137,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.stack_fit",
+      "target": "kneemri.evaluation.member_pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.stack_fit",
       "target": "kneemri.evaluation.scores",
       "weight": 1
     },
@@ -24028,6 +24034,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.stack_fit.StackFit.shipped_weights",
       "target": "kneemri.inference.stacked.StackedLogit.fitted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_fit.main",
+      "target": "kneemri.evaluation.member_pool.MemberPool.at",
       "weight": 1
     },
     {
