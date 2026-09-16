@@ -4258,6 +4258,14 @@ nothing; 0.944 directional; <=0.943 a real share. Read **0.945** against the cha
 the board's resolution, so this bounds raptor's contribution below 0.001 rather than measuring it. Pin stays on
 `tripleseat_v2`. Its pair `nolabelwise_v1` asks the same question of the labelwise trio.
 
+> **THE BOUND ABOVE IS WRONG BY 2x, AND THE PAIRED READING BELOW IS WORSE (2026-09-16).** 0.001 is the board's
+> reporting RESOLUTION; its BLUR — the spread over which two entries certify nothing about each other — is
+> **0.0020**. So a one-tick gap does not bound raptor under 0.001. It bounds nothing: 0.945 and 0.946 are the
+> same reading, and raptor's share is consistent with anything up to about two ticks. The pre-registration was
+> written against the wrong scale, so the `>=0.945` branch it fired is not the branch it meant to fire, and this
+> instrument is UNRESOLVED rather than answered. What it does still establish is a ceiling — raptor is not worth
+> three ticks, because `nolabelwise_v1` shows what three ticks looks like.
+
 ## `nolabelwise_v1` -- 0.943, ref 56264081, 2026-09-15 -- INSTRUMENT: the labelwise trio's share, measured
 
 MECHANISM. None; an instrument, the pair to `noraptor_v1`. `tripleseat_v2`'s eight seats minus the three
@@ -4265,9 +4273,31 @@ MECHANISM. None; an instrument, the pair to `noraptor_v1`. `tripleseat_v2`'s eig
 trio carries nothing; 0.944 directional; <=0.943 a real share. Read **0.943** against the champion's 0.946 --
 **-0.003, three board ticks**, so the <=0.943 branch fired and the trio's share is MEASURED rather than bounded.
 
-Read as a pair, the two instruments say where this champion's load sits. Dropping the ONE foreign seat costs under
+~~Read as a pair, the two instruments say where this champion's load sits. Dropping the ONE foreign seat costs under
 a tick (0.945); dropping the THREE labelwise seats costs three (0.943). Per seat that is roughly 0.001 each for the
 labelwise trio against under 0.001 for raptor, so the labelwise family is what the entry is made of and the foreign
 seat is nearly free. Consequence for the licence axis: a licence-clean entry gives up about one board tick, not the
 entry -- which is what `tripleseatclean_v1` (0.946, same eight seats on licence-clean mounts) already showed from
-the other side. Pin stays on `tripleseat_v2`.
+the other side.~~ Pin stays on `tripleseat_v2`.
+
+> **THE PAIRED READING IS WITHDRAWN (2026-09-16), on all three of its steps.**
+>
+> **The per-seat division.** -0.003 over three seats was divided by three to get 0.001 a seat. That assumes the
+> three seats' contributions ADD, and additivity in this project is not an assumption, it is a question that has
+> been measured and answered NO — `interpretations/kneemri/2026-09-16_grand_fragments_reverse.md` finds every
+> leave-one-out in the grand family sub-additive, with three fragments predicting +0.0075 together and delivering
+> +0.0035 and +0.0049. Dividing a three-seat drop by three is that same error one level up: it reads an
+> interaction term and prints it as a main effect, per seat.
+>
+> **The comparison.** Even granting additivity, 0.001-a-seat against under-0.001-a-seat compares two quantities
+> that are both inside the 0.0020 blur. Nothing separates them. -0.003 itself is 1.5 blurs — directional, not a
+> measurement, which is the standard this file applies to every offline number and did not apply here.
+>
+> **The licence corroboration is false.** `tripleseatclean_v1` is NOT "the same eight seats on licence-clean
+> mounts". Its member list is byte-identical to the pin's, `raptor_v4_swa` included. It is a reproducibility
+> instrument — it shows the board returns 0.946 twice for one seat set, which is worth having and is the
+> evidence the 0.946 ties are real — and it says nothing whatever about licence-clean mounts. So the licence
+> axis has no corroboration from either side here, and "a licence-clean entry gives up about one board tick"
+> is unmeasured.
+>
+> What survives the pair: the labelwise trio carries more than the foreign seat. The direction, and only that.
