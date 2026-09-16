@@ -439,8 +439,11 @@ class EncoderSurgery:
         # THE STEM IS ONE RUNG BELOW THE LOWEST OPEN BLOCK, which is where it sits in the forward pass.
         # Folding it into that block's group instead would step the pixel-reading layer at a rate chosen
         # for a block, and dropping it would hand the optimiser a parameter this window unfroze.
+        # It goes at the FRONT, not the end: this list is ordered by depth and read POSITIONALLY — the
+        # anchor is the last group and the per-rung ratio is the last pair — so a stem at the end is a
+        # trailing group that reports the ladder's bottom rung as its top.
         if window.stem:
-            ladder.append({"params": self.stem_parameters(), "lr": backbone_lr * layer_decay ** len(opened)})
+            ladder.insert(0, {"params": self.stem_parameters(), "lr": backbone_lr * layer_decay ** len(opened)})
         return ladder
 
     def compile_encoder(self) -> None:

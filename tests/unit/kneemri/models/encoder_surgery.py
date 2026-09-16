@@ -353,6 +353,25 @@ def test_backbone_groups_anchor_at_the_top_of_the_window():
     assert [group["lr"] for group in graded] == [2e-6, 4e-6, 8e-6], "the same ladder, one rung per opened block"
 
 
+def test_backbone_groups_put_the_stem_at_the_front_of_the_ladder():
+    """The ladder stays ordered by depth WITH the stem in it, because it is read positionally.
+
+    `parameter_groups` documents the layout the readers depend on: head at 0, backbone at 1:, and a
+    trailing group corrupts both the anchor and the per-rung ratio. The stem is a rung below the lowest
+    open block and earlier than every one of them in the forward pass, so the front is where it keeps
+    that ordering true. Appended instead, `OptimiserWitness` reads the ladder's bottom as its top and
+    refuses the run: measured at `--layer-decay 0.75 --unfreeze-stem`, which reported the stem's
+    7.12e-06 as the asked-for 4e-05 and the total 5.62x span as the asked-for 0.75.
+    """
+    surgery = _surgery()
+    graded = surgery.backbone_groups(backbone_lr=8e-6, window=surgery.window(3, unfreeze_stem=True), layer_decay=0.5)
+    rates = [group["lr"] for group in graded]
+
+    assert rates == [1e-6, 2e-6, 4e-6, 8e-6], "one rung per opened block, and the stem one below the lowest"
+    assert rates[-1] == 8e-6, "the anchor is the LAST group, which is what the trainer captures"
+    assert rates[-2] / rates[-1] == 0.5, "and the last pair is the per-rung ratio the witness measures"
+
+
 def test_stem_parameters():
     """The COMPLEMENT of the block set, so a mis-identified trunk fails loudly rather than opening nothing."""
     surgery = _surgery()
