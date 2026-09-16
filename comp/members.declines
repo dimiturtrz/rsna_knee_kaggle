@@ -1200,7 +1200,12 @@ dropstack_dense_s2026
   climbing at e12 -- the budget-binding read knee-kiss9 now generalises). Seat +0.0005 [-0.0003, +0.0012],
   band includes zero. Declined as the losing dose of a closed sweep.
 
-ghosting_s2026
+ghosting_s2026  # 0.8576 mid / 0.8838 ledger75 (909 rows, e10) against seats at 0.8672/0.9048 —
+                # 0.0096 behind the incumbent on midpoint, and README:7867 sets the bar at 0.0065:
+                # a member that far back is not a seat a slot can be spent to price. The axis it
+                # carries is real and the own-holdout cannot see it (cross-site; the board is our
+                # only OOD ruler), so this declines the SEAT, not the augmentation — re-open it by
+                # training the axis into a member that is not behind, never by re-quoting +0.0057.
   0.8576 (l75 0.8838, e10). The other decode operator: decode_cost -0.0304 against slot_dropout 0.40's
   -0.0229, i.e. +0.0057 vs control where slot dropout reads +0.0132. Same axis, less than half the
   effect; the 0.40 dose is what shelf 2 carries instead.
