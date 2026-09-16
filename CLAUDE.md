@@ -180,6 +180,23 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 
 ## Conventions
 
+- **An unread result is the only work in this repo with a deadline, and it outranks everything that
+  does not.** On 2026-09-15 twenty arms ran overnight and nineteen finished checkpoints sat unpriced
+  for six hours while the time went to roster and shelf bookkeeping, which had no deadline and would
+  have been exactly as correct the next morning. `labelwise_dense_drop40_long36` finished 23:41Z and
+  was first priced ~05:12Z, only because the owner asked. Nothing was broken: `_mark` wrote every
+  verdict and `_seat_value` priced every seat into the arm's own log. **Every check in this file is a
+  PULL channel** — it reports when invoked, and all sixteen worked. So the failure mode this rule
+  guards is not a missing check and can never be fixed by adding one; a seventeenth thing to remember
+  to read is the same defect with more prose. Two consequences. **Mechanically:** a verdict a human
+  must react to is POSTED, not logged — `experiments/lib.sh:_post` delivers ARM DONE and both ARM
+  FAILED into `inbox/main/`, whose listener turns it into a task notification that arrives mid-turn.
+  Arm that listener BEFORE leaving anything unattended; unarmed, the letters queue in the box and
+  deliver late rather than never, which is still better than a log line nobody seeks. **By judgment:**
+  while a card is running, results are read and priced the moment they land, and bookkeeping waits —
+  a result changes what the NEXT arm should be, and reading it late spends the window on questions the
+  first result had already answered. The owner's standing verdict on the habit: *"not reacting to
+  change is definitely your biggest sin, worst habit and you never fixed it."*
 - **Sixteen checks, each for a failure that already happened** (only the smoke wants the card, for two minutes): `python -m
   kneemri.experiments.arm_check` before arming a queue (a flag typo costs a queue slot to discover),
   `python -m kneemri.experiments.ledger_check` after runs finish (five arms once sat in the ledger as "queued" for
