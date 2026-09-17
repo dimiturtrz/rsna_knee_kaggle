@@ -9,12 +9,9 @@
 # training-time technique with a published effect size on that axis.
 #
 # THE SINGLE VARIABLE IS --sharpness 0.05 AND NOTHING ELSE. Control is calib_dense_hold_s2026 = 0.8634
-# @holdout909 midpoint, which ran this exact flag list. No second control arm is needed and no bf16
-# confound exists, because the ascent direction rho*g/||g|| is INVARIANT to the GradScaler's factor: a
-# uniform positive scale cancels between numerator and norm, so `Sharpness` never calls `unscale_` (that
-# call may be spent only once per optimiser per step, and `GradientClip.applied` already spends it).
-# `experiments/recipe.sh:23` passes no --bf16, so this runs under the fp16 path every dense ledger
-# number was measured under.
+# @holdout909 midpoint, which ran this exact flag list. No second control arm is needed and no precision
+# confound exists: the stamped recipe reads "bf16": "True", so there is no GradScaler on this path at all
+# and `Sharpness` has no scale factor to `unscale_`.
 #
 # PREDICTION, WRITTEN BEFORE THE RUN. If flatness is what separates our corner from the board, the mean
 # lands at or above 0.8684 and the gain is SPREAD across labels — a sharpness penalty has no per-finding
@@ -26,11 +23,10 @@
 # row, not by the mean. Between 0.8604 and 0.8684 is inside the board's own noise on a solo read and is
 # DIRECTIONAL ONLY: keep the flag, never plan around it.
 #
-# THE HARNESS SUSPECT, NAMED IN ADVANCE. `Sharpness.climbed` returns False on a non-finite gradient norm,
-# which under fp16 with an enabled GradScaler is a real path and not a defensive nicety — an overflowed
-# backward would otherwise write nan into every weight and would NOT be undone, because `descended`
-# subtracts the remembered offset. A run where that refusal fires often is an ordinary run at half the
-# throughput reporting under the SAM arm's name. Read the decline rate before reading the score.
+# THE HARNESS SUSPECT THIS ARM NAMED IS VOID. It read `Sharpness.climbed` returning False on a
+# non-finite gradient norm as a live fp16/GradScaler path; the stamp says bf16, so that route does not
+# exist here. The suspect was written from this comment rather than from the stamp. It does not touch the
+# verdict, which cleared the harness by direct evidence: the ascent witness fired live at radius 0.05.
 #
 # cost     279 s/epoch measured, DOUBLED by the second forward and backward, x 12 epochs = ~1.9 h.
 #          Zero submission slots.
