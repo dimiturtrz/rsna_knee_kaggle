@@ -47,6 +47,11 @@ knee-dtk already splits Lateral Meniscus as the largest MODEL-side gap of all tw
 model 0.6497, −0.1932) — a vision failure rather than a label artefact. This is the corpus-scale version
 of the same statement, on 1,121 positives instead of 58 studies, and with the sample-size objection
 removed rather than assumed away.
+> **2026-09-17, the subject was the published pool.** The -0.1932 quoted here is the PUBLISHED members'
+> gap. Our champion reads Lateral Meniscus 0.8919 against the same 0.8422 report label on the same 58
+> studies (+0.0497), and beats the reader on all twelve findings. Nothing measured on this page is wrong;
+> what it is a fact ABOUT is those members, not ours, so the vision-failure reading may not be carried to
+> our model. See `interpretations/kneemri/2026-08-14_labels-or-pixels.md`.
 
 ## Sources
 

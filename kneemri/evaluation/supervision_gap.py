@@ -16,16 +16,26 @@ noisy labels CAN beat them by looking at the image, and measured on the publishe
 half the findings. Effusion's report label predicts the radiologist at 0.8137 and the model reaches
 0.9453 — it is correcting the reader. The reference is a comparison, never a bound.
 
-WHAT THE SPLIT DECIDES. Where the model already beats the report, the reader is the weak part and a
-better label reader is the lever. Where the report describes a finding well and the model cannot
-reproduce it — ACL at 0.9841 against 0.8640, Lateral Meniscus at 0.8429 against 0.6497 — the signal is
-in the label and the model is failing to extract it from the pixels; no label work can help those, and
-showing the model more of the image might.
+WHAT THE SPLIT DECIDES, AND WHOSE MODEL IT IS A FACT ABOUT. Where the model already beats the report,
+the reader is the weak part and a better label reader is the lever. Where the report describes a finding
+well and the model cannot reproduce it, the signal is in the label and the pixels are where it is being
+lost. WHICH FINDINGS FALL ON WHICH SIDE IS A PROPERTY OF THE MEMBER, NOT OF THIS CORPUS. On the
+published pool the split reads `labels - model: +0.0266 [-0.0082, +0.0610]` and puts six findings below
+the line, ACL and Lateral Meniscus deepest. On our champion, measured 2026-09-17 on the same 58 studies
+against the same truth, it reads `-0.0616 [-0.0850, -0.0385]` with all twelve above it — Lateral
+Meniscus moves by +0.2429 between the two. So quote this tool's verdict with the `--records` it was run
+on, never as a statement about the task. See
+`interpretations/kneemri/2026-08-14_labels-or-pixels.md`.
 
-IT NEEDS PREDICTIONS THAT DID NOT TRAIN ON THE ANNOTATIONS. Ours are fitted with the annotated studies
-upweighted, so scoring them here would be scoring training data. The published members are fitted on
-`report_labels_v2.csv` with no annotation weighting and carry out-of-fold predictions for every study,
-so the radiologist labels are genuinely unseen by them. See `kneemri.evaluation.oof_oracle`.
+IT NEEDS PREDICTIONS THAT DID NOT TRAIN ON THE ANNOTATIONS. Most of ours are fitted with the annotated
+studies upweighted, so scoring those here would be scoring training data; a member fitted
+`--hold-annotations` is exempt and is why `--records` can now be pointed at the champion. The published
+members are fitted on `report_labels_v2.csv` with no annotation weighting and carry out-of-fold
+predictions for every study, so the radiologist labels are genuinely unseen by them. See
+`kneemri.evaluation.oof_oracle`.
+
+THE DENOMINATOR. 58 annotated studies, 696 cells, 34.5% positive, per-finding positives 9 to 35. The
+aggregate and the bands that exclude zero are claims; a single finding's delta is a shape.
 """
 
 import logging

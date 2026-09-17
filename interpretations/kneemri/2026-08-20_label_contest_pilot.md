@@ -233,6 +233,11 @@ share against annotation-ruler AUC:
 | Lateral OA | 33.1 | 0.7099 | | MCL | 9.8 | 0.8798 |
 | Medial OA | 25.5 | 0.9504 | | ACL | 8.1 | 0.8640 |
 | Contusion | 20.8 | 0.8421 | | Medial Meniscus | 5.7 | 0.8498 |
+> **2026-09-17, the subject was the published pool.** The -0.1932 quoted here is the PUBLISHED members'
+> gap. Our champion reads Lateral Meniscus 0.8919 against the same 0.8422 report label on the same 58
+> studies (+0.0497), and beats the reader on all twelve findings. Nothing measured on this page is wrong;
+> what it is a fact ABOUT is those members, not ours, so the vision-failure reading may not be carried to
+> our model. See `interpretations/kneemri/2026-08-14_labels-or-pixels.md`.
 
 Spearman **ρ = 0.014** (t = 0.04, df 10), Pearson r = −0.111. The best-scoring finding carries 45.9%
 silence; the worst carries 10.0%. There is no ordering to find.

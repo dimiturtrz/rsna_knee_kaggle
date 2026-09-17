@@ -49,6 +49,11 @@ What is left costs the card: supervision volume (the lateral heads see about hal
 matching controls measurement but not training) and vision proper — knee-dtk already splits Lateral
 Meniscus as the largest MODEL-side gap of the twelve (report 0.8429, model 0.6497, −0.1932). The next
 test on this axis is a training arm, not another decode.
+> **2026-09-17, the subject was the published pool.** The -0.1932 quoted here is the PUBLISHED members'
+> gap. Our champion reads Lateral Meniscus 0.8919 against the same 0.8422 report label on the same 58
+> studies (+0.0497), and beats the reader on all twelve findings. Nothing measured on this page is wrong;
+> what it is a fact ABOUT is those members, not ours, so the vision-failure reading may not be carried to
+> our model. See `interpretations/kneemri/2026-08-14_labels-or-pixels.md`.
 
 ## Sources
 

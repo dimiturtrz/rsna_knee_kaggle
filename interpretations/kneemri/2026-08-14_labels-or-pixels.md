@@ -112,3 +112,54 @@ the consumer reads a constant.** It is worth counting how often the cheap check 
 today — a CSV read killed the tie-break that a 4,407-study census had left standing, and the reading
 rules that two beads argued over for three days were written in plain text inside checkpoints nobody had
 opened.
+
+## 2026-09-17: re-read on our own champion — the split is gone, and it was a fact about their model
+
+The table above is the PUBLISHED pool's out-of-fold predictions, which was the only honest choice in
+August: ours were fitted with the annotated studies upweighted, so scoring them there would have been
+scoring training data. The champion member is fitted `--hold-annotations`, so those 58 studies are
+genuinely unseen by it and `supervision_gap --records` can now ask the same question of the model this
+project actually ships:
+
+```
+aggregate: labels 0.8658   model 0.9274
+
+Synovitis         0.6870 -> 0.8590   +0.1720
+Effusion          0.8149 -> 0.9801   +0.1652
+Contusion         0.7530 -> 0.8799   +0.1269
+Fracture          0.8701 -> 0.9417   +0.0715
+Lateral Meniscus  0.8422 -> 0.8919   +0.0497
+Medial OA         0.9085 -> 0.9566   +0.0481
+Lateral OA        0.7892 -> 0.8221   +0.0329
+Baker's           0.9321 -> 0.9565   +0.0245
+PF OA             0.8861 -> 0.9099   +0.0238
+Medial Meniscus   0.9435 -> 0.9591   +0.0156
+ACL               0.9865 -> 0.9926   +0.0061
+MCL               0.9762 -> 0.9796   +0.0034
+
+labels - model: -0.0616  [-0.0850, -0.0385] over 58 studies  (interval EXCLUDES zero)
+published pool, same command, same truth: +0.0266 [-0.0082, +0.0610]  (SPANS zero)
+```
+
+**Twelve of twelve are above the line.** The six findings the August table put below it — Lateral
+Meniscus at -0.1932, ACL at -0.1201, MCL, Medial Meniscus, Lateral OA, PF OA — are all positive on our
+member, and Lateral Meniscus moves by +0.2429 between the two models on the same studies against the
+same truth. So "the signal is in the label and the pixels are where it is being lost" was never a
+property of this corpus; it was a property of the members that sentence was measured on.
+
+**What that retires.** Three interpretations built on the LM/ACL deficit as a VISION failure
+(`2026-08-18_lateral_gap_is_not_prevalence`, `2026-08-18_lateral_gap_is_not_the_crop`,
+`2026-08-20_label_contest_pilot`) were reading a gap that our own model does not have. None of their
+measurements are wrong; their SUBJECT is. Any argument of the form "showing the model more of the image
+might help those findings" has lost the evidence it stood on, and that includes the one supporting
+sentence encoder width had — width may still pay, but not for this reason.
+
+**What it opens.** The reader is now the weaker half on every finding, by 0.0616 aggregate, and that is
+the noise our training targets are made of: where the report says YES the radiologist agrees 65.3% of
+the time. A better label reader is the only lever this measurement licenses, and it is a data lever
+rather than a knob.
+
+**The denominator, stated.** 58 studies, 696 cells, 34.5% positive; per-finding positives run 9 to 35,
+so only the aggregate and the three bands that exclude zero (Effusion, Synovitis, Contusion) are claims.
+The other nine are a shape. And this is agreement with the RADIOLOGIST on the annotated set, not the
+board's ruler and not `ledger75` — it may not be subtracted from the 0.012 gap.
