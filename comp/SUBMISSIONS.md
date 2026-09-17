@@ -4480,3 +4480,29 @@ What the detrended fit gives instead is worth more than the retracted claim:
 
 Re-derive the fit before quoting any number in this subsection; adding a row moves it, which is this file's
 standing failure mode. See knee-5hbtz, which also re-opens part of the seating closure at :2450.
+
+## `ffsolo_v1` — 0.944, ref 56296698, 2026-09-17 — one member lands two ticks under the seven-seat champion
+
+Pre-registered instrument, landed in its own modal band, and the band it landed in is not the interesting
+part. `labelwise_depth24_drop40_long_ff` is the `--fold -1 --ema` refit of the best recipe here, +26%
+studies over its fold-0 twin — the largest data change available without new data. The twin reads ledger75
+0.9053; carried over the +1.09 transfer slope that projects a solo board of **~0.943**, and the refit
+**read 0.944**. FLAT (the 0.9405-0.9454 branch): the extra fifth of the corpus is worth about +0.001 to one
+model, inside the 0.0022 residual sd. So more data does not make a better member either, and the data axis
+closes at the member level and not only inside a saturated ensemble — knee-sexix's closure stands as
+written rather than being re-scoped.
+
+**The slope predicted a board score to one thousandth.** Its only previous solo anchor was `matchpair_v1`;
+it now has two, and `matchpair_v1`'s own retraction the same morning (the `offline75` ruler seam,
+knee-36xad) makes the second one load-bearing.
+
+**And the number that matters is the comparison nobody pre-registered.** A SINGLE member reads 0.944; the
+seven-seat `tripleseat_v2` reads 0.946. The best solo on this board before today was `matchpair_v1` at
+0.933 — but that was `stackfit_s2026`, and the +0.013 ensemble premium read off it was a fact about a weak
+member, not about ensembling. Priced against a GOOD member the ensemble is worth **+0.002**: two ticks on a
+board that resolves to 0.001, and below the 0.0062 offline floor that half-holdout greedy seating already
+could not see past. The 0.011 to the leader is therefore a **member** gap on the arithmetic as well as in
+the prose above, and no reseating of this pool reaches it. Seven board flats across one-seat perturbations
+were saying this; this entry gives it a number.
+
+Re-derive the fit before quoting any number in this subsection.
