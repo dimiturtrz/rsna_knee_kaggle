@@ -4184,6 +4184,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.split_census",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.split_census",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.stack_combiner",
       "target": "core.cli",
       "weight": 1
@@ -24266,6 +24278,48 @@
     },
     {
       "kind": "holds",
+      "source": "kneemri.evaluation.split_census.ShelfSplits",
+      "target": "kneemri.evaluation.split_census.SplitCount",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.split_census.SplitCensus",
+      "target": "kneemri.evaluation.split_census.ShelfSplits",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.split_census.SplitCensus.census",
+      "target": "kneemri.evaluation.split_census.ShelfSplits",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.split_census.SplitCensus.census",
+      "target": "kneemri.evaluation.split_census.SplitCensus.stamp",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.split_census.SplitCensus.census",
+      "target": "kneemri.evaluation.split_census.SplitCount",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.split_census.main",
+      "target": "kneemri.evaluation.split_census.SplitCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.split_census.main",
+      "target": "kneemri.evaluation.split_census.SplitCensus.census",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
       "source": "kneemri.evaluation.stack_combiner.StackCombiner",
       "target": "kneemri.evaluation.pool.Pool",
       "weight": 1
@@ -41693,7 +41747,7 @@
       "role": null
     },
     {
-      "descendants": 327,
+      "descendants": 328,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -41781,7 +41835,7 @@
       "role": null
     },
     {
-      "descendants": 118,
+      "descendants": 119,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -42512,6 +42566,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.slotdrop_tta",
       "label": "slotdrop_tta",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census",
+      "label": "split_census",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -47179,6 +47241,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.slotdrop_tta",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.ShelfSplits",
+      "label": "ShelfSplits",
+      "level": "class",
+      "parent": "kneemri.evaluation.split_census",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.SplitCensus",
+      "label": "SplitCensus",
+      "level": "class",
+      "parent": "kneemri.evaluation.split_census",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.SplitCount",
+      "label": "SplitCount",
+      "level": "class",
+      "parent": "kneemri.evaluation.split_census",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -62666,6 +62752,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.slotdrop_tta",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.ShelfSplits.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.split_census.ShelfSplits",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.SplitCensus.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.split_census.SplitCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.SplitCensus.census",
+      "label": "census",
+      "level": "method",
+      "parent": "kneemri.evaluation.split_census.SplitCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.SplitCensus.stamp",
+      "label": "stamp",
+      "level": "method",
+      "parent": "kneemri.evaluation.split_census.SplitCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.SplitCount.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.split_census.SplitCount",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.split_census.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.split_census",
       "role": null
     },
     {
