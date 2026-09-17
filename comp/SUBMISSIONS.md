@@ -4366,3 +4366,34 @@ All three are labelled INSTRUMENT in their submission messages; none is a rank a
 our favour on any of them must not be pinned. **The rerun is read FIRST** — it is the error bar, and the
 other two are unreadable without it. If the rerun does not return exactly 0.944, every closure in this
 file priced on a 0.002-0.004 board delta is retired, including several that read as settled.
+
+### 56288555 — foldseven re-ship (INSTRUMENT, leg 1) · board **0.944** · read 2026-09-17 00:00Z
+
+**The clause above did not fire.** The rerun returned exactly 0.944, so every closure in this file priced
+on a 0.002-0.004 board delta stands. Byte-identical to `foldseven_v1` (ref 56287691) — same seven seats,
+same kit `c3effa61`, nothing moved — and `entry_offline --ruler midpoint` independently re-derived its
+offline as 0.8767, foldseven's number to the digit, which is the check that the pool really was the same
+one. **The board's run-to-run scatter for an identical entry is 0.000** at the competition's own 0.001
+resolution. Recorded `scope: excluded`: a re-ship carries no new pair, and entering it would weight one
+point twice in a fit that has just been shown to be sensitive to exactly that.
+
+### 56288513 — eightseat (INSTRUMENT, leg 2) · board **0.944** · read 2026-09-17 00:00Z
+
+Foldseven's seven plus `labelwise_depth24_s2026`, an eighth seat chosen FOR being negligible. **State the
+cut**: `seat_add` prices it at +0.0005 @ledger75, and at midpoint — the cut `board.jsonl` records — the
+same seat is worth **+0.0002** (0.8769 against 0.8767). Both are sub-blur. Board: flat.
+
+So **a sub-blur offline move buys exactly nothing**, measured against an error bar of zero rather than an
+assumed one. That is stronger than "the board is noisy below 0.0020": it says the transfer curve is FLAT
+there, and it is only sayable because leg 1 landed first. The thirteenth seating entry to read 0.944.
+
+**The unintended result is larger than the intended one.** `eightseat_v1` is the first designed,
+honestly-priced entry ever to sit above the top band's floor — the two that had been there were
+greedy-selected on the holdout and were voided the same evening (knee-52ldh). Adding it took the ≥0.8705
+band from +1.45 over three pairs marked DIRECTION ONLY to **+1.44 over six resolved pairs [+1.39, +1.96]**,
+and the ≥0.8678 band from +1.05/62 to +1.23/77. The band this project ships in was never unpriceable; it
+was empty. Consequence, filed as knee-xz903: the gap to the leader (0.946 → 0.957, +0.011 read
+2026-09-17 00:13Z) converts to **+0.0076 offline** — above the 0.0062 noise floor, well below the 1.5%
+bar, so first place is a chain of composing sub-bar increments and not a single mechanism.
+
+**Leg 3, 56288717 (swapseat), is still scoring.**
