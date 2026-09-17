@@ -16581,3 +16581,30 @@ untouched and remains the one generalisation-side lever the project has implemen
 every closed axis was closed IN-domain while the board is out-of-domain to our holdout. The honest revisit,
 if ever priced, is rho=0.01 or 0.005, once. Cost for the record: 534 s/epoch against the control's 410, the
 double forward.
+
+## No teacher on disk is above its student — the distillation axis is bounded below the gap — 2026-09-17
+
+Card: zero. Three numbers already in this file, multiplied for the first time.
+
+| bound | source | value | vs the 0.011 board gap |
+|---|---|---|---|
+| ensemble teacher | `56296698` 0.944 solo vs `56232529` 0.946 seven-seat, board | **0.002** | 5.5x short |
+| stronger single teacher | `raptor_v4_swa` board 0.923 solo (README:5400) vs ours 0.944 | **none exists** | teacher is 0.021 BEHIND |
+| the term itself | `seat_distill_lr4e5` +0.0055 / `seat_clean_distill` +0.0056 / foreign +0.0061 | **+0.0056** | under the 0.0062 floor |
+
+Distillation moves a student toward a teacher, so its gain is bounded by what the teacher holds and the
+student does not. Both available sources of that are bounded below the gap — the ensemble one by today's
+`ffsolo` board instrument, the single-teacher one by the board number the best foreign member already
+carries. **The term is real and already spent, which is a fact about the teachers available here and not
+about distillation.** What survives is composition: +0.0056 has never been applied to the shipping
+recipe, and at 221 s/epoch x 24 epochs that is a 1.5 h knob, priced as a knob.
+
+**AND THE TOP FOUR ROWS OF TODAY'S `ledger75` SOLO RANKING ARE VOID.** `raptor_v4_swa` 0.9425,
+`raptor_v4` 0.9399, `raptor_v9` 0.9265, `raptor_effv2l480` 0.9139 are all in-sample against fold 0's
+own 909 at **98.6%** — `comp/members.declines:815-821` had ruled every one of them, and the ranking did
+not consult it. Read as printed the table says a foreign member is 0.037 ABOVE our best solo; read
+honestly the same member is 0.021 BELOW it. `ledger75` prices whatever holdout it is handed and cannot
+see who trained on those studies (knee-vkn45). The honest top of the ranking is unchanged:
+`labelwise_depth24_drop40_long_s2026` 0.9053.
+
+See `interpretations/kneemri/2026-09-17_no_teacher_is_above_the_student.md`.
