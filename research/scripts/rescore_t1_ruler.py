@@ -3,12 +3,20 @@ then re-run greedy 6-seat selection on T1.
 
 T0: binarised (>= 0.5) `truth` from any holdout npz aligned to the 909 reference
     studies of band_span_s2026.holdout.npz.
-T1: T0 with the 469 reference-matching cells of v2_lone_dissent.csv flipped to
+T1: T0 with the reference-matching cells of v2_lone_dissent.csv flipped to
     `cluster_value`.
 
-Run: CUDA_VISIBLE_DEVICES=-1 .venv/Scripts/python.exe research/scripts/rescore_t1_ruler.py
+`--direction` picks WHICH cells. D363 adjudicated 56 blind cells stratified by
+direction and measured the two halves as opposite operations: deletions
+(v2=1 -> cluster 0) 2/28 wrong, additions (v2=0 -> cluster 1) 22/28 wrong.
+`both` (469 cells) is the original T1 and applies one fixing half and one
+breaking half. `down` is T2, the deletions-only ruler the adjudication licenses
+and the one `experiments/arms/v2delonly_span.sh` declares it should be read on.
+
+Run: CUDA_VISIBLE_DEVICES=-1 .venv/Scripts/python.exe research/scripts/rescore_t1_ruler.py [--direction both|down|up]
 """
 
+import argparse
 import csv
 import glob
 import json
@@ -72,6 +80,13 @@ def macro_auc(truth_bin: np.ndarray, preds: np.ndarray) -> float:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--direction", choices=("both", "down", "up"), default="both")
+    args = ap.parse_args()
+    direction = args.direction
+    print(f"=== ruler direction: {direction} "
+          f"({'T1, both halves' if direction == 'both' else 'T2, deletions only' if direction == 'down' else 'additions only'}) ===")
+
     ref = np.load(REFERENCE_NPZ)
     ref_studies = [str(s) for s in ref["studies"].tolist()]
     ref_pos = {s: i for i, s in enumerate(ref_studies)}
@@ -90,14 +105,20 @@ def main() -> None:
                 continue
             j = COLUMNS.index(row["column"])
             i = ref_pos[uid]
-            if t0[i, j] != int(row["v2_value"]):
+            v2v, clv = int(row["v2_value"]), int(row["cluster_value"])
+            if direction == "down" and not (v2v == 1 and clv == 0):
+                continue
+            if direction == "up" and not (v2v == 0 and clv == 1):
+                continue
+            if t0[i, j] != v2v:
                 n_v2_mismatch += 1
-            t1[i, j] = int(row["cluster_value"])
+            t1[i, j] = clv
             n_flips += 1
     print(f"reference studies: {n_ref}; selector cells applied T0->T1: {n_flips}; "
           f"cells where npz truth != v2_value (left at cluster_value anyway): "
           f"{n_v2_mismatch}")
-    assert n_flips == 469, n_flips
+    if direction == "both":
+        assert n_flips == 469, n_flips
 
     kept: dict[str, np.ndarray] = {}
     excluded: list[tuple[str, str]] = []
@@ -142,7 +163,7 @@ def main() -> None:
         print(f"  {name}: T0 {a0:.4f} (expect {e0:.4f}), T1 {a1:.4f} "
               f"(expect {e1:.4f}) -> {'OK' if ok else 'MISMATCH'}")
         bad = bad or not ok
-    if bad:
+    if bad and direction == "both":
         print("\nANCHOR MISMATCH — STOPPING as instructed.")
         sys.exit(1)
 

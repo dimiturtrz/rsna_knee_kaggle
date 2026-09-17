@@ -1,5 +1,5 @@
 reference studies: 909; selector cells applied T0->T1: 469; cells where npz truth != v2_value (left at cluster_value anyway): 8
-npz scanned: 369; kept: 312; excluded: 57
+npz scanned: 448; kept: 391; excluded: 57
   EXCLUDED _probe420: 83 studies, 83 shared
   EXCLUDED base224_smoke: 12 studies, 12 shared
   EXCLUDED base_smoke: 12 studies, 12 shared
@@ -72,45 +72,77 @@ dinov3f0_solo                                 0.8874 0.8862 -0.0012  VOID-INSAMP
 foreign_dinov3_matched                        0.8812 0.8844 +0.0032  VOID-INSAMPLE
 raptor_v9                                     0.8769 0.8838 +0.0068  VOID-INSAMPLE
 foreign_dinov3_band1189                       0.8777 0.8812 +0.0034  VOID-INSAMPLE
+chainfour_drop40_long_s2026                   0.8673 0.8787 +0.0114  
 raptor_effv2l480                              0.8703 0.8768 +0.0065  VOID-INSAMPLE
 foreign_dinov3_band1387                       0.8724 0.8766 +0.0042  VOID-INSAMPLE
 foreign_dinov3_tta3                           0.8729 0.8763 +0.0034  VOID-INSAMPLE
+stack_increments_drop40_long_s2026            0.8650 0.8751 +0.0101  
+labelwise_drop_drop40_long_s2026              0.8703 0.8750 +0.0047  
 stack_increments_s2026                        0.8642 0.8748 +0.0105  
 stack_increments_base_s2026                   0.8635 0.8740 +0.0105  
 foreign_dinov3_tta4                           0.8703 0.8739 +0.0036  VOID-INSAMPLE
 foreign_dinov3_band1090                       0.8704 0.8738 +0.0034  VOID-INSAMPLE
+labelwise_ext_drop40_long_s2026               0.8672 0.8736 +0.0064  
 chainfour_s2026                               0.8648 0.8734 +0.0086  
 merged_distill_cf                             0.8637 0.8733 +0.0096  
 foreign_dinov3_band1486                       0.8685 0.8728 +0.0043  VOID-INSAMPLE
 merged_span_cf                                0.8618 0.8728 +0.0109  
 chaindense_s2026                              0.8628 0.8725 +0.0097  
+distill_stack_clean_s2026                     0.8645 0.8722 +0.0077  
+labelwise_dense_drop40_long_s2026             0.8672 0.8719 +0.0047  
+labelwise_depth24_negpull_s2026               0.8666 0.8719 +0.0053  
+soup_siblings_s2026                           0.8624 0.8718 +0.0094  
+labelwise_depth24_drop40_long_s2026           0.8679 0.8718 +0.0038  
+solobase_hold                                 0.8679 0.8718 +0.0038  
+labelwise_dense_stem_llrd_s2026               0.8667 0.8716 +0.0049  
+lr8e5_ship_s2026                              0.8673 0.8716 +0.0043  
+distill_stack_max_s2026                       0.8634 0.8715 +0.0081  
 merged_blend_cf_r392                          0.8612 0.8710 +0.0098  
 oof_teacher_s2026                             0.8685 0.8709 +0.0024  
+labelwise_dense_drop40_long36_s2026           0.8678 0.8708 +0.0030  
+sam_r01_s2026                                 0.8655 0.8706 +0.0051  
+chainfour_drop40_s2026                        0.8589 0.8706 +0.0116  
+fieldwide_s2026                               0.8668 0.8705 +0.0037  
+labelwise_drop_s2026                          0.8649 0.8701 +0.0052  
+blendhold_drop40_long_s2026                   0.8595 0.8701 +0.0105  
+roinative_labelwise_drop40_long_s2026         0.8641 0.8698 +0.0057  
+dropstack_light_s2026                         0.8654 0.8697 +0.0043  
+roi_labelwise_drop40_long_s2026               0.8648 0.8695 +0.0047  
 foreign_distill_mix07_s2026                   0.8657 0.8695 +0.0038  
 merged_labelwise_cf                           0.8587 0.8693 +0.0105  
+dropstack_long_s2026                          0.8641 0.8691 +0.0049  
 merged_blend_cf                               0.8597 0.8690 +0.0093  
 merged_blend_cf_n12b0.1-0.9                   0.8597 0.8690 +0.0093  
 foreign_distill_calib_s2026                   0.8641 0.8685 +0.0044  
+warm_calib_lowlr_drop40_long_s2026            0.8641 0.8684 +0.0043  
 blendemalabel224_s2026                        0.8591 0.8684 +0.0093  
+labelwise_depth24_s2026                       0.8617 0.8683 +0.0066  
 clean_calib_s2026                             0.8649 0.8682 +0.0033  
 stackfit_s2026                                0.8631 0.8682 +0.0051  
 merged_blend_s2026                            0.8589 0.8681 +0.0093  
+clean_calib_drop40_long_s2026                 0.8647 0.8681 +0.0034  
 blendhold_s2026                               0.8575 0.8681 +0.0106  
 labelwise_extended_s2026                      0.8623 0.8680 +0.0057  
 merged_dense_cf                               0.8569 0.8679 +0.0110  
+warm_calib_lowlr_drop40_long_s2026_run1       0.8632 0.8677 +0.0045  
 calib_hold_clean_distill_s2026                0.8641 0.8675 +0.0035  
 recal_calib_s2026                             0.8620 0.8674 +0.0054  
 labelwise_dense_s2026                         0.8613 0.8671 +0.0058  
 raptor_distill_s2026                          0.8613 0.8667 +0.0054  
+labelwise_depth20_b10_s2026                   0.8607 0.8666 +0.0059  
 blendema224_s2026                             0.8567 0.8666 +0.0099  
 seat_clean_distill_s2026                      0.8634 0.8662 +0.0028  
 seat_distill_lr4e5_s2026                      0.8633 0.8660 +0.0027  
+dropstack_dense_s2026                         0.8595 0.8657 +0.0062  
 merged_blend_cf_r280                          0.8557 0.8656 +0.0099  
 stack_increments_fx_s2026_run1                0.8595 0.8655 +0.0060  
 seat_distill_gen2_s2026                       0.8640 0.8654 +0.0014  
+moment_wide_s2026                             0.8600 0.8650 +0.0050  
 finding_calib_dense_s2026                     0.8600 0.8649 +0.0049  
+band_dense_drop40_long_s2026                  0.8587 0.8649 +0.0062  
 band_dense_s2026_n24b0.1-0.9                  0.8598 0.8648 +0.0050  
 calib_dense_hold_s2026                        0.8634 0.8644 +0.0010  
+unfreeze_deep_s2026                           0.8585 0.8642 +0.0057  
 distill_pairs_s2026                           0.8594 0.8641 +0.0047  
 foreign_dinov3_band1684                       0.8601 0.8641 +0.0040  VOID-INSAMPLE
 small_batch6_s2026                            0.8598 0.8640 +0.0042  
@@ -125,44 +157,59 @@ labels_v4hybrid_s2026                         0.8524 0.8627 +0.0102
 certainty_ramp_s2026                          0.8584 0.8627 +0.0042  
 band_dense_s2026                              0.8578 0.8627 +0.0048  
 warm_calib_lowlr_s2026                        0.8577 0.8626 +0.0049  
+mergedk_labelwise_drop40_long_336_s2026       0.8621 0.8625 +0.0004  
 band_dense_hold_s2026                         0.8573 0.8624 +0.0052  
 small_feat_fit_s2026                          0.8571 0.8623 +0.0052  
 base_clean_s2026                              0.8570 0.8623 +0.0053  
 band_dense_long_s2026                         0.8587 0.8622 +0.0035  
+soup_top5_s2026                               0.8570 0.8622 +0.0051  
 attend_dense_s2026                            0.8569 0.8621 +0.0053  
 raptor_cnv2b336                               0.8550 0.8621 +0.0071  VOID-INSAMPLE
 oof_gen2_fold0_s2026                          0.8609 0.8621 +0.0012  
 disagreed_ramp_s2026                          0.8574 0.8620 +0.0046  
 foreign_dinov3_band0892                       0.8582 0.8619 +0.0037  VOID-INSAMPLE
+ctl_nodrop_s2026                              0.8569 0.8618 +0.0050  
 through_dense_s2026_r392                      0.8587 0.8617 +0.0030  
 small_accum_s2026                             0.8579 0.8615 +0.0036  
 calib_span_hold_s2026                         0.8565 0.8614 +0.0049  
 mixup_dense_s2026                             0.8552 0.8613 +0.0061  
+blendhold_drop40_s2026                        0.8507 0.8611 +0.0104  
+erase_own_cells_s2026                         0.8562 0.8610 +0.0049  
+ctl_slowbb_s2026                              0.8569 0.8609 +0.0040  
 crop160_span_s2026                            0.8564 0.8606 +0.0041  
+ghosting_s2026                                0.8576 0.8606 +0.0029  
 stack_increments_fx_s2026                     0.8489 0.8605 +0.0117  
 seat_distill_clean_s2026                      0.8581 0.8605 +0.0024  
+probe224_control_s2026                        0.8556 0.8601 +0.0044  
 raptor_coat384                                0.8508 0.8601 +0.0092  VOID-INSAMPLE
 unread_dense_s2026                            0.8577 0.8600 +0.0023  
 aprior_dense_s2026                            0.8557 0.8599 +0.0042  
 sided_pool_s2026                              0.8561 0.8597 +0.0036  
 merged_blend_cf_r224                          0.8494 0.8596 +0.0102  
 contrast_dense_s2026                          0.8547 0.8596 +0.0049  
+slot_dropout_hi_s2026                         0.8551 0.8595 +0.0044  
 calib_dense_s2026                             0.8562 0.8593 +0.0031  
 depth_regions_s2026                           0.8549 0.8592 +0.0043  
 band_span_s2026                               0.8565 0.8592 +0.0027  
 through_dense_s2026                           0.8558 0.8592 +0.0034  
+erase_own_cells_s2026_run1                    0.8541 0.8592 +0.0051  
 calib_span_s2026_r392                         0.8555 0.8591 +0.0037  
+base224_drop40_long_s2026                     0.8552 0.8590 +0.0039  
 grade_ladder_s2026                            0.8565 0.8590 +0.0025  
 fovjitter160_s2026                            0.8544 0.8589 +0.0045  
 warm_calib_dense_s2026                        0.8562 0.8588 +0.0026  
+mergedk_drop40_long_s2026                     0.8566 0.8588 +0.0021  
+severity_drop40_long_s2026                    0.8538 0.8587 +0.0049  
 severity_weight_s2026                         0.8530 0.8587 +0.0057  
 noisy_student_s2026                           0.8549 0.8587 +0.0038  
 depth_regions_narrow_s2026                    0.8554 0.8586 +0.0033  
+moment_dense_s2026                            0.8516 0.8586 +0.0070  
 calib_span_s2026                              0.8545 0.8585 +0.0040  
 calib_span_s2026_n12b0.1-0.9                  0.8545 0.8585 +0.0040  
 band140_s2026                                 0.8556 0.8584 +0.0028  
 calib_span_s2026_r280                         0.8532 0.8584 +0.0051  
 ema224_s2026                                  0.8544 0.8583 +0.0039  
+slot_dropout_max_s2026                        0.8546 0.8582 +0.0037  
 merged_corpus_s2026                           0.8545 0.8582 +0.0037  
 grade_ladder_s2026_r280                       0.8567 0.8581 +0.0015  
 aprior_fixed_s2026                            0.8557 0.8580 +0.0023  
@@ -171,10 +218,13 @@ band_wide_s2026                               0.8553 0.8577 +0.0023
 focal_dense_s2026                             0.8534 0.8576 +0.0042  
 extended_band_s2026                           0.8519 0.8572 +0.0053  
 relabel_hold_s2026                            0.8515 0.8570 +0.0055  
+soup_top10_s2026                              0.8526 0.8568 +0.0042  
 fuse_regions_s2026                            0.8518 0.8567 +0.0048  
 labelwise224_s2026                            0.8517 0.8566 +0.0049  
 grade_ladder_s2026_r392                       0.8555 0.8566 +0.0011  
+probe224_control_aug_s2026                    0.8528 0.8566 +0.0037  
 hisfluid_hold_s2026                           0.8518 0.8565 +0.0047  
+base224_drop40_long_s2026_run1                0.8529 0.8565 +0.0036  
 lr4e-5_ws_s2026                               0.8525 0.8565 +0.0039  
 fovjitter160_s2026_run1                       0.8543 0.8565 +0.0021  
 lr4e-5_ws_s2026_r392                          0.8523 0.8565 +0.0041  
@@ -185,13 +235,17 @@ foreign_dissent_s2026                         0.8538 0.8563 +0.0025
 contrast_pool_s2026                           0.8515 0.8563 +0.0048  
 through_dense_s2026_r280                      0.8520 0.8561 +0.0040  
 band_density_s2026                            0.8540 0.8561 +0.0021  
+ctl_nofloor_s2026                             0.8506 0.8560 +0.0054  
 band224_hold_s2026                            0.8516 0.8559 +0.0044  
 holdannot_s2026                               0.8506 0.8559 +0.0053  
+ctl_maxpool_s2026                             0.8503 0.8557 +0.0054  
 res392_ws_s2026                               0.8523 0.8557 +0.0034  
 merged3_corpus_s2026                          0.8521 0.8556 +0.0035  
 base_dense_s2026                              0.8512 0.8556 +0.0044  
+v2delonly_span_s2026                          0.8417 0.8555 +0.0138  
 v2_corrected_s2026                            0.8392 0.8555 +0.0163  
 fuse_attend_s2026                             0.8509 0.8554 +0.0045  
+mergedk_drop40_s2026                          0.8530 0.8553 +0.0024  
 rank966_hold_s2026                            0.8517 0.8551 +0.0034  
 band224_s2026_run1                            0.8512 0.8548 +0.0036  
 dissent_seat_s2026                            0.8509 0.8547 +0.0039  
@@ -199,11 +253,13 @@ weakdraw_flat_s2026                           0.8491 0.8547 +0.0055
 sided224_s2026                                0.8512 0.8546 +0.0033  
 base_honest_batch_s2026                       0.8502 0.8545 +0.0043  
 mixup224_long_s2026                           0.8505 0.8545 +0.0040  
+ctl_nocalib_s2026                             0.8508 0.8544 +0.0036  
 band_span_hold_s2026                          0.8493 0.8544 +0.0052  
 lr4e-5_ws_s2026_r280                          0.8506 0.8543 +0.0037  
 errors_relabel_s2026                          0.8522 0.8543 +0.0021  
 clip224_tight_s2026                           0.8488 0.8543 +0.0055  
 native224_s2026                               0.8502 0.8542 +0.0040  
+ctl_norank_s2026                              0.8497 0.8540 +0.0043  
 attend224_s2026                               0.8503 0.8539 +0.0036  
 cover_labelwise_s2026                         0.8495 0.8539 +0.0044  
 regions224_s2026                              0.8476 0.8539 +0.0063  
@@ -221,6 +277,7 @@ mixup224_strong_s2026                         0.8516 0.8530 +0.0014
 band_deep_matched_s2026                       0.8487 0.8530 +0.0043  
 grade_ladder_s2026_r224                       0.8504 0.8530 +0.0025  
 aug_long_s2026                                0.8511 0.8530 +0.0019  
+probe224_grand_norest_s2026                   0.8497 0.8527 +0.0030  
 margin_seat_s2026                             0.8525 0.8527 +0.0002  
 depth_regions_span_s2026                      0.8487 0.8526 +0.0040  
 disagreed_full_s2026                          0.8471 0.8526 +0.0055  
@@ -233,9 +290,16 @@ oof_fold0_s2026                               0.8498 0.8520 +0.0022
 intensity392_ws_s2026                         0.8459 0.8520 +0.0061  
 calibrated_targets_s2026                      0.8493 0.8516 +0.0023  
 through_dense_s2026_n12b0.1-0.9               0.8451 0.8516 +0.0064  
+mergedk_corpus_s2026                          0.8490 0.8515 +0.0025  
 headlr224_slow_s2026                          0.8475 0.8515 +0.0039  
+probe224_grand_nomixup_s2026                  0.8492 0.8512 +0.0020  
 lr1e-4_ws_s2026                               0.8490 0.8512 +0.0022  
+soup_top20_s2026                              0.8483 0.8511 +0.0028  
 stack224_s2026                                0.8476 0.8511 +0.0034  
+pool_specialise_s2026                         0.8494 0.8510 +0.0017  
+probe224_grand_trim_s2026                     0.8494 0.8510 +0.0016  
+v8named_span_s2026                            0.8468 0.8509 +0.0041  
+probe224_grand_noema_s2026                    0.8478 0.8508 +0.0030  
 through_dense_s2026_r224                      0.8456 0.8504 +0.0048  
 band_pairmem_s2026                            0.8486 0.8502 +0.0016  
 errors_rank_s2026                             0.8462 0.8502 +0.0040  
@@ -251,6 +315,8 @@ adjacent224_s2026                             0.8462 0.8492 +0.0031
 clip224_s2026                                 0.8439 0.8492 +0.0053  
 ortho_pool_read                               0.8464 0.8492 +0.0028  
 mrnet_warm_s2026                              0.8487 0.8491 +0.0004  
+base224_control_s2026                         0.8451 0.8488 +0.0036  
+probe224_grand_nohard_s2026                   0.8462 0.8487 +0.0025  
 crop80_span_s2026                             0.8466 0.8486 +0.0020  
 ortho_fastmri_s2026                           0.8475 0.8485 +0.0010  
 nocycle224_long_s2026                         0.8442 0.8484 +0.0042  
@@ -265,6 +331,7 @@ ortho_dense_s2026                             0.8452 0.8473 +0.0021
 extended_ws_s2026                             0.8462 0.8472 +0.0010  
 sliceattn_s2026                               0.8473 0.8470 -0.0002  
 res392_lr8e-6_ws_s2026                        0.8459 0.8467 +0.0008  
+probe224_grand_s2026                          0.8445 0.8467 +0.0022  
 band_deep224_s2026                            0.8446 0.8463 +0.0018  
 schedule_8_s2026                              0.8429 0.8459 +0.0030  
 depth_true_s2026                              0.8461 0.8458 -0.0002  
@@ -275,11 +342,13 @@ llrd224_s2026                                 0.8453 0.8441 -0.0012
 mricore_corpus_s2026                          0.8390 0.8440 +0.0050  
 centre_tissue_s2026                           0.8409 0.8440 +0.0031  
 merged3_oversample_s2026                      0.8416 0.8438 +0.0022  
+chainfour_v5blend_s2026                       0.8285 0.8437 +0.0152  
 focal_pool_s2026                              0.8432 0.8437 +0.0005  
 decay224_low_s2026                            0.8454 0.8436 -0.0018  
 band_early_s2026                              0.8418 0.8436 +0.0018  
 latent_register_dense_s2026                   0.8385 0.8429 +0.0044  
 ortho_pool_read_run1                          0.8408 0.8428 +0.0019  
+probe224_grand_noaug_s2026                    0.8386 0.8427 +0.0041  
 ortho_stack_s2026                             0.8417 0.8426 +0.0009  
 resnet50d_short_s2026                         0.8393 0.8425 +0.0031  
 per_label_loss_s2026                          0.8414 0.8425 +0.0011  
@@ -290,8 +359,10 @@ vjepa_warm_s2026                              0.8337 0.8410 +0.0074
 resnet_224_long_s2026_run1                    0.8404 0.8410 +0.0006  
 vjepa_member_s2026                            0.8343 0.8399 +0.0056  
 latent_register_deep_s2026                    0.8378 0.8396 +0.0018  
+ctl_fastbb_s2026                              0.8360 0.8387 +0.0027  
 v3small_control_s2026                         0.8371 0.8385 +0.0014  
 crop80_tissue_s2026                           0.8345 0.8383 +0.0039  
+ctl_stripall_s2026                            0.8367 0.8383 +0.0016  
 ortho_lora_s2026                              0.8349 0.8372 +0.0023  
 half_data_s2026                               0.8344 0.8369 +0.0025  
 base20_fold0                                  0.8358 0.8361 +0.0003  
@@ -308,6 +379,7 @@ swin_wholetop_s2026                           0.8274 0.8290 +0.0017
 discord_mask_s2026                            0.8148 0.8288 +0.0140  
 swin_distill_fit_s2026                        0.8255 0.8284 +0.0029  
 ortho_slow_trunk                              0.8265 0.8284 +0.0018  
+v7nontear_span_s2026                          0.8160 0.8282 +0.0122  
 aprior_dense_s2026_run1                       0.8224 0.8279 +0.0055  
 extended_band_s2026_run1                      0.8278 0.8278 +0.0000  
 dinov3_base_lora_s2026                        0.8268 0.8278 +0.0009  
@@ -316,15 +388,19 @@ adapt_null_s2026                              0.8240 0.8274 +0.0034
 encoder_layer_9_s2026                         0.8230 0.8265 +0.0035  
 ortho_fresh_lowlr_s2026                       0.8248 0.8260 +0.0012  
 v3large_dense_s2026                           0.8258 0.8258 +0.0000  
+v5blend_span_s2026                            0.8113 0.8258 +0.0145  
 conf24_s7                                     0.8269 0.8257 -0.0012  
 coatnet_hybrid_s2026                          0.8259 0.8254 -0.0005  
 conf24_s2026                                  0.8259 0.8250 -0.0009  
 swin_calib_dense_s2026                        0.8224 0.8245 +0.0021  
 raptor_feat_pre_s2026                         0.8201 0.8239 +0.0037  
+sam_dense_s2026                               0.8213 0.8236 +0.0023  
+v6tears_span_s2026                            0.8116 0.8235 +0.0119  
 radiodino_corpus_s2026                        0.8214 0.8235 +0.0020  
 resnet50d_lr_s2026                            0.8196 0.8227 +0.0031  
 base_s7_fold0                                 0.8240 0.8223 -0.0017  
 band_mid_s2026                                0.8204 0.8222 +0.0018  
+ctl_nowhole_s2026                             0.8211 0.8220 +0.0008  
 base_fold0                                    0.8238 0.8214 -0.0024  
 lora_r8_v3small_224_s2026                     0.8215 0.8211 -0.0004  
 swin_distill_pre_s2026                        0.8177 0.8210 +0.0032  
@@ -341,6 +417,7 @@ radiodino_s16_s2026                           0.8108 0.8124 +0.0015
 oof_reader_fold0_s2026                        0.7998 0.8100 +0.0102  
 foreign_recipe_v3small_336_20sl_s2026         0.8087 0.8099 +0.0012  
 fovjitter160_s2026_run2                       0.8066 0.8089 +0.0023  
+recal_labelwise_s2026                         0.8026 0.8073 +0.0048  
 dinov3_v3small_224_s2026                      0.8057 0.8064 +0.0007  
 raddino_dense_s2026_run1                      0.7984 0.8021 +0.0037  
 cnx_mid_rate_s2026                            0.7993 0.8019 +0.0026  
@@ -355,10 +432,12 @@ quarter_data_s2026                            0.7907 0.7869 -0.0038
 mricore_rate_s2026                            0.7811 0.7769 -0.0042  
 cnx_top_rate_s2026                            0.7762 0.7768 +0.0006  
 vjepa_member_s2026_run1                       0.7726 0.7768 +0.0042  
+labelwise_dense_stem_s2026                    0.7729 0.7742 +0.0013  
 band_lpft_head                                0.7614 0.7598 -0.0016  
 ortho_lpft_head                               0.7537 0.7512 -0.0025  
 radnet_pinned_s2026                           0.7505 0.7494 -0.0011  
 recal_through_s2026                           0.7464 0.7432 -0.0032  
+vjepa_cold_s2026                              0.7499 0.7422 -0.0076  
 depth_regions_span_s2026_run1                 0.7455 0.7411 -0.0043  
 coatnet_hybrid_s2026_voidnorm                 0.7383 0.7379 -0.0004  
 fovjitter160_s2026_run3                       0.7422 0.7376 -0.0047  
@@ -379,7 +458,7 @@ radnet_family_s2026                           0.6716 0.6653 -0.0063
 focus_mcl_s2026                               0.5332 0.5332 +0.0000  
 focus_latmen_s2026                            0.4747 0.4664 -0.0083  
 
-=== roster members with NO usable holdout npz (20 of 137) ===
+=== roster members with NO usable holdout npz (20 of 147) ===
   final_ws_e12 (no npz on disk)
   calib_span_ff (no npz on disk)
   grade_ladder_ff (no npz on disk)
@@ -410,28 +489,27 @@ focus_latmen_s2026                            0.4747 0.4664 -0.0083
   seat 6: + focus_mcl_s2026                          joint T1 0.9240
   FINAL 6-seat joint: T0 0.9215 | T1 0.9240
 
-=== greedy forward selection on T1 (honest pool (295 members, void in-sample excluded) — sensitivity, because the spec run's early seats are void readings) ===
-  seat 1: + stack_increments_s2026                   joint T1 0.8748
-  seat 2: + merged_labelwise_cf                      joint T1 0.8805
-  seat 3: + labelwise_extended_s2026                 joint T1 0.8828
-  seat 4: + merged_span_cf                           joint T1 0.8842
-  seat 5: + blendhold_s2026                          joint T1 0.8847
-  seat 6: + foreign_labels_dense_s2026               joint T1 0.8850
-  FINAL 6-seat joint: T0 0.8762 | T1 0.8850
+=== greedy forward selection on T1 (honest pool (374 members, void in-sample excluded) — sensitivity, because the spec run's early seats are void readings) ===
+  seat 1: + chainfour_drop40_long_s2026              joint T1 0.8787
+  seat 2: + stack_increments_base_s2026              joint T1 0.8826
+  seat 3: + merged_labelwise_cf                      joint T1 0.8841
+  seat 4: + labelwise_depth24_drop40_long_s2026      joint T1 0.8851
+  seat 5: + blendhold_s2026                          joint T1 0.8858
+  seat 6: + dropstack_long_s2026                     joint T1 0.8862
+  FINAL 6-seat joint: T0 0.8778 | T1 0.8862
 
 === champion comparison ===
-  champion seats: ['final_ws_cf', 'calib_span_ff', 'grade_ladder_cf', 'stack_increments_ff', 'lr4e-5_ws_cf', 'through_dense_cf']
+  champion seats: ['final_ws_cf', 'calib_span_ff', 'stack_increments_ff', 'through_dense_cf', 'labelwise_depth24_drop40_long_s2026', 'labelwise_ext_drop40_long_s2026', 'labelwise_dense_drop40_long_s2026']
   ABSENT (no npz on disk): final_ws_cf
   ABSENT (full-fit, fold -1, unscorable by construction): calib_span_ff
-  ABSENT (no npz on disk): grade_ladder_cf
   ABSENT (full-fit, fold -1, unscorable by construction): stack_increments_ff
-  ABSENT (no npz on disk): lr4e-5_ws_cf
   ABSENT (no npz on disk): through_dense_cf
   overlap champion vs greedy-spec pool: NONE
-  overlap champion vs greedy-honest pool: NONE
-  champion SCORABLE subset: EMPTY — 0 of 6 seats can be scored. The comparison is not merely partial, it is impossible on these rulers; no champion joint score exists offline.
+  overlap champion vs greedy-honest pool: ['labelwise_depth24_drop40_long_s2026']
+  champion SCORABLE subset (3/7 seats): ['labelwise_depth24_drop40_long_s2026', 'labelwise_ext_drop40_long_s2026', 'labelwise_dense_drop40_long_s2026']
+  champion-subset joint: T0 0.8734 | T1 0.8780
 
 OUTCOME:
   spec-pool greedy set: ['raptor_v4_swa', 'dinov3f0_solo', 'foreign_dinov3_matched', 'raptor_effv2l480', 'focus_latmen_s2026', 'focus_mcl_s2026']
-  honest-pool greedy set: ['stack_increments_s2026', 'merged_labelwise_cf', 'labelwise_extended_s2026', 'merged_span_cf', 'blendhold_s2026', 'foreign_labels_dense_s2026']
-  The champion's exact set CANNOT be scored (4 seats have no npz, 2 are full-fit fold -1); 0/6 seats are scorable, so no joint champion number exists on T0 or T1 and the comparison is stated against overlap only: overlap is 0 seats for both greedy runs. Outcome class: DIFFERENT-OVERLAPPING with overlap = 0 — i.e. a wholly different six, but with NO corrected-ruler champion score to beat, the 'better' arm of the classification is vacuous here. Greedy joints: spec pool T0 0.9215 / T1 0.9240; honest pool T0 0.8762 / T1 0.8850.
+  honest-pool greedy set: ['chainfour_drop40_long_s2026', 'stack_increments_base_s2026', 'merged_labelwise_cf', 'labelwise_depth24_drop40_long_s2026', 'blendhold_s2026', 'dropstack_long_s2026']
+  The champion's exact set CANNOT be scored (4 seats have no npz, 2 are full-fit fold -1); 0/6 seats are scorable, so no joint champion number exists on T0 or T1 and the comparison is stated against overlap only: overlap is 0 seats for both greedy runs. Outcome class: DIFFERENT-OVERLAPPING with overlap = 0 — i.e. a wholly different six, but with NO corrected-ruler champion score to beat, the 'better' arm of the classification is vacuous here. Greedy joints: spec pool T0 0.9215 / T1 0.9240; honest pool T0 0.8778 / T1 0.8862.
