@@ -2459,6 +2459,19 @@ curve's own dip and calls it a gain.
 blendseat 0.939 (7) · blendthree 0.939 (7) · pixgroup 0.940 (8) · calibsix 0.941 (6) · calibmix 0.941
 (11). The ordering is **inverse** to offline holdout gain.
 
+> **PARTLY RETRACTED 2026-09-17 00:36Z — the mechanism argument stands, the two board readings do not.**
+> The sound half of this closure is the one about the fit set: a greedy fitting on 454 of 909 studies cannot
+> resolve a seat worth less than the 0.0062 floor, so **half-holdout greedy seating stays closed.** Both
+> board readings offered as evidence are wrong.
+> **There is no sign flip.** `honest12` (offline 0.8751 → board 0.937) against the twinfive shadow it beat
+> offline (`twinfive_v1`, 0.8705 → 0.935) is +0.0046 offline → **+0.002 board, the same sign**. The top-band
+> line predicts +0.0067, so it *under-delivered by 2.1 combined sd* — a shortfall, not a reversal. The
+> "−0.004" compares `honest12` to `calibsix_v1`, a different entry it never claimed to beat.
+> **The inverse ordering is unsupported.** `resseat_v1`, `blendseat_v1`, `blendthree_v1`, `pixgroup_v1`,
+> `calibsix_v1` and `calibmix_v1` all carry `offline: null` in `comp/board.jsonl`. The sentence ranks their
+> board values against offline numbers that do not exist.
+> What re-opens is **designed** seating priced on the full 909 — see knee-5hbtz.
+
 **What it does NOT close.** The members. `calib_dense_hold_s2026` at 0.8634 solo has still never been read
 alone on the board, and seven of these twelve remain individually unpriced. A bad seating of good members
 is not evidence about the members.
@@ -4417,14 +4430,34 @@ Leg 1 measured the board's identical-entry scatter at **0.000**, which is what t
 | `pricetop_v1` | 1 of 6 (near-disjoint) | −0.0010 | **−0.006** |
 
 Every offline delta here is below the 0.0062 holdout noise floor — our ruler cannot separate any of these
-pools. The board separates the third one by three times its own blur. **So board movement at a fixed reading
-tracks POOL OVERLAP, not pool quality on our ruler**: perturb a pool by one seat in either direction and the
-board does not move at all; replace it wholesale and it moves 0.006.
+pools. The `pricetop`/`foldseven` blocker — "one offline point, six board points", which has gated pricing
+every arm in this band — is **resolved and was misframed**: there is no rogue seat to find, because the two
+entries share exactly one member.
 
-Two consequences. The `pricetop`/`foldseven` blocker — "one offline point, six board points", which has
-gated pricing every arm in this band — is **resolved and was misframed**: there is no rogue seat to find,
-because the two entries share exactly one member. And `board_transfer`'s slope may be applied WITHIN a family
-and not ACROSS one: it converts an offline gain for a move that keeps the pool's identity, and prices nothing
-about switching families, where 0.0010 of offline bought 0.006 of board in one direction and could as easily
-buy −0.006 in the other. We are already on the side that transferred better, so this explains pricetop's
-shortfall rather than offering us headroom. n=1 pair on the disjoint case.
+##### RETRACTED 2026-09-17 00:36Z: there is no pool-overlap effect, and the arithmetic that found one was wrong
+
+This section first read the table above as **"board movement at a fixed reading tracks POOL OVERLAP, not
+pool quality on our ruler"**, and drew from it that `board_transfer`'s slope applies within a family and
+not across one. **Both claims are withdrawn.** They rested on the single `pricetop`/`foldseven` pair, read
+without removing the offline trend, which is the same un-detrended comparison this file has now made wrong
+three times.
+
+Fit the 50 ensemble rows that carry both numbers and the top band is a **tight line**: over the 15 rows at
+offline ≥ 0.8700, slope **+1.45** with residual sd **0.0022**. Against that line `pricetop_v1`'s residual is
+**−0.0019 — under one sd.** It is an ordinary point, not an anomaly, and no pool-identity effect is visible
+anywhere in the record. The "three times its own blur" above compared a board delta to the board's
+*rounding*, never to its *scatter about the transfer line*, which is the only denominator that could make it
+mean something.
+
+What the detrended fit gives instead is worth more than the retracted claim:
+
+- **The gap converts and cannot be luck.** 0.011 board to the leader is **4.9 residual sd**, or **+0.0076
+  offline** at the top slope. A real gain that size will show; scatter will not deliver it.
+- **A board delta under ~0.004 between two of our own entries is within 2 sd of the line and is not
+  evidence.** That is a standing rule for reading this file, and it is what the earlier reading violated.
+- **Designed seating is the thing that is working.** The three highest residuals in the top band are
+  `swapseat_v1` +0.0032, `foldseven_v1` +0.0026, `eightseat_v1` +0.0023 — all three designed, all three
+  honestly priced on the full 909.
+
+Re-derive the fit before quoting any number in this subsection; adding a row moves it, which is this file's
+standing failure mode. See knee-5hbtz, which also re-opens part of the seating closure at :2450.

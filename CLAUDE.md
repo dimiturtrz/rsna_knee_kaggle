@@ -271,7 +271,14 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   and four marked DIRECTION ONLY at 00:22Z. That instability is the band definition, not the data, and quoting
   a pair count as a fact was this paragraph's error committed a fifth time, fifteen minutes after writing the
   fourth one down. What is stable across both reads, and is the thing to carry: **the top band's slope is
-  roughly +1.4 to +1.7 and sits well above the whole record's +1.1.** Three things had to be fixed to read it
+  roughly +1.4 to +1.7 and sits well above the whole record's +1.1.** **AND A SLOPE WITHOUT ITS RESIDUAL
+  SCATTER CANNOT SAY WHETHER A DELTA IS EVIDENCE** — quote the two together or neither. Detrended
+  2026-09-17 the top band (offline ≥ 0.8700, n=15) is a TIGHT line: slope +1.45, **residual sd 0.0022**.
+  So a board delta under ~0.004 between two of our own entries is inside 2 sd and means nothing, and the
+  0.011 to the leader is 4.9 sd — real, and not reachable by scatter. Binning "offline-equivalent" peers
+  inside the 0.0062 floor and taking their board sd does NOT give this: that reads 0.0039, and the excess
+  is the offline TREND inside the bin, which is how one un-detrended pair was written up as a pool-overlap
+  effect and retracted the same night (knee-5hbtz). Three things had to be fixed to read it
   at all, and each had put a wrong number here. FIRST, the exclusion of a row was written in `scope_reason` PROSE while `entries()` filters on
   the `scope` FIELD, so eighteen rows declaring EXCLUDED sat on the ensemble scope and the two carrying an
   offline number were in the fit — both greedy-selected ON the holdout, so in-sample by construction, the
