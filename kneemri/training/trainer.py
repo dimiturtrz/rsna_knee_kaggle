@@ -17,6 +17,7 @@ lateral one and teaching the model that the distinction is noise.
 
 import logging
 import math
+import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -726,17 +727,20 @@ class Trainer:
     def save_partial(self, destination: Path, payload: dict[str, object]) -> None:
         """Write the best weights so far, atomically, the moment they improve.
 
-        Holding the only copy in memory until the final epoch is how a run that has already produced
-        its best epoch loses everything — which the OneCycle off-by-one demonstrated by raising on the
-        very last step of a thirty-epoch run. Temp-then-rename means a crash mid-write cannot leave a
-        truncated file behind either.
+        The rename is atomic against a dying PROCESS, not against a dying MACHINE, so the temp file is
+        FLUSHED TO THE PLATTER first: without the fsync the filesystem journals the size while the data
+        blocks sit in cache, and an OS restart leaves a file of exactly the right length whose tail is
+        zeros and which carries no zip central directory — `torch.load` then raises
+        `PytorchStreamReader failed reading zip archive` on weights every other signal says are there.
 
-        The payload is assembled by the CALLER, and is the same one the final save writes. This used
-        to store only weights, holdout and epoch, which preserved a run's work but not its identity:
-        a member with no fingerprint and no recorded reading is refused by MemberPackage, so a killed
-        run left weights that could be inspected and never submitted.
+        The payload is the CALLER's, and is the one the final save writes: weights without a fingerprint
+        and a recorded reading are refused by MemberPackage, so a narrower payload preserves a killed
+        run's work but not its identity.
         """
         partial = destination.with_suffix(".partial")
         temporary = partial.with_suffix(".tmp")
-        torch.save(payload, temporary)
+        with temporary.open("wb") as handle:
+            torch.save(payload, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
         temporary.replace(partial)
