@@ -815,10 +815,17 @@ resnet_224_long_s2026.pt    # The 48-epoch CNN, completed 2026-09-10 after the f
                             # two near-identical CNNs are not two units of diversity. Read it against the
                             # pool with a divergence measurement, never against its solo.
                             # Ledger 2026-09-10.
-oof_band_fold0_s2026.pt     # 0.8522 midpoint on the 909, best of 8 epochs at 68 s/epoch — the CHEAPEST
-                            # member on this roster by an order of magnitude, and it lands within 0.0001
-                            # of `res392_ws_s2026` 0.8523 and above `extended_ws_s2026` 0.8459. Sat
-                            # undocumented from 2026-09-10 15:49Z: it is one of the `oof_{band,reader}`
+oof_band_fold0_s2026.pt     # NO SCORE ON THIS ROSTER'S RULER. Its arm (`oof_band_folds.sh:72`) passes
+                            # `--labels report_labels_v6band50.csv` with `--eval-labels` UNSET, so its
+                            # holdout truth is the band table and not v2 — the ruler moved with the arm,
+                            # the `recal_holdannot_s2026` defect (`comp/members.declines:84`).
+                            # `rescore_t2_deletions_ruler.out.txt:17` refuses it on truth alignment, and
+                            # `RecordMix.per_member` refuses any entry built from it. The 0.8522 this
+                            # line carried is on the band table and MAY NOT be compared to
+                            # `res392_ws_s2026` 0.8523 or `extended_ws_s2026` 0.8459, which are v2.
+                            # Seatable only once re-scored against v2 (knee-g2vm9).
+                            # It is the CHEAPEST member here by an order of magnitude, one of the
+                            # `oof_{band,reader}`
                             # teacher family, whose fold[1-4] siblings are unseatable BY CONSTRUCTION
                             # because their holdout is our holdout — but fold0 holds out fold 0, which
                             # is the fold everything here is read on, so this one is legitimately
