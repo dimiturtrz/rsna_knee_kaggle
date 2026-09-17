@@ -124,3 +124,33 @@ at 0.9074 honest offline75 would be refit into 0.947 against a 0.946 that refits
 - The inversion assumes the fit's slope holds 0.005 beyond its largest x. `l75solo_v1` at 0.9053 is the
   top of the fitted range; 0.9142 is an extrapolation.
 - Nothing here says the +0.0089 is reachable. It says what it would have to be worth.
+
+## AMENDMENT, 2026-09-17 23:25Z — the title is now too strong, and the miss is at the top
+
+`extsolo_v1` (ref 56315030) shipped `labelwise_ext_drop40_long_s2026`, offline75 **0.9045**. The n=8
+fit above predicted **0.9403**, 2 sd [0.9371, 0.9435]. It read **0.937** — below the band, −2.1 sd,
+ending three consecutive thousandth-exact calls.
+
+One point outside a 2 sd band in nine is what a 2 sd band is for. What makes this one load-bearing is
+**where** it sits. Every call the fit got right was taken between 0.875 and 0.896. Everything this
+project plans is an extrapolation ABOVE 0.904, and until tonight exactly one row lived up there
+(`l75solo_v1`, 0.9053 → 0.941). There are now two, 0.0008 apart on the x axis and **0.004 apart on the
+y axis** — twice the residual sd, at essentially the same abscissa.
+
+So the top of this line is one hit and one miss and cannot discriminate between:
+
+* **scatter** — the board resolves to 0.001 and a 0.004 spread at fixed offline75 is within what two
+  members of equal offline quality can differ by on a hidden split; or
+* **a bend** — the line flattens above ~0.904, i.e. offline75 gains stop converting where we actually
+  ship, and every plan that multiplies by 1.1 is over-predicting its own payoff.
+
+The second reading is the expensive one and it is not yet refuted. Refit with the ninth point:
+`board = -0.0705 + 1.1164 * offline75`, **residual sd 0.0019** (was 0.0016) — the slope fell from
+1.165 to 1.116 on one row, which is itself a statement about how little constrains it.
+
+**Operationally, until a third point at the top:** a predicted board above ~0.904 offline75 is an
+**upper bound**, not a centre. Do not price a plan's payoff off this slope alone, and do not quote the
+gap to first place (+0.012 offline75) as though its conversion were known.
+
+`kneemri-headlrsolo` is that third point: `headlr_ship_s2026`, offline75 **0.9059**, the highest this
+project owns, pre-registered on the LINE rather than on its member.
