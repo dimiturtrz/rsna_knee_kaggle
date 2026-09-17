@@ -1,5 +1,6 @@
 """The spawn retry, over the four things a child process can do to us."""
 
+import logging
 import os
 import subprocess
 import sys
@@ -85,6 +86,14 @@ def test_checked() -> None:
     assert Spawn().checked(done, ["git"]).returncode == 1
     with pytest.raises(subprocess.CalledProcessError):
         Spawn().checked(done, ["git"], check=True)
+
+
+def test_checked_logs_the_child_s_own_stderr(caplog: pytest.LogCaptureFixture) -> None:
+    """The diagnosis is in the child's stderr, which `CalledProcessError` never prints."""
+    done = subprocess.CompletedProcess(["kaggle"], 1, stdout="", stderr="429 Too Many Requests")
+    with caplog.at_level(logging.ERROR), pytest.raises(subprocess.CalledProcessError):
+        Spawn().checked(done, ["kaggle"], check=True)
+    assert "429 Too Many Requests" in caplog.text
 
 
 def _alive(pid: int) -> bool:

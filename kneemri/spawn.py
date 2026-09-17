@@ -33,6 +33,11 @@ SPAWN_BACKOFF_S = 2.0
 POSIX_SIGKILL = 9
 """`signal.SIGKILL`, spelled out because the name does not exist on Windows, where `killed` never reaches it."""
 
+SPAWN_STDERR_TAIL = 2000
+"""`CalledProcessError.__str__` prints the argv and the code and never the child's own stderr, so a
+transient API failure reaches the reader as a bare traceback with the diagnosis inside an attribute
+nobody opens. The tail is logged before the raise."""
+
 
 @dataclass(frozen=True)
 class Spawn:
@@ -109,5 +114,11 @@ class Spawn:
     ) -> subprocess.CompletedProcess[str]:
         """Honour the caller's `check`, now that the result is the child's own and not Windows'."""
         if options.get("check") and done.returncode != 0:
+            logger.error(
+                "%s exited %d; its own stderr: %s",
+                command[0],
+                done.returncode,
+                (done.stderr or "").strip()[-SPAWN_STDERR_TAIL:] or "<empty>",
+            )
             raise subprocess.CalledProcessError(done.returncode, list(command), done.stdout, done.stderr)
         return done

@@ -1433,6 +1433,11 @@ labelwise_ext_drop40_long_ff
   Declined as SEATS, not as checkpoints: they are mounted and rebuildable, and a future entry may seat
   them for a reason other than this one. Re-open it by naming a mechanism that is not "more data per
   seat" — that one is measured flat at two doses.
+  RE-OPENED 2026-09-17 on those terms, as a SOLO and not as a seat (knee-22nk5, `kneemri-extffsolo`). The
+  dose series is silent about the solo end by construction: a refit recovers information seven neighbours
+  already supply between them, so flat at a 1-of-8 share is what a REAL solo term predicts. The solo term
+  itself is n=1 (`l75solo_v1` 0.941 / `ffsolo_v1` 0.944) and load-bearing — it prices every open lever —
+  so this checkpoint is shipped alone to measure it at n=2. The seat decline above stands unchanged.
 
 labelwise_dense_drop40_long_ff
   The third refit, ABANDONED at epoch 2 and correctly so: `.partial` on disk, no `.pt`, no holdout record
