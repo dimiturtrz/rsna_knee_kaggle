@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # mae_unitfix.sh — the same in-domain MAE, with the two loss terms finally in the same units.
-# bead: knee-c3qfe
+# bead: knee-zxm9z
 # reading: encoder_drift_mae_unitfix*
 #
 # WHAT WAS WRONG, and it is arithmetic rather than a hypothesis. `SpectralMae.pixel_loss` scores the
