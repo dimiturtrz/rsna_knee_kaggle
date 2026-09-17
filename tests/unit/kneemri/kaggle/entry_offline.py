@@ -74,6 +74,18 @@ def test_mismatched(tmp_path: Path):
     assert abs(fresh - recorded) > FRAME_GAP, "which is the whole claim"
 
 
+def test_mismatched_reads_its_own_rulers_column(tmp_path: Path):
+    """Under `ledger75` the midpoint's cells are not this check's business, and `priced` holds only one.
+
+    The fixture's `priced` row carries `offline` and no `offline75`. A check that recomputes the
+    midpoint and compares it against the midpoint column reports the same gap whatever `--ruler` says,
+    which is a clean report over a column it never read.
+    """
+    entries = EntryOffline(tmp_path, _board(tmp_path), ruler="ledger75")
+
+    assert entries.mismatched() == {}, "no row carries an offline75 cell, so there is nothing to reproduce"
+
+
 def test_rows(tmp_path: Path):
     """A priced entry, the memberless note, and a row the record ruled out are not this file's business."""
     rows = _entries(tmp_path).rows()

@@ -169,24 +169,33 @@ class EntryOffline:
         return {row.identifier: reason for row in self.rows() if (reason := self.declined(row)) is not None}
 
     def mismatched(self) -> dict[str, tuple[float, float]]:
-        """Rows whose RECORDED `offline` a fresh midpoint read cannot reproduce, by entry id.
+        """Rows whose RECORDED number in THIS RULER'S column a fresh read of that ruler cannot reproduce.
 
         The control on everything else here. A recomputed column is only worth writing if the same code
-        path reproduces the column that already exists, so this runs the midpoint arm over the rows that
+        path reproduces the column that already exists, so this runs the chosen ruler over the rows that
         already carry a number and names the ones that come back further than `FRAME_GAP` away. A row that
         fails is not a tolerance to widen — it is a cell holding a statistic other than the one its column
         name promises, which is `knee-f9aao` on the board file.
+
+        IT READS `self.scores` AND `self.column`, AND BOTH HALVES HAVE TO MOVE TOGETHER. While this method
+        hardcoded `LabelScores()` and `row.offline`, `--ruler ledger75 --check` recomputed the MIDPOINT and
+        compared it to the MIDPOINT column, so it reported clean over an `offline75` column it had never
+        read. That column holds two different rulers: `matchpair_v1` carries 0.9039, which is the recut
+        applied to all twelve findings, while `holdsolo_v1` carries 0.8949, which is the mixed cut that
+        leaves `MIDPOINT_COLUMNS` at 0.5 — a 0.0077 seam on a member whose two rows sit adjacent in the
+        record and were read as a 0.0090 separation between the two members.
         """
-        midpoint = LabelScores()
+        recorded = self.stored()
         found: dict[str, tuple[float, float]] = {}
         for row in BoardCensus(record=self.record).rows():
-            if row.offline is None or not row.members_named or self.declined(row) is not None:
+            stored = recorded.get(row.identifier, {}).get(self.column)
+            if not isinstance(stored, float) or not row.members_named or self.declined(row) is not None:
                 continue
             mix = RecordMix([self.processed / f"{name}.pt" for name in row.members_named], foreign=True)
             pool = mix.per_member(VOTE_RULES[self.vote]())
-            fresh = midpoint.mean(pool.combined(list(range(len(pool)))), pool.truth)
-            if abs(fresh - row.offline) > FRAME_GAP:
-                found[row.identifier] = (row.offline, fresh)
+            fresh = self.scores.mean(pool.combined(list(range(len(pool)))), pool.truth)
+            if abs(fresh - stored) > FRAME_GAP:
+                found[row.identifier] = (stored, fresh)
         return found
 
     def report(self) -> list[str]:
@@ -234,7 +243,9 @@ def main() -> None:
     command.parser.add_argument("--record", type=Path, default=RECORD, help="the submission record")
     command.parser.add_argument("--vote", choices=tuple(VOTE_RULES), default=DEFAULT_VOTE)
     command.parser.add_argument("--ruler", choices=tuple(RULERS), default="midpoint", help="the cut, and the column")
-    command.parser.add_argument("--check", action="store_true", help="recompute the recorded midpoint column")
+    command.parser.add_argument(
+        "--check", action="store_true", help="recompute THIS RULER's column and name every cell it cannot reproduce"
+    )
     command.parser.add_argument("--write", action="store_true", help="write the numbers and scopes back")
     arguments = command.parsed()
     root = command.rooted(arguments)
@@ -243,8 +254,11 @@ def main() -> None:
     if arguments.check:
         gaps = entries.mismatched()
         command.report([f"{name} recorded {was:.4f}, recomputed {now:.4f}" for name, (was, now) in gaps.items()])
-        logger.info("%d row(s) further than %.4f from a fresh midpoint read", len(gaps), FRAME_GAP)
-        return
+        logger.info("%d row(s) further than %.4f from a fresh %s read", len(gaps), FRAME_GAP, arguments.ruler)
+        # A cell holding a statistic other than the one its column name promises is not a report: every
+        # consumer of that column — `board_transfer`'s slope and residual sd above all — is already
+        # quoting it. This exits non-zero so the finding cannot be read past.
+        raise SystemExit(1 if gaps else 0)
     command.report(entries.report())
     if arguments.write:
         logger.info("%d row(s) changed in %s", entries.written(), arguments.record)
