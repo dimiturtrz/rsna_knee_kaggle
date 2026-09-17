@@ -549,9 +549,15 @@ rank966_hold_s2026    # The prune selector on the ruler built to see it, and it 
                       # The full reading is logs/rank966_hold_ledger.log.
                       # RE-OPEN BY: nothing about pruning. Two selectors that disagree about WHICH cells
                       # to drop now agree about the result of dropping them, at budgets 5.5x apart. What
-                      # this does NOT answer is OVERWRITING a flagged cell, which no arm has run — a
-                      # relabelling arm that clears the gold control at 0.8956 would be a different
-                      # treatment, not a re-open of this one.
+                      # this does NOT answer is OVERWRITING a flagged cell — a relabelling arm that clears
+                      # the gold control at 0.8956 would be a different treatment, not a re-open of this one.
+                      # THAT DEFERRAL IS ANSWERED, and this line read "which no arm has run" until
+                      # 2026-09-17, eleven days after the arms it was waiting for landed. Both ran
+                      # 2026-09-05: `errors_relabel_s2026` (0.8522 solo, 1,932 cells corrected at the
+                      # net-benefit-optimal budget, roster:710) and `relabel_hold_s2026` (gold +0.0104 with
+                      # an interval crossing zero, proxy -0.0058, :569). Neither clears 0.8956, so
+                      # overwriting is measured and does not pay where pruning did not. Read :569 for what
+                      # the pair DID produce, which is a fact about the ruler rather than about the lever.
 
 band224_hold_s2026    # A RULER, not a candidate. Built so that a 224 px arm could be read on the 58
                       # annotated studies against a 224 px partner — band224_s2026 is not a held fit and
