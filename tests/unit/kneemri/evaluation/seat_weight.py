@@ -28,6 +28,12 @@ def seat_of() -> SeatWeight:
     return SeatWeight(pool_of(), seat=2, scores=LabelScores())
 
 
+def test_scores_defaults_to_ledger75() -> None:
+    """The unspecified cut is LEDGER75, so a weight is comparable to a `seat_add` number."""
+    assert SeatWeight(pool_of(), seat=2).scores.name() == "ledger75"
+    assert LabelScores().name() != "ledger75", "the midpoint has to stay reachable and distinguishable"
+
+
 def test_base() -> None:
     """The base is every member but the candidate, in the pool's own order."""
     assert seat_of().base() == [0, 1]

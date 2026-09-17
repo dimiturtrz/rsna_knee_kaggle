@@ -52,8 +52,8 @@ def main() -> None:
     command.parser.add_argument(
         "--anyway",
         default=None,
-        help="spend the encode even though a byte-identical cache is already built, and say why. The "
-        "refusal it lifts is not a safety rail — five of the six slice readings encode the SAME array.",
+        help="spend the encode even though this cache, or a byte-identical one under another pooling's "
+        "name, is already built — and say why. Five of the six slice readings encode the SAME array.",
     )
     arguments = command.parsed()
 
@@ -95,7 +95,15 @@ def main() -> None:
         slice_read=arguments.slice_read,
     )
     cache = EmbeddingCache(root, spec)
-    twin = None if cache.exists() or arguments.anyway else cache.duplicate()
+    if cache.exists() and not arguments.anyway:
+        built = (
+            f"{cache.features_path.name} is already built and COMPLETE. `build` opens the features with "
+            "open_memmap(mode='w+'), which truncates that finished array under every consumer for the "
+            "length of the encode, so a rebuild that dies leaves nothing where a healthy cache was. A "
+            "cache whose build DIED does not reach this line. Delete it, or say why with --anyway '<why>'."
+        )
+        raise SystemExit(built)
+    twin = None if arguments.anyway else cache.duplicate()
     if twin is not None:
         message = (
             f"{cache.features_path.name} would be BYTE-IDENTICAL to {twin.features_path.name}, which is "

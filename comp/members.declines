@@ -1466,22 +1466,45 @@ labelwise_dense_stem_llrd_s2026
   224 result said the stem carried at all; it reads negative on both cuts, so that cell is closed unrun.
   Re-open only by separating the two flags, and price that against the -0.0041, not against zero.
 
+erase_own_cells_s2026_run1
+  The VOID first run of `erase_own_cells`, kept deliberately and declined deliberately. Its sweep npz was
+  keyed on SEATS while `PatchErasing.loaded` joins by StudyInstanceUID, so nothing joined and every study
+  erased at the MEAN map: it measures a blind generic cutout, not the treatment it is named for. Not
+  shippable under that name and not worth shipping under any other -- LEDGER 0.8541 / LEDGER75 0.8899,
+  which is -0.0015 on `probe224_control_s2026` at midpoint.
+  It is KEPT because it is now the only measurement this project owns of a blind cutout at this rate and
+  grid, and it is the control that makes the repaired run's +0.0021 / +0.0029 over it readable. Deleting
+  it would cost a reading that can only be re-taken with a card.
+  Declined as a member and as a seat. Never quote it as `erase_own_cells`.
+
 erase_own_cells_s2026
-  Map-driven targeted erasing, answered and NEGATIVE on both cuts. Blanks one cell of each study's own
+  Map-driven targeted erasing, answered and FLAT on both cuts. Blanks one cell of each study's own
   4x4 occlusion map per pass at rate 0.25, the maps swept from `labelwise_dense_drop40_long_s2026` over
   3498 train studies. Read ALONE against its own control, 12 epochs, 909 rows, the comparison the arm
   pre-registered:
     probe224_control_s2026   LEDGER 0.8556 / LEDGER75 0.8914   e10
-    erase_own_cells_s2026    LEDGER 0.8541 / LEDGER75 0.8899   e11
-  -0.0015 at midpoint and -0.0015 at LEDGER75 -- the two rulers agree to the digit, which is what makes
-  this a flat rather than a cut artefact (knee-f9aao). `seat_add` over the champion's seven fold-0 seats,
-  ledger75, relation EXACT: base k=7 0.9096, +cand k=8 0.9092, ADD -0.0004 against a +0.0015 bar. So it
-  is neither a member nor a seat, and `member_axes` calling it DISTINCT (rank 0.9037, js 0.0092, maha
-  2.469) did not buy it one -- its js sits AT the roster boundary, so distinct on one axis only.
+    erase_own_cells_s2026    LEDGER 0.8562 / LEDGER75 0.8928   e11
+  +0.0006 at midpoint and +0.0014 at LEDGER75, against a 0.0062 holdout floor over these same 909 rows.
+  Flat on both, and the two cuts agree in sign, which is what makes it a flat rather than a cut artefact
+  (knee-f9aao).
+  THE NUMBERS ABOVE REPLACE A VOID PAIR (-0.0015 / -0.0015), and the reason is the constraint here: the
+  sweep npz recorded SEATS while `PatchErasing.loaded` joins by StudyInstanceUID, so the join matched
+  NOTHING and every study fell to the mean-map fallback. That arm measured a generic cutout under this
+  treatment's name. `patch_map_rekey` re-keys a sweep onto names verified against the truth it stored,
+  and `loaded` now REFUSES a sweep naming none of the corpus rather than degrading to the mean. The
+  repaired run logs `909 of 4407 studies are absent` -- exactly the holdout, so the 3498 swept studies
+  joined and the axis is measured for the first time.
+  The void run is kept as `erase_own_cells_s2026_run1` and is now a free second reading: generic mean-map
+  cutout scores 0.8541 / 0.8899, i.e. -0.0015 on the control. So targeted beats generic by +0.0021 /
+  +0.0029 and both sit inside the floor -- the map buys a little over a blind cutout, and a blind cutout
+  costs a little, and neither clears.
+  `member_axes` calls it DISTINCT (rank 0.9037, js 0.0092, maha 2.469) and that did not buy it a seat --
+  its js sits AT the roster boundary, so distinct on one axis only. THE PRIOR seat_add IS VOID TOO: it
+  was run over the void checkpoint. This member has no measured seat value; do not quote -0.0004.
   It does NOT convict the mechanism's premise. The premise is measured and stands: border-only reads
   0.8006 against centre-only 0.8021, so redundant evidence exists, and the maps are per-study (modal
   cell 26.8%, labels agree on a study's peak cell 19.2% of the time). What is priced is ONE rate at ONE
   grid for ONE budget -- 0.25 at 4x4 over 12 epochs -- and a null there says the augmentation as
   configured buys nothing, not that map-driven erasing cannot. Re-open only by moving grid or rate with
-  an argument for the new value, and price it against this -0.0015, never against zero.
-  Declined as a seat and as a member; the npz stays so the comparison can be re-read.
+  an argument for the new value, and price it against this +0.0014, never against zero.
+  Declined as a member; the npz stays so the comparison can be re-read.

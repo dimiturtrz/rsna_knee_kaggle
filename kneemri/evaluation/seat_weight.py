@@ -12,6 +12,11 @@ SEAT is. Integer weights are therefore the shipped arithmetic rather than a mode
 class learns a parameter it would then have to be trusted with at serving time. It also keeps the two
 rules comparable: the same repetition means the same thing under `LogitAverage` and `RankAverage`.
 
+THE CUT IS LEDGER75, matching `seat_add`, and every printed line names it. The two seat instruments have
+to answer on the same ruler or their numbers cannot be compared, and the midpoint is the cut that orders
+pairs the other way from the board: on the 39 ensemble entries carrying both, midpoint inverts 12 of 414
+resolved pairs and ledger75 inverts 0 of 397. `--midpoint` asks the other question deliberately.
+
 THE INTERVAL IS PAIRED, AND THAT IS THE POINT. The candidate at weight `w` and the base without it are
 read on the SAME studies, so the honest question is how much the DELTA moves under resampling, not how
 wide each score is. A per-arm interval would be dominated by which studies are in the holdout, which is
@@ -33,9 +38,10 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
+from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.vote import LogitAverage, RankAverage, Vote
 
 logger = logging.getLogger(__name__)
@@ -53,10 +59,11 @@ PERCENTILES = (2.5, 97.5)
 class SeatWeight:
     """One candidate's contribution to a base pool at each integer weight, under one vote rule."""
 
-    def __init__(self, pool: Pool, seat: int, scores: LabelScores) -> None:
+    def __init__(self, pool: Pool, seat: int, scores: LabelScores | None = None) -> None:
+        """`scores` defaults to LEDGER75, the cut `seat_add` reads every quoted add under."""
         self.pool = pool
         self.seat = seat
-        self.scores = scores
+        self.scores = scores if scores is not None else LedgerSeventyFive().scorer()
 
     @staticmethod
     def rules() -> dict[str, Vote]:
@@ -159,15 +166,17 @@ def main() -> None:
     command.parser.add_argument("--foreign", action="store_true", help="the candidate's weights are someone else's")
     command.parser.add_argument("--draws", type=int, default=DRAWS, help="bootstrap resamples behind each interval")
     command.parser.add_argument("--split-half", action="store_true", help="choose the weight on half, read on half")
+    command.parser.add_argument("--midpoint", action="store_true", help="read at the midpoint instead of LEDGER75")
     arguments = command.parsed()
 
     records = [*arguments.base, arguments.candidate]
     mixed = RecordMix(records, foreign=arguments.foreign)
+    scores = LabelScores(MIDPOINT) if arguments.midpoint else None
     lines: list[str] = []
     for name, vote in SeatWeight.rules().items():
         pool = mixed.per_member(vote)
-        weighted = SeatWeight(pool, len(pool) - 1, LabelScores())
-        lines += [f"--- {name}", *weighted.lines(arguments.weights, draws=arguments.draws)]
+        weighted = SeatWeight(pool, len(pool) - 1, scores)
+        lines += [f"--- {name} @{weighted.scores.name()}", *weighted.lines(arguments.weights, draws=arguments.draws)]
         if arguments.split_half:
             lines += weighted.split_half(arguments.weights)
     command.report(lines)

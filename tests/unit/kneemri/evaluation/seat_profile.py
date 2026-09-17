@@ -7,6 +7,7 @@ import pytest
 from numpy.typing import NDArray
 
 from core.findings import TARGETS
+from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.seat_profile import SeatProfile
 from kneemri.runs.holdout_record import HoldoutRecord
 
@@ -31,6 +32,12 @@ def _member(directory: Path, name: str, right: str) -> Path:
     path = directory / f"{name}.pt"
     HoldoutRecord(path).write(STUDIES, predictions, truth, epoch=3)
     return path
+
+
+def test_scores_defaults_to_ledger75() -> None:
+    """The unspecified cut is LEDGER75, so a per-finding leader is ordered on the ruler the board agrees with."""
+    assert SeatProfile().scores.name() == "ledger75"
+    assert LabelScores().name() != "ledger75", "the midpoint has to stay reachable and distinguishable"
 
 
 def test_reading(tmp_path: Path) -> None:

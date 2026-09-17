@@ -13,6 +13,11 @@ named below is the best of what can be MEASURED, not the best that could be seat
 
 The AUCs come out of `LabelScores.per_label` against the truth stored beside each member's predictions,
 so they are the same arrays the ledger's numbers were read off, not a re-derivation.
+
+THE CUT IS LEDGER75, matching `seat_add` and `seat_weight`, and the header names it. A per-finding leader
+is an ORDERING, and the midpoint is the cut that orders pairs the other way from the board: on the 39
+ensemble entries carrying both, midpoint inverts 12 of 414 resolved pairs and ledger75 inverts 0 of 397.
+`--midpoint` asks the other question deliberately.
 """
 
 import logging
@@ -20,7 +25,8 @@ from pathlib import Path
 
 from core import cli
 from core.findings import TARGETS
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.ledger75 import LedgerSeventyFive
+from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -28,6 +34,10 @@ logger = logging.getLogger(__name__)
 
 class SeatProfile:
     """The finding-by-finding profile of each member that kept a holdout record."""
+
+    def __init__(self, scores: LabelScores | None = None) -> None:
+        """`scores` defaults to LEDGER75, the cut the seat instruments answer on."""
+        self.scores = scores if scores is not None else LedgerSeventyFive().scorer()
 
     def reading(self, path: Path) -> HoldoutReading:
         """One member's kept predictions, its truth and the epoch they came from."""
@@ -41,7 +51,7 @@ class SeatProfile:
     def scored(self, path: Path) -> dict[str, float]:
         """One member's twelve AUCs, keyed by finding."""
         reading = self.reading(path)
-        return LabelScores().per_label(reading.predictions, reading.truth)
+        return self.scores.per_label(reading.predictions, reading.truth)
 
     def table(self, paths: list[Path]) -> dict[str, dict[str, float]]:
         """Every member that has a record, keyed by the checkpoint's stem then by finding.
@@ -56,7 +66,7 @@ class SeatProfile:
         first = next(iter(readings.values()))
         for reading in readings.values():
             first.aligned(reading)
-        return {name: LabelScores().per_label(reading.predictions, reading.truth) for name, reading in readings.items()}
+        return {name: self.scores.per_label(reading.predictions, reading.truth) for name, reading in readings.items()}
 
     def leaders(self, table: dict[str, dict[str, float]]) -> dict[str, tuple[str, float]]:
         """The member that scores highest on each finding, which is the question a mean cannot answer."""
@@ -77,13 +87,15 @@ def main() -> None:
     """Print the member-by-finding matrix, the per-finding leader, and where the pool spreads widest."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--members", type=Path, nargs="+", required=True, help="member checkpoints")
+    command.parser.add_argument("--midpoint", action="store_true", help="read at the midpoint instead of LEDGER75")
     arguments = command.parsed()
 
-    profile = SeatProfile()
+    profile = SeatProfile(LabelScores(MIDPOINT) if arguments.midpoint else None)
     table = profile.table(list(arguments.members))
     leaders, spread = profile.leaders(table), profile.spread(table)
 
-    lines = [f"{'finding':22s} {'leader':28s} {'best':>7s} {'spread':>7s}"]
+    lines = [f"--- per finding @{profile.scores.name()}"]
+    lines += [f"{'finding':22s} {'leader':28s} {'best':>7s} {'spread':>7s}"]
     lines += [
         f"{target:22s} {leaders[target][0][:28]:28s} {leaders[target][1]:7.4f} {spread[target]:7.4f}"
         for target in sorted(TARGETS, key=lambda name: spread[name], reverse=True)
