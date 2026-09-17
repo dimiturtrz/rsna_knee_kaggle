@@ -4532,6 +4532,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.tail_screen",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.tail_screen",
+      "target": "kneemri.evaluation.study_attribution",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.tail_screen",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.teacher_distance",
       "target": "core.cli",
       "weight": 1
@@ -25525,6 +25543,90 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.tail_screen.ShelfScreen",
+      "target": "kneemri.evaluation.tail_screen.TailOverlap",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.tail_screen.TailScreen",
+      "target": "kneemri.evaluation.study_attribution.AttributionCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.tail_screen.TailScreen",
+      "target": "kneemri.evaluation.study_attribution.StudyAttribution",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.tail_screen.TailScreen",
+      "target": "kneemri.evaluation.tail_screen.ShelfScreen",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.tail_screen.TailScreen.__init__",
+      "target": "kneemri.evaluation.study_attribution.StudyAttribution",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "target": "kneemri.evaluation.study_attribution.AttributionCorpus.members",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "target": "kneemri.evaluation.study_attribution.AttributionCorpus.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "target": "kneemri.evaluation.study_attribution.StudyAttribution.split",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "target": "kneemri.evaluation.tail_screen.ShelfScreen",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "target": "kneemri.evaluation.tail_screen.TailOverlap",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "target": "kneemri.evaluation.tail_screen.TailScreen.shelved",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.tail_screen.main",
+      "target": "kneemri.evaluation.study_attribution.AttributionCorpus",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.tail_screen.main",
+      "target": "kneemri.evaluation.tail_screen.TailScreen",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.tail_screen.main",
+      "target": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.teacher_distance.TeacherDistance",
       "target": "kneemri.evaluation.teacher_distance.TeacherDistance",
@@ -41591,7 +41693,7 @@
       "role": null
     },
     {
-      "descendants": 326,
+      "descendants": 327,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -41679,7 +41781,7 @@
       "role": null
     },
     {
-      "descendants": 117,
+      "descendants": 118,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -42498,6 +42600,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.table_separation",
       "label": "table_separation",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen",
+      "label": "tail_screen",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -47269,6 +47379,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.table_separation",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.ShelfScreen",
+      "label": "ShelfScreen",
+      "level": "class",
+      "parent": "kneemri.evaluation.tail_screen",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.TailOverlap",
+      "label": "TailOverlap",
+      "level": "class",
+      "parent": "kneemri.evaluation.tail_screen",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.TailScreen",
+      "label": "TailScreen",
+      "level": "class",
+      "parent": "kneemri.evaluation.tail_screen",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -63324,6 +63458,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.table_separation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.ShelfScreen.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.tail_screen.ShelfScreen",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.TailOverlap.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.tail_screen.TailOverlap",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.TailScreen.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.tail_screen.TailScreen",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.TailScreen.screen",
+      "label": "screen",
+      "level": "method",
+      "parent": "kneemri.evaluation.tail_screen.TailScreen",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.TailScreen.shelved",
+      "label": "shelved",
+      "level": "method",
+      "parent": "kneemri.evaluation.tail_screen.TailScreen",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.tail_screen.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.tail_screen",
       "role": null
     },
     {
