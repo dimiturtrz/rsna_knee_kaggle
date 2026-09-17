@@ -3362,6 +3362,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.patch_map_rekey",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.patch_map_rekey",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.patch_maps",
       "target": "core.cli",
       "weight": 1
@@ -20656,6 +20668,60 @@
       "kind": "calls",
       "source": "kneemri.evaluation.patch_map_blocks.main",
       "target": "kneemri.evaluation.patch_map_blocks.PatchMapBlocks.joined",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.named",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.positions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.reproduces",
+      "target": "core.data.labels.targets.Targets.load",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.reproduces",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.positions",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.write",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.write",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.reproduces",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.patch_map_rekey.main",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.main",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.main",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.reproduces",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.patch_map_rekey.main",
+      "target": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.write",
       "weight": 1
     },
     {
@@ -41375,7 +41441,7 @@
       "role": null
     },
     {
-      "descendants": 323,
+      "descendants": 324,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -41463,7 +41529,7 @@
       "role": null
     },
     {
-      "descendants": 115,
+      "descendants": 116,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -41938,6 +42004,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.patch_map_blocks",
       "label": "patch_map_blocks",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey",
+      "label": "patch_map_rekey",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -46300,6 +46374,14 @@
       "label": "PatchMapBlocks",
       "level": "class",
       "parent": "kneemri.evaluation.patch_map_blocks",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey.PatchMapRekey",
+      "label": "PatchMapRekey",
+      "level": "class",
+      "parent": "kneemri.evaluation.patch_map_rekey",
       "role": "primary"
     },
     {
@@ -59668,6 +59750,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.patch_map_blocks",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_rekey.PatchMapRekey",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_rekey.PatchMapRekey",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.positions",
+      "label": "positions",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_rekey.PatchMapRekey",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.reproduces",
+      "label": "reproduces",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_rekey.PatchMapRekey",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey.PatchMapRekey.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_rekey.PatchMapRekey",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.patch_map_rekey.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.patch_map_rekey",
       "role": null
     },
     {

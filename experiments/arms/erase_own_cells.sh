@@ -14,9 +14,9 @@
 # transfer out of one. Directional only at this price.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
-require "$MODELS/patches/labelwise_dense_drop40_long_s2026_g4_train.patches.npz"
+require "$MODELS/patches/labelwise_dense_drop40_long_s2026_g4_train.named.patches.npz"
 run_train erase_own_cells \
   --config experiments/recipes/base.toml --config experiments/recipes/probe224.toml \
-  --patch-maps "$MODELS/patches/labelwise_dense_drop40_long_s2026_g4_train.patches.npz" \
+  --patch-maps "$MODELS/patches/labelwise_dense_drop40_long_s2026_g4_train.named.patches.npz" \
   --patch-erase 0.25 \
   --labels "$LABELS" --out "$MODELS/erase_own_cells_s2026.pt"
