@@ -4506,3 +4506,22 @@ the prose above, and no reseating of this pool reaches it. Seven board flats acr
 were saying this; this entry gives it a number.
 
 Re-derive the fit before quoting any number in this subsection.
+
+## `l75solo_v1` — 0.941, ref 56309162, 2026-09-17 — the honest solo, and the 0.005 to the champion splits in two
+
+INSTRUMENT, pre-registered, and it landed on its point prediction. The best solo this project owns
+shipped alone with no selection step: `labelwise_depth24_drop40_long_s2026`, fold-0 trained, so its
+ledger75 **0.9053** is a reading on studies it never saw.
+
+PREDICTED **0.9414** off the solo-only transfer `board = -0.1217 + 1.174 * offline75` (resid sd 0.0019,
+n=7), 2sd `[0.9377, 0.9452]`, modal branch `0.938-0.945`. READ **0.941** — inside 0.0004 of the point,
+the third consecutive thousandth-exact call that slope has made. Re-derive the fit before quoting it.
+
+**What this buys that `ffsolo_v1` could not.** `ffsolo_v1` at 0.944 is the SAME RECIPE refit on the full
+corpus, so the two entries are a matched pair differing in exactly one thing — whether the holdout fifth
+was in training. Full-corpus refit is therefore worth **+0.003** board to one member, measured directly
+rather than inferred against a prediction. The champion at 0.946 is eight seats over that 0.944 member,
+so the ensemble premium is **+0.002**.
+
+The 0.005 between this entry and the champion decomposes as **+0.003 data and +0.002 ensembling**, and
+neither term is reachable by reseating. The 0.011 to the leader stays a MEMBER gap.
