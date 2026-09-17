@@ -843,7 +843,12 @@ raptor_ft_hisrecipe_distill_epens.pt # LEDGER75 0.8880 - the best of the weaker 
 raptor_ft_hisrecipe_distill_swa.pt   # LEDGER75 0.8880 - near-duplicate of _epens at corr 0.9997.
 raptor_ft_hisrecipe_distill.pt       # LEDGER75 0.8875 - near-duplicate at corr 0.99+. Its Fracture column
 # reads 0.872 against a pool column mean of 0.805, +0.038 over stackfit, reproducing to ~0.001 across two
-# binarizations; that is a per-column candidate and not a second seat.
+# binarizations; that is a per-column candidate and not a second seat. PRICED AND CLOSED 2026-09-17: the
+# per-label combination scheme it would feed is already measured at **+0.0043** (split-half per-label
+# top-4, `experiments/README.md:13501`), against a board that is strictly monotone above 0.005 offline and
+# BLIND below 0.002 — so the whole lane is board-invisible before this column is added to it. The seat
+# oracle bounds it from the other side at +0.0039. The ensemble owes **+0.0110** to reach 0.955, which
+# only a better MEMBER can pay. Re-open it only as part of something that also clears that, never alone.
 raptor_ft_hisrecipe_distill_ep10.pt  # LEDGER75 0.8870 - near-duplicate at corr 0.99+.
 raptor_ft_hisrecipe_distill_ep13.pt  # LEDGER75 0.8865 - near-duplicate at corr 0.99+.
 #
@@ -1394,6 +1399,10 @@ band_dense_s2026_n24b0.1-0.9
   changing the KERNEL's decode over the line-65 seat, or by training the spec into its own checkpoint.
 
 labelwise_depth24_drop40_long_ff
+  The whole-corpus `--fold -1 --ema` refit of the depth24 drop40 labelwise seat. Shipped in `fullseat2_v1`
+  as the second dose and read 0.946, identical to the champion carrying neither refit. See the next line:
+  the dose series over 0/1/2 refit seats is 0.946/0.946/0.946 and the argument is the same for both.
+
 labelwise_ext_drop40_long_ff
   The whole-corpus `--fold -1 --ema` refits of two of the champion's three drop40 labelwise seats. Both
   SHIPPED — `fullseat_v1` (ext only) and `fullseat2_v1` (both) — and both read 0.946, identical to
@@ -1411,3 +1420,14 @@ labelwise_dense_drop40_long_ff
   was read as the champion's last untaken seat upgrade and priced as a free lever, and only the board rows
   said otherwise. A decision that lives in five entries' prose and nowhere on this file is a decision the
   next reader pays to make twice.
+
+labelwise_dense_stem_s2026
+  NOT A DECISION ABOUT THE STEM — a dead arm. Died at epoch 4 of the 24 its recipe asked for with
+  `trainer exit 127`, the venv-rewrite signature, at 2026-09-16T21:04Z; `convergence_check` reads
+  TRUNCATED, best e3 of 4 run. The `.holdout.npz` beside it is therefore an epoch-3 read of a
+  24-epoch schedule and prices nothing — under `one_cycle` the anneal never ran, so any number taken
+  off it is a floor, not the member. No `.pt` exists and none will. The log's last lines also record
+  3705 MiB leaving the card mid-run (another process, by arrangement), so the run was already
+  degraded before it died. The question it was armed to answer — whether an open stem carries at
+  224 px — is LIVE in `labelwise_dense_stem_llrd_s2026`, which is the relaunch plus layer decay.
+  Declined so the npz cannot be scored as a member; re-open nothing here, read that arm instead.
