@@ -275,7 +275,18 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   SCATTER CANNOT SAY WHETHER A DELTA IS EVIDENCE** — quote the two together or neither. Detrended
   2026-09-17 the top band (offline ≥ 0.8700, n=15) is a TIGHT line: slope +1.45, **residual sd 0.0022**.
   So a board delta under ~0.004 between two of our own entries is inside 2 sd and means nothing, and the
-  0.011 to the leader is 4.9 sd — real, and not reachable by scatter. Binning "offline-equivalent" peers
+  0.011 to the leader is 4.9 sd — real, and not reachable by scatter. **EVERY NUMBER IN THIS PARAGRAPH SO
+  FAR IS MIDPOINT, AND THE STEEPENING IS A MIDPOINT ARTEFACT — read `--ruler ledger75` instead.** It had
+  no coverage of the band we ship in until 2026-09-17 03:47Z, because `foldseven_v1`, `eightseat_v1` and
+  `swapseat_v1` all carried a null `offline75`; `entry_offline --ruler ledger75 --write` filled six rows
+  and the fit went from 0 resolved pairs in the top band to 24. On IDENTICAL entries, changing only the
+  denominator's ruler, OLS reads **whole record +1.11 (resid sd 0.0036) midpoint against +1.10 (resid sd
+  0.0017) ledger75, and top band +1.37 (0.0019) against +1.09 (0.0013)**. So ledger75 holds the same slope
+  while fitting the board TWICE AS TIGHTLY, and on it the slope is FLAT at +1.09 to +1.10 from the whole
+  record into our own band — there is no steepening to carry. The midpoint's comes from pairs it shrinks
+  toward zero delta, an inflated ratio on a near-zero denominator, the same defect as its 12-of-414
+  inversions; the spread itself barely moves (upper-band median |delta| 0.0033 against 0.0035). Priced on
+  the good ruler the gap to first place is **+0.012 offline75**, not +0.0076. Binning "offline-equivalent" peers
   inside the 0.0062 floor and taking their board sd does NOT give this: that reads 0.0039, and the excess
   is the offline TREND inside the bin, which is how one un-detrended pair was written up as a pool-overlap
   effect and retracted the same night (knee-5hbtz). Three things had to be fixed to read it
