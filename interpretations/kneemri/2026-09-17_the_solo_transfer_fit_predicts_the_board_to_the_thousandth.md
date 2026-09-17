@@ -90,10 +90,37 @@ champion" is not a target to aim a mechanism at.
 the size the owner's standing bar asks for. That is the number every open arm should be priced against,
 and it is why knob-sized arms at the shipping corner are instruments rather than improvements.
 
+## The refit term is SOLO-ONLY, and the board already measured that twice
+
+The +0.003 above is a statement about a LONE member. Inside an ensemble the same swap has been run as a
+dose series, and it is flat at every dose:
+
+| entry | refit seats of 8 | board | ref |
+|---|---|---|---|
+| `tripleseat_v2` | 0 | 0.946 | 56232529 |
+| `fullseat_v1` | 1 | 0.946 | 56246750 |
+| `fullseat2_v1` | 2 | 0.946 | 56250751 |
+
+Three entries, identical but for how many seats were swapped to their `--fold -1 --ema` whole-corpus
+refits, all reading the same thousandth. A tie at one value bounds the true spread below 0.001, so one
+refit seat is worth **< 0.001 board** in an eight-seat entry against **+0.003** as a solo — and two seats
+buy no more than one.
+
+The mechanism this points at: the extra holdout fifth teaches a lone member something its seven
+neighbours already supply between them. Refitting is a way of recovering information the ensemble is
+already recovering by averaging, so the two do not add.
+
+Consequence for the hunt, and it is the reason this section exists: **the champion cannot be lifted by
+refitting its members.** That has been tested at two doses with every gate green. The solo path is the
+one where the refit term is live, which makes the inversion below the correct place to spend it — a solo
+at 0.9074 honest offline75 would be refit into 0.947 against a 0.946 that refits into 0.946.
+
 ## What this does NOT license
 
-- The +0.003 refit term is **one matched pair**, not a curve. It is a directional measurement with n=1
-  and no reason to be constant across recipes.
+- The +0.003 refit term is **one matched pair** at the solo end, not a curve. It is a directional
+  measurement with n=1 and no reason to be constant across recipes. The three ensemble rows above do NOT
+  give it a second solo measurement; they bound the term in a DIFFERENT population (1 seat of 8) where it
+  reads under 0.001.
 - The inversion assumes the fit's slope holds 0.005 beyond its largest x. `l75solo_v1` at 0.9053 is the
   top of the fitted range; 0.9142 is an extrapolation.
 - Nothing here says the +0.0089 is reachable. It says what it would have to be worth.
