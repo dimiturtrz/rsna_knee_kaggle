@@ -1431,3 +1431,15 @@ labelwise_dense_stem_s2026
   degraded before it died. The question it was armed to answer — whether an open stem carries at
   224 px — is LIVE in `labelwise_dense_stem_llrd_s2026`, which is the relaunch plus layer decay.
   Declined so the npz cannot be scored as a member; re-open nothing here, read that arm instead.
+
+labelwise_dense_stem_llrd_s2026
+  The open-stem question, answered and NEGATIVE. 24 of 24 epochs run (convergence_check silent on it),
+  peak e19, priced against its own family sibling on the same 909 rows and the same budget:
+  `labelwise_dense_drop40_long_s2026` LEDGER 0.8672 / LEDGER75 0.9048 against this arm's 0.8667 / 0.9007.
+  So `--unfreeze-stem --layer-decay 0.75` at 224 px costs -0.0005 at midpoint and **-0.0041 at LEDGER75**,
+  against a pre-registered 0.8712 it missed by 0.0045. Declined as a seat because it is strictly worse
+  than the member already sitting in the champion, on the cut a seat is chosen by.
+  It does NOT attribute the loss — stem and layer decay moved together in one arm, so neither is
+  individually convicted. What it does settle is the 336 + open-stem cell, which was armable only if the
+  224 result said the stem carried at all; it reads negative on both cuts, so that cell is closed unrun.
+  Re-open only by separating the two flags, and price that against the -0.0041, not against zero.
