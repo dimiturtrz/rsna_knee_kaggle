@@ -1529,3 +1529,20 @@ labelwise_dense_drop40_long_ff
   by delta/7, and the closed record brackets the dilution at 4.7x-9.8x on three separate levers.
   Against ~3-4 h of card for a member that cannot be read offline, that is the worst ratio on the shelf.
   Re-open only if a single-member entry is ever built on this recipe, where the /7 does not apply.
+
+sam_r01_s2026
+  Sharpness-aware minimisation at rho=0.01 on the calibrated dense recipe. ledger75 0.8981 at epoch 10,
+  CONVERGED, against its own pre-registered control calib_dense_hold_s2026 at 0.8949 — a directional
+  +0.0032, inside the 0.0062 paired floor and inside the band the arm declared before it ran. SAM costs
+  two forward-backward passes per step, so the recipe is twice the card for a delta the ruler cannot
+  resolve. Both numbers are ledger75 on population 66c6f231.
+  Re-open only on a mechanism that predicts SAM should pay MORE at a larger rho or a longer schedule, and
+  price it against the doubled step cost — not by re-running rho=0.01 and reading the same flat again.
+
+recal_labelwise_s2026
+  TRUNCATED. Best epoch 1 of 2 recorded, against 12 asked for by its own recipe. convergence_check reports
+  it non-zero, and under one_cycle the anneal never ran, so its 0.8392 is a FLOOR and not a reading of
+  anything. This is a dead process, not a member: it is declined for having no number, not for having a
+  bad one.
+  Re-open by RE-RUNNING it to its declared 12 epochs. Nothing about the recalibrated-label axis is
+  measured either way until something does.
