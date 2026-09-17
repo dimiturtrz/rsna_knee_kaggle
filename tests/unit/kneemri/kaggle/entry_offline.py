@@ -39,6 +39,7 @@ def _board(tmp_path: Path) -> Path:
         },
         {"id": "gone", "ref": "4", "board": 0.91, "offline": None, "scope": "ensemble", "members_named": ["ghost"]},
         {"id": "priced", "ref": "5", "board": 0.9, "offline": 0.86, "scope": "ensemble", "members_named": ["a"]},
+        {"id": "ruled_out", "ref": "6", "board": 0.9, "offline": None, "scope": "excluded", "members_named": ["a"]},
     ]
     path = tmp_path / "board.jsonl"
     path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
@@ -74,10 +75,14 @@ def test_mismatched(tmp_path: Path):
 
 
 def test_rows(tmp_path: Path):
-    """An entry already carrying a number, and the memberless note, are not this file's business."""
+    """A priced entry, the memberless note, and a row the record ruled out are not this file's business."""
     rows = _entries(tmp_path).rows()
 
     assert sorted(row.identifier for row in rows) == ["clean", "fitted", "foreign", "gone"], "priced and note are out"
+    assert "ruled_out" not in {row.identifier for row in rows}, (
+        "an excluded row is scoreable and must still not be written: filling a cell the record ruled out is how "
+        "a deliberate void gets silently restored"
+    )
 
 
 def test_declined(tmp_path: Path):

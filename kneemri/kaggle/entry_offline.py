@@ -91,6 +91,9 @@ clean one.
 
 DEFAULT_VOTE = "rank"
 
+EXCLUDED_SCOPE = "excluded"
+"""The `scope` value that keeps a row out of `board_transfer`'s fit, and out of this file's writes."""
+
 
 class EntryOffline:
     """Each board entry's offline number, or the reason it does not get one."""
@@ -115,12 +118,19 @@ class EntryOffline:
         return found
 
     def rows(self) -> list[BoardRow]:
-        """The entries this file has anything to say about: members named, this ruler's column still empty."""
+        """The entries this file has anything to say about: members named, this ruler's column still empty.
+
+        An `excluded` row is none of its business. The record has already ruled that row out of the fit
+        in the field the fitter reads, and a number written into a cell that has been ruled out reads as
+        a price on a re-run — which is how this ran once and silently restored two voided offlines.
+        """
         stored = self.stored()
         return [
             row
             for row in BoardCensus(record=self.record).rows()
-            if row.members_named and stored.get(row.identifier, {}).get(self.column) is None
+            if row.members_named
+            and stored.get(row.identifier, {}).get(self.column) is None
+            and stored.get(row.identifier, {}).get("scope") != EXCLUDED_SCOPE
         ]
 
     def declined(self, row: BoardRow) -> str | None:

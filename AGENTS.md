@@ -263,18 +263,22 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   are stale, because a fit moves every time the record gains a row. Neither is a number to use: read the tool.
   On 2026-09-16 +1.55 was quoted from this line to price the gap to 0.955 and was wrong by 1.6x, the constant's
   third time (after +4.67 and +2.14) and the third time it was quoted rather than read. This line ALSO said the
-  curve "saturates — near +0.8 in the top band", and that was a fourth wrong quote: read 2026-09-16 23:53Z the
-  tool reports whole-record median **+1.07**, the ≥0.8678 band **+1.05 over 62 pairs**, and the ≥0.8705 band
-  **+1.45 over THREE pairs, marked DIRECTION ONLY**. The top band is FLAT against the whole record, not lower, and
-  the band we actually ship in is the one the tool refuses to price. Those figures replace a read taken two hours
-  earlier (+1.09 / +1.07 over 65 / +1.71 over TWO) and the move is the reason this paragraph exists: the
-  exclusion of a row was written in `scope_reason` PROSE while `entries()` filters on the `scope` FIELD, so
-  eighteen rows declaring EXCLUDED sat on the ensemble scope and the two carrying an offline number were in the
-  fit. Both were greedy-selected ON the holdout, so their offline is in-sample by construction — the mechanism
-  that voided `raptor_solo` — and they were the ONLY entries above the top band's floor, which means that band
-  was made of nothing else. Removing them cost the top band 0.26 and tightened the middle band's interval from
-  [+1.00, +1.38] to [+1.00, +1.23] while leaving all 21 resolved inversions in place: they inflated the ceiling
-  and mis-ordered nothing (knee-52ldh). So a single slope is the wrong SHAPE for it
+  curve "saturates — near +0.8 in the top band", and that was a fourth wrong quote, in the opposite direction
+  from the one it claimed: read 2026-09-17 00:07Z the tool reports whole-record median **+1.08**, the ≥0.8678
+  band **+1.23 over 77 pairs [+1.04, +1.47]**, and the ≥0.8705 band **+1.44 over SIX resolved pairs
+  [+1.39, +1.96]**. The top band is STEEPER than the whole record, not flatter, and it is priced rather than
+  refused for the first time. Three things had to be fixed to read it, and each one had put a wrong number in
+  this paragraph. FIRST, the exclusion of a row was written in `scope_reason` PROSE while `entries()` filters on
+  the `scope` FIELD, so eighteen rows declaring EXCLUDED sat on the ensemble scope and the two carrying an
+  offline number were in the fit — both greedy-selected ON the holdout, so in-sample by construction, the
+  mechanism that voided `raptor_solo`, and the ONLY entries above the top band's floor, which means that band
+  had been made of nothing else. SECOND, `entry_offline --write` then restored both numbers four hours later,
+  because it filtered on a null column and never read `scope` at all: a tool that fills a cell the record has
+  ruled out will undo any void that is not also a rule it can see. It now skips the excluded scope. THIRD — and
+  this is the part that is a RESULT rather than a repair — the band was never unpriceable, it was EMPTY: one
+  designed, honestly-priced entry (`eightseat_v1`, 0.8769 → 0.944) took it from three pairs marked DIRECTION
+  ONLY to six resolved ones, and took the middle band from +1.05 over 62. So the band we ship in was quoted
+  for months off two rows that should never have been in it, and is now quoted off six that were earned. So a single slope is the wrong SHAPE for it
   whatever its value, and the only correct use of a number in this sentence is as evidence that a quoted constant
   is wrong again. The reason it keeps coming out different is arithmetic, not instability: `sd(board) = 0.0091`
   in EVERY stratum, because the board is one number per entry — only the denominator moves. "Compression" is
