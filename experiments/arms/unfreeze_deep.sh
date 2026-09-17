@@ -3,6 +3,7 @@
 #
 # bead: knee-p724l
 # reading: unfreeze_deep_s2026.holdout.npz
+# control  band_dense = 0.8578 (midpoint; the same control unfreeze_depth.sh declares for the 4-block point)
 #
 # THE FLAG LINE IS band_dense's, BYTE FOR BYTE, PLUS ONE FLAG. The axis already holds two points measured
 # at this exact corner (4 blocks 0.8320, 6 blocks 0.8578 midpoint), so any deviation costs the comparison
