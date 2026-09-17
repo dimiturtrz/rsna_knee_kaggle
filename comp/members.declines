@@ -581,9 +581,25 @@ relabel_hold_s2026    # The supervision arm read as a QUESTION, not as a member,
                       # is logs/relabel_hold_ledger.log.
                       # AND THE BOARD HAS ALREADY ANSWERED THE CHEAP VERSION: relabel7_v1 put corrected
                       # supervision at one seat in seven and scored 0.943 against the champion 0.944.
-                      # RE-OPEN BY: a full-corpus relabel across EVERY seat of an entry, which is a
-                      # retraining bill and not a reseating — one seat has been measured and is worth
-                      # nothing. Or more annotated cells, which is owner-side.
+                      # THE POWER IS NO LONGER OWNER-SIDE, AND THE ANSWER IS FLAT. The gold ruler's
+                      # blindness was never the only ruler available: 410 of the 1,932 corrections land
+                      # in this holdout, so the other 10,498 cells are ones the detector does not flag,
+                      # where the report label is trustworthy and the ruler-bias argument cannot apply.
+                      # Read there against its control band_dense_hold_s2026
+                      # (`python -m kneemri.evaluation.clean_cells`), corrected supervision is
+                      # +0.0005 LEDGER and -0.0005 LEDGER75 over clean cells of the 909-study fold-0
+                      # holdout — opposite signs on the two cuts, a tenth of the noise floor, at 25x
+                      # the gold ruler's n. THAT REFUTES THE RULER-BIAS ACCOUNT rather than confirming
+                      # it: that account predicts a corrected model is better EVERYWHERE, not only on
+                      # the cells it edited, and everywhere is where it is flat.
+                      # The 410 flagged cells cannot arbitrate it either, in either direction — the
+                      # detector selects cells where model and report disagree, so both arms read AUC
+                      # 0.034/0.040 there at the midpoint, a degenerate ruler by construction.
+                      # RE-OPEN BY: a correction table built by something other than model-report
+                      # disagreement, since this one can only edit cells the model already had right.
+                      # NOT by a full-corpus relabel — its licence was the ruler-bias account, and that
+                      # is now measured false on the only population that could see it. Not by more
+                      # annotated cells either: the clean cells are 181x the gold set and read zero.
 
 band_deep224_s2026    # Depth at 224 px, one variable against band224_hold_s2026, and it is DOWN by
                       # 0.0070 (0.8446 against 0.8516) at a matched twelve-epoch budget. Under every

@@ -2066,6 +2066,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.clean_cells",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.clean_cells",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.clean_cells",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.clean_cells",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.clean_cells",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.column_headroom",
       "target": "core.findings",
       "weight": 1
@@ -15832,6 +15862,108 @@
       "kind": "calls",
       "source": "kneemri.evaluation.board_transfer.main",
       "target": "kneemri.evaluation.board_transfer.BoardTransfer.required_offline",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.macro",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRuler.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.macro",
+      "target": "kneemri.evaluation.scores.LabelScores.mean_of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.per_label",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRuler.mask",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.per_label",
+      "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRuler.macro",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRuler.mask",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.scorer",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.CleanCellRuler.table",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.clean_cells.main",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.clean_cells.main",
+      "target": "kneemri.evaluation.clean_cells.CleanCellRuler.table",
       "weight": 1
     },
     {
@@ -41243,7 +41375,7 @@
       "role": null
     },
     {
-      "descendants": 322,
+      "descendants": 323,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -41331,7 +41463,7 @@
       "role": null
     },
     {
-      "descendants": 114,
+      "descendants": 115,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -41406,6 +41538,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.board_transfer",
       "label": "board_transfer",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells",
+      "label": "clean_cells",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -45312,6 +45452,22 @@
       "label": "BoardTransfer",
       "level": "class",
       "parent": "kneemri.evaluation.board_transfer",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRow",
+      "label": "CleanCellRow",
+      "level": "class",
+      "parent": "kneemri.evaluation.clean_cells",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "label": "CleanCellRuler",
+      "level": "class",
+      "parent": "kneemri.evaluation.clean_cells",
       "role": "primary"
     },
     {
@@ -56232,6 +56388,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.board_transfer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler.flagged_cells",
+      "label": "flagged_cells",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler.macro",
+      "label": "macro",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler.mask",
+      "label": "mask",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler.per_label",
+      "label": "per_label",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.CleanCellRuler.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells.CleanCellRuler",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.clean_cells.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.clean_cells",
       "role": null
     },
     {
