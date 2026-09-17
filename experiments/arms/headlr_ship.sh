@@ -12,8 +12,11 @@
 #
 # head_lr IS A SILENT DEFAULT ON THE SHIPPING LINE — the arm names it nowhere, so it resolves to 0.001
 # against a backbone pinned at 4e-5. The corpus holds exactly one isolating pair on this key, at the
-# 224/max corner: 0.005 -> 0.0002 reads +0.0106 midpoint. Shipping sits INSIDE that interval, so the
-# local sign is assumed, not measured. 2e-4 is the step that keeps the arm on the measured side of it.
+# 224/max corner: 0.005 -> 0.0002 reads +0.0106 LEDGER75 (`recipe_pairs` prices on ledger75, not on the
+# midpoint its numbers are easily mistaken for — confident_span prints 0.8785, its ledger75, against a
+# 0.8449 midpoint). Shipping sits INSIDE that interval, so the local sign is assumed, not measured.
+# 2e-4 is the step that keeps the arm on the measured side of it. The control declared above is stated
+# on BOTH rulers for the same reason.
 #
 # THE HEAD HERE IS NOT THE HEAD THE PAIR WAS MEASURED ON. That pair ran --slice-pooling max, one shared
 # projection; this line runs labelwise, twelve per-label projections chasing twelve columns. More head
