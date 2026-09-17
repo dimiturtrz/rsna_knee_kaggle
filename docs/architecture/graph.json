@@ -2822,6 +2822,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.label_invertibility",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_invertibility",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_invertibility",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.label_invertibility",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.label_probe",
       "target": "core.cli",
       "weight": 1
@@ -18682,6 +18706,90 @@
       "kind": "calls",
       "source": "kneemri.evaluation.label_errors.main",
       "target": "kneemri.evaluation.label_errors.LabelErrorAudit.gated",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.label_invertibility.Invertibility",
+      "target": "kneemri.evaluation.label_invertibility.ColumnProbe",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.Invertibility.lines",
+      "target": "kneemri.evaluation.label_invertibility.Invertibility.mean",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.Invertibility.lines",
+      "target": "kneemri.evaluation.label_invertibility.Invertibility.verdict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.Invertibility.verdict",
+      "target": "kneemri.evaluation.label_invertibility.Invertibility.mean",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "target": "kneemri.evaluation.label_invertibility.Invertibility",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "target": "kneemri.evaluation.label_invertibility.ColumnProbe",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "target": "kneemri.evaluation.label_invertibility.Invertibility",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "target": "kneemri.evaluation.label_invertibility.LabelInvertibility.area",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "target": "kneemri.evaluation.label_invertibility.LabelInvertibility.cut",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "target": "kneemri.evaluation.label_invertibility.LabelInvertibility.embedded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "target": "kneemri.evaluation.label_invertibility.LabelInvertibility.findings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "target": "kneemri.evaluation.label_invertibility.LabelInvertibility.held",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.label_invertibility.main",
+      "target": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.label_invertibility.main",
+      "target": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
       "weight": 1
     },
     {
@@ -41747,7 +41855,7 @@
       "role": null
     },
     {
-      "descendants": 328,
+      "descendants": 329,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -41835,7 +41943,7 @@
       "role": null
     },
     {
-      "descendants": 119,
+      "descendants": 120,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -42126,6 +42234,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.label_errors",
       "label": "label_errors",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility",
+      "label": "label_invertibility",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -46337,6 +46453,30 @@
       "level": "class",
       "parent": "kneemri.evaluation.label_errors",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.ColumnProbe",
+      "label": "ColumnProbe",
+      "level": "class",
+      "parent": "kneemri.evaluation.label_invertibility",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.Invertibility",
+      "label": "Invertibility",
+      "level": "class",
+      "parent": "kneemri.evaluation.label_invertibility",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "label": "LabelInvertibility",
+      "level": "class",
+      "parent": "kneemri.evaluation.label_invertibility",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -58744,6 +58884,102 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.label_errors",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.ColumnProbe.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.ColumnProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.Invertibility.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.Invertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.Invertibility.mean",
+      "label": "mean",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.Invertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.Invertibility.verdict",
+      "label": "verdict",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.Invertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility.area",
+      "label": "area",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility.cut",
+      "label": "cut",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility.embedded",
+      "label": "embedded",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility.findings",
+      "label": "findings",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility.held",
+      "label": "held",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.LabelInvertibility.probe",
+      "label": "probe",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility.LabelInvertibility",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.label_invertibility.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.label_invertibility",
       "role": null
     },
     {
