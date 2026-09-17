@@ -105,6 +105,26 @@ the same way.
 `--unfreeze-last` (corner 6, corpus uses 12 in six arms) and `--slice-regions` (corner 1, corpus uses 4
 in seven arms) have **zero** isolating pairs anywhere in 407 arms. They are unpriced, not flat.
 
+### The decay caveat, measured rather than argued (bead knee-dry3h)
+
+The paragraph above is a structural suspicion: the corner sits between the endpoints, so the pair cannot
+price the step from where we are. That step can in fact be measured, by joining the stamped default onto
+the arms that omit the flag — which is what makes the corner a comparable side at all:
+
+| step | median | pairs |
+|---|---|---|
+| 0.005 → **0.02** (corner) | **+0.0077** | 5, all positive |
+| **0.02** (corner) → 0.1 | **+0.0029** | 5, 4 positive |
+
+The curve is *0.005 bad → 0.02 flat top → 0.1 flat*. Most of the +0.0106 was "0.005 is too little decay",
+as suspected; the step from where the corner actually is comes to less than half the paired floor. The
+caveat held, and weight decay does not earn a card.
+
+This is also the three-point curve that `scratchpad/tri.py` reported did not exist anywhere in 407 arms.
+That report is right about the *arms* and wrong as a statement about the *corpus*: the middle point of
+this curve is a default, so it is written in no arm script, and no instrument reading the arms against
+each other can see it.
+
 And this cuts against the mechanism argued above. More weight decay wins and a slower head wins; both are
 *more* regularisation, the opposite of an underfitting story. The three readings are not strictly
 contradictory — a trunk stepping too slowly under a head stepping too fast fits all of them — but the
