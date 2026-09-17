@@ -35,6 +35,8 @@ NOT_IN_CONFIG = {
     "eval_labels": "the holdout table, same",
     "out": "where the run wrote, which the file's own location already answers",
     "config": "the recipe file; each value it set is recorded under its own field name",
+    "resume": "recovery rather than recipe: it says where a killed run picked up, not what it fitted, "
+    "and `epochs_done` already records how far the run got",
     "epochs": "run length — `epochs_done` records what was actually reached, beside the kept epoch",
     "patience": "when the run stopped, which the kept epoch already states",
     "patience_from_progress": "when keeping could begin, which the kept epoch likewise already states",

@@ -49,14 +49,27 @@ def _fold(*, holdout: bool = True) -> Fold:
     )
 
 
-def _fitting(destination: Path, epochs: int = 1, patience: int = 0, patience_from: float = 0.0) -> Fitting:
+def _fitting(
+    destination: Path,
+    epochs: int = 1,
+    patience: int = 0,
+    patience_from: float = 0.0,
+    *,
+    resume: bool = False,
+) -> Fitting:
     torch.manual_seed(SEED)
     model = StudyModel(_FakeBackbone(), DIM, SLOTS)
     trainer = Trainer(model, torch.device("cpu"))
     encoder = Encoder(variant="small", repository="facebook/dinov2-small", dim=DIM)
     record = MemberRecord(OPTIONS.stamp, encoder, model, torch.device("cpu"), [f"S{i}" for i in range(SLOTS)])
     plan = RunPlan(
-        destination=destination, epochs=epochs, batch=BATCH, patience=patience, patience_from=patience_from, seed=SEED
+        destination=destination,
+        epochs=epochs,
+        batch=BATCH,
+        patience=patience,
+        patience_from=patience_from,
+        seed=SEED,
+        resume=resume,
     )
     return Fitting(trainer, record, plan)
 
@@ -107,6 +120,49 @@ def test_keep(tmp_path: Path):
     assert kept.holdout == pytest.approx(0.84)
     assert kept.state["head.out.weight"].device.type == "cpu", "a kept state must outlive the card"
     assert destination.with_suffix(".partial").is_file()
+
+
+def test_resumed(tmp_path: Path):
+    """A run that asked to continue starts after the kept epoch; one that did not starts cold.
+
+    Both halves or neither — the weights come from the `.partial` and the trajectory from the `.resume`
+    beside it, and `keep` wrote the two together, so a resumed run cannot be a fresh model stepping
+    along a used schedule.
+    """
+    destination = tmp_path / "member.pt"
+    killed = _fitting(destination)
+    killed.keep(_fold(), epoch=2, ranked=0.84, predicted=np.zeros((STUDIES, len(TARGETS))))
+
+    cold, nothing, first = _fitting(destination).resumed()
+    assert (cold, nothing, first) == (-1.0, None, 0), "without the flag a trajectory on disk is ignored"
+
+    best, kept, resumes_at = _fitting(destination, resume=True).resumed()
+    assert best == pytest.approx(0.84)
+    assert kept is not None
+    assert kept.epoch == 2
+    assert resumes_at == 3, "the resume point is the last KEPT epoch, so the next one is its successor"
+
+
+def test_a_resumed_run_continues_the_schedule_rather_than_restarting_it(tmp_path: Path):
+    """What separates this from `WarmStart`: the learning-rate curve keeps its position.
+
+    A warm start builds a FRESH `OneCycleLR` from loaded weights, so a run re-entered through it carries
+    the restart as a second knob and is no longer the arm it was priced as.
+    """
+    destination = tmp_path / "member.pt"
+    killed = _fitting(destination)
+    killed.trainer.schedule = torch.optim.lr_scheduler.OneCycleLR(killed.trainer.optimiser, max_lr=0.01, total_steps=10)
+    for _ in range(4):
+        killed.trainer.schedule.step()
+    killed.keep(_fold(), epoch=0, ranked=0.8, predicted=np.zeros((STUDIES, len(TARGETS))))
+
+    continued = _fitting(destination, resume=True)
+    continued.trainer.schedule = torch.optim.lr_scheduler.OneCycleLR(
+        continued.trainer.optimiser, max_lr=0.01, total_steps=10
+    )
+    continued.resumed()
+
+    assert continued.trainer.schedule.last_epoch == 4, "a fresh schedule would read 0"
 
 
 def test_run(tmp_path: Path):

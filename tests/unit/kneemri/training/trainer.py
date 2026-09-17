@@ -707,6 +707,26 @@ def test_save_partial(tmp_path: Path):
     assert reloaded["config"]["slice_pooling"] == "max", "the reading travels with the weights"
 
 
+def test_partial(tmp_path: Path):
+    """The name is derived in one place, so the writer and the resumer cannot disagree about it."""
+    assert Trainer.partial(tmp_path / "member_fold0.pt") == tmp_path / "member_fold0.partial"
+
+
+def test_restore_weights(tmp_path: Path):
+    """The weights go back into the model and the reading that made them a member comes back with them."""
+    trainer = _trainer()
+    destination = tmp_path / "member_fold0.pt"
+    state = {key: value.detach().cpu() for key, value in trainer.model.head.state_dict().items()}
+    trainer.save_partial(destination, {"model": trainer.model.state_dict(), "holdout": 0.81, "epoch": 7})
+
+    for tensor in trainer.model.head.parameters():
+        torch.nn.init.zeros_(tensor)
+    held = trainer.restore_weights(destination)
+
+    assert held["epoch"] == 7
+    assert torch.equal(trainer.model.head.state_dict()[next(iter(state))], state[next(iter(state))])
+
+
 def test_exponential_average():
     """With an EMA attached, the saved weights lag the live ones instead of being them."""
     trainer = _trainer()

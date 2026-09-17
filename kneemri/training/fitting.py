@@ -23,6 +23,7 @@ import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import torch
@@ -37,6 +38,7 @@ from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
 from kneemri.runs.run_metrics import EpochRow, RunMetrics
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.patience import Patience
+from kneemri.training.resume import ResumeState
 from kneemri.training.trainer import Trainer
 
 logger = logging.getLogger(__name__)
@@ -89,6 +91,9 @@ class RunPlan:
     seed: int = 2026
     """Data ORDER only — the model's own initialisation is seeded by the caller before it is built."""
 
+    resume: bool = False
+    """Continue the trajectory left beside `destination`, rather than starting the schedule cold."""
+
     @classmethod
     def of(cls, options: TrainConfig, destination: Path) -> "RunPlan":
         """The plan a parsed run asked for — one place, so a stopping field cannot be parsed and dropped."""
@@ -99,6 +104,7 @@ class RunPlan:
             patience=options.optim.patience,
             patience_from=options.optim.patience_from_progress,
             seed=options.run.seed,
+            resume=options.run.resume,
         )
 
 
@@ -195,6 +201,9 @@ class Fitting:
             )
         kept = Fitted(state=state, holdout=holdout, epoch=epoch, witness=witness)
         self.trainer.save_partial(self.plan.destination, self.record.payload(state, holdout, epoch, witness))
+        # Written with the weights, never separately: a trajectory describing a different epoch than the
+        # checkpoint beside it would resume a run into a state no run was ever in.
+        ResumeState.captured(self.trainer, self.generator, epoch, ranked).write(self.plan.destination)
         return kept
 
     def witnessed(self, fold: Fold, predicted: NDArray[np.float64] | None) -> dict[str, object]:
@@ -234,10 +243,31 @@ class Fitting:
         with Wakelock():
             return self.epochs(fold)
 
+    def resumed(self) -> tuple[float, "Fitted | None", int]:
+        """The score, the kept epoch and the epoch to start at — continuing a killed run, or cold.
+
+        Both halves or neither: the weights come from the `.partial` and the trajectory from the
+        `.resume` beside it, and `keep` wrote the two together so they describe one epoch. Restoring
+        only the trajectory would step a fresh model along a used schedule.
+        """
+        state = ResumeState.read(self.plan.destination) if self.plan.resume else None
+        if state is None:
+            return -1.0, None, 0
+        held = self.trainer.restore_weights(self.plan.destination)
+        state.restore(self.trainer, self.generator)
+        config = cast("dict[str, object]", held["config"])
+        kept = Fitted(
+            state=cast("dict[str, torch.Tensor]", held["model"]),
+            holdout=cast("float", held["holdout"]),
+            epoch=cast("int", held["epoch"]),
+            witness=cast("dict[str, object]", config["witness"]),
+        )
+        return state.best, kept, state.epoch + 1
+
     def epochs(self, fold: Fold) -> Fitted:
         """Every pass over the corpus, and the one whose weights are kept."""
-        best, kept = -1.0, None
-        for epoch in range(self.plan.epochs):
+        best, kept, first = self.resumed()
+        for epoch in range(first, self.plan.epochs):
             started = time.time()
             loss = self.trainer.fit_epoch(fold.corpus, fold.targets, fold.training, self.plan.batch, self.generator)
             # Both the score and the state come from inside this block, so the number that ranks an

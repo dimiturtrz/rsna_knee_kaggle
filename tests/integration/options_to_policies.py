@@ -42,8 +42,10 @@ THE_LOOP = {
     "batches",
     "evaluated",
     "fit_epoch",
+    "partial",
     "plan",
     "predict",
+    "restore_weights",
     "save_partial",
     "shortest_cycle",
 }

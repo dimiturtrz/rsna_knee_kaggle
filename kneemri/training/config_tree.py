@@ -152,6 +152,10 @@ class RunConfig:
     )
     report_vectors: Path | None = ConfigLeaf.of(default=None, says="npz from report_embeddings")
     out: Path | None = ConfigLeaf.of(default=None)
+    resume: bool = ConfigLeaf.of(
+        default=False,
+        says="continue the trajectory beside --out instead of starting the schedule cold",
+    )
     paths: Path = ConfigLeaf.of(default=Path("paths.yaml"))
     config: Path | None = ConfigLeaf.of(default=None, says="a recipe TOML; flags on the line override it")
 

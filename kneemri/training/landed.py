@@ -121,6 +121,9 @@ NOT_A_SWITCH = {
     "checkpoint that does fit is already in the parameters. There is nothing left for an equality here to "
     "catch — and the provenance a landed-check would report is the line `applied` returns, which the run "
     "logs and `member_record` keeps",
+    "resume": "recovery, not recipe: it continues the trajectory a killed run left beside `--out` and "
+    "changes no policy the model could be asked about. Whether it landed is answered by the run itself "
+    "— a resumed run logs the epoch it continues from, and a cold one starts at 0",
     "epochs": "run length, which nothing downstream can silently ignore",
     "studies": "corpus truncation, visible in the split line every run logs",
     "train_fraction": "which TRAINING studies were fitted on — the same kind of thing, and visible in "

@@ -17,7 +17,6 @@ lateral one and teaching the model that the distinction is noise.
 
 import logging
 import math
-import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -48,6 +47,7 @@ from kneemri.training.augmentation import (
     Augmentation,
     AugmentConfig,
 )
+from kneemri.training.durable import Durable
 from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import Predicted
 from kneemri.training.gradient_clip import GradientClip
@@ -725,22 +725,25 @@ class Trainer:
         return torch.cat(chunks).cpu().numpy().astype(np.float64)
 
     def save_partial(self, destination: Path, payload: dict[str, object]) -> None:
-        """Write the best weights so far, atomically, the moment they improve.
+        """Write the best weights so far, the moment they improve, whole or not at all.
 
-        The rename is atomic against a dying PROCESS, not against a dying MACHINE, so the temp file is
-        FLUSHED TO THE PLATTER first: without the fsync the filesystem journals the size while the data
-        blocks sit in cache, and an OS restart leaves a file of exactly the right length whose tail is
-        zeros and which carries no zip central directory — `torch.load` then raises
-        `PytorchStreamReader failed reading zip archive` on weights every other signal says are there.
-
-        The payload is the CALLER's, and is the one the final save writes: weights without a fingerprint
-        and a recorded reading are refused by MemberPackage, so a narrower payload preserves a killed
-        run's work but not its identity.
+        The payload is the CALLER's and is the one the final save writes: weights without a fingerprint
+        and a recorded reading are refused by MemberPackage, so a narrower payload would preserve a
+        killed run's work but not its identity.
         """
-        partial = destination.with_suffix(".partial")
-        temporary = partial.with_suffix(".tmp")
-        with temporary.open("wb") as handle:
-            torch.save(payload, handle)
-            handle.flush()
-            os.fsync(handle.fileno())
-        temporary.replace(partial)
+        Durable.save(payload, self.partial(destination))
+
+    @staticmethod
+    def partial(destination: Path) -> Path:
+        """Where a run's best-so-far weights sit — one home for the name both halves have to agree on."""
+        return destination.with_suffix(".partial")
+
+    def restore_weights(self, destination: Path) -> dict[str, object]:
+        """Load the partial save's weights into the model, and hand back the payload they came with.
+
+        The payload carries the reading and the fingerprint that make those weights a member, which a
+        resumed run has to keep rather than re-derive.
+        """
+        held = torch.load(self.partial(destination), map_location="cpu", weights_only=False)
+        self.model.load_state_dict(held["model"])
+        return held
