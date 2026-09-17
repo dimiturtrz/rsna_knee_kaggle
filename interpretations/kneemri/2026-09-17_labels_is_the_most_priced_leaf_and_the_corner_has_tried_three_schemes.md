@@ -85,7 +85,10 @@ What is NOT settled, and is the whole of what remains:
 
 Neither of those earns a card at 1.6 h against a 0.9053 control while the corner's own knob axis is
 closed and the residual label gaps (MCL, Lateral OA, Fracture, each ≥0.11 below their perfect-truth
-ceilings) point at in-plane resolution rather than at label text. They are recorded here so that the
+ceilings) look structural rather than textual. **This sentence originally named in-plane resolution as
+where they point, and that was refuted the same day** — the one `image_size` pair on disk lifts
+Synovitis and Baker's while Fracture and Lateral OA move the wrong way. See
+`2026-09-17_in_plane_resolution_lifts_fluid_not_thin_bright_lines.md`. They are recorded here so that the
 next reader who arrives at the 30-pair row arrives at this paragraph with it, instead of at the
 sweep.
 

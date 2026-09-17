@@ -81,6 +81,57 @@ Nor is this a 1.5% lever. The honest expectation is a few thousandths, priced at
 baseline has to be paid for — and because an inherited constant on the axis that sets every other
 constant's meaning is worth one arm.
 
+## The arm ran. It is flat, and its mechanism is REFUTED
+
+`lr8e5_ship_s2026`, 8e-5 against the corner's 4e-5, every other flag identical:
+
+```
+labelwise_depth24_drop40_long_s2026        0.8679    0.9053  +0.0374     18    909
+lr8e5_ship_s2026                           0.8673    0.9031  +0.0358     18    909
+```
+
+**−0.0022**, a third of the paired floor. CONVERGED 24 of 24 on both sides, and both peak at the **same
+epoch 18** — so this is not a schedule offset read as a rate effect. Measured 230 s an epoch, ~1.6 h
+rather than the 2.6 h this file priced.
+
+The flat alone would be a null. What makes it a refutation is the training loss, which is the quantity
+the underfitting argument was built on. If the corner were regularisation-bound and wanted more rate,
+the doubled rate should fit MORE. It fits **less, at every matched epoch**:
+
+| epoch | arm 8e-5 | corner 4e-5 |
+|---|---|---|
+| 15 | 0.6780 | — |
+| 16 | 0.6548 | — |
+| 17 | 0.6422 | 0.6036 |
+| 22 / 23 | 0.5973 | 0.5600 |
+
+And the matched-epoch AUCs are a dead heat throughout: e15 .8630/.8635, e16 .8662/.8653, e17
+.8622/.8666, e18 .8673/.8679, e19 .8653/.8662, e20 .8651/.8668, e21 .8667/.8674. There is no epoch at
+which the higher rate is ahead. So 4e-5 is not on a low shoulder at this corner — the 12-epoch tilt
+did not survive the doubled schedule, which was pre-registered as its own band and is what happened.
+
+`comp/members.declines` carries the decline. Re-open only on a mechanism that predicts a rate change
+should pay at 24 epochs under `slot_dropout 0.40` — the 12-epoch pairs above are not that mechanism,
+because they have now been tested here and did not transfer.
+
+## The pre-registered tension, resolved — and the whole optimiser axis with it
+
+Line 137 of this file said that if the rate arm landed flat, the first thing to read is the tension
+that more weight decay wins and a slower head wins, both MORE regularisation. It resolves, and the
+resolution is that **neither reading was ever taken at the corner**:
+
+| leaf | corner | what the corner actually says |
+|---|---|---|
+| `backbone_lr` | 4e-5 | measured here: **−0.0022** for 8e-5, flat |
+| `head_lr` | 0.001 | **399 of 403 resolved recipes run 0.001, and so do ALL 15 corner runs.** The +0.0106 rests on four runs total — three at 2e-4, one at 5e-3 — none at the corner. The leaf has never been varied here. |
+| `weight_decay` | 0.02 | the corner step 0.02 → 0.1 is **+0.0029** (knee-dry3h), under half the floor |
+| `slot_dropout` | 0.40 | 0.0 → 0.4 reads +0.0018 and +0.0005 on two pairs, neither clearing |
+
+So the "more regularisation wins" story was a gradient across extreme endpoints at a recipe nobody
+stands on, exactly as the caveat above suspected — and it cost one count to settle rather than one
+card. **All four optimiser leaves at the shipping corner are now closed**, and the next 1.5% is not on
+this axis.
+
 ## The knobs the corner never NAMED — a bigger blind spot on the same axis
 
 An audit of the corner's own flags can only see flags it writes. The stamped recipe holds 93 leaves, and
