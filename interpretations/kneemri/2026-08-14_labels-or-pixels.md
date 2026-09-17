@@ -154,10 +154,28 @@ measurements are wrong; their SUBJECT is. Any argument of the form "showing the 
 might help those findings" has lost the evidence it stood on, and that includes the one supporting
 sentence encoder width had — width may still pay, but not for this reason.
 
-**What it opens.** The reader is now the weaker half on every finding, by 0.0616 aggregate, and that is
-the noise our training targets are made of: where the report says YES the radiologist agrees 65.3% of
-the time. A better label reader is the only lever this measurement licenses, and it is a data lever
-rather than a knob.
+**What it does NOT open, corrected 10:20Z against the record I should have read first.** The sentence
+that stood here said a better label reader is the lever this licenses. It is not, on two counts already
+on disk. The 2026-09-08 page's §7 closes per-finding pricing as a CLASS — `colnull_v1` shows the board
+is an unweighted mean of twelve column AUCs so a column gaining *d* moves the board by *d*/12, and
+`colhalf_v1` reads a 0.024 board gap against a 0.110 offline spread: every column has to move ~0.010 and
+no per-column shortcut exists. And the reader swap itself was then MEASURED: knee-wko44 is closed on
+`v5reader`, paired gold@58 **-0.0112 sd 0.0122**, whole-table arm not licensed. So this table ranks our
+SUPERVISION, not the board's difficulty, and nothing here is a lever.
+
+**Ranked the way the standing rule requires.** The table above orders by `model - labels`, and the
+2026-09-08 §8 rule forbids exactly that: a baseline may not be a deterministic function of the target,
+and REFERENCE appears on both sides of that subtraction. Ranked by ACHIEVED alone, which has no reader
+term in it, our champion's floor is:
+
+```
+model-bound   Lateral OA 0.8221 · Synovitis 0.8590 · Contusion 0.8799 · Lateral Meniscus 0.8919
+comfortable   ACL 0.9926 · MCL 0.9796 · Effusion 0.9801 · Medial Meniscus 0.9591
+```
+
+Lateral Meniscus was the published pool's worst column at 0.6497 and is our fourth-worst at 0.8919;
+**Lateral OA is now the floor**, and it was second on the published ranking too. That is the one ordering
+statement this page may make.
 
 **The denominator, stated.** 58 studies, 696 cells, 34.5% positive; per-finding positives run 9 to 35,
 so only the aggregate and the three bands that exclude zero (Effusion, Synovitis, Contusion) are claims.
