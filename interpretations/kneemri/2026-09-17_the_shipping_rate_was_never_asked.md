@@ -81,6 +81,36 @@ Nor is this a 1.5% lever. The honest expectation is a few thousandths, priced at
 baseline has to be paid for — and because an inherited constant on the axis that sets every other
 constant's meaning is worth one arm.
 
+## The knobs the corner never NAMED — a bigger blind spot on the same axis
+
+An audit of the corner's own flags can only see flags it writes. The stamped recipe holds 93 leaves, and
+40 of them are never named by any of the corner's arms while some other arm in the corpus moved them:
+those sit at the recipe default, invisible to any read of the arm scripts. Three have a single-flag A/B
+already on disk, and two of them are **larger than anything the rate produced**:
+
+| knob | corner runs | low | high | delta |
+|---|---|---|---|---|
+| `--head-lr` | 0.001 | `headlr224` 5e-3 0.8670 | `headlr224_slow` 2e-4 **0.8777** | **+0.0106** for the SLOWER head |
+| `--weight-decay` | 0.02 | `decay224_low` 0.005 0.8714 | `decay224_high` 0.1 **0.8820** | **+0.0106** for the HIGHER decay |
+| `--pool` | cls_mean | `focal224` 0.8776 / `sided224` 0.8775 | | −0.0001, and +0.0022 on the dense pair |
+
+Both of the 0.0106s clear the 0.0062 paired floor, which no rate pair did. Neither displaces the rate
+arm, for a reason about the pairs rather than their sizes: in both, **the corner's own value sits between
+the two endpoints** (0.001 between 2e-4 and 5e-3; 0.02 between 0.005 and 0.1) and both endpoints are
+deliberately extreme, so the pair prices a gradient across a 20–25× span and says nothing about the step
+from where the corner actually is. Most of +0.0106 over 25× is plausibly just "5e-3 is a broken head
+rate". The rate pairs are cleaner precisely because 4e-5 *is* one endpoint in all four, and all four move
+the same way.
+
+`--unfreeze-last` (corner 6, corpus uses 12 in six arms) and `--slice-regions` (corner 1, corpus uses 4
+in seven arms) have **zero** isolating pairs anywhere in 407 arms. They are unpriced, not flat.
+
+And this cuts against the mechanism argued above. More weight decay wins and a slower head wins; both are
+*more* regularisation, the opposite of an underfitting story. The three readings are not strictly
+contradictory — a trunk stepping too slowly under a head stepping too fast fits all of them — but the
+underfitting argument is weaker than the previous section states, and if the rate arm lands flat this
+tension is the first thing to read.
+
 ## The general shape of the error
 
 This is the same defect as the ledger's twelve populations found the same afternoon, one level up. There
