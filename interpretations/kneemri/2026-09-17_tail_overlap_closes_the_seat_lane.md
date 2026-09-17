@@ -100,3 +100,87 @@ members and 310 honest ones above the merit level.
 alignment rule `AttributionCorpus.members` already enforces and not a choice made here. Tail = the
 worst 90 of 909 studies, each member cut at its own tenth. `ledger75` is the 0.75 cut, not the
 midpoint — a number quoted from this page carries that cut.
+
+## 2026-09-17, 11:00Z: the other half of the closure — every CAPACITY axis is measured too
+
+The section above says a re-opening needs "a member that does not yet exist, whose recipe changes what a
+study looks like rather than how it is scored". This is the census of whether such a recipe is available,
+because if the input axes are also spent then the shelf is saturated on both sides and that is a
+different kind of fact than a seating closure.
+
+**The shelf is ONE recipe.** Read off `torch.load(..., weights_only=True)["options"]` for the ten
+highest-`ledger75` honest members, every one is identical on `image_size 336`, `train_size 0`,
+`compile_encoder True`, `backbone_lr 4e-05`, `pool cls_mean`, `slot_pooling attend`, `encoder_layer -1`,
+`encoder_weights None`, `encoder_adapt_depth 0`. They differ on exactly two knobs — `slice_pooling`
+(labelwise, except `oof_teacher_s2026` at max) and `stochastic_depth` (0.0, except
+`labelwise_drop_drop40_long_s2026` and `fieldwide_s2026` at 0.05) — and they span 0.9007 to 0.9053
+`ledger75` on the same 909 rows. A 0.005 spread across twenty members is what a saturated recipe looks
+like.
+
+**And every axis that would leave that recipe has already been run.**
+
+```
+axis                     member                 ledger75   delta vs its OWN control
+ViT block 9 of 12        encoder_layer_9_s2026    0.8459    -0.0227  (3.7x floor; seat value -0.0034)
+DINOv2-base vs small     base_dense_s2026         0.8812    -0.0057  (inside the 0.0062 floor)
+392 px on a 448 cache    res392_ws_s2026          0.8817    +0.0066  (but see below)
+80 mm joint crop         crop80_tissue_s2026      0.8597    negative
+36 slices                stack224 / cover_labelwise  --     -0.0033 / -0.0014
+reference                labelwise_depth24_drop40_long_s2026  0.9053
+```
+
+**The one positive is already spent.** `res392_ws` read +0.0066 over its control, and
+`experiments/README.md:310-312` separates the cause: `rate_wholestack` moved the encoder rate 8e-6 to
+4e-5 at an unchanged 336 px and read 0.8525 against res392's 0.8523. The gain was the RATE, not the
+pixels — and the stamp above shows every current member already runs `backbone_lr 4e-05`. There is no
+resolution lever left to pull; it was pulled and it is in the champion.
+
+**The caveat that keeps this honest, and it is the thing that would re-open the lane.** Those arms peaked
+at epochs 6 to 10 against controls from the 12-epoch era; the reference peaks at epoch 18 under
+labelwise pooling, drop40 and a long schedule. So the deltas are priced on a recipe the champion no
+longer is, and the standing rule is that **only the SIGN transfers across a recipe change**, never the
+size. Four of the five signs are negative, which is a closure. The fifth, DINOv2-base, is a TIE inside
+the floor — and a tie is the one outcome a longer budget could plausibly move, since a bigger trunk is
+exactly the thing a 12-epoch budget under-trains.
+
+So the single re-opening arm this census licenses is **DINOv2-base under the CURRENT recipe** — 336 px,
+labelwise, drop40, 24 epochs — and it must be priced as an arm whose own pre-registration predicts a
+tie, not sold as a lever. It is not armed here: a base trunk is roughly 3-4x small per epoch against a
+reference arm that already costs hours, which is a poor ratio against a mechanism whose best prior
+evidence is a null.
+
+## 2026-09-17, 11:05Z: the closure's stated MECHANISM was wrong — it is the split, not the recipe
+
+The sections above read shared tail failure as a fact about the recipe. It is a fact about the SPLIT, and
+the difference matters because only one of the two is re-openable.
+
+**345 of 364 members carrying both a checkpoint and a holdout record are fold 0 of `split_seed 2026`.**
+Read off `options` across every `*.holdout.npz` on disk: fold 0 -> 345, fold 1 -> 5, fold 2 -> 5,
+fold 3 -> 5, fold 4 -> 4, plus 79 whose checkpoint would not load. So the shelf the screen ranked is
+almost entirely ONE training set. Members fitted on the same 3497 studies failing the same 90 is not
+evidence that the recipe cannot decorrelate; it is what that construction guarantees.
+
+**And the screen cannot see the class that could.** Alignment is its denominator rule —
+`AttributionCorpus.members` keeps only members whose study order equals the reference's — and a fold-1
+member holds out a DIFFERENT 909 by construction. The 51 members reported as skipped are therefore not
+noise around the edge of the reading; they are the only members whose tails could have differed, removed
+before the ranking began.
+
+**The conclusion survives anyway, for a reason that is not the one given.** All 19 off-fold members are
+the obsolete OOF recipe — `oof_{band,clean,gen2,reader,}_fold{1..4}_s2026`, every one `variant=small`,
+12 slices, 8 epochs, against the reference's 24 slices and 18. No STRONG member exists off fold 0, so
+there was in fact nothing for the screen to find. "The ensemble lane is closed" stands; "no honest member
+fails different studies" does not, and may not be quoted.
+
+**What this makes priceable, and the obstacle that stops it being cheap.** The only untested decorrelation
+source is the current recipe fitted on another fold. It cannot be read on this split: fold-0 and fold-1
+holdouts are DISJOINT, so no study is held out by both and no honest offline number for such a pair
+exists. An honest reading needs OOF-complete predictions over the 4406-study corpus — each study scored
+by the fold that did not train on it — which is what the `oof_*_fold*` family was built for and why it
+sits at 12 slices and 8 epochs. So the arm is four arms plus a corpus reading, not one, and the
+≤0.002 ensemble premium this project quotes against it was itself measured entirely WITHIN fold 0, under
+the same confound. That is the honest case for pricing it and the honest reason it is not armed here.
+
+**Also verified while reading the stamps, replacing an assertion made from bead prose.** Every one of the
+champion's seven seats stamps `variant=small` and `crop_mm 130.0`, at 12 to 24 slices, fold 0 or -1.
+The trunk claim in the census above is now read from the checkpoints.
