@@ -129,6 +129,37 @@ def test_table(tmp_path: Path) -> None:
     assert [row.name for row in rows] == ["strong", "weak"]
 
 
+def _short_member(directory: Path, name: str) -> Path:
+    """A member read on a DIFFERENT, smaller study set — a second population, scoring perfectly."""
+    truth = np.tile(np.array([1.0, 0.0], dtype=np.float32)[:, None], (1, len(TARGETS)))
+    predictions = np.tile(np.array([0.99, 0.01])[:, None], (1, len(TARGETS)))
+    path = directory / f"{name}.pt"
+    HoldoutRecord(path).write(["s9", "s8"], predictions, truth, epoch=5)
+    return path
+
+
+def test_population(tmp_path: Path) -> None:
+    """The digest is the study SET, so record order cannot split one population into two."""
+    ruler = LedgerSeventyFive()
+    one = ruler.reading(_member(tmp_path, "p1", RECUT_COLUMN))
+    two = ruler.reading(_member(tmp_path, "p2", RECUT_COLUMN))
+    assert ruler.population(one) == ruler.population(two)
+    assert ruler.population(one) != ruler.population(ruler.reading(_short_member(tmp_path, "p3")))
+
+
+def test_table_keeps_populations_whole(tmp_path: Path) -> None:
+    """A higher score on another study set may not outrank the majority population — it sorts after it."""
+    rows = LedgerSeventyFive().table(
+        [
+            _short_member(tmp_path, "perfect_elsewhere"),
+            _member(tmp_path, "ours_a", RECUT_COLUMN),
+            _member(tmp_path, "ours_b", HELD_COLUMN),
+        ]
+    )
+    assert rows[-1].name == "perfect_elsewhere", "it scores 1.0 and still may not lead"
+    assert rows[0].studies == len(STUDIES)
+
+
 def test_void(tmp_path: Path) -> None:
     """A member the declines file calls void is MARKED, never dropped and never silently ranked."""
     declines = MemberDeclines("insample.pt  # LEDGER75 0.9425 - void, in-sample.\nhonest.pt  # below the floor.\n")

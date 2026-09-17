@@ -28,7 +28,9 @@ midpoint leaves 21, and 0 of 326 at the >=.0053 floor; R^2 .80 -> .96 with one s
 midpoint's wanders 1.05-1.41.
 """
 
+import hashlib
 import logging
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -60,6 +62,17 @@ class Ledger75Row:
     epoch: int
     studies: int
     between_cut: int = -1
+    population: str = ""
+    """Digest of the study ids this row was read on — the only thing that licenses comparing two rows.
+
+    An AUC is a statistic OF a study set, so two rows read on different sets are two different questions
+    and their difference is not a delta. 426 records on disk carry twelve distinct populations: 375 read
+    the 909 set the project ships against, and the rest are fold members that each held out a different
+    quarter, near-909 foreign refits, and 60-study smokes. Keyed on the id digest and not on the row
+    COUNT, which happens to separate all twelve here and would stop doing so the moment a recut produced
+    a second set of the same size.
+    """
+
     void: bool = False
     """Does `comp/members.declines` say this member's number is not a reading of held-out studies?
 
@@ -151,8 +164,14 @@ class LedgerSeventyFive:
             epoch=reading.epoch,
             studies=len(reading.studies),
             between_cut=self.between(reading),
+            population=self.population(reading),
             void=name in self.void,
         )
+
+    def population(self, reading: HoldoutReading) -> str:
+        """A short digest of the study ids, sorted so record order cannot split one population in two."""
+        joined = "|".join(sorted(str(study) for study in reading.studies))
+        return hashlib.sha1(joined.encode("utf-8"), usedforsecurity=False).hexdigest()[:8]
 
     def between(self, reading: HoldoutReading) -> int:
         """How many truth cells sit in `[MIDPOINT, RECUT)` — the only cells the two rulers disagree about.
@@ -164,11 +183,16 @@ class LedgerSeventyFive:
         return int(np.count_nonzero((truth >= MIDPOINT) & (truth < self.recut.cut)))
 
     def table(self, paths: list[Path]) -> list[Ledger75Row]:
-        """Every member that left a record, best LEDGER75 first — the order a seat decision reads.
+        """Every member that left a record, grouped by population and best LEDGER75 first inside each.
 
         A member whose record is missing is SKIPPED rather than raised on, because the sweep's whole
         purpose is to price everything on disk and a dark arm sitting in the same directory must not
         take the other two hundred down with it.
+
+        The LARGEST population leads, and every other one follows whole rather than interleaved. A flat
+        sort put `foreign_oof_corpus` (4406 studies) third and three `oof_gen2` fold members (849-890,
+        each holding out a different quarter) inside the top sixteen, where a reader takes a rank as a
+        seat ordering. Ordering ACROSS populations is the thing that cannot be done, so it is not done.
         """
         rows = []
         for path in paths:
@@ -176,7 +200,9 @@ class LedgerSeventyFive:
                 rows.append(self.row(path))
             except FileNotFoundError:
                 logger.debug("%s has no holdout record", path)
-        return sorted(rows, key=lambda row: -row.ledger75)
+        leading = Counter(row.population for row in rows).most_common(1)
+        main = leading[0][0] if leading else ""
+        return sorted(rows, key=lambda row: (row.population != main, row.population, -row.ledger75))
 
 
 def main() -> None:
@@ -196,17 +222,30 @@ def main() -> None:
     rows = LedgerSeventyFive(declines=pool.declines).table(paths)
 
     lines = [f"{'member':40s} {'LEDGER':>8s} {'LEDGER75':>9s} {'move':>8s} {'epoch':>6s} {'rows':>6s}"]
-    lines += [
-        f"{row.name[:40]:40s} {row.ledger:8.4f} {row.ledger75:9.4f} {row.moved():+8.4f} {row.epoch:6d} "
-        f"{row.studies:6d}{'  VOID - not a reading of held-out studies' if row.void else ''}"
-        for row in rows
-    ]
+    seen = ""
+    for row in rows:
+        if row.population != seen:
+            seen = row.population
+            lines.append(f"-- population {seen}, {row.studies} studies - ranks below do NOT cross this line --")
+        lines.append(
+            f"{row.name[:40]:40s} {row.ledger:8.4f} {row.ledger75:9.4f} {row.moved():+8.4f} {row.epoch:6d} "
+            f"{row.studies:6d}{'  VOID - not a reading of held-out studies' if row.void else ''}"
+        )
     lines.append(f"{len(rows)} member(s) priced under both rulers")
     command.report(lines)
 
     voided = [row.name for row in rows if row.void]
     if voided:
         message = f"{len(voided)} row(s) VOID by {arguments.declines} and unrankable: {', '.join(voided)}"
+        raise SystemExit(message)
+
+    # Only the EXPLICIT ask refuses. A default sweep spanning populations is a survey and the dividers
+    # make it honest, but `--only a b` is a caller asking for a comparison, and across two study sets
+    # there is no comparison to hand back.
+    asked = {row.population for row in rows} if arguments.only else set()
+    if len(asked) > 1:
+        counts = sorted({row.studies for row in rows})
+        message = f"--only spans {len(asked)} study populations ({counts} studies) - these rows are not comparable"
         raise SystemExit(message)
 
 

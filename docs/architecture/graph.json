@@ -19011,6 +19011,12 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.population",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
       "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
       "weight": 1
     },
@@ -59212,6 +59218,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.per_label",
       "label": "per_label",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.LedgerSeventyFive.population",
+      "label": "population",
       "level": "method",
       "parent": "kneemri.evaluation.ledger75.LedgerSeventyFive",
       "role": null
