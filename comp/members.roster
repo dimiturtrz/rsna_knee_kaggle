@@ -914,3 +914,14 @@ moment_wide_s2026.pt        # 0.8600 ledger (peak e8 of 12, converged). The two 
                             # and the head is twice as wide -- the only member on this roster whose slot
                             # vector is not a selection among slices. It also prices moment_dense's
                             # -0.0118: +0.0084 of it was the mix-down, not the statistic.
+
+headlr_ship_s2026.pt        # 0.8702 solo / 0.9059 ledger75, peak epoch 17 of 24, converged. THE HIGHEST
+                            # LEDGER75 THIS PROJECT OWNS, above labelwise_depth24_drop40_long_s2026
+                            # (0.8679 / 0.9053) and labelwise_ext_drop40_long_s2026 (0.8672 / 0.9045).
+                            # One variable off the first: --head-lr 2e-4 rather than 1e-3. The delta is
+                            # +0.0023 midpoint and +0.0006 ledger75 against a 0.0062 paired floor, so it
+                            # is DIRECTIONAL and is named as one — a knob landing where a knob lands, kept
+                            # because it is free and the mechanism (a head that stops outrunning the trunk
+                            # it reads) is sound, never because the number cleared anything. It is on this
+                            # roster to be SHIPPABLE as the top point of the solo ruler, where the n=8 OLS
+                            # has fewest points and where every entry we care about sits.

@@ -4555,3 +4555,28 @@ reading a mechanism into it would be reading scatter. The two members are board-
 The consequence is for the PLAN, not for the members: there is no untried refit of a better member waiting
 on disk. Both twins are shipped and both land at 0.944-0.945. The 0.011 to the leader remains a MEMBER gap,
 and no reseating of this pool reaches it.
+
+## `extsolo_v1` — 0.937, ref 56315030, 2026-09-17 — the refit term is not a constant, and the solo line missed high
+
+The held-out half of `extffsolo_v1` (0.945): the same recipe, `labelwise_ext_drop40_long_s2026`,
+differing in one thing — the fifth of the corpus held out. So the pair measures the full-corpus refit
+term DIRECTLY on a second member, where the first pair (`l75solo_v1` 0.941 / `ffsolo_v1` 0.944) had
+measured it on `labelwise_depth24_drop40_long`.
+
+**Term = 0.945 − 0.937 = +0.008, against that pair's +0.003.** Two members, 2.7× apart, and a dose
+series of 0/1/2 full-fit seats (`tripleseat_v2` / `fullseat_v1` / `fullseat2_v1`) that reads
+0.946 / 0.946 / 0.946 — flat — on a seat of this very member. A refit is therefore a MEASUREMENT to be
+taken per member, never a step size to multiply by. Every plan ending "refit at `--fold -1` and ship
+it" loses its coefficient.
+
+This retracts `extffsolo_v1`'s own claim that the term reproduces at n=2 and that ~+0.004 could be
+carried. That reading was taken against a PREDICTED honest twin (0.9402), because the twin had never
+shipped. This entry is that twin, measured.
+
+**And the solo transfer line missed for the first time.** `board = −0.1131 + 1.165 · offline75`
+(resid sd 0.0016, n=8) predicted **0.9403**, 2 sd [0.9371, 0.9435]; the read is **0.937**, −2.1 sd,
+outside the band, after three consecutive thousandth-exact calls. One point outside a 2 sd band does
+not break a ruler. What makes it worth writing down is WHERE it sits: this is the second-highest
+offline75 ever shipped, nothing above 0.9053 had ever tested the line, every open plan extrapolates it
+there, and the miss is in the direction that costs. Treat a prediction above ~0.904 as an UPPER BOUND
+until a second point at the top reads on the line.
