@@ -15,11 +15,21 @@ and reports a tighter interval over fewer studies. A run that recorded no recipe
 than guessed at.
 
 And a re-derivation is not the training array. The same weights read the same pixels, but through the
-submission path rather than the training one, and on whatever device is free — which is accurate to the
-cross-precision tolerance, roughly 4x eps, and that is WIDER than the +/-0.016 half-widths a paired
-floor quotes. So the record is written as `DERIVED`, and `run_comparison` prints any floor computed
-from one as INDICATIVE. The record says what it is; nothing downstream has to remember which runs were
-back-filled.
+submission path rather than the training one, and on whatever device is free, so the two disagree at
+the cross-precision tolerance. MEASURED 2026-09-17 on `labelwise_depth24_drop40_long_s2026`, 909
+studies, cuda, by re-deriving a run that already kept a TRAINED record and diffing the two arrays:
+
+    per-cell |delta|   max 0.016822   mean 0.000964   p99 0.006409     (fp16 eps = 9.77e-04)
+    macro AUC          trained 0.867917   derived 0.867955   delta +0.000038
+    worst label        Lateral OA +0.0004, against the 0.0062 paired floor
+
+The two numbers live in DIFFERENT UNITS and must not be compared: a per-cell prediction delta is not a
+score half-width. The per-cell max is 17x eps, not the 4x this docstring asserted unmeasured; the SCORE
+it produces is 0.00004, a hundred and fifty times inside the floor. So a `DERIVED` record is usable for
+a paired floor on the evidence, not merely by tolerance — and the reason it is still stamped `DERIVED`,
+and still printed by `run_comparison` as INDICATIVE, is that this is one member on one device. A member
+whose trunk is deeper diverges further (`witness_check` reads 1.6-2.4x eps on four members and 5.8x on
+the project's largest), so the stamp records the provenance rather than a tolerance nobody re-measures.
 """
 
 import logging

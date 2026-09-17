@@ -37,7 +37,10 @@ band_dense_s2026                        0.8877   the family's control
 ```
 
 `ffsolo_v1` ships the full-corpus (`_ff`) twin of the top row. A `_ff` member holds nothing out, so no
-ledger row can price it; 0.9053 is its fold-0 sibling.
+ledger row can price it; 0.9053 is its fold-0 sibling. The two recipes differ on **two** keys, not one —
+`fold 0 -> -1` and `ema False -> True`, verified off both checkpoints' recorded recipes — because every
+`_ff` member carries EMA. That co-variable is priced: `ema_dense` reads **+0.0010** against `band_dense`,
+a sixth of the paired floor, so the sibling is a sound proxy and not a matched one.
 
 Five variants of one recipe within **0.0009**. The family is at its ceiling. Nothing among 442 members
 beats it.
@@ -179,6 +182,29 @@ study-against-study WITHIN a label; any within-study term orders label-against-l
 orderings over the same logits — buying one COSTS the other rather than composing with it. That is
 why `Objective.pairs` was never missing the side comparison by oversight, and it means a loss term is
 worth arming here only if its ordering is the metric's own.
+
+### The submission path and the training path are the same model, to 0.00004
+
+The standing worry was that the kernel ships something other than what we validate — *"the checkpoint
+file MUST be the same, so the difference must be processing around it ONLY"*. Measured rather than
+argued: the champion member's checkpoint copied aside, re-derived through `holdout_backfill` (which
+reads through `Member`, the type the submission path uses) on the same 909 studies, and diffed against
+the array its own trainer wrote.
+
+```
+truth arrays identical                            909 of 909 studies joined
+per-cell |delta|   max 0.016822   mean 0.000964   p99 0.006409
+macro AUC          trained 0.867917   derived 0.867955   delta +0.000038
+worst label        Lateral OA +0.0004               paired floor 0.0062
+```
+
+**There is no train/deploy divergence to fix on this member.** Offline-to-board disagreement is not
+the inference path; it is the ruler and the truth, which the `board_transfer` slope already prices.
+
+The unit confusion that hid this is worth keeping: `holdout_backfill`'s docstring asserted a "roughly
+4x eps" tolerance and called it "wider than the +/-0.016 half-widths a paired floor quotes". The
+per-cell max IS about 0.016 — and a per-cell prediction delta is not a score half-width. Two different
+units read as one number. The real per-cell figure is 17x eps and the real score figure is 0.00004.
 
 ### The false-negative asymmetry is calibration, not ranking
 
