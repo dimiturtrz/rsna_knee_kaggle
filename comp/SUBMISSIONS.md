@@ -4525,3 +4525,26 @@ so the ensemble premium is **+0.002**.
 
 The 0.005 between this entry and the champion decomposes as **+0.003 data and +0.002 ensembling**, and
 neither term is reachable by reseating. The 0.011 to the leader stays a MEMBER gap.
+
+## `extffsolo_v1` — 0.945, ref 56312235, 2026-09-17 — the refit term reproduces, and the ensemble premium falls to one tick
+
+INSTRUMENT, pre-registered in knee-22nk5, and it cleared its top band. The question was whether the
+**+0.003** whole-corpus refit term REPRODUCES on a second recipe. That term had been measured by exactly
+one matched pair (`l75solo_v1` 0.941 / `ffsolo_v1` 0.944, same recipe, differing only in whether the
+holdout fifth was trained on) while sitting load-bearing in the inversion that prices every open arm.
+
+PREDICTED **0.9432**. The honest twin `labelwise_ext_drop40_long_s2026` reads **0.9045** ledger75; carried
+over the solo transfer `board = -0.1217 + 1.174 * offline75` (resid sd 0.0019, n=7) that gives 0.9402, plus
+the +0.003 term under test. READ **0.945** — inside 0.0018 of the point, so inside one residual sd.
+
+**The term reproduces at n=2, and reads slightly larger here**: +0.0048 against `depth24`'s +0.003. Carry
+~+0.004. The inversion stands: 0.947 needs +0.0021 offline75, 0.955 needs +0.0089.
+
+**The larger reading is the ensemble premium.** The best SOLO on this board is now **0.945** against the
+seven-seat champion `tripleseat_v2` at **0.946**. That premium was read as +0.013 off `matchpair_v1` (an
+artefact of `stackfit_s2026`'s weakness), then +0.002 off `ffsolo_v1`, and is now **+0.001** — one board
+tick, at a board that resolves to 0.001, which bounds it below what this record can measure at all.
+
+**What this entry is NOT.** `labelwise_ext_drop40_long_s2026` is the WEAKER honest twin (0.9045 against
+`depth24`'s 0.9053), so the best member this project owns has still not shipped in its refit form. The
+0.011 to the leader remains a MEMBER gap, and no reseating of this pool reaches it.
