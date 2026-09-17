@@ -1508,3 +1508,12 @@ erase_own_cells_s2026
   configured buys nothing, not that map-driven erasing cannot. Re-open only by moving grid or rate with
   an argument for the new value, and price it against this +0.0014, never against zero.
   Declined as a member; the npz stays so the comparison can be re-read.
+
+solobase_hold
+  NOT A MEMBER — a byte-identical copy of labelwise_depth24_drop40_long_s2026, the champion member.
+  md5 6c6aab320deca08a94c1a7fe8cf4924a on the .pt and d27edf77e383d58a3b2cd46c0fea0c42 on the
+  .holdout.npz, both matching, so every reading it can produce is the champion's own: ledger75 0.9053
+  at epoch 18 over 909 rows, and tail overlap 1.000 against itself on tail_screen. It exists because the
+  checkpoint was copied to a speakable name and the copy kept its holdout record.
+  It may NEVER be seated beside its original — an ensemble that takes both is one member voting twice,
+  and nothing downstream compares hashes. Delete the copy or keep it declined; do not roster it.
