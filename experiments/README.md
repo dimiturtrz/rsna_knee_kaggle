@@ -8438,8 +8438,19 @@ predictions:
 
 | use of `teacher_foreign_corpus.npz` | delta |
 |---|---|
-| SEATED directly (their weights mounted) | **+0.0178** at 6x on the served base of 8, **+0.0218** on the greedyseat base of 7 |
-| ABSORBED into a student | **−0.0004** at 1x, worse at every larger weight |
+| SEATED directly (their weights mounted) | **+0.0178@cut0.5** at 6x on the served base of 8, **+0.0218@cut0.5** on the greedyseat base of 7 |
+| ABSORBED into a student | **−0.0004@cut0.5** at 1x, worse at every larger weight |
+
+**BOTH ROWS ARE MIDPOINT NUMBERS, AND THE SEATED ONE IS ABOUT TWICE THE LEDGER75 READING.** Re-taken
+2026-09-17 on both cuts in one process off `price_served_base8.sh`'s own argv, the midpoint arm
+reproducing 0.8835 / +0.0178 at 6x exactly: RankAverage @ledger75 reads base 0.9134 and **+0.0095 at 4x,
++0.0092 at 6x**, with the interior maximum at **4-5x against the midpoint's 6-7x**. The sign is the same
+at every weight on both cuts, so the cut is NOT what inverted this seat on the board — `foreignseat_v1`'s
+−0.013 keeps the two candidates named below. What the cut does change is the WEIGHT it argues for, and
+that matters because the champion serves this seat at 1/3 of eight, which IS 4x: on the ruler the board
+agrees with, the served weight is already at the optimum, while the midpoint reading was pressure to go
+heavier. Split-half agrees and halves the same way — chosen 5-6x, +0.0092/+0.0091 out-of-sample at
+ledger75 against +0.0182/+0.0159 at the midpoint. `seat_weight --midpoint` is what re-takes these rows.
 
 Distillation is lossy in exactly the dimension seating is not. Together with `foreign_recipe_v3small`
 (their recipe transcribed and retrained here: 0.8087 against their weights' 0.8812), this closes both
