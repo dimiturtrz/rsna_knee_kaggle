@@ -44,9 +44,10 @@ WHAT IT CANNOT SEE, measured on its own first sweep of the corpus rather than gu
   - A TABLE COLUMN. The marker test is per LINE, and a table puts `nearest` in the header row while the
     data rows carry only numbers — so an agreement column or a second-ruler column reads as a row of
     holdout claims. Two of the eighteen findings on the first clean sweep were this.
-  - A SECOND RULER NAMED IN PROSE. `calib_span_hold` genuinely reads 0.9152 on the gold 58 and
-    `lr5x_d6` genuinely reads 0.8475 when both arms are given the TTA they get at inference. The
-    sentence says so; the check cannot, because there is no second ruler on disk to compare against.
+  - A SECOND RULER IT CANNOT RECONSTRUCT. `calib_span_hold` genuinely reads 0.9152 on the gold 58 and
+    `lr5x_d6` genuinely reads 0.8475 when both arms are given the TTA they get at inference. Those two
+    rulers exist only in the sentence. LEDGER75 is the exception and is now checked: it is a recut of
+    the holdout array the run already wrote, so it is recomputed here rather than taken on trust.
   - A FOLD-0 OR FULL-FIT TWIN. The seating tables are written over `_cf` counterparts whose scores are
     not their `_s2026` originals', and only a name distinguishes them.
 
@@ -70,7 +71,10 @@ from pathlib import Path
 
 from core import cli
 from core.denominator import Denominator
+from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.experiments.ledger_check import LedgerCheck
+from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
+from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
@@ -378,13 +382,25 @@ class ClaimsCheck:
 
         Epochs come from the metrics file where one exists; the kept value is always included, because 50 of
         the runs on disk wrote no metrics file at all and their checkpoint is the only account they left.
+
+        THE SECOND RULER COUNTS AS RECORDED. A run's metrics hold the midpoint macro alone, so a page
+        quoting the same run's LEDGER75 was read as quoting a number no run holds — the four standing
+        disputes on 2026-09-17 were all of that one kind and none of them was a misquote. The repo's rule
+        is that a number is midpoint UNLESS IT SAYS OTHERWISE (knee-f9aao), and this is the "otherwise":
+        the recut macro is a real reading of the same record, so it belongs in what the run is held to.
+        Recomputed from the holdout array rather than trusted from prose, which is what makes it a check.
         """
+        ruler = LedgerSeventyFive()
         scores: dict[str, set[str]] = {}
         for name, best in runs.items():
             known = {f"{best:.4f}"}
             metrics = RunMetrics(processed / f"{name}.pt")
             if metrics.exists():
                 known.update(f"{float(row['auc']):.4f}" for row in metrics.rows() if row.get("auc") is not None)
+            record = HoldoutRecord(processed / f"{name}{HOLDOUT_SUFFIX}")
+            reading = record.read() if record.exists() else None
+            if reading is not None:
+                known.add(f"{ruler.macro(reading):.4f}")
             scores[name] = known
         return scores
 

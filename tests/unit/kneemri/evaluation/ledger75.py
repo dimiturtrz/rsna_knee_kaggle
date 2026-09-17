@@ -8,6 +8,7 @@ from numpy.typing import NDArray
 
 from core.findings import TARGETS
 from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, LedgerSeventyFive
+from kneemri.evaluation.member_pool import MemberDeclines
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 
@@ -126,3 +127,12 @@ def test_table(tmp_path: Path) -> None:
     weak = _member(tmp_path, "weak", HELD_COLUMN)
     rows = LedgerSeventyFive().table([strong, weak, tmp_path / "dark.pt"])
     assert [row.name for row in rows] == ["strong", "weak"]
+
+
+def test_void(tmp_path: Path) -> None:
+    """A member the declines file calls void is MARKED, never dropped and never silently ranked."""
+    declines = MemberDeclines("insample.pt  # LEDGER75 0.9425 - void, in-sample.\nhonest.pt  # below the floor.\n")
+    ruler = LedgerSeventyFive(declines=declines)
+    assert ruler.row(_member(tmp_path, "insample", RECUT_COLUMN)).void
+    assert not ruler.row(_member(tmp_path, "honest", RECUT_COLUMN)).void
+    assert not LedgerSeventyFive().row(_member(tmp_path, "unjudged", RECUT_COLUMN)).void

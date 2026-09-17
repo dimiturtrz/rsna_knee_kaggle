@@ -2901,6 +2901,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.ledger75",
+      "target": "kneemri.evaluation.member_pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.ledger75",
       "target": "kneemri.evaluation.scores",
       "weight": 1
     },
@@ -5313,8 +5319,20 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.claims_check",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.claims_check",
       "target": "kneemri.experiments.ledger_check",
       "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.claims_check",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 2
     },
     {
       "kind": "import",
@@ -18913,6 +18931,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "kneemri.evaluation.ledger75.LedgerSeventyFive",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -18922,6 +18946,12 @@
       "kind": "references",
       "source": "kneemri.evaluation.ledger75.LedgerSeventyFive",
       "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.__init__",
+      "target": "kneemri.evaluation.member_pool.MemberDeclines.void",
       "weight": 1
     },
     {
@@ -19012,6 +19042,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.ledger75.main",
       "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.ledger75.main",
+      "target": "kneemri.evaluation.member_pool.MemberPool.at",
       "weight": 1
     },
     {
@@ -28522,6 +28558,36 @@
       "kind": "calls",
       "source": "kneemri.experiments.claims_check.ClaimsCheck.readable",
       "target": "kneemri.experiments.claims_check.ClaimsCheck.columnar",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.macro",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {

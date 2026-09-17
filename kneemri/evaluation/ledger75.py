@@ -36,6 +36,7 @@ import numpy as np
 
 from core import cli
 from core.findings import TARGETS
+from kneemri.evaluation.member_pool import DECLINES, MemberDeclines, MemberPool
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import SUFFIX, HoldoutReading, HoldoutRecord
 
@@ -59,6 +60,15 @@ class Ledger75Row:
     epoch: int
     studies: int
     between_cut: int = -1
+    void: bool = False
+    """Does `comp/members.declines` say this member's number is not a reading of held-out studies?
+
+    This instrument prices whatever holdout file it is handed and cannot see who trained on those
+    studies, so a member fitted on its own holdout reads HIGH and sorts to the top. The four highest
+    rows of a solo ranking taken on 2026-09-17 were all of that kind, already ruled 98.6% in-sample at
+    `comp/members.declines:815-821`, and read as printed the table put a foreign member 0.037 above the
+    project's best solo where the board puts the same member 0.021 below it.
+    """
 
     def moved(self) -> float:
         """LEDGER75 minus the midpoint macro. A member's own re-pricing, not a comparison to anything."""
@@ -84,10 +94,19 @@ class Ledger75Row:
 class LedgerSeventyFive:
     """The mixed-cut ruler: ten findings at 0.75, two at the midpoint, scored off the kept arrays."""
 
-    def __init__(self, recut: float = RECUT, midpoint_columns: tuple[str, ...] = MIDPOINT_COLUMNS) -> None:
+    def __init__(
+        self,
+        recut: float = RECUT,
+        midpoint_columns: tuple[str, ...] = MIDPOINT_COLUMNS,
+        declines: MemberDeclines | None = None,
+    ) -> None:
         self.recut = LabelScores(recut)
         self.midpoint = LabelScores(MIDPOINT)
         self.midpoint_columns = midpoint_columns
+        # Empty rather than reading the file, so the scorer stays pure and the POLICY lives at the
+        # entrypoint that already resolves `--declines`. A default that read disk would put a repo file
+        # behind every construction, the caller's cwd included.
+        self.void = declines.void() if declines else set[str]()
 
     def scorer(self) -> LabelScores:
         """This ruler as a plain scorer, for a caller holding ARRAYS rather than a member's record.
@@ -124,13 +143,15 @@ class LedgerSeventyFive:
         """One member under both rulers, with the epoch and the row count that priced it."""
         reading = self.reading(path)
         ledger = float(np.nanmean(list(self.midpoint.per_label(reading.predictions, reading.truth).values())))
+        name = path.name.removesuffix(SUFFIX).removesuffix(".pt")
         return Ledger75Row(
-            name=path.name.removesuffix(SUFFIX).removesuffix(".pt"),
+            name=name,
             ledger=ledger,
             ledger75=self.macro(reading),
             epoch=reading.epoch,
             studies=len(reading.studies),
             between_cut=self.between(reading),
+            void=name in self.void,
         )
 
     def between(self, reading: HoldoutReading) -> int:
@@ -163,22 +184,30 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--holdouts", type=Path, required=True, help="directory of .holdout.npz records")
     command.parser.add_argument("--only", nargs="+", default=[], help="member stems, instead of the whole directory")
+    command.parser.add_argument("--declines", type=Path, default=DECLINES, help="what deliberately does not ship")
     arguments = command.parsed()
 
-    paths = (
-        [arguments.holdouts / f"{name}{SUFFIX}" for name in arguments.only]
-        if arguments.only
-        else sorted(arguments.holdouts.glob(f"*{SUFFIX}"))
-    )
-    rows = LedgerSeventyFive().table(paths)
+    # The DEFAULT sweep goes through the pool and the explicit ask does not, which is `MemberPool.names`'s
+    # own rule: a named member is a caller pricing a specific record, void or not. What that left open is
+    # that the ranking then carries the void row unlabelled, so the marker below is on the row and the
+    # refusal is at the end — the number stays printable, the table stops being quotable in silence.
+    pool = MemberPool.at(arguments.holdouts, arguments.declines)
+    paths = [arguments.holdouts / f"{name}{SUFFIX}" for name in pool.names(arguments.only)]
+    rows = LedgerSeventyFive(declines=pool.declines).table(paths)
 
     lines = [f"{'member':40s} {'LEDGER':>8s} {'LEDGER75':>9s} {'move':>8s} {'epoch':>6s} {'rows':>6s}"]
     lines += [
-        f"{row.name[:40]:40s} {row.ledger:8.4f} {row.ledger75:9.4f} {row.moved():+8.4f} {row.epoch:6d} {row.studies:6d}"
+        f"{row.name[:40]:40s} {row.ledger:8.4f} {row.ledger75:9.4f} {row.moved():+8.4f} {row.epoch:6d} "
+        f"{row.studies:6d}{'  VOID - not a reading of held-out studies' if row.void else ''}"
         for row in rows
     ]
     lines.append(f"{len(rows)} member(s) priced under both rulers")
     command.report(lines)
+
+    voided = [row.name for row in rows if row.void]
+    if voided:
+        message = f"{len(voided)} row(s) VOID by {arguments.declines} and unrankable: {', '.join(voided)}"
+        raise SystemExit(message)
 
 
 if __name__ == "__main__":
