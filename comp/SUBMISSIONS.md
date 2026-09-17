@@ -4397,3 +4397,34 @@ was empty. Consequence, filed as knee-xz903: the gap to the leader (0.946 → 0.
 bar, so first place is a chain of composing sub-bar increments and not a single mechanism.
 
 **Leg 3, 56288717 (swapseat), is still scoring.**
+
+### 56288717 — swapseat (INSTRUMENT, leg 3) · board **0.944** · read 2026-09-17 00:19Z
+
+`foldseven_v1` with `through_dense_s2026` replaced by `clean_calib_drop40_long_s2026` — six of seven seats
+shared. `run_check` reads **7 of 7 members loaded**, which the kernel states as the condition for this entry
+to read anything at all. Offline 0.8763 at midpoint, **−0.0004** against foldseven (the +0.0001 that chose
+the swap is @ledger75 — different cut, not a different answer). Board: flat.
+
+#### The three legs only mean anything together, and what they make is a series
+
+Leg 1 measured the board's identical-entry scatter at **0.000**, which is what turns legs 2 and 3 from
+"flat, probably noise" into nulls. Against `foldseven_v1` (0.8767 → 0.944), all at midpoint:
+
+| entry | seats shared with foldseven | Δ offline | Δ board |
+|---|---|---|---|
+| `eightseat_v1` | 7 of 8 (one added) | +0.0002 | **0.000** |
+| `swapseat_v1` | 6 of 7 (one swapped) | −0.0004 | **0.000** |
+| `pricetop_v1` | 1 of 6 (near-disjoint) | −0.0010 | **−0.006** |
+
+Every offline delta here is below the 0.0062 holdout noise floor — our ruler cannot separate any of these
+pools. The board separates the third one by three times its own blur. **So board movement at a fixed reading
+tracks POOL OVERLAP, not pool quality on our ruler**: perturb a pool by one seat in either direction and the
+board does not move at all; replace it wholesale and it moves 0.006.
+
+Two consequences. The `pricetop`/`foldseven` blocker — "one offline point, six board points", which has
+gated pricing every arm in this band — is **resolved and was misframed**: there is no rogue seat to find,
+because the two entries share exactly one member. And `board_transfer`'s slope may be applied WITHIN a family
+and not ACROSS one: it converts an offline gain for a move that keeps the pool's identity, and prices nothing
+about switching families, where 0.0010 of offline bought 0.006 of board in one direction and could as easily
+buy −0.006 in the other. We are already on the side that transferred better, so this explains pricetop's
+shortfall rather than offering us headroom. n=1 pair on the disjoint case.
