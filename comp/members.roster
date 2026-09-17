@@ -815,15 +815,19 @@ resnet_224_long_s2026.pt    # The 48-epoch CNN, completed 2026-09-10 after the f
                             # two near-identical CNNs are not two units of diversity. Read it against the
                             # pool with a divergence measurement, never against its solo.
                             # Ledger 2026-09-10.
-oof_band_fold0_s2026.pt     # NO SCORE ON THIS ROSTER'S RULER. Its arm (`oof_band_folds.sh:72`) passes
-                            # `--labels report_labels_v6band50.csv` with `--eval-labels` UNSET, so its
-                            # holdout truth is the band table and not v2 — the ruler moved with the arm,
-                            # the `recal_holdannot_s2026` defect (`comp/members.declines:84`).
-                            # `rescore_t2_deletions_ruler.out.txt:17` refuses it on truth alignment, and
-                            # `RecordMix.per_member` refuses any entry built from it. The 0.8522 this
-                            # line carried is on the band table and MAY NOT be compared to
-                            # `res392_ws_s2026` 0.8523 or `extended_ws_s2026` 0.8459, which are v2.
-                            # Seatable only once re-scored against v2 (knee-g2vm9).
+oof_band_fold0_s2026.pt     # 0.8522 @holdout909 midpoint, COMPARABLE — measured, not assumed. Its npz
+                            # `truth` differs from the reference in the SOFT target only (0.61 where the
+                            # reference grid has 0.68, plus smoothed cells): binarised at the 0.5 that
+                            # `macro_auc` consumes, 0 of 10908 cells differ. So it is scored on this
+                            # roster's ruler and MAY be compared to `res392_ws_s2026` 0.8523 and
+                            # `extended_ws_s2026` 0.8459.
+                            # `rescore_t1_ruler.py:140` refuses it anyway — it tests `np.allclose` on the
+                            # SOFT array while consuming only `>= 0.5`, so its refusal is a false
+                            # positive here and its pool is short one member (knee-g2vm9). The other five
+                            # it refuses differ in BINARY too (32 to 3161 cells) and are real.
+                            # `--labels report_labels_v6band50.csv` is NOT the mechanism:
+                            # `Ruler(v2).moved_cells(Ruler(v6band50))` is 0, so that table scores this
+                            # holdout exactly as v2 does. The axis is soft-target construction.
                             # It is the CHEAPEST member here by an order of magnitude, one of the
                             # `oof_{band,reader}`
                             # teacher family, whose fold[1-4] siblings are unseatable BY CONSTRUCTION

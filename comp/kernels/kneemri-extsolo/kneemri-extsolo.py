@@ -1,11 +1,21 @@
 """Is the full-fit premium a constant, or a property of the member it was measured on?
 
 WHY THIS ENTRY EXISTS. Every plan that ends "refit at `--fold -1` and ship it" multiplies by a REFIT
-TERM, and that term has exactly one measurement behind it. `l75solo_v1` shipped
-`labelwise_depth24_drop40_long_s2026` held out (board 0.941) and `ffsolo_v1` shipped the same recipe
-and seed refit (`_ff`, board 0.944, ref 56296698). One member, one pair, **+0.003** — and `l75solo`'s
-own pre-registration said that anything inside +/-0.004 was inside 2 sd, so it closed by calling the
-premium FREE rather than by resolving it. A single unresolved pair is not something to multiply by.
+TERM. That term has three readings, and the SOLO axis — the one such a plan actually multiplies — has
+only the third:
+
+  * `foldfour_v1` 0.936 / `fitfour_v1` 0.937, a matched four-seat pair, identical seating at fold 0
+    against the full-corpus half. **+0.001.**
+  * `fullseat_v1` 0.946 and `fullseat2_v1` 0.946 against `tripleseat_v2` 0.946 — a dose series of
+    0/1/2 full-fit `drop40` seats reading **0.946 / 0.946 / 0.946, flat**. `fullseat_v1`'s refit seat
+    is `labelwise_ext_drop40_long_s2026`, THIS member: its refit already read flat inside an ensemble.
+  * `l75solo_v1` 0.941 -> `ffsolo_v1` 0.944 (ref 56296698), one member shipped held out and refit,
+    **+0.003** — inside the +/-0.004 that `l75solo` pre-registered as its own null, so it closed by
+    calling the premium FREE rather than by resolving it.
+
+The first two price the term inside an ensemble, where a single seat's extra fit is diluted by six
+others. Only the third is solo, and it is unresolved. So the honest prior is **+0.000 to +0.001**, and
+a plan that multiplies by +0.004 is multiplying by the loosest of the three.
 
 THE SECOND PAIR, AND IT IS ALREADY HALF-BUILT. `extffsolo_v1` (ref 56312235) is
 `labelwise_ext_drop40_long_ff` at board **0.945**. Its held-out twin,
@@ -28,20 +38,28 @@ OLS over those eight: `board = -0.1131 + 1.165 * offline75`, **residual sd 0.001
 
 PRE-REGISTERED, on the REFIT TERM `0.945 - board`, against the +0.003 the first pair read:
 
-  * **board 0.939-0.942** — term +0.003 to +0.006. The two pairs AGREE inside scatter and the premium
-    is a constant near +0.004. Refit-and-ship may be planned as a step with a known size, which is
-    what the head_lr path (knee-xuarh, knee-h25fx) needs before it spends a card on a refit.
-  * **board >= 0.943** — term <= +0.002. The premium is zero twice over, and `l75solo`'s "holding 909
-    studies out is FREE" graduates from one reading to two. The held-out ledger row costs nothing and
-    should be kept on every deliverable.
+  * **board >= 0.943** — term <= +0.002. MODAL, and the branch the ensemble readings predict: the
+    premium is zero on the solo axis too, `l75solo`'s "holding 909 studies out is FREE" graduates from
+    one reading to two, and the two axes agree. A refit step may then be planned as ~0 — which means
+    the head_lr path (knee-xuarh, knee-h25fx) must clear the champion on the ARM, not on the refit.
+    The held-out ledger row costs nothing and should be kept on every deliverable.
+  * **board 0.939-0.942** — term +0.003 to +0.006. The solo axis DISAGREES with the ensemble dose
+    series, and the premium is real but dilutable — a seat's extra fit survives alone and is washed
+    out by six others. Refit-and-ship keeps a known step size, and the dose series stops being
+    evidence about solo plans.
   * **board <= 0.938** — term >= +0.007, more than twice the first pair's. The premium is then
     MEMBER-SPECIFIC, not a constant, and no plan may multiply by it; a refit becomes a measurement
     that must be taken per member.
 
-Every branch also gives the eight-row solo transfer its second out-of-sample test, and the first one
-taken below the point that anchors its top end.
+TWO PRIORS, AND THEY DISAGREE — which is what makes one slot worth spending here. The solo transfer
+line puts this member at **0.9403** (term +0.0047). The flat refit term measured on the ensemble axis,
+on THIS member, puts it at **0.945** (term +0.000). Both are fitted on real board rows and they cannot
+both hold: either the eight-row solo line is right and the refit premium is real but dilutable, or the
+dose series is right and the solo line over-predicts the gap at the top of its range. The reading
+falsifies one of them, and every branch also gives that line its second out-of-sample test — the first
+taken below the point anchoring its top end.
 
-THIS IS AN INSTRUMENT AND IS SUBMITTED AS ONE. The modal branch sits six thousandths under the 0.946
+THIS IS AN INSTRUMENT AND IS SUBMITTED AS ONE. Even the high branch lands a thousandth under the 0.946
 pinned in `comp/champion.json`; a single held-out member is not offered as a way past it. The slot
 buys the constant, not the rank.
 
