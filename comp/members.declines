@@ -1392,3 +1392,22 @@ band_dense_s2026_n24b0.1-0.9
   the whole roster unable to build a package (knee-aqppc). Declined on the mechanism rather than the
   number: package_members ships `.pt` files, so nothing added to the shelf can reach this. Re-open it by
   changing the KERNEL's decode over the line-65 seat, or by training the spec into its own checkpoint.
+
+labelwise_depth24_drop40_long_ff
+labelwise_ext_drop40_long_ff
+  The whole-corpus `--fold -1 --ema` refits of two of the champion's three drop40 labelwise seats. Both
+  SHIPPED — `fullseat_v1` (ext only) and `fullseat2_v1` (both) — and both read 0.946, identical to
+  `tripleseat_v2` with neither. The dose series over 0/1/2 refit seats is 0.946/0.946/0.946, so one extra
+  fifth of the corpus at a 2/3 share over seven seats sits under the board's own 0.001 resolution.
+  Declined as SEATS, not as checkpoints: they are mounted and rebuildable, and a future entry may seat
+  them for a reason other than this one. Re-open it by naming a mechanism that is not "more data per
+  seat" — that one is measured flat at two doses.
+
+labelwise_dense_drop40_long_ff
+  The third refit, ABANDONED at epoch 2 and correctly so: `.partial` on disk, no `.pt`, no holdout record
+  (a `--fold -1` arm holds nothing out). It was not re-armed once `fullseat2_v1` read the second dose flat,
+  because the third dose of a lever measured flat at doses one and two is a ~0-expected run. Written down
+  because an abandoned `.partial` beside two finished siblings LOOKS like unfinished work: on 2026-09-17 it
+  was read as the champion's last untaken seat upgrade and priced as a free lever, and only the board rows
+  said otherwise. A decision that lives in five entries' prose and nowhere on this file is a decision the
+  next reader pays to make twice.

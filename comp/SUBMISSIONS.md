@@ -4455,9 +4455,21 @@ What the detrended fit gives instead is worth more than the retracted claim:
   offline** at the top slope. A real gain that size will show; scatter will not deliver it.
 - **A board delta under ~0.004 between two of our own entries is within 2 sd of the line and is not
   evidence.** That is a standing rule for reading this file, and it is what the earlier reading violated.
-- **Designed seating is the thing that is working.** The three highest residuals in the top band are
-  `swapseat_v1` +0.0032, `foldseven_v1` +0.0026, `eightseat_v1` +0.0023 — all three designed, all three
-  honestly priced on the full 909.
+- **Designed seating buys RESIDUAL, and residual is not level.** The three highest residuals in the top
+  band are `swapseat_v1` +0.0032, `foldseven_v1` +0.0026, `eightseat_v1` +0.0023 — all designed, all
+  honestly priced on the full 909. **All three also read 0.944.** Sitting above the transfer line at a
+  given offline reading is not the same as moving the board, and writing "designed seating is the thing
+  that is working" (this line, 00:36Z) read the first as the second. To land 0.947 the OFFLINE number has
+  to move +0.0076; no seating of this pool does that, because the pool is what bounds it.
+  Four independent measurements now say the same thing and none of them is new:
+  seat COUNT is not an axis (1/2/3/4/6 seats read 0.914/0.919/0.913/0.918/0.911, non-monotone over a
+  0.008 span — `interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md`); the seat AXIS
+  is saturated (`interpretations/kneemri/2026-08-25_the-seat-axis-is-saturated-and-the-member-is-0.028-behind.md`);
+  half-holdout greedy seating cannot resolve a seat below the 0.0062 floor (the surviving half of the
+  closure at `:2450`); and the 0.946 tier reads **flat across five different one-seat perturbations** of
+  `tripleseat_v2` — drop40 dose 3→4, `through_dense_cf` removed, 0/1/2 full-fit refits, mount trimmed —
+  which bounds that tier's true spread under the board's own 0.001. **The next gain has to come from what
+  a member IS**, which is the 2026-08-16 sentence arrived at again by a different road.
 
 Re-derive the fit before quoting any number in this subsection; adding a row moves it, which is this file's
 standing failure mode. See knee-5hbtz, which also re-opens part of the seating closure at :2450.
