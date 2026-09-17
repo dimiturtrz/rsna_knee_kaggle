@@ -16542,3 +16542,42 @@ converges on e10 — the *same* peak epoch as the control, so the obvious object
 by a 12-epoch `one_cycle` budget) is answered rather than assumed. 4e-5 is at its optimum, and the optimum is
 **asymmetric**: 0.5× costs 0.0010, 2.5× costs 0.0215. Err slow. That closes the last open fragment, so
 fragment-level search on this family is now closed entirely, in favour of the data and architecture axes.
+
+## SAM (sharpness-aware minimization) at rho=0.05 — REFUTED, and the cause is the radius
+
+*Ran 2026-09-12, adjudicated the same day on knee-zqouw, written into the ledger 2026-09-17. It sat five
+days as a verdict that existed only in a closed bead's notes, and a later audit re-derived it from the raw
+arrays and nearly re-ran the arm. The row is here so the next grep finds it.*
+
+```
+member                      LEDGER   LEDGER75    epoch   rows   note
+calib_dense_hold_s2026      0.8634     0.8949       6     909   control, identical recipe, its own peak
+sam_dense_s2026             0.8213     0.8498       6     909   --sharpness 0.05, TRUNCATED at e6 of 12
+                           -0.0421    -0.0451                   matched epoch
+```
+
+`experiments/arms/sam_dense.sh` moved one variable — `--sharpness 0.05` — against
+`calib_dense_hold_s2026` on the identical recipe and the identical fp16 GradScaler path. Its pre-registered
+floor was 0.8604 midpoint; it landed 0.8213. The gap is the same on both rulers (−0.0421 midpoint,
+−0.0451 ledger75), so it is not a cut artefact.
+
+**The run is TRUNCATED, and that does not rescue it.** It died at epoch 7 of a 12-epoch `one_cycle`, so the
+anneal never ran and the score is a FLOOR — `trajectory_check` truncated it live at 07:16Z, and the generous
+ceiling it computed (granting the largest e6-to-peak gain seen across 224 runs on disk, 0.8478) still sits
+below both the control and the arm's own directional band.
+
+**The verdict is separable because the gap is UNIFORM, not late.** SAM trails from epoch 0 — 0.6921 against
+the control's 0.7515 — and holds roughly four points at every matched epoch. A truncated score bounds the
+END of training; a deficit already present at epoch 0 is not a statement about the anneal at all, which is
+what lets this read the arm's two pre-registered causes apart. The harness was cleared first: the plumbing
+witness fired live (the ascent was climbing at radius 0.05, so `Sharpness.climbed` was not silently
+returning False on non-finite fp16 gradients, the suspect the arm named in advance), and both sides share a
+holdout and a cut. **The cause is the radius.** rho=0.05 is the published value for from-scratch schedules on
+normalised weight scales; against a pretrained trunk at `--backbone-lr 4e-5` the ascent step is large
+relative to the update and walks out of the basin every step.
+
+**What this refutes is rho=0.05 at this budget, not sharpness-aware minimization.** The flatness mechanism is
+untouched and remains the one generalisation-side lever the project has implemented, which matters because
+every closed axis was closed IN-domain while the board is out-of-domain to our holdout. The honest revisit,
+if ever priced, is rho=0.01 or 0.005, once. Cost for the record: 534 s/epoch against the control's 410, the
+double forward.
