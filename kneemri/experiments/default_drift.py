@@ -46,7 +46,16 @@ class DefaultDrift:
     def __init__(self, recipe: Mapping[str, str], incidental: frozenset[str] = INCIDENTAL) -> None:
         self.recipe = recipe
         self.incidental = incidental
-        self.current = TrainConfig().recipe
+        self.current = self.declared()
+
+    @classmethod
+    def declared(cls) -> dict[str, str]:
+        """Every flag's default as the trainer would apply it now, flat, keyed by flag name.
+
+        One home for the question "what would this run have got if it said nothing", so a second reader
+        of it compares against the same tree this one does rather than a list hand-written beside it.
+        """
+        return TrainConfig().recipe
 
     @classmethod
     def of_metrics(cls, metrics: Path) -> "DefaultDrift":

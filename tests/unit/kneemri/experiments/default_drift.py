@@ -12,6 +12,13 @@ def _recipe() -> dict[str, str]:
     return dict(TrainConfig().recipe)
 
 
+def test_declared() -> None:
+    """The defaults carry the IDENTITY values an off-list cannot express — 1.0 is not 0, and not absent."""
+    defaults = DefaultDrift.declared()
+    assert defaults["layer_decay"] == "1.0"
+    assert defaults["accumulate"] == "1"
+
+
 def test_drifted() -> None:
     """No drift is a measurement, and the check must be able to say it."""
     assert DefaultDrift(_recipe()).drifted() == {}

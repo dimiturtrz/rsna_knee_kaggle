@@ -5450,6 +5450,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.twin_check",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.twin_check",
+      "target": "kneemri.experiments.default_drift",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.twin_check",
+      "target": "kneemri.runs.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.vram_need",
       "target": "kneemri.training.options",
       "weight": 1
@@ -28718,7 +28736,7 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.experiments.default_drift.DefaultDrift.__init__",
+      "source": "kneemri.experiments.default_drift.declared",
       "target": "kneemri.training.config_tree.TrainConfig",
       "weight": 1
     },
@@ -29884,6 +29902,54 @@
       "kind": "calls",
       "source": "kneemri.experiments.trajectory_check.main",
       "target": "kneemri.runs.run_metrics.RunMetrics.name",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.TwinDrift.complaints",
+      "target": "kneemri.experiments.twin_check.TwinDrift.drift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.TwinDrift.complaints",
+      "target": "kneemri.experiments.twin_check.TwinDrift.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.TwinDrift.drift",
+      "target": "kneemri.runs.member_record.StampedRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.TwinDrift.report",
+      "target": "kneemri.experiments.twin_check.TwinDrift.complaints",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.TwinDrift.report",
+      "target": "kneemri.experiments.twin_check.TwinDrift.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.twin_check.main",
+      "target": "kneemri.experiments.twin_check.TwinDrift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.main",
+      "target": "kneemri.experiments.twin_check.TwinDrift.complaints",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.main",
+      "target": "kneemri.experiments.twin_check.TwinDrift.report",
       "weight": 1
     },
     {
@@ -41513,7 +41579,7 @@
       "role": null
     },
     {
-      "descendants": 325,
+      "descendants": 326,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -42545,7 +42611,7 @@
       "role": null
     },
     {
-      "descendants": 26,
+      "descendants": 27,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -42748,6 +42814,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.trajectory_check",
       "label": "trajectory_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check",
+      "label": "twin_check",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -47790,6 +47864,14 @@
       "label": "TrajectoryGate",
       "level": "class",
       "parent": "kneemri.experiments.trajectory_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check.TwinDrift",
+      "label": "TwinDrift",
+      "level": "class",
+      "parent": "kneemri.experiments.twin_check",
       "role": "primary"
     },
     {
@@ -65402,6 +65484,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.default_drift.declared",
+      "label": "declared",
+      "level": "method",
+      "parent": "kneemri.experiments.default_drift",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.default_drift.main",
       "label": "main",
       "level": "method",
@@ -66270,6 +66360,54 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.trajectory_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check.TwinDrift.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.twin_check.TwinDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check.TwinDrift.complaints",
+      "label": "complaints",
+      "level": "method",
+      "parent": "kneemri.experiments.twin_check.TwinDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check.TwinDrift.drift",
+      "label": "drift",
+      "level": "method",
+      "parent": "kneemri.experiments.twin_check.TwinDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check.TwinDrift.pairs",
+      "label": "pairs",
+      "level": "method",
+      "parent": "kneemri.experiments.twin_check.TwinDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check.TwinDrift.report",
+      "label": "report",
+      "level": "method",
+      "parent": "kneemri.experiments.twin_check.TwinDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.twin_check.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.twin_check",
       "role": null
     },
     {
