@@ -9,8 +9,35 @@
 > carried in knee-xuj5's notes and never written here). It compared our BOARD single (`soloseat_v1`,
 > Kaggle's hidden test) against rivals' FORUM self-reports. On the 58 radiologist-annotated studies both
 > sides hold out, `calib_span_hold` reads 0.9152 on the gold 58 against `raptor_ft_coatnet_v4_full`'s 0.9167 — a delta of
-> 0.0015 against a macro standard error of about 0.012 at n=58. **Our member is level with theirs.** The
+> 0.0015 against a macro standard error of about 0.012 at n=58. ~~**Our member is level with theirs.**~~ The
 > 0.028 is the distance between the rulers.
+>
+> > **CORRECTION TO CORRECTION 1, 2026-09-17 01:00Z (knee-5hbtz). "Level" is not what n=58 measured.**
+> > An SE of 0.012 on the delta means this comparison cannot resolve anything smaller than about 0.024,
+> > and the difference that would explain the board is far below that: the detrended top-band transfer
+> > fit puts the 0.011 board gap to the leader at **+0.0076 offline** (slope +1.45, residual sd 0.0022,
+> > n=15). So the gold 58 excludes NOTHING of the size actually at issue — it is an underpowered ruler
+> > reported as a null, which is this repo's own recurring denominator error with the denominator named
+> > for once. **Correct statement: the member comparison against the field is UNRESOLVED, and 58 studies
+> > cannot resolve it.** The withdrawal of the 0.028 stands on its own (a two-ruler artefact, forum
+> > self-reports against a hidden test); what does not stand is the sentence that replaced it. It matters
+> > because "our member is level" is the one claim that would close the member axis — and with seat count,
+> > the seat axis, half-holdout greedy seating and the five-way-flat 0.946 tier all closed, the member is
+> > the only axis left open. The instrument that could settle it is the 909-study holdout, not the 58.
+> >
+> > **AND THAT INSTRUMENT ALREADY EXISTS — read it before planning the comparison again (01:00Z, same
+> > hour).** `comp/members.declines:827-833`: `raptor_ft_repl2x2_c` is a LOCAL fold-0 refit of his recipe
+> > on our data, honest by the discriminator at `:866-869` (a local arm trained the weights), and it reads
+> > **LEDGER75 0.8791 over 896 rows** against our best member's **0.8959** — **our member leads by +0.0168**,
+> > about 7.6 residual sd, on fifteen times the n the gold 58 offered. Its D36 pre-registration
+> > (`experiments/repl2x2_c.prereg.md`) called solo 0.8787, corr 0.830 and seat +0.0027 three weeks early
+> > and matched to 4dp, so this is an independent reproduction rather than a lucky read.
+> >
+> > **So the axis splits, and only one half is open.** Against the published recipe we have replicated,
+> > our member is not level and not behind — it is AHEAD, decisively, and that comparison is CLOSED. What
+> > stays open is the absolute question: making OUR member better, which is the only remaining lever after
+> > seating, count, greedy and the 0.946 plateau. Do not re-run a field-comparison arm on the strength of
+> > the "unresolved" paragraph above; it was written one read too early, and this is the read.
 >
 > **2. The best-by-count table below is stale, and the "+0.024 then turns over" shape does not survive.**
 > `board_check` completed the record on 2026-08-25 (it held 34 of 58 submissions; fifteen scored all-ours

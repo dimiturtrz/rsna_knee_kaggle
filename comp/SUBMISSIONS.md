@@ -4464,7 +4464,14 @@ What the detrended fit gives instead is worth more than the retracted claim:
   Four independent measurements now say the same thing and none of them is new:
   seat COUNT is not an axis (1/2/3/4/6 seats read 0.914/0.919/0.913/0.918/0.911, non-monotone over a
   0.008 span — `interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md`); the seat AXIS
-  is saturated (`interpretations/kneemri/2026-08-25_the-seat-axis-is-saturated-and-the-member-is-0.028-behind.md`);
+  is saturated (`interpretations/kneemri/2026-08-25_the-seat-axis-is-saturated-and-the-member-is-0.028-behind.md`
+  — that title's `0.028` is WITHDRAWN as a two-ruler artefact and the saturation half is what stands; the
+  correction that replaced it, "our member is level with theirs", is itself over-read and was corrected
+  2026-09-17 — n=58 at SE 0.012 cannot resolve the +0.0076 offline the board gap implies. The 896-row
+  answer was already on disk: our best member reads 0.8959 @ledger75 against the honest local refit of
+  his recipe at 0.8791 (`comp/members.declines:827-833`), so against the recipe we have replicated our
+  member LEADS by +0.0168 and that comparison is closed. What is open is the ABSOLUTE member question —
+  making ours better — which is where the card belongs);
   half-holdout greedy seating cannot resolve a seat below the 0.0062 floor (the surviving half of the
   closure at `:2450`); and the 0.946 tier reads **flat across five different one-seat perturbations** of
   `tripleseat_v2` — drop40 dose 3→4, `through_dense_cf` removed, 0/1/2 full-fit refits, mount trimmed —
