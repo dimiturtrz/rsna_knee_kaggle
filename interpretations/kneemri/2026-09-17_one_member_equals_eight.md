@@ -251,3 +251,60 @@ of two of them alongside their reports says what the residual is instead: the la
 report language (*"Simple degeneration"*, *"Suspected small horizontal tear at the anterior horn"*) and
 on lesions of 1-2 mm against a ~7 mm patch token. One study carries two contradicting reports filed
 under one UID.
+
+### Looking at the pixels kills the view hypothesis, and the denominator kills the clustering
+
+The champion has 53 confidently-wrong cells (`truth>0.9 & pred<0.25`, or `truth<0.1 & pred>0.75`): 35
+false negatives, 18 false positives. Read by eye, **PF OA is five of the top ten confident FNs** — and PF
+OA is patellofemoral, which lives at the patella, which is ANTERIOR, while the crop is centred on the
+joint. `crop_mm` and `centre` are two of `run_comparison.VIEW_AXES`, so that reads as a view lever rather
+than a knob: the crop may simply be cutting the patella out of the model's input.
+
+It is not. `study_render` draws the cache the trainer reads, so the page IS the model's input, and on two
+confident PF OA false negatives (pred 0.018, 0.026) against a true-positive control the patella is plainly
+present in all three — whole in the anterior sagittal slices, and the axial stack cuts straight through the
+patellofemoral joint with the trochlea and the retropatellar surface in frame. No difference in framing
+between the misses and the hit. **The field of view is not the mechanism.** (The render samples five slices
+per slot, evenly spaced, so this shows the patella is IN the input; it cannot show that a lesion is absent
+from the slices nobody drew.)
+
+And the clustering that pointed there was the denominator error, for the fourth time. Five-of-ten is a
+count over a top-ten list; the rate that matters is confident FNs over that label's own POSITIVES:
+
+    label              pos   FN   FN/pos   p(binomial, pooled rate 0.0486)
+    PF OA              168   12   0.0714   0.1189
+    Lateral OA          48    9   0.1875   0.000451   <-- survives Bonferroni at 12 labels
+    Medial OA          103    0   0.0000   1.0000
+
+PF OA looked guilty only because it is the most common positive label in the corpus. **The label that is
+actually over-represented is Lateral OA**, at 3.9x the pooled rate — while Medial OA, the same pathology
+one compartment over and twice as prevalent, has ZERO confident misses.
+
+That asymmetry has an obvious mechanism — the model detects tibiofemoral OA and assigns the compartment by
+prior, putting lateral-only disease on the medial column — and the mechanism is wrong. On the nine confident
+Lateral OA false negatives the medial prediction averages **0.231**, over 0.5 in one of nine, and only one
+of the nine is medial-positive in truth. The model is not misfiling the compartment; it is calling the knee
+clean.
+
+What survives, weakly, is a co-occurrence effect rather than a confusion: lateral discrimination is worse
+inside the stratum where medial OA is positive (midpoint cut throughout).
+
+    lateral OA AUC   medial-negative 0.8067 (n=576)   medial-positive 0.7267 (n=333)   gap +0.0799
+    bootstrap 95% CI over studies    [-0.0020, +0.1628]     P(gap <= 0) = 0.0295
+    macro AUC        base 0.8679     ORACLE, perfect lateral ranking in that stratum 0.8790
+
+The CI touches zero, so the gap is marginal on its own. And the ceiling settles it whatever the gap's status:
+**+0.0111 macro for a PERFECT oracle on one stratum of one label**, which nothing real reaches and which is
+under the bar before it is discounted.
+
+Swept across all twelve labels, each against its most co-occurring partner, there is no law to generalise:
+
+    8 of 12 labels degrade inside the partner-positive stratum   (coin null p = 0.194)
+    median gap +0.0150   mean +0.0228   four labels IMPROVE there
+
+The aggregate oracle over the degraded strata reads 0.9249, and that number must not be quoted: the strata
+were selected BY the sign of their own gap on this holdout, which is in-sample by construction — the same
+defect that voided `raptor_solo`. So the co-occurrence smear is not the residual's shape either.
+
+Four hypotheses, four nulls, no card and no slot spent. The confidently-wrong cells still have no lever in
+them, which is the same answer the label audit and the ruler audit gave, on a third axis.
