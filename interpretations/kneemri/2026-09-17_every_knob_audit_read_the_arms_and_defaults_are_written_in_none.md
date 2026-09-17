@@ -89,6 +89,35 @@ The one thing in the table that is not exhausted is `scheme`. The corner runs **
 pair compares `roi` against `roinative`, a third value the corner has never taken, and
 `roinative_labelwise_drop40_long_s2026` at **0.9018** is the third-best solo the project owns.
 
+### `scheme` closed by DECOMPOSITION rather than by a pair
+
+The corner and the roinative run are both complete at 24 of 24 and carry zero schema drift, so they are
+directly comparable — but they differ on six leaves, not one, which is why no pair exists:
+
+| leaf | corner | roinative | this table's own delta |
+|---|---|---|---|
+| `slices` | 24 | 20 | 20 -> 24 **+0.0028** |
+| `stochastic_depth` | 0.0 | 0.05 | 0.0 -> 0.05 **+0.0003** |
+| `scheme` | canonical | roinative | the residual |
+| `accumulate` / `batch` | 1 x 10 | 3 x 4 | effective 10 against 12 |
+| `vram_gb` | 28 | 0 | bookkeeping, no effect on the recipe |
+
+Observed: 0.9053 against 0.9018, **-0.0035** for roinative. Subtracting the two leaves this table
+prices independently leaves about **-0.0010** for `scheme` plus the batch-shape difference — flat, deep
+inside the 0.0062 floor.
+
+**This is a subtraction, not a measurement**, and it assumes the `slices` and `stochastic_depth` deltas
+transfer from the pairs they were read on to this corner. That is the same additivity assumption that a
+single-key pair does not need, which is exactly why a pair is worth more. It is quoted here as a bound:
+for `scheme` to be worth a card at the corner, the two subtracted terms would have to be wrong in the
+same direction by four times their measured size.
+
+So the knob axis at the shipping corner is **closed**, not merely unfinished. Of 32 keys with isolating
+pairs, the only ones clearing the floor price gradients across 25x spans with the corner sitting between
+their endpoints, and the one key left over closes by decomposition. The next 1.5% is not in this recipe's
+flags, and further single-flag A/B arms at this corner are priced at roughly zero expected gain — they
+are instruments for retiring a suspicion, never improvements.
+
 ## The general shape
 
 This is the third instance in two days of the same defect, and the instances are getting cheaper to find
