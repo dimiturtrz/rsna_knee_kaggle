@@ -1517,3 +1517,15 @@ solobase_hold
   checkpoint was copied to a speakable name and the copy kept its holdout record.
   It may NEVER be seated beside its original — an ensemble that takes both is one member voting twice,
   and nothing downstream compares hashes. Delete the copy or keep it declined; do not roster it.
+
+labelwise_dense_drop40_long_ff
+  TRUNCATED at 3 of the 24 epochs its recipe asked for (convergence_check, knee-efv7c). Declined 2026-09-17
+  rather than re-run, and the reason is arithmetic, not doubt about the member.
+  It is a dark arm: fitted at --fold -1, so it holds nothing out and NO ledger row can ever price it.
+  Its fold-0 twin labelwise_dense_drop40_long_s2026 is complete, reads 0.9048 ledger75 at epoch 23, and is
+  already a seat in the pinned champion tripleseat_v2 — so the recipe is shipping, in its readable form.
+  The only thing a 24-epoch re-run could buy is substituting this for that seat, on the theory that a
+  full-corpus fit beats an 80% one. That is a SEAT swap in an unweighted 7-mean, so it moves the ensemble
+  by delta/7, and the closed record brackets the dilution at 4.7x-9.8x on three separate levers.
+  Against ~3-4 h of card for a member that cannot be read offline, that is the worst ratio on the shelf.
+  Re-open only if a single-member entry is ever built on this recipe, where the /7 does not apply.
