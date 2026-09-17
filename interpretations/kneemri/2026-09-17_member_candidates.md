@@ -2,11 +2,14 @@
 # 382 honest members with a record. Champion seats with a record: 3 of 7.
 
 ## Champion's measurable seats
+```
 0.9053  labelwise_depth24_drop40_long_s2026
 0.9048  labelwise_dense_drop40_long_s2026
 0.9045  labelwise_ext_drop40_long_s2026
+```
 
 ## Top 25 honest solo
+```
 0.9053  SEAT labelwise_depth24_drop40_long_s2026
 0.9051       labelwise_drop_drop40_long_s2026
 0.9048  SEAT labelwise_dense_drop40_long_s2026
@@ -32,6 +35,7 @@
 0.8970       labelwise_depth20_b10_s2026
 0.8964       labelwise_dense_s2026
 0.8964       foreign_dinov3_matched
+```
 
 ## Per-finding leader among honest members, and its margin over the best CHAMPION SEAT
 ACL                    0.9692 recal_holdannot_s2026                        +0.0226 over labelwise_dense_drop40_long_s2

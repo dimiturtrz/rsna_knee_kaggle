@@ -96,7 +96,9 @@ otherwise pay interpreter startup separately. All of them still answer `python -
 <packages> --assert` individually, which is how you check ONE while fixing it:
 
 - **arch-fitness** — `python -m devtools.graph.fitness`: god-module (fan-in/out), god-file, import-cycle,
-  and the FILE-level test mirror (a logic module needs its `tests/unit/<pkg>/…/test_<name>.py`); thresholds
+  and the FILE-level test mirror (a logic module needs its `tests/unit/<pkg>/…/<name>.py` — the mirror
+  path is the module's own path under `tests/unit/`, with NO `test_` prefix; a `test_<name>.py` satisfies
+  neither mirror and reads as a missing test); thresholds
   in `[tool.structure]`. Advisory sub-checks: line-floor (off) + chokepoint. It is `devtools.graph.fitness`,
   NOT `devtools.graph` — that is a package and answers `No module named devtools.graph.__main__`.
 - **demeter** — `python -m devtools.coupling.demeter`: CALLING a method through a field into a stranger.

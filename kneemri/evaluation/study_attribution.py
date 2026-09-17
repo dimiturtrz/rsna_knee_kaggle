@@ -376,15 +376,23 @@ class AttributionCorpus:
         table = errors.damages(reading.predictions, reading.truth)
         return errors.ranked(reading.studies, table, reading.truth), table, list(reading.studies), reading.truth
 
-    def members(self, run: str, studies: list[str], wanted: int) -> dict[str, list[StudyDamage]]:
+    def members(
+        self, run: str, studies: list[str], wanted: int, named: Sequence[str] = ()
+    ) -> dict[str, list[StudyDamage]]:
         """Other members ranked the same way, kept only where they cover the SAME studies in the same order.
 
         A member on a different split cannot agree or disagree about a tail — its tail is a different
         population — so it is skipped rather than aligned, which would be a join this reading invents.
+
+        Without `named` the comparison set is whatever sorts first, which is an ALPHABETICAL sample and
+        not a designed one. Naming the members is what lets a tail be compared against a chosen
+        ARCHITECTURE rather than against a neighbouring filename.
         """
         errors = StudyErrors()
         found: dict[str, list[StudyDamage]] = {}
-        for path in sorted(self.models.glob(f"*{SUFFIX}")):
+        every = sorted(self.models.glob(f"*{SUFFIX}"))
+        chosen = [self.models / f"{name}{SUFFIX}" for name in named] if named else every
+        for path in chosen:
             name = path.name.removesuffix(SUFFIX)
             if name == run or len(found) >= wanted:
                 continue
@@ -418,6 +426,9 @@ def main() -> None:
     command = cli.Command(__doc__, LOGGER)
     command.parser.add_argument("--run", type=str, required=True, help="checkpoint stem whose holdout is attributed")
     command.parser.add_argument("--members", type=int, default=MEMBERS, help="how many other members to compare tails")
+    command.parser.add_argument(
+        "--against", type=str, nargs="+", default=(), help="compare tails against these stems, not the first N by name"
+    )
     arguments = command.parsed()
     root = command.rooted(arguments)
     corpus = AttributionCorpus(models=root.models(), raw=root.raw(), processed=root.processed())
@@ -426,7 +437,7 @@ def main() -> None:
     tail_rows, body_rows = attribution.split(rows)
     LOGGER.info(f"{arguments.run}: {len(rows)} studies, tail {len(tail_rows)}, body {len(body_rows)}")
 
-    others = corpus.members(arguments.run, studies, arguments.members)
+    others = corpus.members(arguments.run, studies, len(arguments.against) or arguments.members, arguments.against)
     command.report(attribution.shared(rows, others).lines())
 
     reports = corpus.reports()

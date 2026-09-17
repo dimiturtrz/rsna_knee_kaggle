@@ -150,3 +150,78 @@ competition's own scale: null one column, watch the mean of twelve fall, multipl
 "MCL is MODEL-bound at -0.0964" reading is from the 58-study gold set with nine positives and is
 underpowered against it. **Do not aim work at MCL on the offline number** — it is the single
 widest offline-to-board disagreement the project has measured, 0.17.
+
+## The loss is not a lever, and three arms say so on three different axes
+
+Asked 2026-09-17 after the severity-smear reading (a label-blind severity scalar carries 66% of this
+member's AUC-above-chance, 15.6 sigma) suggested the twelve-column objective was averaging something
+away. It is not. Every phrasing of "read structure the twelve independent binaries throw away" is
+already measured:
+
+```
+sharpen graded targets to hard 0/1   severity_flat  0.8228  -0.0044 vs rank24_s2026 0.8272
+within-label pairwise ranking        rank0_dense    already shipped: --rank-weight 1.0, every arm
+within-study cross-label ordering    side_dense     0.7937  -0.0641 vs band_dense  0.8578
+```
+
+`severity_flat` collapsed the three YES levels (0.68 / 0.82 / 0.94) to their middle, leaving the
+average pull on a YES pair unchanged, and lost. **The gradation is signal the model consumes, not
+assertion-strength it ignores** — so sharpening targets destroys signal rather than freeing gradient.
+
+`side_dense` is the decisive one, and it is a confirmed mechanism rather than a null. The term landed
+(recipe stamp; smoke loss 1.9368 against the control's ~1.2, the excess being exactly `softplus(0)`;
+VRAM and s/epoch byte-identical, as a term adding no parameter must be), and **the contrast moved the
+way the arm predicted** — Lateral OA 0.5141 -> 0.5759. Then all twelve labels fell, ten times the
+0.0062 floor, including the column the term exists to fix.
+
+**The law that generalises, and it prices every future loss idea for free:** the metric ranks
+study-against-study WITHIN a label; any within-study term orders label-against-label. Two orthogonal
+orderings over the same logits — buying one COSTS the other rather than composing with it. That is
+why `Objective.pairs` was never missing the side comparison by oversight, and it means a loss term is
+worth arming here only if its ordering is the metric's own.
+
+### The false-negative asymmetry is calibration, not ranking
+
+Same member, 909 studies, confident cells only (`p < 0.3` on a true positive against `p > 0.7` on a
+true negative), summed over the twelve columns:
+
+```
+confident FN  1.11        confident FP  0.087        ratio ~13:1
+worst columns  Effusion 0.190  MCL 0.122  Medial Meniscus 0.116  PF OA 0.106
+```
+
+The model is a systematic UNDER-CALLER, not a gestalt inflater. **It is nonetheless worth zero on this
+competition**: AUC is rank-only, so where a column places its threshold cannot move the score. Recorded
+because the number is real and because reaching for it as a lever is the mistake it invites.
+
+### A third of every training cell is "the report did not mention this"
+
+```
+verdict share over holdout cells   YES 0.307   NO 0.400   UNK 0.293
+0.28 == UNK (unmentioned)   0.08 == NO (explicit negative)   0.68/0.82/0.94 == the three YES levels
+macro AUC, all cells      0.8679
+macro AUC, decided-only   0.8914   (+0.0235)
+```
+
+UNK cells are targeted at 0.28 — ranked ABOVE an explicit NO and below the 0.5 cut — and binarise
+positive at a rate of ~0.000 for 12 of 12 labels. Dropping them lifts macro AUC by 0.0235, and **that
+is a different denominator, not headroom**: the board's truth is report-derived too, so an unmentioned
+finding is a negative there as well.
+
+### On the confidently-wrong cells the LABEL is not the suspect
+
+`gold_58.csv` (radiologist consensus, the only report text on disk) shares 13 studies with the fold-0
+holdout. On every top confident-wrong cell the radiologist gold AGREES with the LLM soft label:
+
+```
+156570466645 Lateral Meniscus  pred 0.103  soft 1.0  gold 1.0
+781063784327 Lateral Meniscus  pred 0.125  soft 1.0  gold 1.0
+149868367236 Synovitis         pred 0.209  soft 1.0  gold 1.0
+217683272910 ACL               pred 0.736  soft 0.0  gold 0.0
+```
+
+This reverses the working hypothesis that a confidently-wrong study is label-noise. Reading the pixels
+of two of them alongside their reports says what the residual is instead: the labels rest on hedged
+report language (*"Simple degeneration"*, *"Suspected small horizontal tear at the anterior horn"*) and
+on lesions of 1-2 mm against a ~7 mm patch token. One study carries two contradicting reports filed
+under one UID.
