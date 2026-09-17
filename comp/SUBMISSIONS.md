@@ -4545,6 +4545,13 @@ seven-seat champion `tripleseat_v2` at **0.946**. That premium was read as +0.01
 artefact of `stackfit_s2026`'s weakness), then +0.002 off `ffsolo_v1`, and is now **+0.001** — one board
 tick, at a board that resolves to 0.001, which bounds it below what this record can measure at all.
 
-**What this entry is NOT.** `labelwise_ext_drop40_long_s2026` is the WEAKER honest twin (0.9045 against
-`depth24`'s 0.9053), so the best member this project owns has still not shipped in its refit form. The
-0.011 to the leader remains a MEMBER gap, and no reseating of this pool reaches it.
+**A RANK INVERSION, AND IT IS SCATTER.** This entry's honest twin is the WEAKER of the two
+(`labelwise_ext_drop40_long_s2026` 0.9045 against `labelwise_depth24_drop40_long_s2026` 0.9053), and the
+stronger one has ALREADY shipped in refit form — it is `ffsolo_v1`, ref 56296698, which read 0.944. So the
+weaker member scored one tick HIGHER on the board. That inversion is 0.001 against a solo-transfer residual
+sd of 0.0019 and a board resolution of 0.001: it is the smallest difference this record can represent, and
+reading a mechanism into it would be reading scatter. The two members are board-indistinguishable.
+
+The consequence is for the PLAN, not for the members: there is no untried refit of a better member waiting
+on disk. Both twins are shipped and both land at 0.944-0.945. The 0.011 to the leader remains a MEMBER gap,
+and no reseating of this pool reaches it.

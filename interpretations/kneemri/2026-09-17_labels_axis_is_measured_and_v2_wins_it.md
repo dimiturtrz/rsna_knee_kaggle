@@ -53,10 +53,32 @@ v2 AT PREDICTING V2. It cannot establish that nothing here beats v2 at predictin
 
 That is the honest reason this lever keeps being raised and keeps dying: the result is real and the
 question it answers is narrower than the question being asked. Closing it for good needs a ruler that is
-not v2 — held-out annotations, or the board itself — and the board costs a slot per reading at 0.001
-resolution, which is coarser than the 0.0066 being resolved.
+not v2.
+
+## The board IS that ruler, and it resolves this — an arithmetic correction
+
+This section first said the board "costs a slot per reading at 0.001 resolution, which is coarser than
+the 0.0066 being resolved." That compares an OFFLINE delta against a BOARD resolution without passing it
+through the transfer, which is the same class of error `CLAUDE.md` records against the compression
+constant four times. Corrected: on the ledger75 fit the whole-record slope is **+1.10 with residual
+sd 0.0017**, so 0.0066 offline75 lands as **+0.0073 board — seven ticks**. Two readings differ by
+√2 × 0.0017 = **0.0024**, so the predicted gap is **three sigma**. The board resolves this axis.
+
+And it is the RIGHT ruler for it, not merely an available one. The confound above is that every
+challenger is scored against the thing it claims to improve on; the competition's truth was written by
+neither v2 nor any challenger, so a label set that is genuinely cleaner has somewhere to show it. The
+prediction splits the hypotheses cleanly: if v2 is simply better labels, `band_span` beats
+`confident_span` by about seven ticks, as the offline table says. If `confident.csv` is cleaner and only
+LOOKED worse because v2 was the ruler, the order INVERTS — and an inversion cannot be produced by the
+scatter, which is a third of the gap.
+
+Cost is two slots and NO card: both checkpoints have sat on disk since the family was run
+(`band_span_s2026.pt`, `confident_span_s2026.pt`), byte-identical flag lines differing in `--labels`
+alone. That is the cheapest decisive reading available on any open axis.
 
 ## Consequence
 
-The labels leaf is BANKED at the shipping corner, not unexploited. Composition work should look
-elsewhere; `[[head_lr-at-the-shipping-corner]]` (knee-xuarh) is where that search landed instead.
+SELECTION among the owned label sets is finished at the shipping corner, and composition work should
+look elsewhere — `[[head_lr-at-the-shipping-corner]]` (knee-xuarh) is where that search landed. But the
+axis is NOT closed, and the reason it is not is the confound, not a loss of nerve. The reading that
+closes it is priced above and owes no card.
