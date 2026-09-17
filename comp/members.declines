@@ -1546,3 +1546,16 @@ recal_labelwise_s2026
   bad one.
   Re-open by RE-RUNNING it to its declared 12 epochs. Nothing about the recalibrated-label axis is
   measured either way until something does.
+
+lr8e5_ship_s2026
+  The shipping corner at backbone_lr 8e-5, twice the 4e-5 it has carried for 41 arms. ledger75 0.9031
+  against its matched control labelwise_depth24_drop40_long_s2026 at 0.9053 — a directional -0.0022,
+  inside the 0.0062 paired floor. CONVERGED 24/24, and both runs peak at the same epoch 18, so this is a
+  flat rather than a schedule artefact. Both numbers are ledger75 on population 66c6f231.
+  The arm's own mechanism is REFUTED rather than merely unpaid. It argued the corner was
+  regularisation-bound and would take more rate: instead the doubled rate FITS LESS at every matched
+  epoch (train loss 0.5973 at e22 against the control's 0.5600 at e23), which is what a higher peak rate
+  adding gradient noise looks like, not what underfitting looks like.
+  Re-open only on a mechanism that predicts a rate change should pay at 24 epochs under slot_dropout 0.40
+  — the 12-epoch tilt that motivated this arm does not survive the doubled schedule, and re-running any
+  point on that tilt reads this same flat.
