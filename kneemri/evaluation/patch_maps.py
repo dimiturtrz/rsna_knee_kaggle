@@ -278,7 +278,10 @@ def main() -> None:
     block = "" if arguments.split == "holdout" else f"_{arguments.split}{arguments.offset}"
     destination = arguments.out / f"{arguments.checkpoint.stem}_g{arguments.grid}{block}.patches.npz"
     tissue = TissueNull.of(data.images, arguments.grid)
-    np.savez_compressed(destination, maps=maps, studies=np.asarray(holdout), truth=truth, tissue=tissue.shares)
+    # `holdout` indexes THIS cache's order; the consumer joins a trainer's corpus by StudyInstanceUID,
+    # so the sweep has to record the names rather than the seats it happened to find them in.
+    named = np.asarray([identifiers[position] for position in holdout])
+    np.savez_compressed(destination, maps=maps, studies=named, truth=truth, tissue=tissue.shares)
     logger.info("wrote %s", destination)
     for line in PatchMaps(maps, truth, tissue.centre_share()).lines():
         logger.info("%s", line)

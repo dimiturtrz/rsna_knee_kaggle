@@ -49,6 +49,16 @@ def test_erased_is_the_identity_at_the_null_rate():
     assert torch.equal(PatchErasing(importance, 0.0).erased(images, np.arange(STUDIES), torch.Generator()), images)
 
 
+def test_loaded_refuses_a_sweep_that_names_no_study(tmp_path: Path):
+    """A sweep keyed on POSITIONS joins nothing, and the mean-map fallback would hide that as a null."""
+    maps = np.zeros((2, 2, GRID, GRID), dtype=np.float32)
+    destination = tmp_path / "positions.npz"
+    np.savez(destination, studies=np.arange(2), maps=maps)
+
+    with pytest.raises(ValueError, match="key mismatch"):
+        PatchErasing.loaded(destination, ["a", "b"], ALWAYS)
+
+
 def test_loaded(tmp_path: Path):
     """The maps are joined to the corpus BY IDENTIFIER, not by position, and averaged over labels."""
     maps = np.zeros((2, 2, GRID, GRID), dtype=np.float32)

@@ -39,7 +39,10 @@ class PatchErasing:
         augmentation this is: what is being removed is the evidence the head reads from THIS image.
 
         A study the sweep does not name is given the mean map, so a partial sweep degrades toward
-        erasing a typical cell instead of dropping the study out of the augmentation.
+        erasing a typical cell instead of dropping the study out of the augmentation. A sweep naming
+        NONE of them is refused instead: that is a key mismatch rather than partial coverage, and
+        degrading it leaves every study on the mean map — a generic cutout wearing this treatment's
+        name, which reads as a measured null on the axis nobody actually tested.
         """
         held = np.load(maps)
         names = [str(name) for name in held[STUDIES]]
@@ -47,6 +50,9 @@ class PatchErasing:
         mean: Float[NDArray[np.float64], "g g"] = per_study.mean(axis=0)
         recorded: dict[str, Float[NDArray[np.float64], "g g"]] = dict(zip(names, per_study, strict=True))
         missing = [name for name in identifiers if name not in recorded]
+        if len(missing) == len(identifiers):
+            joined = f"{maps} names none of the {len(identifiers)} studies; it holds {names[:3]} - a key mismatch"
+            raise ValueError(joined)
         if missing:
             absent = "%d of %d studies are absent from %s; they erase at the mean map"
             logger.warning(absent, len(missing), len(identifiers), maps)
