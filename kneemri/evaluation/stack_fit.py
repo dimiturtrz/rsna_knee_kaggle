@@ -61,13 +61,31 @@ class MemberHoldout:
 
         By study id, never by position: two members recorded over different holdouts line up perfectly
         under a positional read and the combination is then nonsense with no symptom.
+
+        AN EMPTY INTERSECTION IS REFUSED HERE, NAMING WHAT EMPTIED IT. The pool on disk is not one
+        holdout: 442 records carry TWELVE distinct study sets, 391 of them the canonical 909, and a
+        handful of 8-12 studies left by `arm_check --smoke` runs whose throwaway checkpoints wrote a
+        record beside the real ones. Any pool-wide call that sweeps a directory therefore intersects
+        to nothing, and `np.asarray([])` is float64, so the failure used to surface as
+        `IndexError: arrays used as indices must be of integer (or boolean) type` from the take below
+        - a dtype accident three frames from the cause, which says nothing about the smoke records.
         """
-        shared = sorted(set.intersection(*[set(member.studies.tolist()) for member in members]))
+        held = [set(member.studies.tolist()) for member in members]
+        shared = sorted(set.intersection(*held))
+        if not shared:
+            smallest = sorted(zip(members, held, strict=True), key=lambda pair: len(pair[1]))[:5]
+            narrow = ", ".join(f"{member.name} ({len(studies)})" for member, studies in smallest)
+            message = (
+                f"{len(members)} members share no study, so there is nothing to score them on together. "
+                f"The narrowest holdouts are {narrow} - a record of a dozen studies is an `arm_check --smoke` "
+                f"throwaway and a record of the whole corpus held nothing out. Name a pool with `--only`."
+            )
+            raise ValueError(message)
         order = np.asarray(shared)
         cut = []
         for member in members:
             where = {study: index for index, study in enumerate(member.studies.tolist())}
-            taken = np.asarray([where[study] for study in shared])
+            taken = np.asarray([where[study] for study in shared], dtype=np.int64)
             cut.append(
                 MemberHoldout(member.name, order, member.predictions[taken], member.truth[taken]),
             )

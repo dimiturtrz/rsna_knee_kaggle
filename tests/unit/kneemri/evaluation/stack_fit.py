@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from kneemri.evaluation.stack_fit import MemberHoldout, StackFit, StackResult, main
 
@@ -58,6 +59,19 @@ def test_aligned() -> None:
     shared = MemberHoldout.aligned([first, second])
     assert [member.studies.tolist() for member in shared] == [["s1", "s3"], ["s1", "s3"]]
     assert shared[0].predictions[0].tolist() == [2.0, 3.0]
+
+
+def test_aligned_refuses_an_empty_intersection() -> None:
+    """Disjoint holdouts have nothing to be scored on together, and the refusal names the narrowest.
+
+    This is the shape a directory sweep lands in — a twelve-study `--smoke` record beside the real
+    pool empties the intersection — and it used to surface as an IndexError from a float64 take.
+    """
+    truth = np.zeros((2, 2), dtype=np.int64)
+    wide = MemberHoldout("wide", np.asarray(["s1", "s2"]), np.arange(4.0).reshape(2, 2), truth)
+    smoke = MemberHoldout("smoke", np.asarray(["z1", "z2"]), np.arange(4.0).reshape(2, 2), truth)
+    with pytest.raises(ValueError, match=r"share no study.*smoke \(2\)"):
+        MemberHoldout.aligned([wide, smoke])
 
 
 def test_loaded(tmp_path: Path) -> None:
