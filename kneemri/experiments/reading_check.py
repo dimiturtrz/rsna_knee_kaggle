@@ -126,11 +126,16 @@ class ReadingDrift:
         make, and it stood as a standing false positive until 2026-09-16. A checkpoint belongs to the
         longest arm name that prefixes it.
         """
+        return bool(self.checkpoints(arm))
+
+    def checkpoints(self, arm: ArmDeclaration) -> list[Path]:
+        """The checkpoints on disk that belong to THIS arm rather than to a longer-named sibling."""
         longer = [name for name in self.arm_names() if name != arm.name and name.startswith(arm.name)]
-        return any(
-            not any(checkpoint.name.startswith(name) for name in longer)
-            for checkpoint in self.models.glob(f"{arm.name}{CHECKPOINT_GLOB_SUFFIX}")
-        )
+        return [
+            checkpoint
+            for checkpoint in sorted(self.models.glob(f"{arm.name}{CHECKPOINT_GLOB_SUFFIX}"))
+            if not any(checkpoint.name.startswith(name) for name in longer)
+        ]
 
     def found(self, glob: str) -> bool:
         """Whether a declared glob matches anything, under the models or processed root, or under the repo.
@@ -180,11 +185,24 @@ class ReadingDrift:
         return [] if self.ran(arm) else [glob for glob in arm.readings() if self.found(glob)]
 
     def already_taken(self, only: str) -> list[str]:
-        """The refusal lines for ONE named arm, with the matching artefacts named so they can be read."""
+        """The refusal lines for ONE named arm, with the matching artefacts named so they can be read.
+
+        AN ARM THAT HAS ALREADY RUN IS THE STRONGER CASE, AND IT REPORTED AS CLEAN. `taken` is the exact
+        complement of `missing` and so short-circuits on `ran`, which is correct for the whole-tree pass:
+        there, a ran arm's reading being on disk is the thing `missing` asserts. Routed through `--only`
+        that short-circuit INVERTED the guard — the one arm whose checkpoint AND number are both on disk,
+        the case where re-arming overwrites a result the project already owns, printed the same
+        `no declared reading is on disk yet` as an arm that had never run. So the half of this check that
+        can still save a card was silent on its worst case. `--only` therefore asks `ran` itself.
+        """
+        arms = [arm for arm in self.declarations() if arm.name == only]
         return [
+            f"{arm.name} HAS ALREADY RUN — re-arming overwrites {self._stamps(self.checkpoints(arm))}"
+            for arm in arms
+            if self.ran(arm)
+        ] + [
             f"{arm.name} declared {glob!r} and it ALREADY matches: {self.matches(glob)}"
-            for arm in self.declarations()
-            if arm.name == only
+            for arm in arms
             for glob in self.taken(arm)
         ]
 
@@ -194,8 +212,11 @@ class ReadingDrift:
         absolute = candidate.is_absolute()
         roots = [candidate.parent] if absolute else [self.models, self.processed, Path()]
         pattern = candidate.name if absolute else glob
-        found = [hit for root in roots for hit in sorted(root.glob(pattern))]
-        return ", ".join(f"{hit} ({self._stamped(hit)})" for hit in found)
+        return self._stamps([hit for root in roots for hit in sorted(root.glob(pattern))])
+
+    def _stamps(self, hits: list[Path]) -> str:
+        """Artefacts with their UTC mtimes, because a refusal has to say HOW OLD what already exists is."""
+        return ", ".join(f"{hit} ({self._stamped(hit)})" for hit in hits)
 
     @staticmethod
     def _stamped(hit: Path) -> str:
@@ -249,7 +270,8 @@ def main() -> None:
         taken = drift.already_taken(arguments.only)
         command.report(taken or [f"{arguments.only}: no declared reading is on disk yet"])
         if taken and not arguments.anyway:
-            raise SystemExit(f"{len(taken)} reading(s) already taken — re-read with --anyway '<why>'")
+            refusal = "the arm ran or its reading exists"
+            raise SystemExit(f"{len(taken)} refusal(s): {refusal} — re-take with --anyway '<why>'")
         return
 
     command.report(drift.report())

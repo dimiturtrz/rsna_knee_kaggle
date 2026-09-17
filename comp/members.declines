@@ -1443,3 +1443,23 @@ labelwise_dense_stem_llrd_s2026
   individually convicted. What it does settle is the 336 + open-stem cell, which was armable only if the
   224 result said the stem carried at all; it reads negative on both cuts, so that cell is closed unrun.
   Re-open only by separating the two flags, and price that against the -0.0041, not against zero.
+
+erase_own_cells_s2026
+  Map-driven targeted erasing, answered and NEGATIVE on both cuts. Blanks one cell of each study's own
+  4x4 occlusion map per pass at rate 0.25, the maps swept from `labelwise_dense_drop40_long_s2026` over
+  3498 train studies. Read ALONE against its own control, 12 epochs, 909 rows, the comparison the arm
+  pre-registered:
+    probe224_control_s2026   LEDGER 0.8556 / LEDGER75 0.8914   e10
+    erase_own_cells_s2026    LEDGER 0.8541 / LEDGER75 0.8899   e11
+  -0.0015 at midpoint and -0.0015 at LEDGER75 -- the two rulers agree to the digit, which is what makes
+  this a flat rather than a cut artefact (knee-f9aao). `seat_add` over the champion's seven fold-0 seats,
+  ledger75, relation EXACT: base k=7 0.9096, +cand k=8 0.9092, ADD -0.0004 against a +0.0015 bar. So it
+  is neither a member nor a seat, and `member_axes` calling it DISTINCT (rank 0.9037, js 0.0092, maha
+  2.469) did not buy it one -- its js sits AT the roster boundary, so distinct on one axis only.
+  It does NOT convict the mechanism's premise. The premise is measured and stands: border-only reads
+  0.8006 against centre-only 0.8021, so redundant evidence exists, and the maps are per-study (modal
+  cell 26.8%, labels agree on a study's peak cell 19.2% of the time). What is priced is ONE rate at ONE
+  grid for ONE budget -- 0.25 at 4x4 over 12 epochs -- and a null there says the augmentation as
+  configured buys nothing, not that map-driven erasing cannot. Re-open only by moving grid or rate with
+  an argument for the new value, and price it against this -0.0015, never against zero.
+  Declined as a seat and as a member; the npz stays so the comparison can be re-read.

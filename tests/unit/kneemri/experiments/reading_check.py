@@ -174,6 +174,32 @@ def test_already_taken(tmp_path: Path) -> None:
     assert "one_lr3.npz" in lines[0]
 
 
+def test_already_taken_refuses_an_arm_that_has_run(tmp_path: Path) -> None:
+    """The case `--only` used to call clean: checkpoint and number both on disk, so re-arming overwrites."""
+    drift = _drift(tmp_path)
+    _arm(drift.arms, "one", "# reading: one*.holdout.npz\n")
+    (drift.models / "one_s2026.pt").write_bytes(b"")
+    (drift.models / "one_s2026.holdout.npz").write_bytes(b"")
+
+    lines = drift.already_taken("one")
+    assert len(lines) == 1
+    assert "one HAS ALREADY RUN" in lines[0]
+    assert "one_s2026.pt" in lines[0]
+
+
+def test_checkpoints(tmp_path: Path) -> None:
+    drift = _drift(tmp_path)
+    arm = ArmDeclaration.read(_arm(drift.arms, "one", "x\n"))
+    assert drift.checkpoints(arm) == []
+
+    _arm(drift.arms, "one_336", "x\n")
+    (drift.models / "one_336_s2026.pt").write_bytes(b"")
+    assert drift.checkpoints(arm) == []
+
+    (drift.models / "one_s2026.pt").write_bytes(b"")
+    assert [path.name for path in drift.checkpoints(arm)] == ["one_s2026.pt"]
+
+
 def test_matches(tmp_path: Path) -> None:
     drift = _drift(tmp_path)
     assert drift.matches("nothing*.npz") == ""
