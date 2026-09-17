@@ -308,3 +308,46 @@ defect that voided `raptor_solo`. So the co-occurrence smear is not the residual
 
 Four hypotheses, four nulls, no card and no slot spent. The confidently-wrong cells still have no lever in
 them, which is the same answer the label audit and the ruler audit gave, on a third axis.
+
+### What is left after the roster is spent: one untested width, and it is not a favourite
+
+Eight axes closed on 2026-09-17 without a card and without a slot, seven of them by reading
+what was already on disk.
+
+The four residual hypotheses are above. Four more fell the same morning:
+
+    unlocated      tail 0.700 vs body 0.646, +0.054 +- 0.051   already null in this file
+    EMA            ema_dense +0.0010, weight_average +0.0003   both a fraction of the 0.0062 floor
+    full-fit swap  dose series 0/1/2 refit seats = 0.946/0.946/0.946
+    batch          batch 12 / 6 / 6+accum2 = 0.8578/0.8598/0.8579, spread 0.0020
+
+The full-fit one is the expensive miss avoided. Swapping the champion's fold-0 labelwise seats
+for their whole-corpus `--fold -1 --ema` twins is a DATA lever with the checkpoints already on
+disk, it needs no card, and `allfit`'s +0.004 is recorded in the ledger as a data result. It had
+already been shipped TWICE (`fullseat_v1`, `fullseat2_v1`) and read 0.946 both times, against
+0.946 for the champion carrying neither. `comp/members.declines` states the arithmetic: one extra
+fifth of the corpus at a 2/3 share over seven seats sits under the board's own 0.001 resolution.
+That is a slot saved by reading a decline, not a card.
+
+**Everything that remains is bounded, and the bounds do not reach the gap.**
+
+    champion member solo      0.9053 ledger75
+    ensemble premium          <= 0.002  (three board rows at 0.944)
+    foreign seat's share      <  0.001  (noraptor 0.945 vs 0.946, ref 56263073)
+    gap to first place        +0.012 offline75  /  0.011 board
+
+A committee cannot pay because the members do not disagree on the studies that decide the score;
+the foreign seat is under the board's resolution; the residual has no recognisable population on
+six cuts. So the gap is not an aggregation problem and it is not a residual-shape problem. It is
+a statement that the leader has a better MODEL, and the only mechanism this project has not tried
+that could produce one is encoder width.
+
+**And width is not a favourite.** 51 labelwise-pooling checkpoints are on disk and every one is
+`small`; no base-class checkpoint has ever seen `labelwise` pooling or slot dropout, so the axis
+is genuinely untested. But `base_dense` lost its matched control by -0.0065 on ledger75, its one
+named confound (the halved batch) is closed by measurement, and DINOv2 ViT-S/14 is *distilled from
+ViT-g/14* -- the small is a compression of the giant rather than a small model trained small, which
+is the mechanism that would explain that loss at any operating point. The +0.0106 that base width
+buys over small on the RadioDino corpus does not transfer, because RadioDino has no distilled small.
+So `base_champion` is armed and smoked at ~7.7 h and P ~ 0.08 (knee-4zw4n), and it is the best
+remaining bet only because it is the last one with a capacity mechanism, not because it is likely.
