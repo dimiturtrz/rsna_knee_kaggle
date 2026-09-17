@@ -5486,6 +5486,54 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "kneemri.evaluation.member_pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "kneemri.experiments.convergence_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "kneemri.runs.recorded_run",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.recipe_pairs",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.stale_gap",
       "target": "core.cli",
       "weight": 1
@@ -29995,6 +30043,150 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.KnobPair.line",
+      "target": "kneemri.experiments.recipe_pairs.KnobPair.delta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.KnobPair.line",
+      "target": "kneemri.experiments.recipe_pairs.KnobPair.resolved",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.KnobPair.resolved",
+      "target": "kneemri.experiments.recipe_pairs.KnobPair.delta",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "target": "kneemri.evaluation.ledger75.Ledger75Row",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "target": "kneemri.experiments.recipe_pairs.KnobPair",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.__init__",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.quotable",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck.verdict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.quotable",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.recipes",
+      "target": "kneemri.runs.recorded_run.RecordedRun.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.recipes",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.recipes",
+      "target": "kneemri.runs.run_metrics.RunMetrics.name",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.table",
+      "target": "kneemri.experiments.recipe_pairs.KnobPair",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.RecipePairs.table",
+      "target": "kneemri.experiments.recipe_pairs.RecipePairs.isolating",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "core.denominator.Denominator.refuse_empty",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.evaluation.member_pool.MemberPool.at",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.experiments.recipe_pairs.RecipePairs.lines",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.experiments.recipe_pairs.RecipePairs.quotable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.experiments.recipe_pairs.RecipePairs.recipes",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_pairs.main",
+      "target": "kneemri.experiments.recipe_pairs.RecipePairs.table",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.experiments.stale_gap.StaleGaps",
       "target": "kneemri.experiments.stale_gap.StaleRun",
@@ -41927,7 +42119,7 @@
       "role": null
     },
     {
-      "descendants": 329,
+      "descendants": 330,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -42983,7 +43175,7 @@
       "role": null
     },
     {
-      "descendants": 27,
+      "descendants": 28,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -43162,6 +43354,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.reading_check",
       "label": "reading_check",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs",
+      "label": "recipe_pairs",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -48260,6 +48460,22 @@
       "label": "ReadingDrift",
       "level": "class",
       "parent": "kneemri.experiments.reading_check",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.KnobPair",
+      "label": "KnobPair",
+      "level": "class",
+      "parent": "kneemri.experiments.recipe_pairs",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "label": "RecipePairs",
+      "level": "class",
+      "parent": "kneemri.experiments.recipe_pairs",
       "role": "primary"
     },
     {
@@ -66820,6 +67036,86 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.reading_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.KnobPair.delta",
+      "label": "delta",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.KnobPair",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.KnobPair.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.KnobPair",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.KnobPair.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.KnobPair",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.RecipePairs.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.RecipePairs.isolating",
+      "label": "isolating",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.RecipePairs.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.RecipePairs.quotable",
+      "label": "quotable",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.RecipePairs.recipes",
+      "label": "recipes",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.RecipePairs.table",
+      "label": "table",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs.RecipePairs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_pairs.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_pairs",
       "role": null
     },
     {

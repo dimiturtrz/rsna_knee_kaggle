@@ -13,17 +13,19 @@ unpriceable", and why `scratchpad/tri.py` reported that a certain three-point cu
 407 arms when in fact its middle point was a default.
 
 The resolved side is on disk and always has been. **`<stem>.metrics.jsonl` line 1 is
-`{"recipe": {...}}` with all 93 leaves and every default filled in.** 384 of them carry one. The same
-dict also lives in each checkpoint under the `options` key, but the jsonl is text and needs no torch.
+`{"recipe": {...}}` with all 93 leaves and every default filled in.** 403 runs carry one, read through
+`RecordedRun`, which falls back to the checkpoint's stamped `options` where the metrics file predates
+the stamp. The jsonl is text and needs no torch; the checkpoint is the fallback, not the first read.
 
 ## The instrument
 
-`recipe_pairs.py` reads every resolved recipe, joins them to `ledger75` rows on stdin, and reports pairs
-of scored runs differing in EXACTLY ONE leaf. Against an arms-based read that found 16 isolating pairs
-for `backbone_lr` and declared several keys unpriceable, it finds **108 pairs across 32 keys**.
+`kneemri/experiments/recipe_pairs.py` reads every resolved recipe, joins them to the `ledger75` table,
+and reports pairs of scored runs differing in EXACTLY ONE leaf:
+`python -m kneemri.experiments.recipe_pairs --holdouts <dir> [--key <leaf> …]`. Against an arms-based read that found 16 isolating pairs
+for `backbone_lr` and declared several keys unpriceable, it finds **103 pairs across 31 keys**.
 
-Three guards had to be built into it, and each was added only after its absence produced a wrong number
-in this session. They are the whole reason the count is 108 rather than 1015 or 162.
+Four guards had to be built into it, and each was added only after its absence produced a wrong number
+in this session. They are the whole reason the count is 103 rather than 1015 or 162.
 
 **Population.** `ledger75` prints one block per holdout population under the legend *"ranks below do NOT
 cross this line"*. The first run ignored those headers and returned 162 pairs across 38 keys, whose two
@@ -44,6 +46,13 @@ knob ever took. Tolerating that asymmetry — comparing only the keys both sides
 table to **1015 pairs across 55 keys**, admitting pairs whose recipes were eighteen and thirty-six leaves
 apart as "isolating". Drift has to BREAK a pair: two runs whose recipes are not the same shape are not
 isolating anything.
+
+**Void.** A member fitted on its own holdout reads high and cannot be compared against one that was
+not. This axis only appeared when the instrument was promoted into the package and reused
+`Ledger75Row.void` rather than re-deriving the completeness test: the run reports `427 of 446 records;
+19 excluded as VOID`. The same promotion corrected the completeness test itself — a hand-rolled
+`max(epoch)+1 >= asked` drops a `--patience` STOPPED run as though it were a truncation, where
+`ConvergenceCheck.settled()` separates the two. That correction is why 108 pairs became 103.
 
 ## The retraction this instrument owes
 
@@ -112,9 +121,9 @@ single-key pair does not need, which is exactly why a pair is worth more. It is 
 for `scheme` to be worth a card at the corner, the two subtracted terms would have to be wrong in the
 same direction by four times their measured size.
 
-So the knob axis at the shipping corner is **closed**, not merely unfinished. Of 32 keys with isolating
-pairs, the only ones clearing the floor price gradients across 25x spans with the corner sitting between
-their endpoints, and the one key left over closes by decomposition. The next 1.5% is not in this recipe's
+So the knob axis at the shipping corner is **closed**, not merely unfinished. Of the 31 keys with
+isolating pairs, the only ones clearing the floor price gradients across 25x spans with the corner
+sitting between their endpoints, and the one key left over closes by decomposition. The next 1.5% is not in this recipe's
 flags, and further single-flag A/B arms at this corner are priced at roughly zero expected gain — they
 are instruments for retiring a suspicion, never improvements.
 
@@ -127,3 +136,10 @@ an audit read the side of the record that is written down and was structurally b
 not — and then the instrument built to fix that was itself blind to which of its rows were dead
 processes. In every case nothing was broken and every check was green. What was missing each time was a
 record of what the number is a statement ABOUT.
+
+## What the instrument found that this audit did not look for
+
+`labels` is the leaf it prices most — 30 pairs, 17 clearing the floor, against every other leaf's 0-6 —
+and reading that as a lever is a trap. Every clearing pair sits on the older `*_span_s2026` family,
+which tops out 0.027 below the corner. See
+`2026-09-17_labels_is_the_most_priced_leaf_and_the_corner_has_tried_three_schemes.md`.
