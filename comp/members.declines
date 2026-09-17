@@ -1564,3 +1564,15 @@ lr8e5_ship_s2026
   Re-open only on a mechanism that predicts a rate change should pay at 24 epochs under slot_dropout 0.40
   — the 12-epoch tilt that motivated this arm does not survive the doubled schedule, and re-running any
   point on that tilt reads this same flat.
+
+vjepa_cold_s2026
+  0.7499 midpoint / 0.7614 ledger75 @holdout909, peak epoch 9 of 12 — converged, not budget-bound.
+  0.144 below the honest best solo (labelwise_depth24_drop40_long_s2026, 0.9053 ledger75). Nothing at
+  this distance is shippable or seatable.
+  THE DECLINE IS ABOUT THIS HARNESS, NOT ABOUT V-JEPA2. trajectory_check called it before the run
+  finished (CANNOT REACH, generous ceiling 0.7753) and the pre-registered <0.82 branch names the
+  suspect: this arm ran the ViT-L trunk at 336 px over a 20-slice stack, while the SAME trunk read
+  0.8640 (vjepa_member) and 0.8673 (vjepa_warm) ledger75 at its NATIVE 256 px over 12 slices. A 0.10
+  gap between two harnesses on one trunk is a fact about the harness.
+  Re-open by running this trunk at 256 px / 12 slices under the current recipe and beating its own
+  0.8673, not by re-quoting either number.
