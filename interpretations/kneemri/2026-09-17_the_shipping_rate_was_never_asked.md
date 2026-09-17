@@ -105,6 +105,12 @@ the same way.
 `--unfreeze-last` (corner 6, corpus uses 12 in six arms) and `--slice-regions` (corner 1, corpus uses 4
 in seven arms) have **zero** isolating pairs anywhere in 407 arms. They are unpriced, not flat.
 
+That holds over the RESOLVED recipes too, which is the stronger statement and the one that closes the
+question — see `2026-09-17_every_knob_audit_read_the_arms_and_defaults_are_written_in_none.md`, which
+prices all 93 leaves off the run records rather than the arm scripts and still finds neither key a single
+pair. It also adds `layer_decay` to that list, and retracts a -0.0953 taken off a run that died at epoch
+3 of 24.
+
 ### The decay caveat, measured rather than argued (bead knee-dry3h)
 
 The paragraph above is a structural suspicion: the corner sits between the endpoints, so the pair cannot
