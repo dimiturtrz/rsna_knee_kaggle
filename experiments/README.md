@@ -16915,3 +16915,41 @@ more anatomy ALONG the stack (`crop80_span`, README:330) — and that axis is cl
 with `slicecover36` measured CANNOT REACH. Do not plan around +0.0047. What it is good for is a PRIOR on
 the next mechanism proposed here: one whose gain concentrates on focal findings would be new, and one
 that concentrates regionally is competing with a saturated axis and has to beat it, not join it.
+
+### CORRECTION: dml_b's peer term is NOT blocked from a refit — I filed a capability as a law — 2026-09-18 12:25Z
+
+Six hours ago this file recorded that all three refit routes for `dml_b`'s peer term were blocked, and
+route (a) was written as "the cohort REFUSES `--fold -1` by construction (`teacher_readings` writes the
+TRAINING split's ordering)". That is false, and reading the module says so in its own words.
+
+`TeacherReadings._split` (`kneemri/inference/teacher_readings.py:62`) handles the case explicitly —
+*"A NEGATIVE fold means every study, for a student that holds nothing out"* — and `teach` does not
+refuse it, it WARNS: *"teaching every study: some rows are IN-SAMPLE for some member, so the student's
+own holdout score is void and only the board may price it."* A `--fold -1` refit is dark by
+construction: it HAS no holdout score and is priced on the board, which no member has ever seen. So the
+warning describes the refit case exactly, and the guard it belongs to protects a number that a dark run
+does not have.
+
+WHAT ACTUALLY BLOCKED IT, and it is coverage. `TeacherTargets.rows` (`teacher_targets.py:73`) raises on
+any batch holding a study the teacher file does not cover — *"the run is fitting studies the teacher file
+does not cover"* — and the existing `dml_read_a_r2.npz` covers the fold-0 TRAIN split only. A `--fold -1`
+student adds the ~900 holdout studies, so it dies on the first batch containing one. The fix is an
+inference pass, not a redesign: re-run `teacher_readings` at `--fold -1` for full-corpus coverage.
+
+AND THE CLEAN VERSION IS CLEANER THAN THE WARNING SUGGESTS. Teaching a dark student from the FOLD-AWARE
+twin (`dml_a` at fold 0) gives 3,500 in-sample rows — ordinary distillation — and 900 OUT-OF-FOLD rows,
+which is the most honest reading of those studies this project can produce. Nothing leaks toward the
+board under either spelling, because the board's test set is disjoint from the whole corpus.
+
+WHY THIS MATTERS RATHER THAN BEING A REPAIR. The levers audit closed every axis on owned assets and its
+own conclusion was that the eleven ticks "must come from a member this project has not built and has no
+mechanism for". Peer supervision POSTDATES that close, it produced the highest offline number the
+project owns (0.9078 ledger75), and the reason it was excluded from the shipping path was this false
+blockage. On the fitted transfer line `board = 1.104 * offline75 - 0.0603` it reads 0.942, and with an
+ADDITIVE refit term (+0.005) it reads **0.947 against a 0.946 champion**.
+
+SAID HONESTLY, BECAUSE THE MARGIN IS THE WHOLE POINT: +0.001 is HALF the board's 1.9-tick scatter over
+pairs the offline ruler calls tied. This is a coin flip, not a win, and the doc's own rule forbids
+shipping a 1-2 tick move as a result. It is also entirely conditional on ADDITIVE — under CEILING it
+lands at 0.9445 with everything else. The 13:00Z slot (`kneemri-spanff`, knee-uh1j5) decides which, and
+it now gates a real candidate rather than only settling a premise.

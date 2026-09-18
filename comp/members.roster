@@ -950,7 +950,11 @@ dml_b_s2026.pt              # 0.9078 ledger75, peak epoch 18 of 24, CONVERGED â€
                             # NOT a champion candidate on its own: the offline ruler does not order at the
                             # top (three solos shipped off the top of it read board 0.937/0.941/0.937, all
                             # below the fitted transfer line at -2.7 sd), so 0.9078 predicts board 0.942 as
-                            # an UPPER bound against a 0.946 champion. And its gain has no validated route
-                            # to a refit: the cohort refuses --fold -1 by construction (teacher_readings
-                            # writes the TRAINING split's ordering), and a cold --fold -1 run of its recipe
-                            # is the control refitted with the peer term absent, not this member.
+                            # an UPPER bound against a 0.946 champion. Its route to a refit is OPEN but
+                            # unbuilt: this line said the cohort "refuses --fold -1 by construction" and
+                            # that was a capability filed as a law â€” teacher_readings._split handles
+                            # fold<0 explicitly and teach() only WARNS. What blocks it is teacher-file
+                            # COVERAGE (TeacherTargets.rows raises on studies the file does not cover,
+                            # and dml_read_a_r2.npz holds the fold-0 train split only), which is a ~25 min
+                            # inference pass at --fold -1 off the fold-aware twin. Gated on ADDITIVE vs
+                            # CEILING, since under CEILING it lands 0.9445 with every other refit.
