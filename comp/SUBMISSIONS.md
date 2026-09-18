@@ -4606,3 +4606,32 @@ our holdout ruler no longer discriminates between the best members we own. Every
 offline75 by X and collect 1.1X of board" is unpriced at the top of the range, which is the only place we
 ship. The one term still measured board-to-board is the refit (+0.008 / +0.003), and it is unaffected by
 this because it never passed through the offline ruler.
+
+## `spanff_v1` — 0.926, ref 56330671, 2026-09-18 — the refit term is ADDITIVE, and there is no ceiling at 0.9445
+
+INSTRUMENT, pre-registered before the slot, and it settled the one live question the 2026-09-18 audit left
+open: is the whole-corpus refit term ADDITIVE, or a CEILING that pulls every refit toward ~0.9445 regardless
+of its base? ADDITIVE predicted **0.925–0.929**, CEILING predicted **0.943–0.946**. It read **0.926** — inside
+ADDITIVE, about 9 sigma from the other branch, against a median board blur of 0.0010.
+
+**A weak base refits to a weak result.** `calib_span_s2026` shipped 0.921 as `spansolo_v1`; its whole-corpus
+refit reads 0.926. Member quality survives the refit intact, and the refit does not wash out the differences
+between bases. The prior was inverted to ADDITIVE ~0.8 **before** shipping, on four whole-corpus solos found at
+0.923 / 0.925 / 0.944 / 0.945 with no attractor between them; the slot confirmed a reading already taken from
+the record rather than discovering one, and was labelled that way in its own submission message.
+
+**The term now has three points.**
+
+| base | base board | refit board | term |
+|---|---|---|---|
+| `labelwise_depth24_drop40_long` | 0.941 | 0.944 | +0.003 |
+| `calib_span` | 0.921 | **0.926** | **+0.005** |
+| `labelwise_ext_drop40_long` | 0.937 | 0.945 | +0.008 |
+
+Mean +0.005, and the spread is **not** explained by base strength — the weakest and the strongest base sit at
+opposite ends of it.
+
+**What it does not buy.** Additivity confirms the arithmetic of the gap rather than opening a lever. The best
+honest base this project owns carries a board-equivalent 0.941, and a bankable +0.005 lands 0.946 — exactly the
+standing champion. Reaching the 0.957 leader still requires an honest base near 0.916 ledger75 against our best
+at 0.9078. The 0.011 stays a MEMBER gap, which is what `ffsolo_v1` and `l75solo_v1` each concluded independently.
