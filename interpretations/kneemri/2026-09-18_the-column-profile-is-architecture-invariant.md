@@ -73,25 +73,50 @@ The truth here is **our report-mined supervision binarised at 0.75, not Kaggle t
 `column_headroom.py` states about itself applies unchanged. This gives the ORDERING of column difficulty
 under our labels, not the board's per-column areas.
 
-It therefore cannot yet separate the two live explanations of the invariant shape:
+Two explanations of the invariant shape were live when this was written:
 
 1. **An image ceiling** — the finding is genuinely less visible in these pixels, for anything.
 2. **A label ceiling** — the report-mined column for that finding is noisier, so every model is fitted
    and scored against a noisier target and no architecture can escape it.
 
-These predict different things and the distinction is worth an instrument, because (2) would mean the
-weak columns are capped rather than unsolved, and effort belongs in the columns that are not. The
-discriminating measurement is per-column reader accuracy on the gold annotated studies against this
-profile: under (2) they correlate, under (1) they need not. `report_labels_v2` measures 79.2% overall
-against the annotations and the per-column breakdown is what is missing.
+**(2) is refuted, and the measurement that does it was already on disk.**
+`2026-08-26_label-ambiguity-and-our-deficit-do-not-overlap.md` ran `reader_disagreement` over four
+independent readings of the same reports on 4,406 studies with all three foreign readers aligned
+4406/4406. Correlating its per-finding reader spread against this profile's per-column AUC:
+
+**r = +0.081, Spearman +0.147.** Zero, and the faint sign runs the WRONG way — the columns readers
+argue about most score slightly HIGHER. One of the five weakest columns (Fracture) is among the five
+most-disputed; the other four are not. The disputed columns are Synovitis (spread .300), Contusion
+(.240), Baker's (.218) and Effusion (.208), and three of those four are in our strong half, Baker's
+being our best column of twelve.
+
+That interpretation reached the same place on a second ruler sharing no denominator — UNK mass on the
+58 radiologist-annotated studies is diffuse (Synovitis 41 of 58, Baker's 29, Fracture 26) while the
+focal findings are decided (ACL 4, Medial Meniscus 2, MCL 6) — and stated the consequence plainly:
+*"Text ambiguity is a severity problem, not a detection problem."*
+
+So the invariant profile is an **image ceiling**, not a label ceiling. The weak columns are capped by
+what five encoder families can extract from these pixels, not by the noise in the target — which means
+they are unsolved rather than closed, and worth attacking, just not with another encoder or another
+label table.
 
 Fracture is the case to be careful with either way: 42 positives in 909 studies, so its absolute AUC
 carries a wide interval against the population even though the sixteen-member comparison is paired on
 the same studies and precise.
 
-Also untouched: an encoder nobody here has tried, a genuinely different INPUT (a locator, a segmentation
-prior, a different plane or reconstruction) rather than a different encoder over the same input, and
-supervision that is not report-derived at all.
+Also untouched: an encoder nobody here has tried, and a genuinely different INPUT (a locator, a
+segmentation prior, a different plane or reconstruction) rather than a different encoder over the same
+input.
+
+**And the one lane both chains point at, independently.** The 2026-08-26 interpretation closed the label
+route and named what survives: *"supervision from image-derived labels — MRNet's ACL and meniscal tears,
+made by radiologists FROM THE IMAGES, which is both the failing findings and the measurement KIND the
+hidden test uses"*, plus representation (`knee-jk3`, the 0.044 gap at matched train loss). This
+measurement arrives at the same door from the other side — every architecture reads the same shape, so
+what has to change is what the model is TAUGHT TO SEE, and the only supervision that is not a reading of
+the same reports is supervision made from pixels. `mrnet_acl.csv` and `rijeka_acl.csv` are already in the
+label directory. Neither covers the compartment split (Lateral Meniscus, Lateral OA) that carries most of
+the weak half, so this is a partial answer and should be priced as one.
 
 ## The consequence for choosing work
 
