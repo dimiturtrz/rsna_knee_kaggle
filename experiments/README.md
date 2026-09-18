@@ -16608,3 +16608,26 @@ see who trained on those studies (knee-vkn45). The honest top of the ranking is 
 `labelwise_depth24_drop40_long_s2026` 0.9053.
 
 See `interpretations/kneemri/2026-09-17_no_teacher_is_above_the_student.md`.
+
+## 2026-09-18 — three knob axes close on their own matched controls, and the corner holds on all three
+
+Three arms that had run days earlier sat unpriced until tonight. Each carried a pre-registered branch and
+each fired the closing one. They are recorded together because the reading is the same reading: the
+shipping corner is at its optimum on every axis that still had an argument behind it.
+
+| arm | axis, and why it was not merely a knob | reading | verdict |
+|---|---|---|---|
+| the auxiliary-objective pair (knee-evdfd) | the twelve `--*-weight` terms at FULL budget — every prior reading was at a short budget, so nothing said what they carry where we ship | **−0.0019** against its own matched converged control | the `<= 0.000` branch. Auxiliary objectives do not pay at the corner |
+| `lr8e5` (knee-e9f83) | `--backbone-lr`, the ONLY one of knee-dry3h's 22 defaulted leaves whose corner value was an ENDPOINT rather than an interior point, with 4/4 upward sign agreement across the corpus | **−0.0022** at 8e-5, converged, both arms peaking e18 | the sign REVERSES at 24 epochs with dropout. The upward agreement came from 12-epoch 224 arms without slot dropout — knee-dry3h's own stated honest limit — so the endpoint is an endpoint because it is the optimum |
+| `unfreeze_deep` (knee-p724l) | adaptation depth past six blocks, on the one segment of that curve that RISES: 4 blocks 0.8320, 6 blocks 0.8578, **+0.0129 per block** | **+0.0007 midpoint / −0.0012 ledger75** at seven blocks against `band_dense_s2026`, its control, 909 studies, peak e9 of 12 | the gradient does not survive past six. Both deltas are far inside the 0.0062 paired floor and the BETTER ruler carries the negative sign. `--unfreeze-last 6` is at its optimum where we ship |
+
+**What the three together say.** knee-dry3h priced 22 defaulted leaves and found the corner at its
+optimum on every one with a single exception, and that exception is the middle row here, now measured
+down. So the knob axis is closed not by a survey that found nothing but by the survey's own named
+escape being run and refuted. The residual is downstream of the encoder and downstream of the
+optimiser, which is what `interpretations/kneemri/2026-09-18_state_of_the_levers.md` is the table of.
+
+**A METHOD NOTE THAT COST TWO ARMS' WORTH OF TIME TONIGHT.** `unfreeze_deep` and the auxiliary pair had
+both already RUN and sat on disk unread; the aux pair was nearly re-armed and `reading_check --only`
+refused it. An arm that has run and not been priced is indistinguishable from an arm that has not run,
+except to that check. Run it before arming, always.
