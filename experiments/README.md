@@ -16934,7 +16934,18 @@ WHAT ACTUALLY BLOCKED IT, and it is coverage. `TeacherTargets.rows` (`teacher_ta
 any batch holding a study the teacher file does not cover — *"the run is fitting studies the teacher file
 does not cover"* — and the existing `dml_read_a_r2.npz` covers the fold-0 TRAIN split only. A `--fold -1`
 student adds the ~900 holdout studies, so it dies on the first batch containing one. The fix is an
-inference pass, not a redesign: re-run `teacher_readings` at `--fold -1` for full-corpus coverage.
+inference pass, not a redesign — and it has a DEDICATED FLAG, which is the part that makes the original
+closure indefensible rather than merely wrong:
+
+    --teach-all   teach EVERY study, for a fold -1 student the board rules; voids the student's own
+                  holdout score
+
+`--fold -1` IS refused by `main()`, and I read that refusal as the route being shut. It is the opposite:
+the refusal exists so the intent must be spelled deliberately, and its own message names the spelling —
+*"--teach-all is the deliberate spelling, and it is legal only for a student that holds nothing out"*.
+The sanctioned route was the next argument under the error I quoted. The command is
+
+    python -m kneemri.inference.teacher_readings --checkpoints <dml_a fold-0 ckpt>         --out <teacher>_all.npz --teach-all
 
 AND THE CLEAN VERSION IS CLEANER THAN THE WARNING SUGGESTS. Teaching a dark student from the FOLD-AWARE
 twin (`dml_a` at fold 0) gives 3,500 in-sample rows — ordinary distillation — and 900 OUT-OF-FOLD rows,
