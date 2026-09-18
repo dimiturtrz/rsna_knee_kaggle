@@ -16691,3 +16691,24 @@ the two ends of the anneal axis. Re-open only with a mechanism that puts the mem
 (a common fine-tune trunk, not a common init), which no arm in this ledger has ever produced.
 
 Cost 0.3 h of CPU-and-two-passes, gain zero, and it retires an axis that looked open in writing.
+
+## The three unrecorded runs, priced (2026-09-18T11:15Z, zero card)
+
+`ledger_check` carried three finished runs whose best score appeared in neither this file nor
+`interpretations/`. Priced on both rulers with `ledger75`, and classified with `convergence_check`
+so that a floor is not read as a reading:
+
+| member | LEDGER | LEDGER75 | epoch | rows | convergence |
+|---|---|---|---|---|---|
+| `unfreeze_deep_s2026` | 0.8585 | **0.8865** | 9 | 909 | not truncated — a reading |
+| `recal_labelwise_s2026` | 0.8026 | 0.8392 | 1 | 909 | **TRUNCATED** (best e1 of 2 run, 12 asked) — a FLOOR |
+| `vjepa_cold_s2026` | 0.7499 | 0.7614 | 9 | 909 | not truncated — a reading |
+
+`unfreeze_deep_s2026`'s DELTA was already written up above (adaptation depth past six blocks,
+−0.0012 ledger75 against `band_dense_s2026`); what was missing was its ABSOLUTE, which is why
+`ledger_check` could not see it. The two readings stand; `recal_labelwise_s2026`'s 0.8392 may not be
+quoted as that recipe's score, only as a lower bound on it.
+
+**Nothing here is a member.** The best of the three is 0.8865, which is **0.0158 below**
+`headlr_ship_s2026`'s 0.9059 ledger75. The backlog of unrecorded runs held no hidden champion, and
+that question is now closed rather than carried.
