@@ -39,6 +39,9 @@ NOT_IN_CONFIG = {
     "and `epochs_done` already records how far the run got",
     "epochs": "run length — `epochs_done` records what was actually reached, beside the kept epoch",
     "patience": "when the run stopped, which the kept epoch already states",
+    "stop_after_epoch": "where a round ended its loop — the same write-off as `patience` with a "
+    "deterministic trigger instead of a holdout one. The SCHEDULE is built for `epochs` whatever this "
+    "says, so a rebuild reconstructs the same function; `epochs_done` records how far the loop got",
     "patience_from_progress": "when keeping could begin, which the kept epoch likewise already states",
     "studies": "corpus truncation for a smoke; `cache_studies` records WHICH cache was read",
     "train_fraction": "how much of the TRAINING half was fitted on — a property of the run's data, not "

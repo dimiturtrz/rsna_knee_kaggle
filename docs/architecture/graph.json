@@ -75472,6 +75472,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.fitting.RunPlan.stops_at",
+      "label": "stops_at",
+      "level": "method",
+      "parent": "kneemri.training.fitting.RunPlan",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.ghosting.Ghosting.__init__",
       "label": "__init__",
       "level": "method",
