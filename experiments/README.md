@@ -17005,3 +17005,43 @@ success-weighting could be made PER-LABEL rather than per-model. That is a diffe
 one measured, it has a plausible route above the endpoints, and nothing here closes it. It also needs a
 per-label diversity source we do not currently have, which is the same candidate-supply wall the audit
 hit — so it is a hypothesis with a prerequisite, not a queueable arm.
+
+### The transfer constant, READ not quoted: +1.00 in our band, and the anchor swings it more than the gain — 2026-09-18 12:40Z
+
+knee-8bmi2 was priced two hours ago off `board = 1.104 * offline75 - 0.0603`, quoted from an
+interpretation. CLAUDE.md says read the tool, and lists five previous times this constant was wrong when
+quoted. This is the sixth. `python -m kneemri.evaluation.board_transfer`, live, 48 entries on the
+ensemble scope, 966 orderable pairs:
+
+    compression: median +1.08 board points per holdout point over the WHOLE record
+      at or above 0.8977: 102 resolved pairs, median +1.00 [+0.89, +1.04]
+      at or above 0.9014:  19 resolved pairs, median +1.00 [+0.87, +1.13]
+    board blur over pairs the holdout could not separate: median |board| 0.0010
+    inversions: 10/966 pairs, 0/696 of the pairs the holdout RESOLVED at all (gap >= 0.0053)
+
+**+1.00, not +1.10, and in OUR band specifically.** The whole-record +1.08 is the number to avoid: the
+band we ship in reads flat at +1.00 on both cuts, with the tighter cut's interval [+0.87, +1.13] still
+containing 1. A holdout point buys a board point, one for one, and nothing is being amplified.
+
+**IT IS A PAIRWISE MEDIAN, SO IT HAS NO INTERCEPT AND MUST BE APPLIED AGAINST A NAMED ANCHOR** — which
+is where the estimate this was meant to support falls apart. `dml_b` at 0.9078 against its two natural
+anchors:
+
+    vs headlr_ship_s2026 (0.9059 -> board 0.937): +0.0019 -> 0.939, refitted ~0.944
+    vs l75solo           (0.9053 -> board 0.941): +0.0025 -> 0.9435, refitted ~0.9465
+
+The anchors disagree by 0.0045, which is LARGER than the gain being priced, and the champion sits at
+0.946 inside that spread. So the honest statement is not "0.947" and not "0.944" — it is that this
+member's refit cannot be predicted to either side of the champion with the ruler we have. That spread is
+not noise in the tool; it IS the -2.7 sd transfer failure, two members the offline ruler calls equal
+(0.9059 vs 0.9053, a gap of 0.0006) reading four board ticks apart.
+
+**THE PART THAT IS GOOD NEWS, AND IT IS THE STRONGEST STATEMENT IN THE READ.** Zero inversions in 696
+pairs the holdout actually resolved. The ruler has NEVER ordered the board backwards when the gap is at
+or above 0.0053 — it is only unreliable inside its own floor, which is exactly where every number we
+have been arguing about sits. `dml_b`'s +0.0019 over our best is unresolved by construction.
+
+**WHAT THIS DOES TO THE PROGRAMME.** At +1.00 compression, the 0.011 gap to the leader costs +0.011 of
+offline75, and the entire span from our worst shipped solo to our best is about that. No knob and no
+refit term is that size. Chasing sub-floor gains and hoping transfer amplifies them is arithmetic that
+the tool has now refused twice on the same day.
