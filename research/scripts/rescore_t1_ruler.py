@@ -26,6 +26,9 @@ import sys
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
+MIDPOINT = 0.5
+"""The cut this script scores on, so membership is decided on the same positive set it grades."""
+
 MODELS_ROOT = "D:/models/rsna_knee_abnormality"
 REFERENCE_NPZ = os.path.join(MODELS_ROOT, "band_span_s2026.holdout.npz")
 SELECTOR_CSV = (
@@ -93,7 +96,7 @@ def main() -> None:
     n_ref = len(ref_studies)
     assert len(set(ref_studies)) == n_ref
 
-    t0 = (np.asarray(ref["truth"], dtype=np.float64) >= 0.5).astype(np.int64)
+    t0 = (np.asarray(ref["truth"], dtype=np.float64) >= MIDPOINT).astype(np.int64)
 
     t1 = t0.copy()
     n_flips = 0
@@ -137,8 +140,8 @@ def main() -> None:
         member_truth = np.asarray(z["truth"], dtype=np.float64)
         aligned_truth = np.empty_like(member_truth)
         aligned_truth[order] = member_truth
-        if not np.allclose(aligned_truth, np.asarray(ref["truth"], dtype=np.float64)):
-            excluded.append((name, "truth array disagrees with reference after alignment"))
+        if not np.array_equal((aligned_truth >= MIDPOINT), (np.asarray(ref["truth"], dtype=np.float64) >= MIDPOINT)):
+            excluded.append((name, "positive set disagrees with reference after alignment"))
             continue
         kept[name] = aligned
 
