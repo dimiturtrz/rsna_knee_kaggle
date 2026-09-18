@@ -169,9 +169,21 @@ class LedgerSeventyFive:
         )
 
     def population(self, reading: HoldoutReading) -> str:
-        """A short digest of the study ids, sorted so record order cannot split one population in two."""
-        joined = "|".join(sorted(str(study) for study in reading.studies))
-        return hashlib.sha1(joined.encode("utf-8"), usedforsecurity=False).hexdigest()[:8]
+        """A digest of the studies AND the truth they were scored against, in one canonical study order.
+
+        A population is a QUESTION, not a study list: two members answer the same one only when the same
+        studies are graded by the same table. An arm that overrides `--labels` without `--eval-labels`
+        bakes its own table into its holdout truth, and its macro is then a reading of a different ruler
+        that a flat rank prints in the same column — `recal_holdannot_s2026` reads 0.9004 against
+        `report_labels_v3.csv` and 0.8888 against the corpus table (knee-g2vm9). Digesting the truth puts
+        such a member in a population of its own, which is exactly the case `table` already refuses to
+        interleave and `--only` already refuses to span.
+        """
+        order = np.argsort(np.asarray([str(study) for study in reading.studies]))
+        studies = "|".join(str(reading.studies[index]) for index in order)
+        digest = hashlib.sha1(studies.encode("utf-8"), usedforsecurity=False)
+        digest.update(np.round(np.asarray(reading.truth, dtype=np.float64)[order], 6).tobytes())
+        return digest.hexdigest()[:8]
 
     def between(self, reading: HoldoutReading) -> int:
         """How many truth cells sit in `[MIDPOINT, RECUT)` — the only cells the two rulers disagree about.
@@ -242,10 +254,13 @@ def main() -> None:
     # Only the EXPLICIT ask refuses. A default sweep spanning populations is a survey and the dividers
     # make it honest, but `--only a b` is a caller asking for a comparison, and across two study sets
     # there is no comparison to hand back.
-    asked = {row.population for row in rows} if arguments.only else set()
+    asked = {(row.population, row.studies) for row in rows} if arguments.only else set()
     if len(asked) > 1:
-        counts = sorted({row.studies for row in rows})
-        message = f"--only spans {len(asked)} study populations ({counts} studies) - these rows are not comparable"
+        spans = ", ".join(f"{name} ({studies} studies)" for name, studies in sorted(asked))
+        message = (
+            f"--only spans {len(asked)} populations - a population is the studies AND the table that graded "
+            f"them, so equal counts still answer different questions: {spans}"
+        )
         raise SystemExit(message)
 
 

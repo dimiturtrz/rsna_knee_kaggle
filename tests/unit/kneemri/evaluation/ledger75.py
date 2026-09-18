@@ -147,6 +147,31 @@ def test_population(tmp_path: Path) -> None:
     assert ruler.population(one) != ruler.population(ruler.reading(_short_member(tmp_path, "p3")))
 
 
+def test_population_separates_a_moved_label_table(tmp_path: Path) -> None:
+    """Same studies graded by another table is another question, so it is another population."""
+    ruler = LedgerSeventyFive()
+    ours = ruler.reading(_member(tmp_path, "corpus_table", RECUT_COLUMN))
+    moved = _member(tmp_path, "moved_table", RECUT_COLUMN)
+    kept = ruler.reading(moved)
+    HoldoutRecord(moved).write(STUDIES, kept.predictions, _truth() * 0.5, epoch=5)
+    assert ruler.population(ours) != ruler.population(ruler.reading(moved))
+
+
+def test_population_ignores_record_order(tmp_path: Path) -> None:
+    """Shuffling the rows of one record leaves the truth digested in the same study order."""
+    ruler = LedgerSeventyFive()
+    straight = ruler.reading(_member(tmp_path, "straight", RECUT_COLUMN))
+    shuffled = _member(tmp_path, "shuffled", RECUT_COLUMN)
+    order = [3, 1, 0, 2]
+    HoldoutRecord(shuffled).write(
+        [STUDIES[index] for index in order],
+        straight.predictions[order],
+        _truth()[order],
+        epoch=5,
+    )
+    assert ruler.population(straight) == ruler.population(ruler.reading(shuffled))
+
+
 def test_table_keeps_populations_whole(tmp_path: Path) -> None:
     """A higher score on another study set may not outrank the majority population — it sorts after it."""
     rows = LedgerSeventyFive().table(

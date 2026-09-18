@@ -19,7 +19,7 @@
 0.9021       dinov3f0_solo
 0.9018       roinative_labelwise_drop40_long_s2026
 0.9007       labelwise_dense_stem_llrd_s2026
-0.9004       recal_holdannot_s2026
+0.9004       recal_holdannot_s2026   WRONG RULER - 0.8888 on the corpus table, see the banner below
 0.9000       warm_calib_lowlr_drop40_long_s2026_run1
 0.8998       labelwise_depth24_s2026
 0.8994       warm_calib_lowlr_drop40_long_s2026
@@ -38,6 +38,15 @@
 ```
 
 ## Per-finding leader among honest members, and its margin over the best CHAMPION SEAT
+
+**CORRECTED 2026-09-18T01:14Z — EVERY `recal_holdannot_s2026` ROW IN THIS TABLE IS VOID.** Its holdout
+truth is `report_labels_v3.csv`, whose fourth rung (0.6879) falls on the other side of the 0.75 recut
+from the corpus table's (0.82), so it was graded against a different positive set than the members it is
+compared to here. Re-scored on the corpus truth it reads **0.8888, not 0.9004**, and it loses ELEVEN of
+twelve columns to `headlr_ship_s2026` — it leads nothing. The six leads below are the ruler.
+`comp/members.declines:84` had already ruled this number out and this table quoted it anyway;
+`LedgerSeventyFive.population` now refuses the comparison outright (knee-g2vm9). Evidence:
+`interpretations/kneemri/2026-09-18_the_cut_is_not_what_exhausted_our_ruler.md`.
 ACL                    0.9692 recal_holdannot_s2026                        +0.0226 over labelwise_dense_drop40_long_s2
 MCL                    0.9472 recal_holdannot_s2026                        +0.0423 over labelwise_ext_drop40_long_s202
 Medial Meniscus        0.9364 recal_holdannot_s2026                        +0.0282 over labelwise_ext_drop40_long_s202
@@ -66,7 +75,7 @@ On the champion's three measurable seats (`champ3` = 0.9100, ledger75, 909 studi
 | `lora_r8_v3small_224_s2026` | 0.9068 | -0.0032 | ours |
 | `v3large_dense_s2026` | 0.9063 | -0.0037 | ours |
 | `labelwise_drop_drop40_long_s2026` | 0.9104 | +0.0004 | ours, same family as the seats |
-| `recal_holdannot_s2026` | 0.9100 | 0.0000 | ours |
+| `recal_holdannot_s2026` | 0.9100 | 0.0000 | ours, and on a MOVED RULER - void, see the banner above |
 
 Every DINOv3 member that ADDS is in-sample on 703 of the 909. Every DINOv3 member that is OURS
 subtracts. The isolation that made this look like a mechanism — "two independent DINOv3 members both

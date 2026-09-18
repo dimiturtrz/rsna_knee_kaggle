@@ -83,3 +83,48 @@ change what a slot is for:
 3. **The offline ruler keeps its job below 0.904**, where its residual sd of 0.0021 against a 0.030 span is
    an excellent instrument. Nothing here retires it as a gate on new families; it retires it as a chooser
    among our own best.
+
+## The one member in this pool that is not on this ruler — 01:14Z
+
+`2026-09-17_member_candidates.md` ranks `recal_holdannot_s2026` at 0.9004 and names it the per-finding
+leader on SIX of twelve columns, by +0.0073 to +0.0423. Its holdout truth is `report_labels_v3.csv`:
+rungs `0.0408/0.1356/0.3776/0.6879/0.9583` against the corpus table's `0.08/0.28/0.68/0.82/0.94`, and
+896 of 909 rows differ in every column. Rung four crosses the 0.75 recut in opposite directions in the
+two tables, so the member was graded on a different positive set than everything it was ranked against.
+
+Re-scored on the corpus truth, same predictions, same studies, same order:
+
+| ruler | macro |
+|---|---|
+| own table (`report_labels_v3.csv`) | 0.9004 |
+| corpus table (`report_labels_v2.csv`) | **0.8888** |
+
+**+0.0116 of promotion**, about 2x the paired floor and 1.4x the board gap. On one ruler it loses ELEVEN
+of twelve columns to `headlr_ship_s2026`; its only win is MCL +0.0221. It leads nothing. The six-finding
+lead was the ruler, and an oracle ceiling computed from that table (+0.0215 over our best member) does
+not exist.
+
+**The pool is otherwise clean, and now bounded.** All 458 holdout records on disk were fingerprinted by
+their truth arrays: 451 carry the corpus rungs, 5 are the `oof_band` fold targets (continuous by
+construction), and exactly TWO carry another table — this member and `confident224_s2026`. That confirms
+`experiments/README.md:10701` by measurement rather than by recollection.
+
+`confident224_s2026` moves **exactly 0.0000** between its own table and the corpus one. Its table only
+shifts a rung 0.28 -> 0.50, which lands inside a gap the 0.75 cut cannot see. That is the three-ruler
+collapse of the section above, arriving independently from the supervision side: a rung move that does
+not cross a cut is not a ruler move at all.
+
+## Why this recurred, and what now refuses it
+
+Nothing here is new to the record. `comp/members.declines:84` states the defect in capitals,
+`experiments/README.md:9525` measures the truth disagreement at 100% of cells, and :10701 names both
+members. The number was ranked first anyway, one day ago, by a tool that reads each record's own truth.
+This is the `entry_offline` scope-field pattern for the third time: **a tool that prints a number the
+record has ruled out will keep putting that number back, and prose cannot stop it.**
+
+`LedgerSeventyFive.population` now digests the truth alongside the study ids (knee-g2vm9's open half). A
+population is the studies AND the table that graded them, so a member on a moved table lands in a
+population of its own — which `table` already refuses to interleave and `--only` already refuses to
+span. No new flag and no new branch; the machinery that kept 4406-study records from outranking the 909
+now keeps moved rulers out too. Verified: `--only recal_holdannot_s2026 headlr_ship_s2026` refuses, and
+the default sweep gains a divider rather than a silent row.
