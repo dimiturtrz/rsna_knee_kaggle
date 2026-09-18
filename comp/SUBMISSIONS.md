@@ -4635,3 +4635,19 @@ opposite ends of it.
 honest base this project owns carries a board-equivalent 0.941, and a bankable +0.005 lands 0.946 — exactly the
 standing champion. Reaching the 0.957 leader still requires an honest base near 0.916 ledger75 against our best
 at 0.9078. The 0.011 stays a MEMBER gap, which is what `ffsolo_v1` and `l75solo_v1` each concluded independently.
+
+## `dmlbff_v1` 0.943 · `long36_v1` 0.936 · `dmlbfflong36_v1` 0.938 — refs 56340982/85/99, 2026-09-18 — neither refit term is a lever
+
+Three solo whole-corpus refits, each pre-registered in its bead before shipping.
+
+| entry | member | bead | pre-registered | board | vs its non-term refit |
+|---|---|---|---|---|---|
+| `dmlbff_v1` | `dml_b_ff` | knee-8bmi2 | 0.947+ / 0.944-0.9469 / <0.944 | 0.943 | -0.002 vs `extffsolo_v1` 0.945 |
+| `long36_v1` | `depth24_ff_long36` | knee-lz8pd | 0.947+ / 0.944-0.946 / <=0.943 | 0.936 | -0.008 vs the 24-epoch depth24 refit 0.944 |
+| `dmlbfflong36_v1` | `dml_b_ff_long36` | knee-bxp8h | P(clears 0.946) ~0.20 | 0.938 | below both parents |
+
+The peer term reads -0.002, inside the top band's ~0.004 two-sd scatter: it buys nothing on the board. The
+36-epoch anneal reads -0.008, about twice that scatter: on a whole-corpus refit, where no holdout stops the
+schedule, the longer anneal HURTS. Stacked, they land below both parents. The champion `tripleseat_v2` stands at
+0.946, and the rank read live at 21:36Z is 68 of 3962, leader 0.957. The gap is still a member gap, and neither
+term closes any of it.
