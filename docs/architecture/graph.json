@@ -7508,6 +7508,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.runs.fold_rotation",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.fold_rotation",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.runs.member_record",
       "target": "core.data.corpus.crop_centre",
       "weight": 1
@@ -37634,6 +37646,78 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "target": "kneemri.runs.fold_rotation.FoldCoverage",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation.assemble",
+      "target": "kneemri.runs.fold_rotation.FoldCoverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation.assemble",
+      "target": "kneemri.runs.fold_rotation.OutOfFoldRotation.labels",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation.assemble",
+      "target": "kneemri.runs.fold_rotation.OutOfFoldRotation.overlapping",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation.write",
+      "target": "kneemri.runs.fold_rotation.OutOfFoldRotation.assemble",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation.write",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.fold_rotation.OutOfFoldRotation.write",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.runs.fold_rotation.main",
+      "target": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.fold_rotation.main",
+      "target": "kneemri.runs.fold_rotation.OutOfFoldRotation.write",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.runs.fold_rotation.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.fold_rotation.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.runs.holdout_record.HoldoutReading",
       "target": "kneemri.runs.holdout_record.HoldoutReading",
       "weight": 1
@@ -42269,7 +42353,7 @@
       "role": null
     },
     {
-      "descendants": 332,
+      "descendants": 333,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -44437,11 +44521,19 @@
       "role": null
     },
     {
-      "descendants": 5,
+      "descendants": 6,
       "id": "kneemri.runs",
       "label": "runs",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation",
+      "label": "fold_rotation",
+      "level": "module",
+      "parent": "kneemri.runs",
       "role": null
     },
     {
@@ -50211,6 +50303,22 @@
       "level": "class",
       "parent": "kneemri.process_table",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.FoldCoverage",
+      "label": "FoldCoverage",
+      "level": "class",
+      "parent": "kneemri.runs.fold_rotation",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "label": "OutOfFoldRotation",
+      "level": "class",
+      "parent": "kneemri.runs.fold_rotation",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -73954,6 +74062,70 @@
       "label": "read",
       "level": "method",
       "parent": "kneemri.process_table.ProcessTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.FoldCoverage.complete",
+      "label": "complete",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation.FoldCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.FoldCoverage.share",
+      "label": "share",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation.FoldCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.OutOfFoldRotation.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.OutOfFoldRotation.assemble",
+      "label": "assemble",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.OutOfFoldRotation.labels",
+      "label": "labels",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.OutOfFoldRotation.overlapping",
+      "label": "overlapping",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.OutOfFoldRotation.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation.OutOfFoldRotation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.fold_rotation.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.runs.fold_rotation",
       "role": null
     },
     {
