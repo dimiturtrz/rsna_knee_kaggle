@@ -4580,3 +4580,29 @@ not break a ruler. What makes it worth writing down is WHERE it sits: this is th
 offline75 ever shipped, nothing above 0.9053 had ever tested the line, every open plan extrapolates it
 there, and the miss is in the direction that costs. Treat a prediction above ~0.904 as an UPPER BOUND
 until a second point at the top reads on the line.
+
+## headlrsolo_v1 — 0.937, ref 56316099, 2026-09-18 — the transfer line has no slope where we ship
+
+`headlr_ship_s2026`, offline75 **0.9059**, the highest single member on disk. Pre-registered on the LINE
+rather than on its knob (`--head-lr` 2e-4 is board-invisible at +0.0006 ledger75). The `<= 0.939` branch
+fired.
+
+Three readings now sit at the top of the solo line:
+
+| member | offline75 | board |
+|---|---|---|
+| `labelwise_ext_drop40_long_s2026` | 0.9045 | 0.937 |
+| `labelwise_depth24_drop40_long_s2026` | 0.9053 | 0.941 |
+| `headlr_ship_s2026` | 0.9059 | **0.937** |
+
+Their offline75 spread is **0.0014**, well inside the 0.0062 paired floor — on our own ruler these three
+members are a TIE. Their board spread is 0.004, two board-blur units. The line fitted on the seven points
+below 0.900 (`board = -0.1217 + 1.1743 * offline75`, residual sd 0.0019) over-predicts all three, by
+0.0034 / 0.0004 / 0.0051 — three of three LOW, and −2.7 sd at this point.
+
+This does not prove a bend: three tied members cannot measure a slope. It proves the weaker and more
+expensive thing — **above offline75 0.904 the slope's centre may not be used, only its upper bound**, and
+our holdout ruler no longer discriminates between the best members we own. Every plan shaped "raise
+offline75 by X and collect 1.1X of board" is unpriced at the top of the range, which is the only place we
+ship. The one term still measured board-to-board is the refit (+0.008 / +0.003), and it is unaffected by
+this because it never passed through the offline ruler.

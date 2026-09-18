@@ -154,3 +154,25 @@ gap to first place (+0.012 offline75) as though its conversion were known.
 
 `kneemri-headlrsolo` is that third point: `headlr_ship_s2026`, offline75 **0.9059**, the highest this
 project owns, pre-registered on the LINE rather than on its member.
+
+## SECOND AMENDMENT, 2026-09-18 00:28Z — the title is now wrong, and the top of this line is retired
+
+`headlrsolo_v1` (ref 56316099) shipped `headlr_ship_s2026`, offline75 **0.9059**, the highest single
+member this project owns. It read **0.937** — the same board as `extsolo_v1`'s 0.9045 member.
+
+The top of the line is now three points: 0.9045 → 0.937, 0.9053 → 0.941, 0.9059 → 0.937. Their offline75
+spread is **0.0014**, well inside the 0.0062 paired floor, so on our own ruler these three members are a
+**tie**; their board spread is 0.004. The line fitted on the seven points below 0.900
+(`board = -0.1217 + 1.1743 * offline75`, residual sd 0.0019) over-predicts all three — 0.0034 / 0.0004 /
+0.0051, **three of three LOW**, −2.7 sd at the newest point.
+
+What this establishes, and what it does not. It does NOT establish a bend: three tied members cannot
+measure a slope, and the sign test on n=3 is weak. It DOES establish that **above offline75 0.904 the
+slope's centre may not be used — only its upper bound** — and that our holdout no longer separates the
+best members we own. The original title ("predicts the board to the thousandth") held for the body of the
+range and is false at its top, where every shipping decision is actually made.
+
+Consequence for planning: every plan shaped "raise offline75 by X and collect ~1.1X of board" is unpriced
+where we ship. The one term still measured board-to-board is the **refit** (+0.008 / +0.003), and it is
+untouched by this because it never passes through the offline ruler — see
+`2026-09-17_the_refit_term_is_per_member.md`.
