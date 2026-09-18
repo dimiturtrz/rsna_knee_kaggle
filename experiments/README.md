@@ -16841,9 +16841,13 @@ mechanism that has ever moved this board (62 ensemble attempts, zero ticks over 
 0.946 entry contains one — `interpretations/kneemri/2026-09-18_state_of_the_levers.md:174-207`). B
 cannot take that path by either established route:
 
-- **The cohort refuses `--fold -1`.** `teacher_readings` writes the ordering of the TRAINING split and
-  refuses a full-corpus member by construction (the arm's own LEAK section), so the mutual schedule
-  cannot be re-run at `--fold -1` at all.
+- **The cohort refuses `--fold -1`.** ~~`teacher_readings` writes the ordering of the TRAINING split
+  and refuses a full-corpus member by construction (the arm's own LEAK section), so the mutual schedule
+  cannot be re-run at `--fold -1` at all.~~ **RETRACTED SAME DAY, 12:25Z — this was a capability filed
+  as a law.** `main()` does refuse `--fold -1`, and that refusal is what this bullet read as the route
+  being shut; its own message names the sanctioned spelling, `--teach-all`, which is the next argument
+  in the same parser. What actually blocks it is teacher-file COVERAGE, a ~25 min inference pass. See
+  the CORRECTION section at the end of this file and knee-8bmi2.
 - **A cold `--fold -1` run of B's recipe is not B.** It is `labelwise_depth24_drop40_long_ff` — the
   control, refitted, with the peer term absent. It drops the +0.0025 it was built to carry.
 
@@ -16964,3 +16968,40 @@ pairs the offline ruler calls tied. This is a coin flip, not a win, and the doc'
 shipping a 1-2 tick move as a result. It is also entirely conditional on ADDITIVE — under CEILING it
 lands at 0.9445 with everything else. The 13:00Z slot (`kneemri-spanff`, knee-uh1j5) decides which, and
 it now gates a real candidate rather than only settling a premise.
+
+
+### Cohorts of three to five, and success-weighted supervision — closed by the mechanism, for no card — 2026-09-18
+
+The owner raised this directly: *"mutual supervision is good with two but what about 3-4-5? and after
+each epoch, and layer supervision is weighted by the each model success in the previous epoch"*. It
+deserves an answer rather than an arm, and the cohort-mean reading above already contains one.
+
+**Uniform weighting is bounded by the cohort mean, and the deliverable is the strongest member.** The
+measured effect is not "mutual supervision helps" or "hurts" — it is that both partners are pulled
+toward the cohort's mean, which COST the stronger trunk (-0.0015) and LIFTED the weaker (+0.0025).
+Scaling to N does not escape that; it estimates the mean better. A cohort of our top three has a mean
+strictly below our best member, so the member we would actually ship is the one that pays, and it pays
+MORE as N grows and the mean is pulled further below it by the tail. The gain is real and it lands on
+the members we would discard.
+
+**Success-weighting degenerates at both ends of its own range.** Weighting each partner's supervision by
+its previous-epoch score is exactly the knob that breaks the symmetry — and in the limit where the best
+model is weighted to 1 and pulled by nobody, the cohort IS one-directional distillation from the
+strongest member, which is closed: `dml_a` is its student side, `swin_distill_fit` reads -0.0077 against
+a cold control, and the teacher-liveness interpretation settles that a LIVE teacher does not beat a
+converged one for the deliverable. At the other end, uniform, it is the cohort mean above. The interior
+interpolates between a closed mechanism and a harmful one, and an interpolation between those two has no
+reason to exceed either.
+
+**So this is not "untested", it is bounded.** ~7 h of card (a cohort of three is 3x training) for a
+mechanism whose best case is the better of two measured endpoints, one of which is negative on the
+member we ship. Priced against the 1.5% bar it is a ~0 expected-score run, and it is not worth a slot's
+worth of wall-clock either.
+
+**WHAT WOULD RE-OPEN IT** — stated so this is a closure by argument and not a dismissal. The bound above
+assumes the partners' errors are the thing being averaged. If a cohort were built so partners are strong
+on DIFFERENT labels or structure scales, the mean is no longer below every member on every column, and
+success-weighting could be made PER-LABEL rather than per-model. That is a different mechanism from the
+one measured, it has a plausible route above the endpoints, and nothing here closes it. It also needs a
+per-label diversity source we do not currently have, which is the same candidate-supply wall the audit
+hit — so it is a hypothesis with a prerequisite, not a queueable arm.
