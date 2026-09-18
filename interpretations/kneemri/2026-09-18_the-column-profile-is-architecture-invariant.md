@@ -108,23 +108,40 @@ Also untouched: an encoder nobody here has tried, and a genuinely different INPU
 segmentation prior, a different plane or reconstruction) rather than a different encoder over the same
 input.
 
-**And the one lane both chains point at, independently.** The 2026-08-26 interpretation closed the label
-route and named what survives: *"supervision from image-derived labels — MRNet's ACL and meniscal tears,
-made by radiologists FROM THE IMAGES, which is both the failing findings and the measurement KIND the
-hidden test uses"*, plus representation (`knee-jk3`, the 0.044 gap at matched train loss). This
-measurement arrives at the same door from the other side — every architecture reads the same shape, so
-what has to change is what the model is TAUGHT TO SEE, and the only supervision that is not a reading of
-the same reports is supervision made from pixels. `mrnet_acl.csv` and `rijeka_acl.csv` are already in the
-label directory. Neither covers the compartment split (Lateral Meniscus, Lateral OA) that carries most of
-the weak half, so this is a partial answer and should be priced as one.
+**The lane the 2026-08-26 chain pointed at has since been run, and it closed — on the same shape.** That
+interpretation named image-derived supervision as what survives: *"MRNet's ACL and meniscal tears, made
+by radiologists FROM THE IMAGES."* `merged_corpus` added Rijeka's 736 image-read studies (+0.0020, inside
+the floor, but the deficit set moved as a set: Lateral Meniscus +0.0196\*), and `merged3_corpus` then
+added MRNet's 1,370 (`experiments/README.md:346`). It reads **−0.0024**, and **Lateral Meniscus ranks
+LAST of twelve at −0.0217** — the exact column the MRNet argument had been built on, the one Rijeka had
+moved most. Second site +0.0043, third site −0.0024: the site-count corner is closed negative.
+
+**Its verdict is this finding arriving from the other side, and that is why it belongs here rather than
+only in the ledger.** The ledger's words are *"THE SHAPE IS A ROTATION, NOT AN ADDITION … Two foreign
+sites trade the same small set of columns instead of stacking"* — Synovitis was Rijeka's one starred cost
+(−0.0206\*) and MRNet hands it straight back (+0.0234) while the columns Rijeka bought go down. So the
+column profile is invariant under a change of **corpus** as well as a change of **encoder**. Adding a
+site does not add to the profile; it rotates which columns are paid for out of the same total. Two
+independent axes, the same conserved shape.
+
+That makes the shape the object to attack, and it narrows what could move it to things that change
+neither the encoder nor the site count: the corpus corner the ledger says still pays — **supervision at
+a fixed two-site cache** (`merged_blend_cf` 0.8597, `merged_span_cf` 0.8618) — and **Q-POOL**, the
+combinations `merged3_corpus` explicitly did not try (per-site conditioning, harmonisation,
+pool-then-specialise). Representation remains open on its own evidence (`knee-jk3`, a 0.044 gap at
+matched train loss).
 
 ## The consequence for choosing work
 
 At `d/12` per column — settled, `kneemri-colnull` shipped constant 0.5 and read exactly 0.500 — the four
 weak columns carry 0.19 of deficit between them and lifting them to 0.92 would be +0.0145 macro, a full
-1.5% lever from one mechanism. This measurement says that lever cannot be reached by **swapping the
-encoder**, and the record already says it cannot be reached by **relabelling**, by **mixing the output
-columns**, or by a **loss term naming the axis**.
+1.5% lever from one mechanism.
+
+The profile is now measured invariant under **five encoder families** (this document) and under **three
+corpus sites** (`experiments/README.md:345-346`), and it does not track **label noise** (r = +0.081).
+So that lever is not reachable by swapping the encoder, adding a site, relabelling, mixing the output
+columns, or a loss term naming the axis — five routes, each closed on its own measurement. What is left
+is not a longer list of the same kind of move.
 
 So a candidate member is now cheaply gated before it costs a card: score it per column on this holdout
 and require it to WIN a column outright. Sixteen members across five families have won zero. A candidate
