@@ -23744,6 +23744,24 @@
     },
     {
       "kind": "construct",
+      "source": "kneemri.evaluation.seat_profile.SeatProfile.population",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.SeatProfile.population",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.population",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.SeatProfile.population",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.reading",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
       "source": "kneemri.evaluation.seat_profile.SeatProfile.reading",
       "target": "kneemri.runs.holdout_record.HoldoutRecord",
       "weight": 1
@@ -23762,6 +23780,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.SeatProfile.readings",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.reading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.evaluation.seat_profile.SeatProfile.scored",
       "target": "kneemri.evaluation.seat_profile.SeatProfile.reading",
       "weight": 1
@@ -23769,7 +23793,19 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.seat_profile.SeatProfile.table",
-      "target": "kneemri.evaluation.seat_profile.SeatProfile.reading",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.profile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.SeatProfile.table",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.main",
+      "target": "kneemri.evaluation.member_pool.MemberPool.at",
       "weight": 1
     },
     {
@@ -23793,13 +23829,31 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.seat_profile.main",
-      "target": "kneemri.evaluation.seat_profile.SeatProfile.spread",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.margins",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.seat_profile.main",
-      "target": "kneemri.evaluation.seat_profile.SeatProfile.table",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.population",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.main",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.profile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.main",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.seat_profile.main",
+      "target": "kneemri.evaluation.seat_profile.SeatProfile.spread",
       "weight": 1
     },
     {
@@ -62896,8 +62950,40 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.seat_profile.SeatProfile.margins",
+      "label": "margins",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_profile.SeatProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_profile.SeatProfile.population",
+      "label": "population",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_profile.SeatProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_profile.SeatProfile.profile",
+      "label": "profile",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_profile.SeatProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.seat_profile.SeatProfile.reading",
       "label": "reading",
+      "level": "method",
+      "parent": "kneemri.evaluation.seat_profile.SeatProfile",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.seat_profile.SeatProfile.readings",
+      "label": "readings",
       "level": "method",
       "parent": "kneemri.evaluation.seat_profile.SeatProfile",
       "role": null
