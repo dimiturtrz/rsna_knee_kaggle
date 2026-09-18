@@ -3464,6 +3464,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.peer_signal",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.peer_signal",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.pillar_gate",
       "target": "core.cli",
       "weight": 1
@@ -21154,6 +21166,72 @@
       "kind": "calls",
       "source": "kneemri.evaluation.patch_maps.main",
       "target": "kneemri.inference.members.Member.from_checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.peer_signal.PeerComparison",
+      "target": "kneemri.evaluation.peer_signal.PeerSignal",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.peer_signal.PeerComparison",
+      "target": "kneemri.runs.holdout_record.HoldoutReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.peer_signal.PeerComparison.__init__",
+      "target": "kneemri.evaluation.peer_signal.PeerComparison._rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.peer_signal.PeerComparison.across",
+      "target": "kneemri.evaluation.peer_signal.PeerComparison.between",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.peer_signal.PeerComparison.between",
+      "target": "kneemri.evaluation.peer_signal.PeerComparison._divergence",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.peer_signal.PeerComparison.between",
+      "target": "kneemri.evaluation.peer_signal.PeerSignal",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.peer_signal.PeerSignal.line",
+      "target": "kneemri.evaluation.peer_signal.PeerSignal.ratio",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.peer_signal.main",
+      "target": "kneemri.evaluation.peer_signal.PeerComparison",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.peer_signal.main",
+      "target": "kneemri.evaluation.peer_signal.PeerComparison.across",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.peer_signal.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.peer_signal.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {
@@ -42353,7 +42431,7 @@
       "role": null
     },
     {
-      "descendants": 333,
+      "descendants": 334,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -42441,7 +42519,7 @@
       "role": null
     },
     {
-      "descendants": 120,
+      "descendants": 121,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -42940,6 +43018,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.patch_maps",
       "label": "patch_maps",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal",
+      "label": "peer_signal",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -47406,6 +47492,22 @@
       "label": "TissueNull",
       "level": "class",
       "parent": "kneemri.evaluation.patch_maps",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerComparison",
+      "label": "PeerComparison",
+      "level": "class",
+      "parent": "kneemri.evaluation.peer_signal",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerSignal",
+      "label": "PeerSignal",
+      "level": "class",
+      "parent": "kneemri.evaluation.peer_signal",
       "role": "satellite"
     },
     {
@@ -61078,6 +61180,70 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.patch_maps",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerComparison.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal.PeerComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerComparison._divergence",
+      "label": "_divergence",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal.PeerComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerComparison._rows",
+      "label": "_rows",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal.PeerComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerComparison.across",
+      "label": "across",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal.PeerComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerComparison.between",
+      "label": "between",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal.PeerComparison",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerSignal.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal.PeerSignal",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.PeerSignal.ratio",
+      "label": "ratio",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal.PeerSignal",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.peer_signal.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.peer_signal",
       "role": null
     },
     {
