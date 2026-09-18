@@ -94,6 +94,19 @@ class RunPlan:
     resume: bool = False
     """Continue the trajectory left beside `destination`, rather than starting the schedule cold."""
 
+    stop_after_epoch: int = 0
+    """Epochs to run before ending the loop; 0 runs `epochs`. Bounds the LOOP, never the schedule."""
+
+    @property
+    def stops_at(self) -> int:
+        """The epoch the loop ends on, which is not the count the schedule is annealed over.
+
+        `epochs` builds OneCycle's `total_steps`, so lowering it compresses the anneal into a different
+        recipe. A run that stops short and is `--resume`d steps the same schedule it would have stepped
+        uninterrupted, which is what makes a round readable against a run that was never stopped.
+        """
+        return min(self.epochs, self.stop_after_epoch) if self.stop_after_epoch else self.epochs
+
     @classmethod
     def of(cls, options: TrainConfig, destination: Path) -> "RunPlan":
         """The plan a parsed run asked for — one place, so a stopping field cannot be parsed and dropped."""
@@ -105,6 +118,7 @@ class RunPlan:
             patience_from=options.optim.patience_from_progress,
             seed=options.run.seed,
             resume=options.run.resume,
+            stop_after_epoch=options.optim.stop_after_epoch,
         )
 
 
@@ -267,7 +281,7 @@ class Fitting:
     def epochs(self, fold: Fold) -> Fitted:
         """Every pass over the corpus, and the one whose weights are kept."""
         best, kept, first = self.resumed()
-        for epoch in range(first, self.plan.epochs):
+        for epoch in range(first, self.plan.stops_at):
             started = time.time()
             loss = self.trainer.fit_epoch(fold.corpus, fold.targets, fold.training, self.plan.batch, self.generator)
             # Both the score and the state come from inside this block, so the number that ranks an
@@ -323,6 +337,9 @@ class Fitting:
                 )
                 break
         if kept is None:
-            message = f"no epoch was kept: the run asked for {self.plan.epochs} epochs"
+            message = (
+                f"no epoch was kept: the run asked for {self.plan.epochs} epochs, ran to {self.plan.stops_at}"
+                f" and started at {first}"
+            )
             raise ValueError(message)
         return kept

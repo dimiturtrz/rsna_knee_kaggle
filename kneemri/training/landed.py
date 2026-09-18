@@ -133,6 +133,8 @@ NOT_A_SWITCH = {
     "`patch_erase` is the switch and is compared",
     "patience": "when to stop, read by the stopper each epoch rather than applied once",
     "patience_from_progress": "when keeping and stopping may begin, read by the same stopper each epoch",
+    "stop_after_epoch": "where the loop ends, which the metrics rows answer — a run stopped at a round "
+    "boundary records epochs up to it and no further, and the schedule it did not finish is unchanged",
     "batch": "how many studies a step holds, a resource knob the loader obeys or raises on",
     "vram_gb": "a memory cap set by the queue against the card it runs on",
     "seed": "a seed is not a method; folds and seeds are banned as arms here",

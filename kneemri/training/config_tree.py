@@ -256,6 +256,16 @@ class OptimConfig:
         ),
     )
     patience_from_progress: float = ConfigLeaf.of(default=0.0, says="share before keeping starts")
+    stop_after_epoch: int = ConfigLeaf.of(
+        default=0,
+        says=(
+            "end the loop once this many epochs have run (0 = run the whole count), keeping the schedule "
+            "built for the full one. `patience` ends a run on the HOLDOUT's behaviour; this ends it on a "
+            "count, which is what a run resumed in rounds needs - a cohort exchanging peer readings between "
+            "rounds must stop at a known epoch and `--resume` onto the same anneal, and asking for fewer "
+            "--epochs instead COMPRESSES the cycle into a different recipe."
+        ),
+    )
     certainty_ramp: int = ConfigLeaf.of(
         default=0,
         says=(

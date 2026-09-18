@@ -54,6 +54,7 @@ def _fitting(
     epochs: int = 1,
     patience: int = 0,
     patience_from: float = 0.0,
+    stop_after_epoch: int = 0,
     *,
     resume: bool = False,
 ) -> Fitting:
@@ -68,6 +69,7 @@ def _fitting(
         batch=BATCH,
         patience=patience,
         patience_from=patience_from,
+        stop_after_epoch=stop_after_epoch,
         seed=SEED,
         resume=resume,
     )
@@ -163,6 +165,31 @@ def test_a_resumed_run_continues_the_schedule_rather_than_restarting_it(tmp_path
     continued.resumed()
 
     assert continued.trainer.schedule.last_epoch == 4, "a fresh schedule would read 0"
+
+
+def test_a_round_ends_the_loop_at_its_bound_and_resumes_onto_the_same_schedule(tmp_path: Path):
+    """The cohort's premise: two rounds of a schedule cover the epochs one uninterrupted run would.
+
+    A round may not be bought by lowering `--epochs`, which rebuilds OneCycle over the shorter count and
+    anneals a different recipe. Stopping the loop leaves the schedule's length alone, so the epochs either
+    side of an exchange are the epochs the arm was priced for.
+    """
+    destination = tmp_path / "member.pt"
+    first = _fitting(destination, epochs=6, stop_after_epoch=2)
+    scores = iter([0.70, 0.75, 0.80, 0.85, 0.90, 0.95])
+    first.ranked = lambda fold, epoch: (next(scores), {}, None)  # type: ignore[method-assign]
+
+    first.run(_fold())
+
+    assert [row["epoch"] for row in first.metrics.rows()] == [0, 1], "the bound ends the loop, not the schedule"
+
+    second = _fitting(destination, epochs=6, stop_after_epoch=4, resume=True)
+    second.ranked = lambda fold, epoch: (next(scores), {}, None)  # type: ignore[method-assign]
+
+    kept = second.run(_fold())
+
+    assert [row["epoch"] for row in second.metrics.rows()] == [2, 3], "the next round starts where the last ended"
+    assert kept.epoch == 3, "and the kept epoch is the best of everything run, not of this round"
 
 
 def test_run(tmp_path: Path):
@@ -276,13 +303,27 @@ def test_no_epoch_inside_the_ramp_is_kept_or_counts_toward_patience(tmp_path: Pa
 
 def test_of():
     """Every stopping field the command line parsed LANDS in the plan the loop obeys."""
-    options = TrainConfig().with_leaves(epochs=36, batch=6, patience=4, patience_from_progress=0.25, seed=7)
+    options = TrainConfig().with_leaves(
+        epochs=36, batch=6, patience=4, patience_from_progress=0.25, seed=7, stop_after_epoch=8
+    )
 
     plan = RunPlan.of(options, Path("member.pt"))
 
     assert (plan.epochs, plan.batch, plan.patience, plan.patience_from, plan.seed) == (36, 6, 4, 0.25, 7)
+    assert plan.stop_after_epoch == 8
     assert plan.destination == Path("member.pt")
     assert RunPlan.of(TrainConfig(), Path("member.pt")).patience_from == 0.0, "default settles every epoch"
+
+
+def test_stops_at():
+    """The loop's bound, which is the schedule's count until a round asks for less and never more."""
+    full = RunPlan(destination=Path("member.pt"), epochs=24)
+
+    assert full.stops_at == 24, "0 runs the whole count, which is every arm in the ledger"
+    assert RunPlan(destination=Path("m.pt"), epochs=24, stop_after_epoch=8).stops_at == 8
+    assert RunPlan(destination=Path("m.pt"), epochs=24, stop_after_epoch=99).stops_at == 24, (
+        "a round may end the loop early and may never extend it past the schedule it was annealed for"
+    )
 
 
 def test_the_full_schedule_runs_when_patience_is_off(tmp_path: Path):
