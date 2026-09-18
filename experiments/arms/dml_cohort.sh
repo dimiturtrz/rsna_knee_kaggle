@@ -88,7 +88,9 @@ fit_b() {
 }
 
 read_peer() {
-  uv run --no-sync --project "$REPO" python -u -m kneemri.inference.teacher_readings \
+  # `run_gpu`, not a bare call: a reading pass is GPU work between two fits, and the lock is dropped
+  # when a fit's trainer returns (knee-03uph).
+  run_gpu uv run --no-sync --project "$REPO" python -u -m kneemri.inference.teacher_readings \
     --checkpoints "$1" --out "$2" --fold 0 --slices 24 --band 0.1 0.9
 }
 

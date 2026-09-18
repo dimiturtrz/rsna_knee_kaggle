@@ -391,6 +391,18 @@ release_card() {
   LOCK_DIR=""
 }
 
+run_gpu() {
+  # GPU work that is not a trainer — a reading pass, a scoring pass — under the lock a trainer takes.
+  # `release_card` fires when run_train's pipeline returns, so anything an arm does AFTER a fit holds
+  # the card with no lock, and a sibling chain's `mkdir` then succeeds against it (knee-03uph).
+  # `|| status=$?` rather than a guard, so a failure still releases under `set -e`.
+  local status=0
+  hold_card
+  "$@" || status=$?
+  release_card
+  return "$status"
+}
+
 run_snapshot() {
   # Run an arm from a COPY, never from the file in the repo.
   #
