@@ -31,9 +31,11 @@
 #   this arm was priced for and the result is readable against a 24-epoch control that was never stopped.
 #
 # LEAK
-#   `teacher_readings` writes the ordering of the TRAINING split, the complement of the holdout, and
-#   refuses a `--fold -1` member. A and B hold out the same honest fold 0, so a peer reading of training
-#   studies carries nothing either model held out.
+#   `teacher_readings` writes the ordering of the TRAINING split, the complement of the holdout. It
+#   refuses `--fold -1` as an ARGUMENT -- teaching FROM a full-data member leaks the evaluation labels --
+#   but it does not refuse a full-data STUDENT: `--teach-all` is the sanctioned spelling for one, and
+#   `teach()` only warns. A and B hold out the same honest fold 0, so a peer reading of training studies
+#   carries nothing either model held out.
 #
 # OVERWRITE, DELIBERATELY
 #   `run_train` refuses an `--out` that exists, and rounds 2 and 3 write the one round 1 wrote. Nothing
