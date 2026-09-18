@@ -23,6 +23,7 @@ Card cost of this audit: zero. It is arithmetic over things already on disk.
 | **external data as LABELLED augmentation** — the one axis README:7425 left explicitly open | **closed on our own measurement**: `pool_specialise` FLAT, `noisy_student` 0.8548, `--corpus-oversample 2.22` does not lift the mean | README:15216, :12447, :10737 |
 | **recipe fragments** — any piece of the champion family | **closed entirely**; sign unanimous across seven leave-one-outs, `backbone_lr` at its optimum both sides | README:16503, knee-rn9py, knee-lm2ol |
 | **auxiliary objectives** — the twelve `--*-weight` arms at full budget | **−0.0019** against its own matched converged control, the `<= 0.000` branch | knee-evdfd (read 2026-09-18T02:14Z) |
+| **backbone-lr** — the one knob whose corner value was an ENDPOINT, 4/4 upward in the corpus | **−0.0022** at 8e-5 against its own control, converged, both peaking e18 — the sign REVERSES at 24 epochs with dropout | knee-e9f83 (read 2026-09-18T02:30Z) |
 | **DINOv3 trunk, ours** | best honest member 0.8724 against seats 0.9045 | `2026-09-17_member_candidates.md` |
 | labels · cut · head_lr · resolution · overlap TTA | closed previously | prior ledger |
 
@@ -80,8 +81,14 @@ instrument with resolution at the top, which is what makes a slot spent on a res
 
 ## What is actually live
 
-1. `headlr_ship_ff` — the `--fold -1` refit of the shipping solo, on the card now. Dark arm; its reading
-   is a board slot, not a ledger row.
+1. `headlr_ship_ff` — the `--fold -1` refit of the shipping solo, FINISHED 02:16Z and unread. Dark arm;
+   its reading is a board slot, not a ledger row, and it is priced as an instrument: its honest twin
+   `headlr_ship_s2026` shipped at board 0.937, so carrying the refit term off that predicts 0.940-0.945
+   against a 0.946 champion. P(beats champion) ~0.10.
+3. `slicecover36` (knee-jb0ci) — QUEUED behind a 107 GB corpus decode started 02:32Z, because no
+   36-slice cache exists and `run_train` never builds one. Watcher `after_sc36.sh` gates the arm on the
+   decode's pid. Honest price ~1.5-2 h decode + 2.4 h train, expected value +0.001 — justified as an
+   INSTRUMENT on the aggregation residual below, not as a gain.
 2. ~~the auxiliary-objective pair~~ — CANCELLED 2026-09-18T02:14Z. Both had already run on 2026-09-13 and sat
    unpriced; `reading_check --only` refused the re-arm and the pair reads −0.0019, the closing branch
    (knee-evdfd). The card is free behind `headlr_ship_ff`.
@@ -98,3 +105,23 @@ NO eight days later at README:15216 and sat unjoined to it until now.
 
 What that leaves is not "find the big lever". It is: keep the standing entry protected, spend card only on
 arms with a pre-registered branch, and treat any claim that an axis is open as owing a line in this table.
+
+## Where a 1.5% lever can still live, now that the knobs are gone
+
+knee-dry3h priced 22 defaulted leaves and found the corner at its optimum on every one, with a single
+exception: `--backbone-lr`, the only leaf whose corner value was an ENDPOINT rather than an interior
+point, with 4/4 upward sign agreement across the corpus. That exception is now measured and reads
+**−0.0022**. The upward agreement came from 12-epoch 224 arms without slot dropout — knee-dry3h's own
+honest limit (2) — and the sign reverses at the corner's 24 epochs with dropout.
+
+So three independent lines now say the same thing: a 4x encoder buys nothing, 22 defaulted knobs are at
+their optimum, and the last endpoint reads down. **The residual is downstream of the encoder and
+downstream of the optimiser.** Two places remain, and both are named rather than hoped for:
+
+- **supervision quality** — what the labels mean, not how the model is fitted to them;
+- **slice-to-study aggregation** — how twelve findings are read out of six slots of slices.
+
+`slicecover36` is the input-side instrument for the second. It is not a candidate ship (expected +0.001);
+it decides whether the coverage cell is open at the corner on a harness that cannot be blamed, which is
+what the two prior readings — both 12-epoch, both under a max aggregator whose noise floor grows with the
+size of the set it maxes over — could not.
