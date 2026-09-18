@@ -29127,6 +29127,12 @@
     {
       "kind": "references",
       "source": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "target": "kneemri.runs.run_metrics.EpochRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.experiments.convergence_check.ConvergenceCheck",
       "target": "kneemri.runs.run_metrics.RunMetrics",
       "weight": 1
     },
@@ -29194,6 +29200,12 @@
       "kind": "calls",
       "source": "kneemri.experiments.convergence_check.ConvergenceCheck.verdict",
       "target": "kneemri.experiments.convergence_check.ConvergenceCheck.asked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.convergence_check.ConvergenceCheck.verdict",
+      "target": "kneemri.experiments.convergence_check.ConvergenceCheck.reached",
       "weight": 1
     },
     {
@@ -66746,6 +66758,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.convergence_check.ConvergenceCheck.benchmark",
       "label": "benchmark",
+      "level": "method",
+      "parent": "kneemri.experiments.convergence_check.ConvergenceCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.convergence_check.ConvergenceCheck.reached",
+      "label": "reached",
       "level": "method",
       "parent": "kneemri.experiments.convergence_check.ConvergenceCheck",
       "role": null
