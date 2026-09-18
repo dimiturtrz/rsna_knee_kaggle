@@ -16631,3 +16631,36 @@ optimiser, which is what `interpretations/kneemri/2026-09-18_state_of_the_levers
 both already RUN and sat on disk unread; the aux pair was nearly re-armed and `reading_check --only`
 refused it. An arm that has run and not been priced is indistinguishable from an arm that has not run,
 except to that check. Run it before arming, always.
+
+## 2026-09-18 — 36-slice coverage closes on a truncation, and the offline ruler is measured BLIND at the corner
+
+`slicecover36` (knee-jb0ci) put 36 slices through the labelwise aggregator at the shipping corner, the
+input-side instrument for the aggregation residual, on a fresh 107 GB decode. It was TRUNCATED at epoch 6
+by `trajectory_check --target 0.8742`, the only check allowed to end a job:
+
+```
+slicecover36_s2026  e0 0.7195  e1 0.7381  e2 0.7640  e3 0.7929  e4 0.8054  e5 0.8202  e6 0.8255
+headlr_ship_s2026   e0 0.7238  e1 0.7557  e2 0.7851  e3 0.8114  e4 0.8252  e5 0.8310   (peak 0.8702)
+```
+
+At e5 the check still read "still open"; at e6 it read CANNOT REACH — gain from e6 to peak over 27 matched
+runs is median +0.0204, p90 +0.0277, max +0.0350, so the generous ceiling is **0.8604 against a control at
+0.8702**, losing by 0.0098, 1.6x the 0.0062 paired floor. The arm never led at any matched epoch while taking
+583 steps an epoch against the control's ~350. ~1.6 h of card bought back; 0.8255 is recorded as a FLOOR, not
+a number. knee-4by7q (through-plane at 36 slices) dies with its premise, exactly as that bead pre-registered.
+
+The second reading is about the RULER rather than any arm. `kneemri.evaluation.rank_stability` had only ever
+been run on the 0.851-0.863 family (:12502), where the top arm holds rank 1 in **96.8%** of resamples. Pointed
+at the shipping cluster — the twelve arms of population `eb3ba199` above offline75 0.8998, 909 shared studies,
+500 resamples, ruler ledger75 — it reads:
+
+```
+top arm headlr_ship_s2026 holds rank 1 in 29.2% of resamples
+11 of 12 arms rank first in at least one resample
+score span 0.0052 (inside the 0.0062 paired floor); Kendall tau midpoint vs ledger75 +0.6061
+```
+
+**909 studies cannot order the band we ship in.** So a keep/kill taken inside that band is not a null, it is
+no reading: the three knob closes recorded above (aux objectives -0.0019, `backbone_lr` -0.0022, adaptation
+depth +-0.001) stand as refusals to spend a slot and may NOT be cited as evidence that those mechanisms do
+nothing. A future corner arm has to be worth enough to clear the band, not to win inside it.

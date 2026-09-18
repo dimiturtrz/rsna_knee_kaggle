@@ -82,6 +82,39 @@ ruler is an upper bound and not a rank: **an arm selected on offline75 up there 
 its slot.** The consequence for the schedule is that the board's five slots a day are now the only
 instrument with resolution at the top, which is what makes a slot spent on a reseating expensive.
 
+That was an inference from three board points. It is now **measured**, by pointing
+`kneemri.evaluation.rank_stability` at the shipping cluster itself — the instrument had only ever been
+run on the 0.851-0.863 family (README:12502), where "resolves its top" means the top of *that* band.
+Twelve arms, the whole `eb3ba199` population above offline75 0.8998, 909 shared studies, 500 resamples,
+ruler ledger75, 2026-09-18T03:47Z:
+
+| | 0.851-0.863 family | the shipping cluster |
+|---|---|---|
+| score span | 0.012 | **0.0052** — inside the 0.0062 paired floor |
+| top arm holds rank 1 | **96.8%** | **29.2%** |
+| arms that rank first at least once | 6 of 13 | **11 of 12** |
+| Kendall tau, midpoint vs ledger75 | +0.6667 | +0.6061 |
+
+`headlr_ship_s2026` leads by 0.0006 and holds that lead in under a third of resamples; the arm ranked
+sixth wins outright 5.6% of the time. **909 studies cannot order the band we ship in.** Two things
+follow, and the second is the expensive one:
+
+1. Offline75 cannot choose which solo to ship. Picking the top row is a coin flip with ~29% odds, and
+   the 0.004 board spread across the three shipped solos is what that coin flip looks like from the
+   board side.
+2. **Every keep/kill taken inside this band is not a null — it is no reading.** The three knob closes
+   recorded tonight (aux objectives −0.0019, `backbone_lr` −0.0022, adaptation depth ±0.001) all sit
+   an order of magnitude inside a span the ruler cannot resolve. They remain correct as *refusals to
+   ship* — nothing there earns a slot — but they may not be cited as evidence that those mechanisms do
+   nothing. The distinction matters the next time one of those axes is proposed with a stronger
+   mechanism: the prior is uninformative, not negative.
+
+The bar this sets for any future corner arm: **a mechanism must be worth enough to clear the band, not
+to win inside it.** With the top-12 span at 0.0052 and rank 1 held at 29.2%, an offline-measurable
+result at the corner needs to be a step, not an increment — which is the same conclusion the lever
+table reaches from the other side, and the reason the remaining two places to look are supervision
+quality and slice-to-study aggregation rather than another knob.
+
 ## What is actually live
 
 1. `headlr_ship_ff` — the `--fold -1` refit of the shipping solo, FINISHED 02:16Z and unread. Dark arm;
