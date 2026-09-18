@@ -29,15 +29,17 @@ Two sources, one domain-specific and one general:
 | distil into one model | `distill`, `dml_*`: inside the 0.0053 floor | knee-8bmi2 |
 | full-data refit, multi-seed | done; refit term ~+0.005 | knee-yatne |
 | CV-LB trust | `board_transfer`, ledger75; residual sd 0.0013 | CLAUDE.md, knee-f9aao |
-| RNN / attention slice aggregator trained on the metric | ONE ledger line (`:2572`) | not read as a lever |
+| learned slice aggregator | trained gate, labelwise, depth, moments: flat, span 0.0019 | knee-7gyw, `experiments/README.md:15355` |
 | auxiliary SEGMENTATION loss | no ledger line | no local masks; SKM-TEA is instrument-only by ruling |
 | diverse ensemble | members are near-copies (one trunk, one recipe) | the solo-deliverable directive rules the axis out |
 
 ## Reading
 
-Most of the playbook has already been run and read flat. Two items have never been run properly:
-a learned slice aggregator fitted on the metric, and auxiliary segmentation supervision. The second is
-blocked by the external-data ruling unless a mask source is licence-clean. The one separator every
+Most of the playbook has already been run and read flat, the learned slice aggregator included: once
+its gate was actually in the optimiser (knee-7gyw), max, mean and a trained gate spanned 0.0019, and the
+ledger reads the aggregation stage as saturated, with the limit upstream in the per-slice feature. One
+item has never been run: auxiliary segmentation supervision, which acts on exactly that per-slice
+feature. It is blocked by the external-data ruling unless a mask source is licence-clean. The one separator every
 top write-up shares, a diverse ensemble, is excluded by our own solo directive rather than by a
 measurement, which is a choice worth restating whenever the gap is priced.
 
