@@ -280,3 +280,42 @@ fastMRI never saw our 4407), which is clean and would cut per-fold cost.
 The final ship refit is the opposite case: it has no measurement duty, so leakage there is meaningless.
 `experiments/README.md:6479` prices warm start as a TIME mechanism with no quality term - one warm epoch
 about twelve cold ones - which turns the 2.6 h ship step into roughly 20 minutes.
+
+## CORRECTION: the ruler was not the lever (appended 2026-09-18 06:05Z)
+
+The section above concluded that the offline ruler is the binding constraint, because +0.0065 offline75
+is 1.05 sigma against the 0.0062 paired floor. That conclusion used the wrong denominator. It priced the
+gain against the ruler we happen to run on the card, and never asked what the BOARD resolves.
+
+THE MEASUREMENT. Take every pair of adjacent board entries whose offline75 differs by less than 0.0008 —
+pairs the offline ruler calls tied. There are 33 of them across the whole record. Their board deltas
+scatter with sd 1.9 ticks (0.0019), which independently reproduces the 0.0017 residual of the transfer
+fit. That is the spread of the board over things offline cannot separate.
+
+    ruler                   scatter    +0.0072 board / +0.0065 offline75 reads as
+    offline, today (909)    0.0062     1.05 sigma
+    offline, 1/3 (1471)     0.00487    1.33 sigma
+    public board            0.0019     3.7 sigma
+
+So the board resolves the target at 3.7 sigma and the offline ruler at 1.05. The board is 3.5x the
+sharper instrument and it costs a slot rather than 2.2 h of card, five a day. A public score is also not
+a resampled quantity: it is a deterministic read of the model on a fixed test set, so there is no
+measurement error in it at all.
+
+WHAT THIS CHANGES. "We cannot tell a winning recipe from a tie" is false as stated. OFFLINE cannot. The
+board can, and always could. The binding constraint is therefore CANDIDATE SUPPLY, not measurement: we
+have five 3.7-sigma reads a day and nothing mechanism-backed to put in them. The 2.2 h calibration run
+that the 1/3 ruler owes is not worth its wall-clock — it moves a SCREEN from 1.05 to 1.33 sigma, and a
+screen only has to avoid spending a slot on a dud. It does not change which candidates screen through.
+
+WHAT SURVIVES. `--set run.folds=3` stays the default for new arms: it is free (an existing ConfigLeaf),
+better balanced than k=5 (mean prevalence spread 0.0316 against 0.0352), holds 17 gold studies instead of
+13, and takes the rarest column from 65 positives to 104. It is a better default, not a project. knee-ycz3f
+is re-priced accordingly. The legacy k=5 fold 0 remains the only ruler the ~450 existing holdout records
+can be read on.
+
+THE ONE THING THAT WOULD REVERSE THIS. 3.7 sigma is a statement about the PUBLIC test set. Private is a
+different draw and repeated selection on public is the shakeup trap. No private score exists while the
+competition is live, so the risk cannot be measured here. What bounds it: the move we need is 7 ticks,
+well outside the +/-4-tick public wobble the 33 tied pairs show, so a genuine 7-tick winner is unlikely
+to be a public artefact. A 1-2 tick "win" IS inside that wobble and must not be shipped as a result.
