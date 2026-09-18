@@ -1627,13 +1627,6 @@ slicecover36_s2026
   only by naming a mechanism that inverts a deficit which is stable-to-widening across the ramp - not by
   running the same recipe to 24 epochs, which prices at ~2.2 h for P(clears the floor) ~ 0.10.
 
-dml_b_s2026
-  Scaffolding, never a seat. The DML cohort trains two members so each can teach the other, and B exists
-  only to emit a peer reading between rounds -- it is discarded like a teacher, and the arm's deliverable
-  is the single checkpoint `dml_a_s2026` (knee-z81wd). Shipping B would seat a pair, which is the one
-  thing the arm was designed not to do. Re-open only by an argument that B is a better member than A,
-  which would mean the cohort was mislabelled, not that this decline was wrong.
-
 dml_a_s2026
   DECLINED ON MERIT 2026-09-18 -- the arm completed all 24 epochs across three rounds and read 0.9044
   ledger75 (0.8687 midpoint, peak e18) against its control `headlr_ship_s2026` 0.9059 (0.8702, peak e17):

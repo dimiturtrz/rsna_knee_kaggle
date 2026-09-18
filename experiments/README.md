@@ -16809,3 +16809,51 @@ UNRUN arm on it.
 
 **Consequence.** The 1.5 h is not spent, and the ratio table for the card no longer has a row above
 `headlr_ship_ffp`. Re-open by producing a teacher above the student, never by re-quoting +0.0056.
+
+### The scaffolding outscored the deliverable: `dml_b_s2026` is the best offline member this project owns — 2026-09-18
+
+`dml_cohort.sh` names its deliverable in its own header: *"The deliverable is ONE checkpoint —
+`dml_a_s2026`, the `headlr_ship` recipe. B is scaffolding and is discarded like a teacher."* The arm
+declares `dml_a_s2026.holdout.npz` as its reading and nothing else. B finished at 11:56Z and reads:
+
+| member | recipe | control | ledger75 | delta | peak |
+|---|---|---|---|---|---|
+| `dml_a_s2026` | `headlr_ship` | `headlr_ship_s2026` 0.9059 | 0.9044 | **−0.0015** | e18 |
+| `dml_b_s2026` | `labelwise_depth24_drop40_long` | `labelwise_depth24_drop40_long_s2026` 0.9053 | **0.9078** | **+0.0025** | e18 |
+
+Both CONVERGED at 24 of 24 under the fixed `convergence_check`, both peak at e18 rather than their last
+epoch, so neither number is a last-epoch artefact and neither is a floor.
+
+**THE MECHANISM IS THE ONE THE CLOSURE ALREADY NAMED, READ IN BOTH DIRECTIONS.** Mutual supervision
+pulls both partners toward the cohort mean: it COSTS the stronger trunk and LIFTS the weaker one. A's
+−0.0015 is that effect on the strong side and it is what closed knee-z81wd's fourth branch. B's +0.0025
+is the same effect on the weak side. The closure of the branch stands — the arm asked whether a LIVE
+teacher beats a converged one for the deliverable, and for the deliverable it does not.
+
+**WHAT IS NEW IS THE LEVEL, NOT THE DELTA.** 0.9078 is the highest offline75 number this project owns,
+above `headlr_ship_s2026`'s 0.9059 by +0.0019. Both that +0.0019 and B's own +0.0025 sit INSIDE the
+0.0062 paired floor, so neither is a finding and neither may be planned around; what is not inside a
+floor is the fact that the member exists and is ours. `comp/members.declines` carried `dml_b_s2026` as
+INTERMEDIATE BY CONSTRUCTION, which was written before it had a number and is now wrong.
+
+**AND THE GAIN HAS NO VALIDATED ROUTE TO A REFIT, WHICH IS THE PART THAT BINDS.** The refit is the only
+mechanism that has ever moved this board (62 ensemble attempts, zero ticks over the best solo; every
+0.946 entry contains one — `interpretations/kneemri/2026-09-18_state_of_the_levers.md:174-207`). B
+cannot take that path by either established route:
+
+- **The cohort refuses `--fold -1`.** `teacher_readings` writes the ordering of the TRAINING split and
+  refuses a full-corpus member by construction (the arm's own LEAK section), so the mutual schedule
+  cannot be re-run at `--fold -1` at all.
+- **A cold `--fold -1` run of B's recipe is not B.** It is `labelwise_depth24_drop40_long_ff` — the
+  control, refitted, with the peer term absent. It drops the +0.0025 it was built to carry.
+
+That leaves warm-starting a full-corpus run from `dml_b_s2026.pt`, which no refit in this project has
+ever used — every `_ff`/`_cf` on the board is fitted COLD — and which the owner flagged for overfitting
+when raising it. It is a new path owing its own pre-registration, not a variant of an existing one.
+
+**WHAT THIS DOES NOT CLAIM.** Offline75 does not order members at the top: the three highest-offline
+solos shipped read 0.9045/0.9053/0.9059 against board 0.937/0.941/0.937, all three BELOW the fitted
+transfer line at −2.7 sd. So 0.9078 predicts board 0.942 as an UPPER bound and does not predict a win
+over the 0.946 champion. B honest is not a champion candidate; B refitted would be, if a refit of it
+existed and if the refit term is ADDITIVE rather than a CEILING — which is exactly what `knee-uh1j5`
+answers today for one slot and no card.

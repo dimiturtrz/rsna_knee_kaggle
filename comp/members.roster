@@ -936,3 +936,21 @@ headlr_ship_ff.pt           # THE FULL-CORPUS REFIT of headlr_ship_s2026 — the
                             # labelwise_ext_drop40_long (0.937 -> 0.945). Carried off 0.937 that predicts
                             # 0.940-0.945 against a 0.946 champion, so P(beats champion) ~0.10 and this
                             # entry is bought for the THIRD POINT on the refit term rather than for a rank.
+
+dml_b_s2026.pt              # 0.9078 ledger75, peak epoch 18 of 24, CONVERGED — THE HIGHEST LEDGER75 THIS
+                            # PROJECT OWNS, above headlr_ship_s2026 (0.9059). Its own arm declared it
+                            # scaffolding: knee-z81wd trains a cohort of two so each supervises the other,
+                            # and named `dml_a_s2026` the deliverable. A read in both directions is what
+                            # moved it here — mutual supervision pulls both partners toward the cohort
+                            # mean, which COST the stronger trunk (dml_a 0.9044 against its control's
+                            # 0.9059, -0.0015) and LIFTED the weaker one (0.9078 against
+                            # labelwise_depth24_drop40_long_s2026's 0.9053, +0.0025). Both deltas sit
+                            # inside the 0.0062 paired floor and are DIRECTIONAL; what is not directional
+                            # is the LEVEL, and a member cannot be unshippable for having the best number.
+                            # NOT a champion candidate on its own: the offline ruler does not order at the
+                            # top (three solos shipped off the top of it read board 0.937/0.941/0.937, all
+                            # below the fitted transfer line at -2.7 sd), so 0.9078 predicts board 0.942 as
+                            # an UPPER bound against a 0.946 champion. And its gain has no validated route
+                            # to a refit: the cohort refuses --fold -1 by construction (teacher_readings
+                            # writes the TRAINING split's ordering), and a cold --fold -1 run of its recipe
+                            # is the control refitted with the peer term absent, not this member.
