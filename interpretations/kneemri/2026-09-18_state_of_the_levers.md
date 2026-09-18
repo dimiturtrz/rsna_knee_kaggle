@@ -378,3 +378,43 @@ under which small gains would be worth chasing at all — or whether the fit is 
 the remaining eleven ticks must come from a member this project has not built and has no mechanism for.
 
 Stated plainly for whoever reads this next: at 0.946 against a 0.957 leader, we are not one knob away.
+
+---
+
+## The one live question, answered: the refit term is ADDITIVE
+
+`spanff_v1` (ref 56330671) scored **0.926**, inside the pre-registered ADDITIVE band (0.925-0.929,
+prior ~0.8) and ~9 sigma clear of CEILING (0.943-0.946, prior ~0.2) against a median board blur of
+0.0010. A weak base refits to a weak result: `calib_span_s2026` shipped 0.921 as `spansolo_v1`, and its
+whole-corpus refit reads 0.926. There is no ceiling at 0.9445, and member quality survives the refit
+intact.
+
+| base | base board | refit board | term |
+|---|---|---|---|
+| `labelwise_depth24_drop40_long` | 0.941 | 0.944 | +0.003 |
+| `calib_span` | 0.921 | 0.926 | +0.005 |
+| `labelwise_ext_drop40_long` | 0.937 | 0.945 | +0.008 |
+
+Mean +0.005. The spread is **not** explained by base strength — the weakest and the strongest base sit
+at opposite ends of it, which is itself the evidence against a ceiling.
+
+### What additivity buys, and what it does not
+
+It confirms the arithmetic of the gap rather than opening a lever. The best honest base carries
+board-equivalent 0.941; plus a bankable +0.005 that is 0.946, which is exactly the champion already on
+the board. Reaching the 0.957 leader needs an honest base near **0.916 ledger75** against our best at
+**0.9078**. The 0.011 is a MEMBER gap and additivity does not touch it.
+
+So the verdict above stands, now with its premise resolved rather than assumed: honest-base improvement
+IS bankable at +0.005, and there is still no owned axis that produces it. The sentence this section was
+written to test — "we are not one knob away" — survives its own experiment.
+
+### The one thing it does re-rank
+
+Under a ceiling, the ordering of bases would not have mattered and the highest-offline member would have
+been worth nothing extra. Under additivity it is worth exactly its offline edge, which makes the refit
+of the highest offline member on disk (`dml_b_s2026`, 0.9078 ledger75) the only owned path with a
+predicted board above the champion: 0.9435 at the in-band transfer constant, plus 0.005, about 0.9485.
+That is a knob and it is priced as one (knee-8bmi2, ~3.5 h, P ~0.35). The honest caveat is that
+`dml_b`'s +0.0025 edge over its own base sits INSIDE the 0.0053 paired floor, so the ruler that ranks it
+first cannot actually resolve it from second.
