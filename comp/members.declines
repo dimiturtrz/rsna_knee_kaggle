@@ -1635,11 +1635,16 @@ dml_b_s2026
   which would mean the cohort was mislabelled, not that this decline was wrong.
 
 dml_a_s2026
-  IN FLIGHT, not declined on merit -- round 1 of 3, so the number on disk is a FLOOR and no verdict may be
-  read from it. Round 1 carries no peer term at all (it is the control's recipe), and it priced at 0.8783
-  ledger75 against the control `headlr_ship_s2026` e6 0.8447 midpoint -- a match, which is what round 1 is
-  supposed to be. The peer term first acts in epochs 8-15. Move this to the roster when the arm completes
-  and clears its pre-registration: >= +0.0062 over `headlr_ship_s2026` 0.9059 ledger75 (knee-z81wd).
+  DECLINED ON MERIT 2026-09-18 -- the arm completed all 24 epochs across three rounds and read 0.9044
+  ledger75 (0.8687 midpoint, peak e18) against its control `headlr_ship_s2026` 0.9059 (0.8702, peak e17):
+  -0.0015, which is knee-z81wd's fourth pre-registered branch and closes mutual supervision for this
+  family at w=0.3. The peak is e18 and not the last epoch, so this is a verdict and not a void reading.
+  The per-epoch deficit never crossed zero and never narrowed past -0.0008 (e16 -0.0024, e18 -0.0008,
+  e23 -0.0009), so it is a flat loss rather than a late payer cut off by the budget.
+  Note `convergence_check` calls this run TRUNCATED; that is a false positive on every `--resume`d run,
+  because each round writes a fresh metrics file and the check sees only the last 8 rows (knee-s0c4o).
+  Re-open by answering the flat curve -- a different weight, supervision at a different layer, or a
+  teacher that is not also a student -- never by re-quoting this number.
 
 dml_a_s2026_run1
   INTERMEDIATE BY CONSTRUCTION -- the round-1 checkpoint of the mutual-supervision schedule, written to a

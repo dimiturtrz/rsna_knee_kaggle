@@ -16712,3 +16712,56 @@ quoted as that recipe's score, only as a lower bound on it.
 **Nothing here is a member.** The best of the three is 0.8865, which is **0.0158 below**
 `headlr_ship_s2026`'s 0.9059 ledger75. The backlog of unrecorded runs held no hidden champion, and
 that question is now closed rather than carried.
+
+### `dml_a` — mutual supervision reads −0.0015 on the best member, and closes at w=0.3 — 2026-09-18
+
+`dml_a_s2026` **0.9044 ledger75** (0.8687 midpoint, peak e18 of 24) against its matched control
+`headlr_ship_s2026` **0.9059** (0.8702, peak e17 of 24): **−0.0015**, on 909 studies, population
+`eb3ba199`. That is knee-z81wd's fourth pre-registered branch — mutual supervision does not pay on
+the DINOv2 labelwise corner at peer weight 0.3.
+
+The verdict is readable rather than void because the peak is e18 and not the last epoch. And the
+per-epoch deficit is **flat, not converging**: e16 −0.0024, e17 −0.0020, e18 −0.0008, e20 −0.0014,
+e21 −0.0008, e22 −0.0009, e23 −0.0009. A deficit that narrows to −0.0008 and then sits there for
+five epochs is not a late payer being cut off by the budget.
+
+**What it does not rule out.** A different peer weight, supervision at a different layer, or a
+teacher that is not also a student. What it does settle is the 3-4-5-model extension: that is the
+same mechanism with more of it, and the two-model case reads negative against the strongest trunk on
+disk. Re-opening means answering the flat curve, not re-quoting a number.
+
+`convergence_check` reports this run as `TRUNCATED best e18 of 8 run, 24 asked`. It is not truncated
+— each `--resume` round writes a fresh metrics file, so the check sees only the final round's eight
+rows. False positive on every resumed run (knee-s0c4o).
+
+### The `--fold -1` refit keeps the LAST epoch, and for one member that costs 0.0027 — 2026-09-18
+
+`fitting.py:283-292`: the epoch keep rule is `improved = settled and ranked > best`, and with
+`fold.scored` false `ranked` is the **epoch index** standing in for a score. A monotonically
+increasing index means every epoch "improves", so a `--fold -1` refit always ships its **last**
+epoch's weights. There is nothing to select on, and the code says so in its own comment.
+
+Whether that costs anything is **member-specific**, which is why no earlier refit exposed it. Peak
+versus last, midpoint, on the four 24-epoch corner members:
+
+| member | peak | last | gap |
+|---|---|---|---|
+| `labelwise_ext_drop40_long_s2026` | e23 0.8672 | e23 0.8672 | **0.0000** |
+| `labelwise_dense_drop40_long_s2026` | e23 0.8672 | e23 0.8672 | **0.0000** |
+| `labelwise_depth24_drop40_long_s2026` | e18 0.8679 | e23 0.8673 | −0.0006 |
+| `headlr_ship_s2026` | **e17 0.8702** | e23 0.8676 | **−0.0027** |
+
+So the two refits that measured **+0.008** and **+0.003** on the board paid nothing for last-epoch
+selection — those terms are clean, and the finding does not retract them. `headlr_ship` is the one
+member that decays materially through its own anneal, and it is the one `headlr_ship_ff` refits.
+
+**Consequence for the board.** `headlr_ship_ff` ships e23 weights. Its twin's 0.937 board came from
+peak weights, so the expected board is 0.937 + refit(+0.003..+0.008) − epoch(~0.003) ≈
+**0.937..0.942** against the pinned champion's 0.946. `kneemri-headlrff` is therefore an INSTRUMENT
+that reads the refit term at the top of the offline range, not an attempt on the champion, and it
+ships labelled as one.
+
+**Consequence for the card.** knee-yatne runs `headlr_ship`'s line at `--epochs 18` **with** the
+holdout, so a completed 18-epoch anneal can be read on ledger75 against 0.9059 without spending a
+slot. 0.0027 is the CEILING on what epoch selection alone returns — a fresh 18-epoch `one_cycle` is
+not the 24-epoch run stopped at 17, because the anneal shape changes with the budget.
