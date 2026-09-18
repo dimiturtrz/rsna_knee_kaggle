@@ -319,3 +319,53 @@ different draw and repeated selection on public is the shakeup trap. No private 
 competition is live, so the risk cannot be measured here. What bounds it: the move we need is 7 ticks,
 well outside the +/-4-tick public wobble the 33 tied pairs show, so a genuine 7-tick winner is unlikely
 to be a public artefact. A 1-2 tick "win" IS inside that wobble and must not be shipped as a result.
+
+## The audit closes: no lever remains on owned assets (appended 2026-09-18 06:20Z)
+
+Four independent closures landed within three hours of each other, and together they leave the levers
+table with no unbounded mechanism.
+
+**Coverage closed on the card.** `slicecover36` (knee-jb0ci) was the instrument for the input side of
+slice-to-study aggregation, one of the two places this file named a 1.5% lever could still live. It
+truncated at 03:45Z on CANNOT REACH: e6 0.8255, generous ceiling 0.8604 from the corpus max e6-to-peak
+gain over 27 matched runs, against control `headlr_ship_s2026` at 0.8702 midpoint. It loses by 0.0098,
+1.6x the paired floor, on the best trajectory the corpus has ever recorded. It never led at any matched
+epoch while taking 583 steps to the control's ~350 — more coverage is costly, not flat. knee-4by7q dies
+with its premise.
+
+**Supervision closed by exhaustion, three times.** 34 label-themed interpretations, with the lane
+recorded closed on 2026-08-26, 2026-08-30 and 2026-09-03, and the axis measured with v2 winning it on
+2026-09-17. That was the other of the two named places.
+
+**The trunk was closed on published scaling, not on licence.** In-domain MRI SSL reads +0.073 at 80
+labelled subjects and -0.005 at 800 (Zhang et al. MedIA 2024, README:7425); we hold ~4,400. The owner's
+2026-09-14 external-data ruling does not reopen it, because licence was never what shut it.
+
+**The composition escape is spent, and it failed on the BOARD.** `headlr_ship_s2026` IS the shipping
+recipe plus every directional-positive knob, and at 0.9059 ledger75 it is the highest offline number the
+project owns. It read board **0.937**. The three highest offline members read 0.9045 / 0.9053 / 0.9059
+against board 0.937 / 0.941 / 0.937 — all three BELOW the fitted transfer line at -2.7 sd. So the knobs
+did compose offline and the composition did not transfer. That is a stronger statement than "the knobs
+are flat": it says the offline ruler's top end is winner's curse, and stacking more sub-floor terms
+against it is fitting the ruler rather than the task.
+
+### What this forbids
+
+Resolving the directional knobs individually was the obvious reply, and it prices badly. An OOF rotation
+(knee-700cm) takes the floor 0.0062 -> ~0.0028 but costs 5x training per member, so one knob comparison
+is ~9 h and a +0.003 knob still reads at ~1.1 sigma. Nine hours for one-sigma is not a measurement, and
+the -2.7 sd transfer failure says the number it produced would not transfer anyway.
+
+### What is actually left
+
+Neither queued refit can win. Under ADDITIVE (+0.005 on the honest twin) `depth24_ff_long36` predicts
+0.946 and `headlr_ship_ff` 0.942; under CEILING both predict 0.9445. The champion is 0.946. So no refit
+of any base we own clears it, and the base itself has to improve — on an axis the audit has just closed.
+
+That leaves exactly one live question, and it is answered today for one slot and no card: whether the
+refit term is ADDITIVE or a CEILING (knee-uh1j5, `calib_span_ff`, ~9 sigma). It does not win by itself.
+What it decides is whether honest-base improvement is BANKABLE at +0.005 — the only remaining premise
+under which small gains would be worth chasing at all — or whether the fit is exhausted at 0.9445 and
+the remaining eleven ticks must come from a member this project has not built and has no mechanism for.
+
+Stated plainly for whoever reads this next: at 0.946 against a 0.957 leader, we are not one knob away.
