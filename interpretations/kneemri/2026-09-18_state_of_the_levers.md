@@ -203,3 +203,80 @@ and the remaining tick has to come from the base recipe rather than from the fit
 is a refit off an honest twin BELOW 0.935, which the additive reading predicts near 0.950 and the ceiling
 reading predicts at 0.9445 — and we own honest twins down there, so that experiment costs one slot and no
 card.
+
+## The target as a number, and why the ruler is the lever (appended 2026-09-18 05:48Z)
+
+Fit over every board row with both numbers and a scope that is not `excluded` (n=48, all of which sit
+at offline75 >= 0.8700, so this IS the top band):
+
+    board = 1.104 * offline75 - 0.0603        residual sd 0.0017
+
+Inverted at the champion:
+
+| quantity | value |
+|---|---|
+| board needed to beat the pinned champion | 0.947 |
+| offline75 that predicts it | **0.9124** |
+| our best member today (`headlr_ship_s2026`) | 0.9059 |
+| **required gain** | **+0.0065 offline75** |
+
+That single row is the argument for the rotation. The paired floor on fold 0 is **0.0062**, so the gain
+we need is *at* the floor: a recipe that genuinely wins and a recipe that ties are the same reading on
+today's ruler, and no amount of card time changes that. A rotation covering all 4407 studies takes the
+floor to roughly **0.0028**, which makes +0.0065 a **2.3 sigma** effect - visible, and visible without
+spending a board slot to find out.
+
+### The winner's-curse test, and why it does not answer the question
+
+`headlrsolo_v1` scored 0.937 where the line predicts 0.940 (-1.8 sd), the third top member in a row to
+land low. The proposed mechanism was winner's curse: ~450 members ranked against ONE fixed 909-study
+draw, so the top of that ranking carries an in-sample component that evaporates on fresh board data.
+
+The card-free test was to split transfer-line residuals by the `selection` field:
+
+    search       n=  2   mean resid -0.0025
+    designed     n= 19   mean resid +0.0004
+    unlabelled   n= 27   mean resid -0.0001
+
+The sign is right and the result is **worthless as evidence**, for two independent reasons. First,
+**n=2**. Second, and worse, `selection` records how the ENTRY was assembled, not how the MEMBER was
+chosen - and the three low readings are all solos. The field cannot express the axis the hypothesis is
+about, so this is a wrong-ruler measurement, not a weak one. Winner's curse remains the best available
+explanation and remains **unconfirmed**; it is not to be planned around until something can actually
+separate it from label mismatch and case-mix shift.
+
+### What the rotation is FOR, after the owner's correction
+
+The owner's point (2026-09-18): since every shipped member is refit with `--fold -1` on all 4407, the
+holdout constrains nothing we ship. It is a development instrument, so moving it costs comparability
+with past measurements only - and those measurements have just been shown to be biased at the top.
+
+Two consequences. **We are free to change it**, keeping fold 0 only as the legacy ruler for the ~450
+existing records, which cannot be re-scored anywhere else. And **the fold members are disposable**: a
+rotation prices a RECIPE, not a checkpoint. Train recipe R on k folds, assemble the out-of-fold number,
+and if R wins, refit R on everything and ship that. The k fold checkpoints are deleted. That keeps the
+one-good-member constraint exactly - no ensemble, no pair - while buying the sharper ruler.
+
+**And therefore k=2.** The floor is the same for every k, because the union of the folds is the corpus
+at any k; all a larger k buys is a training share nearer the shipped model's.
+
+| scheme | card | OOF n | floor | each model trains on |
+|---|---|---|---|---|
+| today | 1x | 909 | 0.0062 | 80% |
+| k=2 | **2x (5.2 h)** | 4407 | **~0.0028** | 50% |
+| k=3 | 3x (7.8 h) | 4407 | ~0.0028 | 67% |
+| k=5 | 5x (13 h) | 4407 | ~0.0028 | 80% |
+
+k=5 costs 2.5x more than k=2 for identical measurement precision. k=3 is the pick: 67% keeps the regime
+recognisable against the 100% refit that ships.
+
+### Warm start: which half of it leaks
+
+Fold models may NOT warm-start from any checkpoint we own. Our honest members trained on folds 1-4, so
+warm-starting fold 1 from one hands it rows that are now fold 1's holdout - the `raptor_solo` defect at
+98.6% in-sample. Fold models start cold from DINOv2, or warm from a foreign trunk (MRNet / Rijeka /
+fastMRI never saw our 4407), which is clean and would cut per-fold cost.
+
+The final ship refit is the opposite case: it has no measurement duty, so leakage there is meaningless.
+`experiments/README.md:6479` prices warm start as a TIME mechanism with no quality term - one warm epoch
+about twelve cold ones - which turns the 2.6 h ship step into roughly 20 minutes.
