@@ -72,3 +72,32 @@ that can answer it are the ones whose supervision carries no gold-derived consta
 
 Both are clean of both leakage routes, both are read on the gold ruler first, and between them they
 separate SELECTOR from TREATMENT from RULER on an axis that until today had one refuted point on it.
+
+## How the holdout is chosen (appended 2026-09-18)
+
+Asked three times and answered from source each time, so it lives here now.
+
+`core/data/corpus/folds.py`, `ReportFolds(folds=5, seed=2026)`. Fold index is
+`int(sha1(f"{seed}:{report_text}").hexdigest()[:8], 16) % 5`, and the holdout is **fold 0: 909 of 4407
+studies, population hash `eb3ba199`, 20.6% of the corpus**.
+
+The hash is of the REPORT TEXT rather than the study id because 4,276 distinct reports cover 4,407
+studies: 177 studies sit in duplicate-report groups, the largest 37 sharing one all-normal template.
+Those groups share a derived target vector, so splitting one across the divide would score a model on a
+target whose source it trained on. Foreign-corpus studies take `TRAIN_ONLY = -2` and can never enter a
+holdout, which would otherwise change what the denominator means.
+
+It is NOT stratified — not by label prevalence, not by scanner, site or case mix, and never resampled.
+
+**The consequence that matters, recorded 2026-09-18.** Folds are banned by owner directive, so every
+member this project owns is scored against this ONE draw, and the top of that ranking is what gets
+shipped. That is winner's-curse construction. The evidence arrived the same day: `headlrsolo_v1`
+(offline75 0.9059, the highest on disk) read board 0.937, against `labelwise_depth24_drop40_long`
+(0.9053) at 0.941 and `labelwise_ext_drop40_long` (0.9045) at 0.937. The three offline numbers span
+0.0014 against a 0.0062 paired floor, so they are a TIE offline with a 0.004 board spread — and all
+three landed BELOW the fitted transfer line (-0.0034 / -0.0004 / -0.0051), 3 of 3 low, -2.7 sd.
+
+So above offline75 ~0.904 the transfer line is an UPPER BOUND, not a prediction, and the offline
+ruler's ordering at the shipping corner carries no information. Reject with it, never select with it.
+The `_ff` refits, which hold nothing back and therefore carry no offline number at all, are our two best
+board solos (0.944, 0.945) and are immune to this by construction.
