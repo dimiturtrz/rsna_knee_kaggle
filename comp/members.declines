@@ -1640,3 +1640,17 @@ dml_a_s2026
   ledger75 against the control `headlr_ship_s2026` e6 0.8447 midpoint -- a match, which is what round 1 is
   supposed to be. The peer term first acts in epochs 8-15. Move this to the roster when the arm completes
   and clears its pre-registration: >= +0.0062 over `headlr_ship_s2026` 0.9059 ledger75 (knee-z81wd).
+
+dml_a_s2026_run1
+  INTERMEDIATE BY CONSTRUCTION -- the round-1 checkpoint of the mutual-supervision schedule, written to a
+  `_run1` name when round 2 took over the base name `dml_a_s2026`. It is the SAME weights the base name
+  held at the end of round 1, so it can never be a distinct ensemble seat; shipping it would ship an
+  earlier stopping point of a member already under decision (knee-z81wd). It is kept on disk only so the
+  round-over-round trajectory can be read. Re-open only if round 2 is ever found to have REGRESSED against
+  it by more than the 0.0062 paired floor, which would make round 1 the member and round 2 the discard.
+
+dml_b_s2026_run1
+  INTERMEDIATE BY CONSTRUCTION -- the same, for the peer arm. `dml_b` exists to supervise `dml_a`; the
+  deliverable of knee-z81wd is a SINGLE solo checkpoint, so no `dml_b` checkpoint of any round is a
+  shipping candidate. Re-open only if `dml_b` is ever re-registered as a member in its own right, which
+  would need its own holdout reading against `headlr_ship_s2026` 0.9059 ledger75.
