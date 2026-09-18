@@ -46,7 +46,7 @@ from pathlib import Path
 from core import cli
 from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_metrics import EpochRow, RunMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -196,6 +196,25 @@ class ConvergenceCheck:
             return True
         return scored[-1] - scored[-1 - TAIL] > RISING_MARGIN
 
+    def reached(self, rows: list[EpochRow]) -> int:
+        """How many epochs the run got through, which is NOT how many rows the live file holds.
+
+        A `--resume` round is not a re-run: `RunMetrics.begin` rotates the earlier round's epochs aside
+        and the new round's `epoch` keeps counting from where the last one stopped, so `dml_a_s2026`'s
+        completed 24 epochs sit on disk as a final group of EIGHT rows numbered 16 to 23. Counting rows
+        reported it as `best e16 of 1 run, 24 asked` — TRUNCATED, whose stated meaning is that the
+        anneal never ran and the score is a FLOOR. That is the precise opposite of the truth for a run
+        that finished its budget, and it was about to be recorded against a verdict that closes a family.
+
+        Read from the last row's own index rather than by reading the rotated files, because the rotated
+        checkpoints are a different member: `begin` moves the weights and the predictions aside with the
+        epochs, so a peak unioned across rounds could name an epoch whose `.pt` is no longer the one this
+        run's name resolves to. The index answers the budget question on its own and leaves that
+        provenance rule intact. Identical to the row count for every run that starts at epoch 0, which is
+        every run that was not resumed.
+        """
+        return rows[-1]["epoch"] + 1 if rows else 0
+
     def verdict(self, run: RunMetrics) -> RunConvergence:
         """Read one run's record and say whether its number is finished.
 
@@ -212,7 +231,7 @@ class ConvergenceCheck:
         rows = run.rows()
         best = run.best()
         peak = None if best is None else int(best["epoch"])
-        done = len(rows)
+        done = self.reached(rows)
         asked = self.asked(run)
         return RunConvergence(
             name=run.name(),

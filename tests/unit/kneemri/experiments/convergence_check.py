@@ -14,19 +14,31 @@ purpose: it is the pair that proves the score cannot tell a measurement from a f
 
 
 def write_run(
-    directory: Path, name: str, *, peak: int, epochs: int, asked: int, fold: int = 0, patience: int = 0
+    directory: Path,
+    name: str,
+    *,
+    peak: int,
+    epochs: int,
+    asked: int,
+    fold: int = 0,
+    patience: int = 0,
+    first: int = 0,
 ) -> RunMetrics:
     """A metrics file with `epochs` rows peaking at `peak`, describing a recipe that asked for `asked`.
 
     Written line by line rather than through `RunMetrics.record`, which reads the CUDA allocator — a
     unit test may touch nothing it did not create, and the device is not ours.
+
+    `first` is the epoch the rows START at, which is what a `--resume` round looks like on disk: the
+    earlier rounds have been rotated aside and this file's own epochs go on counting from where they
+    stopped.
     """
     path = directory / f"{name}.metrics.jsonl"
     recipe = {"fold": str(fold), "epochs": str(asked), "patience": str(patience)}
     lines = [json.dumps({"recipe": recipe})]
     lines += [
         json.dumps({"epoch": epoch, "loss": 1.0, "auc": 0.80 + (0.01 if epoch == peak else 0.0), "per_label": {}})
-        for epoch in range(epochs)
+        for epoch in range(first, first + epochs)
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return RunMetrics(path)
@@ -183,3 +195,38 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("sys.argv", ["convergence_check", "--run", "v3base_dense_s2026"])
     with pytest.raises(SystemExit, match="not on disk"):
         main()
+
+
+def test_reached(tmp_path: Path) -> None:
+    """Epochs GOT THROUGH, which is the row count only for a run that started at epoch zero."""
+    check = ConvergenceCheck()
+
+    whole = write_run(tmp_path, "whole", peak=SETTLED_PEAK, epochs=12, asked=12)
+    assert check.reached(whole.rows()) == 12
+
+    # dml_a_s2026: 24 epochs across three --resume rounds, of which this file holds the last eight.
+    resumed = write_run(tmp_path, "resumed", peak=18, epochs=8, asked=24, first=16)
+    assert check.reached(resumed.rows()) == 24
+    assert len(resumed.rows()) == 8
+
+    assert check.reached([]) == 0
+
+
+def test_resumed_run_is_not_truncated(tmp_path: Path) -> None:
+    """A finished run resumed in rounds is CONVERGED, not a floor.
+
+    The verdict this check exists to protect ran into its own blind spot: `dml_a_s2026` completed all
+    24 epochs and read TRUNCATED, whose stated meaning is that the anneal never ran. It was carrying a
+    pre-registered branch that closes a family, so the false positive was one step from retracting a
+    real result.
+    """
+    check = ConvergenceCheck()
+    resumed = check.verdict(write_run(tmp_path, "dml_a_s2026", peak=18, epochs=8, asked=24, first=16))
+    assert resumed.verdict is Convergence.CONVERGED
+    assert resumed.epochs_done == 24
+    assert resumed.settled()
+
+    # And a round that died mid-budget is still a floor: the fix reads the epoch, not the rotation.
+    killed = check.verdict(write_run(tmp_path, "died", peak=18, epochs=4, asked=24, first=16))
+    assert killed.verdict is Convergence.TRUNCATED
+    assert killed.epochs_done == 20
