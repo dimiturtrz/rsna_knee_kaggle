@@ -24,6 +24,7 @@ Card cost of this audit: zero. It is arithmetic over things already on disk.
 | **recipe fragments** — any piece of the champion family | **closed entirely**; sign unanimous across seven leave-one-outs, `backbone_lr` at its optimum both sides | README:16503, knee-rn9py, knee-lm2ol |
 | **auxiliary objectives** — the twelve `--*-weight` arms at full budget | **−0.0019** against its own matched converged control, the `<= 0.000` branch | knee-evdfd (read 2026-09-18T02:14Z) |
 | **backbone-lr** — the one knob whose corner value was an ENDPOINT, 4/4 upward in the corpus | **−0.0022** at 8e-5 against its own control, converged, both peaking e18 — the sign REVERSES at 24 epochs with dropout | knee-e9f83 (read 2026-09-18T02:30Z) |
+| **adaptation depth** — more than six encoder blocks adapting, the segment that RISES +0.0129/block from 4 to 6 | **+0.0007 midpoint / −0.0012 ledger75** at seven blocks against its own control — the gradient does not survive past six | knee-p724l (read 2026-09-18T03:19Z) |
 | **DINOv3 trunk, ours** | best honest member 0.8724 against seats 0.9045 | `2026-09-17_member_candidates.md` |
 | labels · cut · head_lr · resolution · overlap TTA | closed previously | prior ledger |
 

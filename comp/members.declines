@@ -1585,3 +1585,14 @@ headlr_floor_s2026
   separate "monotone down" from "past a flat top", and the third says the axis turns over, 2e-4 is not
   an edge, and there is nothing below it. Declined as a member, kept as the reading that closed the axis
   (knee-h25fx). Re-open only by beating 0.9059 at the corner, not by re-quoting this number.
+
+unfreeze_deep_s2026
+  Seven adapting encoder blocks against the default six, band_dense_s2026's flag line byte for byte
+  plus --unfreeze-last 7. Converged, peak epoch 9 of 12, 909 studies. It reads 0.8585 midpoint /
+  0.8865 ledger75 against the control's 0.8578 / 0.8877: +0.0007 on one ruler and -0.0012 on the
+  other, both far inside the 0.0062 paired floor, and the better ruler carries the negative sign.
+  The arm existed because the segment already measured RISES — 4 blocks 0.8320, 6 blocks 0.8578,
+  +0.0129 per block — and asked whether that gradient survives past six. It does not: the curve has
+  peaked at or before six, and the flag is at its optimum where we ship. Declined as a member, kept
+  as the reading that closed the adaptation-depth axis (knee-p724l). Re-open only by beating 0.8877
+  ledger75 at that corner, never by re-quoting the 4->6 slope.
