@@ -16664,3 +16664,30 @@ score span 0.0052 (inside the 0.0062 paired floor); Kendall tau midpoint vs ledg
 no reading: the three knob closes recorded above (aux objectives -0.0019, `backbone_lr` -0.0022, adaptation
 depth +-0.001) stand as refusals to spend a slot and may NOT be cited as evidence that those mechanisms do
 nothing. A future corner arm has to be worth enough to clear the band, not to win inside it.
+
+## 2026-09-18 - weight-space souping closes on its SECOND explanation: the anneal point does not save it
+
+The K=2 sibling soup (`soup_siblings_s2026`, README above) landed within 0.0004 of the K-law
+`-0.0044 per doubling` and killed heterogeneity as the reason souping fails here. One explanation was
+left live in writing: **the anneal point** - those members were kept at e6-e9 of a one-cycle schedule,
+LR still high, weights not yet in a flat basin, which is exactly the condition under which parameter
+averaging is expected to fail. The shipping corner peaks at e17-e23 of 24, fully annealed.
+
+`soup_anneal2_s2026` is that cell: a uniform weight average of the two best 24-slice shipping members,
+`headlr_ship_s2026` (e17) and `labelwise_depth24_drop40_long_s2026` (e18), identical architecture tuple
+(the builder refuses otherwise), scored by a real 909-study inference pass.
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| `headlr_ship_s2026` | 0.8702 | 0.9059 | 17 |
+| `labelwise_depth24_drop40_long_s2026` | 0.8679 | 0.9053 | 18 |
+| `soup_anneal2_s2026` | **0.8662** | **0.9016** | -1 |
+
+-0.0040 midpoint against the best parent against a K-law prediction of -0.0044, and BELOW BOTH parents,
+so the soup is not even their mean. The anneal point buys nothing: fully-annealed members average as
+badly as mid-cycle ones. Weight-space souping is closed on both of its explanations and is not to be
+re-opened by a larger K, a different pair, or a longer schedule - the K-law has now been confirmed at
+the two ends of the anneal axis. Re-open only with a mechanism that puts the members in a SHARED basin
+(a common fine-tune trunk, not a common init), which no arm in this ledger has ever produced.
+
+Cost 0.3 h of CPU-and-two-passes, gain zero, and it retires an axis that looked open in writing.

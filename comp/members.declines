@@ -1596,3 +1596,10 @@ unfreeze_deep_s2026
   peaked at or before six, and the flag is at its optimum where we ship. Declined as a member, kept
   as the reading that closed the adaptation-depth axis (knee-p724l). Re-open only by beating 0.8877
   ledger75 at that corner, never by re-quoting the 4->6 slope.
+
+soup_anneal2_s2026
+  A uniform weight average of `headlr_ship_s2026` and `labelwise_depth24_drop40_long_s2026`, built to
+  test whether weight-space souping fails only at a high-LR anneal point. It does not: 0.8662 midpoint
+  / 0.9016 ledger75, below BOTH parents and on the K-law's -0.0044 per doubling. Declined as a member,
+  kept as the reading that closed the weight-soup axis on its second explanation. Re-open only with
+  members sharing a fine-tuned basin, never with a larger K.
