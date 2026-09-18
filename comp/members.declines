@@ -1576,3 +1576,12 @@ vjepa_cold_s2026
   gap between two harnesses on one trunk is a fact about the harness.
   Re-open by running this trunk at 256 px / 12 slices under the current recipe and beating its own
   0.8673, not by re-quoting either number.
+
+headlr_floor_s2026
+  The shipping corner at head_lr 5e-5, the third point on an axis whose other two are 1e-3
+  (labelwise_depth24_drop40_long_s2026, 0.9053) and 2e-4 (headlr_ship_s2026, 0.9059). ledger75 0.9011,
+  the WORST of the three by 0.0048 against the top — directional, inside the 0.0062 paired floor, and
+  converged at peak epoch 17 of 24. It was bought as a SHAPE rather than a candidate: two points cannot
+  separate "monotone down" from "past a flat top", and the third says the axis turns over, 2e-4 is not
+  an edge, and there is nothing below it. Declined as a member, kept as the reading that closed the axis
+  (knee-h25fx). Re-open only by beating 0.9059 at the corner, not by re-quoting this number.
