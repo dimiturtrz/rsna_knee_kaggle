@@ -16730,9 +16730,12 @@ teacher that is not also a student. What it does settle is the 3-4-5-model exten
 same mechanism with more of it, and the two-model case reads negative against the strongest trunk on
 disk. Re-opening means answering the flat curve, not re-quoting a number.
 
-`convergence_check` reports this run as `TRUNCATED best e18 of 8 run, 24 asked`. It is not truncated
-— each `--resume` round writes a fresh metrics file, so the check sees only the final round's eight
-rows. False positive on every resumed run (knee-s0c4o).
+`convergence_check` reported this run as `TRUNCATED best e18 of 8 run, 24 asked` until 2026-09-18. It
+is not truncated — each `--resume` round rotates the earlier epochs aside, so the check saw only the
+final round's eight rows and read a finished 24-epoch run as a FLOOR, one step from retracting the
+verdict above with every other gate green. FIXED in `7695751c`: `done` is the last row's own epoch
+index plus one, so a run can only ever leave TRUNCATED, never enter it (knee-s0c4o, closed). This run
+now reads CONVERGED, 24 of 24.
 
 ### The `--fold -1` refit keeps the LAST epoch, and for one member that costs 0.0027 — 2026-09-18
 

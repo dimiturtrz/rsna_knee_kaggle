@@ -1641,8 +1641,9 @@ dml_a_s2026
   family at w=0.3. The peak is e18 and not the last epoch, so this is a verdict and not a void reading.
   The per-epoch deficit never crossed zero and never narrowed past -0.0008 (e16 -0.0024, e18 -0.0008,
   e23 -0.0009), so it is a flat loss rather than a late payer cut off by the budget.
-  Note `convergence_check` calls this run TRUNCATED; that is a false positive on every `--resume`d run,
-  because each round writes a fresh metrics file and the check sees only the last 8 rows (knee-s0c4o).
+  `convergence_check` called this run TRUNCATED until 2026-09-18; that was a false positive on every
+  `--resume`d run and is FIXED in `7695751c` -- it now reads the last row's own epoch index instead of
+  counting rows, so this run reads CONVERGED at 24 of 24 (knee-s0c4o, closed).
   Re-open by answering the flat curve -- a different weight, supervision at a different layer, or a
   teacher that is not also a student -- never by re-quoting this number.
 

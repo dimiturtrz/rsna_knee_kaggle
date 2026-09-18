@@ -19,7 +19,7 @@ Card cost of this audit: zero. It is arithmetic over things already on disk.
 | **planes** — does the pipeline read coronal/axial at all | **already consumed**: six slots span all three planes | `core/data/corpus/slots.py:58` |
 | **slot occupancy** — a finding starved of its primary sequence | **no column's weakness tracks slot presence**; mean 4.57 of 6 slots per study | README:10353; `2026-09-05_the-weak-columns-are-not-a-missing-sequence-and-not-a-combination.md` |
 | **distillation** — a teacher above the student | **teacher headroom 0.002**, term itself +0.0056 (under the 0.0062 floor) | README:16585 |
-| **mutual supervision** — a LIVE peer rather than a converged teacher | **OPEN, running.** All four null rows held teacher liveness fixed; peer disagreement is **28-42% of the supervised residual** and survives the shared trunk | `2026-09-18_teacher_liveness_is_the_distillation_variable_never_moved.md`, knee-z81wd |
+| **mutual supervision** — a LIVE peer rather than a converged teacher | **CLOSED −0.0015** on the strongest trunk (`dml_a_s2026` 0.9044 vs `headlr_ship_s2026` 0.9059, ledger75, 909 studies, peak e18 so the verdict is not a last-epoch artefact). The per-epoch deficit is FLAT, not converging: −0.0024, −0.0020, −0.0008, −0.0014, −0.0008, −0.0009, −0.0009. The peer disagreement was real and did not convert | knee-z81wd branch 4; README `### dml_a` 2026-09-18 |
 | **slice coverage** — 24 -> 36 slices | **CLOSED.** Behind at every one of 7 matched epochs, mean **-0.0224** = 3.6x the paired floor, at 50% more wall-clock | `2026-09-18_coverage_is_closed_on_a_trajectory_not_on_a_score.md`, knee-jb0ci |
 | **in-domain MRI pretraining** — SSL on fastMRI/SKM-TEA | **published wash at our labelled scale** (+0.073 at 80 subjects, −0.005 at 800; we hold ~4,400) | README:7425, Zhang et al. MedIA 2024 |
 | **external data as LABELLED augmentation** — the one axis README:7425 left explicitly open | **closed on our own measurement**: `pool_specialise` FLAT, `noisy_student` 0.8548, `--corpus-oversample 2.22` does not lift the mean | README:15216, :12447, :10737 |
@@ -65,8 +65,15 @@ distinction is per pair, not per size:
   0.75 cut. Distillation subtracts from the pooling stack rather than adding to it (README:15893).
 
 So "compose the surviving sub-floor terms" is a hypothesis owing its own arm each time, never a free sum.
-The one composition explicitly still unspent is **+0.0056 distillation onto the SHIPPING recipe**
-(README:16599) — and the refutation above is evidence against exactly that pairing.
+The one composition that was still unspent — **+0.0056 distillation onto the SHIPPING recipe**
+(README:16599) — is now **spent and null**, and it cost no card: `dml_a_s2026` IS that recipe plus a
+supervision term at w=0.3 against a control that is the same recipe without one, and it reads
+**−0.0015** ledger75. Mutual differs from one-directional in who the TEACHER is, not in what reaches the
+student, and the strong member's peer sits below it, so `dml_a` is a LOWER bound on the one-directional
+form. Three readings, consistent in sign wherever the pooling matches: **+0.0056** at max/mixed pooling
+(not the shipping corner), **−0.0101** labelwise at w=0.7, **−0.0015** labelwise at w=0.3 on the corner.
+The +0.0056 belongs to a pooling this project does not ship. Re-open by producing a teacher above the
+student, never by re-quoting +0.0056.
 
 ## And the offline ruler no longer ORDERS members at the top
 
