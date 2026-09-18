@@ -385,6 +385,10 @@ dml_b_ff.pt                 # DARK BY CONSTRUCTION -- `--fold -1`, the third ref
                             # ADDITIVE lands it ~0.947-0.950, CEILING ~0.9445, and CEILING is the favourite
                             # at P(clears 0.945) ~ 0.20. See knee-8bmi2 for the pre-registration.
                             # It may be seated and never quoted; any entry carrying it reads on the BOARD.
+dml_b_ff_long36.pt          # DARK BY CONSTRUCTION -- `--fold -1 --ema`. dml_b_ff above with `--epochs 36`
+                            # and nothing else moved (knee-bxp8h), 36 of 36 epochs, ARM DONE 19:59Z. It
+                            # carries the peer term and the long anneal together; its controls are the two
+                            # solo entries of dml_b_ff and depth24_ff_long36. Seated only in its own solo kernel.
 
 # ---- the operator pair, five members found already on disk and priced 2026-09-13 ----
 # `roster_check` named seven undocumented checkpoints and five of them were `drop40_long` runs nobody had
