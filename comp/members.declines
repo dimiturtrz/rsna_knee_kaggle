@@ -1653,3 +1653,11 @@ dml_b_s2026_run1
   deliverable of knee-z81wd is a SINGLE solo checkpoint, so no `dml_b` checkpoint of any round is a
   shipping candidate. Re-open only if `dml_b` is ever re-registered as a member in its own right, which
   would need its own holdout reading against `headlr_ship_s2026` 0.9059 ledger75.
+
+dml_a_s2026_run2
+  INTERMEDIATE BY CONSTRUCTION -- the round-2 checkpoint of the mutual-supervision schedule, set aside
+  under a `_run2` name exactly as `dml_a_s2026_run1` above. A fold-0 half whose line ships only as the
+  whole-corpus refit `dml_b_ff`; the deliverable is a single solo checkpoint (knee-z81wd, knee-8bmi2).
+
+dml_b_s2026_run2
+  INTERMEDIATE BY CONSTRUCTION -- the same, for the peer arm. Its line ships as `dml_b_ff` (knee-8bmi2).
