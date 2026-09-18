@@ -46,3 +46,40 @@ Ten points and one free parameter. It screens for a cut that is *obviously* bett
 license adopting a tie as an improvement, and it says nothing about a non-flat recut whose rungs are chosen
 per column by an argument rather than by a sweep — that remains the only untried shape, and it owes a
 mechanism before it owes a run.
+
+## And the corpus cannot be the lever either — 00:52Z, `research/scripts/ruler_ceiling.py`
+
+The section above leaves the corpus as the only remaining way to make our ruler separate the top members.
+This prices it. The paired difference between the two highest members on disk — `headlr_ship_s2026` and
+`labelwise_depth24_drop40_long_s2026`, the pair the board disagreed about at 0.937 vs 0.941 — is
+bootstrapped over studies at a ladder of subsample sizes, 400 draws a rung, under the incumbent mixed ruler.
+
+| n | sd(paired delta) | 2 sd floor |
+|---|---|---|
+| 200 | 0.0046 | 0.0092 |
+| 400 | 0.0035 | 0.0070 |
+| 700 | 0.0024 | 0.0048 |
+| 909 | 0.0021 | **0.0042** |
+
+The scaling exponent is **−0.525**, against −0.500 for a clean sqrt-n law — so the floor shrinks with the
+holdout at very close to the textbook rate, and the extrapolation is honest.
+
+**This pair's own floor is 0.0042, not the repo's general 0.0062**, and the spread to resolve is 0.0014 —
+three times short. Extrapolating: **8,246 held-out studies** would be needed. The project has **4,406
+labelled studies in total**. Holding out every one of them, with nothing left to train on, still lands at
+0.0019 — above 0.0014.
+
+**So the ruler ceiling is structural, not a budget.** Above offline75 ~0.904 no holdout cuttable from this
+corpus can rank the members we actually choose between, under any threshold. Three consequences, and they
+change what a slot is for:
+
+1. **Stop ranking shipping candidates offline at the top of the line.** An offline delta under ~0.004
+   between two of our best members is not weak evidence, it is *no* evidence, and it has been read as
+   evidence repeatedly.
+2. **The board is the only instrument above 0.904**, so a submission slot is now the scarce resource for
+   RANKING, not merely for confirming. That is an argument for spending slots on members that differ by a
+   MECHANISM — where the prior does the separating the ruler cannot — and against spending them on knob
+   variants, whose offline separation was the only thing ever recommending them.
+3. **The offline ruler keeps its job below 0.904**, where its residual sd of 0.0021 against a 0.030 span is
+   an excellent instrument. Nothing here retires it as a gate on new families; it retires it as a chooser
+   among our own best.
