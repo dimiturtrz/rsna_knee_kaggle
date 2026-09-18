@@ -70,6 +70,41 @@ def test_table(tmp_path: Path) -> None:
     assert table["m2"][LAGGARD] == PERFECT
 
 
+def test_readings(tmp_path: Path) -> None:
+    """The pool's kept arrays, keyed by stem and checked onto one ruler before anything is compared."""
+    readings = SeatProfile().readings([_member(tmp_path, "m1", LEADER), _member(tmp_path, "m2", LAGGARD)])
+    assert sorted(readings) == ["m1", "m2"]
+    assert readings["m1"].studies == STUDIES
+
+
+def test_profile(tmp_path: Path) -> None:
+    """An already-read pool scores exactly as `table` does, so the second caller pays no second read."""
+    seat = SeatProfile()
+    paths = [_member(tmp_path, "m1", LEADER), _member(tmp_path, "m2", LAGGARD)]
+    assert seat.profile(seat.readings(paths)) == seat.table(paths)
+
+
+def test_population(tmp_path: Path) -> None:
+    """A member graded by another table answers another question, so it is dropped before anything ranks it."""
+    ours = _member(tmp_path, "m1", LEADER)
+    moved = _member(tmp_path, "moved", LEADER)
+    kept = SeatProfile().reading(moved)
+    HoldoutRecord(moved).write(STUDIES, kept.predictions, _truth() * 0.5, epoch=3)
+    assert SeatProfile().population([ours, moved], "m1") == [ours]
+
+
+def test_margins(tmp_path: Path) -> None:
+    """A finding's leader is taken from the pool MINUS the named member, and priced against it with an interval."""
+    seat = SeatProfile()
+    paths = [_member(tmp_path, "m1", LEADER), _member(tmp_path, "m2", LAGGARD)]
+    readings = seat.readings(paths)
+    margins = seat.margins(readings, seat.profile(readings), "m2")
+    name, margin, (low, high) = margins[LEADER]
+    assert name == "m1", "m2 is the baseline and may not be its own challenger"
+    assert margin == pytest.approx(PERFECT - INVERTED)
+    assert low <= margin <= high, "the interval brackets the margin, or the pair was passed in the wrong order"
+
+
 def test_leaders(tmp_path: Path) -> None:
     """The per-finding leader is the member that scores highest THERE, not the one with the best mean.
 

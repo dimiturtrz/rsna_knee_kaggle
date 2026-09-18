@@ -26,8 +26,9 @@ from pathlib import Path
 from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
+from kneemri.evaluation.member_pool import DECLINES, MemberPool
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
-from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
+from kneemri.runs.holdout_record import SUFFIX, HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,36 @@ class SeatProfile:
         reading = self.reading(path)
         return self.scores.per_label(reading.predictions, reading.truth)
 
+    def margins(
+        self, readings: dict[str, HoldoutReading], table: dict[str, dict[str, float]], against: str
+    ) -> dict[str, tuple[str, float, tuple[float, float]]]:
+        """Each finding's leader, its margin over one named member, and the 95% interval of that margin.
+
+        A leader is the maximum over the whole pool on the same studies that price it, so its margin is
+        selection-optimistic by construction and a positive one proves nothing. The interval is what makes
+        the table decidable in ONE direction: a margin whose interval spans zero is not a per-finding edge
+        even before the selection is discounted, so that column is CLOSED, and only a margin that clears
+        its own interval survives as a candidate still owing an out-of-pool confirmation.
+
+        `spread` says where the pool disagrees; this says whether the disagreement is larger than the
+        studies it was read on, which is the question that decides whether a column is worth an arm.
+        """
+        baseline = readings[against]
+        intervals: dict[str, dict[str, tuple[float, float]]] = {}
+        margins = {}
+        for target in TARGETS:
+            name, best = max(
+                ((name, row[target]) for name, row in table.items() if name != against), key=lambda pair: pair[1]
+            )
+            if name not in intervals:
+                # `paired_interval` reports SECOND minus FIRST, so the baseline goes first for the
+                # interval to bracket `best - table[against]` rather than its negative.
+                intervals[name] = self.scores.paired_interval(
+                    baseline.predictions, readings[name].predictions, baseline.truth
+                )
+            margins[target] = (name, best - table[against][target], intervals[name][target])
+        return margins
+
     def table(self, paths: list[Path]) -> dict[str, dict[str, float]]:
         """Every member that has a record, keyed by the checkpoint's stem then by finding.
 
@@ -62,11 +93,35 @@ class SeatProfile:
         what already refuses that case for a pair; running it against the first reading extends the
         refusal to the whole set, which is the shape this table is read in.
         """
-        readings = {path.stem: self.reading(path) for path in paths}
+        return self.profile(self.readings(paths))
+
+    def profile(self, readings: dict[str, HoldoutReading]) -> dict[str, dict[str, float]]:
+        """The twelve AUCs of each member in an already-read set, so a caller needing both pays one read."""
+        return {name: self.scores.per_label(reading.predictions, reading.truth) for name, reading in readings.items()}
+
+    def readings(self, paths: list[Path]) -> dict[str, HoldoutReading]:
+        """Every member's kept arrays, checked onto one ruler, keyed by the member name the ledger quotes."""
+        readings = {path.name.removesuffix(SUFFIX).removesuffix(".pt"): self.reading(path) for path in paths}
         first = next(iter(readings.values()))
         for reading in readings.values():
             first.aligned(reading)
-        return {name: self.scores.per_label(reading.predictions, reading.truth) for name, reading in readings.items()}
+        return readings
+
+    def population(self, paths: list[Path], against: str) -> list[Path]:
+        """The members answering the SAME question as `against` — same studies, same table that graded them.
+
+        A pool directory holds records from several populations, and two of this project's carry a moved
+        label table (knee-g2vm9): `recal_holdannot_s2026` reads 0.9004 on its own truth and 0.8888 on the
+        corpus table, which a flat per-finding rank prints in the same column as everybody else. Filtering
+        by `LedgerSeventyFive.population` is the same digest the ledger divides its rows by, so a member
+        this drops is one no ledger row ever ranked against the baseline either.
+        """
+        ruler = LedgerSeventyFive()
+        wanted = ruler.population(self.reading(next(path for path in paths if against in path.name)))
+        kept = [path for path in paths if ruler.population(self.reading(path)) == wanted]
+        if len(kept) < len(paths):
+            logger.info(f"population @{wanted}: {len(kept)} of {len(paths)} members answer {against}'s question")
+        return kept
 
     def leaders(self, table: dict[str, dict[str, float]]) -> dict[str, tuple[str, float]]:
         """The member that scores highest on each finding, which is the question a mean cannot answer."""
@@ -86,20 +141,39 @@ class SeatProfile:
 def main() -> None:
     """Print the member-by-finding matrix, the per-finding leader, and where the pool spreads widest."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--members", type=Path, nargs="+", required=True, help="member checkpoints")
+    source = command.parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--members", type=Path, nargs="+", help="member checkpoints")
+    source.add_argument("--holdouts", type=Path, help="directory of .holdout.npz records, void ones dropped")
+    command.parser.add_argument("--declines", type=Path, default=DECLINES, help="the declines file to read void from")
     command.parser.add_argument("--midpoint", action="store_true", help="read at the midpoint instead of LEDGER75")
+    command.parser.add_argument("--against", help="member each finding's leader is priced against")
     arguments = command.parsed()
 
     profile = SeatProfile(LabelScores(MIDPOINT) if arguments.midpoint else None)
-    table = profile.table(list(arguments.members))
+    if arguments.holdouts:
+        pool = MemberPool.at(arguments.holdouts, arguments.declines)
+        paths = [arguments.holdouts / f"{name}{SUFFIX}" for name in pool.names()]
+    else:
+        paths = list(arguments.members)
+    if arguments.against:
+        paths = profile.population(paths, arguments.against)
+    readings = profile.readings(paths)
+    table = profile.profile(readings)
     leaders, spread = profile.leaders(table), profile.spread(table)
+    margins: dict[str, tuple[str, float, tuple[float, float]]] = (
+        profile.margins(readings, table, arguments.against) if arguments.against else {}
+    )
 
     lines = [f"--- per finding @{profile.scores.name()}"]
-    lines += [f"{'finding':22s} {'leader':28s} {'best':>7s} {'spread':>7s}"]
-    lines += [
-        f"{target:22s} {leaders[target][0][:28]:28s} {leaders[target][1]:7.4f} {spread[target]:7.4f}"
-        for target in sorted(TARGETS, key=lambda name: spread[name], reverse=True)
-    ]
+    header = f"{'finding':22s} {'leader':28s} {'best':>7s} {'spread':>7s}"
+    lines += [header + (f"  {'margin':>8s} {'95% interval':>18s}  clears" if margins else "")]
+    for target in sorted(TARGETS, key=lambda name: spread[name], reverse=True):
+        leader = margins[target][0] if margins else leaders[target][0]
+        row = f"{target:22s} {leader[:28]:28s} {table[leader][target]:7.4f} {spread[target]:7.4f}"
+        if margins:
+            _, margin, (low, high) = margins[target]
+            row += f"  {margin:8.4f} [{low:8.4f},{high:8.4f}]  {'YES' if low > 0 else 'no'}"
+        lines.append(row)
     lines.append("")
     for name, row in sorted(table.items(), key=lambda item: -sum(item[1].values())):
         mean = sum(row.values()) / len(row)
