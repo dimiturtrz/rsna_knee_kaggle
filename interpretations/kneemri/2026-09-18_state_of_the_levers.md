@@ -20,6 +20,7 @@ Card cost of this audit: zero. It is arithmetic over things already on disk.
 | **slot occupancy** — a finding starved of its primary sequence | **no column's weakness tracks slot presence**; mean 4.57 of 6 slots per study | README:10353; `2026-09-05_the-weak-columns-are-not-a-missing-sequence-and-not-a-combination.md` |
 | **distillation** — a teacher above the student | **teacher headroom 0.002**, term itself +0.0056 (under the 0.0062 floor) | README:16585 |
 | **in-domain MRI pretraining** — SSL on fastMRI/SKM-TEA | **published wash at our labelled scale** (+0.073 at 80 subjects, −0.005 at 800; we hold ~4,400) | README:7425, Zhang et al. MedIA 2024 |
+| **external data as LABELLED augmentation** — the one axis README:7425 left explicitly open | **closed on our own measurement**: `pool_specialise` FLAT, `noisy_student` 0.8548, `--corpus-oversample 2.22` does not lift the mean | README:15216, :12447, :10737 |
 | **recipe fragments** — any piece of the champion family | **closed entirely**; sign unanimous across seven leave-one-outs, `backbone_lr` at its optimum both sides | README:16503, knee-rn9py, knee-lm2ol |
 | **DINOv3 trunk, ours** | best honest member 0.8724 against seats 0.9045 | `2026-09-17_member_candidates.md` |
 | labels · cut · head_lr · resolution · overlap TTA | closed previously | prior ledger |
@@ -54,8 +55,10 @@ The one composition explicitly still unspent is **+0.0056 distillation onto the 
 The honest reading is that **offline ranking is exhausted and so is the asset pool**: the ruler ceiling
 (offline75 ~0.904) and the per-finding close and this table are three views of one fact. A lever that
 could carry 1.5% would have to add information the project does not hold — labelled studies, or a trunk
-that has seen MRI at a scale our licences do not reach — and both of those were closed on premise, before
-the card was spent, which was the correct call and remains it.
+that has seen MRI at a scale our licences do not reach. The trunk one was closed on premise before the
+card was spent; the labelled-data one was closed the harder way, by three arms of our own, and the
+caveat README:7425 left open ("not a verdict on external data as LABELLED augmentation") was answered
+NO eight days later at README:15216 and sat unjoined to it until now.
 
 What that leaves is not "find the big lever". It is: keep the standing entry protected, spend card only on
 arms with a pre-registered branch, and treat any claim that an axis is open as owing a line in this table.
