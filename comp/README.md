@@ -229,6 +229,20 @@ The curve is NOT flat at the bottom — one member costs −0.020 against five �
 out. But **two whole-stack members is the efficiency entry**, and it is already scored: 0.882, six
 thousandths under our own best, for **2 forward passes against 50**. Twenty-five times cheaper.
 
+> **The bottom of that curve has since flattened, and the sentence above is inverted (2026-09-18).**
+> It priced a 0.868 solo against a 0.888 five-member entry. Today the solo `extffsolo` reads board
+> **0.945** against the seven-member champion `tripleseat_v2` at **0.946** — the member-count cost is
+> **0.001, not 0.020**, and a one-member entry is not merely admissible, it is what the owner shipped to
+> the efficiency row on this date, replacing a 0.939 multi-member entry. What flattened it is the solo
+> itself: every board row at 0.939 carries 3 to 8 members, so the swap cut runtime multiplicatively AND
+> raised accuracy. The cost ratio measured from the two served kernel logs: `kneemri-extffsolo` loads 1
+> member, 1 decode read, **peak 0.8 GB**; `kneemri-tripleseat` loads 7, 4 decode reads, **peak 7.2 GB** —
+> 9x the VRAM for +0.001. (Both logs are the commit-time run on the 3-study public sample; Kaggle does
+> not serve the scored hidden-test run, so these are structure, not scored wall-clock.)
+> Consequence for ranking levers, and it is the reason this correction is worth its lines: a thousandth
+> on the best SOLO now pays on two boards, while a thousandth bought by adding a member pays on one and
+> costs ranks on the other. See `interpretations/kneemri/2026-09-18_state_of_the_levers.md`.
+
 The reason it is that cheap is measured and specific: **a whole-stack member reads ONE window**, because
 its slot embedding is already the elementwise max over every slice. Window TTA is worth +0.0146 to a
 windowed member and exactly **0.0000** to a whole-stack one, so the 10x TTA multiplier simply does not
