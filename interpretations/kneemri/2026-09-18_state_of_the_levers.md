@@ -161,3 +161,45 @@ downstream of the optimiser.** Two places remain, and both are named rather than
 it decides whether the coverage cell is open at the corner on a harness that cannot be blamed, which is
 what the two prior readings — both 12-epoch, both under a max aggregator whose noise floor grows with the
 size of the set it maxes over — could not.
+
+## The board record says ensembling has bought this project nothing over its best solo
+
+`rank_stability` printed one more number: the ensemble's margin over the best single member is
+**+0.0054 paired, 95% [+0.0020, +0.0058]** on 909 studies. That is a real offline margin — its interval
+clears zero — so the obvious expectation is that an ensemble entry outscores a solo entry on the board.
+It does not. Over the 147 scored rows of `comp/board.jsonl`, split by member count and by whether the
+entry carries an honest offline number:
+
+| population | n | best board | best entry |
+|---|---|---|---|
+| solo, honest scope | 17 | **0.945** | `extffsolo_v1` |
+| 2-4 members, honest scope | 23 | 0.939 | `fasttrio_v1` |
+| >= 5 members, honest scope | **62** | **0.945** | `noraptor_v1` |
+| >= 5 members, offline unpriceable | 33 | 0.946 | `tripleseat_v2` (the pin) |
+
+**Sixty-two ensemble attempts of five or more members have never once beaten the best of seventeen solo
+attempts.** The offline +0.0054 does not transfer: at a top-band slope near +1.1 it should have shown as
+roughly +0.006 board, about six ticks, and the measured difference is zero ticks.
+
+Read the fourth row carefully — this is where a first draft of this section was wrong. Those 33 rows are
+NOT a greedy-selection family; `scope_reason` says so for only 2 of them. The rest read *"offline is None
+by construction"*, and their `selection` field is `designed` 20 times. What actually distinguishes them is
+that they contain a full-corpus `_ff`/`_cf` refit or the foreign seat, so no honest offline number exists
+for the seating. So the correct statement is about the REFIT, not about selection:
+
+- the best solo we own is itself a refit (`extffsolo_v1`, 0.945);
+- the honest-offline ceiling is 0.945 whether the entry has one member or seven;
+- the only entries that ever reached 0.946 also contain refits.
+
+That converges with the refit-term question from the other direction. **The lever that has moved the board
+in this project is the full-corpus refit; the ensembling is not.** It is also the reason the standing
+mandate — one solo checkpoint, never an ensemble — costs nothing to obey: the record says the ensemble
+machinery has bought zero board ticks over the best solo across 62 tries, while the refit has bought
+every tick we have.
+
+The live consequence for `headlr_ship_ff`'s slot: under the ceiling reading pre-registered on knee-33iwi
+(refits converging near 0.9445 rather than adding a term), a solo cannot pass 0.946 by refitting at all,
+and the remaining tick has to come from the base recipe rather than from the fit. The separating evidence
+is a refit off an honest twin BELOW 0.935, which the additive reading predicts near 0.950 and the ceiling
+reading predicts at 0.9445 — and we own honest twins down there, so that experiment costs one slot and no
+card.
