@@ -39,6 +39,13 @@
 
 ## Per-finding leader among honest members, and its margin over the best CHAMPION SEAT
 
+> **SUPERSEDED 2026-09-18T01:34Z — this section's whole question is now answered NO.** Every margin
+> below was read bare. Priced with its own 95% paired interval against the shipping solo, **zero of the
+> twelve columns clear**, and the one that nominally does is a max over 374 members judged by a one-pair
+> bound. The pool holds no per-finding specialist; the next member has to be built, not selected. See
+> `2026-09-18_the_pool_holds_no_per_finding_specialist.md`, and take the leaders from
+> `seat_profile --holdouts <dir> --against <member>` rather than from the table below.
+
 **CORRECTED 2026-09-18T01:14Z — EVERY `recal_holdannot_s2026` ROW IN THIS TABLE IS VOID.** Its holdout
 truth is `report_labels_v3.csv`, whose fourth rung (0.6879) falls on the other side of the 0.75 recut
 from the corpus table's (0.82), so it was graded against a different positive set than the members it is
