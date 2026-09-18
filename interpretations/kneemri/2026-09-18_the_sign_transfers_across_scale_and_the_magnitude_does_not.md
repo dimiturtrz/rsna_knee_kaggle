@@ -70,9 +70,26 @@ distillation row tests that full change, and it is one row. So what is establish
 scale does not flip a sign**; that **8 vs 24 epochs** does not is supported by one row plus the two
 epoch-budget pairs in the table, which agree but are both sub-floor.
 
-The cheapest thing that would close that residue is reading an existing 224/8 five-fold arm against its own
-24-epoch twin — not a new run, a lookup — and it is the first thing to do if a rotation result ever
-disagrees with a fold-0 read.
+That residue is now mostly closed, by the lookup rather than a run. `oof_fold0`'s recipe is byte-identical
+to `native224` but for `--epochs 8` against `12`, and it holds out the same fold, so with `native224_long`
+the three make an epoch ladder on one ruler:
+
+| epochs | ledger75 |
+|---|---|
+| 8 (`oof_fold0_s2026`, the instrument corner) | 0.8775 |
+| 12 (`native224_s2026`) | 0.8800 |
+| 24 (`native224_long_s2026`) | 0.8760 |
+
+**Total spread 0.0040 across the whole 8-24 range — inside the 0.0062 floor.** So the epoch budget moves
+the baseline by less than the ruler can see, and a knob read at 8 epochs is read against essentially the
+same baseline it will be deployed against at 24.
+
+**The one place this can still lie is named precisely by the interaction below.** That flatness holds in the
+ABSENCE of slot dropout, which is the regime the instrument recipe sits in. With slot dropout present the
+epoch axis is NOT flat — drop40 and 24 epochs interact by +0.0113. So a knob that interacts with
+regularisation will be measured at 8 epochs in the flat regime and deployed at 24 epochs with drop40 in the
+interacting regime. **The oracle's known failure mode is therefore exactly one class: regularisers.** For
+those, a rotation sign is a hypothesis, not a verdict.
 
 ## An interaction, found on the way and worth its own line
 
