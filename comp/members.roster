@@ -925,3 +925,14 @@ headlr_ship_s2026.pt        # 0.8702 solo / 0.9059 ledger75, peak epoch 17 of 24
                             # it reads) is sound, never because the number cleared anything. It is on this
                             # roster to be SHIPPABLE as the top point of the solo ruler, where the n=8 OLS
                             # has fewest points and where every entry we care about sits.
+
+headlr_ship_ff.pt           # THE FULL-CORPUS REFIT of headlr_ship_s2026 — the same line with --fold -1
+                            # --ema, so it trains on all 4407 studies and holds nothing back. DARK: no
+                            # ledger row can price it (knee-s8kim) and none is owed; its ruler is the
+                            # board. Shipped as an INSTRUMENT, not as a candidate: the honest twin
+                            # headlr_ship_s2026 scored board 0.937 (headlrsolo_v1, ref 56316099), and the
+                            # refit term measured on the two members that have it is NOT a constant —
+                            # +0.003 on labelwise_depth24_drop40_long (0.941 -> 0.944) and +0.008 on
+                            # labelwise_ext_drop40_long (0.937 -> 0.945). Carried off 0.937 that predicts
+                            # 0.940-0.945 against a 0.946 champion, so P(beats champion) ~0.10 and this
+                            # entry is bought for the THIRD POINT on the refit term rather than for a rank.
