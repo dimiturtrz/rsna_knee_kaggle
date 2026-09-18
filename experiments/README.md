@@ -16765,3 +16765,44 @@ ships labelled as one.
 holdout, so a completed 18-epoch anneal can be read on ledger75 against 0.9059 without spending a
 slot. 0.0027 is the CEILING on what epoch selection alone returns — a fresh 18-epoch `one_cycle` is
 not the 24-epoch run stopped at 17, because the anneal shape changes with the budget.
+
+## The 1.5 h distillation composition was already run — `dml_a` is that arm's student side — 2026-09-18
+
+Card: zero. This closes a job that was priced, open, and next.
+
+`README:16599` left one survivor when the distillation axis closed on 2026-09-17: *"What survives is
+composition: +0.0056 has never been applied to the shipping recipe, and at 221 s/epoch x 24 epochs that
+is a 1.5 h knob, priced as a knob."* On ratio that beats the arm actually queued tonight —
+0.0056/1.5 h = **0.0037/h** against `headlr_ship_ffp`'s 0.0027/1.2 h = **0.0023/h** — so it was the next
+thing to put on the card.
+
+It does not need the card, because the student half of it has run.
+
+| reading | what it is | pooling | weight | delta |
+|---|---|---|---|---|
+| `seat_distill_lr4e5` / `seat_clean_distill` / foreign | the term as measured | max / mixed, NOT the corner | 0.3 | **+0.0056** |
+| `distill_stack_clean_s2026` (README:15897) | distillation onto a labelwise stack | **labelwise** | 0.7 | **−0.0101** at the 0.75 cut |
+| `dml_a_s2026` (tonight) | `headlr_ship` + peer supervision | **labelwise, the shipping corner** | 0.3 | **−0.0015** ledger75 |
+
+**Why `dml_a` answers the composition question and not merely a neighbouring one.** The arm IS the
+shipping recipe with a supervision term added; its control `headlr_ship_s2026` is that recipe without
+one. Mutual supervision differs from one-directional distillation in who the teacher is, not in what
+reaches the student: the student takes a weighted peer target at w=0.3, which is the same gradient the
++0.0056 term was measured through. What mutual adds is that the teacher is also learning — and on the
+STRONGER member that is a handicap, since its peer is below it. So `dml_a` is a LOWER bound on the
+one-directional version, and the honest statement is that composition at the corner is bounded at
+−0.0015 from below and has never been shown positive on a labelwise recipe at any weight.
+
+**The two prior readings agree in sign wherever the pooling matches.** +0.0056 was measured off the
+corner; both readings ON a labelwise stack are negative, at opposite ends of the weight range (0.3 and
+0.7). That is the composition claim answered in the direction it was least hoped for: the term does not
+survive the pooling it would have to be added to.
+
+**What this does NOT close.** A teacher that is genuinely ABOVE the student, which
+`2026-09-17_no_teacher_is_above_the_student.md` already shows does not exist on this disk — the ensemble
+teacher is worth 0.002 and the best foreign single is 0.021 BEHIND ours. Both bounds are upstream of this
+one, so the axis was already bounded below the gap before tonight; what tonight removes is the last
+UNRUN arm on it.
+
+**Consequence.** The 1.5 h is not spent, and the ratio table for the card no longer has a row above
+`headlr_ship_ffp`. Re-open by producing a teacher above the student, never by re-quoting +0.0056.
