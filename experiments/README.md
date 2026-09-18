@@ -16888,3 +16888,30 @@ corner is trapped the same way: the ruler that can see it (909 held-out studies)
 (the board, via a full-corpus refit) cannot be spanned by any mechanism that needs the holdout to exist.
 `rank_stability` already said 909 studies cannot ORDER the shipping band (top arm holds rank 1 in 29.2%
 of resamples); this says something stricter — that they cannot EXPORT a gain from it either.
+
+### Where the peer term landed: regional findings, into an axis that is already saturated — 2026-09-18
+
+`run_comparison --control labelwise_depth24_drop40_long_s2026 --arms dml_b_s2026 --cut 0.75` isolates the
+single variable (`teacher_targets None -> dml_read_a_r2.npz`, `distill_weight 0.0 -> 0.3`, and nothing
+else the comparison can name). Per label: **MCL +0.0256\***, Fracture +0.0176, then nothing above 0.006
+in either direction. One label out of twelve clearing its own half-width is what chance produces, so the
+reading that carries is the aggregate, which does not depend on picking a label: **by structure scale,
+regional +0.0047 against focal +0.0014.** The peer term buys spatially EXTENDED findings and is flat on
+focal ones — not the uniform shape a regularisation effect would draw.
+
+**The obvious inference from that is wrong, and it was checked before it was proposed.** Every pooling
+this project has run — max, attend, depth, labelwise, moments, moments_wide — reduces over the slice axis
+permutation-invariantly, so none can express CONTIGUITY: six consecutive positive slices and six scattered
+ones read identically, and extended structures are exactly the ones with contiguous runs. That reads like
+an open gap and it is not one. `depth_true` (README:317) IS the order-aware aggregator — slices mixed with
+their through-plane neighbours before the gate — and it lands **−0.0015**, SECOND-WORST of four operators
+spanning 0.0019, with the frozen-feature proxy having called the sign in advance. Slice order was closed
+as a lever on 2026-08-19 and the aggregation stage is saturated from three directions (more slices
+−0.0001, more slots +0.0002, every combining rule within 0.0019).
+
+**So this is a pointer with nowhere to point, and it is filed as one.** It is consistent with the
+coverage reading the decode-geometry family already produced — regional findings are bought by covering
+more anatomy ALONG the stack (`crop80_span`, README:330) — and that axis is closed at about +0.005 total
+with `slicecover36` measured CANNOT REACH. Do not plan around +0.0047. What it is good for is a PRIOR on
+the next mechanism proposed here: one whose gain concentrates on focal findings would be new, and one
+that concentrates regionally is competing with a saturated axis and has to beat it, not join it.
