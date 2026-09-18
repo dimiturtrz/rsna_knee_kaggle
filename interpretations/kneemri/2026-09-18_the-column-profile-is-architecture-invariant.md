@@ -131,6 +131,32 @@ combinations `merged3_corpus` explicitly did not try (per-site conditioning, har
 pool-then-specialise). Representation remains open on its own evidence (`knee-jk3`, a 0.044 gap at
 matched train loss).
 
+## What predicts the shape, and why the obvious correction is already closed
+
+Neither label noise (r = +0.081) nor architecture explains the ordering, so the question is what does.
+The strongest variable found is **positive count**: `r(AUC, log n_pos) = +0.536`, `r(AUC, prevalence) =
++0.438`. Both matched anatomical pairs track it — Medial Meniscus 1,779 positives at 0.9444 against
+Lateral Meniscus 706 at 0.8949 (+0.0495), Medial OA 1,102 at 0.9215 against Lateral OA 644 at 0.8755
+(+0.0460). It is partial (r² ≈ 0.29): Baker's is the best column of twelve on 566 positives and PF OA is
+weak on 1,448.
+
+**The correction that follows from it has been run, at both ends of the pipeline, and it is negative.**
+At the objective, `per_label_loss` weighted by inverse prevalence read **0.8414 against 0.8457, −0.0043**
+(`experiments/README.md:570-602`), and its pre-registered clause is what settles it: the gain was
+required to concentrate in the rare labels, and it concentrated there with the wrong sign — eleven labels
+inside −0.007, and **Fracture, the rarest at 314 positives and the most up-weighted, at −0.022**.
+Up-weighting a 314-positive column multiplies its gradient variance without adding information to it,
+and AUC being rank-based offers no positive-rate gain to set against that. At the ensemble, `member_curve`'s
+oracle — which picks per finding the best member *with the answers*, and therefore upper-bounds every
+per-label weighting scheme writable over these members — reads **+0.0002 over the plain average**
+(`experiments/README.md:602-633`).
+
+So prevalence predicts the profile without being a lever on it. The ledger's reading is the right one:
+prevalence here *is* the budget that buys the common labels their scores, not a mismatch to correct. This
+is the sixth route closed on the conserved shape. It does NOT close the loss-weight axis over **studies**
+(`severity_weight`, `experiments/README.md:2102`, knee-t1ho), which is a different mechanism and has its
+own evidence.
+
 ## The consequence for choosing work
 
 At `d/12` per column — settled, `kneemri-colnull` shipped constant 0.5 and read exactly 0.500 — the four
@@ -140,8 +166,8 @@ weak columns carry 0.19 of deficit between them and lifting them to 0.92 would b
 The profile is now measured invariant under **five encoder families** (this document) and under **three
 corpus sites** (`experiments/README.md:345-346`), and it does not track **label noise** (r = +0.081).
 So that lever is not reachable by swapping the encoder, adding a site, relabelling, mixing the output
-columns, or a loss term naming the axis — five routes, each closed on its own measurement. What is left
-is not a longer list of the same kind of move.
+columns, a loss term naming the axis, or reweighting the columns by prevalence — six routes, each closed
+on its own measurement. What is left is not a longer list of the same kind of move.
 
 So a candidate member is now cheaply gated before it costs a card: score it per column on this holdout
 and require it to WIN a column outright. Sixteen members across five families have won zero. A candidate
