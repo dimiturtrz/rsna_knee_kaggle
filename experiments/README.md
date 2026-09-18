@@ -16857,3 +16857,34 @@ transfer line at −2.7 sd. So 0.9078 predicts board 0.942 as an UPPER bound and
 over the 0.946 champion. B honest is not a champion candidate; B refitted would be, if a refit of it
 existed and if the refit term is ADDITIVE rather than a CEILING — which is exactly what `knee-uh1j5`
 answers today for one slot and no card.
+
+### `dml_b`'s peer term has no route to the board — warm start was the third blocked one, closed without a card — 2026-09-18
+
+`dml_b_s2026` reads 0.9078 ledger75, the highest this project owns. Its recipe's control reads 0.9053
+and shipped at board 0.941 (`kneemri-l75solo`, ref 56309162); that control's COLD full-corpus refit
+shipped at **0.944** (`kneemri-ffsolo`, ref 56296698), so the refit term on this exact recipe is +0.003
+and the cold refit already sits two ticks under the 0.946 champion. Carrying B's +0.0025 peer term
+through a refit would land on the champion — which is why it was worth an hour of reading before an hour
+of card.
+
+**All three routes are blocked, and the third was closed by a measurement already on disk.** The cohort
+refuses `--fold -1` by construction (`teacher_readings` writes the TRAINING split's ordering). A cold
+`--fold -1` run of B's recipe is `labelwise_depth24_drop40_long_ff` — the control refitted, peer term
+absent — and it is the 0.944 above. That left warm start, and `warm_calib_lowlr` (README:6453) answers
+it: warm starting has **no quality term**, measured twice at two backbone rates — 0.8577 against a cold
+parent's 0.8634, and quartering `--backbone-lr` moved it +0.0015. The mechanism is what kills the route
+rather than the delta: the curve reads **0.8540 at epoch 0, before the run has trained at all**, and then
+every epoch trades holdout for training loss (0.8206 → 0.4467 while the holdout falls to 0.8491). A refit
+is dark, so a warm refit would fly that descending trajectory blind.
+
+**What is not closed.** The measured cell is a warm start onto the corpus the parent already fitted. A
+refit adds 900 studies the parent never saw, and "trades holdout for loss" is a claim about memorising a
+training set that need not carry to data outside it. Re-open it with the HONEST instrument, never with a
+dark run: warm start `dml_b` at `--fold 0` for four epochs at 1e-5, ~20 min, holdout still held out. It
+only says something new if the curve comes back FLAT instead of descending. See knee-2yhah, closed.
+
+**The general form, which is the part worth carrying.** Every offline gain this project has found at the
+corner is trapped the same way: the ruler that can see it (909 held-out studies) and the ruler that pays
+(the board, via a full-corpus refit) cannot be spanned by any mechanism that needs the holdout to exist.
+`rank_stability` already said 909 studies cannot ORDER the shipping band (top arm holds rank 1 in 29.2%
+of resamples); this says something stricter — that they cannot EXPORT a gain from it either.
