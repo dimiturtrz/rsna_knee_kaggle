@@ -5,8 +5,13 @@
 # `--encoder-weights` reads, and its own docstring names the waste it was built to end: "every arm
 # repeating an architecture paid for the first eight epochs again — the ones that only re-learn what a
 # member on disk already knows." It was then never used. Zero of 131 arm scripts pass --encoder-weights,
-# --warm, --resume or anything like them, and `train` has no other warm-start flag. Every member this
-# project owns was fitted cold from the stock natural-image trunk.
+# --warm or anything like them. Every member this project owns was fitted cold from the stock
+# natural-image trunk.
+#
+# `--resume` is NOT one of the missing flags and never was a warm start: it exists (knee-c317d), it
+# restores the optimiser, schedule, scaler and four random streams, and it is proven to land a killed
+# run within 1e-6 of the uninterrupted one. It is opt-in on purpose — a default resume would silently
+# continue a stale checkpoint after a recipe edit, which is the arm you can no longer compare.
 #
 # That is not a small omission. 98 members on disk carry 36 distinct recipe skeletons and the modal one
 # accounts for 31 of them — a third of everything we own is the SAME decode path re-run with a different

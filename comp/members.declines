@@ -1603,3 +1603,26 @@ soup_anneal2_s2026
   / 0.9016 ledger75, below BOTH parents and on the K-law's -0.0044 per doubling. Declined as a member,
   kept as the reading that closed the weight-soup axis on its second explanation. Re-open only with
   members sharing a fine-tuned basin, never with a larger K.
+
+slicecover36_s2026
+  36-slice coverage against the 24-slice shipping recipe. It DIED AT EPOCH 6 OF 24 (convergence_check:
+  TRUNCATED, best e6 of 7 run, silent, mid-step 248/583, 19.93 GB peak against a 22 GB cap - not an OOM),
+  so its 0.8557 ledger75 is a FLOOR and may never be quoted as the recipe's number. The axis is closed
+  anyway, and on better evidence than a final score: the MATCHED-EPOCH trajectory over the seven epochs it
+  lived, on the same 909-study holdout, against TWO independent 24-slice controls that agree with each
+  other to within 0.003 (headlr_ship_s2026, labelwise_depth24_drop40_long_s2026).
+
+    epoch    36 slices   headlr_ship   depth24_long   deficit
+      0        0.7195      0.7238         0.7380      -0.0185
+      1        0.7381      0.7557         0.7705      -0.0324
+      2        0.7640      0.7851         0.7948      -0.0308
+      3        0.7929      0.8114         0.8080      -0.0185
+      4        0.8054      0.8252         0.8293      -0.0239
+      5        0.8202      0.8310         0.8309      -0.0108
+      6        0.8255      0.8447         0.8476      -0.0221
+
+  Behind at every one of seven epochs, mean -0.0224, which is 3.6x the 0.0062 paired floor, and 50% slower
+  per epoch (331 s against 222 s). Truncation moves a FINAL score; it cannot move a whole matched
+  trajectory, so the early death is not the explanation for this and the deficit is the slice count. Re-open
+  only by naming a mechanism that inverts a deficit which is stable-to-widening across the ramp - not by
+  running the same recipe to 24 epochs, which prices at ~2.2 h for P(clears the floor) ~ 0.10.
