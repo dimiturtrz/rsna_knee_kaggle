@@ -430,3 +430,48 @@ predicted board above the champion: 0.9435 at the in-band transfer constant, plu
 That is a knob and it is priced as one (knee-8bmi2, ~3.5 h, P ~0.35). The honest caveat is that
 `dml_b`'s +0.0025 edge over its own base sits INSIDE the 0.0053 paired floor, so the ruler that ranks it
 first cannot actually resolve it from second.
+
+## The solo is now a strategy, not a discipline — it pays on two boards (owner, 2026-09-18)
+
+Until today "one good member getting better" was a rule for staying honest: a way to stop buying seats on
+a plateau. The owner's framing makes it a strategy with two payoffs, and the second one is the thin lane.
+
+**The efficiency track has THREE prize places against 3943 teams on accuracy.** Our accuracy already clears
+its bar — `efficiency_read --live` reads the top-20 efficiency band at 0.933-0.957, median 0.946, and we
+hold 0.946. What separates us from a top rank is runtime alone: 41 teams outrank us on efficiency while
+scoring BELOW us, and at our accuracy the field spans efficiency ranks 8 to 3623.
+
+**The owner swapped our efficiency entry from a 0.939 multi-member entry to `extffsolo` (0.945, ONE member),
+and that reverses the exact trade this ledger recorded as a mistake.** README:5930 — our efficiency row once
+moved from `soloseat` (1 member, 0.925) to a multi-decode entry at 0.941: *"we bought 0.016 of accuracy and
+paid 229 ranks for it."* Today's swap buys accuracy AND runtime in the same move. Every 0.939 row on the
+board is a 3-to-8-member entry (`blendseat` 6, `blendthree` 6, `fasttrio` 3, `l75seat` 8), so the runtime
+cut is multiplicative, not marginal.
+
+**The cost ratio, measured from the served kernel logs.** `extffsolo`: 1 member, 1 decode read at 336,
+peak 0.8 GB vram. `tripleseat` (champion): 7 members + 1 foreign seat, 4 decode reads, peak 7.2 GB vram.
+**9x the VRAM and 4x the decode for +0.001 accuracy.** Caveat that must travel with these numbers: the
+served log is the COMMIT-time run on the 3-study public sample, not the scored hidden-test run, which
+Kaggle does not expose. So this is the structural cost ratio, not wall-clock.
+
+**CONSEQUENCE: a thousandth on the best solo is now worth double.** It buys accuracy rank on a board where
+we are 0.011 behind a leader we are measurably not closing (-0.00016/day), AND efficiency rank on a board
+where our score already sits at the top-20 median. Rank open levers accordingly: a solo improvement
+outranks a seat by the ratio of two payoffs to one.
+
+**Ensembles keep ONE job, and it is instrumentation.** The champion's 7 members buy +0.001 over the best
+solo. That spread is the live measurement of how much headroom the solo has left; when it reaches zero the
+solo has absorbed the ensemble. Poke it occasionally to read the spread — never to ship it.
+
+**What this does NOT license, and it cost a bead to learn (knee-i6ii7).** The obvious follow-on is "cut
+slices, cut runtime" — `extffsolo` runs 20. Two things refuse it. FIRST, the slice-count effect is
+family-dependent and OURS is unmeasured: `slice_count_maxpool` Q vs R reads 12->20 = -0.0001 (README:302)
+while `band_span_hold -> band_dense_hold` reads the same move at +0.0080 (README:4758), and README:4776
+states the disagreement is not resolvable. The -0.0001 carries the mechanism *"the head cannot spend the
+extra slices"* under MAX pooling (README:5273); we ship LABELWISE, whose per-label slots plausibly can.
+SECOND, and this is the ordering error worth remembering: the first draft of that bead asked for 10 min of
+card to measure the ACCURACY cost while only GUESSING the runtime gain. Measure the gain before pricing the
+cost. `comp/kernels/kneemri-loadcheck` times a per-member forward on a real T4 for no slot and no card
+(README:91), and a large fixed cost sits under every run -- 343 s before the script's first line, plus a
+248 s path-glob once found and fixed (README:35). If boot dominates, the slice knob is small regardless of
+what it costs in accuracy.
