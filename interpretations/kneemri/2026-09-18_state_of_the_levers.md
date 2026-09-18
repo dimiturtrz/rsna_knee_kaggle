@@ -22,11 +22,31 @@ Card cost of this audit: zero. It is arithmetic over things already on disk.
 | **in-domain MRI pretraining** — SSL on fastMRI/SKM-TEA | **published wash at our labelled scale** (+0.073 at 80 subjects, −0.005 at 800; we hold ~4,400) | README:7425, Zhang et al. MedIA 2024 |
 | **external data as LABELLED augmentation** — the one axis README:7425 left explicitly open | **closed on our own measurement**: `pool_specialise` FLAT, `noisy_student` 0.8548, `--corpus-oversample 2.22` does not lift the mean | README:15216, :12447, :10737 |
 | **recipe fragments** — any piece of the champion family | **closed entirely**; sign unanimous across seven leave-one-outs, `backbone_lr` at its optimum both sides | README:16503, knee-rn9py, knee-lm2ol |
+| **auxiliary objectives** — the twelve `--*-weight` arms at full budget | **−0.0019** against its own matched converged control, the `<= 0.000` branch | knee-evdfd (read 2026-09-18T02:14Z) |
 | **DINOv3 trunk, ours** | best honest member 0.8724 against seats 0.9045 | `2026-09-17_member_candidates.md` |
 | labels · cut · head_lr · resolution · overlap TTA | closed previously | prior ledger |
 
 **No unbounded single mechanism remains on available assets.** Every priced axis is bounded below the
 gap, most of them below the 0.0062 paired floor.
+
+## The pool's ORACLE is also below the gap
+
+The per-finding close says no single member leads a column. A weaker question is whether the pool leads
+*collectively*: take the best member in every one of the twelve columns at once, and grant it every
+advantage — the 374-way selection is not deflated, the leaders are read on the studies that chose them,
+and combining them is assumed free. That oracle's mean margin over the shipping solo is the mean of the
+twelve margins in `2026-09-18_the_pool_holds_no_per_finding_specialist.md`:
+
+```
+(0.0016 + 0.0113 + 0.0097 + 0.0057 + 0.0302 + 0.0002 + 0.0125 + 0.0120
+ + 0.0124 + 0.0096 + 0.0033 + 0.0062) / 12  =  +0.0096 offline75
+```
+
+**+0.0096 is the ceiling of every recombination of all 374 members**, and the board gap is 0.011. So the
+gap is not reachable by any reseating, re-weighting or per-column routing of what exists, even with an
+oracle doing the routing — and the real figure is smaller, because 0.0302 of that sum is MCL's
+selection artefact on the table's widest interval. This is the quantitative form of "the next member has
+to be BUILT": not a preference, a bound.
 
 ## The composition escape is NOT open by default
 
@@ -42,13 +62,29 @@ So "compose the surviving sub-floor terms" is a hypothesis owing its own arm eac
 The one composition explicitly still unspent is **+0.0056 distillation onto the SHIPPING recipe**
 (README:16599) — and the refutation above is evidence against exactly that pairing.
 
+## And the offline ruler no longer ORDERS members at the top
+
+Three solos have now shipped from the top of the offline ranking. Their offline75 spread is 0.0014 —
+far inside the 0.0062 paired floor, i.e. an offline TIE — and their board spread is 0.004:
+
+| member | offline75 | board | entry |
+|---|---|---|---|
+| `labelwise_ext_drop40_long_s2026` | 0.9045 | 0.937 | `extsolo_v1` |
+| `labelwise_depth24_drop40_long_s2026` | 0.9053 | 0.941 | `l75solo_v1` |
+| `headlr_ship_s2026` | 0.9059 | 0.937 | `headlrsolo_v1` |
+
+The body line fitted below 0.900 over-predicts all three, 3 of 3 LOW. So above offline75 ~0.904 the
+ruler is an upper bound and not a rank: **an arm selected on offline75 up there cannot be priced before
+its slot.** The consequence for the schedule is that the board's five slots a day are now the only
+instrument with resolution at the top, which is what makes a slot spent on a reseating expensive.
+
 ## What is actually live
 
 1. `headlr_ship_ff` — the `--fold -1` refit of the shipping solo, on the card now. Dark arm; its reading
    is a board slot, not a ledger row.
-2. `band_dense_drop40_long` then `severity_drop40_long` — the auxiliary-objective pair, chained behind it
-   (knee-evdfd), P(clears +0.0040) ~0.25, with a CONCENTRATION clause: the gain must land on the graded
-   labels or the mechanism is refuted whatever the mean does.
+2. ~~the auxiliary-objective pair~~ — CANCELLED 2026-09-18T02:14Z. Both had already run on 2026-09-13 and sat
+   unpriced; `reading_check --only` refused the re-arm and the pair reads −0.0019, the closing branch
+   (knee-evdfd). The card is free behind `headlr_ship_ff`.
 
 ## What this says about the schedule
 
