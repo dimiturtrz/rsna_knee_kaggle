@@ -26,7 +26,10 @@ MIB_PER_GB = 1024
 
 
 def main() -> None:
-    need = RunSetup.of(sys.argv[1:]).budget().needed()
+    budget = RunSetup.of(sys.argv[1:]).budget()
+    # A hand-named `--vram-gb` bounds what the allocator may RESERVE, so the run can never hold more than
+    # it: gating on a larger derived figure parks the arm for memory it is forbidden to take.
+    need = min(budget.needed(), budget.vram_gb or math.inf)
     # CEILING, because this number is compared against free VRAM and the comparison is one-sided: a MiB
     # rounded down is a MiB the arm will ask the allocator for and the gate did not require.
     sys.stdout.write(f"{math.ceil(need * MIB_PER_GB)}\n")

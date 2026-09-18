@@ -42,7 +42,7 @@
 #
 # deliberate: --fold -1 --ema — the champion's own fit, matched to `labelwise_depth24_drop40_long_ff`.
 # deliberate: --distill-weight 0.3 — `dml_b_s2026`'s own weight, and `distill_pairs`' control weight.
-# deliberate: --vram-gb 22 — owner VRAM cap 50-70% of the card; the twin's 28 predates DeviceBudget.needed().
+# deliberate: --vram-gb 18 — peak allocation 16.0 GB; the co-tenant holds ~8.6 GB, and 22 left the driver no headroom.
 #
 # CARD. ~25 min teach pass then ~3 h train. Nothing else of ours on the card.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
@@ -53,12 +53,12 @@ require "$MODELS/dml_a_s2026.pt"
 TEACH="$PROCESSED/dml_read_a_all.npz"
 FIT="--fold -1 --ema"
 
-run_gpu uv run --no-sync --project "$REPO" python -u -m kneemri.inference.teacher_readings \
+[ -f "$TEACH" ] || run_gpu uv run --no-sync --project "$REPO" python -u -m kneemri.inference.teacher_readings \
   --checkpoints "$MODELS/dml_a_s2026.pt" --out "$TEACH" --teach-all
 
 run_train dml_b_ff \
   $RECIPE $FIT --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 22 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 18 --band-low 0.1 --band-high 0.9 \
   --calibrated-targets --hold-annotations --slot-dropout 0.40 \
   --distill-weight 0.3 --teacher-targets "$TEACH" \
   --labels "$LABELS" --out "$MODELS/dml_b_ff.pt"

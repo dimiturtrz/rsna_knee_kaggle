@@ -34,3 +34,8 @@ def test_main(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str
 
     shipped = int(_printed(monkeypatch, capsys, ["--slices", "20"]))
     assert shipped > int(thawed), "the shipped 20-slice recipe at the default batch reserves far more"
+
+    capped = int(_printed(monkeypatch, capsys, ["--slices", "20", "--vram-gb", "18"]))
+    assert capped == 18 * MIB_PER_GB, "a named cap bounds the reservation, so the gate may not ask for more"
+    loose = int(_printed(monkeypatch, capsys, ["--slices", "20", "--vram-gb", "31"]))
+    assert loose == shipped, "a cap above the derived need does not inflate what the gate waits for"

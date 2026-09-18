@@ -369,6 +369,18 @@ labelwise_depth24_drop40_long_ff.pt     # DARK BY CONSTRUCTION -- `--fold -1 --e
                             # is the same recipe on fold 0 at 0.9053 ledger75, the best honest solo owned,
                             # seated in kneemri-tripleseat. Finished 24 of 24 epochs 2026-09-15. It may be
                             # seated and never quoted; any entry carrying it reads on the BOARD.
+dml_b_ff.pt                 # DARK BY CONSTRUCTION -- `--fold -1`, the third refit of this family and the
+                            # one that makes the other two READABLE. Its twin `dml_b_s2026` is 0.9078
+                            # ledger75, the highest this project owns, +0.0025 over the depth24 twin above.
+                            # THAT EDGE IS NOT WHY IT IS HERE, and the roster's own `dml_b` line says why:
+                            # the offline ruler does not order at the top, so 0.9078 predicts board 0.942
+                            # as an UPPER bound. It is rostered as the third point of an ADDITIVE-vs-CEILING
+                            # test, because the two refits above already read CEILING -- fold-0 twins 0.937
+                            # and 0.941 (spread 0.004) refit to 0.945 and 0.944 (spread 0.001, ORDER
+                            # INVERTED). A refit that erases a recipe gap is a ceiling, not an addition.
+                            # ADDITIVE lands it ~0.947-0.950, CEILING ~0.9445, and CEILING is the favourite
+                            # at P(clears 0.945) ~ 0.20. See knee-8bmi2 for the pre-registration.
+                            # It may be seated and never quoted; any entry carrying it reads on the BOARD.
 
 # ---- the operator pair, five members found already on disk and priced 2026-09-13 ----
 # `roster_check` named seven undocumented checkpoints and five of them were `drop40_long` runs nobody had
