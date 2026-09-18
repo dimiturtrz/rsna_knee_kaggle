@@ -352,18 +352,30 @@ labelled subjects and -0.005 at 800 (Zhang et al. MedIA 2024, README:7425); we h
 
 **The composition escape is spent, and it failed on the BOARD.** `headlr_ship_s2026` IS the shipping
 recipe plus every directional-positive knob, and at 0.9059 ledger75 it is the highest offline number the
-project owns. It read board **0.937**. The three highest offline members read 0.9045 / 0.9053 / 0.9059
-against board 0.937 / 0.941 / 0.937 — all three BELOW the fitted transfer line at -2.7 sd. So the knobs
-did compose offline and the composition did not transfer. That is a stronger statement than "the knobs
-are flat": it says the offline ruler's top end is winner's curse, and stacking more sub-floor terms
-against it is fitting the ruler rather than the task.
+project owns. It read board **0.937**, against `l75solo`'s 0.941 from a LOWER offline (0.9053). So the
+knobs did compose offline and the composition did not transfer.
+
+**The -2.7 sd that this paragraph originally rested on was a ruler artefact — RETRACTED 2026-09-18
+(knee-jw57g).** The sentence read "all three BELOW the fitted transfer line at -2.7 sd", quoting
+LEDGER75 offline values next to a MIDPOINT residual belonging to ONE entry. Refitted on n=48 rows
+carrying `offline75` (OLS board = -0.0603 + 1.104*offline75, residual sd 0.0017 — which reproduces
+CLAUDE.md's recorded whole-record constants exactly, and is what licenses the rest), the three read
+**-1.9 / +0.9 / -1.0 sd**: mean z -0.68, combined -1.17, not significant, and `l75solo` is ABOVE the
+line. The -2.8 sd is `l75solo`'s MIDPOINT residual, on a fit whose residual sd is 0.0089 — five times
+looser (knee-f9aao, knee-36xad).
+
+What survives is the n=1 observation in the first sentence: the full knob stack underperformed its own
+base on the board. That is a QUESTION at -1.9 sd, not a closed axis, and it may not be quoted as one.
+The "offline ruler's top end is winner's curse" reading is withdrawn — the good ruler does not show it.
 
 ### What this forbids
 
 Resolving the directional knobs individually was the obvious reply, and it prices badly. An OOF rotation
 (knee-700cm) takes the floor 0.0062 -> ~0.0028 but costs 5x training per member, so one knob comparison
-is ~9 h and a +0.003 knob still reads at ~1.1 sigma. Nine hours for one-sigma is not a measurement, and
-the -2.7 sd transfer failure says the number it produced would not transfer anyway.
+is ~9 h and a +0.003 knob still reads at ~1.1 sigma. Nine hours for one-sigma is not a measurement.
+The second half of this argument — that the -2.7 sd transfer failure says the number would not transfer
+anyway — is withdrawn with that number (knee-jw57g). The pricing stands on its own; the transfer
+objection does not.
 
 ### What is actually left
 

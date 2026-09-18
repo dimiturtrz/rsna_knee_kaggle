@@ -24,10 +24,10 @@
 #   offline member on disk, not as a confirmation of the peer term -- that term is unresolvable on any
 #   ruler this project owns, and a board row will not resolve it either.
 #
-# THE -2.7 sd TRANSFER FAILURE DOES NOT APPLY HERE
-#   The three highest offline members read board 0.937 / 0.941 / 0.937, all below the fitted line. Every
-#   one of those is a FOLD-0 shipping entry. The whole-corpus refits transferred at their anchors --
-#   0.944 and 0.945 -- so the curse is on the honest-fit road, not on this one.
+# THE TRANSFER OBJECTION DOES NOT BITE, AND THE NUMBER BEHIND IT WAS WRONG
+#   The audit's "-2.7 sd" mixed rulers and is retracted (knee-jw57g). Refitted on offline75 the three
+#   highest offline members read -1.9 / +0.9 / -1.0 sd, combined -1.17, not significant. This arm's own
+#   base is the +0.9 -- `l75solo`, ABOVE the transfer line -- so the prediction below is conservative.
 #
 # LEAK
 #   `teacher_readings` refuses `--fold -1` as an ARGUMENT, because teaching FROM a full-data member
