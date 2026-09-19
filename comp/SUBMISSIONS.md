@@ -4651,3 +4651,10 @@ The peer term reads -0.002, inside the top band's ~0.004 two-sd scatter: it buys
 schedule, the longer anneal HURTS. Stacked, they land below both parents. The champion `tripleseat_v2` stands at
 0.946, and the rank read live at 21:36Z is 68 of 3962, leader 0.957. The gap is still a member gap, and neither
 term closes any of it.
+
+## `headlrff_v1` — 0.938, ref 56348362, 2026-09-19 — the refit term does not carry the highest-offline75 base
+
+INSTRUMENT, pre-registered in knee-k7292: 0.940-0.945 the term carries / >=0.946 clears the champion / <=0.939 it
+does not. `headlr_ship_s2026` read 0.937 solo; its whole-corpus refit `headlr_ship_ff` reads 0.938, +0.001, inside
+the top band's ~0.004 two-sd scatter. The refit term now has four points, +0.001 / +0.003 / +0.005 / +0.008, and
+the best offline base drew the smallest. It is not a constant a plan can add to a base.
