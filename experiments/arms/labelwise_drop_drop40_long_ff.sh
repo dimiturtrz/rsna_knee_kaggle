@@ -29,11 +29,17 @@
 #             --band-high 0.9 --backbone-lr 4e-5 --calibrated-targets --hold-annotations — inherited
 #             verbatim from the fold-0 twin. Two things move, the fold and the EMA.
 #
-# deliberate: --vram-gb 18 — the BOTTOM of the owner's 50-70% band (16.3-22.8 GB), not the 22 its
-#             siblings carry, because a neighbour is resident this time (3.7 GB, 0% util at launch).
-#             The first launch carried NO bound at all and its recipe stamped `vram_gb 0.0`; an
-#             over-commit on a shared card pages over PCIe and has taken BOTH projects' processes down.
-#             The cost is a smaller batch on a 1.4 h arm, which is the cheap side of that trade.
+# deliberate: --vram-gb 22 — the owner's 50-70% band (16.3-22.8 GB), matched to every sibling _ff arm.
+#             The first launch carried NO bound at all and stamped `vram_gb 0.0`. The second tried 18,
+#             the bottom of the band, on the reasoning that a neighbour was resident (3.7 GB, 0% util):
+#             it OOMed at 14.31 GB allocated plus 3.09 GB reserved-but-unallocated, i.e. 17.4 of 18
+#             allowed, killed by fragmentation rather than by true demand. The arm's real need is
+#             ~17.5 GB, so 18 left no fragmentation headroom at all. 22 is the proven sibling value and
+#             still leaves ~6 GB for the neighbour at its measured 4.2 GB footprint.
+# deliberate: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True — the allocator fix the OOM itself named,
+#             aimed at exactly the 3.09 GB of reserved-but-unallocated that caused it. It lowers the
+#             headroom the bound has to carry, which is what makes 22 comfortable rather than merely
+#             larger.
 #
 # CARD. The twin measured ~0.8 h over 24 epochs; a full fold adds back the held-out quarter, so ~1.1-1.4 h.
 #   Nothing else of ours may share the card (`card_check`).
@@ -47,11 +53,13 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"
 
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 FIT="--fold -1 --ema"
 
 run_train labelwise_drop_drop40_long_ff \
   $RECIPE $FIT --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 20 --vram-gb 18 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 20 --vram-gb 22 --band-low 0.1 --band-high 0.9 \
   --calibrated-targets --hold-annotations \
   --stochastic-depth 0.05 --slot-dropout 0.40 \
   --labels "$LABELS" --out "$MODELS/labelwise_drop_drop40_long_ff.pt"
