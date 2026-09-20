@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# bead: knee-f2mj3
+# unmeasurable: this arm fits --fold -1, so it holds no study back and no ledger row can price it
+#               (knee-s8kim). Its ruler is the board row of the solo entry it feeds, exactly as it was
+#               for `labelwise_ext_drop40_long_ff`, whose own arm states the same bind. What licenses
+#               the spend is that the flag being removed was added for a reason that has since expired.
+#
+# WHAT THIS ARM IS
+#   `labelwise_ext_drop40_long_ff`'s byte-identical line with `--ema` REMOVED. Nothing else moves.
+#   One variable, and it is the one variable the matched-axis sweep says the ship sits wrong on.
+#
+# THE REASON THE FLAG EXISTED, AND WHY IT NO LONGER OBTAINS
+#   `labelwise_ext_drop40_long_ff.sh` states it: "--fold -1 --ema — the champion's own fit, matched so
+#   the new seat is shaped like the ones beside it rather than like our honest pool." That is an
+#   ENSEMBLE-SHAPE argument: it buys nothing about the member and everything about its six neighbours.
+#   The object that ships is `extffsolo_v1`, a SOLO. There are no neighbours, so the argument is spent.
+#
+# THE MECHANISM
+#   `kneemri/models/ema.py` states its own purpose: "An EMA is not a better model so much as a less
+#   arbitrary one" — it damps the 0.0062 three-seed wobble. It buys VARIANCE, not mean. We are 0.011
+#   board behind first, which is 4.9 sd of the top-band `ledger75` residual (sd 0.0022) — real, and not
+#   reachable by scatter. A competitor that is behind wants the upper tail; the damped middle is what it
+#   is paying to avoid.
+#
+# THE NUMBER, AND ITS HONEST WEIGHT
+#   `matched_axes` over 264 recipe-carrying members reads `ema False > True` at +0.0049, n=2, 2/2 agree,
+#   sd 0.0017. One of the two groups IS this member's own corner:
+#     labelwise_dense_drop40_long_s2026 0.9048 (False) vs chainfour_drop40_long_s2026 0.8982 (True)
+#     probe224_grand_noema_s2026        0.8808 (False) vs probe224_grand_s2026        0.8776 (True)
+#   BOTH pairs are single-seed and the pooled mean is UNDER the 0.0062 seed spread, so it is DIRECTIONAL
+#   ONLY and cannot be told from seed luck. This arm is not justified by +0.0049 and does not claim it.
+#
+# WHY THIS AXIS AND NOT ANOTHER
+#   The same sweep shows the shipping member already holds the favoured value on every other contrast
+#   the project owns — backbone_lr 4e-05, calibrated_targets True, epochs 24, image_size 336, mixup 0.0,
+#   slice_pooling labelwise, hold_annotations True, slot_dropout 0.40. The recipe axis is exhausted.
+#   `ema` is the single contrast where the ship sits on the disfavoured side.
+#
+# WHY THERE IS NO FREE VERSION OF THIS
+#   `WeightAverage.state_dict` returns the shadow and the live weights are never written, so the saved
+#   `model` tensor IS the average. The ema-off member cannot be lifted out of the existing checkpoint.
+#
+# THE SCHEDULE IS KNOWN-GOOD WITHOUT AN AVERAGE
+#   The risk a full fit carries is that with no holdout there is nothing to early-stop on, so a run
+#   without an average could land on an arbitrary final step. It cannot here: `--epochs 24` is fixed,
+#   and the fold-0 twin `labelwise_ext_drop40_long_s2026` runs this exact recipe with `ema False`,
+#   returns CONVERGED under `convergence_check`, and reads 0.9045 ledger75. The anneal, not the average,
+#   is what picks the endpoint.
+#
+# PRE-REGISTRATION (board, since there is no offline ruler)
+#   Ship as a SOLO against the standing `extffsolo_v1`, which is the same member with the flag on.
+#   >= +0.005 board   the flag was costing the solo what the matched groups say, and the ensemble-shape
+#                     justification was paying for a neighbour set this entry does not have.
+#   flat (within 0.004, which is 2 sd of the top-band residual)
+#                     EMA is free on a solo. That RETIRES the axis rather than leaving it open, and it
+#                     is the reading that the +0.0049 being under the seed floor already warned about.
+#   <= -0.005 board   the average IS load-bearing on a full fit with nothing held out, and the two
+#                     fold-0 groups do not transfer to `--fold -1`. Then `--ema` stays on every full fit
+#                     and the honest-pool readings stop being evidence about the ships.
+#
+# deliberate: --fold -1 — the champion's own fit shape, and the only way a member sees all ~4400
+#             studies. Kept; it is not this arm's variable.
+# deliberate: --slot-dropout 0.40 — imported operating point (knee-yotj8), not a swept knob.
+# deliberate: --epochs 24 --scheme extended --slices 20 --batch 4 --accumulate 3 --calibrated-targets
+#             --hold-annotations --backbone-lr 4e-5 — inherited verbatim from the twin. Unchanged.
+#
+# CARD. Same footprint as `labelwise_ext_drop40_long_ff`, which measured ~2.9 h on this card. Removing
+#   the average removes one multi-tensor kernel a step (~0.2%), so the estimate stands.
+#   Nothing else of ours may share the card (`card_check`).
+#
+# control  labelwise_ext_drop40_long_ff (on disk, identical line with `--ema`). The control is the
+#          STANDING BOARD ROW of `extffsolo_v1` at 0.945, not an offline comparison — neither member
+#          holds anything out, so no offline number can separate them.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+
+require "$LABELS"
+
+FIT="--fold -1"
+
+run_train labelwise_ext_drop40_long_noema_ff \
+  $RECIPE $FIT --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended \
+  --calibrated-targets --hold-annotations \
+  --batch 4 --accumulate 3 --slot-dropout 0.40 \
+  --labels "$LABELS" --out "$MODELS/labelwise_ext_drop40_long_noema_ff.pt"
