@@ -44,6 +44,7 @@ def _checkpoint(path: Path, value: float, **overrides: str) -> Path:
         "epoch": 3,
         "fingerprint": [1.0, 2.0],
         "fingerprint_config": {"img": 336},
+        "config": {"optim": {"lr": 4e-5}, "witness": {"studies": ["s1"], "predictions": [[value]], "batch": 4}},
     }
     torch.save(payload, path)
     return path
@@ -89,7 +90,12 @@ def test_weight_soup_averaged(tmp_path: Path) -> None:
 
 
 def test_weight_soup_write(tmp_path: Path) -> None:
-    """The soup keeps its first member's recipe, clears its claims, and drops the borrowed fingerprint."""
+    """The soup keeps its first member's recipe, clears its claims, and drops every borrowed witness of it.
+
+    Both claims about a specific set of tensors go: the fingerprint beside the recipe and the end-to-end
+    witness nested inside it. Carrying the latter made every soup read as a reading defect rather than as
+    a network nobody has witnessed yet.
+    """
     soup = WeightSoup([_checkpoint(tmp_path / "a.pt", 1.0), _checkpoint(tmp_path / "b.pt", 3.0)])
     written = torch.load(soup.write(tmp_path / "soup.pt"), map_location="cpu", weights_only=False)
     assert written["options"]["fold"] == "0"
@@ -97,6 +103,8 @@ def test_weight_soup_write(tmp_path: Path) -> None:
     assert written["epoch"] < 0
     assert written["holdout"] != written["holdout"]
     assert "fingerprint" not in written
+    assert "witness" not in written["config"], "a witness belongs to the tensors that produced it"
+    assert written["config"]["optim"] == {"lr": 4e-5}, "the rest of the recipe survives"
     assert torch.allclose(written["model"]["head.bias"], torch.full((WIDTH,), 2.0))
 
 

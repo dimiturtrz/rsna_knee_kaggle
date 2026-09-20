@@ -31,14 +31,24 @@ logger = logging.getLogger(__name__)
 SHIPPED_PACKAGE = "all_ours"
 """The directory under the processed root that `package_members` writes and `push.sh` uploads."""
 
-SECOND_SHELF = "members_2"
-"""The second shelf, pushed as its own Kaggle dataset and mounted BESIDE the first, in mount order.
+SHELF_GLOB = "members_*"
+"""How a shelf BESIDE the shipped one is recognised — discovered, never named.
 
 The shipped shelf holds 127 members and about 10 GB, so a member trained after the last push can only
 reach the board by re-pushing all of it — which is why every offline gain since was unshippable. A
-kernel sees both roots through `spanning`; a local check that reads only the first answers a different
-question than the kernel asks, and answers it wrongly in the direction that refuses a valid entry. The
-same fixed pair, in the same order, that `roster_check` documents against."""
+kernel sees every mounted root through `spanning`; a local check that reads fewer answers a different
+question than the kernel asks, and answers it wrongly in the direction that refuses a valid entry.
+
+This was `SECOND_SHELF = "members_2"`, one literal written the day shelf 2 opened, and it was wrong
+again the day shelf 3 opened: `mount_check` refused a kernel over a member that was packaged, pushed,
+live on Kaggle and named in the kernel's own `dataset_sources`, because the shelf it sits on was not
+the one name this constant held. `champion_check` had already written the rule down — "a literal of
+two, which made it wrong again the day shelf 3 opened; `shelves` discovers" — and this module did not
+follow it.
+
+A GLOB AND NOT EVERY SIBLING HOLDING A MANIFEST. The models root carries `pkg_ortho_probe` and
+`relabel7_members` too, and those are standalone packages a kernel mounts INSTEAD of this one; absorbing
+them would merge packages that exist precisely to stay apart."""
 
 
 class WeightsError(RuntimeError):
@@ -92,10 +102,20 @@ class MemberPackage:
         package, not to grow one.
         """
         package = cls.at(root, paths)
-        beside = package.root.parent / SECOND_SHELF
-        if root is None and (beside / "manifest.json").is_file():
+        if root is not None:
+            return package
+        for beside in package.shelves():
             package.absorb(cls(beside).members, beside)
         return package
+
+    def shelves(self) -> list[Path]:
+        """The other shelves mounted beside this one, in mount order.
+
+        A shelf is a sibling matching `SHELF_GLOB` that carries a manifest. The glob is what keeps a
+        standalone package — one a kernel mounts INSTEAD of this one — out of the span.
+        """
+        mounted = self.root.parent
+        return sorted(beside for beside in mounted.glob(SHELF_GLOB) if (beside / "manifest.json").is_file())
 
     def __init__(self, root: Path, tie: str | None = None) -> None:
         """A mounted package, optionally under a tie rule WE measured rather than one it declares.

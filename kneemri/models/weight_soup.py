@@ -72,6 +72,21 @@ MINIMUM_MEMBERS = 2
 DROPPED = ("fingerprint", "fingerprint_config")
 """Claims about weights that no longer exist. Dropped, never carried."""
 
+WITNESS = "witness"
+"""The end-to-end claim, nested inside the recipe rather than beside it — and dropped for the same reason.
+
+A witness is what TRAINING predicted for eight named studies, so it belongs to one set of tensors exactly
+as the fingerprint does. Carrying the first member's forward made every soup REFUSED by `witness_check`
+at 0.10-0.15 against a 0.0312 bound, which is inside the 0.05-0.5 band that check documents as the
+signature of a real reading defect — a false alarm wearing the costume of the one failure it exists to
+catch. Measured on `basinsoup_k3_s2026`: its witness was byte-identical to `basinsoup_c101`'s and 0.2497
+and 0.2776 from the other two children, so the distance being reported was the average differing from one
+child, which is what souping is for.
+
+A soup is therefore UNVERIFIED and never refused, and that is the honest state rather than a gap. A
+witness has to be recorded by the run that produced the weights; minting one for the average through the
+inference path would compare that path against itself and pass by construction."""
+
 
 class IncompatibleSoupError(ValueError):
     """Raised when checkpoints cannot be averaged, naming the key and the two values that disagree."""
@@ -145,6 +160,10 @@ class WeightSoup:
         payload["soup"] = [path.stem for path in self.members]
         for key in DROPPED:
             payload.pop(key, None)
+        recipe = payload.get("config")
+        payload["config"] = (
+            {key: value for key, value in recipe.items() if key != WITNESS} if isinstance(recipe, dict) else recipe
+        )
         torch.save(payload, out)
         return out
 

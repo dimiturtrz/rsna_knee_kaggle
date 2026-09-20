@@ -10,7 +10,7 @@ import torch
 
 from core.mounts import Mounts
 from core.paths import COMPETITION
-from kneemri.inference.member_package import SECOND_SHELF, SHIPPED_PACKAGE, MemberPackage, WeightsError
+from kneemri.inference.member_package import SHIPPED_PACKAGE, MemberPackage, WeightsError
 from kneemri.models.model import StudyModel
 
 from .members import DIM, SEED, SLOTS, _config, _FakeBackbone, _package
@@ -253,23 +253,51 @@ def test_at(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     assert MemberPackage.at(None, paths).root == shipped
 
 
+def test_shelves(tmp_path: Path):
+    """A sibling matching the glob AND carrying a manifest is a shelf; nothing else is.
+
+    Three equivalence classes beside the package: a shelf, a standalone package a kernel mounts
+    INSTEAD of this one, and a directory the glob matches with no manifest in it.
+    """
+    root = tmp_path / "members"
+    root.mkdir()
+    _package(root, identifier="shipped")
+    beside = tmp_path / "members_2"
+    beside.mkdir()
+    _package(beside, identifier="fresh")
+    (tmp_path / "pkg_ortho_probe").mkdir()
+    (tmp_path / "members_empty").mkdir()
+
+    assert MemberPackage(root).shelves() == [beside], "a manifest makes a shelf; the glob keeps the rest out"
+
+
 def test_shipped(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    """The local package as a KERNEL mounts it — the shipped shelf plus the shelf beside it.
+    """The local package as a KERNEL mounts it — the shipped shelf plus EVERY shelf beside it.
 
     A pre-flight built on `at` checks a package no kernel runs: it refused every entry naming a member
     on the second shelf while the entry was correct. An explicit `--root` is still exactly one shelf.
+
+    Three classes are on disk here: the shipped shelf, two shelves beside it (the literal that spanned
+    only the first of those refused a correctly packaged and uploaded member the day shelf 3 opened),
+    and a standalone package a kernel mounts INSTEAD of this one, which must stay out.
     """
     paths = _shipped(tmp_path, monkeypatch)
     root = MemberPackage.shipped_root(paths)
     root.mkdir(parents=True)
     _package(root, identifier="shipped")
-    beside = root.parent / SECOND_SHELF
+    beside = root.parent / "members_2"
     beside.mkdir()
     _package(beside, identifier="fresh")
+    third = root.parent / "members_3"
+    third.mkdir()
+    _package(third, identifier="newest")
+    apart = root.parent / "pkg_ortho_probe"
+    apart.mkdir()
+    _package(apart, identifier="standalone")
 
     spanned = MemberPackage.shipped(None, paths)
-    assert sorted(member.identifier for member in spanned.members) == ["fresh", "shipped"], "both shelves"
-    assert spanned.roots == [root, beside], "in mount order"
+    assert sorted(member.identifier for member in spanned.members) == ["fresh", "newest", "shipped"], "every shelf"
+    assert spanned.roots == [root, beside, third], "in mount order, and the standalone package stays apart"
 
     named = MemberPackage.shipped(root, paths)
     assert [member.identifier for member in named.members] == ["shipped"], "--root names a package, never grows one"

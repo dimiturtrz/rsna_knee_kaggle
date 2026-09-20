@@ -68916,6 +68916,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.inference.member_package.MemberPackage.shelves",
+      "label": "shelves",
+      "level": "method",
+      "parent": "kneemri.inference.member_package.MemberPackage",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.inference.member_package.MemberPackage.shipped",
       "label": "shipped",
       "level": "method",
@@ -71622,6 +71630,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members.MemberRoster.shelf",
       "label": "shelf",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster.shelves",
+      "label": "shelves",
       "level": "method",
       "parent": "kneemri.kaggle.package_members.MemberRoster",
       "role": null
