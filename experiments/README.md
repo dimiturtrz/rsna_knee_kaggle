@@ -17646,3 +17646,39 @@ live lever rather than merely the nearest to hand, which is what it was run to d
 remaining search: there is no large mis-closed axis, so the route to 0.955 is not one re-opened family but a
 chain of mechanism-sound increments against the ORIGINAL baseline. Running total after this sweep:
 **twelve lever searches, zero hits.**
+
+## The FP-only label cut has no matched pair: five v3 arms ran and not one is a single-term contrast — 2026-09-20T14:58Z
+
+The closed-set sweep left exactly one cell whose mechanism was UNEXPLAINED rather than measured-null: the
+one-sided 3.4:1 over-call in `report_labels_v2`, with `report_labels_v3.csv` on disk as the FP-only cut
+(error 0.2047 -> 0.1696, FP 108 -> 47). This is the audit of that cell, and it cost no card.
+
+**The cell is real, and the design was already solved here.** `--eval-labels` pins the ruler to v2 while
+`--labels` trains on v3, so the number stays comparable to every member in the ledger — the dark-arm trap
+(`recal_holdannot` left it unset and sits in population `bc485a68`, which is why its 0.9004 may not be
+read against anything in `eb3ba199`). Ten `recal_*` arms carry that pinned design.
+
+**But not one of them is a matched contrast, and the first reading of them was mine and wrong.**
+Comparing `recal_dense_s2026` (0.8923) against `labelwise_dense_drop40_long_s2026` (0.9048) reads -0.0125
+and is not a labels measurement: recal_dense is `--epochs 12 --slice-pooling max` with no slot-dropout,
+the base is `--epochs 24 --slice-pooling labelwise --slot-dropout 0.40`. FOUR terms move. `matched_axes
+--key labels` is the instrument that settles it and it returns NO v3 member in any group — the axis
+resolves only `v2` vs `negpull` (0.9053 vs 0.9044, **-0.0009**, nothing) and a five-way `*_span` group.
+
+**Two of the five v3 reads are FLOORS and must not be quoted.** `convergence_check` marks
+`recal_labelwise_s2026` TRUNCATED (best e1 of 2 run, 12 asked) and `recal_through_s2026` TRUNCATED
+(best e0 of 1 run). Their 0.8392 and 0.7712 are facts about killed processes. The family looks
+catastrophic only because of them; the two clean reads are 0.8945 and 0.8923 on short budgets.
+
+**So the ledger's own wording at :17484 stands.** "No arm has ever tested the FP-only intervention" is
+loose — arms exist — but correct in substance: no SINGLE-TERM test of it exists. The cell is still open
+and still unexplained, which is more than any other survivor of the sweep can say.
+
+**PRICED, NOT PLANNED.** The clean test is one arm: the soup parent's line with `--labels v3
+--eval-labels v2` and nothing else moving, against the existing 0.9073 twin. ~1.0 h card. The prior is
+weak and negative-leaning — five unmatched v3 reads all sit below their rough siblings, and the whole-table
+lane is closed on the BOARD (0.943 / 0.942 against the champion's 0.946) — so P(clears the 0.9117 bar)
+~0.15, P(positive at all) ~0.3. Expected value is knob-sized. It is worth running only as the INSTRUMENT
+that closes the last unexplained cell, and must be sold as that and never as an improvement.
+
+Running total after this audit: **thirteen lever searches, zero hits.**
