@@ -54,13 +54,18 @@ class ZippedSource(MRNetSource):
 
 @dataclass(frozen=True)
 class ExtractedSource(MRNetSource):
-    """A corpus already unpacked on disk, named by paths relative to its root so `_members` reads alike."""
+    """A corpus already unpacked on disk, named by paths relative to its root so `_members` reads alike.
+
+    EVERY file, not only the volumes: the download's label tables ship beside them and are read through
+    this same reader, and the volume consumer filters on `VOLUME_SUFFIX` itself. Listing only volumes
+    here made an extracted corpus one that had pixels and no labels.
+    """
 
     root: Path
 
     @override
     def names(self) -> list[str]:
-        return [path.relative_to(self.root).as_posix() for path in self.root.rglob(f"*{VOLUME_SUFFIX}")]
+        return [path.relative_to(self.root).as_posix() for path in self.root.rglob("*") if path.is_file()]
 
     @override
     def read(self, member: str) -> bytes:

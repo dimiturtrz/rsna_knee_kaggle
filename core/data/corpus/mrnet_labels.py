@@ -12,12 +12,13 @@ Case-number parsing lives here rather than beside `MRNetExam` because both sourc
 
 import io
 import logging
-import zipfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import override
 
 import pandas as pd
+
+from core.data.corpus.mrnet_source import MRNetSource
 
 logger = logging.getLogger(__name__)
 
@@ -77,20 +78,25 @@ class MRNetLabels(ABC):
 
 
 class ArchiveLabels(MRNetLabels):
-    """The tables as the Stanford download ships them — `<split>-acl.csv` beside the volumes."""
+    """The tables as the Stanford download ships them — `<split>-acl.csv` beside the volumes.
+
+    Read through `MRNetSource`, which is what makes an EXTRACTED download work: the volumes already
+    resolve that way, and a second reader that only understood the zip made the two halves of one
+    corpus disagree about what a download is.
+    """
 
     def __init__(self, archive: Path) -> None:
         self.archive = archive
 
     @override
     def table(self, split: str) -> dict[str, int]:
-        """One split's ACL table, read from the headerless CSV inside the archive."""
+        """One split's ACL table, read from the headerless CSV the download ships beside the volumes."""
         wanted = f"{split}-{ACL_LABEL}.csv"
-        with zipfile.ZipFile(self.archive) as archive:
-            for name in archive.namelist():
-                if Path(name).name == wanted:
-                    return self.verdicts(pd.read_csv(io.BytesIO(archive.read(name)), header=None, dtype=str))
-        raise FileNotFoundError(f"{wanted} is not in this archive")
+        source = MRNetSource.at(self.archive)
+        for name in source.names():
+            if Path(name).name == wanted:
+                return self.verdicts(pd.read_csv(io.BytesIO(source.read(name)), header=None, dtype=str))
+        raise FileNotFoundError(f"{wanted} is not in this download")
 
 
 class TableLabels(MRNetLabels):
