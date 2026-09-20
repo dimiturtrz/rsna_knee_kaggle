@@ -4755,3 +4755,22 @@ and it is now confirmed twice.
 (n=10 single-member entries, slope +1.071, intercept −0.0307, resid sd 0.0019) puts board 0.955 at
 offline75 **0.9201**. The best fold-0 fit the project owns is `dml_b_s2026` at 0.9078. The gap to first
 place is **+0.0123 offline75**, and souping's measured size is +0.0016.
+
+## 2026-09-20, slots 4 and 5 — the fold penalty, measured
+
+`basinsoupffk3_v1` (ref 56407615, board **0.945**) and `basinsoupfold0_v1` (ref 56407707, board
+**0.943**) are one matched pair, shipped as instruments. Same K=3 soup shape, same recipe; the only
+difference is that one line's children saw the 909 held-out studies and the other's did not.
+
+**The fold penalty is 0.002** — twice the board's own 0.001 resolution, and a fifth of the 0.011 gap to
+first place. A fold-0 `ledger75` number is therefore **board-predictive at a −0.002 offset**, which is
+what the slot bought: the honest fold-0 shelf can now rank candidates against the board without a slot
+being spent to find out.
+
+It also retires `knee-xjxdn`. The apparent fold-0/`_ff` anti-correlation was three points spanning
+0.0033, under the 0.0053 paired floor; the direct matched pair the bead never had reads +0.002 in the
+ordinary direction.
+
+Second reading, from the K=3 row: dropping the anchor parent out of the soup costs 0.001, so the
+children carry the soup rather than the parent being averaged back in. Directional only — inside the
+0.0022 top-band residual sd.
