@@ -17303,3 +17303,47 @@ mode pins 3 frozen norm layer(s)` (36 would have meant a frozen trunk answering 
 recipe can be run at, so this run gives **no evidence that a lighter footprint clearing a 10%
 neighbour-cost bar exists**. Card arms wait for a card that is ours alone; until then the score levers
 that remain are the ones that need no card, which is what the slot spent at this mark was chosen to be.
+
+## The stack is DINOv2-SPECIFIC: it carries +0.054 on a ViT and 0.000 on a CNN — 2026-09-20
+
+`resnet_stack_224` (knee-67rgi) finished 12 of 12 at 12:17Z, `convergence_check` clean (converged,
+peak e9, neither TRUNCATED nor UNDERTRAINED). Read against its own pre-registration, both rulers, all
+909 studies, same split as the rest of the CNN lane:
+
+```
+resnet_224_short_s2026   0.8527 midpoint   0.8842 ledger75   best epoch  8 of 12   (foreign recipe)
+resnet_stack_224_s2026   0.8459 midpoint   0.8821 ledger75   best epoch  9 of 12   (OUR stack)
+resnet_224_long_s2026    0.8460 midpoint   0.8764 ledger75   best epoch 12 of 48
+```
+
+**The branch was `>= 0.8527 midpoint` and it reads 0.8459 — a miss by 0.0068, so the `< 0.8527` branch
+fires and the CNN-under-our-stack lane closes as pre-registered.**
+
+**The two rulers agree on SIGN and disagree on SIZE, and that is written down rather than used.**
+ledger75 reads −0.0021, which is inside the 0.0053 paired floor and at the 0.0022 top-band residual sd —
+a tie, not a loss. The pre-registration was written in midpoint, so the branch is the midpoint's; had it
+been written on the better ruler the honest verdict would have been NULL rather than NEGATIVE. The
+difference does not reopen the lane, because neither ruler shows a GAIN, and the lane was opened on the
+hypothesis that the stack would carry a CNN upward. Recorded so the next pre-registration on this
+instrument states its ruler.
+
+**THE FINDING IS LARGER THAN THE BRANCH.** The same stack — labelwise pooling, calibrated targets, held
+annotations, slot-dropout 0.40, stochastic depth, whole-stack unfreeze — is worth **+0.054** on DINOv2-S
+(native224 0.8502 → 0.9045) and **0.000 to −0.007** on resnet50d. It is not a general recipe that we
+happened to develop on a ViT; it is a set of operators that only pay on that representation. Two
+consequences, both of which cost card if unwritten:
+
+- The CNN lane's best member remains `resnet_224_short_s2026` at 0.8842 ledger75, **0.0236 under** our
+  best honest base (`dml_b_s2026` 0.9078). Closing that with a CNN needs a term nobody has a mechanism
+  for; the stack was the candidate and it is spent.
+- **`knee-mc23l` (resnet_stack at 336) is STOOD DOWN, not deferred.** Its gate was this arm clearing
+  0.8527 midpoint and the gate failed. The arm is written and `arm_check`-clean on disk, but its premise
+  — that the stack transfers to a conv trunk and resolution then scales it — is what this reading
+  refutes. Resolution has no mechanism to be larger for a trunk the stack does not move at all.
+
+**What it does NOT rule out.** This arm carried two unmatched terms against the reference: 12 slices
+(the ledger prices that axis at −0.0001, flat, so it cannot account for 0.0068) and band 0.2–0.8 against
+the reference's 0.1–0.9, for which this project has **no measured number**. That residual is stated as a
+residual: absent a band term, a miss is a miss and the pre-registration stands. It is not a reason to
+spend card, because the effect would have to be 0.007 on an axis whose neighbour axis reads flat.
+
