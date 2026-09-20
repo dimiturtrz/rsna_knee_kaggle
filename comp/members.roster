@@ -947,10 +947,16 @@ dml_b_s2026.pt              # 0.9078 ledger75, peak epoch 18 of 24, CONVERGED �
                             # labelwise_depth24_drop40_long_s2026's 0.9053, +0.0025). Both deltas sit
                             # inside the 0.0062 paired floor and are DIRECTIONAL; what is not directional
                             # is the LEVEL, and a member cannot be unshippable for having the best number.
-                            # NOT a champion candidate on its own: the offline ruler does not order at the
-                            # top (three solos shipped off the top of it read board 0.937/0.941/0.937, all
-                            # below the fitted transfer line at -2.7 sd), so 0.9078 predicts board 0.942 as
-                            # an UPPER bound against a 0.946 champion. Its route to a refit is OPEN but
+                            # NOT a champion candidate on its own: 0.9078 predicts board 0.9423 against a
+                            # 0.946 champion, which is 0.0034 of offline75 short of the 0.9112 the fitted
+                            # transfer line puts the champion at. That prediction is a POINT, not an upper
+                            # bound: this line used to read "the offline ruler does not order at the top
+                            # (three solos ... below the fitted transfer line at -2.7 sd)" and knee-lskiu
+                            # refuted it on the current record — those residuals are -0.0029/-0.0032/-0.0017
+                            # on a residual sd of 0.0017, so -1.7/-1.9/-1.0 sd, and the top quartile's mean
+                            # residual is -0.0004 against the rest's +0.0001 with no saturation. Read the
+                            # bars from the fit (n=48, slope +1.10), never from this line. Its route to a
+                            # refit is OPEN but
                             # unbuilt: this line said the cohort "refuses --fold -1 by construction" and
                             # that was a capability filed as a law — teacher_readings._split handles
                             # fold<0 explicitly and teach() only WARNS. What blocks it is teacher-file

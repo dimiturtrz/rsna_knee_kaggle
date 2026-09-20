@@ -2966,6 +2966,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.matched_axes",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.matched_axes",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.matched_axes",
+      "target": "kneemri.evaluation.member_pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.matched_axes",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.member_axes",
       "target": "core.cli",
       "weight": 1
@@ -19312,6 +19336,96 @@
       "kind": "calls",
       "source": "kneemri.evaluation.locator_audit.main",
       "target": "kneemri.models.locator.SliceCorpus.read",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.matched_axes.AxisContrast",
+      "target": "kneemri.evaluation.matched_axes.AxisContrast",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "target": "kneemri.evaluation.ledger75.Ledger75Row",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "target": "kneemri.evaluation.matched_axes.AxisContrast",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.at",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.at",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.row",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.at",
+      "target": "kneemri.evaluation.member_pool.MemberPool.at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.contrasts",
+      "target": "kneemri.evaluation.matched_axes.AxisContrast.oriented",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.contrasts",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes.groups",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.contrasts",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes.keys",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.contrasts",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes.readings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.groups",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes.recipe_value",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.MatchedAxes.readings",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes.recipe_value",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.main",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes.at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.matched_axes.main",
+      "target": "kneemri.evaluation.matched_axes.MatchedAxes.recipe_value",
       "weight": 1
     },
     {
@@ -42449,7 +42563,7 @@
       "role": null
     },
     {
-      "descendants": 334,
+      "descendants": 335,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -42537,7 +42651,7 @@
       "role": null
     },
     {
-      "descendants": 121,
+      "descendants": 122,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -42884,6 +42998,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.locator_audit",
       "label": "locator_audit",
+      "level": "module",
+      "parent": "kneemri.evaluation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes",
+      "label": "matched_axes",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -47198,6 +47320,22 @@
       "label": "LocatorAudit",
       "level": "class",
       "parent": "kneemri.evaluation.locator_audit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.AxisContrast",
+      "label": "AxisContrast",
+      "level": "class",
+      "parent": "kneemri.evaluation.matched_axes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "label": "MatchedAxes",
+      "level": "class",
+      "parent": "kneemri.evaluation.matched_axes",
       "role": "satellite"
     },
     {
@@ -60006,6 +60144,110 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.locator_audit",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.AxisContrast.agreement",
+      "label": "agreement",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.AxisContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.AxisContrast.line",
+      "label": "line",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.AxisContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.AxisContrast.mean",
+      "label": "mean",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.AxisContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.AxisContrast.oriented",
+      "label": "oriented",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.AxisContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.AxisContrast.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.AxisContrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes.at",
+      "label": "at",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes.contrasts",
+      "label": "contrasts",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes.groups",
+      "label": "groups",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes.keys",
+      "label": "keys",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes.recipe_at",
+      "label": "recipe_at",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.MatchedAxes.recipe_value",
+      "label": "recipe_value",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes.MatchedAxes",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.matched_axes.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.evaluation.matched_axes",
       "role": null
     },
     {
