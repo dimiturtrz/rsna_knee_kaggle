@@ -17714,3 +17714,44 @@ whatever asks the cross-site question later.
 
 Running total after this audit: **thirteen lever searches, zero hits** — unchanged; this is a measurement,
 not a hit.
+
+## 2026-09-20 19:44Z — cycle length BUYS the divergence and the soup pays for it: souping closes on its constraint
+
+Arm `experiments/arms/basinsoup2.sh`, bead knee-ted6u, one term against `basinsoup`: `--epochs 8`
+instead of 4, same parent, same `--backbone-lr 2e-5`, fresh seeds 201/202/203. Priced on
+`ledger75 @ holdout909`, 1.9 h of card, no slot.
+
+| member | ledger75 | vs parent |
+|---|---|---|
+| `labelwise_ext_drop40_long_ema_s2026` (the parent) | 0.9073 | — |
+| `basinsoup_k3_s2026` (the 4-epoch children) | **0.9089** | +0.0016 |
+| `basinsoup2_c201` | 0.9047 | −0.0026 |
+| `basinsoup2_c202` | 0.9055 | −0.0018 |
+| `basinsoup2_c203` | 0.9067 | −0.0006 |
+| `basinsoup2_k3_s2026` | 0.9075 | +0.0002 |
+| `basinsoup2_k4_s2026` | 0.9080 | +0.0007 |
+
+**0.9075 and 0.9080 are both below 0.9089, which is the arm's own third branch, pre-registered before it
+ran: cycle length is not the term either, and souping closes on its CONSTRAINT.**
+
+**THE BUILT-IN FALSIFIER INVERTED, AND THAT IS THE RESULT.** `basinsoup` read K=3 and K=4 agreeing to four
+decimals (0.9089 both), which said the children had never left the parent's point and the average had
+almost nothing to average. Doubling the cycle was aimed at exactly that, and it WORKED: here K=3 reads
+0.9075 against K=4's 0.9080, a 0.0005 separation, so the children genuinely diverged. The purchased
+divergence made the product worse. Eight epochs at 2e-5 left all three children BELOW the parent
+(−0.0026 / −0.0018 / −0.0006), and a uniform average of three sub-parent points lands sub-parent-soup.
+K=4 recovers +0.0005 of it, which is the average being dragged back toward the one good point in the pot.
+
+**So the constraint was never child divergence — it is that every child this parent can produce is worse
+than the parent.** The average can only interpolate between one good point and worse ones, which makes
+`basinsoup`'s +0.0016 the reading of the *least* travelled children available, the closest thing to a
+no-op average. More travel, more loss, monotonically across both arms. There is no cycle length at which
+this reverses, because the direction of travel away from a converged 23-epoch EMA parent is down. That is
+the third and last explanation weight-space souping had here, and it is the one that closes the family
+rather than a term in it: heterogeneity (2026-09-17), the anneal point (2026-09-18), and now divergence.
+
+Convergence clean — the children peaked at e3 / e3 / e5 of the 8 asked, no `TRUNCATED` row, so these are
+facts about the recipe and not about a killed process.
+
+**The best solo this project owns stands at `basinsoup_k3_s2026`, 0.9089 offline75, against the 0.9117 a
+solo needs to beat the pinned 0.946 champion. The gap is 0.0028 and souping no longer has a path to it.**
