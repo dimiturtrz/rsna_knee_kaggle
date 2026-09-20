@@ -60,8 +60,18 @@
 #   `device_budget` records 2026-08-17 — an over-commit paged over PCIe, drew three nvlddmkm engine
 #   resets, and took BOTH projects' processes down. Slack is not free when a co-tenant holds the card.
 #   BatchNorm still sees ~144 images per micro-batch, an order past the 32 where Wu & He's curve flattens.
-#   torch.compile is deliberately NOT used: it fuses into larger kernels, which is precisely what would
-#   queue biohub's bursts behind ours. `channels_last` is absent from this codebase and is not taken.
+#   `channels_last` is absent from this codebase and is not taken.
+#
+#   THE PARAGRAPH ABOVE WAS FALSIFIED BY THIS ARM'S OWN RUN, 2026-09-20 (knee-67rgi). "The headroom is
+#   real but lives in the gaps between its bursts" predicted that many short kernels would interleave.
+#   They did not, they CONTENDED: biohub's median step rate went 10.0 it/s pre-arm -> 6.7 with this arm
+#   resident -> 9.1 within 90 s of killing it. That is -33% on the neighbour, and the recovery is what
+#   makes it a mechanism rather than a coincidence. The arm was killed at epoch 5 of 12 (holdout 0.8122,
+#   still climbing) and its reading forfeited. DO NOT RE-ARM THIS WHILE A CO-TENANT IS RESIDENT. Two
+#   further rules this bought, both cheap and both learned the expensive way: a co-tenancy sample taken
+#   inside the first ~2 min measures WARMUP and lies (this one read +25% FASTER before settling at -33%),
+#   and 6 GB / batch 2 was ALREADY the small end, so there is no evidence a "lighter" footprint exists
+#   that clears a 10% neighbour-cost bar.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"

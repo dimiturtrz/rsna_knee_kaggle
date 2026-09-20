@@ -17260,3 +17260,46 @@ of a coefficient that currently sits in the recipe table with a sign that a matc
 **WHAT IT DOES NOT RULE OUT.** This is one corner (drop40, 24 epochs, labelwise) at one fold. It says
 nothing about ema on a different trunk or a different schedule, and the cross-member grouping may still
 be measuring a real fold term that deserves its own matched arm.
+
+### Co-tenancy is not free, and the "burst gaps" premise is wrong: a 6 GB arm costs the neighbour 33% (2026-09-20)
+
+`resnet_stack_224` was armed on a card shared with another project by the owner's arrangement, under a
+grant of roughly 30% utilisation and one hard constraint — "we dont want thrawing". It was designed for
+that: batch 2 with `--accumulate 4` rather than a larger micro-batch (**many short kernels, not few long
+ones**), `--vram-gb 6` derived with no slack, peak 5.70 GB reserved. The premise, written into the arm's
+own header, was that the neighbour is bursty (SM 14-58%, mean ~36) and therefore **the headroom is real
+but lives in the gaps between its bursts**.
+
+**THE PREMISE IS FALSE, AND THE RECOVERY IS WHAT PROVES IT.** biohub's median step rate, over matched
+windows on its own log:
+
+| when | median it/s | n | vs pre-arm |
+| --- | --- | --- | --- |
+| pre-arm baseline | 10.0 | 59 | — |
+| ~2 min after launch | 12.5 | 20 | **+25%, and this reading is WORTHLESS** |
+| steady state, arm resident | 6.7 | 24 | **−33%** |
+| clean 75 s re-sample | 6.7 | 13 | −33% |
+| 90 s after the kill | 9.1 | 11 | −9%, back inside its own spread |
+
+Short kernels did not interleave into the gaps; they contended. The kill restoring the neighbour within
+90 seconds is the part that makes this a **mechanism** rather than a coincidence — it is the one test
+that separates "our arm was the cause" from "the neighbour changed phase", and it fired clean.
+
+**THE +25% IS THE MOST EXPENSIVE NUMBER HERE.** A co-tenancy sample taken ~2 min after launch measured
+WARMUP and compile, not steady state, and it read the sign BACKWARDS — faster, not slower. Acting on it
+would have licensed exactly the arm that was costing a third of the neighbour's throughput. **A
+co-tenancy reading inside the first few minutes is not a weak measurement, it is an inverted one.**
+
+**WHAT IT COST AND WHAT IT DID NOT CLOSE.** The arm died at epoch 5 of 12 with holdout 0.8122 still
+climbing (0.754 → 0.7968 → 0.8122), 22 min of card for no number. Under `one_cycle` the anneal never ran,
+so **0.8122 is a FLOOR**, which is what `convergence_check` says about any TRUNCATED run — it sits below
+all three pre-registered branches for a reason that has nothing to do with the trunk. So **the CNN-under-
+our-stack lane (knee-67rgi) is OPEN and unpriced**, and must not be read as the closed CNN axis at
+README:7796, which is about foreign-corpus trunks a full point lower. The harness was verified before the
+kill and was not the suspect: the recipe dump confirmed `unfreeze_last 16` with the log reading `train
+mode pins 3 frozen norm layer(s)` (36 would have meant a frozen trunk answering a different question).
+
+**WHAT IS NOW PRICED IS THE VENUE, NOT THE IDEA.** 6 GB at batch 2 was already the small end of what this
+recipe can be run at, so this run gives **no evidence that a lighter footprint clearing a 10%
+neighbour-cost bar exists**. Card arms wait for a card that is ours alone; until then the score levers
+that remain are the ones that need no card, which is what the slot spent at this mark was chosen to be.

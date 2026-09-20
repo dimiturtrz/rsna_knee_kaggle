@@ -1680,7 +1680,16 @@ dml_b_ff
   FOLD-AWARE road, which was never the thing shipped here -- re-opening it means answering this reading,
   not re-quoting the 0.9078.
 
-soup336_k3_s2026 / soup336_k5_s2026 / soup336_k8_s2026
+soup336_k3_s2026
+  DECLINED 2026-09-20 at 0.8949 ledger75, the second rung of the soup336_k* ladder — see the shared
+  ladder argument under soup336_k8_s2026 below, which is what this decline rests on rather than the
+  single number.
+
+soup336_k5_s2026
+  DECLINED 2026-09-20 at 0.8916 ledger75, the third rung of the soup336_k* ladder — see the shared
+  ladder argument under soup336_k8_s2026 below.
+
+soup336_k8_s2026
   DECLINED 2026-09-20 on a MONOTONE ladder, not on any one number. Priced together on the 909 at
   ledger75: k2 0.9015, k3 0.8949, k5 0.8916, k8 0.8855 — every added ingredient costs score, and the
   span k2->k8 is 0.0160, more than twice the 0.0062 seed spread, so the ordering is not scatter. The
