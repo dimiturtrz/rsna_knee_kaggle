@@ -44,3 +44,10 @@ basinsoup_k4_s2026.pt       # 0.8709 midpoint / 0.9089 ledger75. The same averag
                             # as a fourth member. It reads IDENTICAL to k3 to four decimals, which is the
                             # measurement that the children never left the parent's point — seat it only
                             # as k3's alternate, never beside it.
+basinsoup_ff_k4_s2026.pt    # DARK, fold -1: no offline number exists or can be made. The same K=4 uniform
+                            # weight average as the row above, moved onto the FULL-DATA line: parent
+                            # labelwise_ext_drop40_long_ff (`extffsolo_v1`, board 0.945, the best solo this
+                            # project owns) plus three 4-epoch seed-children forked off it at backbone-lr
+                            # 2e-5, seeds 301/302/303. On the fold-0 line that operation read +0.0016
+                            # ledger75 (0.9073 -> 0.9089), the only weight-space op this project has
+                            # measured positive. Shipped as a solo; the board is its only ruler.

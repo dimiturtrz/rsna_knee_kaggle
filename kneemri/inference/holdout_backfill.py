@@ -275,13 +275,16 @@ def main() -> None:
             # reason a refresh does — the gate keeps a plain walk from re-deriving what is done.
             destination = sizing.destination(checkpoint) if sizing else checkpoint
             destination = regroup.beside(destination) if regroup else destination
+            # Before the holdout gate, not inside it. `stamp` is a no-op for a checkpoint already
+            # witnessed, so the walk costs nothing — and a soup of FULL-DATA fits holds nothing out,
+            # so it refuses backfill below and reaches no other stamping path in the repo. Under the
+            # gate, a fingerprint was available only to a member that could also be scored, which made
+            # every dark soup unshippable for a reason unrelated to shipping (knee-emyky is the same
+            # defect one branch earlier).
+            if not (sizing or regroup):
+                backfill.stamp(Member.from_checkpoint(checkpoint), destination)
             if HoldoutRecord(destination).exists() and not (arguments.refresh or arguments.restamp):
                 logger.info("%s: already keeps its predictions", checkpoint.stem)
-                # A run that kept its predictions may still carry no fingerprint — every soup on disk
-                # does — and `stamp` is a no-op for one already witnessed, so the walk costs nothing
-                # and a soup backfilled before knee-emyky becomes shippable without re-deriving.
-                if not (sizing or regroup):
-                    backfill.stamp(Member.from_checkpoint(checkpoint), destination)
                 continue
             try:
                 plan = Backfill.of(checkpoint)
