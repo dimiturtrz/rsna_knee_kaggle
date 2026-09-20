@@ -53,16 +53,18 @@ from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
 logger = logging.getLogger(__name__)
 
 ROSTER = Path("comp/members.roster")
-ROSTERS = (ROSTER, Path("comp/members2.roster"))
-"""Every shelf a member may be named on, in mount order.
+ROSTERS = MemberRoster.shelves()
+"""Every shelf a member may be named on, in shelf order.
 
-There are two because the shipped package is ~10 GB: adding one member to it means re-pushing all of
-it, so members trained after the last big push live in a SECOND dataset mounted beside the first
-(`MemberPackage.spanning`). That is a second shelf, never a second standard — this check reads both and
-holds every member on either to the same rule, so moving a line between them changes what gets pushed
-and nothing about what is documented. A name on BOTH shelves is a duplicate the MOUNT refuses, and
-`duplicated` is what names it here — this docstring used to claim `packaged` caught it "because it is a
-set", which is backwards: a set is how the two names quietly become one. See knee-hcu3k."""
+There is more than one because the shipped package is ~13.8 GB: adding one member to it means
+re-pushing all of it, so members trained after the last big push live in a LATER dataset mounted beside
+the first (`MemberPackage.spanning`). That is another shelf, never another standard — this check reads
+them all and holds every member on any of them to the same rule, so moving a line between them changes
+what gets pushed and nothing about what is documented. A name on TWO shelves is a duplicate the MOUNT
+refuses, and `duplicated` is what names it here — this docstring used to claim `packaged` caught it
+"because it is a set", which is backwards: a set is how the two names quietly become one. See
+knee-hcu3k. The tuple was a LITERAL of two until shelf 3 opened and this check reported both its
+members undocumented; `shelves` discovers them instead."""
 CHECKPOINT_SUFFIX = ".pt"
 CHECKPOINT_GLOB = f"*{CHECKPOINT_SUFFIX}"
 

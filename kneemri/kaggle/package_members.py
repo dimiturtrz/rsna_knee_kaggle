@@ -112,9 +112,36 @@ class MemberRoster:
     the member and every offline reading of it stays valid; only a `chosen` tuple is refused.
     """
 
+    SHELF_DIR = Path("comp")
+    SHELF_GLOB = "members*.roster"
+
     @classmethod
     def read(cls, path: Path) -> "MemberRoster":
         return cls(path.read_text(encoding="utf-8"))
+
+    @classmethod
+    def shelves(cls, directory: Path | None = None) -> tuple[Path, ...]:
+        """Every shelf that ships, discovered rather than listed, in shelf order.
+
+        A shelf exists because `kaggle datasets version` re-pushes a whole dataset: at 156 members and
+        ~13.8 GB, putting one new member on the first shelf taxes its first submission with all of it.
+        So shelves ROTATE — a new one opens whenever the current one stops being cheap — and the count
+        is a fact about upload cost, never about what is documented or shippable.
+
+        That rotation is why the list is a glob. Three modules each held their own literal tuple, and
+        opening the third shelf made all three wrong at once: `roster_check` reported its two members
+        undocumented, `champion_check` could not have rebuilt a pin that seated one, and
+        `submit_check` — whose copy is the LICENCE gate — would have read a foreign member's
+        `# licence:` tag on any shelf but the first as absent, which is the one direction that fails
+        silently. Shelf 2 carries no tag today, so that hole was latent; it would not have stayed that
+        way.
+
+        Ordered by the shelf's own number so shelf 10 follows shelf 9 rather than shelf 1, which plain
+        lexicographic sorting of the filenames gets wrong. Order is presentation only — `spanning`
+        merges every mounted root and REFUSES a name two shelves both hold.
+        """
+        found = (directory or cls.SHELF_DIR).glob(cls.SHELF_GLOB)
+        return tuple(sorted(found, key=lambda shelf: int("".join(c for c in shelf.stem if c.isdigit()) or "1")))
 
     def patterns(self) -> list[str]:
         """The named members, without the prose that says why each is in the package."""

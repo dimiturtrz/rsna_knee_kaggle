@@ -32,9 +32,14 @@ from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)
 
-ROSTER = Path("comp/members.roster")
-"""Where the licence tags live. The roster is the only file that states, per member, which external
-table it trained on, so it is the only file that can answer whether a seat is shippable at all."""
+ROSTERS = MemberRoster.shelves()
+"""Where the licence tags live — EVERY shelf, not the first one. The rosters are the only files that
+state, per member, which external table it trained on, so they are the only files that can answer
+whether a seat is shippable at all.
+
+This was `comp/members.roster` alone, which reads a tag on any later shelf as ABSENT — and absent is
+the answer that ships. Shelf 2 carries no tag today so nothing was let through, but the gate was one
+foreign member on a later shelf away from silently passing the thing it exists to refuse."""
 
 UNKNOWN_EXIT = 2
 OVERLAP_FLOOR = 0.5
@@ -136,7 +141,9 @@ def main() -> None:
     command.parser.add_argument("--record", type=Path, default=RECORD, help="the board record to read")
     command.parser.add_argument("--kernels", type=Path, default=KERNELS, help="where bare kernel names live")
     command.parser.add_argument("--anyway", default="", help="ship a known repeat, stating WHY in one line")
-    command.parser.add_argument("--roster", type=Path, default=ROSTER, help="what may ship, and its licence tags")
+    command.parser.add_argument(
+        "--roster", type=Path, nargs="+", default=list(ROSTERS), help="every shelf that ships, and its licence tags"
+    )
     command.parser.add_argument(
         "--idea", action="append", default=[], help="a mechanism word of this entry; repeat it, every one must match"
     )
@@ -151,7 +158,7 @@ def main() -> None:
     # Before the repeat question, because a repeat is a wasted slot and this is a wasted WIN: rule 2.5
     # obliges the winner to license the submission and its source, and a member trained on a
     # no-derivatives table cannot be relicensed by us. `--anyway` does not open this one.
-    refusals = MemberRoster.read(arguments.roster).licence_refusals(named)
+    refusals = [refusal for shelf in arguments.roster for refusal in MemberRoster.read(shelf).licence_refusals(named)]
     for refusal in refusals:
         logger.error("LICENCE %s: %s", kernel.name, refusal)
     if refusals:

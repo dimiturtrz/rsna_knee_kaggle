@@ -44,9 +44,10 @@ KERNELS = Path("comp/kernels")
 CHOSEN = "chosen"
 """The name a kernel binds its member tuple to, which is the only line of it this check reads."""
 
-SHELVES = (Path("comp/members.roster"), Path("comp/members2.roster"))
-"""Every roster a kernel can mount a member from. A pin may seat members off either shelf, so a check
-reading only the first called `tripleseat_v2` unbuildable over three members the second shelf ships."""
+SHELVES = MemberRoster.shelves()
+"""Every roster a kernel can mount a member from. A pin may seat members off any shelf, so a check
+reading only the first called `tripleseat_v2` unbuildable over three members the second shelf ships.
+It was then a literal of two, which made it wrong again the day shelf 3 opened; `shelves` discovers."""
 
 PINNABLE = "ensemble"
 """The one scope a pin may hold. An `excluded` row is on the board and disqualified for a stated reason

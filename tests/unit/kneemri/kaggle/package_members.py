@@ -197,3 +197,14 @@ def test_shelf(tmp_path: Path):
     path = tmp_path / "members2.roster"
     path.write_text(SHELF, encoding="utf-8")
     assert MemberRoster.read(path).shelf().title == "kneemri-members-2"
+
+
+def test_shelves(tmp_path: Path):
+    """Shelves are DISCOVERED, so opening one does not make three hardcoded lists wrong at once."""
+    for name in ("members.roster", "members2.roster", "members10.roster", "notes.md"):
+        (tmp_path / name).write_text("", encoding="utf-8")
+
+    found = MemberRoster.shelves(tmp_path)
+
+    assert [shelf.name for shelf in found] == ["members.roster", "members2.roster", "members10.roster"]
+    assert MemberRoster.shelves(tmp_path / "empty") == ()
