@@ -17536,3 +17536,32 @@ the offline number is the only kind left; refitting, reseating and knob-turning 
 **What it does NOT rule out.** The four bases disagree from +0.001 to +0.007, which is a real spread
 around ~+0.004 and not noise about a constant — a base-dependent refit term may still be predictable
 from something we have not looked at. Filed, not planned.
+
+## Two levers closed card-free: slot routing is not broken, and data scale is worked — 2026-09-20
+
+Both were raised against the bar derived above (offline75 >= 0.9128 to beat the pinned 0.946), and both
+died for free. Written down because the first nearly took an arm.
+
+**Slot routing recomputes, so the 78.7% column is not in the path.** `slots.py` records that the shipped
+`Fluid_Sensitive` column matches recovered fluid sensitivity on only 78.7% of 150 sampled series against
+`Fat_Suppression`'s 99.3%, and fluid sensitivity is one of the two axes defining the six acquisition
+slots — so a 21% error rate reads like systematic misrouting of series into slots that cannot show the
+finding, in training and at inference, for every study. It is not. `Slot.accepts` (`slots.py:51`) tests
+`acquisition.fluid_sensitive`, which is a DERIVED property (`acquisition.py:299`, `weighting in
+("PD","T2")`) off the header `Acquisition.probe` reads itself. The shipped column is a statement about a
+table we do not route on. The measurement stands as a warning about that column; it is not a defect in
+the corpus we train.
+
+**Data scale is a worked axis and it loses.** Twelve arms, four corpus builders and the merged caches
+already exist (`build_mrnet`, `build_kmar`, `build_merged`, `merged_cache`). Priced on ledger75 the best
+member any of them produced is `merged_distill_cf` at **0.8934, rank 55** — 0.0144 under `dml_b_s2026`'s
+0.9078, and 0.0194 under the bar. `mergedk_labelwise_drop40_long_336_s2026` 0.8901 (78) and
+`merged_blend_s2026` 0.8886 (96) follow. No merged-corpus member reaches the top forty. Adding studies
+from MRNet and KMAR does not move the offline number on this corpus, and the owner's ruling makes
+fastMRI, Rijeka and SKM-TEA instrument-only regardless.
+
+**Running total: eleven lever searches, zero hits.** The closed set now covers trunk size, depth, slices,
+resolution, the CNN lane, augmentation carriers, label tables, declines, distillation, EMA, slot routing
+and data scale. What remains open is not a knob, a refit or a corpus — the refit road is capped at 0.9455
+against a 0.946 champion, so the next thing worth card time has to move the offline number by +0.005 by
+a mechanism none of those twelve axes contains.
