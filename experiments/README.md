@@ -17682,3 +17682,35 @@ lane is closed on the BOARD (0.943 / 0.942 against the champion's 0.946) — so 
 that closes the last unexplained cell, and must be sold as that and never as an improvement.
 
 Running total after this audit: **thirteen lever searches, zero hits.**
+
+## 2026-09-20 19:18Z — the cross-site DECODE toll, measured for the first time
+
+`knee-fbo5e` listed `foreign_readout` as having no artefact on disk and named KMAR-read-through-a-cross-site-decode-ruler
+as one of only two genuinely unmeasured claims left. The arm ran. Five of its seven rows pass their own
+`slot_cost` gate and are readable; two are void on `knee-f1syi` and are NOT quoted here.
+
+`decode_cost`, our pixels against his pixels through the same member, 909 studies, fold 0:
+
+```
+  labelwise_depth24_drop40_long_s2026   -0.0223
+  dml_b_s2026                           -0.0223
+  labelwise_drop_drop40_long_s2026      -0.0243
+  calib_span_s2026                      -0.0280
+  band_dense_hold_s2026                 -0.0360
+```
+
+**The toll is large and uniform in sign.** Every member loses 0.022 to 0.036 AUC serving foreign pixels —
+3.5x to 5.8x the 0.0062 seed spread. `holdout909` is blind to all of it by construction, so a member ranked
+on `holdout909` is ranked by a ruler that cannot see a quantity several times larger than the spread that
+ruler can resolve.
+
+**And the toll SPREADS ACROSS MEMBERS by 0.0137**, best readable row to worst — 2.2x the seed spread, well
+outside it. Members are therefore not interchangeable in cross-site robustness, and nothing in this project
+has ever selected on that axis.
+
+**It is not a lever on the accuracy ladder and is not offered as one.** The competition test set is
+same-site, so this reopens none of the thirteen closed lever searches. It is a SEATING axis, priced for
+whatever asks the cross-site question later.
+
+Running total after this audit: **thirteen lever searches, zero hits** — unchanged; this is a measurement,
+not a hit.
