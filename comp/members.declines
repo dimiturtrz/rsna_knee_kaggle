@@ -1661,3 +1661,9 @@ dml_a_s2026_run2
 
 dml_b_s2026_run2
   INTERMEDIATE BY CONSTRUCTION -- the same, for the peer arm. Its line ships as `dml_b_ff` (knee-8bmi2).
+resnet_224_ext_s2026
+  PARTIAL TRANSFER, BELOW THE VIT ON THE SAME RECIPE -- 0.8948 @ledger75 on the 909, converged (best
+  e11 of 12 asked). It is +0.0106 over resnet_224_short 0.8842 and short of the >= 0.8990 the arm
+  pre-registered, so the five-term recipe that lifted the ViT +0.025 to labelwise_ext_drop40_long
+  0.9045 carries less than half of that onto a resnet50d trunk. Kept as the CNN-trunk reading of
+  knee-k01q0, not a shipping candidate: the deliverable is one solo and the ViT solo is 0.0097 above it.

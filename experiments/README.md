@@ -17045,3 +17045,28 @@ have been arguing about sits. `dml_b`'s +0.0019 over our best is unresolved by c
 offline75, and the entire span from our worst shipped solo to our best is about that. No knob and no
 refit term is that size. Chasing sub-floor gains and hoping transfer amplifies them is arithmetic that
 the tool has now refused twice on the same day.
+
+## 2026-09-20 `resnet_224_ext` — the ViT's recipe on a CNN trunk carries less than half (knee-k01q0)
+
+`resnet_224_ext` **0.8948 @ledger75** on the 909, best epoch 11 of the 12 asked, converged — not a
+floor. Ran 23:44Z-00:12Z, 28 min, one variable against `resnet_224_short` 0.8842: the five-term recipe
+that took the ViT from `band224` 0.8801 to `labelwise_ext_drop40_long` 0.9045 (labelwise slice pooling,
+the extended nine-slot scheme, calibrated targets, held annotations, 0.40 slot dropout). Trunk settings
+held fixed at the CNN's own (resnet50d, 224 px, 2.5D through-plane, whole-stack finetune at 2e-4,
+twelve epochs, batch 4 x accumulate 2).
+
+Pre-registered: >= 0.8990 transfers, 0.8870-0.8989 partial, <= 0.8869 does not. Landed **partial** at
++0.0106 against the ViT's +0.025 on the same five terms.
+
+**THE READING.** The recipe is not trunk-agnostic. At 224 px the CNN *beat* the ViT bare (0.8842 vs
+0.8801) and *loses* to it by 0.0097 once both carry the recipe, so the ViT is the trunk that converts
+these terms and the ordering between the two architectures INVERTS under them. That kills the cheap
+version of this lever — there was no free CNN solo sitting behind a recipe nobody had given it. It does
+not say which of the five terms is trunk-specific; the arm moved all five at once, deliberately, because
+a partial answer at 28 min was worth more than five arms at 28 min each.
+
+**WHAT IT DOES NOT RULE OUT.** A CNN trunk as a *different* reader of the same studies. 0.8948 is inside
+the roster's shippable band, and the ledger's own ensemble reads have never had a converted-CNN seat to
+test against. The solo directive is what declines it, not the number.
+
+Declined in `comp/members.declines` with that reason; roster clean at 0 undocumented.
