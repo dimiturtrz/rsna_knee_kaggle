@@ -77,3 +77,52 @@ against its control, saturated at 0.40 per `knee-yotj8`, so banked but proof the
 
 A corollary for slot pacing: with nothing in the pool able to beat the champion, a submission mark
 spends on an INSTRUMENT, labelled as one, and never on a reseating.
+
+## 5. CORRECTION: the bar above was wrong by 8x, and the board says the same thing anyway
+
+Sections 1-4 priced everything against "+0.0073, because solos ship 0.936-0.938 and the champion is
+0.946". **That was a recency sample of the last four submissions, not the record.** Read from
+`comp/board.jsonl` (107 priceable rows, 22 of them solo):
+
+**The best solo this project owns is `extffsolo_v1` at board 0.945 — ONE TICK under the champion**
+(`tripleseat_v2`, 0.946, submission 56232529). The solo bar is +0.001, not +0.008, and the ensemble
+premium over the best solo is +0.001 at a board resolution of 0.001. `knee-4zw4n`'s "<=0.002 premium"
+was right; the "+0.008" framing was mine and is retracted.
+
+### Why the top solos have no offline number
+
+`entry_offline --ruler ledger75 --write`: **0 fillable, 48 declined.** Every top solo is an `_ff` —
+refit at `--fold -1`, so it has seen every holdout study and can carry no honest offline reading BY
+CONSTRUCTION. That is not a defect; it is what a final fit is. The one honest solo row is `l75solo_v1`,
+fold-0 `labelwise_depth24_drop40_long`, offline75 0.9053 -> board 0.941, which landed on its own point
+prediction.
+
+### The whole-corpus refit term is real, spent, and too noisy to steer by
+
+Measured on three matched arrangements of one base against its own refit:
+
+| base | fold-0 board | refit board | term |
+|---|---|---|---|
+| labelwise_ext_drop40_long | 0.937 | 0.945 | **+0.008** |
+| labelwise_depth24_drop40_long | 0.941 | 0.944 | **+0.003** |
+| headlr_ship | 0.937 | 0.938 | **+0.001** |
+
+Mean ~+0.004 with a spread as wide as the mean. **All five of our best bases have now been refit and
+shipped** — extffsolo_v1 0.945, ffsolo_v1 0.944, dmlbff_v1 0.943, headlrff_v1 0.938, dmlbfflong36_v1
+0.938. The axis is closed by exhaustion, not by a verdict.
+
+### The board confirms §2-§3 independently
+
+Offline does NOT order the refit outcomes: offline75 0.9045 refit to 0.945, while the HIGHER 0.9059
+refit to 0.938. The ~0.004 refit scatter swamps the ~0.0015 offline spread separating our top members.
+This is exactly §3's result arriving from the other direction — offline differences among the top of a
+saturated pool are real (§2, ranking corr 0.989) and too small to survive a transfer whose own noise is
+larger.
+
+### What this closes
+
+**No submission built from the current member pool can be expected to beat 0.946.** Every base is
+refit and shipped, the pool's honest internal spread is +0.0041, and the refit term is exhausted. A
+submission mark therefore buys an INSTRUMENT, labelled as one, and the only route to 0.947+ is a member
+genuinely better than anything on disk — which must clear ~+0.004 offline to be legible above the
+transfer scatter at all. That is the same 1.5%-class bar as §1, reached by a different road.
