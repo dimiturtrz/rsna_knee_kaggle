@@ -5,8 +5,8 @@ to the honest twin's board score, and that number has been read exactly twice:
 
 | member | honest | refit `_ff` | term |
 |---|---|---|---|
-| `labelwise_depth24_drop40_long` | 0.941 (`l75solo_v1`, ref 56309162) | 0.944 (`ffsolo_v1`, ref 56296698) | **+0.003** |
-| `labelwise_ext_drop40_long` | 0.937 (`extsolo_v1`, ref 56315030) | 0.945 (`extffsolo_v1`, ref 56312235) | **+0.008** |
+| `labelwise_depth24_drop40_long` | 0.941 (`l75solo_v1`, 56309162) | 0.944 (`ffsolo_v1`, 56296698) | **+0.003** |
+| `labelwise_ext_drop40_long` | 0.937 (`extsolo_v1`, 56315030) | 0.945 (`extffsolo_v1`, 56312235) | **+0.008** |
 
 Two readings that differ by 0.005 — more than twice the top band's residual sd of 0.0022 — are not a
 constant and are not yet a shape. Two points cannot separate "the term is noisy around +0.005" from

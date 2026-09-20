@@ -19,6 +19,7 @@ spread between the best and worst subset of a given size is the honest error bar
 
 import itertools
 import logging
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -633,7 +634,13 @@ def main() -> None:
     command.parser.add_argument("--fold", type=int, default=0)
     command.parser.add_argument("--folds", type=int, default=5)
     command.parser.add_argument("--split-seed", type=int, default=2026)
-    command.parser.add_argument("--slices", type=int, default=12)
+    command.parser.add_argument(
+        "--slices",
+        type=int,
+        default=None,
+        help="cap the READ depth. CENTRES a window on the slab, so it narrows the band too and isolates "
+        "neither; price a serving cap with holdout_backfill --served-slices/--served-band instead.",
+    )
     command.parser.add_argument("--overlap", action="store_true", help="every window start, not just disjoint ones")
     command.parser.add_argument(
         "--paired",
@@ -720,7 +727,15 @@ def main() -> None:
     # a sweep over the pool runs unattended for hours past the idle timer (knee-wyzj).
     with Wakelock():
         for member, slab, held in readings.slabs(holdout, reference, corpus):
-            window = member.window(held.slices, overlap=arguments.overlap)
+            # Cap the member's OWN depth, never the slab's `available`: a whole-stack member centres by
+            # (available - width) // 2, so capping `available` makes width == available, the offset
+            # degenerates to zero, and every rung reads the FIRST n slices instead of the middle n.
+            read = (
+                member
+                if arguments.slices is None
+                else replace(member, config={**member.config, "slices": min(member.slices, arguments.slices)})
+            )
+            window = read.window(held.slices, overlap=arguments.overlap)
             scored = predictions.cached(member, slab, cache, window)
             per_member.append(scored)
             names.append(member.file.name)
