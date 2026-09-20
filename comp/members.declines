@@ -1667,3 +1667,15 @@ resnet_224_ext_s2026
   pre-registered, so the five-term recipe that lifted the ViT +0.025 to labelwise_ext_drop40_long
   0.9045 carries less than half of that onto a resnet50d trunk. Kept as the CNN-trunk reading of
   knee-k01q0, not a shipping candidate: the deliverable is one solo and the ViT solo is 0.0097 above it.
+
+dml_b_ff
+  THE PEER TERM COSTS THROUGH THE REFIT -- dmlbff_v1 (ref 56340982, 2026-09-18) read board 0.943, the
+  bottom branch knee-8bmi2 pre-registered (`<= 0.943  the peer term costs through the refit; close the DML
+  road and decline dml_b_ff in writing`). It is the whole-corpus refit of dml_b_s2026, the highest ledger75
+  this project owns (0.9078), on ffsolo_v1's exact line with the peer term as the only difference -- and it
+  read 0.001 BELOW ffsolo_v1's 0.944, whose base was 0.9053. So the +0.0025 offline gain from mutual
+  supervision did not survive the refit, in the direction the arm named as its own kill condition.
+  The member is fitted at --fold -1 and has seen every holdout study, so no offline ruler can ever re-open
+  this: the board reading is the only one there will be. What it does NOT rule out is the peer term on a
+  FOLD-AWARE road, which was never the thing shipped here -- re-opening it means answering this reading,
+  not re-quoting the 0.9078.
