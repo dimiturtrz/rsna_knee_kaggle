@@ -363,6 +363,25 @@ labelwise_ext_drop40_long_ff.pt         # DARK BY CONSTRUCTION -- fitted with `-
                             # measured recipe into a shippable seat, not an exception to it.
                             # WHAT IT IS NOT: evidence. It may be seated, and it may never be quoted as a
                             # number. Any entry carrying it reads on the BOARD or not at all.
+labelwise_ext_drop40_long_noema_ff.pt   # DARK BY CONSTRUCTION -- `--fold -1`, holds out nothing, so no
+                            # ledger row can price it. It is the line directly above with `--ema` REMOVED
+                            # and NOTHING else moved, so its control is not an offline number at all: it
+                            # is the STANDING BOARD ROW of `extffsolo_v1`, 0.945 at ref 56312235, which is
+                            # this same member with the flag on.
+                            # WHY THE FLAG COMES OFF. `labelwise_ext_drop40_long_ff` carries `--ema`
+                            # because its arm wanted the seat "shaped like the ones beside it" -- an
+                            # ENSEMBLE-SHAPE argument. The object that ships is a SOLO. There are no
+                            # neighbours, so the argument is spent. `models/ema.py` states its own
+                            # purpose: an average buys VARIANCE, not mean, and a competitor 0.011 behind
+                            # first wants the upper tail, not the damped middle.
+                            # THE NUMBER, AND ITS WEIGHT. `matched_axes` reads `ema False > True` at
+                            # +0.0049 over 264 recipe-carrying members, n=2, 2/2 agreeing, sd 0.0017
+                            # (labelwise_dense_drop40_long 0.9048 vs chainfour_drop40_long 0.8982;
+                            # probe224_grand_noema 0.8808 vs probe224_grand 0.8776). Both pairs are
+                            # single-seed and the pooled mean is UNDER the 0.0062 seed spread, so it is
+                            # DIRECTIONAL ONLY. This member is not justified by +0.0049 and does not
+                            # claim it; what licenses the spend is that the flag's stated reason expired.
+                            # It may be seated and never quoted; it reads on the BOARD or not at all.
 labelwise_depth24_drop40_long_ff.pt     # DARK BY CONSTRUCTION -- `--fold -1 --ema`, holds out nothing, so
                             # no ledger row can price it. Rostered on its TWIN, exactly as
                             # `labelwise_ext_drop40_long_ff` above: `labelwise_depth24_drop40_long_s2026`
@@ -385,6 +404,13 @@ dml_b_ff.pt                 # DARK BY CONSTRUCTION -- `--fold -1`, the third ref
                             # ADDITIVE lands it ~0.947-0.950, CEILING ~0.9445, and CEILING is the favourite
                             # at P(clears 0.945) ~ 0.20. See knee-8bmi2 for the pre-registration.
                             # It may be seated and never quoted; any entry carrying it reads on the BOARD.
+                            # THE PRE-REGISTRATION FIRED AND THIS IS SETTLED (2026-09-18): shipped solo as
+                            # `dmlbff_v1`, ref 56340982, BOARD 0.943 -- the `<0.944` branch. The peer term
+                            # buys nothing on a whole-corpus refit. Against `extffsolo_v1` at 0.945 the
+                            # delta is -0.002, INSIDE the top band's ~0.004 2-sd board scatter, so this is
+                            # a NULL and may not be quoted as an inversion of the offline ruler. Do not
+                            # re-propose this member as an unshipped edge: the paragraph above is the
+                            # argument for the run, not a record that it is outstanding.
 dml_b_ff_long36.pt          # DARK BY CONSTRUCTION -- `--fold -1 --ema`. dml_b_ff above with `--epochs 36`
                             # and nothing else moved (knee-bxp8h), 36 of 36 epochs, ARM DONE 19:59Z. It
                             # carries the peer term and the long anneal together; its controls are the two
