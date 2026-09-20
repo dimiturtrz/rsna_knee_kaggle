@@ -4699,3 +4699,29 @@ retraction was an ema misattribution, and the working carry of ~+0.004 survives 
 at 0.9078, and the top eight span 0.0033 — the saturation of `interpretations/kneemri/2026-09-20_pool_exhaustion.md`
 §1 stands. The champion `tripleseat_v2` holds 0.946; rank read live 11:42:49Z is 70 of 4037, tied with 13, leader
 0.957, gap 0.011. Both beads close and the standing entry is untouched.
+
+## `deepsolo_v1` — 0.941, ref 56405965, 2026-09-20 — serving past the fitted depth COSTS, and the offline ladder predicted the wrong sign
+
+`extffsolo_v1`'s member (`labelwise_ext_drop40_long_ff`) byte for byte, band held at its fitted
+0.1–0.9, served at **32** slices instead of the fitted 20. One constant moved. It landed on the
+pre-registered bottom branch — the one the kernel itself named as the branch that would retire the
+whole idea — at **0.941 against 0.945, four board ticks down.**
+
+`run_check` on the downloaded log reads `loaded 1 of 1 members`, so this is a reading of the SERVING
+and not a `KernelRun` member drop wearing a score (the `farseat_v1` failure).
+
+**The offline ruler called the sign wrong, which is the part worth keeping.** The ladder this entry
+extrapolated from — `band_dense_s2026` through `holdout_backfill --served-slices`, band held, reading
+0.8859 / 0.8877 / 0.8888 ledger75 at 12 / 20 / 24 — is monotone increasing and projected +0.0024 at
+32. The board read −0.004. The entry named one suspect before it ran: that ladder was measured on a
+`canonical`-scheme member and this member is `extended`, so the per-slice information curve may not be
+scheme-invariant. The second suspect is the head — 32 slots is further outside the twenty-slot
+distribution `attend` was fitted over than anything the offline ladder touched, so the pooling is being
+asked to weight slots it has never seen.
+
+**Consequence, and it is a slot saved.** `kneemri-deep40solo` is built and COMPLETE at 40 slices and
+**will not be shipped**: 40 is strictly further out of distribution than 32 on an axis now measured
+negative, so its expected value sits below this row. The board has measured the descending half of this
+ladder four times (`onegroup_v1` 0.942 at 12, `cheapdecode_v1` 0.925 and `cheapwide_v1` 0.928 at the
+224 px / 12 corner, this row at 32) and the ascending half once, negative. **Serve every member at its
+fitted depth.**
