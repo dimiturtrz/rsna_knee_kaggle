@@ -33,30 +33,39 @@ indices across the SAME band. Fixed corpus, fixed band, fixed pixels, fixed epoc
 | `base_dense_s2026` | dense | 0.8812 | 0.8778 | -0.0034 |
 | `labelwise_dense_s2026` | labelwise | 0.8964 | 0.8925 | -0.0039 |
 | `labelwise_depth20_b10_s2026` | labelwise | 0.8970 | 0.8974 | +0.0004 |
+| `labelwise_depth24_drop40_long_s2026` | labelwise | 0.9053 | 0.9038 | **-0.0015** |
 
 plus, independently and already on disk, `read_groups.py`: the champion's five fold-0 twins read 0.8706
-native against 0.8684 at 12 slices / band 0.1-0.9, a cost of 0.0022. Four readings, two heads, all
+native against 0.8684 at 12 slices / band 0.1-0.9, a cost of 0.0022. Five readings, two heads, all
 between 0.0000 and 0.0039 - every one inside the 0.0053 paired-holdout floor. This retires the worry
 that our labelwise head, with per-label slots, would spend slices a max-pooling head could not: it does
 not, and its mean cost is SMALLER than dense's.
 
-WHAT IS ASSUMED, not measured. None of those four IS this entry's member. Both
-`labelwise_ext_drop40_long_s2026` and `labelwise_depth24_drop40_long_s2026` refuse to re-derive - no
-recipe recorded in their metrics or checkpoints - so the cost here is TRANSFERRED from three other
-members rather than read on this one. The transfer is supported by the spread being 0.004 wide across
-every member and head tried, and it is an assumption. It is stated in the submission message.
+THE LAST ROW IS THE CORNER ITSELF, and it is why the transfer is no longer the weak part of this entry.
+`labelwise_depth24_drop40_long_s2026` is the drop40_long corner this member lives in - and it was read
+at 24 -> 12, a 2x cut, where the shipping member runs 20 -> 12. The harsher cut on the nearer member is
+the CHEAPEST reading of the four, which is the opposite of slice-hungry.
+
+WHAT IS STILL ASSUMED, stated in the submission message. None of the five IS this entry's member, and
+it cannot be: `labelwise_ext_drop40_long_ff` is a `fold -1` full fit, so it held nothing out and has no
+holdout to re-derive - correct behaviour, not a gap. Its fold-0 twin `labelwise_ext_drop40_long_s2026`
+carries `scheme: extended`, and the corpus cache suffix comes from THAT key, so it wants a 12-slice
+extended corpus that is not on disk (only the 20-slice one it trained on). Reading it would cost a full
+decode, which is why the corner was read on its canonical sibling instead.
 
 PRE-REGISTERED, on the EXCHANGE RATE rather than on the score. At the top-band `ledger75` slope of
-+1.09 to +1.17, a 0.003 offline cost predicts board **0.941-0.942** against this member's own 0.945.
++1.09 to +1.17, the corner's 0.0015 offline cost predicts board **0.943** against this member's own
+0.945; the three-member transfer's wider 0.003 predicts 0.941-0.942. Either is inside the branch below.
 
   * **board 0.941-0.942 and efficiency rank improves** - the transfer holds and runtime is purchasable
     at about 0.001 of board per 13% of decode. Then the next efficiency entry caps harder, not smarter.
   * **board 0.941-0.942 and efficiency rank does NOT improve** - the metric does not weight decode the
     way the 6-teams-above-us reading implies, and slice count is closed as an efficiency knob. That is
     the most useful thing this slot can return, because it retires the whole axis.
-  * **board <= 0.939** - the transfer from three other members FAILED on this one, which would mean the
-    drop40_long corner is slice-hungry in a way nothing measured is, and would make the unpriceable-
-    members bug a blocker rather than an inconvenience.
+  * **board <= 0.939** - now the UNLIKELY branch, and a sharper finding than it was. It would mean the
+    `scheme: extended` corpus, the ONE axis separating this member from the corner read above, is what
+    spends slices - which no reading has ever isolated, and which would make the 12-slice extended
+    decode worth paying for.
 
 Every reading above is a FLOOR in the honest direction: this member was TRAINED at 20, so a capped read
 pays a domain shift on top of the information it drops. A member trained at 12 should beat it.
