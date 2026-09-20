@@ -1695,6 +1695,17 @@ arm gave all twelve blocks ONE flat 4e-5, which is peak rate on blocks 0–5 —
 blocks the whole axis is about. `--layer-decay` (built 2026-08-21) is what removes it. A re-run at
 `--layer-decay 0.7` is a different experiment, not a repeat, and it is the one the axis is owed.
 
+**THE DEBT WAS PAID, AND THE LADDER DOES NOT RESCUE DEPTH 12 (read 2026-09-20, knee-fbo5e).** Six runs
+carrying a ladder are on disk and three sit at exactly `layer_decay 0.7 / unfreeze_last 12`. Against the
+matched frozen-6 control `band_dense_s2026` at 0.8877 `ledger75`: `band_dense_llrd_s2026` 0.8765
+(**−0.0112**), `band_deep_matched_s2026` 0.8781 (−0.0096), `band_deep224_s2026` 0.8718; and in the
+labelwise corner `labelwise_dense_stem_llrd_s2026` 0.9007 at `0.75 / 6` against 0.9048 (−0.0041). The
+confound WAS real and the ladder DOES remove it — flat-rate twelve collapsed to 0.7162 and the laddered
+twelve reads 0.8765, recovering most of that — but recovering a collapse is not beating the control. All
+three agree in sign and −0.0112 is ~1.8× the 0.0062 seed spread, so this is not scatter. **The default
+stays six and the ladder is closed on top of it.** Read it off the ledger before re-proposing it: the
+paragraph above is the argument for the run, not a record that it is outstanding.
+
 ### encoder_adapt_lower — 0.7309, and the diagnosis it was built on is refuted (2026-08-20)
 
 **The flag landed.** `encoder initialised from adapt_small_e6_lr1e5.pt (113 tensors, 110 left stock)` —
