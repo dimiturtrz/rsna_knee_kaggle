@@ -971,9 +971,6 @@ labelwise_ext_drop40_long_ema_s2026.pt  # 0.8687 @holdout909 midpoint / 0.9073 l
                             # unshippable for as long as nobody typed this line. It is also the ema-ON
                             # arm of knee-0ed8f, the first matched single-variable ema contrast on this
                             # corner (+0.0028 ledger75 over the ema-OFF twin, same fold, same 909).
-labelwise_depth24_drop40_long_s2026_n12b0.1-0.9.pt  # 0.8659 midpoint / 0.9038 ledger75, peak epoch 18 of
-                            # 24. The depth-24 twin read at 12 slices, band 0.1-0.9 — a READING of an
-                            # existing checkpoint at a narrower slot budget, not a separate fit.
 soup336_trunk3_s2026.pt     # 0.8680 midpoint / 0.9032 ledger75. Weight soup at 336 px over a 3-trunk
                             # pool. The best of the soup336 family and the only one of them above 0.903.
 soup336_k2_s2026.pt         # 0.8667 midpoint / 0.9015 ledger75. The 2-member soup, and the best of the

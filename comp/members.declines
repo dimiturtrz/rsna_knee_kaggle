@@ -1718,3 +1718,25 @@ basinsoup_c103              # 0.9057  basinsoup_k3, and each is a twin of the pa
                             # (K=3 and K=4 agree to four decimals). Seating one is seating the parent
                             # with extra steps. Re-opened only by a child that MEASURABLY diverges —
                             # longer at 2e-5, not a higher LR (knee-0dfys).
+band_dense_s2026_n12b0.1-0.9      # regroup price for band_dense_s2026, and the 12-slice rung of the
+                            # depth ladder knee-egppe prices (0.8859 at 12 / 0.8877 at 20 / 0.8888 at
+                            # 24 ledger75, total span 0.0029 — INSIDE the 0.0053 paired floor).
+labelwise_depth24_drop40_long_s2026_n12b0.1-0.9   # regroup price for labelwise_depth24_drop40_long_s2026,
+                            # 0.8659 midpoint / 0.9038 ledger75 at peak epoch 18 of 24. It sat on the
+                            # ROSTER until 2026-09-20 naming a `.pt` that has never existed: only the
+                            # `.holdout.npz` is on disk, because `SharedRead.regrouped` re-reads a
+                            # checkpoint and writes a record beside it rather than new weights. A
+                            # regroup is a SERVING decision a kernel makes, so it can never be a
+                            # packaged member — which is why every other one of these is declined.
+basinsoup2_c201             # 0.9020 ledger75. The longer-cycle seed-children of the basinsoup arm, forked
+basinsoup2_c202             # 0.9024  off the same converged EMA parent at 8 epochs instead of 4. They are
+basinsoup2_c203             # 0.9031  the REFUTATION half of knee-0dfys: doubling the cycle bought real
+                            # divergence and the soup of them FELL, so each child is below the parent by
+                            # more than its 4-epoch twin was. Nothing seats a child that exists to be
+                            # averaged.
+basinsoup2_k3_s2026         # 0.9075 ledger75, against basinsoup_k3's 0.9089 on the identical operation at
+basinsoup2_k4_s2026         # 0.9080  4 epochs. This PAIR is the reading that fixed 4 epochs at 2e-5 as the
+                            # measured optimum of weight souping here rather than a knob with a sweep in
+                            # it: K=3 and K=4 disagree at 8 epochs where they agreed to four decimals at
+                            # 4, and both products land under the shorter cycle's. Declined as members,
+                            # kept as the argument.
