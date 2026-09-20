@@ -17440,3 +17440,51 @@ THIS IS THE EFFICIENCY TRACK, NOT ACCURACY. The bead prices P(clears 1.5% on acc
 stands: 12 slices is worse, just not measurably so. The gain is runtime -- 40% fewer DICOM reads than
 20 -- on an axis where `efficiency_read --live` records six teams ranked above us while SCORING BELOW
 us, on runtime alone.
+
+## The label lane closes HARDER on ledger75: −0.0040 becomes −0.0128 — 2026-09-20
+
+Card-free, slot-free, off holdouts already on disk. M326 argued the label table is the project's biggest
+untouched lever: `report_labels_v2` is the worst of five independent extractions on gold57 (FP 108 / FN 32
+/ 0.2047, a one-sided 3.4:1 over-call) against MAJORITY_5 at 0.1827, paired study-clustered bootstrap
+ours − majority5 = +0.0219 [+0.0044, +0.0395], with 286 arm invocations sitting on the losing table. Its
+stated reason for never being pursued was that the 909-study ruler is DERIVED from v2, so a truer table
+must read worse by construction, leaving the board as the only valid instrument.
+
+**Both halves of that argument fail on measurement, and the recut is what shows it.**
+
+| pair | what moves | midpoint | **ledger75** |
+|---|---|---|---|
+| `stack_increments_fx` vs `stack_increments` | `blend_hybrid_fx.csv` vs v2, byte-identical otherwise | −0.0040 | **−0.0128** |
+| `labels_v4hybrid` vs `band_dense_hold` | `blend_hybrid_fx_v4b.csv` vs v2 | −0.0054 | −0.0003 |
+
+The first pair is the clean one: two byte-identical arms differing only in `--labels`, same card, same
+hours, neither truncated. On the midpoint its −0.0040 sat inside the 0.0062 floor and the lane was retired
+on a NULL. **On ledger75 the same pair reads −0.0128** — 2.4x the 0.0053 paired floor, on the ruler whose
+top-band residual sd is 0.0013-0.0022 and whose board transfer is +1.09. The recut does not reopen the
+lane; it converts a null into a measured regression. (Best epoch moves with the ruler: e6 midpoint, e4
+ledger75. The two rulers disagree about WHERE the peak is and agree about the sign.)
+
+The second pair is flat, and is NOT evidence the other way: v4b is `blend_hybrid_fx` plus the Effusion
+graft that README:10894 proves is a confirmed recall regression (D200 blinded adjudication, 58/59 against
+it over the 520 cells it moves). A table that is base-plus-a-known-bad-column reading flat where the base
+alone reads −0.0128 is two effects on different bases, not a ranking.
+
+**The rigged-ruler defence is retired by the board, which already ran the A/B.** `v4solo_v1` (trained on
+v4b) **0.922** against `holdsolo_v1` (trained on v2) **0.928**, `comp/SUBMISSIONS.md:3629-3638` — the
+competition's labels are image-read radiologist consensus with third-reader adjudication, the same KIND of
+object as the gold 58 and not report-derived. So the instrument M326 named as the only valid one has
+spoken, and it agrees in SIGN with both offline rulers. Three rulers, one sign.
+
+**What this costs and what it buys.** It costs M326 as a lever: a night's card was ranked against it on the
+strength of a +0.0219 gold57 advantage. What survives, unchanged from 2026-09-04, is the mechanism-level
+finding that is more useful than the lever was — **a gain measured on 57 gold studies does not predict a
+gain under training.** gold57 is a 57-study ruler; the training holdout is 909. The recut sharpens that:
+the transfer is not merely absent, it is NEGATIVE past the floor on the tight ruler.
+
+**What it does NOT rule out.** The one-sided 3.4:1 over-call in v2 is real and unexplained — every table
+tested so far replaces v2 WHOLE, and no arm has ever tested the FP-only intervention that M326's own error
+decomposition points at (the 0.68 rung, precision 37/98 = 0.38, reproducing `MEASURED_AGREEMENT`'s pooled
+0.378 independently). `report_labels_v3` IS that cut and reproduces to three decimals (0.2047 -> 0.1696,
+FP 108 -> 47), so the object exists on disk. That is a different intervention from a table swap and is not
+priced by anything above; it is also not licensed by anything above, and it inherits the same prior that
+just failed three times. Filed, not planned.
