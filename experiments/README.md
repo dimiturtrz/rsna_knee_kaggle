@@ -17347,3 +17347,48 @@ the reference's 0.1–0.9, for which this project has **no measured number**. Th
 residual: absent a band term, a miss is a miss and the pre-registration stands. It is not a reason to
 spend card, because the effect would have to be 0.007 on an axis whose neighbour axis reads flat.
 
+
+## Augmentation is NOT the transfer carrier — slot dropout is, and it is alone — 2026-09-20
+
+knee-ipefi, the half of knee-lm37v never run. `foreign_readout` on the shifted path, 909 studies, all
+candidates `_s2026` so no seed term enters the cross-member comparison. Read at 12:29-12:38Z, ~15 s a
+member on a free card — the bead priced it at 1.0-1.5 h and that was wrong by two orders of magnitude,
+which is worth knowing before the next readout is deferred for want of a card window.
+
+**The calibration gate passed exactly.** `band_dense_s2026` returned decode **-0.0361** to the fourth
+decimal and `slots +0.0000`, in all three independent passes. `foreign_readout`'s own docstring warns
+that a broken shifted path still produces a plausible number, so this is the one number that had to be
+right before any candidate could be read.
+
+```
+band_dense_s2026       (control)   native 0.8578  foreign 0.8217   decode -0.0361     --
+aug_long_s2026                     native 0.8511  foreign 0.8115   decode -0.0395   -0.0034  HARMFUL
+mixup_dense_s2026                  native 0.8552  foreign 0.8254   decode -0.0298   +0.0063  DIRECTIONAL
+mixup224_strong_s2026              native 0.8516  foreign 0.8174   decode -0.0341   +0.0020  NULL
+crop160_span_s2026                 UNREADABLE - images_420px_12sl_160mm_0.1-0.9band.npy deleted
+intensity392_ws_s2026              UNREADABLE - images_448px_12sl.npy deleted
+```
+
+**The pre-registered NULL branch fires, and knee-lm37v's branch with it: augmentation is not the
+carrier, and no card is spent on it for transfer.** DIRECTIONAL required TWO independent members. There
+is one, and it clears the 0.0062 floor by a single thousandth.
+
+**The reason that one is not promoted is a mechanism check, not a threshold.** `mixup_dense` and
+`mixup224_strong` are the same operator at two strengths, and the STRONGER one transfers WORSE
+(+0.0020 against +0.0063). Slot dropout — the only confirmed carrier — did the opposite: 0.40 read
++0.0132 and 0.55 read +0.0147, monotone in strength and both over twice the floor. An operator whose
+effect does not order with its own dose is not a carrier that happens to be weak; it is scatter. Stated
+against it: the two mixup members are not a clean dose pair (different input resolution, 20 vs 12
+slices), so this is evidence about the AXIS, not a fitted dose curve. D205's positive control prices
+slice count as free on this instrument (corr 0.9999); resolution is unpriced here.
+
+**What this leaves.** The cross-site toll stands at -0.0336 +/- 0.0038, flat across eleven members and
+3x the live board gap, and the ONE training operator known to move it is already saturated at 0.40 and
+banked in every shipped member (knee-yotj8). Four operators have now been asked and none is a second
+carrier. The toll is not an augmentation-shaped problem.
+
+**And it cost two members permanently.** `crop160_span` and `intensity392_ws` cannot be read on any
+offline instrument ever again — their caches went in the 355 GB purge, joining `tissue224_s2026`,
+`resnet_224_short_s2026` and `resnet_224_long_s2026`. Five members are now write-once. The set that
+answered this question was 3 of 5, and the two missing ones are the two most different from the mixup
+pair, which is the worst possible way to lose coverage on an axis being closed.
