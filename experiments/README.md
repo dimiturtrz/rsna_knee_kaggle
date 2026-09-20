@@ -17163,3 +17163,55 @@ closed on measurement at every rung that fits the card. `roinative`'s gain is re
 — 0.193 mm/px over the structure against 0.387 — which canonical framing cannot reach at any affordable
 width, because at 130 mm the same pixels are spent on the whole field. The two numbers are consistent and
 only one of them is a lever.
+
+## The recipe axis at full width — 9 of 11 favoured, the biggest one is at its peak, and one axis is off-contrast (read 2026-09-20)
+
+`matched_axes --holdouts $MODELS` over **264 recipe-carrying members** (445 of 465 records; 20 VOID by
+`comp/members.declines`) resolves **11 contrasts with ≥ 2 matched groups**, all on `ledger75`:
+
+| axis | contrast | n | mean | sd | agree |
+|---|---|---|---|---|---|
+| `backbone_lr` | 4e-05 > 0.0001 | 2 | **+0.0151** | 0.0065 | 2/2 |
+| `calibrated_targets` | True > False | 6 | +0.0072 | 0.0040 | 6/6 |
+| `ema` | False > True | 2 | +0.0049 | 0.0017 | 2/2 |
+| `sample_alpha` | 0.0 > 1.0 | 2 | +0.0035 | 0.0014 | 2/2 |
+| `epochs` | 24 > 12 | 5 | +0.0035 | 0.0035 | 3/5 |
+| `image_size` | 336 > 224 | 2 | +0.0031 | 0.0032 | 1/2 |
+| `mixup` | 0.0 > 0.2 | 2 | +0.0026 | 0.0004 | 2/2 |
+| `slice_pooling` | labelwise > max | 5 | +0.0013 | 0.0049 | 4/5 |
+| `hold_annotations` | True > False | 4 | +0.0012 | 0.0018 | 3/4 |
+| `slot_dropout` | 0.4 > 0.0 | 2 | +0.0011 | 0.0006 | 2/2 |
+| `scheme` | mergedk > canonical | 2 | +0.0010 | 0.0023 | 1/2 |
+
+The paired floor is 0.0053, so only the top two clear it and everything from `ema` down is DIRECTIONAL.
+
+**`backbone_lr` is the only contrast this project owns that clears the 1.5% bar, and it is unharvestable
+— which is the point.** The ship already runs 4e-05, and the other side is bracketed as well: the
+resolution reading above establishes that the whole +0.0066 of `res392_ws_s2026` belonged to the rate
+step 8e-6 → 4e-5 and not to the width. Bracketed at 1e-4 above and 8e-6 below, 4e-05 is a **measured
+local optimum**. So the largest number in the table is not an open lever and must never be quoted as one.
+
+**Nine of eleven favoured values are already on the shipping member** (`backbone_lr` 4e-05,
+`calibrated_targets` True, `epochs` 24, `image_size` 336, `mixup` 0.0, `slice_pooling` labelwise,
+`hold_annotations` True, `slot_dropout` 0.4, and `ema` False once the running arm lands). That is the
+concrete form of "the recipe axis is exhausted" (knee-f2mj3) and it is now a counted statement rather
+than an impression.
+
+**The two that are not favoured are not disfavoured either — the ship sits OFF the contrast on both**,
+which is a blind spot in how this table is read. `matched_axes` reports a contrast as `(key, valueA,
+valueB)`, so an axis where the member holds a THIRD value is invisible to a check for disfavoured sides.
+`sample_alpha` runs 0.5 against a 0.0-vs-1.0 contrast, and `scheme` runs `extended` against
+`mergedk`-vs-`canonical` (+0.0010 at 1/2 agree, which is noise and says nothing either way).
+`sample_alpha` is the one with a real direction, and it still does not earn a card: both groups
+(`disagreed_uniform` 0.8819 vs `disagreed_full` 0.8770; `weakdraw_flat` 0.8807 vs `weakdraw_frx` 0.8785)
+come from SAMPLING-focused families near 0.88, about **0.02 below our 0.905 corner**, and the axis is
+probed at its two ENDPOINTS only. Reading 0.5 → 0.0 as half the range gives ~+0.0018 by assuming
+linearity at an interior point nobody has measured, at a corner that is not ours — an extrapolation
+dressed as an interpolation. Priced ~2.9 h for ~+0.0018, P(clears 0.0062) ~0.12. Filed as knee-ofdte,
+as a RECORD rather than as work.
+
+**What the whole table means for the board.** The live gap is 0.011, and on the top-band `ledger75`
+slope of +1.09 that needs ~+0.010 offline. The largest recipe axis in the project is +0.0151 and is
+already spent; the largest still-open one is a +0.0035 extrapolation. **No knob left on this recipe can
+reach the gap, and the remainder of the table sums to less than the seed spread.** That is the counted
+version of the 0/11 axis sweep and of knee-xe0aq — the lever has to be DATA, not recipe.
