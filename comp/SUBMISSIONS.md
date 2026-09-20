@@ -4658,3 +4658,44 @@ INSTRUMENT, pre-registered in knee-k7292: 0.940-0.945 the term carries / >=0.946
 does not. `headlr_ship_s2026` read 0.937 solo; its whole-corpus refit `headlr_ship_ff` reads 0.938, +0.001, inside
 the top band's ~0.004 two-sd scatter. The refit term now has four points, +0.001 / +0.003 / +0.005 / +0.008, and
 the best offline base drew the smallest. It is not a constant a plan can add to a base.
+
+## `noemasolo_v1` — 0.944, ref 56391333, 2026-09-20 — EMA is not the expired flag the bead argued, and it was hiding a refit-term artefact
+
+INSTRUMENT, pre-registered in knee-f2mj3: `>=0.950` a real lever licensing a programme / `0.946-0.949` flat /
+`==0.945` dead flat / `<=0.944` EMA was load-bearing. **READ 0.944, the bottom branch.** This is a one-flag A/B on
+the board — `labelwise_ext_drop40_long_noema_ff` against its byte-identical twin `extffsolo_v1` (0.945), the same
+recipe at `--fold -1` with `--ema` ON — so the delta is **−0.001** for removing it.
+
+One tick is the board's own resolution, and the bead was right that a ~0.004 two-sd scatter could not resolve a
+~0.005 effect. What makes it readable is that **an independent honest ruler landed the same morning and agrees on
+the sign.** knee-0ed8f put the matched fold-0 contrast on the card (the ship arm verbatim plus `--ema`, one
+variable, control already on disk):
+
+| member | LEDGER | LEDGER75 | epoch | rows |
+|---|---|---|---|---|
+| `labelwise_ext_drop40_long_ema_s2026` | 0.8687 | **0.9073** | 23 | 909 |
+| `labelwise_ext_drop40_long_s2026` | 0.8672 | 0.9045 | 23 | 909 |
+
+**+0.0028 for ema ON**, inside knee-0ed8f's ±0.0053 matched-null band but positive, and the board's −0.001 for ema
+OFF carried at the +1.071 solo slope is −0.0009 to −0.003. Two rulers, one sign.
+
+**`matched_axes` had the sign backwards.** It read ema `False > True` at +0.0049 over 264 recipe-carrying members.
+That estimate was cross-member at n=2 and single-seed, drawn from a corner where every fold-0 member is ema OFF and
+every `_ff` refit is ema ON — ema perfectly confounded with fold, which is the confound knee-0ed8f was written to
+break. It broke it in the direction that says: **keep `--ema` on every `_ff` refit.** The shipping configuration was
+already correct, and knee-f2mj3's premise — that the flag's ensemble-shape justification expired when the entry
+became a solo — is refuted on measurement rather than left open.
+
+**AND THE CONFOUND WAS IN A CONSTANT WE PLAN WITH.** `extsolo_v1`'s row prices the whole-corpus refit term on this
+recipe at **+0.008** (0.945 − 0.937) and concludes the term is "2.7x apart" from depth24's +0.003 and has "no single
+value". That pair crosses the ema axis: `extffsolo_v1` is ema ON, `extsolo_v1` is ema OFF. The matched ema-ON twin
+is this morning's arm at 0.9073, which the solo transfer (n=10, slope +1.071, intercept −0.0307, resid sd 0.0021)
+prices at board **0.9413** — so `extffsolo_v1`'s term is **+0.004**, not +0.008. The fully-measured ema-OFF pair is
+`extsolo_v1` 0.937 → `noemasolo_v1` 0.944, **+0.007**. Four bases now read +0.001 (headlr), +0.003 (depth24), +0.004
+(ext, ema-on), +0.007 (ext, ema-off). Still not a constant — but the outlier that drove the "no single value"
+retraction was an ema misattribution, and the working carry of ~+0.004 survives it.
+
+**No new best member, and the ladder is unchanged.** 0.9073 is second on the honest ledger75, behind `dml_b_s2026`
+at 0.9078, and the top eight span 0.0033 — the saturation of `interpretations/kneemri/2026-09-20_pool_exhaustion.md`
+§1 stands. The champion `tripleseat_v2` holds 0.946; rank read live 11:42:49Z is 70 of 4037, tied with 13, leader
+0.957, gap 0.011. Both beads close and the standing entry is untouched.
