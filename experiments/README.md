@@ -17108,3 +17108,48 @@ the roster's shippable band, and the ledger's own ensemble reads have never had 
 test against. The solo directive is what declines it, not the number.
 
 Declined in `comp/members.declines` with that reason; roster clean at 0 undocumented.
+
+## `roi` / `roinative` — the input crop costs, and the upsample was exactly half of why (read 2026-09-20)
+
+**TWO ARMS RAN TO COMPLETION AND NEITHER WAS EVER PRICED.** `roi_labelwise_drop40_long_s2026` and
+`roinative_labelwise_drop40_long_s2026` (knee-vgz5b.10) have sat on disk with full logs, 24 of 24 epochs
+each, flat over their last three, and no heading in this file. They were found by auditing what the INPUT
+contains rather than by proposing a lever — which is the only search that has returned anything today.
+
+**THE LEVER.** Every locality result this repo owns acts at the FEATURE stage (`cls_mean_focal`,
+`depth_regions`, `--anatomical-prior`, `--focus-label`, all flat to negative). These two act at the
+INPUT: `ROI_SCHEME` re-cuts the three sagittal slots to a detected box, so a 2-3 mm meniscus tear stops
+being ~5 px of a 130 mm field. That is aimed straight at the standing diagnosis that "the limit is
+upstream, in what one slice's feature vector contains", and it is the one version of the idea the feature
+stage cannot express.
+
+**THE CONTROL HAD TO BE FOUND BEFORE THE NUMBER MEANT ANYTHING.** Both arms carry
+`--stochastic-depth 0.05`, which the corner members do NOT (`labelwise_depth24_drop40_long` and
+`labelwise_dense_drop40_long` are both `0.0`). Read against those, the pair crosses TWO variables and
+nothing may be attributed to the crop. `labelwise_drop_drop40_long_s2026` is the matched canonical
+control — same 24 epochs, 336 px, 20 slices, slot-dropout 0.40, stochastic-depth 0.05, labelwise,
+whole-stack — leaving `scheme` as the only moving part.
+
+| member | scheme | `ledger75` | vs control |
+|---|---|---|---|
+| `labelwise_drop_drop40_long_s2026` | canonical | **0.9051** | — |
+| `roinative_labelwise_drop40_long_s2026` | roinative | 0.9018 | **−0.0033** |
+| `roi_labelwise_drop40_long_s2026` | roi | 0.8984 | **−0.0067** |
+
+**THE CROP COSTS, AND THE ARM'S OWN HYPOTHESIS IS CONFIRMED AS EXACTLY HALF OF WHY.** `roinative` was
+built on the argument that the upsampled crop "threw away detail the crop existed to buy" — 73% of
+sagittal series are acquired finer than 0.387 mm/px. Re-cutting from DICOM at 672 px recovers **+0.0034**
+of the 0.0067, which is that argument landing. The residual **−0.0033** is the crop ITSELF, and it is what
+the arm did not predict: with resolution restored and the boxes unchanged, discarding the surrounding
+anatomy still costs. −0.0067 clears the 0.0062 seed spread; −0.0033 sits under it, so the residual is
+DIRECTIONAL and the recovery is the better-supported half.
+
+**MECHANISM, AND WHAT IT DOES NOT RULE OUT.** This is the locality family's shape again, now demonstrated
+at the stage that was still open: the head does not want a tighter field, it wants context it can weigh.
+It does NOT rule out a crop that ADDS a view rather than REPLACING one — every reading here substitutes
+the tight cut for the canonical slot, so no member has ever seen both.
+
+**IT WAS NEVER SHIPPABLE ANYWAY, AND THAT IS THE FIRST THING TO CHECK NEXT TIME.** Both arms state
+`OFFLINE ONLY: locator fitted on SKM-TEA, licence ruling knee-vgz5b.7`. The locator is instrument-only,
+so no ROI member may enter a kit whatever it scores. The score was worth taking for the mechanism; the
+licence should have been read before the card was spent, not after.
