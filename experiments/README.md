@@ -17598,3 +17598,51 @@ other on offline75 (0.9045 / 0.9053 / 0.9059) and spread 0.004 on the board (0.9
 the residual is real scatter, not slope error, and at +-0.002 it is comparable to the board's own 0.001
 resolution. And our best member, at 0.9073, projects to **0.9413**: five ticks UNDER the champion. No
 member this project owns clears the bar on its own, which is the impasse stated as a number.
+
+## The closed set holds: a full sweep for an axis closed on weak evidence returns two cells, both knob-sized — 2026-09-20T14:20Z
+
+Card-free, zero slots. The question was the one the standing brief keeps asking: is any axis closed on a WEAK
+MEASUREMENT rather than on a mechanism, with a plausible size worth the card? Every `close`, `refuted`,
+`retired` and `does NOT rule out` line in this file was read and classified.
+
+**The answer is no, and the arithmetic says why it was always unlikely.** A 1.5% lever on a SOLO would win
+the competition outright: our best member is `dml_b_s2026` at 0.9078 offline75, and +0.015 puts it at 0.9228
+— past the 0.9201 the refitted solo transfer maps to board 0.955. So "a mis-closed axis worth 1.5%" is the
+same claim as "an axis worth first place was closed by accident", and the closed set does not contain one.
+
+The surviving re-openers sort into three buckets, none of them usable here:
+
+- **Ensemble-side.** `:2629` (a twelve-epoch schedule overturning the seat verdict, ~3.2 h), `:3390` (the
+  greedy's never-offered trade). Both are about SEATING. The deliverable is a single checkpoint, so these are
+  closed by the brief, not by the measurement.
+- **Trunk/data scale, closed on several independent readings.** The CNN lane (`:17307`, +0.054 on a ViT and
+  0.000 to -0.007 on resnet50d), SSL-as-init (`:2688`, three collapses), the corpus axis (`:15254`, three
+  agreeing readings at +0.0043 / -0.0024 / -0.0031). One weak reading is re-openable; three that agree is
+  not, and none of these was closed on a single number.
+- **Knob-sized.** Everything else.
+
+**Two cells are genuinely never-run, and both are named here so the next sweep starts from them rather than
+repeating this one:**
+
+1. **`:17149` — ROI as an ADDED view rather than a REPLACEMENT.** The entire locality family shares one
+   confound: every arm substituted the tight cut for the canonical slot, so no member has ever seen both.
+   The family's own mechanism note (`:17147`) reads "the head does not want a tighter field, it wants context
+   it can weigh" — which is an argument FOR handing it both, and the substitution design is exactly what
+   makes the -0.0033 / -0.0067 readings unable to answer it. Solo-compatible: more slots, one checkpoint, one
+   forward pass. **But `extended_slots` priced ADDING a view at +0.0002 (`:338`, refuted on the mean), so the
+   honest prior is knob-sized, not 1.5%.**
+2. **`:17484` — the FP-only label intervention.** Every table tested so far replaces `report_labels_v2`
+   WHOLE; the one-sided 3.4:1 over-call is real and unexplained, and no arm has tested the FP-only fix its own
+   error decomposition points at. Against it: the label lane is closed on the BOARD at `:15761` (0.943 and
+   0.942 against the champion's 0.946), which is the ruler that matters.
+
+**And the ledger already downgrades three of its own closes**, at `:16701`: "909 studies cannot order the band
+we ship in … the three knob closes recorded above (aux objectives -0.0019, `backbone_lr` -0.0022, adaptation
+depth +-0.001) stand as refusals to spend a slot and may NOT be cited as evidence that those mechanisms do
+nothing." That is the honest shape of a weak close, it was already caught, and it is knob-sized too.
+
+**CONSEQUENCE, stated plainly.** This sweep does not redirect the card; it LICENSES `basinsoup` as the best
+live lever rather than merely the nearest to hand, which is what it was run to decide. It also prices the
+remaining search: there is no large mis-closed axis, so the route to 0.955 is not one re-opened family but a
+chain of mechanism-sound increments against the ORIGINAL baseline. Running total after this sweep:
+**twelve lever searches, zero hits.**
