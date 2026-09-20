@@ -24,9 +24,18 @@
 #   ~0.9003 at K=3) and weight souping closes on its THIRD explanation, permanently.
 #
 # PRE-REGISTERED, on ledger75 @ holdout909, parent = 0.9073
-#   >= 0.9128       carries the bar — the offline75 a solo needs to beat the pinned 0.946 champion.
-#   0.9073..0.9128  real but insufficient alone. Directional, no slot.
+#   >= 0.9117       carries the bar — the offline75 a solo needs to beat the pinned 0.946 champion.
+#   0.9073..0.9117  real but insufficient alone. Directional, no slot.
 #   < 0.9073        the shared basin does not save souping. The axis closes for good.
+#
+# THE BAR IS RE-DERIVED, NOT QUOTED (2026-09-20T14:04Z). `board_transfer` has no `solo` scope, so this
+#   fit exists only as prose in a board row — the exact shape of the constant this repo has now quoted
+#   wrong five times. Refitted off `comp/board.jsonl` directly: the ten single-member entries carrying
+#   both numbers give OLS slope +1.071, intercept -0.0307, residual sd 0.0019 (population) / 0.0021
+#   (sample), which reproduces the recorded fit. Inverting it puts board 0.946 at offline75 0.9117 and
+#   board 0.955 at 0.9201 — so the bar carried into this arm as 0.9128 was 0.0011 TOO HIGH, half a
+#   residual sd, enough to read a marginal win as merely directional. The parent's own 0.9073 projects
+#   to board 0.9413, five ticks under the champion; the soup must find +0.0044 offline75 to clear it.
 #
 # deliberate: --init "$PARENT" --init-scope all — the one flag that makes this a basin fork rather than
 #             the independent-runs setting already refuted twice. `all` and not `trunk`: the parent's

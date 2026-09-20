@@ -17565,3 +17565,36 @@ resolution, the CNN lane, augmentation carriers, label tables, declines, distill
 and data scale. What remains open is not a knob, a refit or a corpus — the refit road is capped at 0.9455
 against a 0.946 champion, so the next thing worth card time has to move the offline number by +0.005 by
 a mechanism none of those twelve axes contains.
+
+## The bar is 0.9117, not 0.9128 — the solo transfer refitted off the record — 2026-09-20T14:04Z
+
+The two sections above quote the bar a solo must clear as `offline75 >= 0.9128` to beat the pinned
+0.946 champion and `>= 0.9204` to reach 0.955. Both came from inverting the solo transfer fit as it is
+RECORDED IN PROSE in `noemasolo_v1`'s board row — n=10, slope +1.071, intercept -0.0307, resid sd
+0.0021. That is the same shape as every `board_transfer` constant this file has had to retract: a
+fitted number carried forward by quotation rather than re-read.
+
+`board_transfer` cannot settle it — it has no `solo` scope, only `ensemble`, `excluded` and
+`member_mean`, so the solo fit has no tool and lives only in that row. Refitted directly off
+`comp/board.jsonl` (single-member, non-excluded entries carrying both numbers, n=10):
+
+    ortho_solo_v1    0.8748 -> 0.907      matchpair_v1   0.8962 -> 0.933
+    resnetlong_v1    0.8764 -> 0.907      extsolo_v1     0.9045 -> 0.937
+    cnnsolo_v1       0.8842 -> 0.915      l75solo_v1     0.9053 -> 0.941
+    v4solo_v1        0.8874 -> 0.922      headlrsolo_v1  0.9059 -> 0.937
+    spansolo_v1      0.8895 -> 0.921
+    holdsolo_v1      0.8949 -> 0.928
+
+    OLS slope +1.071  intercept -0.0307  resid sd 0.0019 population / 0.0021 sample
+
+**The fit reproduces exactly.** The recorded slope, intercept and n are right, and the recorded 0.0021
+is the sample sd. What does NOT reproduce is the INVERSION: board 0.946 sits at offline75 **0.9117**
+and board 0.955 at **0.9201**, so the bar has been carried 0.0011 too high — half a residual sd. That
+is small, and it is exactly the size that decides a marginal case, which is where a pre-registered
+branch earns its keep. `basinsoup`'s branch was corrected before the arm ran.
+
+Two readings worth keeping from the table itself. The top three entries sit within 0.0014 of each
+other on offline75 (0.9045 / 0.9053 / 0.9059) and spread 0.004 on the board (0.937 / 0.941 / 0.937) —
+the residual is real scatter, not slope error, and at +-0.002 it is comparable to the board's own 0.001
+resolution. And our best member, at 0.9073, projects to **0.9413**: five ticks UNDER the champion. No
+member this project owns clears the bar on its own, which is the impasse stated as a number.
