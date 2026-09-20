@@ -55,6 +55,14 @@ PRE-REGISTERED, against `extffsolo_v1`'s 0.945 and the board's 0.001 resolution:
   * **0.944 or below** - serving out of distribution COSTS, and the fitted depth is the right one. This
     is the branch that would retire the whole idea, and it is not the unlikely one.
 
+THE ONE WAY THIS FAILS BADLY, AND WHY IT CANNOT HAPPEN HERE. `Ensemble` mitigates an overrun by giving
+up the weakest member per chunk, and it stops at `len(surviving) <= 1` - a SOLO is never dropped. So a
+solo that projects past the ceiling is not trimmed, it is killed at nine hours having written nothing,
+and the slot scores nothing at all. That is the failure to rule out before shipping, not after. It is
+ruled out structurally: `tripleseat_v2` serves THREE read groups of 20 slices - sixty slice-decodes a
+study - plus eight member forwards, and it finishes. This entry is thirty-two slice-decodes and ONE
+forward, under a third of the champion's bill on both axes.
+
 NOT A RESEATING, WHICH IS WHY IT MAY HAVE THE SLOT. `submit_check` refuses it on SET equality against
 `extffsolo_v1` and that refusal is correct and expected: the member set is IDENTICAL BY DESIGN. The
 variable is the serving, and a check that guards member sets cannot see it. The `--anyway` says so.
