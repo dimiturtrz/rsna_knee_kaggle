@@ -17153,3 +17153,13 @@ the tight cut for the canonical slot, so no member has ever seen both.
 `OFFLINE ONLY: locator fitted on SKM-TEA, licence ruling knee-vgz5b.7`. The locator is instrument-only,
 so no ROI member may enter a kit whatever it scores. The score was worth taking for the mechanism; the
 licence should have been read before the card was spent, not after.
+
+**AND THE +0.0034 DOES NOT TRANSFER TO CANONICAL RESOLUTION — THAT AXIS IS ALREADY FLAT.** The obvious
+read of the recovery is "decode finer everywhere", and it is wrong. `resolution.sh 392 448 8e-6` — 392 px
+at the CONTROL's encoder rate — reads **−0.0002**, and the whole +0.0066 of `res392_ws_s2026` belongs to
+the encoder rate 8e-6 → 4e-5 (see "The confound came apart, and resolution is not the cause"). 448 px
+OOMs whole-stack at batch 12 and 392 was the last rung fitting 28.4 GB of 32 GB, so the canonical axis is
+closed on measurement at every rung that fits the card. `roinative`'s gain is resolution **inside a box**
+— 0.193 mm/px over the structure against 0.387 — which canonical framing cannot reach at any affordable
+width, because at 130 mm the same pixels are spent on the whole field. The two numbers are consistent and
+only one of them is a lever.
