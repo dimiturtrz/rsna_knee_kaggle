@@ -978,3 +978,14 @@ soup336_trunk3_s2026.pt     # 0.8680 midpoint / 0.9032 ledger75. Weight soup at 
                             # pool. The best of the soup336 family and the only one of them above 0.903.
 soup336_k2_s2026.pt         # 0.8667 midpoint / 0.9015 ledger75. The 2-member soup, and the best of the
                             # soup336_k* ladder — see the declines for why k>2 does not follow it on.
+basinsoup_k3_s2026.pt       # 0.8712 midpoint / 0.9089 ledger75. Three seed-children re-annealed off the
+                            # fine-tuned parent labelwise_ext_drop40_long_ema_s2026 (0.9073) and averaged
+                            # in weight space — the shared-basin condition the two earlier souping closes
+                            # named as their only re-open (knee-0dfys). The best soup this project owns
+                            # and +0.0016 over its own parent, one forward pass. Seats as a TWIN of
+                            # labelwise_ext_drop40_long_s2026: swapping it in reads +0.0012, real but
+                            # under the +0.0040 this ruler picks board ticks at, so hold it, never a slot.
+basinsoup_k4_s2026.pt       # 0.8709 midpoint / 0.9089 ledger75. The same average with the parent itself
+                            # as a fourth member. It reads IDENTICAL to k3 to four decimals, which is the
+                            # measurement that the children never left the parent's point — seat it only
+                            # as k3's alternate, never beside it.

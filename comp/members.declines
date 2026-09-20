@@ -1712,3 +1712,9 @@ resnet_stack_224_s2026.pt   # OUR stack on a resnet50d trunk, 224px/12sl/0.2-0.8
                             # worth +0.054 on DINOv2-S and 0.000 here; it is representation-specific.
                             # Re-opened only by a measured band term (0.2-0.8 vs 0.1-0.9 is unmatched
                             # and unpriced), never by re-quoting the ledger75 near-tie.
+basinsoup_c101              # 0.9077 ledger75. A seed-child of labelwise_ext_drop40_long_ema_s2026 whose
+basinsoup_c102              # 0.9065  only purpose was to be averaged: the three exist to make
+basinsoup_c103              # 0.9057  basinsoup_k3, and each is a twin of the parent and of the others
+                            # (K=3 and K=4 agree to four decimals). Seating one is seating the parent
+                            # with extra steps. Re-opened only by a child that MEASURABLY diverges —
+                            # longer at 2e-5, not a higher LR (knee-0dfys).
