@@ -67,6 +67,19 @@
 #             average ~ parent, a null — and that null is branch three, not a wasted card.
 # deliberate: every other flag is the parent's line byte for byte, so the architecture tuple
 #             `weight_soup` refuses on is identical across parent and all three children.
+#             VERIFIED AGAINST THE PARENT'S OWN STAMP, not against the arm file that claims to have
+#             produced it (2026-09-20T14:30Z). `weight_soup` refuses on twelve ARCHITECTURE keys plus
+#             three SPLIT keys, and NINE of those fifteen are set by neither line — `$RECIPE` is only
+#             `--fold 0 --one-cycle --weight-floor --rank-weight 1.0`, so variant, pool, slot_pooling,
+#             image_size, unfreeze_last, encoder_layer, lora_rank, folds and split_seed all fall through
+#             to `TrainConfig` defaults. A claim of "byte for byte" says nothing about a key neither line
+#             mentions, which is where a refusal after 1.1 h of card would have hidden. The parent's
+#             stamp reads small / cls_mean / attend / 336 / 20 / whole_stack / 6 / 0.1-0.9 / -1 / 0, and
+#             folds 5 / split_seed 2026 / fold 0 — and the child line omits exactly the same nine flags,
+#             so both resolve identically by construction rather than by coincidence. The only diffs are
+#             --epochs, --backbone-lr, --vram-gb, --init, --init-scope and --seed, none of which is in
+#             either tuple. fold is 0 and not -1, so K=4 including the parent is not a FULL_DATA_FOLD
+#             leak. Same `$LABELS` on both lines, so the same scored-against table.
 # deliberate: --vram-gb 22 — the owner's 50-70% band, the proven sibling value.
 #
 # CARD. ~4 epochs x ~280 s x 3 children = ~1.1 h, plus the soup and its 909-study pass. Nothing else of
