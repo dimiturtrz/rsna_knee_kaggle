@@ -4725,3 +4725,33 @@ negative, so its expected value sits below this row. The board has measured the 
 ladder four times (`onegroup_v1` 0.942 at 12, `cheapdecode_v1` 0.925 and `cheapwide_v1` 0.928 at the
 224 px / 12 corner, this row at 32) and the ascending half once, negative. **Serve every member at its
 fitted depth.**
+
+## basinsoupff_v1 — 0.946, ref 56406877, 2026-09-20 — a SOLO ties the seven-seat champion, and weight souping transfers to the full-data line
+
+`basinsoup_ff_k4_s2026` is the uniform weight average of four full-data checkpoints: the shipping solo
+`labelwise_ext_drop40_long_ff` (= `extffsolo_v1`, board 0.945) and three 4-epoch `--fold -1` seed-children
+forked off it with `--init-scope all` at backbone-lr 2e-5, seeds 301/302/303. One checkpoint, one forward
+pass, no new recipe. `run_check` on the downloaded kernel log reads `loaded 1 of 1 members`.
+
+**It landed on the middle pre-registered branch.** The kernel named `>=0.947` as the op transferring,
+`0.946` as a tie under the board's own blur, and `<=0.945` as the family closing on its fourth
+explanation. It read 0.946.
+
+**What is new.** This is the first solo this project owns to reach 0.946. It ties `tripleseat_v2` — seven
+members, three read groups, 56 slice-reads a study — with a single member behind a single decode. On the
+efficiency ladder the solo dominates that champion by construction, and nothing about a seating can make
+seven trunks cheaper than one.
+
+**What it does not do.** 0.946 does not beat 0.946. The pin does not move, the standing entry is
+untouched, and the +0.001 over its own parent sits inside the 0.0022 top-band residual sd — directional
+only, not a finding, and not a delta to plan around.
+
+**What it settles.** Weight souping transfers from the fold-0 line to the full-data line. Fold-0 measured
++0.0016 (parent 0.9073 → `basinsoup_k3` 0.9089); the board paid +0.001 on the `_ff` line. Same sign, same
+order, two different rulers. The op is the only weight-space operation this project has measured positive
+and it is now confirmed twice.
+
+**The bar it still misses, stated on the ruler that can resolve it.** The solo board-transfer fit
+(n=10 single-member entries, slope +1.071, intercept −0.0307, resid sd 0.0019) puts board 0.955 at
+offline75 **0.9201**. The best fold-0 fit the project owns is `dml_b_s2026` at 0.9078. The gap to first
+place is **+0.0123 offline75**, and souping's measured size is +0.0016.

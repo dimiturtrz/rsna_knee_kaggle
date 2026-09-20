@@ -1740,3 +1740,13 @@ basinsoup2_k4_s2026         # 0.9080  4 epochs. This PAIR is the reading that fi
                             # it: K=3 and K=4 disagree at 8 epochs where they agreed to four decimals at
                             # 4, and both products land under the shorter cycle's. Declined as members,
                             # kept as the argument.
+basinsoup_dmlb_k3_s2026     # 0.9088 ledger75 against k4's 0.9092 on the identical children. Declined as
+                            # k4's alternate, never beside it — the +0.0004 between them is the parent
+                            # anchor's whole contribution and is four decimals inside the 0.0053 paired
+                            # floor. Same reading as basinsoup_k3/k4 agreeing to four decimals: the
+                            # children never left the parent's point.
+basinsoup_dmlb_c401         # 0.9061 ledger75 \
+basinsoup_dmlb_c402         # 0.9062 ledger75  > the three seed-children of `dml_b_s2026`. Every one lands
+basinsoup_dmlb_c403         # 0.9062 ledger75 /  BELOW the 0.9078 parent, and their average lands above it
+                            # — which is the whole point of the soup and the reason none of them is a
+                            # member on its own. Declined as ingredients, kept as the argument.

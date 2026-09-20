@@ -51,3 +51,11 @@ basinsoup_ff_k4_s2026.pt    # DARK, fold -1: no offline number exists or can be 
                             # 2e-5, seeds 301/302/303. On the fold-0 line that operation read +0.0016
                             # ledger75 (0.9073 -> 0.9089), the only weight-space op this project has
                             # measured positive. Shipped as a solo; the board is its only ruler.
+basinsoup_dmlb_k4_s2026.pt  # 0.8720 midpoint / 0.9092 ledger75, epoch 1, 909 rows — the HIGHEST fold-0
+                            # number this project owns. Uniform weight average of `dml_b_s2026` (0.9078,
+                            # the best honest fold-0 fit) and three 4-epoch seed-children forked off it at
+                            # backbone-lr 2e-5, seeds 401/402/403. +0.0014 over the parent, against the
+                            # same operation's +0.0016 on `basinsoup`'s base: the soup op REPRODUCES on a
+                            # second base, and on a non-EMA parent. Under the solo board-transfer fit
+                            # (knee-0dfys: slope +1.071, intercept -0.0307) this projects to board ~0.9436,
+                            # so it is a shelf member and a base for further work, not a slot candidate.
