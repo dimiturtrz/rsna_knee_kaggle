@@ -12332,7 +12332,7 @@ differ on slices AND band (12sl/0.2-0.8 against 20sl/0.1-0.9) and therefore pric
 The default-resolution table this rests on: `--variant` resolves to `SMALL`/`dinov2-small`
 (`pretrain.py:262`); `--slices` 12, `--image-size` 336, band 0.20/0.80 (`core/data/corpus/cache_flags.py`).
 
-### D262 — norm CHOICE is closed; LN-affine test-time adaptation is the open lever
+### D262 — norm CHOICE is closed; ~~LN-affine test-time adaptation is the open lever~~ THE RANKING IS SUPERSEDED (knee-fvzvm)
 
 The M&Ms BN-over-IN result that has been quoted at this project is **one borrowed sentence citing Bjorck
 2018**; the 2x2 exists in that paper but the interaction is never tested — the evidence is a visual
@@ -12350,6 +12350,33 @@ no new cache, it applies to every member on disk, and it attacks the flat −0.0
 blind spot every member SHARES rather than a seat. It also changes the SERVED function, so it is gated
 on `witness_check` and on whether the adapted forward pass depends on test-batch composition. The recipe
 question is out as M264.
+
+> **"NEVER MEASURED" IS FALSE, AND THE REFUTATION IS 290 LINES ABOVE IN THIS FILE (knee-fvzvm, 2026-09-20).**
+> `knee-2sqyb` swept the CARVE per-study adapt budget over `lr x steps` against `fovjitter160_s2026` on
+> 2026-09-09 and read the decode cost FLAT-to-WORSE across a **10000x displacement range**:
+>
+> | budget | decode cost | kept |
+> |---|---|---|
+> | control | −0.0297 | 0.8504 |
+> | \|dθ\| 2e-3 | −0.0309 | |
+> | \|dθ\| 1e-2 | −0.0355 | |
+> | \|dθ\| 2e-2 | −0.0360 | 0.7570 |
+>
+> That is **0.0063 in the WRONG direction**, and its close reason states the finding generically: "there is
+> no budget at which decode turns, so 'try smaller' closes too. REPRESENTATION-BOUND with the model-side
+> lever removed rather than untested — **the norm affines are not where the missing information is**."
+>
+> **This closes TENT, not merely CARVE.** TENT adapts THE SAME PARAMETERS and differs only in the objective
+> pointing the gradient (entropy minimisation against CARVE Eq. 9). `knee-2sqyb` is a statement about which
+> parameters carry the information, measured over four orders of magnitude. The honest residual, stated so
+> the closure is not overclaimed: the sweep displaced the affines along CARVE's direction only, so a
+> different objective is not *literally* excluded — it is strongly disfavoured, and it may not be described
+> as unmeasured.
+>
+> The paragraph above is kept because its survey and its mechanism reasoning are worth having. Its RANKING
+> is not: it names this the one open lever and attaches a −0.0336 toll to it, twice the +0.018 ledger75 that
+> prices first place, so a reader ranking levers off it arms a closed axis. That has already cost this
+> project a night's card once (`knee-18c5r`).
 
 Closed by the same letter: decode-time intensity normalisation. With per-volume z-score already at the
 flat optimum it is ~0.5% of transfer variance — not a lever, and not worth a slot.
