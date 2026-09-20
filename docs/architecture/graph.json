@@ -11132,6 +11132,12 @@
     },
     {
       "kind": "calls",
+      "source": "core.data.corpus.mrnet_labels.ArchiveLabels.table",
+      "target": "core.data.corpus.mrnet_source.MRNetSource.at",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "core.data.corpus.mrnet_labels.MRNetLabels.verdicts",
       "target": "core.data.corpus.mrnet_labels.MRNetLabels.case_of",
       "weight": 1
