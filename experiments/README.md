@@ -17215,3 +17215,48 @@ slope of +1.09 that needs ~+0.010 offline. The largest recipe axis in the projec
 already spent; the largest still-open one is a +0.0035 extrapolation. **No knob left on this recipe can
 reach the gap, and the remainder of the table sums to less than the seed spread.** That is the counted
 version of the 0/11 axis sweep and of knee-xe0aq — the lever has to be DATA, not recipe.
+
+### The ema axis: the table's coefficient has the WRONG SIGN, because ema was confounded with fold (2026-09-20)
+
+`matched_axes` reports **ema-OFF ahead by +0.0049**. That coefficient is a CROSS-MEMBER contrast — it
+groups every member carrying `--ema` against every member without it — and across the drop40 corner the
+flag is not independent of the fold: the ema-ON members there are largely the `_ff` whole-corpus refits
+and the ema-OFF members largely the fold-0 fits. The table cannot see that, because a cross-member
+contrast has no way to hold a second axis fixed.
+
+`knee-0ed8f` broke the confound with the first MATCHED single-variable arm on this corner — same recipe,
+same fold, same 909 studies, `--ema` the only flag that moves, both runs convergence-clean:
+
+| member | ledger75 | midpoint | epoch |
+|---|---|---|---|
+| `labelwise_ext_drop40_long_ema_s2026` (ema ON) | **0.9073** | 0.8687 | 23 of 24 |
+| `labelwise_ext_drop40_long_s2026` (ema OFF) | 0.9045 | 0.8672 | — |
+
+**ema-ON ahead by +0.0028 ledger75 — the OPPOSITE SIGN to the table's +0.0049.** Both numbers sit under
+the 0.0053 paired floor, so this is DIRECTIONAL and neither refutes the other outright; what it does
+establish is that the table's coefficient is not measuring what its name says, and it should not be
+spent as a +0.0049 in any sum. It is also consistent with the shipping practice nobody had justified:
+every `_ff` we ship is already ema-on.
+
+**THE BOARD READ WAS ARMED THE SAME DAY AND IS NOT YET SCORED.** The fold-0 pair above cannot settle
+the sign on its own, so the contrast was pushed to a third ruler at FULL FIT, where the two entries
+differ in `--ema` and nothing else:
+
+| entry | member | fit | ema | board |
+|---|---|---|---|---|
+| `extffsolo_v1` (ref 56312235) | `labelwise_ext_drop40_long_ff` | `--fold -1` | ON | **0.945** |
+| `kneemri-noemasolo` | `labelwise_ext_drop40_long_noema_ff` | `--fold -1` | OFF | pending |
+
+Branches were pre-registered in `knee-f2mj3` BEFORE the slot: `>= 0.946` corroborates the table and
+licenses dropping `--ema`; `0.943-0.945` is FLAT and retires both contradictory coefficients as noise;
+`<= 0.942` confirms ema-ON and VOIDS the table's `+0.0049`. The modal branch is the flat one — the board
+resolves at 0.001 against a 0.0022 top-band residual sd, so a ~0.003 true delta is ~1.4 sd, and this
+instrument can corroborate a sign without settling it.
+
+**WHY IT IS WORTH A SLOT ANYWAY, stated as the ratio:** 0 card-hours (the kernel was already built and
+COMPLETE), 1 slot, P(decisive branch) ~0.45. What it buys is not +0.003 of score — it is the retirement
+of a coefficient that currently sits in the recipe table with a sign that a matched arm contradicts.
+
+**WHAT IT DOES NOT RULE OUT.** This is one corner (drop40, 24 epochs, labelwise) at one fold. It says
+nothing about ema on a different trunk or a different schedule, and the cross-member grouping may still
+be measuring a real fold term that deserves its own matched arm.
