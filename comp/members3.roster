@@ -59,3 +59,9 @@ basinsoup_dmlb_k4_s2026.pt  # 0.8720 midpoint / 0.9092 ledger75, epoch 1, 909 ro
                             # second base, and on a non-EMA parent. Under the solo board-transfer fit
                             # (knee-0dfys: slope +1.071, intercept -0.0307) this projects to board ~0.9436,
                             # so it is a shelf member and a base for further work, not a slot candidate.
+basinsoup_ff_k3_s2026.pt    # DARK, fold -1: no offline number exists or can be made. The K=3 uniform
+                            # weight average of the SAME three seed-children basinsoup_ff_k4 holds, with
+                            # the parent anchor dropped -- the one-variable counterpart to the entry that
+                            # boarded 0.946. Packaged as the instrument that attributes that +0.001 to
+                            # the children's average or to the anchor, a question no offline ruler can
+                            # answer on a full-data fit.
