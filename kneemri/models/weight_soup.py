@@ -21,6 +21,13 @@ network read by a different ruler, which is the arithmetic-on-two-questions fail
 already paid for once; and a `fold -1` member is refused outright because a full-data fit saw the
 holdout, so one of them in the pot silently leaks the number the soup is about to be read on.
 
+THAT ONE REFUSAL HAS A RELEASE, AND ONLY THAT ONE. `ship_only` averages full-data members, because the
+leak it guards is a leak INTO A NUMBER and an all-full-data soup has no such number: there is no holdout
+for it, `holdout_backfill` has nothing to write and `ledger75` no row to price, so the only ruler it can
+ever be read by is the board. A MIX stays refused and needs no extra code to stay refused — `fold` sits in
+`SPLIT`, so members disagreeing on it already fail the signature, and the mixed pot is the case the guard
+was actually written for. The flag therefore widens nothing except the deliberate all-`-1` ship.
+
 THE SOUP CARRIES ITS FIRST MEMBER'S RECIPE AND NONE OF ITS CLAIMS. `holdout` and `epoch` are cleared:
 the average never ran an epoch and has no score until something reads it. The weight FINGERPRINT is
 dropped rather than copied, because it is a witness of a specific set of tensors and copying it forward
@@ -95,11 +102,12 @@ class IncompatibleSoupError(ValueError):
 class WeightSoup:
     """A uniform weight-space average of independently fitted runs that share an architecture."""
 
-    def __init__(self, members: Sequence[Path]) -> None:
+    def __init__(self, members: Sequence[Path], *, ship_only: bool = False) -> None:
         if len(members) < MINIMUM_MEMBERS:
             message = f"a soup needs at least {MINIMUM_MEMBERS} members, got {len(members)}"
             raise IncompatibleSoupError(message)
         self.members = list(members)
+        self.ship_only = ship_only
         self.payloads = [torch.load(path, map_location="cpu", weights_only=False) for path in self.members]
 
     def signature(self, payload: dict[str, object]) -> tuple[str, ...]:
@@ -120,7 +128,7 @@ class WeightSoup:
     def agreed(self) -> tuple[str, ...]:
         """The one signature every member shares, or a refusal naming the first member that differs."""
         first = self.signature(self.payloads[0])
-        if first[len(ARCHITECTURE) + SPLIT.index("fold")] == FULL_DATA_FOLD:
+        if first[len(ARCHITECTURE) + SPLIT.index("fold")] == FULL_DATA_FOLD and not self.ship_only:
             message = f"{self.members[0].stem} is a full-data fit and has already seen the holdout"
             raise IncompatibleSoupError(message)
         for path, payload in zip(self.members[1:], self.payloads[1:], strict=True):
@@ -173,8 +181,9 @@ def main() -> None:
     command = cli.Command(WeightSoup.__doc__, logger)
     command.parser.add_argument("--members", type=Path, nargs="+", required=True)
     command.parser.add_argument("--out", type=Path, required=True)
+    command.parser.add_argument("--ship-only", action="store_true")
     arguments = command.parsed()
-    soup = WeightSoup(arguments.members)
+    soup = WeightSoup(arguments.members, ship_only=arguments.ship_only)
     logger.info("souping %d members sharing %s", len(arguments.members), soup.agreed())
     logger.info("wrote %s", soup.write(arguments.out))
 

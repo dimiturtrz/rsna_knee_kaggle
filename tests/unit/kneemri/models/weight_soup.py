@@ -112,8 +112,11 @@ def test_weight_soup_refuses_one_member(tmp_path: Path) -> None:
     """One checkpoint averaged with itself is that checkpoint, and a full-data fit has seen the holdout."""
     with pytest.raises(IncompatibleSoupError, match="at least"):
         WeightSoup([_checkpoint(tmp_path / "a.pt", 1.0)])
-    dark = WeightSoup(
-        [_checkpoint(tmp_path / "dark.pt", 1.0, fold="-1"), _checkpoint(tmp_path / "e.pt", 3.0, fold="-1")]
-    )
+    members = [_checkpoint(tmp_path / "dark.pt", 1.0, fold="-1"), _checkpoint(tmp_path / "e.pt", 3.0, fold="-1")]
     with pytest.raises(IncompatibleSoupError, match="full-data"):
-        dark.agreed()
+        WeightSoup(members).agreed()
+    shipped = WeightSoup(members, ship_only=True)
+    assert shipped.agreed()[-2] == "-1", "an all-full-data pot has no holdout to leak into and ships"
+    mixed = [members[0], _checkpoint(tmp_path / "f.pt", 3.0)]
+    with pytest.raises(IncompatibleSoupError, match="fold"):
+        WeightSoup(mixed, ship_only=True).agreed()
