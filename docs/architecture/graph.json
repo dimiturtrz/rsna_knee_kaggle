@@ -5835,6 +5835,18 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_backfill",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
+      "target": "kneemri.models.fingerprint",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_backfill",
       "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
@@ -31573,6 +31585,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.HoldoutBackfill.stamp",
+      "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.load",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.inference.holdout_backfill.ReadSize",
       "target": "kneemri.inference.members.Member",
@@ -31618,6 +31636,12 @@
       "kind": "calls",
       "source": "kneemri.inference.holdout_backfill.main",
       "target": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_backfill.main",
+      "target": "kneemri.inference.holdout_backfill.HoldoutBackfill.stamp",
       "weight": 1
     },
     {
@@ -59948,6 +59972,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.Ledger75Row.price",
+      "label": "price",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.Ledger75Row",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.ledger75.Ledger75Row.recut_blind",
       "label": "recut_blind",
       "level": "method",
@@ -68670,6 +68702,14 @@
       "descendants": 0,
       "id": "kneemri.inference.holdout_backfill.HoldoutBackfill.derive",
       "label": "derive",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_backfill.HoldoutBackfill",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_backfill.HoldoutBackfill.stamp",
+      "label": "stamp",
       "level": "method",
       "parent": "kneemri.inference.holdout_backfill.HoldoutBackfill",
       "role": null
