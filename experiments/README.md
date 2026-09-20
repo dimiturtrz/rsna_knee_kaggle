@@ -17488,3 +17488,51 @@ decomposition points at (the 0.68 rung, precision 37/98 = 0.38, reproducing `MEA
 FP 108 -> 47), so the object exists on disk. That is a different intervention from a table swap and is not
 priced by anything above; it is also not licensed by anything above, and it inherits the same prior that
 just failed three times. Filed, not planned.
+
+## The +0.008 refit term was an EMA misattribution: it is +0.004, and the refit road is capped below the champion — 2026-09-20
+
+`noemasolo_v1` (ref 56391333, board **0.944**) was shipped as a pre-registered one-flag instrument
+(knee-f2mj3) and landed on its bottom branch. Its first reading is the axis it was built for and its
+second is worth more.
+
+**The axis. Keep `--ema` on every `_ff` refit.** `labelwise_ext_drop40_long_noema_ff` is byte-identical
+to `extffsolo_v1`'s member but for the flag, and reads 0.944 against 0.945 — one board tick, at the
+board's own 0.001 resolution. An independent honest ruler agrees in sign the same morning: the matched
+fold-0 pair (knee-0ed8f) reads ema ON 0.9073 against OFF 0.9045 ledger75, same fold, same 909 studies,
++0.0028 for ema ON. Two rulers, one sign. So `matched_axes`' +0.0049 FOR ema-OFF had the wrong sign —
+it is cross-member, n=2, single-seed, over a corner where ema is perfectly confounded with fold. The
+`>= 0.950` branch is dead; there is no programme of refitting the fleet without EMA.
+
+**The constant. `extffsolo_v1`'s refit term is +0.004, not +0.008.** The pair that produced +0.008 —
+`extsolo_v1` 0.937 to `extffsolo_v1` 0.945 — CROSSES THE EMA AXIS: the second is ema ON and the first
+is ema OFF, so the gap is refit plus ema, not refit. The matched ema-ON fold-0 twin is knee-0ed8f's arm
+at 0.9073 ledger75, which the solo transfer (n=10, slope +1.071, intercept -0.0307, resid sd 0.0021)
+prices at board 0.9413 — leaving **+0.004** for the refit. The fully-measured ema-OFF pair is
+`extsolo_v1` 0.937 to `noemasolo_v1` 0.944, **+0.007**. The term across four bases now reads +0.001
+(headlr), +0.003 (depth24), +0.004 (ext, ema-on), +0.007 (ext, ema-off). Still not a constant, but the
++0.008 outlier that drove "no single value" was this misattribution, and the working carry is ~+0.004.
+
+**What it costs: the refit road is capped BELOW the champion.** Refitting is the only positive measured
+board term this repo owns, and it is now half the size it was quoted at. Priced on the corrected fit,
+every member we own projects short of the pinned 0.946:
+
+| member | offline75 | fit | + refit ~+0.004 |
+|---|---|---|---|
+| `dml_b_s2026` (best we own) | 0.9078 | 0.9415 | **0.9455** |
+| `labelwise_drop_drop40_long_s2026` (knee-9grwy, on the card) | 0.9051 | 0.9387 | **0.9427** |
+
+`dml_b_ff` already TESTED the top row and landed 0.943, under even the fit. So **no refit of the
+existing pool can produce a solo that beats 0.946.** knee-9grwy is re-priced DOWN a second time: it
+needs +0.0033 over its fit, 1.6 sd of the residual, P(beats champion) ~0.06 — and the "+0.008 upper
+tail" its own header names as its entire mechanism is the misattribution corrected here. It is an
+INSTRUMENT or nothing, exactly as `dml_b_ff` was.
+
+**What it buys: the bar restated as an offline number.** Inverting the solo transfer, a solo checkpoint
+needs **offline75 >= 0.9128** to beat the 0.946 champion (+0.005 over our best member) and **>= 0.9204**
+to reach 0.955 (+0.013). That is the target any future lever must be priced against. A lever that moves
+the offline number is the only kind left; refitting, reseating and knob-turning are all inside the
+0.0062 seed spread of a pool whose top six span 0.0033.
+
+**What it does NOT rule out.** The four bases disagree from +0.001 to +0.007, which is a real spread
+around ~+0.004 and not noise about a constant — a base-dependent refit term may still be predictable
+from something we have not looked at. Filed, not planned.

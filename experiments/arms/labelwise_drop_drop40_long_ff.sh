@@ -19,6 +19,14 @@
 #   a draw from a distribution with a measured +0.008 upper tail, and this is the LAST such draw the top
 #   band holds: every other top-6 member is already shipped, or is `soup_anneal2` at -0.0029 below ship.
 #
+# THAT MECHANISM IS RETIRED, AFTER LAUNCH. `noemasolo_v1` (board 0.944, 2026-09-20) showed the +0.008
+#   pair CROSSES THE EMA AXIS — `extffsolo_v1` is ema ON, `extsolo_v1` is ema OFF — so it prices refit
+#   plus ema, not refit. The matched ema-ON twin prices at board 0.9413, leaving +0.004. The term across
+#   four bases is +0.001 / +0.003 / +0.004 / +0.007; there is no +0.008 upper tail to draw from. This
+#   arm's base reads 0.9051 offline75, which the solo transfer prices at 0.9387, so +0.004 lands it at
+#   0.9427 and beating the 0.946 champion needs 1.6 sd of the residual: P ~0.06. It runs to completion
+#   because its card is sunk, and it SHIPS AS AN INSTRUMENT OR NOT AT ALL. See the ledger, 2026-09-20.
+#
 # deliberate: --fold -1 — the point of the arm. A full fit holds nothing back.
 # deliberate: --ema — knee-0ed8f landed 2026-09-20T09:22Z, the first matched single-variable ema
 #             contrast on this corner: ema-ON ahead by +0.0028 ledger75 (0.9073 vs 0.9045, same fold,
