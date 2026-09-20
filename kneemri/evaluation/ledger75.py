@@ -33,8 +33,10 @@ import logging
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 import numpy as np
+import torch
 
 from core import cli
 from core.findings import TARGETS
@@ -86,6 +88,31 @@ class Ledger75Row:
     def moved(self) -> float:
         """LEDGER75 minus the midpoint macro. A member's own re-pricing, not a comparison to anything."""
         return self.ledger75 - self.ledger
+
+    def price(self, checkpoint: Path) -> bool:
+        """Write this row's midpoint macro into a checkpoint whose own `holdout` is missing or NaN.
+
+        A WEIGHT SOUP IS SCOREABLE BUT UNSHIPPABLE WITHOUT IT. `weight_soup` sets `holdout = nan`, and
+        `package_members` reads that field into the manifest row seat ranking is done on (knee-emyky).
+        The number written is `ledger`, this row's own — never a second arithmetic for the same field.
+
+        Here and not in `holdout_backfill`, which is the pass that stamps the soup's other missing field:
+        pricing a record is this package's arithmetic, and inference may not import the layer that
+        scores it. A checkpoint already carrying a number is left alone, because that number is what its
+        own training run measured and this ruler must not silently replace a member's recorded price.
+        """
+        # A record whose checkpoint is gone is priced and unshippable both, and 83 of the members on
+        # disk are exactly that (`roster_check`); a sweep must not die on the first one.
+        if not checkpoint.exists():
+            return False
+        saved = dict(torch.load(checkpoint, map_location="cpu", weights_only=True))
+        if not np.isnan(float(cast(float, saved.get("holdout", np.nan)))):
+            return False
+        saved["holdout"] = self.ledger
+        staged = checkpoint.with_suffix(".pricing")
+        torch.save(saved, staged)
+        staged.replace(checkpoint)
+        return True
 
     def recut_blind(self) -> bool:
         """Is this row's PAIR of numbers empty of information — no truth mass between the two cuts?
@@ -223,6 +250,11 @@ def main() -> None:
     command.parser.add_argument("--holdouts", type=Path, required=True, help="directory of .holdout.npz records")
     command.parser.add_argument("--only", nargs="+", default=[], help="member stems, instead of the whole directory")
     command.parser.add_argument("--declines", type=Path, default=DECLINES, help="what deliberately does not ship")
+    command.parser.add_argument(
+        "--price",
+        action="store_true",
+        help="write LEDGER into any priced checkpoint whose own holdout is NaN (a weight soup's is)",
+    )
     arguments = command.parsed()
 
     # The DEFAULT sweep goes through the pool and the explicit ask does not, which is `MemberPool.names`'s
@@ -244,6 +276,11 @@ def main() -> None:
             f"{row.studies:6d}{'  VOID - not a reading of held-out studies' if row.void else ''}"
         )
     lines.append(f"{len(rows)} member(s) priced under both rulers")
+    if arguments.price:
+        # Only a VOID row is skipped: its number is not a reading of held-out studies, so writing it
+        # into the checkpoint would put an in-sample price where seat ranking reads a holdout one.
+        written = [row.name for row in rows if not row.void and row.price(arguments.holdouts / f"{row.name}.pt")]
+        lines.append(f"priced {len(written)} checkpoint(s) that carried no holdout: {', '.join(written) or 'none'}")
     command.report(lines)
 
     voided = [row.name for row in rows if row.void]

@@ -58,8 +58,21 @@ class PackagedMember:
         return str(config.get("variant", SMALL))
 
     def entry(self) -> dict[str, object]:
-        """The row, at the keys `Member` reads back."""
+        """The row, at the keys `Member` reads back.
+
+        A checkpoint with no fingerprint is REFUSED BY NAME rather than by `KeyError`. `weight_soup`
+        drops the key deliberately and nothing restored it, so every soup raised here with every other
+        gate green and the traceback named neither the soup nor the remedy (knee-emyky).
+        """
         identifier = self.identifier
+        if "fingerprint" not in self.checkpoint:
+            message = (
+                f"{self.path.name} carries no weight fingerprint, so it cannot be packaged - the "
+                "fingerprint is what stops a member being run under a reading it was not fitted "
+                "under. A weight soup arrives this way by design; give it one with\n"
+                f"  python -m kneemri.inference.holdout_backfill --device cuda --checkpoints {self.path}"
+            )
+            raise ValueError(message)
         return {
             "id": identifier,
             "file": self.path.name,

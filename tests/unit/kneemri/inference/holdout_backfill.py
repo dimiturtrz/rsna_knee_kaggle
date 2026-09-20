@@ -205,3 +205,18 @@ def test_destination(tmp_path: Path):
 
     assert destination == tmp_path / "member_r224.pt"
     assert HoldoutRecord(destination).path != HoldoutRecord(checkpoint).path, "the native record survives a price"
+
+
+def test_stamp(tmp_path: Path):
+    """A checkpoint that already witnesses its own weights is left alone.
+
+    The half that rebuilds the encoder is not exercised here, for the reason `HoldoutPredictions.load`
+    states about its own backbone: it needs a network and a 90 MB download, so a unit test of it would
+    not be a unit test. What IS testable is the refusal, and it is the one that decides whether a member
+    silently gets a fresh witness for weights nobody re-read.
+    """
+    backfill = HoldoutBackfill(DataRoot(tmp_path), torch.device("cpu"))
+
+    witnessed = tmp_path / "witnessed.pt"
+    torch.save({"model": {}, "fingerprint": [0.1, 0.2], "holdout": 0.87}, witnessed)
+    assert not backfill.stamp(_member(tmp_path / "ignored.pt"), witnessed), "a witness is never recomputed silently"

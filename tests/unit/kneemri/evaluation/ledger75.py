@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import torch
 from numpy.typing import NDArray
 
 from core.findings import TARGETS
@@ -192,3 +193,17 @@ def test_void(tmp_path: Path) -> None:
     assert ruler.row(_member(tmp_path, "insample", RECUT_COLUMN)).void
     assert not ruler.row(_member(tmp_path, "honest", RECUT_COLUMN)).void
     assert not LedgerSeventyFive().row(_member(tmp_path, "unjudged", RECUT_COLUMN)).void
+
+
+def test_price(tmp_path: Path) -> None:
+    """A checkpoint carrying no holdout gets this row's own midpoint macro; one carrying a number keeps it."""
+    path = _member(tmp_path, "m9", RECUT_COLUMN)
+    row = LedgerSeventyFive().row(path)
+
+    torch.save({"model": {}, "holdout": float("nan")}, path)
+    assert row.price(path), "a NaN price is what a weight soup arrives with"
+    assert float(torch.load(path, weights_only=True)["holdout"]) == pytest.approx(row.ledger)
+
+    torch.save({"model": {}, "holdout": 0.5}, path)
+    assert not row.price(path), "a recorded price is never silently replaced by a ruler"
+    assert float(torch.load(path, weights_only=True)["holdout"]) == pytest.approx(0.5)

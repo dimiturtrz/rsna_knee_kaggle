@@ -42,7 +42,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.corpus.folds import ReportFolds
-from core.data.corpus.slot_reader import SLICE_BAND
+from core.data.corpus.slot_reader import GROUP, SLICE_BAND
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.paths import DataRoot
@@ -53,6 +53,8 @@ from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_metrics import RunMetrics
@@ -194,6 +196,46 @@ class HoldoutBackfill:
         HoldoutRecord(backfill.checkpoint).write(studies, predicted, truth, backfill.epoch, source=DERIVED)
         return len(studies)
 
+    def stamp(self, member: Member, checkpoint: Path) -> bool:
+        """Give a checkpoint that has no weight fingerprint one, computed from the weights on disk.
+
+        A WEIGHT SOUP ARRIVES WITHOUT ONE BY DESIGN, AND COULD THEREFORE BE SCORED BUT NEVER SHIPPED.
+        `weight_soup` drops the fingerprint rather than copying it forward, because a fingerprint
+        witnesses a specific set of tensors and an average is none of them; its docstring records that a
+        soup "is re-fingerprinted" when it earns a seat, and that step did not exist. `package_members`
+        is a file copy with no device, and indexes `checkpoint["fingerprint"]` directly, so every one of
+        the ten soups on disk raised `KeyError` at packaging with every other gate green (knee-emyky).
+        Here because this is the one pass that already rebuilds the member on a card.
+
+        The soup's OTHER missing field, its `holdout`, is not written here: pricing a record is
+        `kneemri.evaluation`'s arithmetic and inference may not import the layer that scores it.
+        `ledger75 --price` writes that one, off the same row it prints.
+
+        Returns whether anything was written. A checkpoint that already carries a fingerprint is left
+        alone — a fingerprint is a witness of the weights that were measured, and recomputing one
+        silently is how a member gets a fresh witness for weights nobody re-read.
+        """
+        saved = dict(torch.load(checkpoint, map_location="cpu", weights_only=True))
+        if len(np.asarray(saved.get("fingerprint", []), np.float32)) > 0:
+            return False
+
+        encoder = ENCODERS[member.variant]
+        model = self.predictions.load(checkpoint, encoder.load(), encoder.dim, member.slot_count)
+        saved["fingerprint"] = model.fingerprint(member.read_size, GROUP, self.predictions.device).tolist()
+        saved["fingerprint_config"] = {
+            "img": member.read_size,
+            "n_slot": model.n_slot,
+            "group": GROUP,
+            "seed": FINGERPRINT.seed,
+        }
+        # Never in place: a checkpoint half-written by a crash is a member that loads as far as the
+        # truncation and then raises, and this one is 89 MB over a copy.
+        staged = checkpoint.with_suffix(".stamping")
+        torch.save(saved, staged)
+        staged.replace(checkpoint)
+        logger.info("%s: stamped weight fingerprint", checkpoint.stem)
+        return True
+
 
 def main() -> None:
     """Back-fill the arms already run: `python -m kneemri.inference.holdout_backfill --checkpoints *.pt`."""
@@ -235,6 +277,11 @@ def main() -> None:
             destination = regroup.beside(destination) if regroup else destination
             if HoldoutRecord(destination).exists() and not (arguments.refresh or arguments.restamp):
                 logger.info("%s: already keeps its predictions", checkpoint.stem)
+                # A run that kept its predictions may still carry no fingerprint — every soup on disk
+                # does — and `stamp` is a no-op for one already witnessed, so the walk costs nothing
+                # and a soup backfilled before knee-emyky becomes shippable without re-deriving.
+                if not (sizing or regroup):
+                    backfill.stamp(Member.from_checkpoint(checkpoint), destination)
                 continue
             try:
                 plan = Backfill.of(checkpoint)
@@ -258,6 +305,11 @@ def main() -> None:
                 plan = replace(plan, checkpoint=destination)
             written = backfill.derive(member, plan, corpus, identifiers)
             logger.info("%s: %d studies re-derived at epoch %d", checkpoint.stem, written, plan.epoch)
+            # NATIVE PASSES ONLY. A sized or re-grouped record prices the member at a reading it was
+            # not fitted at, and stamping the checkpoint's `holdout` from one would replace the number
+            # every ensemble and seat search reads with a price of something else.
+            if not (sizing or regroup):
+                backfill.stamp(member, destination)
 
 
 if __name__ == "__main__":
