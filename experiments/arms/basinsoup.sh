@@ -37,6 +37,16 @@
 #   residual sd, enough to read a marginal win as merely directional. The parent's own 0.9073 projects
 #   to board 0.9413, five ticks under the champion; the soup must find +0.0044 offline75 to clear it.
 #
+# deliberate: PARENT = labelwise_ext_drop40_long_ema_s2026 (0.9073), and NOT the rank-1 member.
+#             `dml_b_s2026` reads 0.9078, ahead by 0.0005 — a TENTH of the 0.0053 paired floor, so the
+#             offline ruler cannot order the two at all and "fork off the best member" does not pick
+#             between them. What does pick is cost of the fork. `dml_b`'s recipe carries
+#             `--distill-weight 0.3 --teacher-targets`, so every child needs a teacher-readings file
+#             rebuilt for its split, and the one on disk covers the fold-0 TRAINING split only —
+#             `TeacherTargets.rows` raises on any study it does not cover. That is a second
+#             card-bound pass, a leak surface (`teacher_readings` refuses `--fold -1` as an argument
+#             for exactly this reason) and a third term varying between parent and children, when the
+#             soup's whole premise is that ONLY the seed differs. The ext parent needs none of it.
 # deliberate: --init "$PARENT" --init-scope all — the one flag that makes this a basin fork rather than
 #             the independent-runs setting already refuted twice. `all` and not `trunk`: the parent's
 #             head is exactly the head the children want, same corpus and same six slots.
