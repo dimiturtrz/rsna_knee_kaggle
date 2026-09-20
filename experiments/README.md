@@ -17392,3 +17392,51 @@ offline instrument ever again — their caches went in the 355 GB purge, joining
 `resnet_224_short_s2026` and `resnet_224_long_s2026`. Five members are now write-once. The set that
 answered this question was 3 of 5, and the two missing ones are the two most different from the mixup
 pair, which is the worst possible way to lose coverage on an axis being closed.
+
+## The slices ladder, measured on the SHIPPED intervention: depth is flat from 12 to 24 — 2026-09-20
+
+knee-uy8z0 was retracted because `member_curve --slices` and `SharedRead(slices=n)` are different
+interventions and the published ladder priced the wrong one. `member_curve` CENTRES a window on the
+already-decoded slab, so 20 -> 12 drops four slices off EACH END and narrows the effective band from
+[0.1, 0.9] to ~[0.26, 0.74]; the shipped `SharedRead` spreads n indices across the SAME band and
+changes only sampling DENSITY. The retracted ladder therefore charged band loss to depth.
+
+The instrument for the shipped semantics already existed and `member_curve.py:642` already pointed at
+it -- `holdout_backfill --served-slices/--served-band`, which builds `SharedRead(served_slices, band)`
+at `holdout_backfill.py:226`. Measured on `band_dense_s2026` (DINOv2-S, 336 px, native 20 slices,
+band 0.10-0.90), same 909 studies, same epoch 8, band HELD, density alone moving:
+
+```
+served   midpoint   ledger75   vs native (ledger75)
+  24      0.8598     0.8888      +0.0011
+  20      0.8578     0.8877         --        (native)
+  12      0.8540     0.8859      -0.0018
+```
+
+**Depth is FLAT across 12-24.** The whole ladder spans 0.0029 ledger75, inside the 0.0053 paired
+holdout floor, and the 12-slice cost is -0.0018 -- below the 0.0022 top-band residual sd. On the
++1.10 transfer line that is ~-0.002 board, one to two ticks, and within the fit's own 0.0017 scatter.
+
+**The retracted ladder read -0.0056 at 12, about three times the honest cost.** Two thirds of what was
+charged to depth was band narrowing. But that comparison CROSSES MEMBERS and is stated as such: the
+retracted ladder ran on `labelwise_ext_drop40_long_s2026`, and that member cannot be re-grouped at any
+depth -- it reads the `_extended` cache family, which exists on disk ONLY at 20 slices. The honest
+ladder had to be taken on a different checkpoint of the same family (DINOv2-S / 336 px / 20 sl /
+0.1-0.9), so the 3x is a cross-member statement, not a matched one. What IS matched, and is the
+finding, is the within-member flatness above.
+
+CACHE-BOUND RUNGS. `--served-slices n` reads a per-depth cache, so the ladder is only takeable where
+one exists: at 336 px on the 0.1-0.9 band that is {12, 20, 24}. **16 has no cache**, which retires the
+bead's own corrected conclusion "ship 16, not 12" -- 16 is not a shippable option without a decode
+pass, and the choice is between 20 and 12.
+
+TRAP, recorded because it would have reproduced the retraction exactly. `slot_reader.py:35` sets
+`SLICE_BAND = (0.20, 0.80)`, and `--served-band` defaults to it. Omitting the flag on a 0.1-0.9 member
+silently re-bands it to 0.2-0.8 -- moving the band WITH the density, which is the confound the
+retraction is about. Pass `--served-band 0.1 0.9` explicitly; the record's name carries it
+(`band_dense_s2026_n12b0.1-0.9`).
+
+THIS IS THE EFFICIENCY TRACK, NOT ACCURACY. The bead prices P(clears 1.5% on accuracy) ~ 0.00 and that
+stands: 12 slices is worse, just not measurably so. The gain is runtime -- 40% fewer DICOM reads than
+20 -- on an axis where `efficiency_read --live` records six teams ranked above us while SCORING BELOW
+us, on runtime alone.

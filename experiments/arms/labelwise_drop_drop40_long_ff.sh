@@ -29,6 +29,12 @@
 #             --band-high 0.9 --backbone-lr 4e-5 --calibrated-targets --hold-annotations — inherited
 #             verbatim from the fold-0 twin. Two things move, the fold and the EMA.
 #
+# deliberate: --vram-gb 18 — the BOTTOM of the owner's 50-70% band (16.3-22.8 GB), not the 22 its
+#             siblings carry, because a neighbour is resident this time (3.7 GB, 0% util at launch).
+#             The first launch carried NO bound at all and its recipe stamped `vram_gb 0.0`; an
+#             over-commit on a shared card pages over PCIe and has taken BOTH projects' processes down.
+#             The cost is a smaller batch on a 1.4 h arm, which is the cheap side of that trade.
+#
 # CARD. The twin measured ~0.8 h over 24 epochs; a full fold adds back the held-out quarter, so ~1.1-1.4 h.
 #   Nothing else of ours may share the card (`card_check`).
 #
@@ -45,6 +51,7 @@ FIT="--fold -1 --ema"
 
 run_train labelwise_drop_drop40_long_ff \
   $RECIPE $FIT --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
+  --backbone-lr 4e-5 --slices 20 --vram-gb 18 --band-low 0.1 --band-high 0.9 \
+  --calibrated-targets --hold-annotations \
   --stochastic-depth 0.05 --slot-dropout 0.40 \
   --labels "$LABELS" --out "$MODELS/labelwise_drop_drop40_long_ff.pt"
