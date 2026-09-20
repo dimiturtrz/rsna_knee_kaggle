@@ -1,0 +1,46 @@
+# shelf: kneemri-members-3
+# out: members_3
+#
+# comp/members3.roster — the THIRD weights dataset, `kneemri-members-3`, mounted beside the other two.
+#
+# WHY A THIRD PACKAGE EXISTS, and it is the SAME reason the second one does. `comp/members2.roster`
+# states it: adding one member to a shelf means re-pushing the whole shelf, so "every member trained
+# after the last big push was an offline gain that could never become a board gain." Shelf 1 has since
+# grown to 156 members and ~13.8 GB, and shelf 2 to 41 members and ~3.6 GB — so shelf 2 now has the
+# disease it was created to cure. A member costs 89 MB. Putting one on shelf 1 to ship it taxes the
+# submission 13.8 GB; putting it here taxes it 89 MB.
+#
+# THIS IS A ROTATING SHELF, NOT AN ARCHIVE. When it grows past a gigabyte or so it stops being cheap
+# and the next new member opens shelf 4 rather than paying this one's push. Nothing needs to move
+# between shelves for that: `MemberPackage.spanning` merges every mounted root into one package, so
+# which shelf a member sits on is a fact about what it cost to upload and about nothing else.
+#
+# NO MEMBER MAY APPEAR ON TWO SHELVES. `MemberPackage.spanning` REFUSES an identifier two roots both
+# hold — "a duplicate is not a merge conflict, it is a vote loading weights nobody chose". Both members
+# below were appended to `comp/members.roster` on 2026-09-20 and were moved here the same day, before
+# either was packaged or pushed; that file now carries a pointer where they were.
+#
+# A KERNEL MUST DECLARE THIS SHELF to see anything on it: `dimiturnt/kneemri-members-3` in
+# `dataset_sources`, beside the other two. A kernel that names a member from here without mounting it
+# does not fail loudly — `KernelRun` DROPS a member it cannot mount and keeps going, which is the
+# silent-drop failure `run_check` exists for. Run it on the kernel log before the slot is spent.
+#
+# A MEMBER FITTED ON ANY FOREIGN CORPUS CARRIES `# licence: <corpus>` ON ITS OWN LINE, exactly as on the
+# other two shelves — `submit_check` refuses on the TAG's PRESENCE, so an untagged foreign member ships
+# silently. Neither member below is foreign: both descend from `labelwise_ext_drop40_long_ema_s2026`,
+# fitted on our own corpus.
+
+basinsoup_k3_s2026.pt       # 0.8712 midpoint / 0.9089 ledger75. Three seed-children re-annealed off the
+                            # fine-tuned parent labelwise_ext_drop40_long_ema_s2026 (0.9073) and averaged
+                            # in weight space — the shared-basin condition the two earlier souping closes
+                            # named as their only re-open (knee-0dfys). The best soup this project owns
+                            # and +0.0016 over its own parent, one forward pass. Seats as a TWIN of
+                            # labelwise_ext_drop40_long_s2026: swapping it in reads +0.0012, real but
+                            # under the +0.0040 this ruler picks board ticks at, so hold it, never a slot.
+                            # It is fold 0, so it trained on two thirds of the corpus while every solo
+                            # this project has shipped is `--fold -1` — a board reading of it prices the
+                            # soup and that fold penalty TOGETHER and can separate neither.
+basinsoup_k4_s2026.pt       # 0.8709 midpoint / 0.9089 ledger75. The same average with the parent itself
+                            # as a fourth member. It reads IDENTICAL to k3 to four decimals, which is the
+                            # measurement that the children never left the parent's point — seat it only
+                            # as k3's alternate, never beside it.
