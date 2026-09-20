@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # bead: knee-0dfys
-# reading: basinsoup_c*.pt
+# reading: basinsoup_k*_s2026.pt
 #
 # WHAT THIS ARM IS
 #   Three seed-children forked off ONE already-corpus-fine-tuned parent, so their weight-space average
@@ -70,3 +70,28 @@ for SEED in 101 102 103; do
     --init "$PARENT" --init-scope all --seed "$SEED" \
     --labels "$LABELS" --out "$MODELS/basinsoup_c$SEED.pt"
 done
+
+# THE ARM PRICES ITS OWN PRODUCT. Three children are not the reading — the SOUP is, and `weight_soup`
+#   clears the `holdout` block it inherits, so a souped checkpoint arrives with no per-study record and
+#   `ledger75` cannot see it. `holdout_backfill` is the pass that gives it one. Leaving those three
+#   commands to a later session is exactly the shape of the nineteen-unpriced-arms failure.
+ARMPY="uv run --no-sync --project $REPO python"
+
+$ARMPY -m kneemri.models.weight_soup \
+  --members "$MODELS/basinsoup_c101.pt" "$MODELS/basinsoup_c102.pt" "$MODELS/basinsoup_c103.pt" \
+  --out "$MODELS/basinsoup_k3_s2026.pt"
+
+# K=4 includes the PARENT itself, which K=3 does not. The parent is the basin's centre by construction
+#   and the only member here with a 24-epoch fit behind it, so if the children have drifted the parent
+#   is the anchor that pulls the average back; if they have not, K=4 and K=3 agree and that agreement
+#   is itself the measurement. Both are one checkpoint with one forward pass.
+$ARMPY -m kneemri.models.weight_soup \
+  --members "$PARENT" "$MODELS/basinsoup_c101.pt" "$MODELS/basinsoup_c102.pt" "$MODELS/basinsoup_c103.pt" \
+  --out "$MODELS/basinsoup_k4_s2026.pt"
+
+$ARMPY -m kneemri.inference.holdout_backfill --device cuda \
+  --checkpoints "$MODELS/basinsoup_k3_s2026.pt" "$MODELS/basinsoup_k4_s2026.pt"
+
+$ARMPY -m kneemri.evaluation.ledger75 --holdouts "$MODELS" \
+  --only basinsoup_k3_s2026 basinsoup_k4_s2026 basinsoup_c101 basinsoup_c102 basinsoup_c103 \
+         labelwise_ext_drop40_long_ema_s2026
