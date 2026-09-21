@@ -25,6 +25,12 @@
 # growth, not the arm's `--vram-gb` cap: a cap is a ceiling the run may never reach, and the reserve is
 # what it takes. Reading the reserve off a previous run of the same recipe is the honest source.
 #
+# AND READ IT, DO NOT REMEMBER IT. `transduce_dmlb` was gated at 17000 MiB on a remembered ~11.4 GB
+# reserve; the run then reported `peak memory 16.57 GB reserved`, so the true margin over the reserve
+# was ~0.4 GB and not the ~5.6 GB intended. It survived because the peers fell further than the gate
+# asked, which is luck wearing a gate's clothes. The recipe prints its own figure -- grep the previous
+# run's `peak memory` line for `<recipe> reserved` and add the headroom to THAT.
+#
 # CONTENTION IS STILL CHECKED, because room and contention are independent failures and the standing
 # rule is that no second job of ours ever shares this card.
 set -u
