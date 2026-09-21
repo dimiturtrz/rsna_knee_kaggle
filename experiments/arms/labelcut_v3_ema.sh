@@ -49,9 +49,15 @@
 #             `arm_check` prices the real figure off --slices at ~9.6 GB; 11 leaves ~1.4 GB of headroom
 #             and is under a third of the card. Measured 2026-09-21: our uncapped 16.5 GB vanished on
 #             kill and the device total did not move, because two peers absorbed it within seconds.
-# deliberate: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Fragmentation headroom is the other
-#             half of the same greed -- it is reserve the run holds and never uses. Numerics are
-#             unchanged, so the contrast against the twin survives it.
+# deliberate: NO PYTORCH_CUDA_ALLOC_CONF. The first version of this arm exported
+#             expandable_segments:True, reasoning that fragmentation headroom is the other half of the
+#             same greed. The reasoning is fine and the flag does not work here: torch prints
+#             `UserWarning: expandable_segments not supported on this platform` at startup
+#             (CUDAAllocatorConfig.h:39) and uses the ordinary allocator. Measured on THIS arm's own
+#             log, 2026-09-21. Removing a no-op cannot move the number, so the contrast against the
+#             twin is unaffected -- but leaving it in would put a false mechanism in the file, and the
+#             next arm would copy it as though it had been tested. Windows/WDDM; do not re-add it
+#             without a log line showing it took.
 #
 # CARD. 24 epochs x 206 s measured on the twin's own log = ~1.4 h, plus ~2 min to price.
 #
@@ -62,8 +68,6 @@ require "$LABELS"
 
 CUT="$PROCESSED/labels/report_labels_v3.csv"
 require "$CUT"
-
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 run_train labelcut_v3_ema \
   $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT --vram-gb 11 \
