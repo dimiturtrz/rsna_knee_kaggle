@@ -6,11 +6,13 @@
 # spills to host memory and the arm runs at ~1/10 throughput while reporting 100% utilisation, which
 # reads as a compute cost rather than the memory fault it is. So gate on FREE memory, not on time.
 #
-# NOT --vram-gb 22. That flag is a ceiling, not the reservation: arm_check reports the recipe
-# OVERSTATED by 10.65 GB against what its own --slices reserve (knee-ylp0), and basinsoup_soft measured
-# 11618 MiB actually reserved at the identical shape. Gate on the true figure plus backfill headroom, so
-# the arm starts as soon as the peer drops to ~19 GB instead of waiting for a nearly empty card.
-NEED_MIB=13000
+# The gate is the peer's ABSENCE, not our own footprint. 13000 MiB was the measured reservation
+# (basinsoup_soft: 11618 MiB, and arm_check calls --vram-gb 22 OVERSTATED by 10.65 GB, knee-ylp0) plus
+# backfill headroom -- and it fired at 02:56Z while the peer still held 14.6 GB. Our arm then reserved
+# 17.84 GB into a card with 14.6 GB already spoken for, so WDDM spilled: epoch 0 took 1789 s against
+# round 1's ~255 s on the identical recipe, a 7x slowdown reported as 100% utilisation. Sizing the gate
+# to what WE need is the error; two jobs that each fit still do not both fit.
+NEED_MIB=20000
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 
 for i in $(seq 1 720); do
