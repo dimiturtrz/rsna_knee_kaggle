@@ -61,7 +61,12 @@ require "$MODELS/basinsoup_dmlb_c401.pt"
 require "$MODELS/basinsoup_dmlb_c402.pt"
 require "$MODELS/basinsoup_dmlb_c403.pt"
 
+# A child whose checkpoint is already on disk is skipped, so a killed arm resumes where it stopped
+# rather than re-earning children that cost ~15 min each. Every child is the same recipe at a different
+# seed, so one already written is as good as one written now -- this is resumption, not a re-read of a
+# result (the arm's own `# reading:` artefacts are the soups, and those are always rebuilt below).
 for SEED in 404 405 406; do
+  [ -f "$MODELS/basinsoup_dmlb_c$SEED.pt" ] && continue
   run_train "basinsoup_dmlb_c$SEED" \
     $RECIPE --epochs 4 --slice-pooling labelwise --whole-stack $THROUGHPUT \
     --backbone-lr 2e-5 --slices 24 --vram-gb 22 --band-low 0.1 --band-high 0.9 \
