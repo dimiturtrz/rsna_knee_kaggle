@@ -17843,3 +17843,39 @@ the shipping member, satisfies it; nothing that refits afterwards can.
 
 The one-shot has already been spent on the best plain fit the project owns (dml_b 0.9078, round 1), so
 there is no untried cell left on this axis.
+
+### K is the last free parameter in weight space, and it is spent — the premium decays (knee-gxu5r)
+
+`basinsoup_wide` extended round 1's three children off `dml_b_s2026` with three more (seeds 404/405/406),
+recipe byte-identical, and averaged at K=6 (six children, no parent) and K=7 (parent + six). Priced on
+ledger75, fold 0, zero slots:
+
+    basinsoup_dmlb_k7_s2026   0.9096   parent + six children
+    basinsoup_dmlb_k6_s2026   0.9095   six children, no parent
+    basinsoup_dmlb_k4_s2026   0.9092   parent + three   (round 1)
+    basinsoup_dmlb_k3_s2026   0.9089   three children   (round 1)
+    dml_b_s2026               0.9078   the plain-fit parent
+
+The arm pre-registered three bands against k4's 0.9092. `>= 0.9102` licensed soup-of-ff K=8, the
+best-priced slot then available. `<= 0.9092` closed the axis. Both readings land in the middle band —
+**weak or decaying scale: real, not worth 1.2 h of card and a slot. Record and stop.** K=4 to K=7 buys
+**+0.0004**, a fourteenth of the 0.0062 seed spread, against +0.0014 for the first soup. The premium is
+sublinear in K and has flattened by six.
+
+The reading is a mechanism verdict rather than a harness one, by the arm's own void-check: the new
+children read 0.9064/0.9065/0.9065 against round 1's 0.9061/0.9062/0.9062 — the same band, so the seeds
+are exchangeable and the average is cancelling the noise it was supposed to cancel.
+
+**k6 and k7 agree to 0.0001, which answers a second question for free.** K=4 included the parent because
+it is the basin's centre and the only member with a 24-epoch fit behind it — the anchor that pulls a
+drifted average back. At K=6 dropping it costs nothing measurable. The anchor's pull is a 1/K term and it
+has been averaged away.
+
+**So weight space closes with no free parameter left rather than with one untested.** The rule stands
+unchanged (averaging must be the LAST operation), the shipping `basinsoup_ff_k4_s2026` still satisfies
+it, and the one remaining knob turns out to be flat. The best fold-0 number this project owns is now
+`basinsoup_dmlb_k7_s2026` at 0.9096 — still **-0.0021** short of the 0.9117 that the solo transfer puts
+under the pinned 0.946 champion, and reachable from here only by something that is not an average.
+
+One correction this reading forces: `basinsoup_dmlb_k4_s2026`'s 0.9092 is quoted in `comp/members3.roster`
+as "the highest fold-0 number this project owns". It no longer is.

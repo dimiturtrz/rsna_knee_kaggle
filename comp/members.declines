@@ -1750,3 +1750,34 @@ basinsoup_dmlb_c402         # 0.9062 ledger75  > the three seed-children of `dml
 basinsoup_dmlb_c403         # 0.9062 ledger75 /  BELOW the 0.9078 parent, and their average lands above it
                             # — which is the whole point of the soup and the reason none of them is a
                             # member on its own. Declined as ingredients, kept as the argument.
+basinsoup_dmlb_c404         # 0.9065 ledger75 \
+basinsoup_dmlb_c405         # 0.9065 ledger75  > children 4-6 of `dml_b_s2026`, seeds 404/405/406, the
+basinsoup_dmlb_c406         # 0.9064 ledger75 /  K-extension of the 401/402/403 trio. Declined as
+                            # ingredients for the same reason as that trio: each lands below the 0.9078
+                            # parent and only their average is worth anything. They also ARE the arm's
+                            # void-check — round 1's children read 0.9061/0.9062/0.9062 and these read
+                            # 0.9064/0.9065/0.9065, the same band, so the seeds are exchangeable and the
+                            # K reading is a mechanism verdict rather than a harness one.
+basinsoup_dmlb_c404_run1    # 0.9043 ledger75. NOT a member and not a datum: this is the WDDM-spilled
+                            # c404 (epoch 0 at 1789 s against ~255 s, the peer holding 14.6 GB while our
+                            # arm reserved 17.84). Killed at 1.3 h and re-run as c404. Its loss curve and
+                            # holdout are both correct, which is exactly why it has to be declined in
+                            # writing — nothing about the checkpoint says it was starved.
+basinsoup_r2_k3_s2026       # 0.9088 ledger75 \
+basinsoup_r2_k4_s2026       # 0.9091 ledger75  > round 2 (fork off a SOUP, not a plain fit) and round 3
+basinsoup_soft_k3_s2026     # 0.9074 ledger75 /  (softer fork). Both are real soups and both are
+basinsoup_soft_k4_s2026     # 0.9081 ledger75    dominated by the round-1 family at every K. Declined by
+                            # the rule the README closes the ladder on — averaging must be the LAST
+                            # operation — which these violate by forking off an already-averaged point.
+basinsoup_r2_c501           # 0.9067 ledger75 \
+basinsoup_r2_c502           # 0.9084 ledger75  > the children of those two rounds. Ingredients, declined
+basinsoup_r2_c503           # 0.9050 ledger75 /  as their parents' trio was.
+basinsoup_soft_c701         # 0.9060 ledger75
+basinsoup_soft_c702         # 0.9060 ledger75
+basinsoup_soft_c703         # 0.9056 ledger75
+headlr_ship_s2026_n12b0.2-0.8  # 0.8695 midpoint / 0.9033 ledger75. NOT a trained member: this is
+                            # `headlr_ship_s2026` re-derived by `holdout_backfill --served-slices 12`,
+                            # the instrument that priced the serving slice cap for the efficiency lane
+                            # (-0.0026 for half the slices). It shares the shipping member's weights
+                            # exactly and exists only as a record. Shipping it would ship the same model
+                            # at a worse read.
