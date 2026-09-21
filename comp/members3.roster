@@ -65,3 +65,13 @@ basinsoup_ff_k3_s2026.pt    # DARK, fold -1: no offline number exists or can be 
                             # boarded 0.946. Packaged as the instrument that attributes that +0.001 to
                             # the children's average or to the anchor, a question no offline ruler can
                             # answer on a full-data fit.
+basinsoup_dmlb_ff.pt        # DARK, fold -1: no offline number exists or can be made. The _ff operation
+                            # applied to a SOUP -- the order this project had never run. The champion
+                            # `basinsoup_ff_k4_s2026` is soup-of-ff (children refitted whole-corpus, then
+                            # averaged); this is ff-of-soup, four epochs at backbone-lr 2e-5 with
+                            # --init-scope all on --fold -1 off `basinsoup_dmlb_k4_s2026`, whose 0.9092
+                            # ledger75 is the highest fold-0 number this project owns. Pickable only
+                            # after slot 56407707 measured the FOLD PENALTY at 0.002, which made a
+                            # fold-0 number board-predictive at a -0.002 offset. Transfer puts the base
+                            # at fit 0.9430; the refit term across four bases is +0.001/+0.003/+0.004/
+                            # +0.007, so this projects to ~0.947 against a 0.946 champion. knee-17la8.
