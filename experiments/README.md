@@ -17794,3 +17794,52 @@ pre-registered ~0.947) is the same term on the shipping side: four epochs of gra
 averaged point that *was* its value. Weight space is closed in both ORDERS; what this entry re-opens is
 whether the order that pays is ITERABLE, which is a different question and the only compounding
 operation on the shelf.
+
+### Souping is ONE-SHOT, not a ladder — the knife-edge reading — 2026-09-21
+
+`basinsoup_soft` (knee-grkrv) is `basinsoup_r2` byte for byte with the FORK alone moved to
+`--epochs 2 --backbone-lr 1e-5`, ~4x less weight movement. Same parent, same K=3/K=4 shape, seeds
+701/702/703. 0.5 h of card, zero slots. ledger75, 909 studies, population eb3ba199:
+
+    basinsoup_dmlb_k4_s2026   0.9092      (round 1 soup, the parent of rounds 2 and 3)
+    basinsoup_r2_k4_s2026     0.9091      (round 2, fork 4 ep @ 2e-5)
+    basinsoup_soft_k4_s2026   0.9081      (round 3, fork 2 ep @ 1e-5)   <- this arm
+    basinsoup_soft_k3_s2026   0.9074
+    children                  0.9060 / 0.9060 / 0.9056   mean 0.9059
+
+| round | parent | parent kind | children | soup K=4 | premium | degradation | net |
+|---|---|---|---|---|---|---|---|
+| 1 | dml_b 0.9078 | plain fit | 0.9062 | 0.9092 | +0.0030 | -0.0016 | **+0.0014** |
+| 2 | basinsoup_dmlb 0.9092 | soup | 0.9067 | 0.9091 | +0.0024 | -0.0025 | -0.0001 |
+| 3 | basinsoup_dmlb 0.9092 | soup | 0.9059 | 0.9081 | +0.0022 | -0.0033 | **-0.0011** |
+
+**The premium is confirmed constant a third time** — +0.0030 / +0.0024 / +0.0022 across a child spread
+that ranged over 34x. Averaging works and never stopped working.
+
+**Degradation does NOT respond to the fork rate, which is what this arm was built to test.** Rounds 2
+and 3 share a parent and differ in one variable; the GENTLER fork degraded MORE. The arm's own
+pre-registered null diagnostic was the child mean: "at or below 0.9067 says the fork rate does not set
+degradation". It read 0.9059. The two-term decomposition survives; the recipe lever inside it is what
+died.
+
+**What replaces it: leaving a soup is a STEP, not a slope.** Two epochs at 1e-5 from a warm start move
+the weights very little, and still cost 0.0033. The averaged point is a knife-edge whose value IS the
+averaging; any resumed gradient forfeits it in full, and the size of the walk is not what is billed.
+Re-averaging then returns the constant premium. The two constants nearly cancel, so the net of a round
+is structurally ~0 and does not depend on the recipe.
+
+**Consequence: souping is ONE-SHOT.** It pays once, off a PLAIN FIT (round 1, +0.0014, degradation only
+-0.0016), and ~0 forever after, because the parent of every later round is itself an averaged point and
+is billed the larger step (-0.0025, -0.0033). This supersedes `knee-p9mp5`'s SATURATION verdict (which
+named the net without its cause) and `knee-0dfys`'s DIVERGENCE constraint (refuted: 34x spread, premium
+flat). The ladder is not iterable and the family is closed for good, on three rounds and two independent
+fork recipes rather than on one arm.
+
+**It is the same mechanism as the same week's board row.** `dmlbffsoup_v1` (ff-of-soup) put four epochs
+of whole-corpus gradient on a soup and boarded 0.940 against a pre-registered ~0.947 — a 3.2 sd miss.
+That is this step, paid at corpus scale. Both orders of weight space are now closed, and they are closed
+by ONE rule rather than two readings: **averaging must be the LAST operation.** `basinsoup_ff_k4_s2026`,
+the shipping member, satisfies it; nothing that refits afterwards can.
+
+The one-shot has already been spent on the best plain fit the project owns (dml_b 0.9078, round 1), so
+there is no untried cell left on this axis.
