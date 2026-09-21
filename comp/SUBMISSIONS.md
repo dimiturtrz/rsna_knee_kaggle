@@ -4790,9 +4790,9 @@ no checkpoint on disk before 2026-09-20.
 soup is spent rather than compounded. soup-of-ff survives precisely because the averaging is LAST.
 
 **Second reading, not separated by this row.** The −0.002 fold-penalty offset was fitted on the `basinsoup`
-K=3 pair, and using it to rank a dml_b-family base at 0.9092 over 0.9089 asked a 0.0003 offline difference
-to order two board entries — a tenth of the residual sd. The offset is real on its own family (2× board
-resolution, matched pair) and was over-extended here.
+K=3 pair, and using it to rank two dml_b-family bases asked a 0.0003 offline difference to order two board
+entries — a tenth of the residual sd. The offset is real on its own family (2× board resolution, matched
+pair) and was over-extended here.
 
 **Consequence.** The weight-space family is closed in both orders: round 2 already read SATURATES (the soup
 recovers its basin's ceiling and cannot raise it, while divergence rose 34× and bought nothing), and this

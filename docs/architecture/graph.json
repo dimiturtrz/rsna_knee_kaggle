@@ -7755,12 +7755,6 @@
     {
       "kind": "import",
       "source": "kneemri.training.config_tree",
-      "target": "core.data.labels.targets",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.config_tree",
       "target": "kneemri.models.model",
       "weight": 1
     },
@@ -7828,6 +7822,12 @@
       "kind": "import",
       "source": "kneemri.training.config_tree",
       "target": "kneemri.training.sharpness",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
+      "target": "kneemri.training.target_config",
       "weight": 1
     },
     {
@@ -8570,6 +8570,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.target_config",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.target_config",
+      "target": "kneemri.training.config_leaf",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.teacher_features",
       "target": "kneemri.teacher_file",
       "weight": 1
@@ -8637,6 +8649,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.train",
+      "target": "kneemri.training.config_tree",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.train",
       "target": "kneemri.training.fitting",
       "weight": 1
     },
@@ -8650,12 +8668,6 @@
       "kind": "import",
       "source": "kneemri.training.train",
       "target": "kneemri.training.landed",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.train",
-      "target": "kneemri.training.options",
       "weight": 1
     },
     {
@@ -38492,18 +38504,6 @@
     },
     {
       "kind": "references",
-      "source": "kneemri.training.config_tree.TargetConfig",
-      "target": "core.data.labels.targets.Supervision",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.config_tree.TargetConfig.supervision",
-      "target": "core.data.labels.targets.Supervision",
-      "weight": 1
-    },
-    {
-      "kind": "references",
       "source": "kneemri.training.config_tree.TrainConfig",
       "target": "kneemri.runs.member_record.RunStamp",
       "weight": 1
@@ -38545,12 +38545,6 @@
       "weight": 1
     },
     {
-      "kind": "holds",
-      "source": "kneemri.training.config_tree.TrainConfig",
-      "target": "kneemri.training.config_tree.TargetConfig",
-      "weight": 1
-    },
-    {
       "kind": "references",
       "source": "kneemri.training.config_tree.TrainConfig",
       "target": "kneemri.training.config_tree.TrainConfig",
@@ -38566,6 +38560,12 @@
       "kind": "holds",
       "source": "kneemri.training.config_tree.TrainConfig",
       "target": "kneemri.training.sampling.SamplingConfig",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.config_tree.TrainConfig",
+      "target": "kneemri.training.target_config.TargetConfig",
       "weight": 1
     },
     {
@@ -41174,6 +41174,18 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.target_config.TargetConfig",
+      "target": "core.data.labels.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.target_config.TargetConfig.supervision",
+      "target": "core.data.labels.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.teacher_features.TeacherFeatures",
       "target": "kneemri.training.teacher_features.TeacherFeatures",
       "weight": 1
@@ -42587,7 +42599,7 @@
       "role": null
     },
     {
-      "descendants": 335,
+      "descendants": 336,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -44843,7 +44855,7 @@
       "role": null
     },
     {
-      "descendants": 53,
+      "descendants": 54,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -45222,6 +45234,14 @@
       "descendants": 0,
       "id": "kneemri.training.spectral_mae",
       "label": "spectral_mae",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.target_config",
+      "label": "target_config",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -50820,14 +50840,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.config_tree.TargetConfig",
-      "label": "TargetConfig",
-      "level": "class",
-      "parent": "kneemri.training.config_tree",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.config_tree.TrainConfig",
       "label": "TrainConfig",
       "level": "class",
@@ -51432,6 +51444,14 @@
       "label": "SpectralMaskConfig",
       "level": "class",
       "parent": "kneemri.training.spectral_mae",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.target_config.TargetConfig",
+      "label": "TargetConfig",
+      "level": "class",
+      "parent": "kneemri.training.target_config",
       "role": "satellite"
     },
     {
@@ -75332,14 +75352,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.config_tree.TargetConfig.supervision",
-      "label": "supervision",
-      "level": "method",
-      "parent": "kneemri.training.config_tree.TargetConfig",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.config_tree.TrainConfig._built",
       "label": "_built",
       "level": "method",
@@ -77704,6 +77716,14 @@
       "label": "unpatchify",
       "level": "method",
       "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.target_config.TargetConfig.supervision",
+      "label": "supervision",
+      "level": "method",
+      "parent": "kneemri.training.target_config.TargetConfig",
       "role": null
     },
     {

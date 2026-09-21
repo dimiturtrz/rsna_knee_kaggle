@@ -69,7 +69,11 @@ class ReportFolds:
         return assignments
 
     def holdout(
-        self, assignments: NDArray[np.int64], fold: int, excluded: int = EXCLUDE_NONE
+        self,
+        assignments: NDArray[np.int64],
+        fold: int,
+        excluded: int = EXCLUDE_NONE,
+        pseudo: int = EXCLUDE_NONE,
     ) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
         """Training and holdout positions for one fold — fixed rather than rotated within a run.
 
@@ -79,9 +83,22 @@ class ReportFolds:
         scored on fold 0 mimics four functions that each memorised fold 0's labels, and the fold-0
         number is inflated by that mimicry rather than by the treatment. Excluding fold 0 from every
         teacher's training set is the only thing that removes the path.
+
+        `pseudo` is the mirror of it and the other thing `--fold` alone cannot express: a fold that
+        enters TRAINING while staying in the holdout. Transduction needs exactly that pair — the held
+        studies are fitted under INVENTED labels and scored under TRUE ones, which is the definition of
+        the method rather than a leak, and `--eval-labels` already carries the label half of the split.
+        `--fold -1` cannot stand in for it (nothing is held out, so no score exists) and `--fold 0`
+        cannot either (it removes from training precisely the studies that must be in it).
+
+        A fold cannot be excluded and pseudo-labelled at once; the two arguments would be asking for it
+        to be out of training and in it.
         """
+        if pseudo != EXCLUDE_NONE and pseudo == excluded:
+            raise ValueError(f"fold {pseudo} cannot be both excluded from training and pseudo-labelled into it")
         holdout = np.flatnonzero(assignments == fold)
-        training = np.flatnonzero((assignments != fold) & (assignments != excluded))
+        trainable = (assignments != fold) | (assignments == pseudo)
+        training = np.flatnonzero(trainable & (assignments != excluded))
         return training, holdout
 
 

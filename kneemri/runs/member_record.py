@@ -58,6 +58,9 @@ NOT_IN_CONFIG = {
     "fold": "which half was held out — a property of the SCORE, and `holdout` is what serves it",
     "exclude_fold": "which fold was withheld from TRAINING too — a property of the corpus a run was "
     "fitted on, and the recipe block carries it; a rebuild reconstructs the function, not the split",
+    "pseudo_fold": "which fold was trained on AS WELL AS held out — the transductive cut, and a "
+    "property of the corpus a run was fitted on exactly as `exclude_fold` is. A rebuild reconstructs "
+    "the function, not the split",
     "one_cycle": "a schedule: it changes how the weights were reached, never how they are rebuilt",
     "init": "where the walk STARTED — the second stage of an LP-FT pair loads a member instead of a "
     "fresh head, which changes nothing about the module a rebuild constructs and everything about "

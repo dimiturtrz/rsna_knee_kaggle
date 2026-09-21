@@ -77,10 +77,26 @@ def main() -> None:
     # was scoring a model on 717 studies it had trained on.
     folds = ReportFolds(arguments.run.folds, arguments.run.split_seed)
     training, holdout = folds.holdout(
-        folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.run.fold, arguments.run.exclude_fold
+        folds.assign(str(root.raw() / "train.csv"), identifiers),
+        arguments.run.fold,
+        arguments.run.exclude_fold,
+        arguments.run.pseudo_fold,
     )
     if arguments.run.exclude_fold != EXCLUDE_NONE:
         logger.warning("fold %d excluded from training: %d studies fit", arguments.run.exclude_fold, len(training))
+    if arguments.run.pseudo_fold != EXCLUDE_NONE:
+        # The holdout is inside the training set on purpose, so the number this run reports is only
+        # honest while --labels and --eval-labels are DIFFERENT tables. Said here because this is the
+        # one place that knows the split was made, and a transductive score filed as an ordinary one
+        # is the most expensive mistake this flag can cause.
+        logger.warning(
+            "TRANSDUCTIVE RUN: fold %d is trained on AND held out (%d studies fit). Its score is honest "
+            "only if --labels are invented and --eval-labels are true; labels=%s eval_labels=%s",
+            arguments.run.pseudo_fold,
+            len(training),
+            arguments.run.labels,
+            arguments.run.eval_labels,
+        )
     positions = arguments.run.positions
     training, holdout = positions.sampled(training, holdout)
     training = positions.thinned(training)

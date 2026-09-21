@@ -7,7 +7,8 @@ that parent. The two differ in exactly one term: whether the parent anchor is in
 checkpoint, single forward pass, same serving line, same kit.
 
 WHY THIS IS AN INSTRUMENT AND SAYS SO. It proposes no new member and cannot be expected to beat the
-pin. Its whole job is to attribute the +0.001 that `basinsoupff_v1` bought over its own 0.945 parent:
+pin. Its whole job is to attribute the +0.001 that `basinsoupff_v1` (0.946) bought over the same parent
+shipped solo as `extffsolo_v1` (0.945):
 to the CHILDREN'S AVERAGE, or to the parent anchor that K=4 keeps and K=3 drops. Every slot this week
 has been priced against a soup family whose next step nobody can name, and this is the reading that
 names it.

@@ -11,7 +11,6 @@ from core.data.corpus.crop_centre import Crop
 from core.data.corpus.folds import FitPositions
 from core.data.corpus.slot_reader import Band, Reading
 from core.data.corpus.slots import Routing
-from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.training.augmentation import RegularisationConfig
 from kneemri.training.config_tree import NOT_STATED, TrainConfig
 from kneemri.training.recipe_layers import RecipeLayers
@@ -276,21 +275,6 @@ def test_typed():
     assert TrainConfig.typed(Path | None, "a.npz") == Path("a.npz")
     assert TrainConfig.typed(bool, "True") is True
     assert TrainConfig.typed(float | None, NOT_STATED) is None
-
-
-def test_supervision(monkeypatch: pytest.MonkeyPatch):
-    """The two label switches must reach the targets, from argv, without `main` in the way.
-
-    Both change what the model is FITTED ON while every recorded config keeps agreeing with itself —
-    the shape of nine defects here already — and they map to a data argument rather than to a policy
-    object, so the `options_to_policies` walk cannot see them.
-    """
-    monkeypatch.setattr("sys.argv", ["train", "--labels", "labels.csv", "--weight-floor", "--calibrated-targets"])
-    asked = TrainConfig.parse().targets.supervision
-
-    assert asked.floor == CONFIDENCE_FLOOR, "a finding the report never mentions still pulls with this"
-    assert asked.calibrated
-    assert TrainConfig().targets.supervision == Supervision(), "unasked-for, the run trains on the raw levels"
 
 
 def test_crop():

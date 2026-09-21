@@ -2,8 +2,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
-from core.data.corpus.folds import TRAIN_ONLY, FitPositions, ReportFolds
+from core.data.corpus.folds import EXCLUDE_NONE, TRAIN_ONLY, FitPositions, ReportFolds
 
 
 def _table(tmp_path: Path) -> Path:
@@ -82,6 +83,41 @@ def test_holdout_excludes_a_second_fold_from_training_without_scoring_it():
 
     assert holdout.tolist() == [1, 6]
     assert training.tolist() == [2, 3, 4]
+
+
+def test_holdout_puts_a_pseudo_fold_in_training_while_it_stays_held_out():
+    """Transduction: fold 0 is fitted AND scored, which no other flag combination expresses.
+
+    The held studies enter training under invented labels and are scored under true ones — that is the
+    method, not a leak, and `--eval-labels` carries the label half. --fold -1 cannot stand in (nothing
+    is held out, so no score exists) and --fold 0 alone cannot either (it removes exactly these).
+    """
+    assignments = np.array([0, 1, 2, 3, 4, 0, 1], dtype=np.int64)
+
+    training, holdout = ReportFolds(5, 2026).holdout(assignments, fold=0, pseudo=0)
+
+    assert holdout.tolist() == [0, 5], "the holdout is untouched — the score is still over fold 0"
+    assert training.tolist() == list(range(len(assignments))), "and every study trains, fold 0 included"
+
+
+def test_holdout_without_a_pseudo_fold_is_the_ordinary_split():
+    """The default sentinel is unassignable, so the flag is inert until it is asked for."""
+    assignments = np.array([0, 1, 2, 3, 4, 0, 1], dtype=np.int64)
+    folds = ReportFolds(5, 2026)
+
+    plain = folds.holdout(assignments, fold=0)
+    defaulted = folds.holdout(assignments, fold=0, pseudo=EXCLUDE_NONE)
+
+    assert plain[0].tolist() == defaulted[0].tolist() == [1, 2, 3, 4, 6]
+    assert plain[1].tolist() == defaulted[1].tolist() == [0, 5]
+
+
+def test_holdout_refuses_a_fold_that_is_both_excluded_and_pseudo_labelled():
+    """The two arguments would be asking for one fold to be out of training and in it."""
+    assignments = np.array([0, 1, 2, 3, 4, 0, 1], dtype=np.int64)
+
+    with pytest.raises(ValueError, match="cannot be both excluded"):
+        ReportFolds(5, 2026).holdout(assignments, fold=1, excluded=0, pseudo=0)
 
 
 def test_holdout_leaves_a_foreign_corpus_training_when_a_fold_is_excluded():

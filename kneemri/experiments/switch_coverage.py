@@ -65,6 +65,7 @@ COVERAGE = {
     "padding_mode": "--padding-mode reflection",
     "patience_from_progress": "--patience 2 --patience-from-progress 0.5",
     "hold_annotation_studies": "--hold-annotations --hold-annotation-studies",
+    "pseudo_fold": "--pseudo-fold 3",
 }
 """One smoke recipe per switch no arm selects, holding every other flag at its default.
 
