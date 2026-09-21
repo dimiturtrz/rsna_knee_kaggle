@@ -17755,3 +17755,42 @@ facts about the recipe and not about a killed process.
 
 **The best solo this project owns stands at `basinsoup_k3_s2026`, 0.9089 offline75, against the 0.9117 a
 solo needs to beat the pinned 0.946 champion. The gap is 0.0028 and souping no longer has a path to it.**
+
+## Souping is two terms, and the one everyone named was the wrong one — 2026-09-21
+
+Card: zero. Five members already on disk, priced together for the first time (`ledger75 --holdouts
+D:/models/rsna_knee_abnormality`, population eb3ba199, 909 studies).
+
+| round | children | child mean | parent | soup |
+|---|---|---|---|---|
+| 1 (`basinsoup_dmlb`) | 0.9061 / 0.9062 / 0.9062 | 0.9062 | `dml_b_s2026` 0.9078 | **0.9092** |
+| 2 (`basinsoup_r2`) | 0.9067 / 0.9084 / 0.9050 | 0.9067 | `basinsoup_dmlb_k4` 0.9092 | **0.9091** |
+
+    SOUP PREMIUM over the children mean   +0.0030 (r1)   +0.0024 (r2)
+    FORK DEGRADATION vs the parent        -0.0016 (r1)   -0.0025 (r2)
+    net                                   +0.0014        -0.0001
+
+**The premium is constant and divergence-independent.** Child spread went 0.0001 → 0.0034 between the
+rounds — 34× — and the premium moved 0.0006, inside noise. So `knee-0dfys`'s binding constraint (child
+DIVERGENCE) is not binding, and `knee-p9mp5`'s verdict (SATURATION — "the soup recovers its basin's
+ceiling and cannot raise it") describes the net without naming its cause. Averaging never stopped
+working. What changed is the **degradation**, which grows with parent strength and in round 2 exactly
+cancelled the premium.
+
+**Both rounds degrade — that is what kills the obvious repair.** The first hypothesis tonight was that
+round 2 was confounded: children forked off a *souped* parent might be degraded in a way round 1's were
+not. The table refutes it — round 1's children are also all below their parent, by 0.0016. There is no
+confound, only a term that got bigger.
+
+**Why it matters more than either verdict.** Degradation is the only term a recipe can move, and round 2
+held it fixed by declaration: `basinsoup_r2.sh` calls `--epochs 4 --backbone-lr 2e-5` "fixed by
+measurement, not a knob with a sweep in it". Those values were measured positive on a **non-souped**
+parent, where degradation was 0.0016. Nothing has ever measured them on a souped one. `basinsoup_soft`
+(knee-grkrv) is round 2 byte for byte with the fork alone at `--epochs 2 --backbone-lr 1e-5`, ~4× less
+weight movement; launched 00:51Z, ~0.8 h, zero slots.
+
+**Read this beside the same night's board row.** `dmlbffsoup_v1` (ff-of-soup, board 0.940 against a
+pre-registered ~0.947) is the same term on the shipping side: four epochs of gradient walk a soup off the
+averaged point that *was* its value. Weight space is closed in both ORDERS; what this entry re-opens is
+whether the order that pays is ITERABLE, which is a different question and the only compounding
+operation on the shelf.
