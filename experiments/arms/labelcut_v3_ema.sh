@@ -39,10 +39,19 @@
 # deliberate: --eval-labels "$LABELS". Without it the run is SCORED on v3 too and measures agreement
 #             with its own training table instead of with the readings -- the one way this arm returns
 #             a number that means nothing. Same pin as transduce_dmlb.sh.
-# deliberate: NO --vram-gb, because the twin had none. It is a ceiling rather than a treatment, but a
-#             ceiling that binds changes the allocator's behaviour, and this arm's whole value is that
-#             one flag moved. Room is bought at launch instead: the twin's own log measured
-#             `peak memory 17.28 GB reserved`, so the watcher gates on 23000 MiB free.
+# deliberate: --vram-gb 11, against the twin's uncapped `peak memory 17.28 GB reserved`.
+#             The first version of this arm carried NO cap, copying the twin, on the reasoning that a
+#             binding ceiling changes allocator behaviour. That reasoning was right about BINDING and
+#             wrong about ABSENT: with no cap the caching allocator grows into whatever is free and
+#             never releases it, so an uncapped arm on a shared card claims the CARD rather than its
+#             recipe's share -- and its "peak reserved" then records what was available, not what was
+#             needed. Quoting 17.28 as the requirement was quoting that greed back as a spec.
+#             `arm_check` prices the real figure off --slices at ~9.6 GB; 11 leaves ~1.4 GB of headroom
+#             and is under a third of the card. Measured 2026-09-21: our uncapped 16.5 GB vanished on
+#             kill and the device total did not move, because two peers absorbed it within seconds.
+# deliberate: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True. Fragmentation headroom is the other
+#             half of the same greed -- it is reserve the run holds and never uses. Numerics are
+#             unchanged, so the contrast against the twin survives it.
 #
 # CARD. 24 epochs x 206 s measured on the twin's own log = ~1.4 h, plus ~2 min to price.
 #
@@ -54,8 +63,10 @@ require "$LABELS"
 CUT="$PROCESSED/labels/report_labels_v3.csv"
 require "$CUT"
 
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 run_train labelcut_v3_ema \
-  $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT --vram-gb 11 \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended \
   --calibrated-targets --hold-annotations --ema \
   --batch 4 --accumulate 3 --slot-dropout 0.40 \
