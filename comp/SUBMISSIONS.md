@@ -4774,3 +4774,27 @@ ordinary direction.
 Second reading, from the K=3 row: dropping the anchor parent out of the soup costs 0.001, so the
 children carry the soup rather than the parent being averaged back in. Directional only — inside the
 0.0022 top-band residual sd.
+
+## 2026-09-21, slot 1 — ff-of-soup, and weight space closes in both orders
+
+`dmlbffsoup_v1` (ref 56409058, kernel `kneemri-dmlbffsoup`, member `basinsoup_dmlb_ff`) read **0.940**
+against a pre-registered ~0.947. The bottom branch, and by a margin that is a reading rather than scatter:
+−0.007 from the fit is 3.2× the 0.0022 top-band residual sd.
+
+The operation was ff-of-soup — average first on the fold-0 line, then give the average the corpus — the
+opposite order to the standing champion `basinsoup_ff_k4_s2026` (soup-of-ff, 0.946), and an order that had
+no checkpoint on disk before 2026-09-20.
+
+**Mechanism.** A soup sits at an averaged point whose value *is* the averaging. Four epochs of gradient at
+`--backbone-lr 2e-5 --init-scope all` walk it off that point, and nothing re-averages afterwards, so the
+soup is spent rather than compounded. soup-of-ff survives precisely because the averaging is LAST.
+
+**Second reading, not separated by this row.** The −0.002 fold-penalty offset was fitted on the `basinsoup`
+K=3 pair, and using it to rank a dml_b-family base at 0.9092 over 0.9089 asked a 0.0003 offline difference
+to order two board entries — a tenth of the residual sd. The offset is real on its own family (2× board
+resolution, matched pair) and was over-extended here.
+
+**Consequence.** The weight-space family is closed in both orders: round 2 already read SATURATES (the soup
+recovers its basin's ceiling and cannot raise it, while divergence rose 34× and bought nothing), and this
+row closes the remaining operation. Champion pin unchanged — `basinsoup_ff_k4_s2026`, board 0.946, rank 74
+of 4068, gap 0.011 to the 0.957 leader.
