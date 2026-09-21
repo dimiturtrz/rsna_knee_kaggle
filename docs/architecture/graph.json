@@ -8330,6 +8330,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.pseudo_table",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pseudo_table",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pseudo_table",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.remembered_contrast",
       "target": "kneemri.training.grades",
       "weight": 1
@@ -40261,6 +40279,48 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.pseudo_table.PseudoTable.coverage",
+      "target": "kneemri.training.pseudo_table.PseudoTable.covered",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pseudo_table.PseudoTable.written",
+      "target": "kneemri.training.pseudo_table.PseudoTable.covered",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pseudo_table.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pseudo_table.main",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pseudo_table.main",
+      "target": "kneemri.training.pseudo_table.PseudoTable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pseudo_table.main",
+      "target": "kneemri.training.pseudo_table.PseudoTable.coverage",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pseudo_table.main",
+      "target": "kneemri.training.pseudo_table.PseudoTable.written",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.training.recipe_layers.RecipeLayers",
       "target": "kneemri.training.recipe_layers.RecipeLayers",
@@ -42599,7 +42659,7 @@
       "role": null
     },
     {
-      "descendants": 336,
+      "descendants": 337,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -44855,7 +44915,7 @@
       "role": null
     },
     {
-      "descendants": 54,
+      "descendants": 55,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -45146,6 +45206,14 @@
       "descendants": 0,
       "id": "kneemri.training.progress_schedule",
       "label": "progress_schedule",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pseudo_table",
+      "label": "pseudo_table",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -51292,6 +51360,14 @@
       "label": "Scheduled",
       "level": "class",
       "parent": "kneemri.training.progress_schedule",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pseudo_table.PseudoTable",
+      "label": "PseudoTable",
+      "level": "class",
+      "parent": "kneemri.training.pseudo_table",
       "role": "primary"
     },
     {
@@ -77044,6 +77120,46 @@
       "label": "strengthen",
       "level": "method",
       "parent": "kneemri.training.progress_schedule.Scheduled",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pseudo_table.PseudoTable.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.pseudo_table.PseudoTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pseudo_table.PseudoTable.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "kneemri.training.pseudo_table.PseudoTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pseudo_table.PseudoTable.covered",
+      "label": "covered",
+      "level": "method",
+      "parent": "kneemri.training.pseudo_table.PseudoTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pseudo_table.PseudoTable.written",
+      "label": "written",
+      "level": "method",
+      "parent": "kneemri.training.pseudo_table.PseudoTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.pseudo_table.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.training.pseudo_table",
       "role": null
     },
     {
