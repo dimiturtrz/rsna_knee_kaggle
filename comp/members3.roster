@@ -51,8 +51,10 @@ basinsoup_ff_k4_s2026.pt    # DARK, fold -1: no offline number exists or can be 
                             # 2e-5, seeds 301/302/303. On the fold-0 line that operation read +0.0016
                             # ledger75 (0.9073 -> 0.9089), the only weight-space op this project has
                             # measured positive. Shipped as a solo; the board is its only ruler.
-basinsoup_dmlb_k4_s2026.pt  # 0.8720 midpoint / 0.9092 ledger75, epoch 1, 909 rows — the HIGHEST fold-0
-                            # number this project owns. Uniform weight average of `dml_b_s2026` (0.9078,
+basinsoup_dmlb_k4_s2026.pt  # 0.8720 midpoint / 0.9092 ledger75, epoch 1, 909 rows. SUPERSEDED as the
+                            # highest fold-0 number by `basinsoup_dmlb_k7_s2026` (0.9096) — that row, not
+                            # this one, is where the superlative lives.
+                            # Uniform weight average of `dml_b_s2026` (0.9078,
                             # the best honest fold-0 fit) and three 4-epoch seed-children forked off it at
                             # backbone-lr 2e-5, seeds 401/402/403. +0.0014 over the parent, against the
                             # same operation's +0.0016 on `basinsoup`'s base: the soup op REPRODUCES on a
@@ -70,7 +72,8 @@ basinsoup_dmlb_ff.pt        # DARK, fold -1: no offline number exists or can be 
                             # `basinsoup_ff_k4_s2026` is soup-of-ff (children refitted whole-corpus, then
                             # averaged); this is ff-of-soup, four epochs at backbone-lr 2e-5 with
                             # --init-scope all on --fold -1 off `basinsoup_dmlb_k4_s2026`, whose 0.9092
-                            # ledger75 is the highest fold-0 number this project owns. Pickable only
+                            # ledger75 was the best fold-0 base when this was built (k7 has since read
+                            # 0.9096). Pickable only
                             # after slot 56407707 measured the FOLD PENALTY at 0.002, which made a
                             # fold-0 number board-predictive at a -0.002 offset. Transfer puts the base
                             # at fit 0.9430; the refit term across four bases is +0.001/+0.003/+0.004/
