@@ -230,7 +230,7 @@ read at `ledger75`. Same seam as knee-f9aao, one layer earlier. knee-4c9w4.
 
 | item | state |
 |---|---|
-| **SAM at rho=0.01 or 0.005** | **OPEN** — the one live mechanism in table D; implemented, never tried at the right radius. Needs a bead carrying `PRICE:` and `P(clears …)` before `arm_check` passes it |
+| **SAM at rho=0.01** | **RAN 2026-09-17 and this row was stale for five days.** `sam_r01_s2026` reads **0.8655 / 0.8981 ledger75** against `calib_dense_hold_s2026` 0.8634 / 0.8949 — **+0.0021 mid, +0.0032 ledger75**, inside the arm's own pre-registered 0.8604–0.8684 directional band. So the radius WAS the cause of the rho=0.05 collapse (all four points recovered) and the flag is **DIRECTIONAL ONLY: keep it where free, never plan around it.** Composition onto the shipping recipe (`sam_ship`, knee-k3v5t) is priced at **P ~ 0.05 and unarmed** — the give-back proxy SAM would have to recover is 0.0036 at the dense corner and **0.0006** at the shipping corner, a tenth of the 0.0062 paired floor | README:16588; knee-fw1hc, knee-k3v5t |
 | `basinsoup_dmlb_ff.pt` | **UNREAD** — on disk since 2026-09-21 03:00. `--fold -1`, so readable only by a slot |
 | `headlr_ship_ffp` | complete (`best e- of 18 run, 24 asked` is its design); awaiting a board slot as a declared INSTRUMENT |
 | ResNet-vs-DINO decorrelation read | **free, unrun** — gates the owner's EfficientNet question |

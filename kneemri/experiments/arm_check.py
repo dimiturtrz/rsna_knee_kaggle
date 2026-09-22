@@ -34,6 +34,7 @@ from core.data.corpus.study_cache import CorpusSplit, StudyCache
 from core.data.labels.ruler import DEFAULT_LABELS, Ruler
 from core.denominator import Denominator
 from core.paths import DataRoot
+from kneemri.experiments.arm_budget import ArmBudget
 from kneemri.experiments.arm_diff import ArmDiff
 from kneemri.experiments.arm_header import ARMS, ArmHeader
 from kneemri.experiments.arm_shadow import ArmShadow
@@ -42,7 +43,7 @@ from kneemri.experiments.arm_verdict import ArmVerdict
 from kneemri.experiments.switch_coverage import SwitchCoverage
 from kneemri.spawn import Spawn
 from kneemri.training.config_tree import TrainConfig
-from kneemri.training.device_budget import GB_PER_SLICE
+from kneemri.training.device_budget import SHARED_SHARE
 from kneemri.training.run_setup import RunSetup
 
 logger = logging.getLogger(__name__)
@@ -425,8 +426,14 @@ class ArmCheck:
         `uncached` are handed in rather than recomputed here, because the smoke and the closing tally
         both want the raw dicts and parsing a hundred arms twice to re-derive them is a hundred parses.
         """
-        overstated = self.overstated(invocations)
+        parsed = {name: self._parsed(flags)[0] for name, flags in invocations.items()}
+        budgets = ArmBudget(
+            {name: RunSetup(options).budget() for name, options in parsed.items() if options is not None}
+        )
+        overstated = budgets.overstated()
         worst = max(overstated, key=lambda name: overstated[name], default="")
+        unshareable = budgets.unshareable()
+        worst_share = max(unshareable, key=lambda name: unshareable[name], default="")
         return [
             ArmVerdict("REFUSED", refused, always=True, refuses=True),
             ArmVerdict(
@@ -452,6 +459,18 @@ class ArmCheck:
                 f"{overstated.get(worst, 0.0):.2f} GB — the flag predates DeviceBudget.needed() and no "
                 f"arm needs it, so drop it",
                 bead="knee-ylp0",
+            ),
+            ArmVerdict(
+                "UNSHAREABLE",
+                {
+                    name: f"demands {over:.2f} GB above this project's {SHARED_SHARE:.0%} of the card — "
+                    f"cut --slices / --image-size / the batch, not the flag"
+                    for name, over in unshareable.items()
+                },
+                clause=f"demand more than this project's {SHARED_SHARE:.0%} share of the card, worst "
+                f"{worst_share} by {unshareable.get(worst_share, 0.0):.2f} GB — the recipe is the lever, "
+                f"a hand-typed --vram-gb under the derived need raises rather than shares (advisory)",
+                bead="knee-l2d7o",
             ),
             ArmVerdict(
                 "UNSTATED",
@@ -532,42 +551,6 @@ class ArmCheck:
         slot scheme is implemented and no twelve-slot cache has ever been built.
         """
         return {name: reading.key for name, reading in self.readings(invocations).items() if not reading.decoded()}
-
-    def overstated(self, invocations: dict[str, str]) -> dict[str, float]:
-        """The arms asking for more VRAM than their own slice count needs, by how many GB.
-
-        A HAND-TYPED CAP IS A THIRD STATEMENT OF A FACT `--slices` ALREADY MAKES, and the third one goes
-        stale: `depth_regions_narrow` is `depth_regions` with the slices dropped to 12 and the 20-slice
-        cap of 28 copied along, 10 GB above what a 12-slice step reserves. That was free on an empty
-        card — `DeviceBudget.await_headroom` waits for `free >= vram_gb` and an overstatement just
-        passes — and stopped being free when `biohub_kaggle` took ~13 GB of the 32: the arm now polls
-        for memory it never needed, burns the wait, and starts into the PCIe-paging crawl the cap
-        exists to prevent. `depth_regions_span` was queued at 28 on a 12-slice recipe and caught by
-        hand; this is that catch, mechanised.
-
-        Measured against `DeviceBudget.needed`, which already carries one slice of slack. Only
-        OVERSTATEMENT is reported: asking under the derived need is what `band_dense` does at 28
-        against 28.26, and it peaked at 26.92.
-
-        IT REPORTS 38 OF 50 ARMS, AND THAT IS THE TRUE ANSWER RATHER THAN A LOOSE BAR. I first read the
-        count as noise and tried to legislate a threshold under which slack was "inside the 20 / 26 /
-        28 convention" — but that convention is exactly the defect: every one of those numbers was
-        picked as a fraction of the CARD, months before `DeviceBudget.needed` derived a cap from the
-        RECIPE, so 26 on a 12-slice arm is 8.4 GB over need for the same reason 28 is 10.4 — not
-        because one was copied and the other rounded. There is no honest line between them. So this
-        returns all of them and `main` says it once, in a sentence naming the worst, instead of
-        thirty-eight times: the flag is obsolete tree-wide, and the fix is to delete it tree-wide
-        (knee-ylp0), not to tune a bar until the report is quiet.
-        """
-        asked: dict[str, float] = {}
-        for name, flags in invocations.items():
-            options = self._parsed(flags)[0]
-            if options is None or not options.run.vram_gb:
-                continue
-            needed = RunSetup(options).budget().needed()
-            if options.run.vram_gb > needed + GB_PER_SLICE:
-                asked[name] = round(options.run.vram_gb - needed, 2)
-        return asked
 
     @staticmethod
     def unstated(invocations: dict[str, str]) -> dict[str, list[str]]:

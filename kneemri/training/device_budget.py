@@ -61,6 +61,24 @@ IT APPLIES TO THE DERIVATION ONLY. A hand-named `--vram-gb` is a measured number
 prediction and is left exactly as typed, and `DEFAULT_SHARE` is a fraction of a real card and needs no
 margin over itself."""
 
+CARD_GB = 31.84
+"""The card, as `mem_get_info` reports it — spelled here so a check that runs without one can ask.
+
+Read off this 5090 and already quoted twice in the paragraphs below. Every caller that HAS a device
+passes the measured `whole` instead; this is for `arm_check`, which prices an arm on CI and on a
+machine whose card belongs to someone else.
+"""
+
+SHARED_SHARE = 0.5
+"""This project's share of a card another trainer is on — the owner's standing directive, not a fit.
+
+A CEILING PER JOB IS NOT A SHARE. `DEFAULT_SHARE` is 0.8 because that is where the arms that named a
+cap landed, and those arms were written when this project had the card to itself. Three jobs each
+under their own 0.8 sum past the WDDM eviction line at ~31.7 of 32.6 GB, and the card thrashes with
+every participant inside its own stated bound. So the sharing question is a different one from the
+capping question and takes its own number.
+"""
+
 DESKTOP_RESERVE_GB = 2.0
 """VRAM held back from every cap, so the allocator's ceiling always lands BELOW the physical card.
 

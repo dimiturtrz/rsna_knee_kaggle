@@ -69,6 +69,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.band_coverage",
+      "target": "core.data.corpus.audit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.band_coverage",
       "target": "core.data.corpus.crop_centre",
       "weight": 1
     },
@@ -76,18 +82,6 @@
       "kind": "import",
       "source": "core.data.corpus.band_coverage",
       "target": "core.data.corpus.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.band_coverage",
-      "target": "core.data.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.band_coverage",
-      "target": "core.data.corpus.study",
       "weight": 1
     },
     {
@@ -423,6 +417,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.crop_alignment",
+      "target": "core.data.corpus.audit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.crop_alignment",
       "target": "core.data.corpus.crop_centre",
       "weight": 1
     },
@@ -430,24 +430,6 @@
       "kind": "import",
       "source": "core.data.corpus.crop_alignment",
       "target": "core.data.corpus.crop_coverage",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.crop_alignment",
-      "target": "core.data.corpus.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.crop_alignment",
-      "target": "core.data.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.crop_alignment",
-      "target": "core.data.corpus.study",
       "weight": 1
     },
     {
@@ -471,6 +453,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.crop_coverage",
+      "target": "core.data.corpus.audit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.crop_coverage",
       "target": "core.data.corpus.crop_centre",
       "weight": 1
     },
@@ -478,18 +466,6 @@
       "kind": "import",
       "source": "core.data.corpus.crop_coverage",
       "target": "core.data.corpus.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.crop_coverage",
-      "target": "core.data.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.crop_coverage",
-      "target": "core.data.corpus.study",
       "weight": 1
     },
     {
@@ -519,6 +495,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.crop_laterality",
+      "target": "core.data.corpus.audit",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.crop_laterality",
       "target": "core.data.corpus.crop_centre",
       "weight": 1
     },
@@ -538,12 +520,6 @@
       "kind": "import",
       "source": "core.data.corpus.crop_laterality",
       "target": "core.data.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.crop_laterality",
-      "target": "core.data.corpus.study",
       "weight": 1
     },
     {
@@ -776,6 +752,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.mrnet_labels",
+      "target": "core.data.corpus.mrnet_source",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.native_depth",
       "target": "core.cli",
       "weight": 1
@@ -867,25 +849,7 @@
     {
       "kind": "import",
       "source": "core.data.corpus.slot_geometry",
-      "target": "core.data.corpus.crop_coverage",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.slot_geometry",
-      "target": "core.data.corpus.slot_reader",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.slot_geometry",
-      "target": "core.data.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.corpus.slot_geometry",
-      "target": "core.data.corpus.study",
+      "target": "core.data.corpus.audit",
       "weight": 1
     },
     {
@@ -2444,6 +2408,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_gate",
+      "target": "kneemri.inference.study_reading",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_holdout",
       "target": "core.cli",
       "weight": 1
@@ -2528,6 +2498,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_price",
+      "target": "kneemri.teacher_file",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.foreign_readout",
       "target": "core.cli",
       "weight": 1
@@ -2602,6 +2578,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.foreign_readout",
       "target": "kneemri.inference.members",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_readout",
+      "target": "kneemri.inference.norm_adaptation",
       "weight": 1
     },
     {
@@ -3118,6 +3100,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.member_distance",
       "target": "kneemri.evaluation.pool",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_distance",
+      "target": "kneemri.evaluation.scores",
       "weight": 1
     },
     {
@@ -4084,6 +4072,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.seat_profile",
       "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.seat_profile",
+      "target": "kneemri.evaluation.member_pool",
       "weight": 1
     },
     {
@@ -5120,6 +5114,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.arm_budget",
+      "target": "kneemri.training.device_budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.arm_check",
       "target": "core.cli",
       "weight": 1
@@ -5146,6 +5146,12 @@
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_check",
+      "target": "kneemri.experiments.arm_budget",
       "weight": 1
     },
     {
@@ -5193,13 +5199,13 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
-      "target": "kneemri.training.device_budget",
+      "target": "kneemri.training.config_tree",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_check",
-      "target": "kneemri.training.options",
+      "target": "kneemri.training.device_budget",
       "weight": 1
     },
     {
@@ -5265,12 +5271,6 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_smoke",
-      "target": "kneemri.training.options",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.experiments.arm_smoke",
       "target": "kneemri.training.run_setup",
       "weight": 1
     },
@@ -5313,13 +5313,13 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.budget_residuals",
-      "target": "kneemri.training.device_budget",
+      "target": "kneemri.training.config_tree",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.experiments.budget_residuals",
-      "target": "kneemri.training.options",
+      "target": "kneemri.training.device_budget",
       "weight": 1
     },
     {
@@ -5433,7 +5433,7 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.default_drift",
-      "target": "kneemri.training.options",
+      "target": "kneemri.training.config_tree",
       "weight": 1
     },
     {
@@ -5625,12 +5625,6 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.vram_need",
-      "target": "kneemri.training.options",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.experiments.vram_need",
       "target": "kneemri.training.run_setup",
       "weight": 1
     },
@@ -5728,6 +5722,12 @@
       "kind": "import",
       "source": "kneemri.inference.foreign_holdout",
       "target": "kneemri.inference.foreign_member",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.foreign_holdout",
+      "target": "kneemri.inference.study_reading",
       "weight": 1
     },
     {
@@ -5883,6 +5883,12 @@
     {
       "kind": "import",
       "source": "kneemri.inference.holdout_predictions",
+      "target": "kneemri.inference.norm_adaptation",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.holdout_predictions",
       "target": "kneemri.inference.prediction_cache",
       "weight": 1
     },
@@ -6004,6 +6010,12 @@
       "kind": "import",
       "source": "kneemri.inference.pillar_member",
       "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.pillar_member",
+      "target": "kneemri.inference.atlas_import",
       "weight": 1
     },
     {
@@ -6196,6 +6208,12 @@
       "kind": "import",
       "source": "kneemri.inference.teacher_readings",
       "target": "kneemri.teacher_file",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.inference.test_time",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -6741,6 +6759,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.pool_ceiling",
+      "target": "core.bootstrap",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pool_ceiling",
       "target": "core.cli",
       "weight": 1
     },
@@ -7083,6 +7107,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.seat_value",
+      "target": "kneemri.evaluation.ledger75",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seat_value",
       "target": "kneemri.evaluation.member_axes",
       "weight": 1
     },
@@ -7264,7 +7294,7 @@
       "kind": "import",
       "source": "kneemri.models.backbone",
       "target": "kneemri.models.variants",
-      "weight": 30
+      "weight": 32
     },
     {
       "kind": "import",
@@ -7516,6 +7546,18 @@
       "kind": "import",
       "source": "kneemri.models.stochastic_depth",
       "target": "kneemri.models.drop_path",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.timm_trunk",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.timm_trunk",
+      "target": "core.paths",
       "weight": 1
     },
     {
@@ -8860,6 +8902,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.witness",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.warm_start",
+      "target": "kneemri.training.init_scope",
       "weight": 1
     },
     {
@@ -27883,6 +27931,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.experiments.arm_budget.ArmBudget",
+      "target": "kneemri.training.device_budget.DeviceBudget",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.experiments.arm_check.ArmCheck",
       "target": "kneemri.experiments.arm_check.ArmReading",
@@ -28016,24 +28070,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "target": "kneemri.experiments.arm_check.ArmCheck._parsed",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "target": "kneemri.training.run_setup.RunSetup",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "target": "kneemri.training.run_setup.RunSetup.budget",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.prices",
       "target": "kneemri.experiments.arm_check.ArmCheck._descriptions",
       "weight": 1
@@ -28099,6 +28135,30 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.experiments.arm_budget.ArmBudget",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.experiments.arm_budget.ArmBudget.overstated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.experiments.arm_budget.ArmBudget.unshareable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.experiments.arm_check.ArmCheck._parsed",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
       "target": "kneemri.experiments.arm_check.ArmCheck.carriage_returns",
@@ -28108,12 +28168,6 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
       "target": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
-      "target": "kneemri.experiments.arm_check.ArmCheck.overstated",
       "weight": 1
     },
     {
@@ -28150,6 +28204,18 @@
       "kind": "construct",
       "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
       "target": "kneemri.experiments.arm_verdict.ArmVerdict",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.training.run_setup.RunSetup",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.verdicts",
+      "target": "kneemri.training.run_setup.RunSetup.budget",
       "weight": 1
     },
     {
@@ -43773,11 +43839,19 @@
       "role": null
     },
     {
-      "descendants": 28,
+      "descendants": 29,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
       "parent": "kneemri",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_budget",
+      "label": "arm_budget",
+      "level": "module",
+      "parent": "kneemri.experiments",
       "role": null
     },
     {
@@ -44957,7 +45031,7 @@
       "role": null
     },
     {
-      "descendants": 55,
+      "descendants": 54,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -45192,14 +45266,6 @@
       "descendants": 0,
       "id": "kneemri.training.objective_checks",
       "label": "objective_checks",
-      "level": "module",
-      "parent": "kneemri.training",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.options",
-      "label": "options",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -48843,6 +48909,14 @@
       "level": "class",
       "parent": "kneemri.evaluation.weights_gap",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_budget.ArmBudget",
+      "label": "ArmBudget",
+      "level": "class",
+      "parent": "kneemri.experiments.arm_budget",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -66110,6 +66184,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_budget.ArmBudget.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_budget.ArmBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_budget.ArmBudget.overstated",
+      "label": "overstated",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_budget.ArmBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.arm_budget.ArmBudget.unshareable",
+      "label": "unshareable",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_budget.ArmBudget",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.__init__",
       "label": "__init__",
       "level": "method",
@@ -66184,14 +66282,6 @@
       "descendants": 0,
       "id": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
       "label": "moving_ruler",
-      "level": "method",
-      "parent": "kneemri.experiments.arm_check.ArmCheck",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.experiments.arm_check.ArmCheck.overstated",
-      "label": "overstated",
       "level": "method",
       "parent": "kneemri.experiments.arm_check.ArmCheck",
       "role": null
