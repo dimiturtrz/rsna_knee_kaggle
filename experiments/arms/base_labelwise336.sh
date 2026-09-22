@@ -4,6 +4,25 @@
 # bead: knee-mm6v0
 # reading: base_labelwise336_s2026.holdout.npz
 #
+# WHY IT OOMED TWICE AND WHAT CHANGED. Both deaths (20 GB cap / 18.67 allocated, then 27 / 23.21 + 2.38)
+# happened with gradient checkpointing OFF: `--recompute-activations` (`adaptation.py:248`, default False)
+# was simply absent from the line, and twenty-five other arms pass it. It is now passed. The flag is the
+# ENABLING one, not a second variable — `encoder_surgery.py:470-495` measures it on this workload at 798
+# img/s against 946 (a 19% tax) for nearly all of the encoder's activation memory, same batch, same loss,
+# same 66 within-batch pairs the `--rank-weight` term scores, which is why that docstring chose it over
+# splitting the batch.
+#
+# AND WHY 12 SLICES RATHER THAN 20. The 20-slice version of this corner (`base_labelwise_dense336`) was
+# run WITH checkpointing on 2026-09-22 and still OOMed: 21.06 GiB allocated, 3.57 more requested, 26.00
+# allowed, 6.17 free of 31.84 on the card. That corner is machine-barred for a base trunk, and raising the
+# cap toward 30 does not fix it — it PERMITS PCIe paging, which thrashes instead of crashing. Slices are
+# the only free dimension, because batch may not be cut without changing the pairwise term. 12/20 of that
+# footprint is ~14.8 GiB, well inside the 26 cap.
+#
+# PRICE, restated. ~385 s/epoch at this corner x the measured 1.23 checkpointing tax is ~474 s, so ~1.6 h
+# for 12 epochs. Zero decode, zero submission slots, control free. P(clears 0.8961) ~ 0.35.
+# P(clears the 1.5% bar) ~ 0.10.
+#
 # WHAT LICENSES THIS ARM. `base_labelwise224` landed 0.8899 ledger75 against `labelwise224`'s 0.8832 —
 # +0.0067, above the 0.0062 paired floor, converged over 12 epochs on 909 studies. That is the band-1
 # outcome its own pre-registration named: capacity is NOT inert once the readout can spend the width, so
@@ -68,5 +87,6 @@ require "$LABELS"
 run_train base_labelwise336 \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --image-size 336 --variant base --vram-gb 27 \
+  --recompute-activations \
+  --image-size 336 --variant base --vram-gb 26 \
   --labels "$LABELS" --out "$MODELS/base_labelwise336_s2026.pt"
