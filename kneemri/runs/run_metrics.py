@@ -2,6 +2,7 @@
 
 import json
 import logging
+import shutil
 from pathlib import Path
 from statistics import median
 from typing import NotRequired, TypedDict, cast
@@ -150,7 +151,7 @@ class RunMetrics:
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps({RECIPE: recipe}) + "\n")
 
-    def begin(self, recipe: dict[str, str]) -> None:
+    def begin(self, recipe: dict[str, str], *, resuming: bool = False) -> None:
         """Start a run's record, moving any PREVIOUS run's epochs AND ARTEFACTS aside first.
 
         A re-run to the same `--out` used to append, which left one file describing two runs and one
@@ -174,6 +175,8 @@ class RunMetrics:
         Under `_run<n>`, the spelling a human already reached for by hand that night, so the rotated
         artefacts read as an ordinary run to every tool: `HoldoutRecord` resolves the pair, the ledger
         check counts it in its denominator, and a comparison can pair it like any other member.
+
+        A RESUMING run carries the rotated predictions back — see `_carry_back`.
         """
         if any("epoch" in entry for entry in self._entries()):
             run = self._rotation()
@@ -181,8 +184,25 @@ class RunMetrics:
                 if live.exists():
                     live.replace(aside)
                     logger.info("    earlier run under this name kept as %s", aside.name)
+            if resuming:
+                self._carry_back(run)
             self.path.replace(self._epochs_aside(run))
         self.describe(recipe)
+
+    def _carry_back(self, run: int) -> None:
+        """Put the rotated predictions back under the live name, for a run that is RESUMING.
+
+        `--resume` restores the KEPT epoch, so the record just rotated aside is the reading OF THE
+        CHECKPOINT THIS RUN STARTS FROM — and a predictions file is only rewritten when a new best
+        fires. Resume onto a best no later epoch beats and the live name stays empty for a run that
+        succeeded: `labelcut_v3_ema_s2026` finished e23 with its 0.9039 reading sitting under
+        `_run1`, its declared `# reading:` path absent, and `reading_check` refusing the arm. Copied
+        rather than moved, because the rotated run's own record must stay whole beside its epochs.
+        """
+        live, aside = self._holdout(), self._holdout_aside(run)
+        if aside.exists():
+            shutil.copyfile(aside, live)
+            logger.info("    resuming: %s carried back as this run's reading until an epoch beats it", aside.name)
 
     def _rotation(self) -> int:
         """The next free rotation number, so no earlier run's record is ever overwritten.
@@ -204,12 +224,19 @@ class RunMetrics:
         """Where an earlier run's `<run>.metrics.jsonl` goes — the numbering already on disk."""
         return self.path.with_name(f"{self.name()}{METRICS_SUFFIX}.{run}.jsonl")
 
+    def _holdout(self) -> Path:
+        """Where this run's predictions live."""
+        return self.path.with_name(self.name() + HOLDOUT_SUFFIX)
+
+    def _holdout_aside(self, run: int) -> Path:
+        """Where an earlier run's predictions go."""
+        return self.path.with_name(f"{self.name()}_run{run}{HOLDOUT_SUFFIX}")
+
     def _artefacts(self, run: int) -> list[tuple[Path, Path]]:
         """The weights and predictions of an earlier run, and where they go, as (live, aside) pairs."""
-        stem = self.name()
         return [
-            (self.checkpoint(), self.path.with_name(f"{stem}_run{run}.pt")),
-            (self.path.with_name(stem + HOLDOUT_SUFFIX), self.path.with_name(f"{stem}_run{run}{HOLDOUT_SUFFIX}")),
+            (self.checkpoint(), self.path.with_name(f"{self.name()}_run{run}.pt")),
+            (self._holdout(), self._holdout_aside(run)),
         ]
 
     def recipe(self) -> dict[str, str] | None:

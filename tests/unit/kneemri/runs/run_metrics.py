@@ -283,6 +283,41 @@ def test_begin_rotates_the_artefacts_with_the_epochs(tmp_path: Path):
     assert (tmp_path / "run.metrics.1.jsonl").exists(), "and its epochs carry the same index"
 
 
+def test_begin_carries_the_predictions_back_when_resuming(tmp_path: Path):
+    """A resuming run keeps the rotated reading under the live name; the aside copy stays whole.
+
+    `--resume` restores the KEPT epoch, and a predictions file is rewritten only when a new best
+    fires — so a resume onto a best no later epoch beats used to finish with its declared
+    `# reading:` path absent. `labelcut_v3_ema_s2026` did exactly that: e23 done, 0.9039 sitting
+    under `_run1`, `reading_check` refusing an arm that had succeeded.
+    """
+    metrics = RunMetrics(tmp_path / "run.pt")
+    metrics.begin({"slices": "12"})
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.8668, seconds=1, per_label={"ACL": 0.5}))
+    (tmp_path / "run.holdout.npz").write_text("kept predictions", encoding="utf-8")
+
+    metrics.begin({"slices": "12"}, resuming=True)
+
+    assert (tmp_path / "run.holdout.npz").read_text(encoding="utf-8") == "kept predictions", (
+        "the reading of the checkpoint the resume starts from is under the live name"
+    )
+    assert (tmp_path / "run_run1.holdout.npz").read_text(encoding="utf-8") == "kept predictions", (
+        "copied, not moved — the rotated run keeps its own record beside its epochs"
+    )
+
+
+def test_begin_leaves_the_live_name_free_when_not_resuming(tmp_path: Path):
+    """A plain re-run is a DIFFERENT run, so it may not inherit the previous one's reading."""
+    metrics = RunMetrics(tmp_path / "run.pt")
+    metrics.begin({"slices": "12"})
+    metrics.record(EpochRow(epoch=0, loss=1.0, auc=0.84, seconds=1, per_label={"ACL": 0.5}))
+    (tmp_path / "run.holdout.npz").write_text("first predictions", encoding="utf-8")
+
+    metrics.begin({"slices": "16"})
+
+    assert not (tmp_path / "run.holdout.npz").exists()
+
+
 def test_begin_rotates_what_a_killed_run_left(tmp_path: Path):
     """A run that scored an epoch but never checkpointed still rotates, and takes no absent file with it.
 
