@@ -43,7 +43,8 @@ Two companion files, neither of which this one replaces:
 | ResNet | **CLOSED** — peaked epoch 12 of 48, so the budget was never the constraint; the ViT recipe carries less than half onto it | README:12872, :17087 `resnet_224_ext` |
 | the CNN axis as a class | **CLOSED on its own named re-opener, card-free** | README:7796; `2026-09-05_the-cnn-axis-is-maximally-distinct-and-still-worthless.md` |
 | RadImageNet DenseNet | **CLOSED** — closes the convolutional trunk lane empty | README:6685 |
-| RAD-DINO (medical-report backbone) | **CLOSED** −0.037 against its own exact control | README:2790, :4291 |
+| RAD-DINO (medical-report backbone) | **CLOSED** −0.037 against its own exact control — 0.8141 e7 vs `base_dense_s2026` 0.8512, six times the paired floor. The cleanest single-variable encoder read this project owns: RAD-DINO is finetuned FROM `facebook/dinov2-base`, so the arms differ in **initialisation weights and nothing else**. Normalisation and truncation both cleared before the verdict; a rate refit is owner-blocked | README:2790, :4291 |
+| continued multi-crop SSL pretraining on a medical corpus | **CLOSED AT THIS CORNER, not as a class.** RAD-DINO *is* that mechanism, built by Microsoft on chest radiographs, and it loses 0.037. Chest-radiograph→knee-MRI is not knee-MRI→knee-MRI, so SSL continuation on OUR corpus survives — but it costs days of card and the nearest datapoint is negative. **Do not rank it above §B's labelwise re-reads.** DINO's multi-crop objective (2 global 224 ⧺ 8 local 96, student-local matched to teacher-global through an EMA teacher) is a PRETRAINING mechanism, discarded at inference; it is not what `multiscale` tried | README:4295; `research/deep_dives/2026-09-02_orthofoundation_preprocessing_qaf_answer.md:23` |
 | Swin (supervised) | **CLOSED**; block discovery had found ONE stage on a staged trunk | README:6130, :6374; knee-94ec |
 | ViT-in21k | **CLOSED** on a trajectory instrument | README:6196 |
 | EfficientNetV2-L | **NULL, not a loss** — the 44-slot corpus takes it | README:9106 |
@@ -54,9 +55,25 @@ Two companion files, neither of which this one replaces:
 
 ## B. Input geometry
 
+**THE RULER UNDER FOUR OF THESE ROWS IS DISOWNED.** `extended_slots`, `resolution_420`, `multiscale` and
+`knee-ezz` were each measured on a **max-pooling head**, which demonstrably suppresses a real input change,
+so a flat read from it is not evidence the input change is inert. Those four are **UNREAD, not REFUTED —
+and not re-opened as promising**: the 2×2 that found this gives one interaction on a single seed, and
++0.0010 is itself inside the macro noise floor. What clears the floor is the per-column pair, which is
+mechanism, not score. **Re-open one by re-running it under `--slice-pooling labelwise`, one axis at a time,
+priced against its own labelwise control — never against a max-pooling number.** The ledger names
+`multiscale` as the input change most likely to be dilution-limited and as the cheapest such test, unrun;
+its cache is not on disk, and the decode that must run alone is what prices the arm, not the training.
+(README ~14510.)
+
 | axis | verdict | where |
 |---|---|---|
-| resolution 224 / 336 / 392 | **CLOSED.** 224 costs 0.0049 solo and buys 3.2× throughput; 336→392 does not lift the meniscus columns | README:8327, :7915, :3729 |
+| resolution 224 / 336 | **CLOSED.** 224 costs 0.0049 solo and buys 3.2× throughput | README:8327, :7915 |
+| resolution 336 → 392 | **CLOSED** — does not lift the meniscus columns | README:3729 |
+| resolution 420 | **UNREAD** — max-pooling ruler, see the caveat above | README ~14510 |
+| `multiscale` (12 slots: six wide ⧺ the same six tight) | **UNREAD.** Gated out 2026-08-16 at ≈ **+0.0016 on the mean for a 71.6 GB cache and a training slot** — per-label at matched e7 it landed the diffuse half (Baker's −0.028, Synovitis −0.019, Effusion −0.015) and missed the half the build depended on (Medial Meniscus −0.012, ACL/MCL at floor, Fracture +0.019 on the worst-agreement label). `multiscale.sh` is `retired` in `lib.sh` terms. **But that gate was a max-pooling read**, and this is now the cheapest unrun input test | README:676-682, ~14519; `interpretations/kneemri/2026-08-16_crop80_resolution_gate.md` |
+| `extended_slots` (nine slots) | **UNREAD** at +0.0002 — max-pooling ruler; the dilution the nine-slot scheme showed is the reason `multiscale` at twelve is expected to show it harder | README ~14510 |
+| cached slices 20 vs 12 (`knee-ezz`) | **UNREAD** at −0.0001 — max-pooling ruler | README ~14510 |
 | field of view / band width | **CLOSED** — the FOV axis closes and MCL is why | README:2032 `band140`; `2026-09-09` FOV census README:12178 |
 | crop CENTRE | **CLOSED** — moving it at the control's extent does nothing, which is the point | README:517 |
 | ROI crop / upsample | **CLOSED** — the crop costs, and the upsample was exactly half of why | README:17112 |
@@ -203,6 +220,8 @@ from a knob.
 | `basinsoup_dmlb_ff.pt` | **UNREAD** — on disk since 2026-09-21 03:00. `--fold -1`, so readable only by a slot |
 | `headlr_ship_ffp` | complete (`best e- of 18 run, 24 asked` is its design); awaiting a board slot as a declared INSTRUMENT |
 | ResNet-vs-DINO decorrelation read | **free, unrun** — gates the owner's EfficientNet question |
+| `multiscale` under `--slice-pooling labelwise` | **UNREAD, and the ledger's own "cheapest next test, unrun"** — see §B. Priced by a decode that must run alone, not by the training |
+| focal / sided pooling under labelwise | **UNREAD** — cheapest of the dilution attacks, and the only one with a positive per-label result already recorded (`focal_dense`: Lateral Meniscus 0.846 → 0.856, the largest model-side gap in the corpus and a 1–3 mm finding, while the regional group paid −0.0114) | README:338 |
 | `basinsoup_soft` (knee-grkrv) verdict | **decided, negative, and written down nowhere but here** — see §F |
 | `basinsoup_wide` (knee-gxu5r) verdict | **decided, middle branch** — see §F |
 
