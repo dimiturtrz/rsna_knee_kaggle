@@ -465,6 +465,13 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   that ensemble diversity beats member quality (six leaderboard entries built to isolate it). Both were
   filed as discoveries and then "corrected" by measurements the repo had already made. `bd search` will
   not find them; grep the ledger.
+  **Start at `docs/AXES.md`** — the axis index, one row per lever, verdict plus pointer. The record is
+  465 ledger sections, 240 interpretations, 152 research docs, 434 arms and 505 closed beads, and the
+  cost of that is not a missing answer but an answer found too slowly to change what the card runs next.
+  The index carries the verdict and the LINK; the number stays where it was measured, because a number
+  copied into two files is a number that will disagree with itself. A closed axis adds ONE ROW there and
+  its paragraph to the ledger. An axis is re-opened by ANSWERING the mechanism in its row — never by
+  re-quoting a number at it.
 - **Three mailboxes, one per side, on neutral ground, and this file is read from ALL of them** — so the
   rule is written without a first person. `inbox/main/` holds letters TO the main agent,
   `inbox/researcher/` letters TO the researcher, `inbox/mastermind/` letters TO the coordinator. They

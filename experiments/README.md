@@ -17,6 +17,10 @@ stay in it.
 An arm file carries its hypothesis, its control number, and its result in the header. Reading the
 directory is meant to be the same as reading the ledger.
 
+**This file is the HOME of the numbers and is not readable end to end — `docs/AXES.md` is its index.**
+One row per axis, its verdict, and the line here that holds the measurement. Add the paragraph here and
+the row there; never the number twice.
+
 ## What "seat value" means in a row below — and what it does NOT mean
 
 Eighteen rows quote one. **Every one of them is the price of an ADDITIONAL member**, computed by

@@ -3,7 +3,8 @@
 This is the canonical plan. Read it at session start before proposing work. Substance lives here and is
 cited by bead id; the ORDER and STATE of the work live in beads (`bd ready`, `bd list`), which is the one
 place they can be true. Measured results live in `experiments/README.md` and `interpretations/`; the
-build log is git history.
+build log is git history. **`docs/AXES.md` indexes every lever already tried** — verdict and pointer, one
+row each — and is the first thing to read before proposing an axis.
 
 ## Goal
 
