@@ -51,11 +51,15 @@
 # control  base_labelwise224_s2026 = 0.8899 ledger75 @ epoch 8, 909 studies. No control run is owed.
 #
 # deliberate: --image-size 336 (the arm's thesis)
-# deliberate: --vram-gb 20 — named rather than derived, because the derived figure reads the slice count
-#             and the image size and is blind to --variant, so it returns small's number for a base trunk.
-#             The anchor is measured, not scaled from a guess: `mergedk_labelwise_drop40_long_336` is a
-#             small trunk at this exact 336/12sl corner and allocated 9.30 GB, and base measured 1.89x
-#             small at 224/12sl (6.86 -> 12.99), which puts this arm near 17.6 GB. 20 is that plus slack.
+# deliberate: --vram-gb 27 — named rather than derived, because the derived figure reads the slice count
+#             and the image size and is blind to --variant, so it returns 36 GB for a corner a small trunk
+#             measured at 9.30 GB allocated (`mergedk_labelwise_drop40_long_336`). Scaling that by the
+#             1.89x base/small ratio measured at 224/12sl predicted 17.6 GB, and 20 was typed on it; the
+#             run OOMed against its own cap at `20.00 GiB allowed, 18.67 GiB allocated`, so that ratio
+#             understates at this corner. 27 is set on the crash rather than on the scaling. It is 85% of
+#             the card — inside the owner's 2026-09-22 grant of the whole card, NOT inside the 50% share.
+# deliberate: PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True — the OOM named 1.21 GB reserved and
+#             unallocated, which is the fragmentation this setting exists to remove.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
@@ -64,5 +68,5 @@ require "$LABELS"
 run_train base_labelwise336 \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --image-size 336 --variant base --vram-gb 20 \
+  --image-size 336 --variant base --vram-gb 27 \
   --labels "$LABELS" --out "$MODELS/base_labelwise336_s2026.pt"

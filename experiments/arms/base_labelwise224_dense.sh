@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# base_labelwise224_dense.sh — the dense recipe's TARGET handling, on the validated base trunk.
+#
+# bead: knee-mm6v0
+# reading: base_labelwise224_dense_s2026.holdout.npz
+#
+# WHAT LICENSES THIS ARM. `base_labelwise224` landed 0.8899 ledger75 against `labelwise224`'s 0.8832 —
+# +0.0067, above the 0.0062 paired floor, converged over 12 epochs on 909 studies. Capacity is not inert
+# once the readout can spend the width. The shipping family (`labelwise_dense` 0.8964,
+# `labelwise_dense_drop40_long36` 0.9030) beats that from a SMALL trunk, and it differs from the 224
+# corner on three axes at once: 336 pixels, 20 slices, and `--calibrated-targets --hold-annotations`.
+# This arm takes the third, because it is the only one of the three that is both cached and fits.
+#
+# WHY NOT THE OTHER TWO, BOTH ATTEMPTED FIRST AND BOTH BLOCKED BY THE MACHINE RATHER THAN BY AN ARGUMENT.
+#   * PIXELS. `base_labelwise336` OOMed twice, at a 20 GB cap (18.67 GB allocated) and again at 27 GB
+#     (23.21 allocated, 2.38 more requested, 31.84 on the card). base at 336/12sl does not fit at batch 12,
+#     and batch is the one dimension that may not be cut: `--rank-weight 1.0` is pairwise and sees `--batch`
+#     studies within a step regardless of `--accumulate`, so cutting it confounds every 0.88-0.90 control.
+#   * SLICES. `base_labelwise224_20sl` died on `FileNotFoundError` for `images_224px_20sl_0.1-0.9band.npy`.
+#     The 20-slice array on disk carries an `_extended` suffix — it was built under `--scheme extended`,
+#     which changes which SERIES fill the slots, so using it would move a third variable. `arm_check` had
+#     already said UNCACHED and was overridden; it was right. The `--smoke` pass that seemed to clear it
+#     proves nothing here, because a smoke reads the `_first60` array it writes itself, never the corpus.
+#
+# ONE CHANGE against `base_labelwise224`: `--calibrated-targets --hold-annotations`. They travel together
+# in every dense arm and are treated as one step rather than pretended to be separable. Everything else is
+# byte-identical — same base trunk, same 224 px, same 12 slices, same 0.2-0.8 band, same batch 12, same
+# array on disk. The control is free at 0.8899.
+#
+# MECHANISM. This is a TARGET and SUPERVISION change, not an input one: calibrated targets replace the
+# hard label with the annotator-agreement-calibrated one, and holding annotations keeps the per-reader
+# structure instead of collapsing it. The labels that lead our model-side error census are exactly the
+# ones readers disagree about most, so the claim is that the gradient currently spends capacity fitting
+# label noise that a calibrated target does not ask for. A wider trunk has MORE capacity to spend that
+# way, which is why this pairs with base specifically and is not simply a knob carried over.
+#
+# PRICE, out loud. Same corner as `base_labelwise224`, which ran 171 s/epoch, so ~35 min of card for 12
+# epochs. Zero decode, zero submission slots, control free. P(clears 0.8961) ~ 0.30.
+# P(clears the 1.5% bar) ~ 0.08.
+#
+# BANDS, pre-registered, ledger75, against base_labelwise224 0.8899.
+#   * >= 0.8961  the dense recipe's lead is carried by its targets rather than by its pixels or slices,
+#                which matters because targets are the one axis of the three that fits on this card with a
+#                base trunk. The next arm is the drop40/long36 schedule on top.
+#   * 0.8899-0.8961  directional. Keep nothing, compose nothing.
+#   * <  0.8899  the dense lead is in the input axes after all, and both of those are blocked for base by
+#                VRAM and by the cache. That verdict says the base trunk cannot reach the shipping family
+#                on this machine without a decode or a batch change, and it is worth knowing before any
+#                more card goes at it.
+#
+# READ THE FOCAL LABELS, NOT ONLY THE MEAN. Lateral Meniscus -0.1925, ACL -0.1225, MCL -0.0964 lead the
+# model-side error census and are the labels reader disagreement concentrates in. A target-calibration
+# change that moves the mean without moving those is not this mechanism. Say so.
+#
+# HARNESS CHECK. The printed recipe must name "variant": "base" AND "calibrated_targets": true AND
+# "slice_pooling": "labelwise" AND "image_size": "224" AND "slices": "12".
+#
+# control  base_labelwise224_s2026 = 0.8899 ledger75 @ epoch 8, 909 studies. No control run is owed.
+#
+# deliberate: --calibrated-targets --hold-annotations (the arm's thesis, taken as one step)
+# deliberate: --vram-gb 20 — the control measured 12.99 GB allocated at this exact corner and neither flag
+#             changes the activation footprint. This is the cap the control ran under, not a new guess.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+require "$LABELS"
+
+run_train base_labelwise224_dense \
+  $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
+  --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
+  --image-size 224 --variant base --vram-gb 20 --calibrated-targets --hold-annotations \
+  --labels "$LABELS" --out "$MODELS/base_labelwise224_dense_s2026.pt"
