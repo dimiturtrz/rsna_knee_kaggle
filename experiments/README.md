@@ -17925,3 +17925,39 @@ inside the floor. `large_labelwise224_dense` (knee-jzho6) is the rung above base
 00:35Z, and it fits: 22194 MiB, 97% util, 759 img/s warm against the control's 1642 — 2.2x, so ~237
 s/epoch and ~47 min for 12, against the ~1.1 h priced. The fragmentation that closed 336 does not appear
 at 224.
+
+
+## The capacity rung at 224 came in one paired floor low, and its own arm cannot say why — 2026-09-23T02:20Z
+
+`large_labelwise224_dense` (DINOv2-large, 224 px, 12 slices, 12 epochs) finished 01:55Z.
+
+| member | LEDGER | LEDGER75 | move | epoch | rows |
+| --- | --- | --- | --- | --- | --- |
+| `base_labelwise224_dense_s2026` | 0.8589 | **0.8950** | +0.0361 | 8 | 909 |
+| `large_labelwise224_dense_s2026` | 0.8541 | **0.8888** | +0.0347 | 6 | 909 |
+
+**−0.0062 against its control — exactly one paired floor below**, and above `base_labelwise224`'s own
+control at 0.8899, so it does not reach the arm's harshest band either. Band 3 as pre-registered.
+
+**It may not close the capacity axis, because the confound is mine.** `--unfreeze-last 6` is a constant
+every recipe here inherited, fitted on a 12-block trunk where it adapts HALF; DINOv2-large has 24 blocks,
+so the arm adapted a QUARTER. Width and adapted fraction moved together.
+
+The train loss says the same thing and adds to it. At the holdout PEAK (e6) large read 0.6610 against
+base's 0.5663 final — learning slower, the under-adaptation signature. But by e11 it had driven train
+loss to **0.5213, BELOW base**, while the holdout sat flat from e6 (0.8541, 0.8499, 0.8533, 0.8501,
+0.8488, 0.8489). So a quarter-adapted large trunk eventually fits the 909 studies HARDER than base and
+still loses holdout. That is not a capacity ceiling and not pure under-adaptation: it is a trunk whose
+adapted quarter overfits before its frozen three-quarters has been asked for anything.
+
+**Peak memory 20.15 GB reserved / 17.05 GB allocated** under the 26 GB cap — 224/12sl does not fragment,
+which is the corner fact the seven 336 crashes were about.
+
+`large_labelwise224_half` is the answer arm: `--unfreeze-last 12`, twelve of twenty-four, the fraction
+the base control got from its 6 of 12. It **OOMed at 01:57Z under the 26 GB cap in two minutes** — and
+the cap was the binder, not fragmentation: 21.94 GiB allocated against a 26.00 GiB ceiling with the card
+still holding 3.83 GiB free of 31.84 when a 916 MiB request failed. `card_check` then named where that
+"free" went: LibreOffice holds **2515 MiB** of this card by arrangement. So the true budget is 31.84
+minus 2.5 minus driver. Relaunched 02:22Z at `--vram-gb 28`, which covers the ~25 GiB the six extra
+trainable 1024-wide blocks demand and still leaves ~1.3 GB of slack. A second OOM at 28 would make
+224/12sl machine-closed for a wide trunk too, and that is a real verdict rather than a retry.

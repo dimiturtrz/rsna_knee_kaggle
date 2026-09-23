@@ -81,8 +81,13 @@
 # deliberate: --unfreeze-last 12 — matched ADAPTED FRACTION against the base control's 6 of 12, which is
 #             the arm's whole point and not a capacity knob in its own right.
 # deliberate: --variant large (the axis under test)
-# deliberate: --vram-gb 26 — the cap the quarter-adapted arm ran under at this exact corner (23712 MiB
-#             measured), not a new guess.
+# deliberate: --vram-gb 28 — RAISED from 26 after this arm OOMed at 26 in two minutes, 2026-09-23T01:57Z.
+#             The ceiling was the binder, not fragmentation: PyTorch held 21.94 GiB allocated against a
+#             26.00 GiB cap with 3.48 GiB reserved-unallocated, and the CARD still had 3.83 GiB free of
+#             31.84 when the 916 MiB request failed. So the memory existed and the cap forbade it. 28 GB
+#             leaves the driver ~2.8 GB and covers the ~1.2 GB the six extra trainable 1024-wide blocks
+#             cost over the quarter-adapted arm's measured 23712 MiB. If it OOMs AGAIN at 28 the binder
+#             is fragmentation after all and this corner joins 336 as machine-closed for a wide trunk.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
@@ -91,5 +96,5 @@ require "$LABELS"
 run_train large_labelwise224_half \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 --unfreeze-last 12 \
-  --image-size 224 --variant large --vram-gb 26 --calibrated-targets --hold-annotations \
+  --image-size 224 --variant large --vram-gb 28 --calibrated-targets --hold-annotations \
   --labels "$LABELS" --out "$MODELS/large_labelwise224_half_s2026.pt"
