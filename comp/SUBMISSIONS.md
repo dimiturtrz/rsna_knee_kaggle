@@ -4836,3 +4836,11 @@ already showed on the other family.
 them: ~10-14 h of card (UNVERIFIED per-child time) for an expected ~0.947 against the 0.946 champion — a
 +0.001 knob inside scatter, against a 1.5% bar. Recorded as licensed and unqueued. Gates: submit_check new
 set, mount/kit/roster/champion clean, run_check 1 of 1, witness UNVERIFIED (a soup).
+
+## soupraptor_v1 — 0.944, ref 56504501, 2026-09-23 — raptor dilutes our top member
+
+INSTRUMENT (knee-3mamq). `basinsoup_ff_k4_s2026` + `raptor_v4_swa` at weight 1/2. 0.944 against the soup
+served alone at 0.946: −0.002, the pre-registered "≤0.946" branch. The two-architecture lift seen by
+lower entries does not survive at our top — a 0.946 member averaged with a weaker foreign reader loses.
+knee-ir6d3's gate parks the ensemble lane on this read. `soupraptor23_v1` (weight 2/3, ref 56505465)
+is still scoring; by this result its expected read is lower still.
