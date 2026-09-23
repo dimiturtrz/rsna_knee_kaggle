@@ -7592,6 +7592,18 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.models.weight_soup",
+      "target": "kneemri.runs.run_identity",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.weight_soup",
+      "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.process_table",
       "target": "kneemri.spawn",
       "weight": 1
@@ -38020,6 +38032,24 @@
       "kind": "calls",
       "source": "kneemri.models.weight_soup.WeightSoup.write",
       "target": "kneemri.models.weight_soup.WeightSoup.averaged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.WeightSoup.write",
+      "target": "kneemri.runs.run_identity.RunIdentity.begun",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.models.weight_soup.WeightSoup.write",
+      "target": "kneemri.runs.run_metrics.RunMetrics",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.WeightSoup.write",
+      "target": "kneemri.runs.run_metrics.RunMetrics.begin",
       "weight": 1
     },
     {

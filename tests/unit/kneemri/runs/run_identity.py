@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 import pytest
+import torch
 
 from kneemri.runs.run_identity import GIT_ENV, UNKNOWN, RunIdentity
 from kneemri.runs.run_metrics import RunMetrics
@@ -56,6 +57,11 @@ def test_of(tmp_path: Path):
 
     assert RunIdentity.of(tmp_path / "run.pt") == "abc"
     assert RunIdentity.of(tmp_path / "never.pt") is None
+
+    torch.save({"run": {"id": "orig"}}, tmp_path / "copy.pt")
+    assert RunIdentity.of(tmp_path / "copy.pt") == "orig", "a copy carries its original's id inside the weights"
+    torch.save({"model": {}}, tmp_path / "old.pt")
+    assert RunIdentity.of(tmp_path / "old.pt") is None
 
 
 def test_stamp():

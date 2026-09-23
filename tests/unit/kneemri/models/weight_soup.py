@@ -6,6 +6,7 @@ import pytest
 import torch
 
 from kneemri.models.weight_soup import IncompatibleSoupError, WeightSoup
+from kneemri.runs.run_record import RunRecord
 
 WIDTH = 4
 """Two tensors wide enough to tell an average from either input, and small enough to write in a test."""
@@ -44,6 +45,7 @@ def _checkpoint(path: Path, value: float, **overrides: str) -> Path:
         "epoch": 3,
         "fingerprint": [1.0, 2.0],
         "fingerprint_config": {"img": 336},
+        "run": {"id": f"run-{value}"},
         "config": {"optim": {"lr": 4e-5}, "witness": {"studies": ["s1"], "predictions": [[value]], "batch": 4}},
     }
     torch.save(payload, path)
@@ -106,6 +108,9 @@ def test_weight_soup_write(tmp_path: Path) -> None:
     assert "witness" not in written["config"], "a witness belongs to the tensors that produced it"
     assert written["config"]["optim"] == {"lr": 4e-5}, "the rest of the recipe survives"
     assert torch.allclose(written["model"]["head.bias"], torch.full((WIDTH,), 2.0))
+    assert written["run"]["id"] not in {"run-1.0", "run-3.0"}, "a soup is a run of its own, not its first member"
+    assert [parent["run"] for parent in written["run"]["parents"].values()] == ["run-1.0", "run-3.0"]
+    assert RunRecord(tmp_path / "soup.pt").run() == written["run"], "the record beside it says the same"
 
 
 def test_weight_soup_refuses_one_member(tmp_path: Path) -> None:

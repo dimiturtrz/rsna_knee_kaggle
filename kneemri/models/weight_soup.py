@@ -33,6 +33,12 @@ the average never ran an epoch and has no score until something reads it. The we
 dropped rather than copied, because it is a witness of a specific set of tensors and copying it forward
 would let `witness_check` pass a checkpoint whose weights it never saw. `package_members` is the only
 consumer that indexes it, so a soup that earns a seat is re-fingerprinted then, deliberately.
+
+IT IS A RUN OF ITS OWN, AND IT NAMES ITS PARENTS. Copying the first member's payload used to copy its
+`run` stamp too, so every soup claimed to BE its first member; its parents lived only in arm scripts and
+ledger prose. It now mints its own identity with every member's run id as a parent, in the checkpoint and
+in a record beside it — a record with a recipe and a run line and no epochs, the same shape a run killed
+before its first epoch leaves.
 """
 
 import logging
@@ -44,6 +50,8 @@ from torch import Tensor
 
 from core import cli
 from kneemri.runs.holdout_record import UNKNOWN_EPOCH
+from kneemri.runs.run_identity import RunIdentity
+from kneemri.runs.run_metrics import RunMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +174,9 @@ class WeightSoup:
         payload["holdout"] = float("nan")
         payload["epoch"] = UNKNOWN_EPOCH
         payload["soup"] = [path.stem for path in self.members]
+        parents = {f"member{index}": str(path) for index, path in enumerate(self.members)}
+        payload["run"] = RunIdentity.begun(parents, out, resuming=False).stamp()
+        RunMetrics(out).begin(parents, run=payload["run"])
         for key in DROPPED:
             payload.pop(key, None)
         recipe = payload.get("config")

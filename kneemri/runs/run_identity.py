@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
+import torch
+
 from kneemri.runs.run_record import RunRecord
 
 GIT_ENV = "KNEEMRI_GIT_SHA"
@@ -72,9 +74,17 @@ class RunIdentity:
 
     @staticmethod
     def of(weights: Path) -> str | None:
-        """The run id a weights file's record carries, or None for one written before runs had ids."""
+        """The run id a weights file's record carries — else the one stamped inside the file — else None.
+
+        The file's own stamp is what makes a COPY resolve: `package_members` copies the checkpoint and
+        leaves the record behind, and the stamp travels with the weights. Memory-mapped, so asking a
+        multi-gigabyte checkpoint for its id reads the header, not the tensors.
+        """
         stamped = RunRecord(weights).run()
-        return str(stamped["id"]) if stamped and "id" in stamped else None
+        if not stamped and weights.suffix in WEIGHTS and weights.exists():
+            saved = torch.load(weights, map_location="cpu", weights_only=True, mmap=True)
+            stamped = saved.get("run") if isinstance(saved, dict) else None
+        return str(stamped["id"]) if isinstance(stamped, dict) and "id" in stamped else None
 
     def stamp(self) -> dict[str, object]:
         """The identity as plain data, so a `weights_only` load of the checkpoint can read it back."""
