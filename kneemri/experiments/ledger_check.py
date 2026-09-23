@@ -192,6 +192,11 @@ class LedgerCheck:
         wanted, digits = self.stem(name), self.plain(f"{score:.4f}")
         return any(wanted in line and digits in line for line in self.lines)
 
+    def named(self, name: str) -> bool:
+        """Whether any line spells this run's name at all, with or without a number beside it."""
+        wanted = self.stem(name)
+        return any(wanted in line for line in self.lines)
+
     def owns(self, name: str, score: float) -> bool:
         """Whether a line names this run beside this score, strictly enough to accuse it of owning one.
 

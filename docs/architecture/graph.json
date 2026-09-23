@@ -5570,6 +5570,36 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.experiments.runs_table",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.runs_table",
+      "target": "kneemri.experiments.ledger_check",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.runs_table",
+      "target": "kneemri.runs.artefact",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.runs_table",
+      "target": "kneemri.runs.run_identity",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.runs_table",
+      "target": "kneemri.runs.run_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.experiments.stale_gap",
       "target": "core.cli",
       "weight": 1
@@ -29924,6 +29954,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.ledger_check.LedgerCheck.named",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.stem",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.ledger_check.LedgerCheck.owns",
       "target": "kneemri.experiments.ledger_check.LedgerCheck.attributed",
       "weight": 1
@@ -30706,6 +30742,90 @@
       "kind": "calls",
       "source": "kneemri.experiments.recipe_pairs.main",
       "target": "kneemri.experiments.recipe_pairs.RecipePairs.table",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.experiments.runs_table.RunsTable",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.names",
+      "target": "kneemri.runs.artefact.Artefact.stem",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.row",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck.named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.row",
+      "target": "kneemri.runs.run_identity.RunIdentity.of",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.runs_table.RunsTable.row",
+      "target": "kneemri.runs.run_record.RunRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.row",
+      "target": "kneemri.runs.run_record.RunRecord.best",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.row",
+      "target": "kneemri.runs.run_record.RunRecord.checkpoint",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.row",
+      "target": "kneemri.runs.run_record.RunRecord.rows",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.row",
+      "target": "kneemri.runs.run_record.RunRecord.run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.write",
+      "target": "kneemri.experiments.runs_table.RunsTable.names",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.RunsTable.write",
+      "target": "kneemri.experiments.runs_table.RunsTable.row",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.runs_table.main",
+      "target": "kneemri.experiments.ledger_check.LedgerCheck",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.experiments.runs_table.main",
+      "target": "kneemri.experiments.runs_table.RunsTable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.runs_table.main",
+      "target": "kneemri.experiments.runs_table.RunsTable.write",
       "weight": 1
     },
     {
@@ -43265,7 +43385,7 @@
       "role": null
     },
     {
-      "descendants": 345,
+      "descendants": 346,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -44337,7 +44457,7 @@
       "role": null
     },
     {
-      "descendants": 29,
+      "descendants": 30,
       "id": "kneemri.experiments",
       "label": "experiments",
       "level": "module",
@@ -44532,6 +44652,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.recipe_pairs",
       "label": "recipe_pairs",
+      "level": "module",
+      "parent": "kneemri.experiments",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.runs_table",
+      "label": "runs_table",
       "level": "module",
       "parent": "kneemri.experiments",
       "role": null
@@ -49782,6 +49910,14 @@
       "label": "RecipePairs",
       "level": "class",
       "parent": "kneemri.experiments.recipe_pairs",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.runs_table.RunsTable",
+      "label": "RunsTable",
+      "level": "class",
+      "parent": "kneemri.experiments.runs_table",
       "role": "primary"
     },
     {
@@ -68258,6 +68394,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.ledger_check.LedgerCheck.named",
+      "label": "named",
+      "level": "method",
+      "parent": "kneemri.experiments.ledger_check.LedgerCheck",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.ledger_check.LedgerCheck.owns",
       "label": "owns",
       "level": "method",
@@ -68838,6 +68982,46 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.recipe_pairs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.runs_table.RunsTable.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.experiments.runs_table.RunsTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.runs_table.RunsTable.names",
+      "label": "names",
+      "level": "method",
+      "parent": "kneemri.experiments.runs_table.RunsTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.runs_table.RunsTable.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.experiments.runs_table.RunsTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.runs_table.RunsTable.write",
+      "label": "write",
+      "level": "method",
+      "parent": "kneemri.experiments.runs_table.RunsTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.runs_table.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.experiments.runs_table",
       "role": null
     },
     {

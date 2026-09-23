@@ -153,6 +153,16 @@ def test_attributed(tmp_path: Path):
     )
 
 
+def test_named(tmp_path: Path):
+    """A name in the record, number or not, against a name nowhere in it."""
+    ledger = tmp_path / "README.md"
+    ledger.write_text("the `warm_calib_dense` arm ran overnight", encoding="utf-8")
+    check = LedgerCheck(ledger)
+
+    assert check.named("warm_calib_dense_s2026"), "the prose spelling of the file's name, seed tail dropped"
+    assert check.named("never_written_s2026") is False
+
+
 def test_owns(tmp_path: Path):
     """Attribution plus the one extra condition: a one-word stem may not be accused of owning a score."""
     ledger = tmp_path / "README.md"

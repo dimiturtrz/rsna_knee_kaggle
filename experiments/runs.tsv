@@ -1,0 +1,525 @@
+name	run_id	git	epochs	best_epoch	best_auc	checkpoint	holdout	ledgered
+_probe420			1	0	0.6525	yes	yes	no
+adapt_null_s2026			4	3	0.8240	yes	yes	yes
+adjacent224_s2026			12	9	0.8462	yes	yes	yes
+aprior_dense_s2026			12	8	0.8557	yes	yes	yes
+aprior_fixed_s2026			12	6	0.8557	yes	yes	yes
+attend224_s2026			12	9	0.8503	yes	yes	yes
+attend_dense_s2026			12	8	0.8569	yes	yes	yes
+attend_true_s2026			12	5	0.8476	yes	yes	yes
+aug_long_s2026			24	9	0.8511	yes	yes	yes
+band140_s2026			12	6	0.8556	yes	yes	yes
+band224_hold_s2026			12	11	0.8516	yes	yes	yes
+band224_s2026			12	6	0.8529	yes	yes	yes
+band224_s2026_run1						yes	yes	yes
+band_deep224_s2026			12	11	0.8446	yes	yes	yes
+band_deep_matched_s2026			12	11	0.8487	yes	yes	yes
+band_dense_drop40_long_s2026			24	16	0.8587	yes	yes	yes
+band_dense_hold_s2026			12	7	0.8573	yes	yes	yes
+band_dense_llrd_s2026			12	10	0.8483	yes	yes	yes
+band_dense_long_s2026			24	6	0.8587	yes	yes	yes
+band_dense_s2026			12	8	0.8578	yes	yes	yes
+band_density_s2026			12	6	0.8540	yes	yes	yes
+band_early_s2026			12	9	0.8418	yes	yes	yes
+band_full_s2026			12	5	0.8427	yes	yes	yes
+band_lpft_head			12	9	0.7614	yes	yes	yes
+band_lpft_s2026			12	6	0.8513	yes	yes	yes
+band_mid_s2026			4	3	0.8204	no	yes	yes
+band_pairmem_s2026			12	6	0.8486	yes	yes	yes
+band_span_hold_s2026			12	7	0.8493	yes	yes	yes
+band_span_s2026			12	6	0.8565	yes	yes	yes
+band_wide_s2026			12	6	0.8553	yes	yes	yes
+base20_fold0						yes	yes	yes
+base224_control_s2026			12	10	0.8451	yes	yes	yes
+base224_drop40_long_s2026			24	17	0.8552	yes	yes	yes
+base224_drop40_long_s2026_run1						yes	yes	no
+base224_s2026			12	9	0.8509	yes	yes	yes
+base224_smoke			1	0	0.5804	no	yes	no
+base_clean_s2026			12	7	0.8570	yes	yes	yes
+base_dense_ff			12			yes	no	yes
+base_dense_s2026			12	8	0.8512	yes	yes	yes
+base_fold0						yes	yes	yes
+base_honest_batch_s2026			12	11	0.8502	yes	yes	yes
+base_labelwise224_20sl_s2026						no	no	yes
+base_labelwise224_dense_drop40_long36_s2026			36	18	0.8645	yes	yes	yes
+base_labelwise224_dense_s2026			12	8	0.8589	yes	yes	yes
+base_labelwise224_s2026			12	8	0.8569	yes	yes	yes
+base_labelwise336_s2026						no	no	no
+base_labelwise_dense336_s2026						no	no	no
+base_s7_fold0						yes	yes	yes
+base_smoke			1	0	0.5884	yes	yes	no
+basinsoup2_c201			8	5	0.8676	yes	yes	yes
+basinsoup2_c202			8	3	0.8676	yes	yes	yes
+basinsoup2_c203			8	3	0.8689	yes	yes	yes
+basinsoup2_k3_s2026						yes	yes	yes
+basinsoup2_k4_s2026						yes	yes	yes
+basinsoup_c101			4	2	0.8704	yes	yes	no
+basinsoup_c102			4	2	0.8688	yes	yes	no
+basinsoup_c103			4	3	0.8679	yes	yes	no
+basinsoup_dmlb_c401			4	3	0.8700	yes	yes	no
+basinsoup_dmlb_c402			4	2	0.8677	yes	yes	no
+basinsoup_dmlb_c403			4	1	0.8698	yes	yes	no
+basinsoup_dmlb_c404			4	1	0.8688	yes	yes	no
+basinsoup_dmlb_c405			4	3	0.8693	yes	yes	no
+basinsoup_dmlb_c406			4	0	0.8690	yes	yes	no
+basinsoup_dmlb_ff			4			yes	no	yes
+basinsoup_dmlb_k3_s2026						yes	yes	yes
+basinsoup_dmlb_k4_s2026						yes	yes	yes
+basinsoup_dmlb_k6_s2026						yes	yes	yes
+basinsoup_dmlb_k7_s2026						yes	yes	yes
+basinsoup_ff_c301			4			yes	no	no
+basinsoup_ff_c302			4			yes	no	no
+basinsoup_ff_c303			4			yes	no	no
+basinsoup_ff_k3_s2026						yes	no	no
+basinsoup_ff_k4_s2026						yes	no	yes
+basinsoup_k3_s2026						yes	yes	yes
+basinsoup_k4_s2026						yes	yes	no
+basinsoup_r2_c501			4	0	0.8695	yes	yes	no
+basinsoup_r2_c502			4	2	0.8703	yes	yes	no
+basinsoup_r2_c503			4	1	0.8703	yes	yes	no
+basinsoup_r2_k3_s2026						yes	yes	no
+basinsoup_r2_k4_s2026						yes	yes	yes
+basinsoup_soft_c701			2	0	0.8689	yes	yes	no
+basinsoup_soft_c702			2	0	0.8696	yes	yes	no
+basinsoup_soft_c703			2	1	0.8672	yes	yes	no
+basinsoup_soft_k3_s2026						yes	yes	yes
+basinsoup_soft_k4_s2026						yes	yes	yes
+blend_base						no	no	no
+blend_calib			12			yes	no	no
+blend_ladder			12			yes	no	no
+blend_through			12			no	no	no
+blend_ws			12			yes	no	no
+blendema224_s2026			12	7	0.8567	yes	yes	yes
+blendemalabel224_s2026			12	7	0.8591	yes	yes	yes
+blendhold_drop40_long_s2026			24	19	0.8595	yes	yes	yes
+blendhold_drop40_s2026			12	11	0.8507	yes	yes	yes
+blendhold_s2026			12	9	0.8575	yes	yes	yes
+blendlabels_s2026			12	9	0.8537	yes	yes	yes
+blendsix_smoke			1			no	no	no
+calib_dense_hold_ff			12			yes	no	yes
+calib_dense_hold_s2026			12	6	0.8634	yes	yes	yes
+calib_dense_s2026			12	6	0.8562	yes	yes	yes
+calib_hold_clean_distill_s2026			12	8	0.8641	yes	yes	yes
+calib_span_df			12			yes	no	yes
+calib_span_ff			12			yes	no	yes
+calib_span_hold_s2026			12	9	0.8565	yes	yes	yes
+calib_span_s2026			12	9	0.8545	yes	yes	yes
+calib_span_s2026_n12b0.1-0.9						yes	yes	yes
+calib_span_s2026_r224						yes	yes	yes
+calib_span_s2026_r280						yes	yes	yes
+calib_span_s2026_r392						yes	yes	yes
+calibrated_targets_s2026			10	6	0.8495	yes	yes	yes
+calibrated_targets_s2026_r224						yes	yes	yes
+calibrated_targets_s2026_r280						yes	yes	yes
+centre_tissue_s2026			8	6	0.8409	yes	yes	yes
+certainty_ramp_s2026			12	8	0.8584	yes	yes	yes
+chaindense_s2026			12	7	0.8628	yes	yes	yes
+chainfour_drop40_long_s2026			24	14	0.8673	yes	yes	yes
+chainfour_drop40_s2026			12	11	0.8589	yes	yes	yes
+chainfour_ff_s2026			12			no	no	yes
+chainfour_s2026			12	7	0.8648	yes	yes	yes
+chainfour_v5blend_s2026			12	7	0.8285	yes	yes	yes
+clean_calib_drop40_long_s2026			24	23	0.8647	yes	yes	yes
+clean_calib_s2026			12	9	0.8649	yes	yes	yes
+clip224_s2026			12	9	0.8439	yes	yes	yes
+clip224_tight_s2026			12	9	0.8488	yes	yes	yes
+cnx_dense_s2026			12	11	0.7927	yes	yes	yes
+cnx_mid_rate_s2026			12	6	0.7993	yes	yes	yes
+cnx_own_recipe_s2026			12	6	0.8186	yes	yes	yes
+cnx_smoke			1	0	0.5459	yes	yes	no
+cnx_top_rate_s2026			4	3	0.7762	no	yes	yes
+cnx_warm_anneal_s2026			6	2	0.8142	yes	yes	yes
+coatnet_hybrid_s2026			12	6	0.8259	yes	yes	yes
+coatnet_hybrid_s2026_voidnorm			1	0	0.7383	no	yes	yes
+conf24_s2026						yes	yes	yes
+conf24_s7						yes	yes	yes
+confident224_s2026			12	6	0.8431	yes	yes	yes
+confident_span_s2026			12	9	0.8449	yes	yes	yes
+contrast_dense_s2026			12	5	0.8547	yes	yes	yes
+contrast_pool_s2026			12	5	0.8515	yes	yes	yes
+cover_labelwise_s2026			12	9	0.8495	yes	yes	yes
+crop160_span_s2026			12	8	0.8564	yes	yes	yes
+crop80_span_s2026			12	6	0.8466	yes	yes	yes
+crop80_tissue_full_s2026			12	6	0.8343	yes	yes	yes
+crop80_tissue_s2026			8	7	0.8345	yes	yes	yes
+ctl_fastbb_s2026			12	11	0.8360	yes	yes	yes
+ctl_maxpool_s2026			12	10	0.8503	yes	yes	yes
+ctl_nocalib_s2026			12	10	0.8508	yes	yes	yes
+ctl_nodrop_s2026			12	10	0.8569	yes	yes	yes
+ctl_nofloor_s2026			12	10	0.8506	yes	yes	yes
+ctl_norank_s2026			12	11	0.8497	yes	yes	yes
+ctl_nowhole_s2026			12	11	0.8211	yes	yes	yes
+ctl_slowbb_s2026			12	10	0.8569	yes	yes	yes
+ctl_stripall_s2026			12	9	0.8367	yes	yes	yes
+decay224_high_s2026			12	8	0.8487	yes	yes	yes
+decay224_low_s2026			12	6	0.8454	yes	yes	yes
+deep24_s2026						yes	yes	yes
+depth24_ff_long36			36			yes	no	yes
+depth_regions_narrow_s2026			12	8	0.8554	yes	yes	yes
+depth_regions_s2026			12	8	0.8549	yes	yes	yes
+depth_regions_span_s2026			9	8	0.8487	yes	yes	yes
+depth_regions_span_s2026_run1			12	9	0.8505	yes	yes	yes
+depth_smoke			1	0	0.5578	yes	yes	no
+depth_smoke_run1						yes	yes	no
+depth_true_s2026			12	6	0.8461	yes	yes	yes
+dinov3_base_lora_s2026			12	10	0.8268	yes	yes	yes
+dinov3_v3small_224_s2026			12	8	0.8057	yes	yes	yes
+dinov3_v3small_s2026			3	2	0.7769	no	no	yes
+dinov3_v3splus_224_lr8e-6_s2026			12	8	0.8012	no	no	no
+disagreed_full_s2026			12	7	0.8471	yes	yes	yes
+disagreed_ramp_s2026			12	7	0.8574	yes	yes	yes
+disagreed_uniform_s2026			12	11	0.8507	yes	yes	yes
+discord_mask_s2026			12	6	0.8148	yes	yes	yes
+dissent_seat_s2026			9	6	0.8509	yes	yes	yes
+distill_pairs_s2026			12	8	0.8594	yes	yes	yes
+distill_stack_clean_s2026			12	11	0.8645	yes	yes	yes
+distill_stack_max_s2026			12	8	0.8634	yes	yes	yes
+dml_a_s2026			8	18	0.8687	yes	yes	yes
+dml_a_s2026_run1						yes	yes	no
+dml_a_s2026_run2						yes	yes	no
+dml_b_ff			24			yes	no	yes
+dml_b_ff_long36			36			yes	no	yes
+dml_b_s2026			8	18	0.8703	yes	yes	yes
+dml_b_s2026_run1						yes	yes	no
+dml_b_s2026_run2						yes	yes	no
+dropstack_dense_s2026			12	11	0.8595	yes	yes	yes
+dropstack_light_s2026			12	10	0.8654	yes	yes	yes
+dropstack_long_s2026			24	12	0.8641	yes	yes	yes
+ema224_s2026			12	7	0.8544	yes	yes	yes
+ema_dense_s2026			12	7	0.8588	yes	yes	yes
+ema_smoke			1	0	0.5943	yes	yes	no
+ema_ws_s2026			12	7	0.8460	yes	yes	yes
+encoder_adapt_gentle_s2026			12	10	0.6875	yes	yes	yes
+encoder_adapt_lower_s2026			12	11	0.7309	yes	yes	yes
+encoder_adapt_s2026			12	11	0.6902	yes	yes	yes
+encoder_adapt_thawed_s2026			12	10	0.7162	yes	yes	yes
+encoder_layer_9_s2026			12	10	0.8230	yes	yes	yes
+erase_own_cells_s2026			12	11	0.8562	yes	yes	no
+erase_own_cells_s2026_run1						yes	yes	no
+errors_dense_s2026			12	6	0.8420	yes	yes	yes
+errors_rank_s2026			12	6	0.8462	yes	yes	yes
+errors_relabel_s2026			12	6	0.8522	yes	yes	yes
+errors_v3small_s2026			12	6	0.8280	yes	yes	yes
+extended_band_s2026			12	9	0.8519	yes	yes	yes
+extended_ws_s2026			12	6	0.8459	yes	yes	yes
+fieldwide_s2026			12	10	0.8668	yes	yes	yes
+final_ws_cf			12			yes	no	yes
+final_ws_df			12			yes	no	yes
+final_ws_e12			12			yes	no	yes
+final_ws_ramp			12			no	no	yes
+finding_calib_dense_ff			12			no	no	yes
+finding_calib_dense_s2026			12	9	0.8600	yes	yes	yes
+focal224_s2026			12	9	0.8487	yes	yes	yes
+focal_dense_s2026			12	9	0.8534	yes	yes	yes
+focal_labelwise224_s2026			12	9	0.8502	yes	yes	no
+focal_pool_s2026			10	6	0.8432	yes	yes	yes
+focal_pool_smoke						no	no	no
+focus_latmen_s2026			1	0	0.4747	no	yes	yes
+focus_mcl_s2026			12	2	0.5332	yes	yes	yes
+foreign_dissent_s2026			12	6	0.8538	yes	yes	yes
+foreign_distill_calib_s2026			12	9	0.8641	yes	yes	yes
+foreign_distill_mix07_s2026			12	8	0.8657	yes	yes	yes
+foreign_distill_s2026			12	9	0.8595	yes	yes	yes
+foreign_labels_dense_s2026			12	6	0.8507	yes	yes	yes
+foreign_recipe_v3small_336_20sl_s2026			12	11	0.8087	yes	yes	yes
+fovjitter160_reflect_s2026			6	5	0.8422	no	yes	yes
+fovjitter160_s2026			12	10	0.8544	yes	yes	yes
+fuse_attend_s2026			12	8	0.8509	yes	yes	yes
+fuse_regions_s2026			12	9	0.8518	yes	yes	yes
+ghosting_s2026			12	10	0.8576	yes	yes	yes
+grade_ladder_cf			12			yes	no	yes
+grade_ladder_ff			12			yes	no	yes
+grade_ladder_ramp						no	no	yes
+grade_ladder_s2026			12	6	0.8565	yes	yes	yes
+grade_ladder_s2026_n12b0.1-0.9						yes	yes	yes
+grade_ladder_s2026_r224						yes	yes	yes
+grade_ladder_s2026_r280						yes	yes	yes
+grade_ladder_s2026_r392						yes	yes	yes
+grand_recipe_s2026						no	no	yes
+half_data_s2026			12	6	0.8344	yes	yes	yes
+headlr224_s2026			12	9	0.8408	yes	yes	yes
+headlr224_slow_s2026			12	9	0.8475	yes	yes	yes
+headlr_floor_s2026			24	17	0.8652	yes	yes	yes
+headlr_ship_ff			24			yes	no	yes
+headlr_ship_ffp			18			yes	no	yes
+headlr_ship_s2026			24	17	0.8702	yes	yes	yes
+hisfluid_hold_s2026			6	3	0.8518	yes	yes	yes
+hold_clean_distill_s2026			12	8	0.8607	yes	yes	yes
+holdannot_s2026			12	7	0.8506	yes	yes	yes
+intensity392_ws_s2026			12	9	0.8459	yes	yes	yes
+labelcut_v3_ema_s2026			8	23	0.8663	yes	yes	no
+labels_v4hybrid_s2026			12	8	0.8524	yes	yes	yes
+labelwise224_s2026			12	9	0.8517	yes	yes	yes
+labelwise_dense_deep12_s2026						no	no	no
+labelwise_dense_deep9_s2026						no	no	no
+labelwise_dense_drop40_long36_s2026			36	17	0.8678	yes	yes	yes
+labelwise_dense_drop40_long_ff			3			no	no	yes
+labelwise_dense_drop40_long_s2026			24	23	0.8672	yes	yes	yes
+labelwise_dense_ff			12			yes	no	yes
+labelwise_dense_s2026			12	7	0.8613	yes	yes	yes
+labelwise_dense_stem_llrd_s2026			24	19	0.8667	yes	yes	yes
+labelwise_dense_stem_s2026			4	3	0.7729	no	yes	yes
+labelwise_depth20_b10_s2026			12	8	0.8607	yes	yes	yes
+labelwise_depth24_drop40_long_ff			24			yes	no	yes
+labelwise_depth24_drop40_long_s2026			24	18	0.8679	yes	yes	yes
+labelwise_depth24_negpull_s2026			24	19	0.8666	yes	yes	yes
+labelwise_depth24_s2026			12	8	0.8617	yes	yes	yes
+labelwise_drop_drop40_long_ff			24			yes	no	yes
+labelwise_drop_drop40_long_s2026			24	18	0.8703	yes	yes	yes
+labelwise_drop_s2026			12	10	0.8649	yes	yes	yes
+labelwise_ext_drop40_long36_s2026						no	no	no
+labelwise_ext_drop40_long_ema_s2026			24	23	0.8687	yes	yes	yes
+labelwise_ext_drop40_long_ff			24			yes	no	yes
+labelwise_ext_drop40_long_noema_ff			24			yes	no	yes
+labelwise_ext_drop40_long_s2026			24	23	0.8672	yes	yes	yes
+labelwise_extended_s2026			12	8	0.8623	yes	yes	yes
+large_labelwise224_dense_s2026			12	6	0.8541	yes	yes	yes
+large_labelwise224_half_s2026			12	8	0.8607	yes	yes	yes
+latent_mask_dense_s2026						no	no	no
+latent_register_deep_s2026			12	9	0.8378	yes	yes	yes
+latent_register_dense_s2026			12	10	0.8385	yes	yes	yes
+lean_weak_columns_s2026			12	11	0.8501	yes	yes	yes
+llrd224_flat_s2026			12	6	0.8440	yes	yes	yes
+llrd224_s2026			12	6	0.8453	yes	yes	yes
+lora_r8_small_336_s2026			4	3	0.8127	no	no	yes
+lora_r8_v3small_224_s2026			12	8	0.8217	yes	yes	yes
+lr1e-4_ws_s2026			12	9	0.8490	yes	yes	yes
+lr2e-4_ws_s2026			12	9	0.7391	yes	yes	yes
+lr4e-5_ws_cf			12			yes	no	yes
+lr4e-5_ws_ff			12			yes	no	yes
+lr4e-5_ws_s2026			12	8	0.8525	yes	yes	yes
+lr4e-5_ws_s2026_n12b0.1-0.9						yes	yes	yes
+lr4e-5_ws_s2026_r224						yes	yes	yes
+lr4e-5_ws_s2026_r280						yes	yes	yes
+lr4e-5_ws_s2026_r392						yes	yes	yes
+lr8e5_ship_s2026			24	18	0.8673	yes	yes	yes
+mae_matched_s2026			4	3	0.6735	yes	yes	yes
+mae_unitfix_s2026			2	1	0.6901	no	yes	yes
+margin_calib_s2026			12	9	0.8235	yes	yes	yes
+margin_seat_ff			12			no	no	yes
+margin_seat_s2026			12	10	0.8525	yes	yes	yes
+margin_smoke			1	0	0.6092	no	yes	no
+medsam_dense_s2026			12	8	0.8137	yes	yes	yes
+member_fold0			3	1	0.7128	yes	yes	yes
+merged3_corpus_s2026			12	7	0.8521	yes	yes	yes
+merged3_oversample_s2026			12	11	0.8416	yes	yes	yes
+merged_blend_cf			12	9	0.8597	yes	yes	yes
+merged_blend_cf_n12b0.1-0.9						yes	yes	yes
+merged_blend_cf_r224						yes	yes	yes
+merged_blend_cf_r280						yes	yes	yes
+merged_blend_cf_r392						yes	yes	yes
+merged_blend_s2026			12	7	0.8589	yes	yes	yes
+merged_corpus_s2026			12	7	0.8545	yes	yes	yes
+merged_dense_cf			12	8	0.8569	yes	yes	yes
+merged_distill_cf			12	8	0.8637	yes	yes	yes
+merged_labelwise_cf			12	9	0.8587	yes	yes	yes
+merged_smoke			1	0	0.5418	yes	yes	no
+merged_span_cf			12	8	0.8618	yes	yes	yes
+merged_span_ff			12			yes	no	yes
+mergedk_corpus_s2026			12	8	0.8490	yes	yes	yes
+mergedk_drop40_long_s2026			24	17	0.8566	yes	yes	yes
+mergedk_drop40_s2026			12	11	0.8530	yes	yes	yes
+mergedk_labelwise_drop40_long_336_s2026			24	12	0.8621	yes	yes	yes
+mixup224_long_s2026			24	12	0.8505	yes	yes	yes
+mixup224_s2026			12	10	0.8496	yes	yes	yes
+mixup224_strong_s2026			12	11	0.8516	yes	yes	yes
+mixup_dense_s2026			12	11	0.8552	yes	yes	yes
+moment_dense_s2026			12	10	0.8516	yes	yes	yes
+moment_wide_s2026			12	8	0.8600	yes	yes	yes
+mricore_corpus_s2026			12	11	0.8390	yes	yes	yes
+mricore_rate_s2026			5	3	0.7811	no	yes	yes
+mrnet_acl_pretrain_s2026						no	no	no
+mrnet_warm_s2026			12	6	0.8487	yes	yes	yes
+native224_long_s2026			24	9	0.8490	yes	yes	yes
+native224_s2026			12	9	0.8502	yes	yes	yes
+nocycle224_long_s2026			24	12	0.8442	yes	yes	yes
+noisy_student_s2026			12	8	0.8549	yes	yes	yes
+normcount224_s2026			12	6	0.8498	yes	yes	yes
+oof_band_fold0_s2026			8	7	0.8522	yes	yes	yes
+oof_band_fold1_s2026			8	6	0.8600	yes	yes	yes
+oof_band_fold2_s2026			8	6	0.8602	yes	yes	no
+oof_band_fold3_s2026			8	7	0.8747	yes	yes	no
+oof_band_fold4_s2026			4	3	0.8537	no	yes	no
+oof_clean_fold1_s2026			8	7	0.8572	yes	yes	yes
+oof_clean_fold2_s2026			8	7	0.8524	yes	yes	no
+oof_clean_fold3_s2026			8	7	0.8607	yes	yes	no
+oof_clean_fold4_s2026			8	7	0.8611	yes	yes	no
+oof_fold0_s2026			8	7	0.8498	yes	yes	yes
+oof_fold1_s2026			8	7	0.8578	yes	yes	yes
+oof_fold2_s2026			8	6	0.8567	yes	yes	no
+oof_fold3_s2026			8	7	0.8740	yes	yes	no
+oof_fold4_s2026			8	7	0.8695	yes	yes	no
+oof_gen2_fold0_s2026			8	7	0.8609	yes	yes	yes
+oof_gen2_fold1_s2026			8	7	0.8707	yes	yes	no
+oof_gen2_fold2_s2026			8	6	0.8733	yes	yes	no
+oof_gen2_fold3_s2026			8	7	0.8814	yes	yes	yes
+oof_gen2_fold4_s2026			8	7	0.8820	yes	yes	no
+oof_reader_fold0_s2026			8	3	0.7998	yes	yes	yes
+oof_reader_fold1_s2026			8	7	0.8095	yes	yes	no
+oof_reader_fold2_s2026			8	4	0.8118	yes	yes	no
+oof_reader_fold3_s2026			8	4	0.8247	yes	yes	no
+oof_reader_fold4_s2026			8	5	0.8188	yes	yes	no
+oof_teacher_s2026			12	11	0.8685	yes	yes	yes
+ortho_dense_s2026			12	8	0.8452	yes	yes	yes
+ortho_fastmri_masked_s2026			12	6	0.8464	yes	yes	yes
+ortho_fastmri_s2026			12	5	0.8475	yes	yes	yes
+ortho_fresh_lowlr_s2026			12	10	0.8248	yes	yes	yes
+ortho_lora_s2026			12	10	0.8349	yes	yes	yes
+ortho_lpft_head			12	11	0.7537	yes	yes	yes
+ortho_lpft_s2026			5	4	0.7937	no	yes	yes
+ortho_pool_read			12	8	0.8464	yes	yes	yes
+ortho_pool_read.killed_batch12						no	no	no
+ortho_slow_trunk			12	11	0.8265	yes	yes	yes
+ortho_stack_s2026			12	6	0.8417	yes	yes	yes
+pair_memory_s2026			4	3	0.8155	yes	yes	yes
+per_label_loss_s2026			12	6	0.8414	yes	yes	yes
+pool_specialise_s2026			12	3	0.8494	yes	yes	yes
+probe224_control_aug_s2026			12	10	0.8528	yes	yes	yes
+probe224_control_s2026			12	10	0.8556	yes	yes	yes
+probe224_grand_noaug_s2026			12	11	0.8386	yes	yes	yes
+probe224_grand_noema_s2026			12	10	0.8478	yes	yes	yes
+probe224_grand_nohard_s2026			12	11	0.8462	yes	yes	yes
+probe224_grand_nomixup_s2026			12	11	0.8492	yes	yes	yes
+probe224_grand_norest_s2026			12	11	0.8497	yes	yes	yes
+probe224_grand_s2026			12	11	0.8445	yes	yes	yes
+probe224_grand_trim_s2026			12	11	0.8494	yes	yes	yes
+quarter_data_s2026			12	9	0.7907	yes	yes	yes
+raddino_dense_s2026			12	7	0.8141	yes	yes	yes
+raddino_normfix_s2026			12	7	0.8155	yes	yes	yes
+radiodino_corpus_s2026			12	8	0.8214	yes	yes	yes
+radiodino_s16_s2026			12	11	0.8108	yes	yes	yes
+radiodino_s8_s2026			12	6	0.7971	yes	yes	yes
+radnet_family_s2026			12	6	0.6716	yes	yes	yes
+radnet_pinned_s2026			12	9	0.7505	yes	yes	yes
+ramp_dense_gate			12	7	0.8579	yes	yes	yes
+rank966_hold_s2026			12	6	0.8517	yes	yes	yes
+raptor_distill_s2026			12	8	0.8613	yes	yes	yes
+raptor_feat_fit_s2026			12	6	0.8334	yes	yes	yes
+raptor_feat_pre_s2026			4	3	0.8201	yes	yes	yes
+reader_through_s2026			1	0	0.7137	no	yes	yes
+recal_calib_s2026			12	8	0.8620	yes	yes	yes
+recal_dense_s2026			12	6	0.8610	yes	yes	yes
+recal_holdannot_s2026			12	8	0.8964	yes	yes	yes
+recal_labelwise_s2026			2	1	0.8026	no	yes	yes
+recal_through_s2026			1	0	0.7464	no	yes	yes
+regions224_s2026			12	8	0.8476	yes	yes	yes
+relabel_hold_s2026			12	8	0.8515	yes	yes	yes
+res392_lr8e-6_ws_s2026			10	6	0.8459	yes	yes	yes
+res392_ws_s2026			12	6	0.8523	yes	yes	yes
+resnet50d_lr_s2026			12	7	0.8196	yes	yes	yes
+resnet50d_short_s2026			12	6	0.8393	yes	yes	yes
+resnet_224_ext_s2026			12	11	0.8568	yes	yes	yes
+resnet_224_long_s2026			48	12	0.8460	yes	yes	yes
+resnet_224_short_s2026			12	8	0.8527	yes	yes	yes
+resnet_stack_224_s2026			12	9	0.8459	yes	yes	yes
+roi_labelwise_drop40_long_s2026			24	17	0.8648	yes	yes	yes
+roinative_labelwise_drop40_long_s2026			24	17	0.8641	yes	yes	yes
+sam_dense_s2026			7	6	0.8213	no	yes	yes
+sam_r01_s2026			12	10	0.8655	yes	yes	no
+schedule_8_s2026			8	7	0.8429	yes	yes	yes
+scratch_geom_probe			1	0	0.6459	no	no	no
+seat_clean_distill_s2026			12	9	0.8634	yes	yes	yes
+seat_distill_clean_s2026			12	8	0.8581	yes	yes	yes
+seat_distill_gen2_s2026			12	8	0.8640	yes	yes	yes
+seat_distill_lr4e5_s2026			12	11	0.8633	yes	yes	yes
+seat_oof5_distill_s2026			12			yes	no	yes
+severity_drop40_long_s2026			24	18	0.8538	yes	yes	yes
+severity_weight_s2026			12	10	0.8530	yes	yes	yes
+side_dense_s2026			12	10	0.7937	yes	yes	yes
+sided224_s2026			12	5	0.8512	yes	yes	yes
+sided_pool_s2026			12	9	0.8561	yes	yes	yes
+sliceattn_s2026			12	6	0.8473	yes	yes	yes
+slicecover36_s2026			7	6	0.8255	no	yes	yes
+slices16_ws_s2026			9	6	0.8411	yes	yes	yes
+slot_dropout_hi_s2026			12	11	0.8551	yes	yes	yes
+slot_dropout_max_s2026			12	11	0.8546	yes	yes	yes
+slot_dropout_s2026			12	9	0.8592	yes	yes	yes
+slotmean_s2026			12	6	0.8406	yes	yes	yes
+small_accum_s2026			12	8	0.8579	yes	yes	yes
+small_batch6_ff			12			yes	no	yes
+small_batch6_s2026			12	8	0.8598	yes	yes	yes
+small_feat_fit_s2026			12	8	0.8571	yes	yes	yes
+small_feat_pre_s2026			4	3	0.7939	yes	yes	yes
+smoke_distill						no	no	no
+smoke_final_fit			1			no	no	no
+smoke_fovjitter160			1	0	0.5350	no	yes	no
+smoke_loop			1	0	0.5215	yes	yes	no
+smoke_v3base			1	0	0.6562	yes	yes	no
+smoke_vjepa						no	yes	no
+solobase_ff						yes	no	yes
+solobase_hold						yes	yes	yes
+soup336_k2_s2026						yes	yes	no
+soup336_k3_s2026						yes	yes	no
+soup336_k5_s2026						yes	yes	no
+soup336_k8_s2026						yes	yes	no
+soup336_trunk3_s2026						yes	yes	no
+soup_anneal2_s2026						yes	yes	yes
+soup_siblings_s2026						yes	yes	yes
+soup_top10_s2026						yes	yes	yes
+soup_top20_s2026						yes	yes	yes
+soup_top5_s2026						yes	yes	yes
+stack224_s2026			12	9	0.8476	yes	yes	yes
+stack_increments_base_s2026			12	9	0.8635	yes	yes	yes
+stack_increments_drop40_long_s2026			24	16	0.8650	yes	yes	no
+stack_increments_ff			12			yes	no	yes
+stack_increments_fx_s2026			5	4	0.8489	no	yes	yes
+stack_increments_fx_s2026_run1						yes	yes	yes
+stack_increments_s2026			12	9	0.8642	yes	yes	yes
+stackfit_s2026			12	7	0.8631	yes	yes	yes
+swin_calib_dense_s2026			12	6	0.8224	yes	yes	yes
+swin_distill_fit_s2026			12	6	0.8255	yes	yes	yes
+swin_distill_pre_s2026			4	3	0.8177	yes	yes	yes
+swin_supervised_ff						no	no	yes
+swin_supervised_s2026			12	6	0.8331	yes	yes	yes
+swin_wholetop_s2026			12	6	0.8274	yes	yes	yes
+through224_s2026			12	8	0.8505	yes	yes	yes
+through_dense_cf			12			yes	no	yes
+through_dense_ff			12			yes	no	yes
+through_dense_ramp			12			no	no	yes
+through_dense_s2026			12	8	0.8558	yes	yes	yes
+through_dense_s2026_n12b0.1-0.9						yes	yes	yes
+through_dense_s2026_r224						yes	yes	yes
+through_dense_s2026_r280						yes	yes	yes
+through_dense_s2026_r392						yes	yes	yes
+throughput_bf16			1	0	0.7589	no	no	yes
+throughput_ckpt_off			1	0	0.7601	no	no	yes
+throughput_ckpt_on			1	0	0.7612	no	no	yes
+throughput_compiled			1	0	0.7606	no	no	yes
+throughput_plain			1	0	0.7600	no	no	yes
+throughput_unfreeze4			1	0	0.7539	no	no	yes
+tissue224_s2026			12	6	0.8491	yes	yes	yes
+transduce_dmlb_c407			4	3	0.8691	yes	yes	no
+transduce_dmlb_c408			4	3	0.8701	yes	yes	no
+transduce_dmlb_c409			4	1	0.8703	yes	yes	no
+transduce_dmlb_c410						no	no	no
+unfreeze4_s2026			12	6	0.8320	yes	yes	yes
+unfreeze_deep_s2026			12	9	0.8585	yes	yes	yes
+unread_dense_s2026			12	6	0.8577	yes	yes	yes
+v2_corrected_s2026			12	6	0.8392	yes	yes	yes
+v2delonly_span_s2026			12	6	0.8417	yes	yes	yes
+v3_calib_ff			4			no	no	yes
+v3base_band_s2026						no	no	yes
+v3base_dense_s2026			12	6	0.8455	yes	yes	yes
+v3large_dense_s2026			12	6	0.8258	yes	yes	yes
+v3large_stack_s2026			12	9	0.8277	yes	yes	yes
+v3lora_smoke			1	0	0.5269	yes	yes	no
+v3small_control_s2026			12	6	0.8371	yes	yes	yes
+v5blend_span_s2026			12	5	0.8113	yes	yes	yes
+v6tears_span_s2026			12	6	0.8116	yes	yes	yes
+v7nontear_span_s2026			12	6	0.8160	yes	yes	yes
+v8named_span_s2026			12	8	0.8468	yes	yes	yes
+vit_in21k_s2026			5	4	0.7847	no	yes	yes
+vjepa_cold_s2026			12	9	0.7499	yes	yes	yes
+vjepa_member_s2026			10	9	0.8343	no	yes	yes
+vjepa_warm_s2026			6	3	0.8337	yes	yes	yes
+warm224_brief_s2026			12	9	0.8498	yes	yes	yes
+warm224_long_s2026			12	9	0.8512	yes	yes	yes
+warm_calib_dense_s2026			12	6	0.8562	yes	yes	yes
+warm_calib_lowlr_drop40_long_s2026			24	8	0.8641	yes	yes	yes
+warm_calib_lowlr_s2026			12	4	0.8577	yes	yes	yes
+weakdraw_flat_s2026			12	9	0.8491	yes	yes	yes
+weakdraw_frx_s2026			12	7	0.8500	yes	yes	yes
+wholestack_fold1			12	6	0.8505	no	no	yes
+wholestack_fold2			6	5	0.8518	no	no	yes
+wholestack_s2026			12	6	0.8457	no	no	yes
+wsfold0_e6						yes	yes	yes
