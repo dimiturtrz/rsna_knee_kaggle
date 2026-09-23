@@ -250,6 +250,19 @@ def test_of(tmp_path: Path):
     assert stamped is not None
     assert stamped.options["whole_stack"] == "True", "the run's flags, as the recipe stores them"
     assert stamped.kept_epoch == 6
+    assert stamped.run_id is None, "a record built with no run begun stamps no id"
+
+
+def test_of_reads_the_run_id(tmp_path: Path):
+    """The id minted at the start travels in the checkpoint, so a member names its run without its record."""
+    record = replace(_record(), run={"id": "20260923T072400Z-0a1b2c3d", "git": "abc", "parents": {}})
+    checkpoint = tmp_path / "arm.pt"
+    torch.save(record.payload({"w": torch.zeros(1)}, holdout=0.83, epoch=6), checkpoint)
+
+    stamped = StampedRun.of(checkpoint)
+
+    assert stamped is not None
+    assert stamped.run_id == "20260923T072400Z-0a1b2c3d"
 
 
 def test_of_refuses_to_derive_a_kept_epoch_a_checkpoint_never_wrote(tmp_path: Path):

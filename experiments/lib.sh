@@ -429,6 +429,11 @@ run_snapshot() {
   rm -rf "$ARM_SRC"; mkdir -p "$ARM_SRC"
   cp -r "$REPO/kneemri" "$REPO/core" "$ARM_SRC/"
   cp "$REPO/paths.yaml" "$ARM_SRC/"
+  # The snapshot has no .git, so the commit a run's identity records is handed over here; a tree with
+  # uncommitted package edits says so, because the sha alone would name code the arm did not run.
+  KNEEMRI_GIT_SHA="$(git -C "$REPO" rev-parse HEAD 2>/dev/null || echo unknown)"
+  git -C "$REPO" diff --quiet HEAD -- kneemri core 2>/dev/null || KNEEMRI_GIT_SHA="$KNEEMRI_GIT_SHA+dirty"
+  export KNEEMRI_GIT_SHA
   # A `--config experiments/recipes/<name>.toml` resolves against the working directory, which is this
   # one, and the recipe is frozen with the package for the same reason the package is.
   if [ -d "$REPO/experiments/recipes" ]; then

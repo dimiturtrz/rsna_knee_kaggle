@@ -19,6 +19,7 @@ from core.paths import DataRoot
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign
 from kneemri.runs.member_record import MemberRecord
+from kneemri.runs.run_identity import RunIdentity
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.fitting import Fitting, Fold, RunPlan
 from kneemri.training.init_scope import InitScope
@@ -146,8 +147,15 @@ def main() -> None:
         raise ValueError(message)
 
     destination = arguments.run.out or (root.models() / f"member_fold{arguments.run.fold}.pt")
+    identity = RunIdentity.begun(arguments.stamp.recipe, destination, resuming=arguments.run.resume)
+    logger.info("run %s at %s", identity.id, identity.git)
     record = MemberRecord(
-        arguments.stamp, encoder, model, device, [slot.name for slot in SCHEMES[arguments.data.scheme]]
+        arguments.stamp,
+        encoder,
+        model,
+        device,
+        [slot.name for slot in SCHEMES[arguments.data.scheme]],
+        run=identity.stamp(),
     )
     plan = RunPlan.of(arguments, destination)
     kept = Fitting(trainer, record, plan).run(

@@ -7682,6 +7682,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.runs.run_identity",
+      "target": "kneemri.runs.run_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.runs.run_metrics",
       "target": "kneemri.runs.artefact",
       "weight": 1
@@ -8722,6 +8728,12 @@
       "kind": "import",
       "source": "kneemri.training.train",
       "target": "kneemri.runs.member_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.train",
+      "target": "kneemri.runs.run_identity",
       "weight": 1
     },
     {
@@ -38228,6 +38240,36 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.runs.run_identity.RunIdentity",
+      "target": "kneemri.runs.run_identity.RunIdentity",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.runs.run_identity.RunIdentity.begun",
+      "target": "kneemri.runs.run_record.RunRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_identity.RunIdentity.begun",
+      "target": "kneemri.runs.run_record.RunRecord.run",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.runs.run_identity.RunIdentity.of",
+      "target": "kneemri.runs.run_record.RunRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_identity.RunIdentity.of",
+      "target": "kneemri.runs.run_record.RunRecord.run",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.runs.run_metrics.RunMetrics",
       "target": "kneemri.runs.run_record.EpochRow",
       "weight": 1
@@ -41433,6 +41475,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.train.main",
+      "target": "kneemri.runs.run_identity.RunIdentity.begun",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.train.main",
       "target": "kneemri.training.config_tree.TrainConfig.parse",
       "weight": 1
     },
@@ -42773,7 +42821,7 @@
       "role": null
     },
     {
-      "descendants": 339,
+      "descendants": 340,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -44965,7 +45013,7 @@
       "role": null
     },
     {
-      "descendants": 8,
+      "descendants": 9,
       "id": "kneemri.runs",
       "label": "runs",
       "level": "module",
@@ -45016,6 +45064,14 @@
       "descendants": 0,
       "id": "kneemri.runs.recorded_run",
       "label": "recorded_run",
+      "level": "module",
+      "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_identity",
+      "label": "run_identity",
       "level": "module",
       "parent": "kneemri.runs",
       "role": null
@@ -50890,6 +50946,14 @@
       "label": "RecordedRun",
       "level": "class",
       "parent": "kneemri.runs.recorded_run",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_identity.RunIdentity",
+      "label": "RunIdentity",
+      "level": "class",
+      "parent": "kneemri.runs.run_identity",
       "role": "satellite"
     },
     {
@@ -75042,6 +75106,38 @@
       "label": "of",
       "level": "method",
       "parent": "kneemri.runs.recorded_run.RecordedRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_identity.RunIdentity.begun",
+      "label": "begun",
+      "level": "method",
+      "parent": "kneemri.runs.run_identity.RunIdentity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_identity.RunIdentity.commit",
+      "label": "commit",
+      "level": "method",
+      "parent": "kneemri.runs.run_identity.RunIdentity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_identity.RunIdentity.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.runs.run_identity.RunIdentity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_identity.RunIdentity.stamp",
+      "label": "stamp",
+      "level": "method",
+      "parent": "kneemri.runs.run_identity.RunIdentity",
       "role": null
     },
     {

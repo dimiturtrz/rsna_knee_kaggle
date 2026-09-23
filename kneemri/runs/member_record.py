@@ -291,6 +291,8 @@ class MemberRecord:
     model: StudyModel
     device: torch.device
     slot_names: list[str]
+    run: dict[str, object] | None = None
+    """`RunIdentity.stamp` — which run these weights came from; None where no run was begun."""
 
     @property
     def read_size(self) -> int:
@@ -378,6 +380,7 @@ class MemberRecord:
             # refuses to unpickle a Path, so saving the options raw would make the checkpoint
             # unloadable by our own code.
             "options": self.recipe,
+            "run": self.run,
             "targets": list(TARGETS),
             "slots": list(self.slot_names),
             "config": {
@@ -513,6 +516,9 @@ class StampedRun:
     its LAST epoch — on all three pre-`epoch` checkpoints checked it equals `options.epochs`, the
     length the run was asked for, which under patience is a different epoch entirely."""
 
+    run_id: str | None = None
+    """The id `RunIdentity` minted for the run, None for a checkpoint written before runs had one."""
+
     @classmethod
     def of(cls, checkpoint: Path) -> "StampedRun | None":
         """The stamp, or None for a checkpoint written before runs recorded one."""
@@ -523,8 +529,10 @@ class StampedRun:
         if not options:
             return None
         kept = saved.get("epoch")
+        run = saved.get("run") or {}
         return cls(
             options={name: str(value) for name, value in options.items()},
             config={name: str(value) for name, value in (saved.get("config") or {}).items()},
             kept_epoch=None if kept is None else int(kept),
+            run_id=str(run["id"]) if "id" in run else None,
         )
