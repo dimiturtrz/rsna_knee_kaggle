@@ -17883,3 +17883,45 @@ under the pinned 0.946 champion, and reachable from here only by something that 
 
 One correction this reading forces: `basinsoup_dmlb_k4_s2026`'s 0.9092 is quoted in `comp/members3.roster`
 as "the highest fold-0 number this project owns". It no longer is.
+
+## The schedule step pays LESS with width, and the "best solo" anchor was 0.0048 low — 2026-09-23T00:40Z
+
+Card: ~1.7 h (`base_labelwise224_dense_drop40_long36`, 36 epochs at 224/12sl, ~108 s/epoch warm, not
+the 171 s I priced). Zero decode, zero slots. Priced with `ledger75 --holdouts
+D:/models/rsna_knee_abnormality`, population eb3ba199, 909 studies.
+
+| member | LEDGER | LEDGER75 | move | epoch |
+|---|---|---|---|---|
+| `dml_b_s2026` | 0.8703 | **0.9078** | +0.0375 | 18 |
+| `labelwise_dense_drop40_long36_s2026` (small, 336/20sl) | 0.8678 | 0.9030 | +0.0352 | 17 |
+| `base_labelwise224_dense_drop40_long36_s2026` | 0.8645 | **0.8996** | +0.0351 | 18 |
+| `base_labelwise224_dense_s2026` (control) | 0.8589 | 0.8950 | +0.0361 | 8 |
+
+**The step is +0.0046, inside the 0.0062 paired floor — band 2 of its own pre-registration.** Directional.
+Keep nothing, compose nothing. `convergence_check` does not list the run, so 0.8996 is a real score and
+not a truncation floor; throughput ran 1636-2638 img/s against the control's 1642, so the 100% utilisation
+was compute and not PCIe paging.
+
+**The cross-arm read is the actual finding.** The identical two flags — `--epochs 36 --slot-dropout 0.40`
+— bought **+0.0066** on the small trunk (`labelwise_dense` 0.8964 → `labelwise_dense_drop40_long36`
+0.9030) and **+0.0046** on base. That is the transfer question this arm was pre-registered to answer, and
+the answer is that the schedule step pays LESS as the trunk widens, not more. The mechanism argued for the
+opposite (a wider trunk has more capacity to spend memorising 909 studies, so a stronger regulariser
+should pay more), so the argument is refuted in its own direction rather than merely unconfirmed.
+
+**AND THE ANCHOR THIS ENTRY WAS ALMOST WRITTEN AGAINST IS WRONG.** Through the whole 336 OOM sequence and
+into the bands of two arms I quoted `labelwise_dense_drop40_long36` 0.9030 as "the best solo the project
+owns". It is not. `dml_b_s2026` reads **0.9078** on the same ruler and the same 909 studies, +0.0048 —
+most of a paired floor — and it was sitting in this file the whole time (README:17763, as the PARENT of
+the souping rounds, which is why it read as a soup ingredient rather than as a member). A weight soup is
+a single averaged checkpoint, so `basinsoup_dmlb_k4` **0.9092** is a solo deliverable too, and it is the
+best number this project has ever put on one file. Neither has a holdout npz that `ledger75` can re-price
+for the soup, so the 0.9092 ledger row is its only record — that is a gap worth closing before it is
+shipped. The base trunk at an instrument corner is therefore **0.0082 behind the shelf**, not 0.0034.
+
+**What it changes.** The capacity axis at 224/12sl is still the one that fits (seven 336 OOMs, cause
+identified as allocator fragmentation, `docs/AXES.md`), but it is chasing a target 0.0082 away, not one
+inside the floor. `large_labelwise224_dense` (knee-jzho6) is the rung above base at that corner, launched
+00:35Z, and it fits: 22194 MiB, 97% util, 759 img/s warm against the control's 1642 — 2.2x, so ~237
+s/epoch and ~47 min for 12, against the ~1.1 h priced. The fragmentation that closed 336 does not appear
+at 224.

@@ -51,9 +51,14 @@
 # rather than modelling further.
 #
 # BANDS, pre-registered, ledger75, against base_labelwise224_dense 0.8950.
-#   * >= 0.9012  the rung pays, and at an instrument corner it is already level with the best solo the
-#                project owns from a 336/20sl recipe. The next arm is this one at
-#                `--epochs 36 --slot-dropout 0.40` and that is the solo deliverable.
+#   * >= 0.9012  the rung pays. CORRECTION, made while this arm was running: the band originally read
+#                "already level with the best solo the project owns", anchored on
+#                `labelwise_dense_drop40_long36` 0.9030. That is NOT the best solo. `dml_b_s2026` reads
+#                **0.9078** ledger75 @ e18 on the same 909-study population, and a weight SOUP is a single
+#                averaged checkpoint — so `basinsoup_dmlb_k4` 0.9092 (README:17763) is a solo too. The
+#                anchor was 0.0048 low, most of a paired floor. Clearing 0.9012 is the one-variable
+#                capacity verdict and nothing more; the deliverable still has to reach 0.9078+. The next
+#                arm is this one at `--epochs 36 --slot-dropout 0.40`.
 #   * 0.8950-0.9012  directional. Keep nothing, compose nothing. Read the epoch of the peak: still
 #                improving at 12 means the budget bound it and the 36-epoch version is the re-test;
 #                an early peak means 909 studies will not support 304M parameters and the capacity axis
