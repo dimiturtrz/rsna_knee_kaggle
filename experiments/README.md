@@ -17961,3 +17961,51 @@ still holding 3.83 GiB free of 31.84 when a 916 MiB request failed. `card_check`
 minus 2.5 minus driver. Relaunched 02:22Z at `--vram-gb 28`, which covers the ~25 GiB the six extra
 trainable 1024-wide blocks demand and still leaves ~1.3 GB of slack. A second OOM at 28 would make
 224/12sl machine-closed for a wide trunk too, and that is a real verdict rather than a retry.
+
+## The capacity axis closes FLAT once the adapted fraction is matched — 2026-09-23T04:20Z
+
+`large_labelwise224_half` (DINOv2-large, `--unfreeze-last 12` = half of 24 blocks, the fraction the base
+control gets from its inherited 6 of 12) reads **0.8936 ledger75 @ e8** against `base_labelwise224_dense`
+**0.8950**. That is **-0.0014**, inside the 0.0062 paired floor, for **3.1x the parameters** (304M against
+86.6M) and **3.1x the wall-clock** (534 against 170 s/epoch). **The trunk is not what is missing.**
+
+**A RULER INVERSION decided this, and the axis may never be read on midpoint.** Midpoint says large WON:
+peak e8 **0.8607** against base's e8 **0.8589**. ledger75 says large LOST. Same checkpoints, same
+population, opposite verdict.
+
+**The confound was real and is now proven removed.** `large_labelwise224_dense` inherited
+`--unfreeze-last 6`, a constant fitted on a 12-block trunk, which adapts a QUARTER of a 24-block one. It
+scored **0.8888 @ e6**, -0.0062 on the control. The evidence that the matched-fraction arm is a clean
+WIDTH test is its train loss: **0.6856 at e5 against the base control's 0.6824**, essentially identical,
+where the quarter-adapted arm read **0.7015**. The adapted fraction was what slowed it, exactly as its
+header predicted before it finished.
+
+**The quarter-adapted arm was neither a capacity ceiling nor pure under-adaptation.** At its holdout peak
+(e6) train loss 0.6610 sat ABOVE base's 0.5663 final, but by e11 it drove train loss to **0.5213, BELOW
+base**, while the holdout sat flat from e6 (0.8541, 0.8499, 0.8533, 0.8501, 0.8488, 0.8489). It fits
+harder than base eventually and still does not generalise.
+
+**The 26 GB OOM was the CAP, not fragmentation**, and `card_check` found the missing headroom: LibreOffice
+`soffice.exe` pid 41440 holds 2515 MiB of the card by arrangement. PyTorch held 21.94 GiB allocated under
+a 26.00 GiB ceiling with **3.83 GiB still free on the device** when a 916 MiB request failed. 29 GB would
+have left the driver 0.3 GB; **28 GB** is the value that runs (measured 528 img/s). Peak was 20.15 GB
+reserved / 17.05 GB allocated — **this corner does not fragment**, unlike 336.
+
+## The basin soup is SATURATED 0.0002 under the bar it was built to clear — 2026-09-23T04:20Z
+
+`basinsoup_dmlb` against the **fold-0 ledger75 >= 0.9098** bar its own header sets (knee-xjxdn):
+k3 **0.9088** -> k4 **0.9092** -> k6 **0.9095** -> k7 **0.9096**. Increments +0.0004, +0.0003 over two
+children, **+0.0001**. It tops at 0.9096 and does not reach the bar.
+
+**K=4 INCLUDES THE PARENT, NOT A FOURTH CHILD** — k3 is three children, k4 is three children plus
+`dml_b_s2026`. Any "+0.0004 per child" extrapolation off k3->k4 is invalid, and adding children is priced
+by the k4->k7 slope (+0.0004 over three), not by it.
+
+**And the fold-0 advantage does not transfer.** The dmlb family owns the better fold-0 number (0.9096) and
+the worse board number: `dmlbffsoup_v1` **0.940** against `basinsoupff_v1` **0.946**, whose fold-0
+analogue `basinsoup_k3` is only 0.9089. Offline->board does not carry across these two families, so the
+shippable line is the basinsoup family and raising the dmlb fold-0 number further buys nothing.
+
+**A SOLO ALREADY TIES THE CHAMPION.** `basinsoupff_v1` — members: **1**, `basinsoup_ff_k4_s2026` — scores
+board **0.946**, level with the eight-seat `tripleseat_v2` pinned in `comp/champion.json`. The
+single-checkpoint deliverable is at parity; beating it is what is missing.

@@ -35,10 +35,25 @@
 # more planes is more for it to attend over rather than more to average away, which is why this is worth
 # reading on this head and was not on a `max` one.
 #
+# WHAT THIS ARM IS NOT, written after its first attempt died. It is NOT a one-variable depth step, and
+# it cannot be one on this machine. The only 20-slice 224 array on disk is
+# `images_224px_20sl_0.1-0.9band_extended.npy` (37.1 GB, built 2026-09-19), which is extended-scheme AND
+# 0.1-0.9 band. Against the matched control `base_labelwise224` (canonical, 0.2-0.8, 12 slices) this arm
+# therefore moves THREE flags. They are not three knobs: extended slots, the 0.1-0.9 band and 20 slices
+# are together the DATA CORNER that `labelwise_ext_drop40_long` and the whole shipping family run at 336.
+# So the question this arm can honestly answer is whether that corner beats the dense 224 recipe at the
+# instrument corner — a corner test, not a depth test. A depth reading would need a matched
+# 224px/12sl/0.1-0.9/extended control, which is a decode nobody has paid.
+#
+# THE FIRST ATTEMPT DIED ON THE SCHEME, NOT ON A RESULT. 2026-09-23T00:48Z it raised
+# `FileNotFoundError: images_224px_20sl_0.1-0.9band.npy` because its stamp read `"scheme": "canonical"`
+# while the array on disk is `_extended`. `--scheme extended` is the whole fix, and extended is the right
+# scheme independently: the 0.8950 dense control's family and every shipping member run it.
+#
 # PRICE, out loud. `base_labelwise224` ran 171 s/epoch at 12 slices; 20 slices puts this near 285 s, so
-# ~1 h of card for 12 epochs. Zero submission slots, control free. Whether the 224px/20sl/0.2-0.8 array
-# is already decoded is what `arm_check` answers; if it is not, the decode is the arm's real cost and the
-# price above is wrong. P(clears 0.8961) ~ 0.35. P(clears the 1.5% bar) ~ 0.10.
+# ~1.0 h of card for 12 epochs. ZERO DECODE — the array is on disk, which is what makes this the best
+# ratio available with the capacity axis closed and the soup saturated. Zero submission slots, control
+# free. P(clears 0.8961) ~ 0.35. P(clears the 1.5% bar) ~ 0.08.
 #
 # BANDS, pre-registered, ledger75, against base_labelwise224 0.8899.
 #   * >= 0.8961  depth sampling carries the gap under labelwise where it read +0.0001 under max, and the shipping family's lead over the 224 corner is
@@ -53,11 +68,14 @@
 # moves and those do not, the delta is not this mechanism. Say so.
 #
 # HARNESS CHECK. The printed recipe must name "variant": "base" AND "slices": "20" AND
-# "slice_pooling": "labelwise" AND "image_size": "224".
+# "slice_pooling": "labelwise" AND "image_size": "224" AND "scheme": "extended". If "scheme" reads
+# "canonical" this is the run that already died and the card is being spent on a FileNotFoundError.
 #
 # control  base_labelwise224_s2026 = 0.8899 ledger75 @ epoch 8, 909 studies. No control run is owed.
 #
-# deliberate: --slices 20 --band-low 0.1 --band-high 0.9 (the arm's thesis, and the array that exists)
+# deliberate: --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended — one corner, three flags,
+#             moved together because the array that exists is the shipping family's corner and no
+#             single-flag 224 array was ever decoded. Read the verdict as a corner verdict.
 # deliberate: --vram-gb 24 — named rather than derived. base measured 12.99 GB allocated at 224/12sl;
 #             activation memory is linear in slices, so 20 slices predicts ~21.6. 24 is that plus slack,
 #             and unlike the 336 attempt it is a scaling WITHIN the resolution the ratio was measured at.
@@ -68,6 +86,6 @@ require "$LABELS"
 
 run_train base_labelwise224_20sl \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended \
   --image-size 224 --variant base --vram-gb 24 \
   --labels "$LABELS" --out "$MODELS/base_labelwise224_20sl_s2026.pt"
