@@ -80,7 +80,8 @@ class EpochRow(TypedDict):
     weights still moving — so it is a fit-side trend to read against `auc`, never a number to compare with
     it. `grad_norm_*` are the pre-clip gradient norms over the epoch's optimiser steps, `nonfinite_steps`
     how many were not finite, `lr` the rate per parameter group at the epoch's last step, and `drawn_*`
-    what the sampler drew: rows, distinct studies, and positives per finding. All `NotRequired` for the
+    what the sampler drew: rows, distinct studies, and positives per finding. `fit_seconds` is the part of
+    `seconds` spent fitting rather than scoring the holdout. All `NotRequired` for the
     same reason as the rest.
     """
 
@@ -92,6 +93,7 @@ class EpochRow(TypedDict):
     vram_peak_gb: NotRequired[float]
     vram_alloc_gb: NotRequired[float]
     started: NotRequired[int]
+    fit_seconds: NotRequired[int]
     ece: NotRequired[float]
     loss_q25: NotRequired[float]
     loss_q50: NotRequired[float]

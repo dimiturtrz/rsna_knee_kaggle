@@ -17,6 +17,8 @@ independent axes. This bounds the DISTANCE one update may travel; decay bounds w
 from dataclasses import dataclass
 
 import torch
+from jaxtyping import Float
+from torch import Tensor
 
 UNCLIPPED = 0.0
 """No ceiling at all — the unbounded step every number in the ledger was measured under, and therefore
@@ -37,8 +39,11 @@ class GradientClip:
 
     max_norm: float = UNCLIPPED
 
-    def applied(self, model: torch.nn.Module, optimiser: torch.optim.Optimizer, scaler: torch.amp.GradScaler) -> None:
-        """Clip this step's gradients in place, immediately before the optimiser steps.
+    def applied(
+        self, model: torch.nn.Module, optimiser: torch.optim.Optimizer, scaler: torch.amp.GradScaler
+    ) -> Float[Tensor, ""]:
+        """Clip this step's gradients in place, immediately before the optimiser steps, and return the
+        norm they had BEFORE clipping.
 
         THE SCALER IS UNSCALED FIRST AND IT MUST BE. Under fp16 the loss is multiplied by a scale factor
         before the backward pass, so the gradients this sees are that many times too large and a norm
@@ -47,8 +52,14 @@ class GradientClip:
         adapts. `GradScaler.unscale_` returns immediately when the scaler is disabled, which is the bf16
         default here, so the call is correct under both precisions and costs nothing under one of them.
         `scaler.step` skips its own unscaling once this has happened, so the step is unchanged.
+
+        The norm is measured ALWAYS, clipped or not, because it is what the run record keeps per step: a
+        run whose steps grew is otherwise indistinguishable from one whose data got harder. It stays on
+        the device; the reader syncs once per epoch.
         """
-        if not self.max_norm:
-            return
         scaler.unscale_(optimiser)
-        torch.nn.utils.clip_grad_norm_(model.parameters(), self.max_norm)
+        parameters = [parameter for parameter in model.parameters() if parameter.grad is not None]
+        norm = torch.nn.utils.get_total_norm([parameter.grad for parameter in parameters if parameter.grad is not None])
+        if self.max_norm:
+            torch.nn.utils.clip_grads_with_norm_(parameters, self.max_norm, norm)
+        return norm

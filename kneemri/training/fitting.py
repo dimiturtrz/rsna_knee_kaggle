@@ -32,12 +32,12 @@ from numpy.typing import NDArray
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.wakelock import Wakelock
-from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
-from kneemri.runs.run_metrics import RunMetrics
-from kneemri.runs.run_record import EpochRow
+from kneemri.runs.run_metrics import HeldOut, RunMetrics
 from kneemri.training.config_tree import TrainConfig
+from kneemri.training.epoch_probes import PROBES, EpochReading
 from kneemri.training.patience import Patience
 from kneemri.training.resume import ResumeState
 from kneemri.training.trainer import Trainer
@@ -47,7 +47,6 @@ logger = logging.getLogger(__name__)
 NO_HOLDOUT = float("nan")
 """What a run with nothing held back may report: not a number, because it cannot measure one."""
 
-ECE_BINS = 15
 """How many equal-width bins over [0, 1] an epoch's calibration error is read over.
 
 Fifteen is the conventional count — Guo et al.'s and every replication's since — and nothing here has
@@ -152,31 +151,6 @@ class Fitting:
         self.generator = np.random.default_rng(plan.seed)
         self.patience = Patience(plan.patience, plan.patience_from)
 
-    @staticmethod
-    def _calibration_error(predicted: NDArray[np.float64], truth: NDArray[np.float32]) -> float:
-        """One epoch's expected calibration error, over every (study, label) cell of the holdout pooled.
-
-        The truth is BINARISED AT 0.5 — `MIDPOINT`, the cut `LabelScores.per_label` scores the twelve AUCs
-        against — so the calibration reading is taken against the same partition as the ranking reading.
-        Pooled rather than per label, because a per-label ECE is twelve noisy instruments where one will
-        do: the bins are filled by every cell, with NaN cells excluded — a finding whose truth was never
-        read is not a negative.
-
-        `predicted` is already probabilities in [0, 1]: `Trainer.predict` applies the sigmoid, and this
-        relies on that rather than repeating it.
-        """
-        cells = ~(np.isnan(predicted) | np.isnan(truth))
-        if not cells.any():
-            return float("nan")
-        probability = predicted[cells]
-        positive = (truth[cells] > MIDPOINT).astype(np.float64)
-        which = np.minimum((probability * ECE_BINS).astype(np.int64), ECE_BINS - 1)
-        count = np.bincount(which, minlength=ECE_BINS).astype(np.float64)
-        live = count > 0
-        confidence = np.bincount(which, weights=probability, minlength=ECE_BINS)[live] / count[live]
-        accuracy = np.bincount(which, weights=positive, minlength=ECE_BINS)[live] / count[live]
-        return float((np.abs(confidence - accuracy) * count[live]).sum() / count.sum())
-
     def ranked(self, fold: Fold, epoch: int) -> tuple[float, dict[str, float], NDArray[np.float64] | None]:
         """The number this epoch is ranked by, its per-label scores, and what it predicted.
 
@@ -279,12 +253,22 @@ class Fitting:
         )
         return state.best, kept, state.epoch + 1
 
+    def recorded(self, fold: Fold, reading: EpochReading) -> None:
+        """Hand one epoch to the record: its probed row, its steps, its draw, and its holdout predictions."""
+        held = (
+            None
+            if reading.predicted is None
+            else HeldOut(reading.predicted, reading.truth, HoldoutRecord.named(fold.targets.identifiers, fold.holdout))
+        )
+        self.metrics.closed(reading.row(PROBES), reading.trace.rows(reading.epoch), reading.drawn, held)
+
     def epochs(self, fold: Fold) -> Fitted:
         """Every pass over the corpus, and the one whose weights are kept."""
         best, kept, first = self.resumed()
         for epoch in range(first, self.plan.stops_at):
             started = time.time()
             loss = self.trainer.fit_epoch(fold.corpus, fold.targets, fold.training, self.plan.batch, self.generator)
+            fitted = time.time()
             # Both the score and the state come from inside this block, so the number that ranks an
             # epoch is measured on exactly the weights that epoch would write.
             with self.trainer.evaluated():
@@ -293,44 +277,33 @@ class Fitting:
                 improved = settled and ranked > best
                 if improved:
                     best, kept = ranked, self.keep(fold, epoch, ranked, predicted)
-            seconds = round(time.time() - started)
-            # `ranked` is an epoch INDEX when there is no holdout, and it is only fit to rank epochs by.
-            # Reported as itself it becomes a score: the log reads "mean AUC 4.0000" and the ledger row
-            # carries 4.0, which `ledger_check` then quotes as the arm's best — its own docstring says a
-            # final fit records NaN, and until now only the checkpoint did.
+            # `ranked` is an epoch INDEX when there is no holdout, fit only to rank epochs by; reported as
+            # itself it would become a score of 4.0 in the ledger.
             scored = ranked if fold.scored else NO_HOLDOUT
-            # The SAME partition the AUCs are scored under, so the calibration number and the ranking
-            # number describe one binarisation. NaN rather than absent when nothing was held out,
-            # matching what a final fit already records in the `auc` column.
-            ece = (
-                self._calibration_error(predicted, fold.evaluation.scores[fold.holdout])
-                if predicted is not None
-                else NO_HOLDOUT
-            )
-            quantiles = self.trainer.loss_quantiles
             # THE DENOMINATOR, WHENEVER IT IS NOT THE COMPETITION'S. `nanmean` drops a finding with only
             # one class present on this holdout, so the headline is a mean over however many survived —
             # and two runs whose means are read against each other may not have averaged the same set.
             # Only said when it differs from twelve, because a line printed every epoch stops being read.
             defined = sum(1 for value in per_label.values() if not np.isnan(value))
             over = "" if defined == len(per_label) else f" over {defined} of {len(per_label)} labels"
+            seconds = time.time() - started
             logger.info("epoch %d: loss %.4f  holdout mean AUC %.4f%s  (%ds)", epoch, loss, scored, over, seconds)
-            # AFTER the metrics row, so a stopped run's ledger is complete up to the epoch it stopped on.
-            self.metrics.record(
-                EpochRow(
+            self.recorded(
+                fold,
+                EpochReading(
                     epoch=epoch,
                     loss=loss,
-                    auc=scored,
-                    ece=ece,
-                    loss_q25=quantiles["q25"],
-                    loss_q50=quantiles["q50"],
-                    loss_q75=quantiles["q75"],
-                    loss_q90=quantiles["q90"],
-                    loss_q95=quantiles["q95"],
+                    started=started,
+                    fit_seconds=fitted - started,
                     seconds=seconds,
+                    ranked=scored,
                     per_label=per_label,
-                    started=round(started),
-                )
+                    predicted=predicted,
+                    truth=fold.evaluation.scores[fold.holdout],
+                    drawn=self.trainer.trace.drawn,
+                    drawn_scores=fold.targets.scores[self.trainer.trace.drawn],
+                    trace=self.trainer.trace,
+                ),
             )
             if settled and self.patience.exhausted(improved=improved):
                 logger.info(

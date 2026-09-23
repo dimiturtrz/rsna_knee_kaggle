@@ -52,7 +52,6 @@ from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import Predicted
 from kneemri.training.gradient_clip import GradientClip
 from kneemri.training.heartbeat import Heartbeat
-from kneemri.training.loss_quantiles import EpochLosses
 from kneemri.training.mixup import Blend, Mixup
 from kneemri.training.objective import Objective
 from kneemri.training.patch_erasing import PatchErasing
@@ -60,6 +59,7 @@ from kneemri.training.progress_schedule import FULL, ProgressSchedule
 from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision
 from kneemri.training.sampling import Sampling, Uniform
 from kneemri.training.sharpness import Sharpness
+from kneemri.training.step_trace import StepTrace
 from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
 from kneemri.training.witness import OptimiserWitness
@@ -210,11 +210,8 @@ class Trainer:
         # None means "read the cache at its own resolution", which is what every run did before
         # resampling existed. See `resample_to`.
         self.read_size: int | None = None
-        # Per-study losses for the CURRENT epoch; reset at the start of `fit_epoch` and turned into
-        # quantiles at the end. Kept here rather than returned, so `fit_epoch`'s contract stays a scalar
-        # and every existing caller is untouched.
-        self._epoch_losses = EpochLosses()
-        self._loss_quantiles: dict[str, float] = {}
+        # What the current epoch's steps did; read by `Fitting` once the epoch returns.
+        self.trace = StepTrace()
 
     @property
     def loss_quantiles(self) -> dict[str, float]:
@@ -223,7 +220,7 @@ class Trainer:
         Empty before the first `fit_epoch`. NaN when no study contributed a loss, so a final fit that
         never calls `fit_epoch` still records a number of the right shape.
         """
-        return self._loss_quantiles
+        return self.trace.quantiles
 
     def policies(self) -> dict[str, object]:
         """WHICH OPTIONAL POLICIES ARE ATTACHED, read off this trainer rather than off the run's flags.
@@ -533,8 +530,6 @@ class Trainer:
         # the batch and slicing afterwards materialises all twelve (97.5 MB per batch) to discard three
         # quarters of them: measured 35 ms against 3.3 ms, ten seconds of every forty-second epoch.
         self.model.train()
-        # A fresh epoch's quantiles start empty; the list is populated per batch and reduced at the end.
-        self._epoch_losses = EpochLosses()
         # THE RUNNING TOTAL STAYS ON THE DEVICE. Reading a loss back with float() synchronises: the host
         # blocks until the backward that produced it has finished, so it cannot queue the next step while
         # the card works on this one — which is most of what the prefetch in front of the loop just bought.
@@ -548,6 +543,7 @@ class Trainer:
         # first is the identity and this line is the one every arm in the ledger ran.
         logger.info("aug %.3f hard %.3f", self._strengthen(self._epochs_fitted), self._harden(self._epochs_fitted))
         drawn = self.sampling.drawn(positions, generator)
+        self.trace.opened(drawn)
         plan = self.plan(corpus, self.batches(drawn, size, generator, shuffle=True), generator)
         # TRUNCATED TO COMPLETE GROUPS before the reader is started, so the prefetch never reads a
         # micro-batch whose gradient the epoch will throw away. Without accumulation this is the
@@ -627,16 +623,7 @@ class Trainer:
                 return self.objective(judged) + self.reports(readout.report.float(), batch), judged
 
             loss, judged = forward()
-            # PER-STUDY LOSS for the epoch's quantiles: the same weighted BCE the scalar is built from,
-            # averaged over labels within each study. Done under no_grad so it cannot feed back into
-            # training, and on the UNSHARED loss so the distribution matches the number the epoch reports.
-            with torch.no_grad():
-                elementwise = torch.nn.functional.binary_cross_entropy_with_logits(
-                    judged.logits, judged.scores, reduction="none"
-                )
-                weighted = elementwise * judged.weights
-                per_study = weighted.sum(dim=1) / judged.weights.sum(dim=1).clamp(min=1e-6)
-                self._epoch_losses.collect(per_study.cpu().numpy().astype(np.float64))
+            self.trace.judged(judged)
             self.scaler.scale(self.accumulation.share(loss)).backward()
             steps += 1
             # THE SCHEDULE AND THE WEIGHT AVERAGE MOVE WITH THE OPTIMISER, not with the reader. Stepping
@@ -662,7 +649,7 @@ class Trainer:
                 # AFTER the last micro-batch's backward and BEFORE the step: the norm has to be the one
                 # the optimiser will actually apply, so clipping a partially accumulated gradient would
                 # bound a quantity that is never used.
-                self.clipping.applied(self.model, self.optimiser, self.scaler)
+                self.trace.stepped(loss, self.clipping.applied(self.model, self.optimiser, self.scaler), self.optimiser)
                 self.scaler.step(self.optimiser)
                 self.scaler.update()
                 self.optimiser.zero_grad(set_to_none=True)
@@ -681,7 +668,7 @@ class Trainer:
                 lambda accumulated=total, count=steps: float(accumulated) / count,
                 int(pixels.shape[0] * pixels.shape[1] * pixels.shape[2]),
             )
-        self._loss_quantiles = self._epoch_losses.quantiles()
+        self.trace.closed()
         self._epochs_fitted += 1
         return float(total) / max(steps, 1)
 

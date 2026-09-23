@@ -24,7 +24,8 @@ def test_applied():
     scaler = torch.amp.GradScaler("cpu", enabled=False)
     over = _model_with_gradient(-4.0)
     optimiser = torch.optim.SGD(over.parameters(), lr=0.0)
-    GradientClip(2.0).applied(over, optimiser, scaler)
+    norm = GradientClip(2.0).applied(over, optimiser, scaler)
+    assert float(norm) == pytest.approx(4.0), "the norm returned is the one BEFORE clipping"
     # APPROX, because `clip_grad_norm_` divides by the norm plus a 1e-6 epsilon rather than by the norm,
     # so the clipped value lands a millionth under the ceiling by construction and never on it.
     assert float(over.weight.grad) == pytest.approx(-2.0), "a norm of 4 under a ceiling of 2 halves, keeping its sign"
@@ -34,5 +35,6 @@ def test_applied():
     assert float(under.weight.grad) == 0.5, "below the ceiling the gradient is untouched"
 
     off = _model_with_gradient(9.0)
-    GradientClip(UNCLIPPED).applied(off, torch.optim.SGD(off.parameters(), lr=0.0), scaler)
+    unclipped = GradientClip(UNCLIPPED).applied(off, torch.optim.SGD(off.parameters(), lr=0.0), scaler)
+    assert float(unclipped) == pytest.approx(9.0), "measured even when nothing is clipped"
     assert float(off.weight.grad) == 9.0, "the default must be the unbounded step the ledger was measured on"

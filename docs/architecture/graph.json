@@ -7952,6 +7952,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.epoch_probes",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.epoch_probes",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.epoch_probes",
+      "target": "kneemri.runs.run_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.epoch_probes",
+      "target": "kneemri.training.step_trace",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.feature_distillation",
       "target": "kneemri.training.grades",
       "weight": 1
@@ -8013,13 +8037,13 @@
     {
       "kind": "import",
       "source": "kneemri.training.fitting",
-      "target": "kneemri.runs.run_record",
+      "target": "kneemri.training.config_tree",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.training.fitting",
-      "target": "kneemri.training.config_tree",
+      "target": "kneemri.training.epoch_probes",
       "weight": 1
     },
     {
@@ -8654,6 +8678,30 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.step_trace",
+      "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.step_trace",
+      "target": "kneemri.runs.run_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.step_trace",
+      "target": "kneemri.training.grades",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.step_trace",
+      "target": "kneemri.training.loss_quantiles",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.target_config",
       "target": "core.data.labels.targets",
       "weight": 1
@@ -8871,12 +8919,6 @@
     {
       "kind": "import",
       "source": "kneemri.training.trainer",
-      "target": "kneemri.training.loss_quantiles",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.trainer",
       "target": "kneemri.training.mixup",
       "weight": 1
     },
@@ -8914,6 +8956,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.sharpness",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.step_trace",
       "weight": 1
     },
     {
@@ -38271,6 +38319,18 @@
     {
       "kind": "references",
       "source": "kneemri.runs.run_metrics.RunMetrics",
+      "target": "kneemri.runs.artefact.Artefact",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.run_metrics.RunMetrics",
+      "target": "kneemri.runs.run_metrics.HeldOut",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.run_metrics.RunMetrics",
       "target": "kneemri.runs.run_record.EpochRow",
       "weight": 1
     },
@@ -38284,6 +38344,12 @@
       "kind": "references",
       "source": "kneemri.runs.run_metrics.RunMetrics",
       "target": "kneemri.runs.run_record.StepRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics._stacked",
+      "target": "kneemri.runs.artefact.Artefact.beside",
       "weight": 1
     },
     {
@@ -38318,8 +38384,44 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.closed",
+      "target": "kneemri.runs.run_metrics.RunMetrics.drawn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.closed",
+      "target": "kneemri.runs.run_metrics.RunMetrics.predicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.closed",
+      "target": "kneemri.runs.run_metrics.RunMetrics.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.closed",
+      "target": "kneemri.runs.run_metrics.RunMetrics.steps_taken",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.describe",
       "target": "kneemri.runs.run_metrics.RunMetrics._append",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.drawn",
+      "target": "kneemri.runs.run_metrics.RunMetrics._stacked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.predicted",
+      "target": "kneemri.runs.run_metrics.RunMetrics._stacked",
       "weight": 1
     },
     {
@@ -38978,6 +39080,78 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.epoch_probes.ClockProbe",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.DrawProbe",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.EpochProbe",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.EpochReading",
+      "target": "kneemri.runs.run_record.EpochRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.EpochReading",
+      "target": "kneemri.training.epoch_probes.EpochProbe",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.epoch_probes.EpochReading",
+      "target": "kneemri.training.step_trace.StepTrace",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.FitProbe",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.HoldoutProbe",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.epoch_probes.HoldoutProbe.read",
+      "target": "kneemri.training.epoch_probes.HoldoutProbe.calibration_error",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.epoch_probes.HoldoutProbe.read",
+      "target": "kneemri.training.epoch_probes.HoldoutProbe.loss",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.LossProbe",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.epoch_probes.OptimProbe",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.feature_distillation.FeatureDistilledObjective",
       "target": "kneemri.training.feature_distillation.Widths",
       "weight": 1
@@ -39081,6 +39255,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.fitting.Fitting",
+      "target": "kneemri.training.epoch_probes.EpochReading",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.fitting.Fitting",
       "target": "kneemri.training.fitting.Fitted",
       "weight": 1
     },
@@ -39139,21 +39319,9 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.training.fitting.Fitting.epochs",
-      "target": "kneemri.runs.run_metrics.RunMetrics.record",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.training.fitting.Fitting.epochs",
-      "target": "kneemri.runs.run_record.EpochRow",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.fitting.Fitting.epochs",
-      "target": "kneemri.training.fitting.Fitting._calibration_error",
+      "target": "kneemri.training.epoch_probes.EpochReading",
       "weight": 1
     },
     {
@@ -39166,6 +39334,12 @@
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.epochs",
       "target": "kneemri.training.fitting.Fitting.ranked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.epochs",
+      "target": "kneemri.training.fitting.Fitting.recorded",
       "weight": 1
     },
     {
@@ -39250,6 +39424,30 @@
       "kind": "calls",
       "source": "kneemri.training.fitting.Fitting.ranked",
       "target": "kneemri.training.trainer.Trainer.predict",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.recorded",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.named",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.fitting.Fitting.recorded",
+      "target": "kneemri.runs.run_metrics.HeldOut",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.recorded",
+      "target": "kneemri.runs.run_metrics.RunMetrics.closed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.recorded",
+      "target": "kneemri.training.epoch_probes.EpochReading.row",
       "weight": 1
     },
     {
@@ -41390,6 +41588,66 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.step_trace.StepTrace",
+      "target": "kneemri.runs.run_record.StepRow",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.step_trace.StepTrace",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.step_trace.StepTrace.__init__",
+      "target": "kneemri.training.step_trace.StepTrace.opened",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.step_trace.StepTrace.closed",
+      "target": "kneemri.training.loss_quantiles.EpochLosses",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.step_trace.StepTrace.closed",
+      "target": "kneemri.training.loss_quantiles.EpochLosses.collect",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.step_trace.StepTrace.closed",
+      "target": "kneemri.training.loss_quantiles.EpochLosses.quantiles",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.step_trace.StepTrace.fit_auc",
+      "target": "kneemri.evaluation.scores.LabelScores.area_under_curve",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.step_trace.StepTrace.optimised",
+      "target": "kneemri.training.step_trace.StepTrace._host",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.step_trace.StepTrace.rows",
+      "target": "kneemri.runs.run_record.StepRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.step_trace.StepTrace.rows",
+      "target": "kneemri.training.step_trace.StepTrace._host",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.target_config.TargetConfig",
       "target": "core.data.labels.targets.Supervision",
       "weight": 1
@@ -41637,12 +41895,6 @@
     {
       "kind": "holds",
       "source": "kneemri.training.trainer.Trainer",
-      "target": "kneemri.training.loss_quantiles.EpochLosses",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.mixup.Mixup",
       "weight": 1
     },
@@ -41686,6 +41938,12 @@
       "kind": "holds",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.sharpness.Sharpness",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.step_trace.StepTrace",
       "weight": 1
     },
     {
@@ -41751,12 +42009,6 @@
     {
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
-      "target": "kneemri.training.loss_quantiles.EpochLosses",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.mixup.Mixup",
       "weight": 1
     },
@@ -41794,6 +42046,12 @@
       "kind": "construct",
       "source": "kneemri.training.trainer.Trainer.__init__",
       "target": "kneemri.training.sharpness.Sharpness",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.trainer.Trainer.__init__",
+      "target": "kneemri.training.step_trace.StepTrace",
       "weight": 1
     },
     {
@@ -41941,24 +42199,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.training.trainer.Trainer.fit_epoch",
-      "target": "kneemri.training.loss_quantiles.EpochLosses",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.Trainer.fit_epoch",
-      "target": "kneemri.training.loss_quantiles.EpochLosses.collect",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.trainer.Trainer.fit_epoch",
-      "target": "kneemri.training.loss_quantiles.EpochLosses.quantiles",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.mixup.Mixup.draw",
@@ -41986,6 +42226,30 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.sharpness.Sharpness.descended",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.step_trace.StepTrace.closed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.step_trace.StepTrace.judged",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.step_trace.StepTrace.opened",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.step_trace.StepTrace.stepped",
       "weight": 1
     },
     {
@@ -42821,7 +43085,7 @@
       "role": null
     },
     {
-      "descendants": 340,
+      "descendants": 342,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -45109,7 +45373,7 @@
       "role": null
     },
     {
-      "descendants": 54,
+      "descendants": 56,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -45192,6 +45456,14 @@
       "descendants": 0,
       "id": "kneemri.training.encoder_profile",
       "label": "encoder_profile",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes",
+      "label": "epoch_probes",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -45488,6 +45760,14 @@
       "descendants": 0,
       "id": "kneemri.training.spectral_mae",
       "label": "spectral_mae",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace",
+      "label": "step_trace",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -50958,6 +51238,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.run_metrics.HeldOut",
+      "label": "HeldOut",
+      "level": "class",
+      "parent": "kneemri.runs.run_metrics",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.run_metrics.RunMetrics",
       "label": "RunMetrics",
       "level": "class",
@@ -51170,6 +51458,70 @@
       "label": "SavedAdaptation",
       "level": "class",
       "parent": "kneemri.training.encoder_profile",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.ClockProbe",
+      "label": "ClockProbe",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.DrawProbe",
+      "label": "DrawProbe",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.EpochProbe",
+      "label": "EpochProbe",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.EpochReading",
+      "label": "EpochReading",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.FitProbe",
+      "label": "FitProbe",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.HoldoutProbe",
+      "label": "HoldoutProbe",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.LossProbe",
+      "label": "LossProbe",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.OptimProbe",
+      "label": "OptimProbe",
+      "level": "class",
+      "parent": "kneemri.training.epoch_probes",
       "role": "satellite"
     },
     {
@@ -51747,6 +52099,14 @@
       "level": "class",
       "parent": "kneemri.training.spectral_mae",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace",
+      "label": "StepTrace",
+      "level": "class",
+      "parent": "kneemri.training.step_trace",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -75166,6 +75526,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics._stacked",
+      "label": "_stacked",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.run_metrics.RunMetrics.begin",
       "label": "begin",
       "level": "method",
@@ -75174,8 +75542,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.closed",
+      "label": "closed",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.run_metrics.RunMetrics.describe",
       "label": "describe",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.drawn",
+      "label": "drawn",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.predicted",
+      "label": "predicted",
       "level": "method",
       "parent": "kneemri.runs.run_metrics.RunMetrics",
       "role": null
@@ -76014,6 +76406,86 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.epoch_probes.ClockProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.ClockProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.DrawProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.DrawProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.EpochProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.EpochProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.EpochReading.row",
+      "label": "row",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.EpochReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.FitProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.FitProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.HoldoutProbe.calibration_error",
+      "label": "calibration_error",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.HoldoutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.HoldoutProbe.loss",
+      "label": "loss",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.HoldoutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.HoldoutProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.HoldoutProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.LossProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.LossProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.OptimProbe.read",
+      "label": "read",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.OptimProbe",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.feature_distillation.FeatureDistilledObjective.__call__",
       "label": "__call__",
       "level": "method",
@@ -76134,14 +76606,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.fitting.Fitting._calibration_error",
-      "label": "_calibration_error",
-      "level": "method",
-      "parent": "kneemri.training.fitting.Fitting",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.fitting.Fitting.epochs",
       "label": "epochs",
       "level": "method",
@@ -76160,6 +76624,14 @@
       "descendants": 0,
       "id": "kneemri.training.fitting.Fitting.ranked",
       "label": "ranked",
+      "level": "method",
+      "parent": "kneemri.training.fitting.Fitting",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.fitting.Fitting.recorded",
+      "label": "recorded",
       "level": "method",
       "parent": "kneemri.training.fitting.Fitting",
       "role": null
@@ -78154,6 +78626,86 @@
       "label": "unpatchify",
       "level": "method",
       "parent": "kneemri.training.spectral_mae.SpectralMae",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace._host",
+      "label": "_host",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.closed",
+      "label": "closed",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.fit_auc",
+      "label": "fit_auc",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.judged",
+      "label": "judged",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.loss_fields",
+      "label": "loss_fields",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.opened",
+      "label": "opened",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.optimised",
+      "label": "optimised",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.step_trace.StepTrace.stepped",
+      "label": "stepped",
+      "level": "method",
+      "parent": "kneemri.training.step_trace.StepTrace",
       "role": null
     },
     {

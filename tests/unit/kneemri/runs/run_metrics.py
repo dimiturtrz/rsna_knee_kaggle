@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 import torch
 
-from kneemri.runs.run_metrics import BYTES_PER_GB, RunMetrics
+from kneemri.runs.run_metrics import BYTES_PER_GB, HeldOut, RunMetrics
 from kneemri.runs.run_record import EpochRow, StepRow
 
 RESERVED_GB = 26.0
@@ -188,3 +189,49 @@ def test_begin_rotates_every_file_of_the_run(tmp_path: Path):
     for spelling in (".steps.jsonl", ".draws.npz", ".epochs.npz"):
         assert (tmp_path / f"run_run1{spelling}").read_text(encoding="utf-8") == "first run"
         assert not (tmp_path / f"run{spelling}").exists()
+
+
+def test_drawn(tmp_path: Path):
+    """Each epoch's draw lands under its own key, and an earlier epoch's survives the rewrite."""
+    metrics = RunMetrics(tmp_path / "member.pt")
+    metrics.drawn(0, np.array([3, 1, 3], dtype=np.int64))
+    metrics.drawn(1, np.array([2], dtype=np.int64))
+
+    with np.load(tmp_path / "member.draws.npz") as draws:
+        assert draws["e0"].tolist() == [3, 1, 3], "a repeated position is a repeated draw and must stay"
+        assert draws["e1"].tolist() == [2]
+    assert not (tmp_path / "member.draws.npz.part").exists(), "the partial is renamed, never left behind"
+
+
+def test_predicted(tmp_path: Path):
+    """Every epoch's holdout predictions, beside the truth and the study names they are read against."""
+    metrics = RunMetrics(tmp_path / "member.pt")
+    truth = np.array([[1.0], [0.0]], dtype=np.float32)
+    metrics.predicted(0, HeldOut(np.array([[0.9], [0.2]]), truth, ["a", "b"]))
+    metrics.predicted(1, HeldOut(np.array([[0.8], [0.1]]), truth, ["a", "b"]))
+
+    with np.load(tmp_path / "member.epochs.npz") as epochs:
+        assert epochs["studies"].tolist() == ["a", "b"]
+        assert epochs["truth"].tolist() == [[1.0], [0.0]]
+        assert epochs["e0"][0, 0] == pytest.approx(0.9)
+        assert epochs["e1"][1, 0] == pytest.approx(0.1)
+
+
+def test_closed(tmp_path: Path):
+    """Steps, draw and holdout land before the row, and an unscored epoch writes no holdout file."""
+    metrics = RunMetrics(tmp_path / "member.pt")
+    steps = [StepRow(epoch=0, step=0, loss=0.7, grad_norm=3.0, lr=[1e-4])]
+    row = EpochRow(epoch=0, loss=1.0, auc=0.8, seconds=9, per_label={"ACL": 0.8})
+    held = HeldOut(np.array([[0.9]]), np.array([[1.0]], dtype=np.float32), ["a"])
+    metrics.closed(row, steps, np.array([0], dtype=np.int64), held)
+
+    assert [line["epoch"] for line in metrics.rows()] == [0]
+    assert (tmp_path / "member.steps.jsonl").exists()
+    assert (tmp_path / "member.draws.npz").exists()
+    assert (tmp_path / "member.epochs.npz").exists()
+
+    bare = RunMetrics(tmp_path / "bare.pt")
+    bare.closed(
+        EpochRow(epoch=0, loss=1.0, auc=0.8, seconds=9, per_label={"ACL": 0.8}), [], np.array([0], dtype=np.int64), None
+    )
+    assert not (tmp_path / "bare.epochs.npz").exists(), "nothing held out, nothing to keep"

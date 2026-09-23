@@ -8,8 +8,12 @@ import json
 import logging
 import shutil
 from collections.abc import Mapping
+from dataclasses import dataclass
 
+import numpy as np
 import torch
+from jaxtyping import Float, Int
+from numpy.typing import NDArray
 
 from kneemri.runs.artefact import Artefact
 from kneemri.runs.run_record import RECIPE, RUN, EpochRow, RunRecord, StepRow
@@ -20,6 +24,15 @@ BYTES_PER_GB = 1024**3
 
 ROTATING = (Artefact.CHECKPOINT, Artefact.HOLDOUT, Artefact.STEPS, Artefact.DRAWS, Artefact.EPOCHS)
 """Every file one run writes under its name, so a re-run rotates the whole run aside, never part of it."""
+
+
+@dataclass(frozen=True)
+class HeldOut:
+    """One epoch's holdout predictions, the graded truth they are read against, and whose studies they are."""
+
+    predicted: Float[NDArray[np.float64], "h o"]
+    truth: Float[NDArray[np.float32], "h o"]
+    studies: list[str]
 
 
 class RunMetrics(RunRecord):
@@ -141,10 +154,49 @@ class RunMetrics(RunRecord):
                 row["vram_alloc_gb"],
             )
 
+    def closed(
+        self, row: EpochRow, steps: list[StepRow], drawn: Int[NDArray[np.int64], " n"], held: HeldOut | None
+    ) -> None:
+        """Write one epoch: its steps, what it drew, what it predicted on the holdout, then its row.
+
+        The ROW LAST, so a run stopped by patience has a complete record up to the epoch it stopped on,
+        and every file a row points at already exists when the row lands.
+        """
+        self.steps_taken(steps)
+        self.drawn(row["epoch"], drawn)
+        if held is not None:
+            self.predicted(row["epoch"], held)
+        self.record(row)
+
     def steps_taken(self, rows: list[StepRow]) -> None:
         """Append one epoch's optimiser steps to the step stream beside the record."""
         with Artefact.STEPS.beside(self.path).open("a", encoding="utf-8") as handle:
             handle.writelines(json.dumps(row) + "\n" for row in rows)
+
+    def drawn(self, epoch: int, positions: Int[NDArray[np.int64], " n"]) -> None:
+        """Keep the positions the sampler drew this epoch, under `e<epoch>` in the draws file."""
+        self._stacked(Artefact.DRAWS, epoch, positions)
+
+    def predicted(self, epoch: int, held: HeldOut) -> None:
+        """Keep this epoch's holdout predictions beside the truth and study names they are read against.
+
+        EVERY epoch, not only the kept one: the `.holdout.npz` holds the best epoch's predictions, so how
+        a label's ranking moved from epoch to epoch — the curve behind every "peaked early" — had no file.
+        """
+        self._stacked(Artefact.EPOCHS, epoch, held.predicted, truth=held.truth, studies=np.asarray(held.studies))
+
+    def _stacked(self, kind: Artefact, epoch: int, array: NDArray[np.generic], **constant: NDArray[np.generic]) -> None:
+        """Add one epoch's array to a per-run npz, rewriting it whole through a partial file.
+
+        Rewritten rather than appended because npz cannot append, and through `.part` so a run killed
+        mid-write keeps every earlier epoch rather than a truncated archive.
+        """
+        path = kind.beside(self.path)
+        held: dict[str, NDArray[np.generic]] = dict(np.load(path)) if path.exists() else {}
+        partial = path.with_name(path.name + ".part")
+        with partial.open("wb") as handle:
+            np.savez(handle, allow_pickle=False, **(held | constant | {f"e{epoch}": array}))
+        partial.replace(path)
 
     def _append(self, line: Mapping[str, object]) -> None:
         with self.path.open("a", encoding="utf-8") as handle:

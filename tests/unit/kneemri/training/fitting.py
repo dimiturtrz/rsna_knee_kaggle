@@ -18,6 +18,7 @@ from kneemri.models.backbone import Encoder
 from kneemri.models.model import StudyModel
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.config_tree import TrainConfig
+from kneemri.training.epoch_probes import EpochReading
 from kneemri.training.fitting import Fitted, Fitting, Fold, RunPlan
 from kneemri.training.trainer import Trainer
 
@@ -439,7 +440,7 @@ def test_epochs_record_ece_and_loss_quantiles(tmp_path: Path):
     predicted = np.full((STUDIES, len(TARGETS)), 0.5, dtype=np.float64)
     fitting.ranked = lambda fold, epoch: (0.9, dict.fromkeys(TARGETS, 0.9), predicted)  # type: ignore[method-assign]
     fitting.trainer.fit_epoch = lambda _corpus, _targets, _positions, _size, _generator: 1.23  # type: ignore[method-assign]
-    fitting.trainer._loss_quantiles = {"q25": 0.1, "q50": 0.2, "q75": 0.3, "q90": 0.4, "q95": 0.5}
+    fitting.trainer.trace.quantiles = {"q25": 0.1, "q50": 0.2, "q75": 0.3, "q90": 0.4, "q95": 0.5}
 
     fitting.run(_fold())
 
@@ -448,3 +449,36 @@ def test_epochs_record_ece_and_loss_quantiles(tmp_path: Path):
     assert row["ece"] == pytest.approx(0.0), "predicted 0.5 against a 0.5-positive holdout is perfectly calibrated"
     assert row["loss_q50"] == pytest.approx(0.2)
     assert row["loss_q95"] == pytest.approx(0.5)
+    assert row["holdout_loss"] == pytest.approx(np.log(2)), "0.5 against anything graded costs log 2 a cell"
+    assert (tmp_path / "member.epochs.npz").exists(), "every epoch's holdout predictions are kept"
+    assert (tmp_path / "member.draws.npz").exists()
+
+
+def test_recorded(tmp_path: Path):
+    """One epoch handed to the record lands as a row, with its holdout named by the fold's studies."""
+    fitting = _fitting(tmp_path / "member.pt")
+    fold = _fold()
+    trace = fitting.trainer.trace
+    trace.opened(np.array([0, 1], dtype=np.int64))
+    trace.closed()
+    held = len(fold.holdout)
+    reading = EpochReading(
+        epoch=0,
+        loss=0.5,
+        started=0.0,
+        fit_seconds=1.0,
+        seconds=2.0,
+        ranked=0.7,
+        per_label=dict.fromkeys(TARGETS, 0.7),
+        predicted=np.full((held, len(TARGETS)), 0.5),
+        truth=np.full((held, len(TARGETS)), 0.5, dtype=np.float32),
+        drawn=trace.drawn,
+        drawn_scores=fold.targets.scores[trace.drawn],
+        trace=trace,
+    )
+
+    fitting.recorded(fold, reading)
+
+    assert fitting.metrics.rows()[0]["drawn_rows"] == 2
+    with np.load(tmp_path / "member.epochs.npz") as epochs:
+        assert len(epochs["studies"]) == held
