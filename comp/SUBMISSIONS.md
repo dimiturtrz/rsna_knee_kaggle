@@ -4798,3 +4798,12 @@ pair) and was over-extended here.
 recovers its basin's ceiling and cannot raise it, while divergence rose 34× and bought nothing), and this
 row closes the remaining operation. Champion pin unchanged — `basinsoup_ff_k4_s2026`, board 0.946, rank 74
 of 4068, gap 0.011 to the 0.957 leader.
+
+## soup16_v1 — 0.944, ref 56489294, 2026-09-23 — serving BELOW the fitted depth costs too
+
+INSTRUMENT on knee-uy8z0. `basinsoupff_v1`'s single member (`basinsoup_ff_k4_s2026`, 0.946) served at
+`SharedRead(16, (0.1, 0.9))` instead of its fitted 20 slices, band held. `run_check`: loaded 1 of 1.
+Pre-registered: >= 0.946 the shallow rung is free; <= 0.944 the fitted depth is optimal from both sides.
+Read 0.944, the bottom branch. The -0.002 is ~1 top-band residual sd, so it is directional on its own;
+it is the ladder that carries the verdict: 12 slices 0.942 (`onegroup_v1`), 16 0.944, 20 fitted 0.946,
+32 0.941 (`deepsolo_v1`). Serve every member at its fitted depth; the decode saving is not free.
