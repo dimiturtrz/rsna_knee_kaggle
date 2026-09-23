@@ -9,6 +9,7 @@ import logging
 import shutil
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -17,6 +18,7 @@ from numpy.typing import NDArray
 
 from kneemri.runs.artefact import Artefact
 from kneemri.runs.run_record import RECIPE, RUN, EpochRow, RunRecord, StepRow
+from kneemri.runs.tracker import Fanout, Tracker
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +26,11 @@ BYTES_PER_GB = 1024**3
 
 ROTATING = (Artefact.CHECKPOINT, Artefact.HOLDOUT, Artefact.STEPS, Artefact.DRAWS, Artefact.EPOCHS)
 """Every file one run writes under its name, so a re-run rotates the whole run aside, never part of it."""
+
+KEPT = (Artefact.METRICS, Artefact.STEPS, Artefact.DRAWS, Artefact.EPOCHS, Artefact.HOLDOUT)
+"""What a finished run hands its mirrors: every record it wrote, never the weights, which stay where they are."""
+
+SILENT = Fanout()
 
 
 @dataclass(frozen=True)
@@ -51,6 +58,10 @@ class RunMetrics(RunRecord):
     Peak VRAM goes in because it decides what else can share the card, and it cannot be recovered
     afterwards.
     """
+
+    def __init__(self, destination: Path, tracker: Tracker = SILENT) -> None:
+        super().__init__(destination)
+        self.tracker = tracker
 
     def describe(self, recipe: dict[str, str]) -> None:
         """Record WHICH RUN these epochs belong to, once, before the first of them.
@@ -104,6 +115,7 @@ class RunMetrics(RunRecord):
         self.describe(recipe)
         if run is not None:
             self._append({RUN: run})
+        self.tracker.begun(Artefact.stem(self.path), recipe, run or {})
 
     def _carry_back(self, run: int) -> None:
         """Put the rotated predictions back under the live name, for a run that is RESUMING.
@@ -142,6 +154,7 @@ class RunMetrics(RunRecord):
             row["vram_alloc_gb"] = round(torch.cuda.max_memory_allocated() / BYTES_PER_GB, 2)
             torch.cuda.reset_peak_memory_stats()
         self._append(row)
+        self.tracker.logged(row)
         logger.info("    %s", {name: round(value, 3) for name, value in row["per_label"].items()})
         if "vram_peak_gb" in row:
             # SAID WHILE THE RUN IS GOING, not only left in the JSONL. An arm that does not fit crawls
@@ -167,6 +180,13 @@ class RunMetrics(RunRecord):
         if held is not None:
             self.predicted(row["epoch"], held)
         self.record(row)
+
+    def finished(self) -> None:
+        """Hand every record this run wrote to its mirrors, and tell them it ended."""
+        for kind in KEPT:
+            if (written := kind.beside(self.path)).exists():
+                self.tracker.attached(written)
+        self.tracker.ended()
 
     def steps_taken(self, rows: list[StepRow]) -> None:
         """Append one epoch's optimiser steps to the step stream beside the record."""

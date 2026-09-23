@@ -36,6 +36,7 @@ from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
 from kneemri.runs.run_metrics import HeldOut, RunMetrics
+from kneemri.runs.tracker import Fanout
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.epoch_probes import PROBES, EpochReading
 from kneemri.training.patience import Patience
@@ -139,7 +140,7 @@ class Fitting:
         self.trainer = trainer
         self.record = record
         self.plan = plan
-        self.metrics = RunMetrics(plan.destination)
+        self.metrics = RunMetrics(plan.destination, Fanout.configured())
         self.predictions = HoldoutRecord(plan.destination)
         # Written HERE rather than at the first scored epoch, so a run killed before it scores still
         # leaves a file that says what it was trying — and it OPENS the record rather than appending to
@@ -230,7 +231,9 @@ class Fitting:
         be interrupted, and released by the context manager whether the loop returns or raises.
         """
         with Wakelock():
-            return self.epochs(fold)
+            fitted = self.epochs(fold)
+        self.metrics.finished()
+        return fitted
 
     def resumed(self) -> tuple[float, "Fitted | None", int]:
         """The score, the kept epoch and the epoch to start at — continuing a killed run, or cold.

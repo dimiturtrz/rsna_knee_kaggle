@@ -7670,6 +7670,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.runs.mlflow_tracker",
+      "target": "kneemri.runs.mlflow_client",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.runs.recorded_run",
       "target": "kneemri.runs.member_record",
       "weight": 1
@@ -7700,8 +7706,20 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.runs.run_metrics",
+      "target": "kneemri.runs.tracker",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.runs.run_record",
       "target": "kneemri.runs.artefact",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.runs.tracker",
+      "target": "kneemri.runs.mlflow_tracker",
       "weight": 1
     },
     {
@@ -8032,6 +8050,12 @@
       "kind": "import",
       "source": "kneemri.training.fitting",
       "target": "kneemri.runs.run_metrics",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.fitting",
+      "target": "kneemri.runs.tracker",
       "weight": 1
     },
     {
@@ -38251,6 +38275,66 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "target": "kneemri.runs.mlflow_client.MlflowClient",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "target": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.attached",
+      "target": "kneemri.runs.mlflow_client.MlflowClient.log_artifact",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.begun",
+      "target": "kneemri.runs.mlflow_client.MlflowClient.create_experiment",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.begun",
+      "target": "kneemri.runs.mlflow_client.MlflowClient.create_run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.begun",
+      "target": "kneemri.runs.mlflow_client.MlflowClient.get_experiment_by_name",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.begun",
+      "target": "kneemri.runs.mlflow_client.MlflowClient.log_param",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.ended",
+      "target": "kneemri.runs.mlflow_client.MlflowClient.set_terminated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.logged",
+      "target": "kneemri.runs.mlflow_client.MlflowClient.log_metric",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.mlflow_tracker.MlflowTracker.logged",
+      "target": "kneemri.runs.mlflow_tracker.MlflowTracker.scalars",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.runs.recorded_run.RecordedRun",
       "target": "kneemri.runs.recorded_run.RecordedRun",
@@ -38347,9 +38431,21 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.runs.run_metrics.RunMetrics",
+      "target": "kneemri.runs.tracker.Tracker",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics._stacked",
       "target": "kneemri.runs.artefact.Artefact.beside",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.begin",
+      "target": "kneemri.runs.artefact.Artefact.stem",
       "weight": 1
     },
     {
@@ -38380,6 +38476,12 @@
       "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.begin",
       "target": "kneemri.runs.run_record.RunRecord._entries",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.begin",
+      "target": "kneemri.runs.tracker.Tracker.begun",
       "weight": 1
     },
     {
@@ -38420,6 +38522,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.finished",
+      "target": "kneemri.runs.tracker.Tracker.attached",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.finished",
+      "target": "kneemri.runs.tracker.Tracker.ended",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.predicted",
       "target": "kneemri.runs.run_metrics.RunMetrics._stacked",
       "weight": 1
@@ -38428,6 +38542,12 @@
       "kind": "calls",
       "source": "kneemri.runs.run_metrics.RunMetrics.record",
       "target": "kneemri.runs.run_metrics.RunMetrics._append",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.run_metrics.RunMetrics.record",
+      "target": "kneemri.runs.tracker.Tracker.logged",
       "weight": 1
     },
     {
@@ -38494,6 +38614,24 @@
       "kind": "calls",
       "source": "kneemri.runs.run_record.RunRecord.stalls",
       "target": "kneemri.runs.run_record.RunRecord.rows",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.runs.tracker.Fanout",
+      "target": "kneemri.runs.tracker.Fanout",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.runs.tracker.Fanout",
+      "target": "kneemri.runs.tracker.Tracker",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.tracker.Fanout.configured",
+      "target": "kneemri.runs.mlflow_tracker.MlflowTracker.opened",
       "weight": 1
     },
     {
@@ -39313,6 +39451,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.__init__",
+      "target": "kneemri.runs.tracker.Fanout.configured",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.training.fitting.Fitting.__init__",
       "target": "kneemri.training.patience.Patience",
@@ -39472,6 +39616,12 @@
       "kind": "construct",
       "source": "kneemri.training.fitting.Fitting.run",
       "target": "core.wakelock.Wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.fitting.Fitting.run",
+      "target": "kneemri.runs.run_metrics.RunMetrics.finished",
       "weight": 1
     },
     {
@@ -43085,7 +43235,7 @@
       "role": null
     },
     {
-      "descendants": 342,
+      "descendants": 345,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -45277,7 +45427,7 @@
       "role": null
     },
     {
-      "descendants": 9,
+      "descendants": 12,
       "id": "kneemri.runs",
       "label": "runs",
       "level": "module",
@@ -45326,6 +45476,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.mlflow_client",
+      "label": "mlflow_client",
+      "level": "module",
+      "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker",
+      "label": "mlflow_tracker",
+      "level": "module",
+      "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.recorded_run",
       "label": "recorded_run",
       "level": "module",
@@ -45352,6 +45518,14 @@
       "descendants": 0,
       "id": "kneemri.runs.run_record",
       "label": "run_record",
+      "level": "module",
+      "parent": "kneemri.runs",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker",
+      "label": "tracker",
       "level": "module",
       "parent": "kneemri.runs",
       "role": null
@@ -51222,6 +51396,22 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient",
+      "label": "MlflowClient",
+      "level": "class",
+      "parent": "kneemri.runs.mlflow_client",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "label": "MlflowTracker",
+      "level": "class",
+      "parent": "kneemri.runs.mlflow_tracker",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.recorded_run.RecordedRun",
       "label": "RecordedRun",
       "level": "class",
@@ -51275,6 +51465,22 @@
       "level": "class",
       "parent": "kneemri.runs.run_record",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Fanout",
+      "label": "Fanout",
+      "level": "class",
+      "parent": "kneemri.runs.tracker",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Tracker",
+      "label": "Tracker",
+      "level": "class",
+      "parent": "kneemri.runs.tracker",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -75462,6 +75668,118 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient.create_experiment",
+      "label": "create_experiment",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_client.MlflowClient",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient.create_run",
+      "label": "create_run",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_client.MlflowClient",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient.get_experiment_by_name",
+      "label": "get_experiment_by_name",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_client.MlflowClient",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient.log_artifact",
+      "label": "log_artifact",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_client.MlflowClient",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient.log_metric",
+      "label": "log_metric",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_client.MlflowClient",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient.log_param",
+      "label": "log_param",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_client.MlflowClient",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_client.MlflowClient.set_terminated",
+      "label": "set_terminated",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_client.MlflowClient",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker.attached",
+      "label": "attached",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker.begun",
+      "label": "begun",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker.ended",
+      "label": "ended",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker.logged",
+      "label": "logged",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker.opened",
+      "label": "opened",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.mlflow_tracker.MlflowTracker.scalars",
+      "label": "scalars",
+      "level": "method",
+      "parent": "kneemri.runs.mlflow_tracker.MlflowTracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.recorded_run.RecordedRun.of",
       "label": "of",
       "level": "method",
@@ -75498,6 +75816,14 @@
       "label": "stamp",
       "level": "method",
       "parent": "kneemri.runs.run_identity.RunIdentity",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
       "role": null
     },
     {
@@ -75560,6 +75886,14 @@
       "descendants": 0,
       "id": "kneemri.runs.run_metrics.RunMetrics.drawn",
       "label": "drawn",
+      "level": "method",
+      "parent": "kneemri.runs.run_metrics.RunMetrics",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.run_metrics.RunMetrics.finished",
+      "label": "finished",
       "level": "method",
       "parent": "kneemri.runs.run_metrics.RunMetrics",
       "role": null
@@ -75682,6 +76016,78 @@
       "label": "steps",
       "level": "method",
       "parent": "kneemri.runs.run_record.RunRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Fanout.attached",
+      "label": "attached",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Fanout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Fanout.begun",
+      "label": "begun",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Fanout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Fanout.configured",
+      "label": "configured",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Fanout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Fanout.ended",
+      "label": "ended",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Fanout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Fanout.logged",
+      "label": "logged",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Fanout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Tracker.attached",
+      "label": "attached",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Tracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Tracker.begun",
+      "label": "begun",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Tracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Tracker.ended",
+      "label": "ended",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Tracker",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.tracker.Tracker.logged",
+      "label": "logged",
+      "level": "method",
+      "parent": "kneemri.runs.tracker.Tracker",
       "role": null
     },
     {

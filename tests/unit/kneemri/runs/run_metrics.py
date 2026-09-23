@@ -1,4 +1,5 @@
 import json
+from collections.abc import Mapping
 from pathlib import Path
 
 import numpy as np
@@ -7,6 +8,7 @@ import torch
 
 from kneemri.runs.run_metrics import BYTES_PER_GB, HeldOut, RunMetrics
 from kneemri.runs.run_record import EpochRow, StepRow
+from kneemri.runs.tracker import Fanout
 
 RESERVED_GB = 26.0
 ALLOCATED_GB = 23.33
@@ -235,3 +237,38 @@ def test_closed(tmp_path: Path):
         EpochRow(epoch=0, loss=1.0, auc=0.8, seconds=9, per_label={"ACL": 0.8}), [], np.array([0], dtype=np.int64), None
     )
     assert not (tmp_path / "bare.epochs.npz").exists(), "nothing held out, nothing to keep"
+
+
+class Mirror:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, object]] = []
+
+    def begun(self, name: str, recipe: Mapping[str, str], run: Mapping[str, object]) -> None:
+        self.calls.append(("begun", (name, dict(recipe), dict(run))))
+
+    def logged(self, row: Mapping[str, object]) -> None:
+        self.calls.append(("logged", row["epoch"]))
+
+    def attached(self, path: Path) -> None:
+        self.calls.append(("attached", path.name))
+
+    def ended(self) -> None:
+        self.calls.append(("ended", None))
+
+
+def test_finished(tmp_path: Path):
+    """The mirror sees the run begin, every row, then every record the run wrote, then its end — never the weights."""
+    mirror = Mirror()
+    metrics = RunMetrics(tmp_path / "member_s2026.pt", Fanout((mirror,)))
+    metrics.begin({"lr": "1e-4"}, run={"id": "abc"})
+    metrics.closed(
+        EpochRow(epoch=0, loss=1.0, auc=0.8, seconds=9, per_label={"ACL": 0.8}), [], np.array([0], dtype=np.int64), None
+    )
+    (tmp_path / "member_s2026.pt").write_bytes(b"weights")
+    metrics.finished()
+
+    assert mirror.calls[0] == ("begun", ("member_s2026", {"lr": "1e-4"}, {"id": "abc"}))
+    assert mirror.calls[1] == ("logged", 0)
+    attached = [value for kind, value in mirror.calls if kind == "attached"]
+    assert attached == ["member_s2026.metrics.jsonl", "member_s2026.steps.jsonl", "member_s2026.draws.npz"]
+    assert mirror.calls[-1] == ("ended", None)
