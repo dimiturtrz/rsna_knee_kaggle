@@ -86,3 +86,8 @@ basinsoup_dmlb_k6_s2026.pt  # 0.8722 midpoint / 0.9095 ledger75. Six children, N
                             # separator between "more children" and "the parent's pull". It reads within
                             # 0.0001 of k7, so the parent contributes nothing once K is large: the
                             # anchor mattered at K=4 and has been averaged away by K=6.
+headlr_ship_ffp.pt          # DARK, fold -1. headlr_ship's refit STOPPED at e17, the epoch its holdout
+                            # twin headlr_ship_s2026 (0.9059 ledger75) peaks at, with the 24-epoch anneal
+                            # kept. headlr_ship_ff shipped e23 and boarded 0.938; the twin decays 0.0027
+                            # midpoint from e17 to e23. Shelved as an INSTRUMENT for the stop-at-peak
+                            # refit question, never as a champion candidate. knee-yatne.

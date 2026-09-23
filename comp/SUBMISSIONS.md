@@ -4807,3 +4807,15 @@ Pre-registered: >= 0.946 the shallow rung is free; <= 0.944 the fitted depth is 
 Read 0.944, the bottom branch. The -0.002 is ~1 top-band residual sd, so it is directional on its own;
 it is the ladder that carries the verdict: 12 slices 0.942 (`onegroup_v1`), 16 0.944, 20 fitted 0.946,
 32 0.941 (`deepsolo_v1`). Serve every member at its fitted depth; the decode saving is not free.
+
+## headlrffp_v1 — 0.939, ref 56493655, 2026-09-23 — stopping a refit at its twin's peak buys nothing visible
+
+INSTRUMENT (knee-yatne). `headlr_ship_ffp` is `headlr_ship`'s `--fold -1` refit stopped after e17 via
+`--stop-after-epoch`, the 24-epoch anneal kept, so the only difference from `headlrff_v1` (e23, **0.938**)
+is which epoch ships. The holdout twin `headlr_ship_s2026` decays 0.0027 midpoint from its e17 peak to e23.
+
+Pre-registered: >= 0.941 the stop transfers; 0.939-0.940 directional; <= 0.938 no. It read **0.939**:
++0.001, the board's resolution and under one top-band residual sd. The midpoint decay does not reach the
+board as a usable gain, so last-epoch refits stand and the champion soup's children are NOT re-cut at a
+peak epoch. Gates: submit_check new set, roster/kit/mount/champion clean, witness 1 ok (the submission
+message says UNVERIFIED — wrong, the witness had not finished when it was written), run_check 1 of 1.
