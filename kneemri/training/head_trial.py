@@ -61,7 +61,9 @@ term scores pairs WITHIN a batch, so a wider one sees quadratically more of them
 HEAD_LR = 1e-3
 """The pixel trainer's head rate, unchanged — this is the same head on the same features."""
 
-TRIAL_SLICE_POOLINGS = tuple(name for name, pooling in SLICE_POOLINGS.items() if pooling.per_slice)
+TRIAL_SLICE_POOLINGS = tuple(
+    name for name, pooling in SLICE_POOLINGS.items() if pooling.per_slice and not pooling.reads_patches
+)
 """The slice reductions expressible over CACHED features, which is not every one the model has.
 
 DERIVED from the model's own registry rather than listed here, because a hand-written list is a second

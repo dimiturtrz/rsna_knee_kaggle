@@ -235,9 +235,10 @@ class StudyModel(nn.Module):
         # the aggregator is still built at the width flowing IN.
         self.head_width = pooled_width * pooling.out_multiplier
         self._encodes_each_slice = pooling.per_slice
+        self._reads_patches = pooling.reads_patches
         # Built only for the design that uses it: an unused module would still land in the state dict
         # and every published member would fail to load against it.
-        self.slices = pooling.aggregator(pooled_width) if pooling.aggregator is not None else None
+        self.slices = pooling.build(pooled_width, dim)
         self.head = SLOT_POOLINGS[self.design.slot_pooling](self.head_width, n_slot, len(TARGETS), prior)
         # PERSISTENT, so they ride in the state dict — which is what makes fixing the default safe:
         # every member already on disk keeps the constants it was actually fitted under, whatever the
@@ -351,7 +352,7 @@ class StudyModel(nn.Module):
         apply the mask themselves.
         """
         if mask is None:
-            return self.folded(self.slice_features(imgs, img_size))
+            return self.folded(*self._encoded(imgs, img_size))
         present = mask >= PRESENT
         # Packed as ONE study of `n` slots rather than a ragged batch: every aggregator below acts
         # within a (study, slot) pair and none of them reads across the slot axis, so the fold is
@@ -363,16 +364,24 @@ class StudyModel(nn.Module):
         if packed.shape[1] == 0:
             message = "every slot of every study in the batch is absent - nothing to encode"
             raise ValueError(message)
-        features = self.folded(self.slice_features(packed, img_size))[0]
+        features = self.folded(*self._encoded(packed, img_size))[0]
         scattered = features.new_zeros((*imgs.shape[:2], *features.shape[1:]))
         scattered[present] = features
         return scattered
 
-    def folded(self, stacked: Float[Tensor, "b s g w"]) -> Float[Tensor, "b s *o d"]:
-        """The slice axis collapsed by whichever aggregator this design owns."""
+    def folded(
+        self, stacked: Float[Tensor, "b s g w"], patches: Float[Tensor, "b s g t d"] | None = None
+    ) -> Float[Tensor, "b s *o w"]:
+        """The slice axis collapsed by whichever aggregator this design owns.
+
+        `patches` reaches the aggregator only when the design keeps them (`labelwise_patch`); every other
+        design is handed None by `_encoded` and computes exactly what it did.
+        """
         if not self.per_slice:
             return stacked[:, :, 0]
-        return self.slices(stacked) if self.slices is not None else self.over_depth(stacked)
+        if self.slices is None:
+            return self.over_depth(stacked)
+        return self.slices(stacked) if patches is None else self.slices(stacked, patches)
 
     def over_depth(self, stacked: Float[Tensor, "b s g w"]) -> Float[Tensor, "b s w"]:
         """The slot's embedding from its slices: a maximum per depth region, averaged over regions.
@@ -407,6 +416,17 @@ class StudyModel(nn.Module):
         Channel stacking has no per-slice axis by construction — the group IS the encoder's three
         channels — so it returns a single position, and pooling over it is the identity.
         """
+        return self._encoded(imgs, img_size)[0]
+
+    def _encoded(
+        self, imgs: UInt8[Tensor, "b s g p q"], img_size: int | None
+    ) -> tuple[Float[Tensor, "b s g w"], Float[Tensor, "b s g t d"] | None]:
+        """The pooled per-slice features, and the PATCH tokens too when the slice pooling reads them.
+
+        One encoder pass for both: the patch tokens are the same tensor the token pooling reduced, kept
+        by reference, so a design that does not read them pays nothing and one that does pays no second
+        forward.
+        """
         batch, slots, group = imgs.shape[:3]
         per_slice = self.per_slice
         x = self.reading.pixels(imgs, self.mean, self.std, img_size, per_slice=per_slice)
@@ -414,8 +434,13 @@ class StudyModel(nn.Module):
         self.reading.check_tokens(x, tokens)
         pooled = self._pool(tokens)
         if not per_slice:
-            return pooled.reshape(batch, slots, 1, -1)
-        return pooled.reshape(batch, slots, group, -1)
+            return pooled.reshape(batch, slots, 1, -1), None
+        patches = (
+            tokens[:, self.reading.prefix_tokens :].reshape(batch, slots, group, -1, tokens.shape[-1])
+            if self._reads_patches
+            else None
+        )
+        return pooled.reshape(batch, slots, group, -1), patches
 
     def supervised(
         self,

@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from core.findings import TARGETS
-from kneemri.models.slice_pooling import ATTEND, CHANNELS, DEPTH, LABELWISE, MAXIMUM, SLICE_POOLINGS
+from kneemri.models.slice_pooling import ATTEND, CHANNELS, DEPTH, LABELWISE, LABELWISE_PATCH, MAXIMUM, SLICE_POOLINGS
 
 DIM = 8
 BATCH, SLOTS, GROUP = 2, 3, 4
@@ -94,3 +94,19 @@ def test_slice_poolings_may_replace_the_slice_axis_with_a_diagnosis_axis():
     with torch.no_grad():
         out = aggregator(DIM).eval()(torch.randn(BATCH, SLOTS, GROUP, DIM))
     assert out.shape == (BATCH, SLOTS, len(TARGETS), DIM)
+
+
+def test_build():
+    """`build` hands the trunk's token width only to a pooling that reads patches, and None to `max`."""
+    torch.manual_seed(2026)
+    assert SLICE_POOLINGS[MAXIMUM].build(DIM, DIM // 2) is None
+    with torch.no_grad():
+        x = torch.randn(BATCH, SLOTS, GROUP, DIM)
+        labelwise = SLICE_POOLINGS[LABELWISE].build(DIM, DIM // 2)
+        patch = SLICE_POOLINGS[LABELWISE_PATCH].build(DIM, DIM // 2)
+        assert labelwise is not None
+        assert patch is not None
+        patches = torch.randn(BATCH, SLOTS, GROUP, 6, DIM // 2)
+        assert patch(x, patches).shape == labelwise(x).shape == (BATCH, SLOTS, len(TARGETS), DIM)
+    assert SLICE_POOLINGS[LABELWISE_PATCH].reads_patches
+    assert not SLICE_POOLINGS[LABELWISE].reads_patches

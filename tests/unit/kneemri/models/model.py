@@ -25,7 +25,7 @@ from kneemri.models.model import (
     StudyDesign,
     StudyModel,
 )
-from kneemri.models.slice_pooling import ATTEND, SLICE_POOLINGS
+from kneemri.models.slice_pooling import ATTEND, LABELWISE, LABELWISE_PATCH, SLICE_POOLINGS
 from kneemri.models.slot_head import PRESENT, REPORT_DIMS, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN_FOCAL, MEAN, POOL_PARTS
 from kneemri.models.volume_read import VolumeRead
@@ -987,3 +987,31 @@ def test_train(study_model: StudyModel):
 
     study_model.eval()
     assert not study_model.training, "eval needs no special case — it puts every norm where it belongs"
+
+
+def test_slot_features_labelwise_patch_starts_as_labelwise_and_reads_patches_once_trained():
+    """`labelwise_patch` is `labelwise` at initialisation through the WHOLE model, masked path included.
+
+    The patch tokens are threaded past the token pooling only for this design, so the equality has to be
+    taken end to end: same weights for everything the two designs share, and the zeroed projection must
+    make the extra reading add exactly nothing. Then a nonzero projection must move the output, or the
+    patches never reached the aggregator at all.
+    """
+    imgs = torch.randint(0, 256, (2, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    mask = torch.ones(2, SLOTS)
+    mask[1, 0] = 0.0
+    torch.manual_seed(SEED)
+    patch = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=LABELWISE_PATCH)).eval()
+    plain = StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling=LABELWISE)).eval()
+    extra = ("slices.gate.", "slices.project.")
+    shared = {
+        key.replace("slices.over_slices.", "slices."): value
+        for key, value in patch.state_dict().items()
+        if not key.startswith(extra)
+    }
+    plain.load_state_dict(shared)
+    with torch.no_grad():
+        assert torch.equal(patch.slot_features(imgs, 14, mask), plain.slot_features(imgs, 14, mask))
+        assert torch.equal(patch(imgs, mask, 14), plain(imgs, mask, 14))
+        torch.nn.init.normal_(cast("nn.Linear", cast("nn.Module", patch.slices).project).weight, std=1.0)
+        assert not torch.allclose(patch(imgs, mask, 14), plain(imgs, mask, 14), atol=1e-4)

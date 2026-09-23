@@ -12,6 +12,7 @@ from torch import nn
 
 from kneemri.models.depth_attention import DepthAttention
 from kneemri.models.labelwise_attention import LabelwiseAttention
+from kneemri.models.labelwise_patch_attention import LabelwisePatchAttention
 from kneemri.models.moment_pooling import MOMENTS as MOMENT_PARTS
 from kneemri.models.moment_pooling import MomentPooling
 from kneemri.models.slice_attention import SliceAttention
@@ -58,6 +59,13 @@ LABELWISE = "labelwise"
 The only pooling that hands the head a diagnosis axis rather than a single vector per slot. See
 `LabelwiseAttention` for why a shared query's +0.0002 is the null this predicts."""
 
+LABELWISE_PATCH = "labelwise_patch"
+"""`labelwise`, plus a per-finding softmax over every PATCH token of the slot, entering through a zeroed
+projection so that at initialisation it IS `labelwise`.
+
+The only pooling that reads inside a slice per diagnosis: every other name sees each slice already reduced
+to one vector by the token pooling. See `LabelwisePatchAttention`."""
+
 
 @dataclass(frozen=True)
 class SlicePooling:
@@ -70,7 +78,7 @@ class SlicePooling:
     """
 
     per_slice: bool
-    aggregator: Callable[[int], nn.Module] | None = None
+    aggregator: Callable[..., nn.Module] | None = None
     out_multiplier: int = 1
     """How many times the pooled width the aggregator HANDS BACK — 1 for every pooling that preserves it.
 
@@ -82,6 +90,18 @@ class SlicePooling:
 
     It may replace that axis with a DIAGNOSIS axis rather than remove it outright — `labelwise` does —
     and `SlotHead.per_diagnosis` is the one place that reconciles the two shapes."""
+    reads_patches: bool = False
+    """Whether the aggregator also takes the slot's PATCH tokens, not only the token-pooled slices.
+
+    The model keeps the patch tokens past the token pooling only when this is set, so every other pooling
+    computes exactly what it did. A cached-feature trial has no patches to give, which is why it refuses
+    these names."""
+
+    def build(self, width: int, token_width: int) -> nn.Module | None:
+        """The aggregator at the pooled `width`, told the trunk's `token_width` when it reads patches."""
+        if self.aggregator is None:
+            return None
+        return self.aggregator(width, token_width) if self.reads_patches else self.aggregator(width)
 
 
 SLICE_POOLINGS: dict[str, SlicePooling] = {
@@ -90,6 +110,7 @@ SLICE_POOLINGS: dict[str, SlicePooling] = {
     ATTEND: SlicePooling(per_slice=True, aggregator=SliceAttention),
     DEPTH: SlicePooling(per_slice=True, aggregator=DepthAttention),
     LABELWISE: SlicePooling(per_slice=True, aggregator=LabelwiseAttention),
+    LABELWISE_PATCH: SlicePooling(per_slice=True, aggregator=LabelwisePatchAttention, reads_patches=True),
     MOMENTS: SlicePooling(per_slice=True, aggregator=MomentPooling),
     MOMENTS_WIDE: SlicePooling(per_slice=True, aggregator=WideMomentPooling, out_multiplier=MOMENT_PARTS),
 }
