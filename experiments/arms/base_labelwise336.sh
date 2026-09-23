@@ -4,24 +4,34 @@
 # bead: knee-mm6v0
 # reading: base_labelwise336_s2026.holdout.npz
 #
-# WHY IT OOMED TWICE AND WHAT CHANGED. Both deaths (20 GB cap / 18.67 allocated, then 27 / 23.21 + 2.38)
-# happened with gradient checkpointing OFF: `--recompute-activations` (`adaptation.py:248`, default False)
-# was simply absent from the line, and twenty-five other arms pass it. It is now passed. The flag is the
-# ENABLING one, not a second variable — `encoder_surgery.py:470-495` measures it on this workload at 798
-# img/s against 946 (a 19% tax) for nearly all of the encoder's activation memory, same batch, same loss,
-# same 66 within-batch pairs the `--rank-weight` term scores, which is why that docstring chose it over
-# splitting the batch.
+# DO NOT RE-LAUNCH THIS ARM. It has now OOMed five times and the reason is none of the three things that
+# were tried. The record, because each attempt cost a card slot and the wrong conclusion was written down
+# twice:
+#   * 20 GB cap, 18.67 allocated. Read as a cap that was too low.
+#   * 27 GB cap, 23.21 allocated + 2.38 requested. Read as the 336 corner being barred for a base trunk.
+#   * `base_labelwise_dense336` at 20 slices, 26 GB cap: 21.06 + 3.57, 6.17 free of 31.84.
+#   * this arm at 12 slices, 26 GB cap: 23.21 + 2.38 — BYTE-IDENTICAL to its own 27 GB death.
+#   * this arm again with `--eager-encoder`: 23.21 + 2.38 again, 3.38 free of 31.84.
 #
-# AND WHY 12 SLICES RATHER THAN 20. The 20-slice version of this corner (`base_labelwise_dense336`) was
-# run WITH checkpointing on 2026-09-22 and still OOMed: 21.06 GiB allocated, 3.57 more requested, 26.00
-# allowed, 6.17 free of 31.84 on the card. That corner is machine-barred for a base trunk, and raising the
-# cap toward 30 does not fix it — it PERMITS PCIe paging, which thrashes instead of crashing. Slices are
-# the only free dimension, because batch may not be cut without changing the pairwise term. 12/20 of that
-# footprint is ~14.8 GiB, well inside the 26 cap.
+# WHAT IS NOT THE CAUSE, each ruled out by measurement rather than by argument.
+#   * NOT missing gradient checkpointing. `experiments/recipe.sh:31` defines THROUGHPUT as exactly
+#     `--recompute-activations`, and every one of these invocations passes `$THROUGHPUT`. Checkpointing
+#     was ON for all five. A commit on 2026-09-22 claimed the opposite and is wrong.
+#   * NOT the slice count. 12 slices died at a LARGER allocated figure than 20 did. The footprint is not
+#     monotone in slices, so the dominant term is not what the slice arithmetic models.
+#   * NOT `torch.compile`. `--eager-encoder` (`recipe.sh:28-30`, compile is on by default) reproduced the
+#     request to the byte.
+#   * NOT the `--vram-gb` cap. The 27 GB attempt died at 25.59 GB of demand, under its own cap.
 #
-# PRICE, restated. ~385 s/epoch at this corner x the measured 1.23 checkpointing tax is ~474 s, so ~1.6 h
-# for 12 epochs. Zero decode, zero submission slots, control free. P(clears 0.8961) ~ 0.35.
-# P(clears the 1.5% bar) ~ 0.10.
+# WHAT THE NUMBERS ACTUALLY SAY. At the crash PyTorch holds 23.21 GiB allocated and the CARD has 3.38 GiB
+# free of 31.84 — roughly 28.5 GiB is reserved against 23.21 in use. The binder is allocator fragmentation,
+# and `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` is a confirmed no-op on this Windows machine. The
+# remaining levers all change the experiment: batch may not be cut without changing the 66 within-batch
+# pairs the `--rank-weight` term scores, and `--unfreeze-last` cuts the very capacity the arm is testing.
+#
+# So the base trunk cannot reach 336 on this machine, and the capacity axis has to be spent somewhere it
+# fits. Base at 224/12sl reads 0.8996 (`base_labelwise224_dense_drop40_long36`), 0.0034 under the best solo
+# the project owns, which is inside the 0.0062 paired floor — the trunk is not the thing that is missing.
 #
 # WHAT LICENSES THIS ARM. `base_labelwise224` landed 0.8899 ledger75 against `labelwise224`'s 0.8832 —
 # +0.0067, above the 0.0062 paired floor, converged over 12 epochs on 909 studies. That is the band-1
@@ -87,6 +97,5 @@ require "$LABELS"
 run_train base_labelwise336 \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 12 --band-low 0.2 --band-high 0.8 \
-  --recompute-activations \
   --image-size 336 --variant base --vram-gb 26 \
   --labels "$LABELS" --out "$MODELS/base_labelwise336_s2026.pt"

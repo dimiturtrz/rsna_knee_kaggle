@@ -10,14 +10,16 @@
 # and `--slot-dropout 0.40` — worth +0.0066, above the 0.0062 paired floor. This arm asks whether that step
 # transfers to the wider trunk. Composed naively it projects ~0.9016 against the 0.9030 best solo.
 #
-# WHY THIS AND NOT MORE 336 WORK. Four OOMs now sit against the base trunk at 336, and the last two are
-# what closes the line rather than another cap to climb. `base_labelwise_dense336` (20 slices, checkpointing
-# CONFIRMED landed in the stamped recipe) died at 21.06 GiB allocated + 3.57 requested; `base_labelwise336`
-# (12 slices, same flag) died at 23.21 + 2.38 — byte-identical to its own earlier death at a 27 GB cap with
-# checkpointing OFF. So the footprint neither fell with gradient checkpointing nor scaled with the slice
-# count, which means the dominant term is not encoder activations and the model behind `--vram-gb`, and
-# behind my own slice arithmetic, does not describe this trunk. That is a diagnosis to make off the card,
-# not four more crashes to pay for. 224 is an instrument corner and this arm cannot be the deliverable on
+# WHY THIS AND NOT MORE 336 WORK. Four OOMs sat against the base trunk at 336 when this arm was written.
+# CORRECTION, recorded after the fact: this paragraph originally said the earlier death at a 27 GB cap had
+# checkpointing OFF. It did not. `experiments/recipe.sh:31` defines THROUGHPUT as exactly
+# `--recompute-activations` and every one of these invocations passes `$THROUGHPUT`, so gradient
+# checkpointing was ON for ALL of them. `base_labelwise_dense336` (20 slices) died at 21.06 GiB allocated
+# + 3.57 requested; `base_labelwise336` (12 slices) died at 23.21 + 2.38, byte-identical to its own earlier
+# death. So the footprint neither fell with gradient checkpointing nor scaled with the slice count, and the
+# binder is allocator fragmentation (~28.5 GiB reserved against 23.21 in use) — see `base_labelwise336.sh`'s
+# header for all seven crashes and the four causes ruled out by measurement. That is a diagnosis to make off
+# the card, not four more crashes to pay for. 224 is an instrument corner and this arm cannot be the deliverable on
 # its own, but it is the only mechanism-sound step that is KNOWN to fit: the control measured 12.99 GiB
 # allocated at this exact corner and neither new flag touches the activation footprint.
 #
