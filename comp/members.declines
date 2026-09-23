@@ -1796,3 +1796,4 @@ transduce_dmlb_c407         # 0.8691 midpoint / 0.9066 ledger75. Fold-0 TRANSDUC
                             # a shipped copy; shipping needs the adaptation at serve time, not these weights.
 transduce_dmlb_c408         # 0.8701 midpoint / 0.9080 ledger75. Same as c407 (knee-nchjt).
 transduce_dmlb_c409         # 0.8703 midpoint / 0.9067 ledger75. Same as c407 (knee-nchjt).
+labelwise_patch_s2026       # 0.8698 midpoint / 0.9064 ledger75 vs control labelwise_depth24_drop40_long 0.9053: +0.0011, null (knee-hbta3).

@@ -18069,3 +18069,24 @@ board (0.940 against 0.946).
 **So every FF-side decision costs a submission slot, and that — not a missing idea — is what caps the
 rate at which this project can move.** The card was left idle rather than spent ~1 h at P ~ 0.05, which
 is the correct call under the ratio rule and is recorded here so it is a decision rather than a gap.
+
+## Label-specific IN-PLANE selection is null under labelwise — 2026-09-23T23:30Z
+
+`labelwise_patch_s2026` (knee-hbta3): per-diagnosis gated attention over slice×patch tokens, added to
+labelwise slice attention through a zero-init projection, one variable against
+`labelwise_depth24_drop40_long_s2026` (same recipe, 336/24sl, drop40, 24 epochs, fold 0, 909 studies).
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_patch_s2026 | 0.8698 | **0.9064** | 17 |
+| labelwise_depth24_drop40_long_s2026 (control) | 0.8679 | **0.9053** | 18 |
+
+**+0.0011 ledger75**, inside the 0.0062 paired floor, against a pre-registered +0.015 (P ~0.05).
+The mechanism FIRED: the zero-init `slices.project.weight` ends at norm 12.46, so the patch path was
+trained and used, and the curve tracked the control within ±0.004 midpoint at every epoch read. It
+converged clean (peak e17 of 24, no truncation). What it rules out: that the labelwise head is short of
+per-diagnosis IN-PLANE localisation when it can learn it from RSNA labels alone. What it does NOT rule
+out: supervised localisation (a location target), which RSNA does not carry (58/4407 studies annotated)
+and every available locator is trained on barred data. With focal/sided (label-agnostic, −0.0036) this
+closes the token-selection axis in both its label-agnostic and label-specific forms.
+Declined in `comp/members.declines`.

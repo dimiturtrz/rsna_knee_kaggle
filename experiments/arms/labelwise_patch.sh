@@ -34,6 +34,6 @@ require "$LABELS"
 
 run_train labelwise_patch \
   $RECIPE --epochs 24 --slice-pooling labelwise_patch --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 28 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 22 --band-low 0.1 --band-high 0.9 \
   --calibrated-targets --hold-annotations --slot-dropout 0.40 \
   --labels "$LABELS" --out "$MODELS/labelwise_patch_s2026.pt"
