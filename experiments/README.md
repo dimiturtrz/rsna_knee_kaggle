@@ -18009,3 +18009,29 @@ shippable line is the basinsoup family and raising the dmlb fold-0 number furthe
 **A SOLO ALREADY TIES THE CHAMPION.** `basinsoupff_v1` — members: **1**, `basinsoup_ff_k4_s2026` — scores
 board **0.946**, level with the eight-seat `tripleseat_v2` pinned in `comp/champion.json`. The
 single-checkpoint deliverable is at parity; beating it is what is missing.
+
+## 224/20sl is MACHINE-CLOSED, and the two OOMs that closed it are different failures — 2026-09-23T05:22Z
+
+`base_labelwise224_20sl` ran twice and died twice, and reading them as one crash loses the verdict.
+
+**At `--vram-gb 24` the CAP was the binder.** 19.31 GiB allocated, 3.00 GiB reserved-unallocated, a
+2.18 GiB request refused — with **6.92 GiB still FREE on the device**. The memory existed. Same reading
+`large_labelwise224_half` produced at 26 GB the same night.
+
+**At `--vram-gb 28` the CARD was the binder.** 23.92 GiB allocated, 3.75 GiB reserved-unallocated = 27.67
+under a 28.00 ceiling, and only **1.59 GiB free on the device** when a 1.34 GiB request failed. The
+budget is 31.84 minus the 2.34 GB LibreOffice holds by arrangement, so 28 is the largest cap this machine
+has run clean and there is no cap above it. The reserved-unallocated 3.75 GiB is the fragmentation
+signature the 336 corner shows, so at 28 both binders are present at once.
+
+**The arm pre-registered this closure before it ran** ("a SECOND OOM at 28 would make 224/20sl
+machine-closed") and the escape hatches are barred by prior measurement, not by preference: batch may not
+be cut because the pairwise `--rank-weight` term sees `--batch` studies within a step regardless of
+`--accumulate` (66 pairs to a handful, which confounds every 0.88-0.90 control), slices ARE the thesis,
+and 224 is already the small side of the resolution axis.
+
+**So the depth question is unanswerable at the instrument corner, and answering it at the SHIPPING corner
+needs a decode nobody has paid**: the 336 arrays on disk are 20sl-extended (83.4 GB, what the shipping
+family already runs) and 24sl-canonical (66.7 GB); `images_336px_24sl_0.1-0.9band_extended.npy` does not
+exist. That is ~80 GB on a disk at 196 GB free plus ~3-4 h of decode that buys no signal by itself,
+before a ~2 h arm — the same ratio as `multiscale`, declined the same morning for the same reason.

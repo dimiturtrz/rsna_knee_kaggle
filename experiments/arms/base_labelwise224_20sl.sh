@@ -76,9 +76,15 @@
 # deliberate: --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended — one corner, three flags,
 #             moved together because the array that exists is the shipping family's corner and no
 #             single-flag 224 array was ever decoded. Read the verdict as a corner verdict.
-# deliberate: --vram-gb 24 — named rather than derived. base measured 12.99 GB allocated at 224/12sl;
-#             activation memory is linear in slices, so 20 slices predicts ~21.6. 24 is that plus slack,
-#             and unlike the 336 attempt it is a scaling WITHIN the resolution the ratio was measured at.
+# deliberate: --vram-gb 28 — RAISED from 24 after this arm OOMed at 24 on 2026-09-23T04:3xZ. The
+#             derivation that set 24 was right about the footprint and wrong about the slack: base
+#             measured 12.99 GB at 224/12sl and 20 slices predicted ~21.6, but the run held 19.31 GiB
+#             allocated plus 3.00 GiB reserved-unallocated and a 2.18 GiB request then failed — with
+#             6.92 GiB STILL FREE ON THE DEVICE. So the ceiling was the binder, not the card and not
+#             fragmentation, which is the identical reading `large_labelwise224_half` produced at 26 GB
+#             the same night. The budget is 31.84 total minus the 2.34 GB LibreOffice holds by
+#             arrangement (`card_check`), so 28 leaves the driver ~1.5 GB and is the largest cap this
+#             machine has run clean. A SECOND OOM at 28 would make 224/20sl machine-closed.
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
@@ -87,5 +93,5 @@ require "$LABELS"
 run_train base_labelwise224_20sl \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --scheme extended \
-  --image-size 224 --variant base --vram-gb 24 \
+  --image-size 224 --variant base --vram-gb 28 \
   --labels "$LABELS" --out "$MODELS/base_labelwise224_20sl_s2026.pt"
