@@ -78,11 +78,11 @@ basinsoup_dmlb_ff.pt        # DARK, fold -1: no offline number exists or can be 
                             # fold-0 number board-predictive at a -0.002 offset. Transfer puts the base
                             # at fit 0.9430; the refit term across four bases is +0.001/+0.003/+0.004/
                             # +0.007, so this projects to ~0.947 against a 0.946 champion. knee-17la8.
-basinsoup_dmlb_k7_s2026     # 0.8724 midpoint / 0.9096 ledger75. Parent + six children, the K extension
+basinsoup_dmlb_k7_s2026.pt  # 0.8724 midpoint / 0.9096 ledger75. Parent + six children, the K extension
                             # of `basinsoup_dmlb_k4_s2026` (0.9092). The highest fold-0 number this
                             # project owns, superseding k4 — and by +0.0004, which is a fourteenth of
                             # the 0.0062 seed spread. One checkpoint, one forward. knee-gxu5r.
-basinsoup_dmlb_k6_s2026     # 0.8722 midpoint / 0.9095 ledger75. Six children, NO parent — the arm's
+basinsoup_dmlb_k6_s2026.pt  # 0.8722 midpoint / 0.9095 ledger75. Six children, NO parent — the arm's
                             # separator between "more children" and "the parent's pull". It reads within
                             # 0.0001 of k7, so the parent contributes nothing once K is large: the
                             # anchor mattered at K=4 and has been averaged away by K=6.

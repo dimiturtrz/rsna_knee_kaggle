@@ -1781,3 +1781,18 @@ headlr_ship_s2026_n12b0.2-0.8  # 0.8695 midpoint / 0.9033 ledger75. NOT a traine
                             # (-0.0026 for half the slices). It shares the shipping member's weights
                             # exactly and exists only as a record. Shipping it would ship the same model
                             # at a worse read.
+base_labelwise224_dense_drop40_long36_s2026  # 0.8645 midpoint / 0.8996 ledger75. Base trunk at 224, the
+                            # capacity axis (knee-jzho6): below the 0.908 solo it would have to replace.
+base_labelwise224_dense_s2026  # 0.8589 midpoint / 0.8950 ledger75. Capacity axis (knee-jzho6), closed.
+base_labelwise224_s2026     # 0.8569 midpoint / 0.8899 ledger75. Capacity axis (knee-jzho6), closed.
+large_labelwise224_dense_s2026  # 0.8541 midpoint / 0.8888 ledger75. Large trunk with an unfreeze-last
+                            # constant fitted on 12 blocks (confound on knee-jzho6); -0.0062 vs base.
+large_labelwise224_half_s2026  # 0.8607 midpoint / 0.8936 ledger75. Capacity axis (knee-jzho6), closed.
+focal_labelwise224_s2026    # 0.8502 midpoint / 0.8796 ledger75. Focal loss is a knob; 0.028 under the solo.
+labelcut_v3_ema_s2026       # 0.8667 midpoint / 0.9038 ledger75. Below the basinsoup solos it would replace.
+labelcut_v3_ema_s2026_run1  # 0.8668 midpoint / 0.9039 ledger75. A re-run of the line above, same verdict.
+transduce_dmlb_c407         # 0.8691 midpoint / 0.9066 ledger75. Fold-0 TRANSDUCTION (knee-nchjt): adapted
+                            # on the holdout's own unlabelled studies, so the number is not out-of-sample for
+                            # a shipped copy; shipping needs the adaptation at serve time, not these weights.
+transduce_dmlb_c408         # 0.8701 midpoint / 0.9080 ledger75. Same as c407 (knee-nchjt).
+transduce_dmlb_c409         # 0.8703 midpoint / 0.9067 ledger75. Same as c407 (knee-nchjt).
