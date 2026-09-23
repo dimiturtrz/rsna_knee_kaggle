@@ -4819,3 +4819,20 @@ Pre-registered: >= 0.941 the stop transfers; 0.939-0.940 directional; <= 0.938 n
 board as a usable gain, so last-epoch refits stand and the champion soup's children are NOT re-cut at a
 peak epoch. Gates: submit_check new set, roster/kit/mount/champion clean, witness 1 ok (the submission
 message says UNVERIFIED — wrong, the witness had not finished when it was written), run_check 1 of 1.
+
+## dmlbsoup_v1 — 0.944, ref 56500295, 2026-09-23 — the dmlb family is not what lost; the order was
+
+INSTRUMENT. `basinsoup_dmlb_k7_s2026` (fold-0 soup, 0.9096 ledger75, the best fold-0 checkpoint owned)
+served solo, so the soup-then-serve order matches `basinsoupfold0_v1` (0.943) and only the family changes.
+It separates the two readings of `dmlbffsoup_v1`'s 0.940: family or order.
+
+Pre-registered: >= 0.944 the order was the cause and a dmlb soup-of-ff is licensed; 0.943 directional;
+<= 0.942 family closed. Read **0.944**, the top branch by the letter — but +0.001 is the board's resolution
+and half a top-band residual sd, so what it establishes is the NEGATIVE: the dmlb family is not worse, and
+the 0.940 was ff-of-soup losing to soup-of-ff, as `basinsoupff_v1` (0.946) vs `basinsoupfold0_v1` (0.943)
+already showed on the other family.
+
+**The licence is not spent.** A dmlb soup-of-ff means refitting seven children with `--fold -1` and souping
+them: ~10-14 h of card (UNVERIFIED per-child time) for an expected ~0.947 against the 0.946 champion — a
++0.001 knob inside scatter, against a 1.5% bar. Recorded as licensed and unqueued. Gates: submit_check new
+set, mount/kit/roster/champion clean, run_check 1 of 1, witness UNVERIFIED (a soup).
