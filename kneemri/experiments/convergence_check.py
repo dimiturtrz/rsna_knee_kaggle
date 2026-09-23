@@ -46,7 +46,7 @@ from pathlib import Path
 from core import cli
 from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_record import EpochRow, RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +141,7 @@ class RunConvergence:
 class ConvergenceCheck:
     """Every run on disk, against whether its own record says the number is finished."""
 
-    def smoke(self, run: RunMetrics) -> bool:
+    def smoke(self, run: RunRecord) -> bool:
         """Whether the run capped the corpus — short by construction, so no budget verdict applies.
 
         Read from the RECIPE rather than the name, for the reason `ledger_check` learned the hard way:
@@ -151,7 +151,7 @@ class ConvergenceCheck:
         recipe = RecordedRun.of(run).recipe
         return recipe is not None and recipe.get(STUDIES, "0") not in ("0", "")
 
-    def benchmark(self, run: RunMetrics) -> bool:
+    def benchmark(self, run: RunRecord) -> bool:
         """Whether the run asked for one epoch, which makes every convergence verdict vacuous.
 
         A one-epoch run peaks on its last epoch BY CONSTRUCTION — there is no earlier epoch to peak on —
@@ -162,14 +162,14 @@ class ConvergenceCheck:
         asked = self.asked(run)
         return asked is not None and asked <= 1
 
-    def asked(self, run: RunMetrics) -> int | None:
+    def asked(self, run: RunRecord) -> int | None:
         """The epoch budget the recipe requested, or None for a run that recorded no recipe."""
         recipe = RecordedRun.of(run).recipe
         if recipe is None or EPOCHS not in recipe:
             return None
         return int(recipe[EPOCHS])
 
-    def stoppable(self, run: RunMetrics) -> bool:
+    def stoppable(self, run: RunRecord) -> bool:
         """Whether a stopper was armed, which is the only innocent reason to end short.
 
         `patience=0` is the default and means no stopper, so a run that carries it and stops short was
@@ -178,7 +178,7 @@ class ConvergenceCheck:
         recipe = RecordedRun.of(run).recipe
         return recipe is not None and int(recipe.get(PATIENCE, 0)) > 0
 
-    def rising(self, run: RunMetrics) -> bool:
+    def rising(self, run: RunRecord) -> bool:
         """Whether the run was still GAINING at the end, rather than merely peaking there.
 
         Peaking on the last epoch is an ARGMAX; being bound by a budget is a SLOPE. Seven of the eleven runs
@@ -215,14 +215,14 @@ class ConvergenceCheck:
         """
         return rows[-1]["epoch"] + 1 if rows else 0
 
-    def verdict(self, run: RunMetrics) -> RunConvergence:
+    def verdict(self, run: RunRecord) -> RunConvergence:
         """Read one run's record and say whether its number is finished.
 
         The order is deliberate. Ending short is decided FIRST, because a killed run also peaks on its
         last recorded epoch and would otherwise be filed as merely undertrained — the softer finding and
         the wrong fix.
 
-        WHAT THIS CANNOT SEE, and it is on disk today. `RunMetrics.rows()` returns the LAST run's group,
+        WHAT THIS CANNOT SEE, and it is on disk today. `RunRecord.rows()` returns the LAST run's group,
         because a re-run to the same `--out` appends. `slices16_ws_s2026` holds a finished twelve-epoch
         run AND a killed re-run, and its checkpoint is the FINISHED run's — so this reports TRUNCATED for
         a member whose weights are fine. The verdict is about the last thing that ran, not always about
@@ -258,7 +258,7 @@ class ConvergenceCheck:
         found = [
             self.verdict(run)
             for metrics in sorted(models.glob("*.metrics.jsonl"))
-            if (run := RunMetrics(metrics)).rows() and not self.smoke(run) and not self.benchmark(run)
+            if (run := RunRecord(metrics)).rows() and not self.smoke(run) and not self.benchmark(run)
         ]
         return sorted(found, key=lambda seen: (seen.settled(), seen.name))
 
@@ -276,7 +276,7 @@ def main() -> None:
         # hides a typo, which is how a converged run was read as having no score at all. The whole point
         # of this check is that a number is not quoted from a run that cannot support it, so a reading
         # taken of no file is the one thing it may never return quietly.
-        record = RunMetrics(arguments.run)
+        record = RunRecord(arguments.run)
         if not record.exists():
             message = f"{record.path} is not on disk - --run takes a PATH to a metrics file, not a run name"
             raise SystemExit(message)

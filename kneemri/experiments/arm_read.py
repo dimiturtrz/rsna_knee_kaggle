@@ -39,7 +39,7 @@ from pathlib import Path
 from core import cli
 from kneemri.evaluation.run_comparison import RunComparison
 from kneemri.experiments.arm_header import ArmHeader
-from kneemri.runs.run_metrics import METRICS_SUFFIX, RunMetrics
+from kneemri.runs.run_record import METRICS_SUFFIX, RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -104,16 +104,16 @@ class ArmRead:
 
         THE CHECKPOINT ALONE SATISFIES THE DIRECT BRANCH, not just a metrics file. `wsfold0_e6` — the
         control knee-bot's whole argument rests on — predates the recorder and kept its predictions
-        rather than epoch rows, which `RunComparison.scored` reads and `RunMetrics.exists` does not. On
+        rather than epoch rows, which `RunComparison.scored` reads and `RunRecord.exists` does not. On
         the metrics test alone it fell through to the sibling search, found no siblings either, and a
         control that resolves perfectly one layer down was reported as matching nothing.
         """
         direct = RunComparison.resolved(Path(self.produced(named)), models)
-        if direct.exists() or RunMetrics(direct).exists():
+        if direct.exists() or RunRecord(direct).exists():
             return direct
         records = models.glob(f"{named}_*{METRICS_SUFFIX}.jsonl")
         runs = [models / f"{record.name.removesuffix(f'{METRICS_SUFFIX}.jsonl')}.pt" for record in records]
-        best = ((run, RunMetrics(run).best()) for run in runs)
+        best = ((run, RunRecord(run).best()) for run in runs)
         scored = {run: row["auc"] for run, row in best if row is not None}
         if declared is not None:
             matched = [path for path, auc in scored.items() if abs(auc - declared) <= DECLARED_TOLERANCE]

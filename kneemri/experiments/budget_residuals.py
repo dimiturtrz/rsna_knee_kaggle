@@ -30,7 +30,7 @@ from dataclasses import dataclass, replace
 
 from core import cli
 from kneemri.models.backbone import ENCODERS
-from kneemri.runs.run_metrics import METRICS_RECORD, RunMetrics
+from kneemri.runs.run_record import METRICS_RECORD, RunRecord
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import DeviceBudget
 from kneemri.training.run_setup import RunSetup
@@ -55,7 +55,7 @@ class PricedRun:
     """The largest reserved peak any epoch of the run recorded, in GB."""
 
     @classmethod
-    def of(cls, metrics: RunMetrics) -> "PricedRun | None":
+    def of(cls, metrics: RunRecord) -> "PricedRun | None":
         """Price a recorded run, or None when it cannot be priced against the corrected reading.
 
         Three ways a run declines to be priced, and all three are silence rather than an error: it
@@ -129,7 +129,7 @@ def main() -> None:
 
     processed = command.rooted(arguments).models()
     found = sorted(processed.glob(f"*{METRICS_RECORD}"))
-    priced = [run for run in (PricedRun.of(RunMetrics(path)) for path in found) if run is not None]
+    priced = [run for run in (PricedRun.of(RunRecord(path)) for path in found) if run is not None]
     logger.info("%d recorded runs, %d priceable against the corrected reading", len(found), len(priced))
     command.report(run.line() for run in sorted(priced, key=lambda run: run.residual))
 

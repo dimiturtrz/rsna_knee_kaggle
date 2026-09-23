@@ -6,7 +6,8 @@ import pytest
 
 from core.paths import COMPETITION
 from kneemri.experiments.budget_residuals import ALLOCATED, RESERVED, PricedRun, main
-from kneemri.runs.run_metrics import METRICS_RECORD, RunMetrics
+from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import METRICS_RECORD
 from kneemri.training.config_tree import TrainConfig
 
 SETTLED = TrainConfig().with_leaves(slices=12, batch=12, variant="small", unfreeze_last=6)

@@ -47,7 +47,7 @@ import torch
 from core import cli
 from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import METRICS_SUFFIX, RunMetrics
+from kneemri.runs.run_record import METRICS_SUFFIX, RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -95,13 +95,13 @@ class LedgerCheck:
     def best(self, metrics: Path) -> float | None:
         """The best holdout mean AUC a run recorded, or None if it never scored an epoch.
 
-        Through `RunMetrics` rather than parsing the JSONL again, because that file now holds two row
+        Through `RunRecord` rather than parsing the JSONL again, because that file now holds two row
         shapes — epochs and the recipe line — and a second reader is a second place to learn that. It
         also drops NaN, which a hand-rolled `is not None` does not: a final fit (`--fold -1`) records
         NaN by design, and `max()` over it can return NaN, quoted as "nan" and reported UNRECORDED for
         as long as the run exists.
         """
-        best = RunMetrics(metrics).best()
+        best = RunRecord(metrics).best()
         return best["auc"] if best else None
 
     def finished(self, models: Path) -> dict[str, float]:
@@ -125,10 +125,10 @@ class LedgerCheck:
             name: score
             for name, score in scores.items()
             if not any(fragment in name for fragment in UNQUOTABLE)
-            and not self.truncated(RunMetrics(models / f"{name}.pt"))
+            and not self.truncated(RunRecord(models / f"{name}.pt"))
         }
 
-    def truncated(self, run: RunMetrics) -> bool:
+    def truncated(self, run: RunRecord) -> bool:
         """Whether the run capped the corpus it touched — a SMOKE BY CONSTRUCTION, not by name.
 
         The name test alone fails on exactly the smoke this project documents: `--studies 60 --epochs 1`

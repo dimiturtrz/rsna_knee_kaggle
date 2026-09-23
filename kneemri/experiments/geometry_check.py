@@ -71,7 +71,7 @@ from pathlib import Path
 from core import cli
 from core.denominator import Denominator
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class TrainedGeometry:
     hours: float
 
     @classmethod
-    def of(cls, run: RunMetrics) -> "TrainedGeometry | None":
+    def of(cls, run: RunRecord) -> "TrainedGeometry | None":
         """This run's geometry, or None when it recorded no recipe to read one from.
 
         A run with no recipe is not reported as a distinct geometry: an empty fingerprint would gather
@@ -181,13 +181,13 @@ class GeometryCheck:
         """
         grouped: dict[tuple[str, ...], list[TrainedGeometry]] = defaultdict(list)
         for metrics in sorted(models.glob("*.metrics.jsonl")):
-            run = RunMetrics(metrics)
+            run = RunRecord(metrics)
             if run.rows() and (seen := TrainedGeometry.of(run)) is not None:
                 grouped[seen.fingerprint].append(seen)
         repeated = [GeometryCluster(tuple(runs)) for runs in grouped.values() if len(runs) > ALONE]
         return sorted(repeated, key=lambda cluster: -cluster.hours)
 
-    def twins(self, models: Path, run: RunMetrics) -> list[TrainedGeometry]:
+    def twins(self, models: Path, run: RunRecord) -> list[TrainedGeometry]:
         """The runs that already trained THIS run's geometry — the question before queuing an arm.
 
         Excludes the run itself by name, so asking about a run already on disk returns the others rather
@@ -217,7 +217,7 @@ def main() -> None:
         # A PATH, not a name, for `convergence_check`'s reason: a name resolves against the working
         # directory, finds nothing, and reports "no twins" — the sentence a genuinely novel geometry
         # produces, from a reading taken of no file at all.
-        record = RunMetrics(arguments.run)
+        record = RunRecord(arguments.run)
         if not record.exists():
             message = f"{record.path} is not on disk - --run takes a PATH to a metrics file, not a run name"
             raise SystemExit(message)

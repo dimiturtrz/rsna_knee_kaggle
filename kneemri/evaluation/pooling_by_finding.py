@@ -39,7 +39,7 @@ from core.findings import TARGETS
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.evaluation.seat_swap import SeatFrame
 from kneemri.runs.holdout_record import SUFFIX, HoldoutReading
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ class PoolingByFinding:
 
     def rule(self, stem: str) -> str | None:
         """The pooling rule this run recorded, or None when its metrics file never stated one."""
-        metrics = RunMetrics(self.holdouts / f"{stem}.metrics.jsonl")
+        metrics = RunRecord(self.holdouts / f"{stem}.metrics.jsonl")
         recipe = metrics.recipe()
         return None if recipe is None else recipe.get(POOLING)
 

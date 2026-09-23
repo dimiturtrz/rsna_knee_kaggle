@@ -22,7 +22,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class LabelStability:
     def best(self, metrics: Path) -> dict[str, float] | None:
         """The per-label scores from the run's best epoch, or None if it never scored one.
 
-        Rows come from `RunMetrics`, which answers for the LAST run in the file, because a re-run to the
+        Rows come from `RunRecord`, which answers for the LAST run in the file, because a re-run to the
         same `--out` appends and the checkpoint beside it holds only the newest one. This method used to
         parse the file itself and take a maximum over every line, so `pair_memory_s2026` — twelve epochs
         peaking at 0.8353, then four more peaking at 0.8155 — contributed the profile of a checkpoint
@@ -44,7 +44,7 @@ class LabelStability:
         exactly where that lands unnoticed: the number it produces is a rank correlation, which stays
         plausible whichever of the two runs it came from.
         """
-        scored = [row for row in RunMetrics(metrics).rows() if row.get("auc") is not None and row.get("per_label")]
+        scored = [row for row in RunRecord(metrics).rows() if row.get("auc") is not None and row.get("per_label")]
         return max(scored, key=lambda row: row["auc"])["per_label"] if scored else None
 
     def correlation(self, first: dict[str, float], second: dict[str, float]) -> float:

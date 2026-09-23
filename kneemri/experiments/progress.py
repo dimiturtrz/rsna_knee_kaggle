@@ -24,7 +24,7 @@ import logging
 from datetime import UTC, datetime
 
 from core import cli
-from kneemri.runs.run_metrics import METRICS_RECORD, RunMetrics
+from kneemri.runs.run_record import METRICS_RECORD, RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ SECONDS_PER_HOUR = 3600.0
 class ArmProgress:
     """One run's metrics file, read as PROGRESS rather than as a result."""
 
-    def __init__(self, metrics: RunMetrics) -> None:
+    def __init__(self, metrics: RunRecord) -> None:
         # A SNAPSHOT, not a live view. The file is being appended to by the run it describes, so
         # re-reading it per question lets one reading disagree with the next: `producing` can see the
         # epoch that `line` then reports as missing. Reading it once fixes the moment being reported.
@@ -88,7 +88,7 @@ def main() -> None:
 
     processed = command.rooted(arguments).models()
     now = datetime.now(UTC).timestamp()
-    arms = [ArmProgress(RunMetrics(found)) for found in sorted(processed.glob(f"*{METRICS_RECORD}"))]
+    arms = [ArmProgress(RunRecord(found)) for found in sorted(processed.glob(f"*{METRICS_RECORD}"))]
     producing = [arm for arm in arms if arm.producing(now)]
     logger.info("%d runs recorded, %d producing", len(arms), len(producing))
     for arm in producing:

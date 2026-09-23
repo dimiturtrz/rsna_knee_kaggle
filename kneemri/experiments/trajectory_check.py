@@ -71,7 +71,7 @@ from pathlib import Path
 from core import cli
 from core.denominator import Denominator
 from kneemri.experiments.convergence_check import AUC, ConvergenceCheck
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +158,7 @@ class TrajectoryGate:
     def __init__(self) -> None:
         self._runs = ConvergenceCheck()
 
-    def scored(self, run: RunMetrics) -> list[float]:
+    def scored(self, run: RunRecord) -> list[float]:
         """The run's holdout series, NaN rows dropped.
 
         A `--fold -1` member holds nothing back and records NaN rather than omitting the key, so a filter
@@ -166,7 +166,7 @@ class TrajectoryGate:
         The first run of this check reported `median +nan, max +nan` over 119 runs for exactly that."""
         return [value for row in run.rows() if isinstance(value := row.get(AUC), float) and math.isfinite(value)]
 
-    def gain(self, run: RunMetrics, budget: int | None, gate: int = GATE_EPOCH) -> float | None:
+    def gain(self, run: RunRecord, budget: int | None, gate: int = GATE_EPOCH) -> float | None:
         """This run's gain from the gate epoch to its peak, or None if it does not belong in the corpus.
 
         `budget` matches on the epoch count the recipe ASKED for, because the gain is a statement about a
@@ -175,7 +175,7 @@ class TrajectoryGate:
         long schedule's headroom excuse a short arm.
 
         A run recording MORE epochs than it asked for is refused outright, and it stays refused now that
-        `RunMetrics.rows()` splits on a restarting epoch as well as on a recipe line (knee-v5lb). That fix
+        `RunRecord.rows()` splits on a restarting epoch as well as on a recipe line (knee-v5lb). That fix
         is what makes `lora_r8_v3small_224` readable at all — 16 rows against a 12-epoch recipe, its e3 in
         one run and its peak in another, contributing +0.1350 as one series against a corpus whose largest
         real gain is +0.0529, and the maximum is what decides here. This guard caught it BEFORE the reader
@@ -195,7 +195,7 @@ class TrajectoryGate:
         gains = [
             gain
             for metrics in sorted(models.glob("*.metrics.jsonl"))
-            if (run := RunMetrics(metrics)).rows() and not self._runs.smoke(run) and not self._runs.benchmark(run)
+            if (run := RunRecord(metrics)).rows() and not self._runs.smoke(run) and not self._runs.benchmark(run)
             if (gain := self.gain(run, budget, gate)) is not None
         ]
         # An unmounted data root, or a budget too thinly used to have a distribution, would otherwise make
@@ -245,7 +245,7 @@ class TrajectoryGate:
             logger.info("falling back to the calibrated gate e%d, which admits more runs", GATE_EPOCH)
             return self.spread(models, budget)
 
-    def reading(self, run: RunMetrics, target: float, spread: Spread) -> RunTrajectory:
+    def reading(self, run: RunRecord, target: float, spread: Spread) -> RunTrajectory:
         """Where the arm stands now, and the best it could still do by the corpus's own maximum gain.
 
         Read from the LAST recorded epoch, and the spread must therefore be measured from that same epoch —
@@ -281,7 +281,7 @@ def main() -> None:
         logger.info("%s", gate.spread(models).line())
         return
 
-    record = RunMetrics(arguments.run)
+    record = RunRecord(arguments.run)
     if not record.exists():
         message = f"{record.path} is not on disk - --run takes a PATH to a metrics file, not a run name"
         raise SystemExit(message)

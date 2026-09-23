@@ -1,7 +1,8 @@
 from pathlib import Path
 
 from kneemri.experiments.progress import OVERDUE_FACTOR, ArmProgress
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import EpochRow
 
 EPOCH_SECONDS = 400
 STARTED = 1_700_000_000

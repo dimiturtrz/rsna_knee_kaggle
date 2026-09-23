@@ -20,7 +20,7 @@ together — a comparison wants the recipe, a back-fill wants both — so they a
 from dataclasses import dataclass
 
 from kneemri.runs.member_record import StampedRun
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 
 @dataclass(frozen=True)
@@ -48,12 +48,12 @@ class RecordedRun:
     from `epochs_done`, which is what stamped `wsfold0_e6` as epoch 11 for its epoch-6 best."""
 
     @classmethod
-    def of(cls, metrics: RunMetrics) -> "RecordedRun":
+    def of(cls, metrics: RunRecord) -> "RecordedRun":
         """Read both records once and answer each fact from the one that can state it.
 
         Takes the metrics reader rather than a path because that is what its callers hold: the
         comparison names runs by their metrics files, the back-fill by their checkpoints, and
-        `RunMetrics` already accepts either spelling and resolves the pair.
+        `RunRecord` already accepts either spelling and resolves the pair.
         """
         stamped = StampedRun.of(metrics.checkpoint())
         recorded, best = metrics.recipe(), metrics.best()

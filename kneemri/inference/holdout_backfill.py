@@ -57,7 +57,7 @@ from kneemri.models.backbone import ENCODERS
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.runs.holdout_record import DERIVED, UNKNOWN_EPOCH, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +96,7 @@ class Backfill:
         re-derivable runs to protect a field nothing joins on yet, and guessing it is what stamped
         `wsfold0_e6` as epoch 11.
         """
-        recorded = RecordedRun.of(RunMetrics(checkpoint))
+        recorded = RecordedRun.of(RunRecord(checkpoint))
         recipe = recorded.recipe
         if recipe is None:
             message = (

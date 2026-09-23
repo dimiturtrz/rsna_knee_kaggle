@@ -3,7 +3,8 @@ from pathlib import Path
 import torch
 
 from kneemri.runs.metrics_recipe import MetricsRecipe
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import EpochRow
 
 
 def _run(root: Path, name: str, *, options: dict[str, object] | None) -> RunMetrics:

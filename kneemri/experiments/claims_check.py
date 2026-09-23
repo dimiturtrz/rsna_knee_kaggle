@@ -75,7 +75,7 @@ from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.experiments.ledger_check import LedgerCheck
 from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
 from kneemri.runs.holdout_record import HoldoutRecord
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -394,7 +394,7 @@ class ClaimsCheck:
         scores: dict[str, set[str]] = {}
         for name, best in runs.items():
             known = {f"{best:.4f}"}
-            metrics = RunMetrics(processed / f"{name}.pt")
+            metrics = RunRecord(processed / f"{name}.pt")
             if metrics.exists():
                 known.update(f"{float(row['auc']):.4f}" for row in metrics.rows() if row.get("auc") is not None)
             record = HoldoutRecord(processed / f"{name}{HOLDOUT_SUFFIX}")

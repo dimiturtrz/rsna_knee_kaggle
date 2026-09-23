@@ -11,7 +11,7 @@ numbers were read off. What it cannot recover is the loss and the wall-clock, wh
 array; those come back as NaN and 0 rather than as plausible values.
 
 NOTHING IS WRITTEN. A reconstructed row is returned in memory and never appended to a metrics file:
-its 0-second epoch would then be a real row on disk, and `RunMetrics.epoch_seconds` would read a run's
+its 0-second epoch would then be a real row on disk, and `RunRecord.epoch_seconds` would read a run's
 cost as zero — a fabricated number outliving the comparison that needed it.
 """
 
@@ -21,7 +21,7 @@ import numpy as np
 
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_record import EpochRow, RunRecord
 
 UNRECOVERABLE_SECONDS = 0
 """A reconstructed epoch has no wall-clock: the array never held one. Zero rather than a guess, and it
@@ -108,7 +108,7 @@ class HoldoutMetrics:
             loss_q95=float("nan"),
         )
 
-    def of(self, metrics: RunMetrics) -> ScoredEpoch | None:
+    def of(self, metrics: RunRecord) -> ScoredEpoch | None:
         """This run's best epoch, preferring what it recorded, or None when neither source can say.
 
         THE RECORDED ROW WINS when there is one. It carries the loss and the wall-clock, and a run that
@@ -122,7 +122,7 @@ class HoldoutMetrics:
         True and `named()` prints it — because a filtered number that claimed to be the recorded one
         would be the more dangerous of the two mistakes.
 
-        A run that held NOTHING back is refused outright, whatever files sit beside it. `RunMetrics.best`
+        A run that held NOTHING back is refused outright, whatever files sit beside it. `RunRecord.best`
         already refuses one on its recipe, and reconstruction must obey the same rule or it becomes the
         way around it: a final fit's `--fold -1` means there is no held-out study to score, so any
         number computed here would be a score on training data wearing a holdout's name.

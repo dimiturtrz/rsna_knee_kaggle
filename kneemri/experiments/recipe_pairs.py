@@ -44,7 +44,7 @@ from kneemri.evaluation.member_pool import DECLINES, MemberPool
 from kneemri.experiments.convergence_check import ConvergenceCheck
 from kneemri.runs.holdout_record import SUFFIX
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +110,7 @@ class RecipePairs:
         """
         found = {}
         for metrics in sorted(self.models.glob("*.metrics.jsonl")):
-            run = RunMetrics(metrics)
+            run = RunRecord(metrics)
             recipe = RecordedRun.of(run).recipe
             if recipe is not None:
                 found[run.name()] = {key: value for key, value in recipe.items() if value is not None}
@@ -128,7 +128,7 @@ class RecipePairs:
         for row in rows:
             if row.population != population or row.void:
                 continue
-            verdict = self.convergence.verdict(RunMetrics(self.models / f"{row.name}.metrics.jsonl"))
+            verdict = self.convergence.verdict(RunRecord(self.models / f"{row.name}.metrics.jsonl"))
             if verdict.settled():
                 kept[row.name] = row.ledger75
         return kept

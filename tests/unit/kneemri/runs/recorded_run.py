@@ -5,7 +5,8 @@ from pathlib import Path
 import torch
 
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import EpochRow
 
 
 def _scored(checkpoint: Path, aucs: list[float], recipe: dict[str, str] | None = None) -> RunMetrics:

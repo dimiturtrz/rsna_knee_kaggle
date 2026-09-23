@@ -8,7 +8,7 @@ from core.findings import TARGETS
 from kneemri.evaluation.run_comparison import SUPERVISION_AXES, VIEW_AXES, PairedWidths, RunComparison
 from kneemri.evaluation.supervision_gap import Bottleneck
 from kneemri.runs.holdout_record import DERIVED, TRAINED, HoldoutRecord
-from kneemri.runs.run_metrics import EpochRow
+from kneemri.runs.run_record import EpochRow
 
 STUDIES = 40
 

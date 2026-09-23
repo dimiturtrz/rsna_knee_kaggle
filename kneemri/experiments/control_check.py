@@ -42,7 +42,7 @@ from pathlib import Path
 from core import cli
 from core.denominator import Denominator
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
-from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ class Comparability:
     written — and is not a finding at all. Merged, the check reported 42 UNRESOLVED against a
     researcher's independently-swept 4, and the whole difference was arms waiting their turn."""
 
-    def sourced(self, control: RunMetrics, quoted: float) -> bool:
+    def sourced(self, control: RunRecord, quoted: float) -> bool:
         """Whether the quoted score is the control's, under ANY ruler this side can compute.
 
         Any epoch rather than the best one, because a write-up legitimately quotes a matched epoch — the
@@ -160,7 +160,7 @@ class Comparability:
         midpoint = {round(float(row[AUC]), QUOTED_PLACES) for row in control.rows() if row.get(AUC) is not None}
         return target in midpoint or target in self._recomputed(control)
 
-    def scoreable(self, control: RunMetrics) -> bool:
+    def scoreable(self, control: RunRecord) -> bool:
         """Whether the control kept predictions, which is a run this side can price with no metrics file.
 
         An epoch export carries the checkpoint and the holdout record and leaves the metrics file under
@@ -168,7 +168,7 @@ class Comparability:
         """
         return bool(self._recomputed(control))
 
-    def _recomputed(self, control: RunMetrics) -> frozenset[float]:
+    def _recomputed(self, control: RunRecord) -> frozenset[float]:
         """Both macro rulers off the control's kept predictions, or nothing when it kept none.
 
         BOTH, because the recut is not a correction to the midpoint — they are two rulers and an arm may
@@ -186,7 +186,7 @@ class Comparability:
             return frozenset()
         return frozenset({round(row.ledger, QUOTED_PLACES), round(row.ledger75, QUOTED_PLACES)})
 
-    def recorded(self, arm: RunMetrics, control: RunMetrics) -> bool:
+    def recorded(self, arm: RunRecord, control: RunRecord) -> bool:
         """Whether both runs wrote a recipe, which is what BUDGET and BUILD are read out of.
 
         An epoch export has predictions and no metrics file, so its recipe is unreadable — and an absent
@@ -196,7 +196,7 @@ class Comparability:
         """
         return arm.recipe() is not None and control.recipe() is not None
 
-    def budgeted(self, arm: RunMetrics, control: RunMetrics) -> bool:
+    def budgeted(self, arm: RunRecord, control: RunRecord) -> bool:
         """Whether both runs asked for the same number of epochs.
 
         The recipe's ask rather than the rows delivered: a run killed at 4 of 12 is a truncation, which
@@ -205,7 +205,7 @@ class Comparability:
         """
         return self._asked(arm) == self._asked(control)
 
-    def built(self, arm: RunMetrics, control: RunMetrics) -> tuple[str, ...]:
+    def built(self, arm: RunRecord, control: RunRecord) -> tuple[str, ...]:
         """The recipe keys present in one run and absent from the other, which are code paths, not values.
 
         A key missing from a recipe block was not defaulted — it did not exist in the trainer that wrote
@@ -215,11 +215,11 @@ class Comparability:
         mine, theirs = self._keys(arm), self._keys(control)
         return tuple(sorted(mine ^ theirs))
 
-    def _asked(self, run: RunMetrics) -> str | None:
+    def _asked(self, run: RunRecord) -> str | None:
         recipe = run.recipe()
         return None if recipe is None else recipe.get(EPOCHS)
 
-    def _keys(self, run: RunMetrics) -> frozenset[str]:
+    def _keys(self, run: RunRecord) -> frozenset[str]:
         recipe = run.recipe()
         return frozenset() if recipe is None else frozenset(recipe)
 
@@ -241,7 +241,7 @@ class ControlCheck:
             return None
         return Comparison(trained["name"], control["name"], float(control["score"]), arm, control["rest"])
 
-    def resolve(self, name: str) -> RunMetrics | None:
+    def resolve(self, name: str) -> RunRecord | None:
         """The run a control token names, under every spelling this repository gives one run.
 
         Three, because a token is written by whoever remembered the run and they remembered a different
@@ -255,7 +255,7 @@ class ControlCheck:
         cannot be judged — that is silence about them, never a pass.
         """
         for spelling in (name, f"{name}{SEED_SUFFIX}"):
-            record = RunMetrics(self.models / f"{spelling}.pt")
+            record = RunRecord(self.models / f"{spelling}.pt")
             if record.rows() or self.comparability.scoreable(record):
                 return record
         stem = self._output_stem(name)

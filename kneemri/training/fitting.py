@@ -35,7 +35,8 @@ from core.wakelock import Wakelock
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.runs.member_record import WITNESS_STUDIES, MemberRecord
-from kneemri.runs.run_metrics import EpochRow, RunMetrics
+from kneemri.runs.run_metrics import RunMetrics
+from kneemri.runs.run_record import EpochRow
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.patience import Patience
 from kneemri.training.resume import ResumeState

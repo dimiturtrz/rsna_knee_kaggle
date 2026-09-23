@@ -16,7 +16,7 @@ from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.evaluation.supervision_gap import Bottleneck, SupervisionGap
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
-from kneemri.runs.run_metrics import METRICS_SUFFIX, EpochRow, RunMetrics
+from kneemri.runs.run_record import METRICS_SUFFIX, EpochRow, RunRecord
 
 logger = logging.getLogger(__name__)
 
@@ -133,8 +133,8 @@ class RunComparison:
         bottleneck: Bottleneck | None = None,
         holdout: HoldoutMetrics | None = None,
     ) -> None:
-        self.control = RunMetrics(control)
-        self.arms = [RunMetrics(arm) for arm in arms]
+        self.control = RunRecord(control)
+        self.arms = [RunRecord(arm) for arm in arms]
         self.errors = self._intervals(labels) if labels else {}
         # PASSED IN, never measured here: the split costs the published corpus and its alignment to the
         # annotations, which is `SupervisionGap`'s subject and not this module's. Absent, every arm still
@@ -197,7 +197,7 @@ class RunComparison:
             for target, total in power.positives().items()
         }
 
-    def scored(self, run: RunMetrics) -> ScoredEpoch | None:
+    def scored(self, run: RunRecord) -> ScoredEpoch | None:
         """One run's best epoch from whichever of its two records can state it.
 
         A run that predates the recorder still kept its predictions, and `wsfold0_e6` — the control
@@ -206,7 +206,7 @@ class RunComparison:
         """
         return self.holdout.of(run)
 
-    def recipe(self, run: RunMetrics) -> dict[str, str] | None:
+    def recipe(self, run: RunRecord) -> dict[str, str] | None:
         """One run's recipe from whichever of its two records carries it.
 
         Its metrics file OR its checkpoint stamp, the same rule the back-fill reads splits by. Reading
@@ -274,7 +274,7 @@ class RunComparison:
             )
         return "\n".join(lines)
 
-    def _arm(self, arm: RunMetrics, deltas: dict[str, float] | None) -> list[str]:
+    def _arm(self, arm: RunRecord, deltas: dict[str, float] | None) -> list[str]:
         """One arm's block of the table — its deltas, the floor they are marked against, and its stalls.
 
         Its own method because `report` was doing two jobs at one indent: assembling the document, and
@@ -306,7 +306,7 @@ class RunComparison:
         ]
 
     @staticmethod
-    def _peaks(run: RunMetrics) -> dict[str, tuple[float, int]]:
+    def _peaks(run: RunRecord) -> dict[str, tuple[float, int]]:
         """Each label's OWN best AUC across every recorded epoch, and the epoch index it peaked at.
 
         The delta line reads every label at ONE epoch — the one the run's MEAN peaked at. A label that
@@ -323,7 +323,7 @@ class RunComparison:
                     peaks[label] = (value, row["epoch"])
         return peaks
 
-    def _peaks_line(self, arm: RunMetrics, scored: ScoredEpoch | None) -> list[str]:
+    def _peaks_line(self, arm: RunRecord, scored: ScoredEpoch | None) -> list[str]:
         """Each label's own peak beside its value at the global-best epoch, or nothing when unrecorded.
 
         A LIST rather than a string, like `_stalled`: a run with no epoch rows contributes no line and
@@ -343,7 +343,7 @@ class RunComparison:
         return [f"  label peaks across epochs: {shown}"]
 
     @staticmethod
-    def _stalled(run: RunMetrics) -> list[str]:
+    def _stalled(run: RunRecord) -> list[str]:
         """One line per stalled epoch, or nothing at all for a run that has none.
 
         Here because this report is where a run's cost is READ, and a stall is exactly the thing that
@@ -372,7 +372,7 @@ class RunComparison:
         started = row.get("started")
         return "" if started is None else f", from {datetime.fromtimestamp(started, tz=UTC):%Y-%m-%d %H:%M UTC}"
 
-    def paired(self, arm: RunMetrics) -> PairedWidths | None:
+    def paired(self, arm: RunRecord) -> PairedWidths | None:
         """This pair's OWN per-label 95% half-widths, or None when either run kept no predictions.
 
         The unpaired bound is each label's sampling error from its positive count, and it is far too
@@ -396,7 +396,7 @@ class RunComparison:
             exact=control.source == TRAINED and theirs.source == TRAINED,
         )
 
-    def floor(self, arm: RunMetrics) -> tuple[dict[str, float], str]:
+    def floor(self, arm: RunRecord) -> tuple[dict[str, float], str]:
         """The intervals this arm's deltas are marked against, and the sentence naming which they are."""
         paired = self.paired(arm)
         if paired is None:
@@ -415,7 +415,7 @@ class RunComparison:
         """
         return {name: value for name, value in theirs.items() if name in control and control[name] != value}
 
-    def unmatched(self, arm: RunMetrics) -> str:
+    def unmatched(self, arm: RunRecord) -> str:
         """What this arm changed BESIDES the axis under test, read from both runs' recorded recipes.
 
         A per-label delta is a claim about one axis, and it is only that if nothing else moved. Two of
@@ -437,13 +437,13 @@ class RunComparison:
         said = ", ".join(moved) if moved else "matched on every option both runs recorded"
         return said if not newer else f"{said}; control predates {', '.join(newer)}"
 
-    def view(self, run: RunMetrics) -> dict[str, str] | None:
+    def view(self, run: RunRecord) -> dict[str, str] | None:
         """The reading one run was fitted under, from the checkpoint block that records it in both eras."""
         if run.path not in self._recorded:
             self._recorded[run.path] = RecordedRun.of(run)
         return self._recorded[run.path].view
 
-    def moved_view(self, arm: RunMetrics) -> bool:
+    def moved_view(self, arm: RunRecord) -> bool:
         """Whether this arm changed the field of view or the pixel density the control read at.
 
         Read off the two CONFIGS rather than the two recipes. The recipe is the flag list, and the flag
@@ -462,7 +462,7 @@ class RunComparison:
             return False
         return bool(self.disagreements(control, {name: value for name, value in theirs.items() if name in VIEW_AXES}))
 
-    def moved(self, arm: RunMetrics) -> set[str] | None:
+    def moved(self, arm: RunRecord) -> set[str] | None:
         """Every option this arm changed against the control, or None when either recipe is unrecorded.
 
         The recipe diff PLUS the view axes the two configs disagree on, because a crop arm against a
@@ -499,7 +499,7 @@ class RunComparison:
         """
         return {name for name, value in theirs.items() if name not in control and value not in OFF_VALUES}
 
-    def judged_on(self, arm: RunMetrics, deltas: dict[str, float]) -> list[str]:
+    def judged_on(self, arm: RunRecord, deltas: dict[str, float]) -> list[str]:
         """The same deltas, restricted to the findings this arm's kind of change could actually move.
 
         NOT A NEW SCORE, and the line says so: the ledger number stays the twelve-label mean, or the
@@ -526,7 +526,7 @@ class RunComparison:
             "  — the arm's CLAIM, not its score; the ledger number stays the twelve-label mean above",
         ]
 
-    def reader_change(self, arm: RunMetrics) -> str:
+    def reader_change(self, arm: RunRecord) -> str:
         """Which half of the pipeline this arm moved, read from the two recipes rather than declared.
 
         NOT filtered through `NOT_AN_AXIS`: that list answers "is this pair matched", and a swapped
