@@ -18035,3 +18035,37 @@ needs a decode nobody has paid**: the 336 arrays on disk are 20sl-extended (83.4
 family already runs) and 24sl-canonical (66.7 GB); `images_336px_24sl_0.1-0.9band_extended.npy` does not
 exist. That is ~80 GB on a disk at 196 GB free plus ~3-4 h of decode that buys no signal by itself,
 before a ~2 h arm — the same ratio as `multiscale`, declined the same morning for the same reason.
+
+## The labelwise re-read programme is EXHAUSTED at every corner this card reaches — 2026-09-23T05:32Z
+
+Surveying `docs/AXES.md` with the capacity axis closed flat, the soup saturated, the schedule step
+board-refuted and 224/20sl machine-closed, every remaining UNREAD row is one of three things and none is
+a lever:
+
+* **machine-barred** — `extended_slots` (nine slots), `resolution 420` and `cached slices 20 vs 12` all
+  want a 336-corner cache, which is the corner with seven OOMs and where `--unfreeze-last` 12 and 9 both
+  died with the flag confirmed in the stamp.
+* **unreadable on our ruler by construction** — acquisition-physics augmentation (`ghosting_s2026`,
+  +0.0057 directional) must be priced on `decode_cost`, because holdout909 is drawn from the same decode
+  as training.
+* **already answered directional** — SAM recovered at rho=0.01 (+0.0032 ledger75) and its composition
+  onto the shipping recipe is priced at P ~ 0.05, because the give-back it would have to recover is
+  **0.0006** at the shipping corner, a tenth of the 0.0062 paired floor.
+
+**And SSL is closed with a published number rather than a preference**: RAD-DINO is continued multi-crop
+SSL on a medical corpus and loses 0.037; Zhang et al. (MedIA 2024) measure external-data SSL at +0.073 at
+80 labelled subjects and **-0.005 at 800**, and we hold ~4,400. So the axis the owner has raised
+repeatedly is a wash AT OUR LABELLED SCALE — the mechanism is real and the scale is wrong for it.
+
+**The structural reason there is no cheap next reading: the line that SHIPS has no offline ruler at all.**
+`basinsoupff_v1` is `members: 1`, board **0.946**, level with the eight-seat champion — and
+`basinsoup_ff.sh:35-37` pre-registered why it can never be priced here: *"NO `holdout_backfill` and NO
+`ledger75` tail... a full-data fit has seen every study, so a holdout record for it would be a number
+about the training set."* Scoring it anyway would manufacture the in-sample number that voided
+`raptor_solo` at 98.6% overlap. The fold-0 analogue is the only proxy, and the cross-family inversion
+says the proxy is weak: dmlb owns the better fold-0 (0.9096 against basinsoup_k3's 0.9089) and the WORSE
+board (0.940 against 0.946).
+
+**So every FF-side decision costs a submission slot, and that — not a missing idea — is what caps the
+rate at which this project can move.** The card was left idle rather than spent ~1 h at P ~ 0.05, which
+is the correct call under the ratio rule and is recorded here so it is a decision rather than a gap.
