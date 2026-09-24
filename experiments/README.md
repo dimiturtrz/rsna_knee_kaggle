@@ -18090,3 +18090,18 @@ out: supervised localisation (a location target), which RSNA does not carry (58/
 and every available locator is trained on barred data. With focal/sided (label-agnostic, −0.0036) this
 closes the token-selection axis in both its label-agnostic and label-specific forms.
 Declined in `comp/members.declines`.
+
+## Map-driven erasing is null on the labelwise family too — 2026-09-24T07:25Z
+
+`erase_lw24_s2026` (knee-xxr8l): `labelwise_depth24_drop40_long`'s recipe plus the single addition
+`--patch-maps <labelwise_dense_drop40_long g4 train> --patch-erase 0.25`, the erasing `erase_own_cells`
+read null alone on the 224/12-epoch probe (knee-0e2gd). Here the maps come from the shipping family.
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| erase_lw24_s2026 | 0.8679 | **0.9057** | 17 of 24 |
+| labelwise_depth24_drop40_long_s2026 (control) | 0.8679 | **0.9053** | 18 |
+
+**+0.0004 ledger75**, the pre-registered bottom branch (≤ +0.0061): erasing is closed on both families.
+Converged clean (peak e17 of 24, ARM DONE). What it does NOT rule out: erasing driven by a map from
+a clean localiser, which nothing licence-clean provides. Declined in `comp/members.declines`.
