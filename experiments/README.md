@@ -18120,3 +18120,28 @@ a clean localiser, which nothing licence-clean provides. Declined in `comp/membe
 of falling train loss never recover it (0.8515-0.8532). The surrogate moves a fitted CE network OFF its
 ranking rather than sharpening it — the same sign `margin_seat` read from scratch. Two-stage AUC-margin
 closed; the loss-axis AUC surrogate is now closed in both its published uses.
+
+## Multiscale slots are null under labelwise too; WiSE-FT pulls toward pretrained lose — 2026-09-24T11:20Z
+
+`labelwise_ms` (knee-5jfix, `--scheme multiscale --centre tissue`, 12 slots on the 336px/12-slice
+cache) against `labelwise_ms_ctrl`, identical recipe and seed:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_ms_ctrl_s2026 | 0.8637 | 0.9006 | 20 |
+| labelwise_ms_s2026 | 0.8593 | 0.8960 | 12 |
+
+−0.0046 ledger75: closed under the pre-registration (≤ +0.0061). The midpoint lead was +0.0136 at e3,
++0.0074 at e8 and gone by e9 — multiscale buys early convergence, not a better optimum. The
+control itself sits −0.0047 below the 24-slice shipping control (0.9053) at about half its card cost.
+
+WiSE-FT on `labelwise_depth24_drop40_long` (only blocks 6-11 moved; 108 backbone tensors
+interpolated toward `facebook/dinov2-small`, head untouched):
+
+| α (fine-tuned share) | LEDGER | LEDGER75 | vs 0.9053 |
+|---|---|---|---|
+| 0.85 | 0.8695 | 0.9061 | +0.0008 |
+| 0.70 | 0.8683 | 0.9038 | −0.0015 |
+| 0.50 | 0.8564 | 0.8895 | −0.0158 |
+
+Monotone; no interior optimum. Closed. The three soups are declined in `comp/members.declines`.
