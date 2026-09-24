@@ -101,7 +101,7 @@ now a solo — so a loss that buys diversity and costs solo quality buys nothing
 
 | axis | verdict | where |
 |---|---|---|
-| AUC-margin surrogate (LibAUC / Deep AUC Maximization) | **CLOSED** — `margin_seat` −0.0053 solo. This is the literature's single best loss offer for imbalanced medical AUC, and it is spent | README:374; knee-bdhb |
+| AUC-margin surrogate (LibAUC / Deep AUC Maximization) | **CLOSED** — `margin_seat` −0.0053 solo. Two-stage (CE then AUC fine-tune, the paper's recipe) `auc_ft_lw24` −0.0096 ledger75 on the labelwise line, 2026-09-24 (knee-rt48x). This is the literature's single best loss offer for imbalanced medical AUC, and it is spent | README:374; knee-bdhb |
 | rank / dissent objective as a seat lever | **CLOSED** — 38th of 66; the per-label table says why | README:463 |
 | per-label loss weighting | **refuted twice**, once from the training side | README:567, :1145 |
 | severity weighting | **CLOSED** — the knob fired and moved the graded findings the WRONG way | README:1476 |

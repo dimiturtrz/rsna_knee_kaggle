@@ -19,7 +19,7 @@
 # The recipe stamps "bf16": "True", so no GradScaler exists and Sharpness has no scale factor to
 # unscale_. --accumulate must stay 1: sharpen() raises rather than approximating across micro-batches.
 #
-# deliberate: --vram-gb 28 matches the control's value, not the 22 the owner's cap would set. The budget
+# deliberate: --vram-gb 22 matches the control's value, not the 22 the owner's cap would set. The budget
 #             feeds batch sizing, so changing it moves a second variable.
 #
 # bead: knee-k3v5t
@@ -30,7 +30,7 @@ require "$LABELS"
 
 run_train sam_ship \
   $RECIPE --epochs 24 --slice-pooling labelwise --whole-stack $THROUGHPUT \
-  --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 28 --band-low 0.1 --band-high 0.9 \
+  --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 22 --band-low 0.1 --band-high 0.9 \
   --calibrated-targets --hold-annotations --slot-dropout 0.40 \
   --sharpness 0.01 \
   --labels "$LABELS" --out "$MODELS/sam_ship_s2026.pt"

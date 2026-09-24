@@ -18105,3 +18105,18 @@ read null alone on the 224/12-epoch probe (knee-0e2gd). Here the maps come from 
 **+0.0004 ledger75**, the pre-registered bottom branch (≤ +0.0061): erasing is closed on both families.
 Converged clean (peak e17 of 24, ARM DONE). What it does NOT rule out: erasing driven by a map from
 a clean localiser, which nothing licence-clean provides. Declined in `comp/members.declines`.
+
+## Two-stage AUC-margin (LibAUC's own recipe) costs on the labelwise line — 2026-09-24T07:58Z
+
+`auc_ft_lw24_s2026` (knee-rt48x): stage two of Yuan et al.'s two-stage recipe — `--auc-margin 1.0
+--rank-weight 0`, 6 epochs at backbone 1e-5, `--init labelwise_depth24_drop40_long_s2026`.
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| auc_ft_lw24_s2026 | 0.8539 | **0.8957** | 0 of 6 |
+| labelwise_depth24_drop40_long_s2026 (parent/control) | 0.8679 | **0.9053** | 18 |
+
+**−0.0096 ledger75**, bottom branch. The drop lands in epoch 0 (0.8679 → 0.8539 midpoint) and six epochs
+of falling train loss never recover it (0.8515-0.8532). The surrogate moves a fitted CE network OFF its
+ranking rather than sharpening it — the same sign `margin_seat` read from scratch. Two-stage AUC-margin
+closed; the loss-axis AUC surrogate is now closed in both its published uses.

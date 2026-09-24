@@ -1798,3 +1798,4 @@ transduce_dmlb_c408         # 0.8701 midpoint / 0.9080 ledger75. Same as c407 (k
 transduce_dmlb_c409         # 0.8703 midpoint / 0.9067 ledger75. Same as c407 (knee-nchjt).
 labelwise_patch_s2026       # 0.8698 midpoint / 0.9064 ledger75 vs control labelwise_depth24_drop40_long 0.9053: +0.0011, null (knee-hbta3).
 erase_lw24_s2026            # 0.8679 midpoint / 0.9057 ledger75 vs control labelwise_depth24_drop40_long 0.9053: +0.0004, null (knee-xxr8l).
+auc_ft_lw24_s2026           # 0.8539 midpoint / 0.8957 ledger75 vs parent 0.9053: -0.0096 (knee-rt48x).
