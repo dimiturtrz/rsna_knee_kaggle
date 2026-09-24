@@ -91,6 +91,14 @@ class EncoderConfig:
             " dense work. Costs no extra forward pass."
         ),
     )
+    fuse_blocks: int = ConfigLeaf.of(
+        default=0,
+        says=(
+            "how many blocks before the last add their normalised tokens to the last block's, each through"
+            " a zero-initialised per-channel gate, so the run starts exactly at the control. 0 is every "
+            "member so far. Costs no extra forward pass."
+        ),
+    )
     through_plane: bool = ConfigLeaf.of(
         default=StudyDesign().through_plane,
         says=(

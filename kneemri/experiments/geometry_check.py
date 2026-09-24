@@ -90,6 +90,7 @@ GEOMETRY_KEYS = (
     "slice_pooling",
     "through_plane",
     "encoder_layer",
+    "fuse_blocks",
     "whole_stack",
     "labels",
     "studies",

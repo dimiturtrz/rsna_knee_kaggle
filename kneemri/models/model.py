@@ -125,6 +125,14 @@ class StudyDesign:
     work — and our findings are 1-3 mm while our head pools patch tokens, so this is the axis they live
     on. Untested for either encoder until now."""
 
+    fuse_blocks: int = 0
+    """How many blocks BEFORE the last add their normalised tokens to the last block's, each through a
+    per-channel gate that starts at zero. 0 is every member so far.
+
+    Reading one intermediate block alone REPLACES the pretrained readout (encoder_layer 9 cost -0.0227);
+    a zero gate instead starts byte-identical to the control and lets the head pull in finer, less
+    pretraining-specialised features only as far as the loss asks for them. Costs no extra forward pass."""
+
     @staticmethod
     def lora_rank_of(config: Mapping[str, object]) -> int:
         """The rank of a config's adapters, or zero — read WITH the design, though not a field of it.
@@ -156,6 +164,7 @@ class StudyDesign:
             slice_regions=int(str(config.get("slice_regions", 1))),
             through_plane=bool(config.get("through_plane", False)),
             layer=int(str(config.get("encoder_layer", -1))),
+            fuse_blocks=int(str(config.get("fuse_blocks", 0))),
         )
 
 
@@ -240,6 +249,8 @@ class StudyModel(nn.Module):
         # and every published member would fail to load against it.
         self.slices = pooling.build(pooled_width, dim)
         self.head = SLOT_POOLINGS[self.design.slot_pooling](self.head_width, n_slot, len(TARGETS), prior)
+        if self.design.fuse_blocks:
+            self.fusion = nn.Parameter(torch.zeros(self.design.fuse_blocks, dim))
         # PERSISTENT, so they ride in the state dict — which is what makes fixing the default safe:
         # every member already on disk keeps the constants it was actually fitted under, whatever the
         # registry now says, and only a fresh fit moves.
@@ -639,9 +650,23 @@ class StudyModel(nn.Module):
         # AND A FIXED-GRID TRUNK TAKES ONE MORE, for the same reason and with the same failure mode one
         # step earlier — see `GridFit`, which reads it off the trunk rather than off the registry.
         extra = self.reading.extra()
+        if self.design.fuse_blocks:
+            read = self.backbone(**{keyword: x}, **extra, output_hidden_states=True)
+            return self._fused(read.last_hidden_state, read.hidden_states)
         if self.design.layer == -1:
             return self.backbone(**{keyword: x}, **extra).last_hidden_state
         return self.backbone(**{keyword: x}, **extra, output_hidden_states=True).hidden_states[self.design.layer]
+
+    def _fused(self, last: Float[Tensor, "n t d"], states: tuple[Tensor, ...]) -> Float[Tensor, "n t d"]:
+        """The last block's tokens plus each earlier block's, normalised by the trunk's own final norm.
+
+        `hidden_states` are PRE-norm while `last_hidden_state` is post-norm, so an earlier block is put
+        through the same `layernorm` before it is added — otherwise the gate would have to learn the
+        scale the norm already knows.
+        """
+        norm = self.backbone.get_submodule("layernorm")
+        earlier = states[-1 - self.design.fuse_blocks : -1]
+        return last + sum(gate * norm(state) for gate, state in zip(self.fusion, earlier, strict=True))
 
     def _pool(self, tokens: Float[Tensor, "n t d"]) -> Float[Tensor, "n f"]:
         """Reduce this read's tokens to one vector, by the design's named pooling."""

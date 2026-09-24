@@ -964,6 +964,35 @@ def test_tokens_reads_the_layer_the_design_asks_for():
     assert not torch.allclose(from_last, from_middle), "a different block must reach the head"
 
 
+class _NormedBackbone(_FakeBackbone):
+    """The stand-in plus the final `layernorm` a DINOv2 carries, which fusion reuses."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.layernorm = torch.nn.LayerNorm(DIM)
+
+
+def test_fused():
+    """Zero gates read exactly the control's tokens; opened gates move them; no fusion builds no gates.
+
+    Classes: the default design (no `fusion` in the state dict, so every published member still
+    loads), a fused design at initialisation (byte-identical features), and one whose gates moved.
+    """
+    imgs = torch.randint(0, 256, (1, SLOTS, GROUP, 14, 14), dtype=torch.uint8)
+    torch.manual_seed(SEED)
+    control = StudyModel(_NormedBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")).eval()
+    torch.manual_seed(SEED)
+    fused = StudyModel(_NormedBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max", fuse_blocks=3)).eval()
+
+    assert not any(key.startswith("fusion") for key in control.state_dict())
+    assert fused.fusion.shape == (3, DIM)
+    with torch.no_grad():
+        assert torch.equal(control.slice_features(imgs, 14), fused.slice_features(imgs, 14))
+        fused.fusion.fill_(0.5)
+        assert not torch.allclose(control.slice_features(imgs, 14), fused.slice_features(imgs, 14))
+    assert StudyDesign.from_config({"fuse_blocks": 3}).fuse_blocks == 3
+
+
 def test_every_slot_pooling_name_builds_its_own_head():
     """The name a member records must build the head it names — for every name, not just the default.
 

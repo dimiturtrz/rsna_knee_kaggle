@@ -246,6 +246,7 @@ class RunStamp:
     slice_regions: int
     slot_pooling: str
     encoder_layer: int
+    fuse_blocks: int
     through_plane: bool
     anatomical_prior: bool
     lora_rank: int
@@ -440,6 +441,7 @@ class MemberRecord:
                 # Recorded AND read back by Member.layer. A value written here and defaulted by a
                 # consumer is the shape that has cost this project nine defects.
                 "encoder_layer": options.encoder_layer,
+                "fuse_blocks": options.fuse_blocks,
                 "ema": options.ema,
                 # Precision is part of what produced these weights: bf16 and fp16 are different
                 # arithmetic, and a member scored under one is not strictly comparable to a control

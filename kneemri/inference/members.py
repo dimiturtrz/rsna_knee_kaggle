@@ -63,6 +63,9 @@ class MemberConfig(TypedDict):
     encoder_layer: NotRequired[int]
     """Which encoder block the head read; absent on every member fitted before it was a flag."""
 
+    fuse_blocks: NotRequired[int]
+    """How many earlier blocks were gated into the last; absent on every member fitted before fusion."""
+
     bf16: NotRequired[bool]
     """Whether the run's autocast was bfloat16; absent on every member fitted before the flag existed."""
 

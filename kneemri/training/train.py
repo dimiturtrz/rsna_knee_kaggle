@@ -123,6 +123,7 @@ def main() -> None:
         slot_pooling=arguments.model.slot_pooling,
         anatomical_prior=arguments.encoder.anatomical_prior,
         layer=arguments.encoder.encoder_layer,
+        fuse_blocks=arguments.encoder.fuse_blocks,
     )
     encoder = ENCODERS[arguments.encoder.variant]
     # Before the weights are fetched and the cache is mapped: a read size the patch grid cannot tile is
