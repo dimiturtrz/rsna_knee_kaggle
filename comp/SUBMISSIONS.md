@@ -4844,3 +4844,9 @@ served alone at 0.946: −0.002, the pre-registered "≤0.946" branch. The two-a
 lower entries does not survive at our top — a 0.946 member averaged with a weaker foreign reader loses.
 knee-ir6d3's gate parks the ensemble lane on this read. `soupraptor23_v1` (weight 2/3, ref 56505465)
 is still scoring; by this result its expected read is lower still.
+
+## soupraptor23_v1 — 0.939, ref 56505465, 2026-09-23 — the raptor-weight curve is monotone down
+
+INSTRUMENT. Same two members as `soupraptor_v1`, raptor weight 2/3. Curve over raptor weight:
+0 → 0.946 (soup alone), 1/2 → 0.944, 2/3 → 0.939. Monotone decreasing: at our top the foreign reader
+only dilutes, so no raptor weight rescues the ensemble lane (knee-ir6d3, parked).
