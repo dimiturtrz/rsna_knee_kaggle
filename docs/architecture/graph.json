@@ -37622,6 +37622,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.models.model.StudyModel._tokens",
+      "target": "kneemri.models.model.StudyModel._fused",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.models.model.StudyModel.applied",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery.applied",
       "weight": 1
@@ -74830,6 +74836,14 @@
       "descendants": 0,
       "id": "kneemri.models.model.StudyModel._encoded",
       "label": "_encoded",
+      "level": "method",
+      "parent": "kneemri.models.model.StudyModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.models.model.StudyModel._fused",
+      "label": "_fused",
       "level": "method",
       "parent": "kneemri.models.model.StudyModel",
       "role": null
