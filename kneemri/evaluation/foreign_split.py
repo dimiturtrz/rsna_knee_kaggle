@@ -33,6 +33,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.findings import STUDY
+from kneemri.inference.foreign_folds import ForeignFolds
 
 logger = logging.getLogger(__name__)
 
@@ -97,10 +98,7 @@ def main() -> None:
     command.parser.add_argument("--fold", type=int, default=0)
     arguments = command.parsed()
 
-    if arguments.studies.suffix == ".npz":
-        studies = [str(one) for one in np.load(arguments.studies, allow_pickle=True)["studies"]]
-    else:
-        studies = pd.read_csv(arguments.studies)[STUDY].astype(str).tolist()
+    studies = ForeignFolds.read_studies(arguments.studies)
     command.report(ForeignSplit.of(studies, pd.read_csv(arguments.labels)).lines(arguments.fold))
 
 

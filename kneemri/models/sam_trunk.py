@@ -46,10 +46,10 @@ class TokensInsteadOfNeck(nn.Module):
     THE OBJECTION WORTH ANSWERING was that MedSAM's fine-tune updated every image-encoder parameter,
     the neck included, and published no layer-wise breakdown — so a neck-concentrated adaptation would
     make this change throw away the medical part of a medical checkpoint and leave a plain SAM under
-    MedSAM's name. `kneemri.models.sam_drift` measured it against `facebook/sam-vit-base`, which is the
-    release MedSAM started from: all twelve blocks moved between 0.85 and 1.72 of their own initial
-    norm, and the neck moved 0.68 — the least-moved region of the fifteen bar the position table. The
-    adaptation is in the trunk. Dropping the neck keeps it.
+    MedSAM's name. `kneemri.models.sam_drift` (retired, last at dd9a4566) measured it against
+    `facebook/sam-vit-base`, which is the release MedSAM started from: all twelve blocks moved between
+    0.85 and 1.72 of their own initial norm, and the neck moved 0.68 — the least-moved region of the
+    fifteen bar the position table. The adaptation is in the trunk. Dropping the neck keeps it.
 
     Kept as a module substituted for the neck rather than as a different forward path because
     `SamVisionEncoder.forward` calls `self.neck` unconditionally: the read-out point is a property of

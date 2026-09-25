@@ -78,7 +78,7 @@
 # medicine is.
 #
 # MEASURED BEFORE CHANGING IT, because a neck-concentrated fine-tune would have made this swap discard
-# the medical part of a medical checkpoint. `kneemri.models.sam_drift` against `facebook/sam-vit-base`,
+# the medical part of a medical checkpoint. `kneemri.models.sam_drift` (retired, last at dd9a4566) against `facebook/sam-vit-base`,
 # the release MedSAM started from: every one of the twelve blocks moved 0.85-1.72 of its own initial
 # norm, and the neck moved 0.68 — the least-moved of fifteen regions bar the position table. The
 # adaptation is in the trunk. The published case agrees at a distance: SAM's neck linear-probes at 11.1%

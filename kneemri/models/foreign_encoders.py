@@ -662,7 +662,7 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
     # (SAMantics, arXiv:2411.15288) and the one medical model stating a read-out point drops it
     # (FODA-PG, arXiv:2409.03947) — but MedSAM fine-tuned every image-encoder parameter and published no
     # layer-wise breakdown, so a neck-concentrated adaptation would have made this change discard the
-    # medical part of a medical checkpoint. `kneemri.models.sam_drift` measured it against
+    # medical part of a medical checkpoint. `kneemri.models.sam_drift` (retired, last at dd9a4566) measured it against
     # `facebook/sam-vit-base`: all twelve blocks moved 0.85-1.72 of their own initial norm and the neck
     # moved 0.68, the least of the fifteen regions bar the position table. The adaptation is in the
     # trunk.

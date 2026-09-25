@@ -30,7 +30,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from kneemri.evaluation.gold_rows import GoldRows
-from kneemri.runs.holdout_record import FOREIGN, HoldoutRecord
+from kneemri.runs.holdout_record import FOREIGN, UNKNOWN_EPOCH, HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +38,6 @@ PREDICTIONS = "pred"
 """His key for the out-of-fold predictions. Ours is `predictions`, which is why this module exists."""
 
 IDENTIFIERS = "ids"
-
-UNKNOWN_EPOCH = -1
-"""His OOF file records the FOLD, never the epoch its weights came from — so the epoch is not invented.
-
-`HoldoutMetrics` prints whatever it is given, and a fabricated 0 would read as "his best was the first
-epoch", which is a claim about his schedule that nothing in the file supports."""
 
 
 @dataclass(frozen=True)

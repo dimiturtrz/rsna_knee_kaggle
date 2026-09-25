@@ -2294,6 +2294,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.foreign_split",
+      "target": "kneemri.inference.foreign_folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.gold_estimators",
       "target": "kneemri.evaluation.scores",
       "weight": 1
@@ -6550,12 +6556,6 @@
       "kind": "import",
       "source": "kneemri.models.model",
       "target": "kneemri.models.variants",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.sam_drift",
-      "target": "core.cli",
       "weight": 1
     },
     {
@@ -16084,6 +16084,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_split.main",
       "target": "kneemri.evaluation.foreign_split.ForeignSplit.of",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.foreign_split.main",
+      "target": "kneemri.inference.foreign_folds.ForeignFolds.read_studies",
       "weight": 1
     },
     {
@@ -32702,18 +32708,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.models.sam_drift.main",
-      "target": "kneemri.models.sam_drift.SamDrift.lines",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.sam_drift.main",
-      "target": "kneemri.models.sam_drift.SamDrift.moved",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.models.sam_trunk.SamVisionWeights.build",
       "target": "kneemri.models.encoder.Encoder.refuse_unloaded",
       "weight": 1
@@ -38049,7 +38043,7 @@
       "role": null
     },
     {
-      "descendants": 303,
+      "descendants": 302,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39617,7 +39611,7 @@
       "role": null
     },
     {
-      "descendants": 37,
+      "descendants": 36,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -39772,14 +39766,6 @@
       "descendants": 0,
       "id": "kneemri.models.moment_pooling",
       "label": "moment_pooling",
-      "level": "module",
-      "parent": "kneemri.models",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.sam_drift",
-      "label": "sam_drift",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -44702,14 +44688,6 @@
       "label": "MomentPooling",
       "level": "class",
       "parent": "kneemri.models.moment_pooling",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.sam_drift.SamDrift",
-      "label": "SamDrift",
-      "level": "class",
-      "parent": "kneemri.models.sam_drift",
       "role": "primary"
     },
     {
@@ -65190,46 +65168,6 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.models.moment_pooling.MomentPooling",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.sam_drift.SamDrift.grouped",
-      "label": "grouped",
-      "level": "method",
-      "parent": "kneemri.models.sam_drift.SamDrift",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.sam_drift.SamDrift.lines",
-      "label": "lines",
-      "level": "method",
-      "parent": "kneemri.models.sam_drift.SamDrift",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.sam_drift.SamDrift.moved",
-      "label": "moved",
-      "level": "method",
-      "parent": "kneemri.models.sam_drift.SamDrift",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.sam_drift.SamDrift.region",
-      "label": "region",
-      "level": "method",
-      "parent": "kneemri.models.sam_drift.SamDrift",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.sam_drift.main",
-      "label": "main",
-      "level": "method",
-      "parent": "kneemri.models.sam_drift",
       "role": null
     },
     {

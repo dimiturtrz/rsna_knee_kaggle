@@ -171,7 +171,6 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | command | what it answers |
 |---|---|
 | `python -m kneemri.models.load_check` | Does every registry entry actually RECEIVE its pretrained weights? |
-| `python -m kneemri.models.sam_drift` | Where a SAM fine-tune actually moved — per-region parameter drift between two releases. |
 | `python -m kneemri.models.weight_soup` | Average the WEIGHTS of runs that share an architecture: `python -m kneemri.models.weight_soup`. |
 
 ### runs

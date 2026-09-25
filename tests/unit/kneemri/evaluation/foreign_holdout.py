@@ -7,8 +7,8 @@ import pandas as pd
 import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.foreign_holdout import IDENTIFIERS, PREDICTIONS, UNKNOWN_EPOCH, ForeignHoldout
-from kneemri.runs.holdout_record import FOREIGN, HoldoutRecord
+from kneemri.evaluation.foreign_holdout import IDENTIFIERS, PREDICTIONS, ForeignHoldout
+from kneemri.runs.holdout_record import FOREIGN, UNKNOWN_EPOCH, HoldoutRecord
 
 STUDIES = 6
 
