@@ -211,7 +211,7 @@ The deliverable is a **single solo checkpoint**. This class is kept for the mech
 | seed spread | **0.0062** | ledger |
 | board resolution | **0.001** — the competition's own | `2026-09-11_board_quantization.md` |
 | board blur on tied pairs | **0.0020** | README:9783 (D86) |
-| top-band ledger75 residual sd | **0.0022** — so a board delta under ~0.004 between two of our own entries means nothing | `CLAUDE.md`; `board_check --live` |
+| top-band residual sd | **0.0013 ledger75** (0.0017 whole record; 0.0022 was the MIDPOINT fit) — so a board delta under ~0.003 between two of our own entries means nothing | `CLAUDE.md`; `board_check --live` |
 | midpoint vs ledger75 | the midpoint ruler is **seven times blinder**; a number in this repo is midpoint unless it says otherwise | README:15942; knee-f9aao |
 | board transfer slope | **read it, never quote it** — `board_check --live --ruler ledger75`. It has been quoted wrong five times | `CLAUDE.md` |
 | generalisation toll, holdout → board | **flat −0.0336 ± 0.0038** across eleven members — nobody is robust and nobody is fragile | README:11766 |
