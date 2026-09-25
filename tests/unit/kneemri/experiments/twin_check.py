@@ -45,13 +45,13 @@ def test_drift(tmp_path: Path) -> None:
     assert era.drift(tmp_path / "arm_ff.pt", tmp_path / "arm_s2026.pt") == []
 
 
-def test_complaints(tmp_path: Path) -> None:
+def test_faults(tmp_path: Path) -> None:
     """A pair differing on the allowance alone is silent; one carrying another axis names it."""
-    assert pair(tmp_path, DEPLOYED).complaints() == []
+    assert pair(tmp_path, DEPLOYED).faults() == []
 
     stamp(tmp_path / "arm_ff.pt", {**DEPLOYED, "slices": 24})
     stamp(tmp_path / "arm_s2026.pt", {**VALIDATED, "slices": 20})
-    assert "slices" in TwinDrift(tmp_path).complaints()[0]
+    assert "slices" in TwinDrift(tmp_path).faults()[0]
 
 
 def test_report(tmp_path: Path) -> None:
@@ -65,5 +65,5 @@ def test_strict(tmp_path: Path) -> None:
     """`--strict` drops ema from the allowance, which is how the check graduates."""
     stamp(tmp_path / "arm_ff.pt", DEPLOYED)
     stamp(tmp_path / "arm_s2026.pt", VALIDATED)
-    assert TwinDrift(tmp_path, strict=True).complaints()
-    assert TwinDrift(tmp_path, strict=False).complaints() == []
+    assert TwinDrift(tmp_path, strict=True).faults()
+    assert TwinDrift(tmp_path, strict=False).faults() == []

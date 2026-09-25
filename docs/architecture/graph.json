@@ -25772,20 +25772,20 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.reading_check.ReadingDrift.complaints",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.declarations",
+      "target": "kneemri.experiments.reading_check.ArmDeclaration.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.faults",
       "target": "kneemri.experiments.reading_check.ReadingDrift.missing",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.reading_check.ReadingDrift.complaints",
+      "source": "kneemri.experiments.reading_check.ReadingDrift.faults",
       "target": "kneemri.experiments.reading_check.ReadingDrift.undeclared",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.reading_check.ReadingDrift.declarations",
-      "target": "kneemri.experiments.reading_check.ArmDeclaration.read",
       "weight": 1
     },
     {
@@ -25821,13 +25821,13 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.reading_check.ReadingDrift.report",
-      "target": "kneemri.experiments.reading_check.ReadingDrift.complaints",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.declarations",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.experiments.reading_check.ReadingDrift.report",
-      "target": "kneemri.experiments.reading_check.ReadingDrift.declarations",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.faults",
       "weight": 1
     },
     {
@@ -25881,7 +25881,7 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.reading_check.main",
-      "target": "kneemri.experiments.reading_check.ReadingDrift.complaints",
+      "target": "kneemri.experiments.reading_check.ReadingDrift.faults",
       "weight": 1
     },
     {
@@ -26378,18 +26378,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.twin_check.TwinDrift.complaints",
-      "target": "kneemri.experiments.twin_check.TwinDrift.drift",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.twin_check.TwinDrift.complaints",
-      "target": "kneemri.experiments.twin_check.TwinDrift.pairs",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.experiments.twin_check.TwinDrift.drift",
       "target": "kneemri.experiments.default_drift.DefaultDrift.declared",
       "weight": 1
@@ -26402,8 +26390,20 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.experiments.twin_check.TwinDrift.faults",
+      "target": "kneemri.experiments.twin_check.TwinDrift.drift",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.twin_check.TwinDrift.faults",
+      "target": "kneemri.experiments.twin_check.TwinDrift.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.experiments.twin_check.TwinDrift.report",
-      "target": "kneemri.experiments.twin_check.TwinDrift.complaints",
+      "target": "kneemri.experiments.twin_check.TwinDrift.faults",
       "weight": 1
     },
     {
@@ -26421,7 +26421,7 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.twin_check.main",
-      "target": "kneemri.experiments.twin_check.TwinDrift.complaints",
+      "target": "kneemri.experiments.twin_check.TwinDrift.faults",
       "weight": 1
     },
     {
@@ -28394,6 +28394,84 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.duplicated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.hollow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.miscounted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.mismatched",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.misscoped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.phantom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.recoverable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.refless",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.uncorrected",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.undeclared",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.unnamed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.unpriceable",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "target": "kneemri.kaggle.board_check.BoardCensus.unrecorded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.hollow",
       "target": "kneemri.kaggle.board_check.BoardCensus.rows",
       "weight": 1
@@ -28450,84 +28528,6 @@
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.BoardCensus.refless",
       "target": "kneemri.kaggle.board_check.BoardCensus.rows",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.duplicated",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.hollow",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.miscounted",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.mismatched",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.misscoped",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.phantom",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.recoverable",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.refless",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.uncorrected",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.undeclared",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.unnamed",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.unpriceable",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "target": "kneemri.kaggle.board_check.BoardCensus.unrecorded",
       "weight": 1
     },
     {
@@ -28593,13 +28593,13 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.main",
-      "target": "kneemri.kaggle.board_check.BoardCensus.pending",
+      "target": "kneemri.kaggle.board_check.BoardCensus.faults",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.board_check.main",
-      "target": "kneemri.kaggle.board_check.BoardCensus.refusals",
+      "target": "kneemri.kaggle.board_check.BoardCensus.pending",
       "weight": 1
     },
     {
@@ -31022,36 +31022,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.duplicated",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.phantom",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.reasonless",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.roster_check.RosterDrift.complaints",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
       "target": "kneemri.evaluation.member_pool.MemberDeclines.read",
       "weight": 1
@@ -31066,6 +31036,36 @@
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.duplicated",
       "target": "kneemri.kaggle.package_members.MemberRoster.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.faults",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.faults",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.duplicated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.faults",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.phantom",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.faults",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.reasonless",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_check.RosterDrift.faults",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.undocumented",
       "weight": 1
     },
     {
@@ -31125,7 +31125,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.RosterDrift.report",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.faults",
       "weight": 1
     },
     {
@@ -31197,7 +31197,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_check.main",
-      "target": "kneemri.kaggle.roster_check.RosterDrift.complaints",
+      "target": "kneemri.kaggle.roster_check.RosterDrift.faults",
       "weight": 1
     },
     {
@@ -31430,25 +31430,25 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "source": "kneemri.kaggle.run_check.KernelLog.faults",
       "target": "kneemri.kaggle.run_check.KernelLog.changed",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "source": "kneemri.kaggle.run_check.KernelLog.faults",
       "target": "kneemri.kaggle.run_check.KernelLog.dropped",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "source": "kneemri.kaggle.run_check.KernelLog.faults",
       "target": "kneemri.kaggle.run_check.KernelLog.fell_back",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.run_check.KernelLog.refusals",
+      "source": "kneemri.kaggle.run_check.KernelLog.faults",
       "target": "kneemri.kaggle.run_check.KernelLog.seats",
       "weight": 1
     },
@@ -40598,6 +40598,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.cli.Exit",
+      "label": "Exit",
+      "level": "class",
+      "parent": "core.cli",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.acquisition.Acquisition",
       "label": "Acquisition",
       "level": "class",
@@ -46150,6 +46158,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.cli.Command.conclude",
+      "label": "conclude",
+      "level": "method",
+      "parent": "core.cli.Command",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.cli.Command.parsed",
       "label": "parsed",
       "level": "method",
@@ -46168,6 +46184,14 @@
       "descendants": 0,
       "id": "core.cli.Command.rooted",
       "label": "rooted",
+      "level": "method",
+      "parent": "core.cli.Command",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.cli.Command.unknown",
+      "label": "unknown",
       "level": "method",
       "parent": "core.cli.Command",
       "role": null
@@ -59502,16 +59526,16 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.reading_check.ReadingDrift.complaints",
-      "label": "complaints",
+      "id": "kneemri.experiments.reading_check.ReadingDrift.declarations",
+      "label": "declarations",
       "level": "method",
       "parent": "kneemri.experiments.reading_check.ReadingDrift",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.reading_check.ReadingDrift.declarations",
-      "label": "declarations",
+      "id": "kneemri.experiments.reading_check.ReadingDrift.faults",
+      "label": "faults",
       "level": "method",
       "parent": "kneemri.experiments.reading_check.ReadingDrift",
       "role": null
@@ -59894,16 +59918,16 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.twin_check.TwinDrift.complaints",
-      "label": "complaints",
+      "id": "kneemri.experiments.twin_check.TwinDrift.drift",
+      "label": "drift",
       "level": "method",
       "parent": "kneemri.experiments.twin_check.TwinDrift",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.experiments.twin_check.TwinDrift.drift",
-      "label": "drift",
+      "id": "kneemri.experiments.twin_check.TwinDrift.faults",
+      "label": "faults",
       "level": "method",
       "parent": "kneemri.experiments.twin_check.TwinDrift",
       "role": null
@@ -61694,6 +61718,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.board_check.BoardCensus.faults",
+      "label": "faults",
+      "level": "method",
+      "parent": "kneemri.kaggle.board_check.BoardCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardCensus.hollow",
       "label": "hollow",
       "level": "method",
@@ -61752,14 +61784,6 @@
       "descendants": 0,
       "id": "kneemri.kaggle.board_check.BoardCensus.refless",
       "label": "refless",
-      "level": "method",
-      "parent": "kneemri.kaggle.board_check.BoardCensus",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.board_check.BoardCensus.refusals",
-      "label": "refusals",
       "level": "method",
       "parent": "kneemri.kaggle.board_check.BoardCensus",
       "role": null
@@ -63598,14 +63622,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.roster_check.RosterDrift.complaints",
-      "label": "complaints",
-      "level": "method",
-      "parent": "kneemri.kaggle.roster_check.RosterDrift",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.kaggle.roster_check.RosterDrift.contradictory",
       "label": "contradictory",
       "level": "method",
@@ -63616,6 +63632,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.roster_check.RosterDrift.duplicated",
       "label": "duplicated",
+      "level": "method",
+      "parent": "kneemri.kaggle.roster_check.RosterDrift",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.roster_check.RosterDrift.faults",
+      "label": "faults",
       "level": "method",
       "parent": "kneemri.kaggle.roster_check.RosterDrift",
       "role": null
@@ -63894,6 +63918,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.run_check.KernelLog.faults",
+      "label": "faults",
+      "level": "method",
+      "parent": "kneemri.kaggle.run_check.KernelLog",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.run_check.KernelLog.fell_back",
       "label": "fell_back",
       "level": "method",
@@ -63912,14 +63944,6 @@
       "descendants": 0,
       "id": "kneemri.kaggle.run_check.KernelLog.read",
       "label": "read",
-      "level": "method",
-      "parent": "kneemri.kaggle.run_check.KernelLog",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.kaggle.run_check.KernelLog.refusals",
-      "label": "refusals",
       "level": "method",
       "parent": "kneemri.kaggle.run_check.KernelLog",
       "role": null

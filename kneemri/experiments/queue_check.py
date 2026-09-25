@@ -94,10 +94,6 @@ as a queue that finished. `ARM FAILED` deliberately does NOT close a strand: an 
 owes its work, and relaunching it is the right advice.
 """
 
-UNREADABLE = 1
-FOUND = 2
-"""Distinct exit codes, because "the table could not be read" is not "the queue is broken"."""
-
 
 @dataclass(frozen=True)
 class Watch:
@@ -569,16 +565,11 @@ def main() -> None:
     arguments = command.parsed()
     running = ProcessTable.read().text
     if not running:
-        logger.warning(
-            "no process listing: none of %s could be read, so liveness cannot be crossed",
-            ", ".join(probe.executable for probe in PROBES),
-        )
-        raise SystemExit(UNREADABLE)
+        probes = ", ".join(probe.executable for probe in PROBES)
+        command.unknown(f"no process listing: none of {probes} could be read, so liveness cannot be crossed")
     queue = QueuedArms(arguments.directory, running)
-    for line in queue.lines():
-        logger.info(line)
-    if queue.faults():
-        raise SystemExit(FOUND)
+    command.report(queue.lines())
+    command.conclude(queue.faults(), "fault(s) in the queue")
 
 
 if __name__ == "__main__":

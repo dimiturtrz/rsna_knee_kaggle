@@ -31,10 +31,27 @@ why `parsed()` returns the namespace to the caller rather than keeping it.
 
 import argparse
 import logging
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
+from enum import IntEnum
 from pathlib import Path
+from typing import NoReturn
 
 from core.paths import DataRoot
+
+
+class Exit(IntEnum):
+    """What a check's status means, one spelling for every check.
+
+    UNKNOWN is apart from FOUND because "the check could not run" and "the check ran and found
+    something" must not share a code — and neither may share 0, which a log tail reads as a pass.
+    Until 2026-09-25 card_check and queue_check exited 2 on FOUND while mount_check and submit_check
+    exited 2 on UNKNOWN; every shell caller only tests non-zero, so the swap moved no caller.
+    """
+
+    CLEAN = 0
+    FOUND = 1
+    UNKNOWN = 2
+
 
 FORMAT = "%(message)s"
 """Bare message, no level or timestamp. These commands print reports for a person, not a service log."""
@@ -77,3 +94,14 @@ class Command:
         """Print a report a line at a time, through the calling module's logger."""
         for line in lines:
             self.log.info(line)
+
+    def conclude(self, faults: Sequence[str], what: str) -> None:
+        """Exit FOUND, counting the faults as `what`, if there are any; return quietly if not."""
+        if faults:
+            self.log.error("%d %s", len(faults), what)
+            raise SystemExit(Exit.FOUND)
+
+    def unknown(self, why: str) -> NoReturn:
+        """Exit UNKNOWN: the check could not look, which is neither a pass nor a finding."""
+        self.log.error("UNKNOWN - %s", why)
+        raise SystemExit(Exit.UNKNOWN)

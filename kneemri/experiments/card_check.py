@@ -77,10 +77,6 @@ would also be the WRONG check on a second checkout: what makes a holder ours is 
 tree, not that it runs from a tree with a particular name.
 """
 
-UNREADABLE = 1
-FOUND = 2
-"""Distinct exit codes, because "the driver could not be asked" is not "the card is oversubscribed"."""
-
 
 @dataclass(frozen=True)
 class DeviceReport:
@@ -249,16 +245,14 @@ def main() -> None:
     `queue_check` states at the same place: a warning that leaves the status at 0 reads, in a log tail,
     exactly like a pass.
     """
-    cli.Command(__doc__, logger).parsed()
+    command = cli.Command(__doc__, logger)
+    command.parsed()
     report = DEVICE.read()
     if not report.strip():
-        logger.warning("nvidia-smi could not be read, so the card's holders cannot be crossed")
-        raise SystemExit(UNREADABLE)
+        command.unknown("nvidia-smi could not be read, so the card's holders cannot be crossed")
     card = CardHolders.crossed(DeviceReport(report), PROBES)
-    for line in card.lines(TOTAL.read()):
-        logger.info(line)
-    if card.faults():
-        raise SystemExit(FOUND)
+    command.report(card.lines(TOTAL.read()))
+    command.conclude(card.faults(), "fault(s) on the card")
 
 
 if __name__ == "__main__":

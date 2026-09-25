@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from core.cli import Exit
 from kneemri.experiments.queue_check import QueuedArms, Watch, main
 from kneemri.process_table import ProcessTable
 
@@ -317,7 +318,7 @@ def test_main_exits_when_the_table_cannot_be_read(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr("sys.argv", ["queue_check", "--directory", str(tmp_path)])
     with pytest.raises(SystemExit) as exit_code:
         main()
-    assert exit_code.value.code == 1
+    assert exit_code.value.code == Exit.UNKNOWN
 
 
 def test_main_exits_on_a_fault(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
@@ -327,7 +328,7 @@ def test_main_exits_on_a_fault(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     monkeypatch.setattr("sys.argv", ["queue_check", "--directory", str(tmp_path)])
     with pytest.raises(SystemExit) as exit_code:
         main()
-    assert exit_code.value.code == 2
+    assert exit_code.value.code == Exit.FOUND
 
 
 BESPOKE = "User 57616 1 ? bash experiments/after_holdclean.sh\n"

@@ -20,7 +20,6 @@ to read differently from "I looked and it is new".
 
 import json
 import logging
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -41,7 +40,6 @@ This was `comp/members.roster` alone, which reads a tag on any later shelf as AB
 the answer that ships. Shelf 2 carries no tag today so nothing was let through, but the gate was one
 foreign member on a later shelf away from silently passing the thing it exists to refuse."""
 
-UNKNOWN_EXIT = 2
 OVERLAP_FLOOR = 0.5
 """How much of a shipped entry's seats a candidate must share before the overlap is worth a line.
 
@@ -152,8 +150,7 @@ def main() -> None:
     kernel = SubmitCheck.resolved(arguments.kernel, arguments.kernels)
     named = SubmitCheck.seats(kernel)
     if named is None:
-        logger.error("UNKNOWN %s: names no members in its source, so this check did not look", kernel.name)
-        sys.exit(UNKNOWN_EXIT)
+        command.unknown(f"{kernel.name} names no members in its source, so this check did not look")
 
     # Before the repeat question, because a repeat is a wasted slot and this is a wasted WIN: rule 2.5
     # obliges the winner to license the submission and its source, and a member trained on a
@@ -161,8 +158,7 @@ def main() -> None:
     refusals = [refusal for shelf in arguments.roster for refusal in MemberRoster.read(shelf).licence_refusals(named)]
     for refusal in refusals:
         logger.error("LICENCE %s: %s", kernel.name, refusal)
-    if refusals:
-        sys.exit(1)
+    command.conclude(refusals, "licence refusal(s)")
 
     shipped = SubmitCheck(BoardCensus(record=arguments.record).rows())
     Denominator(len(shipped.rows), "no recorded entry names its members, so nothing could be compared").refuse_empty()
@@ -185,7 +181,7 @@ def main() -> None:
         logger.warning("SHIPPING A KNOWN REPEAT of %s: %s", kernel.name, arguments.anyway)
         return
     logger.error("REFUSED %s: this member set has already spent a slot. --anyway '<why>' to ship it again", kernel.name)
-    sys.exit(1)
+    raise SystemExit(cli.Exit.FOUND)
 
 
 if __name__ == "__main__":

@@ -56,7 +56,7 @@
 #
 # deliberate: --epochs 12 (matched to every other family in the null; the warm arm's 6 is what broke it)
 # deliberate: no --encoder-weights (a COLD start; the chain is what collapsed n=4 to n=2)
-# deliberate: identical to vjepa_member (a TRUNCATED arm re-run to completion, not a new cell)
+# twin-of: vjepa_member (a TRUNCATED arm re-run to completion, not a new cell)
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"

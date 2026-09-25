@@ -191,7 +191,7 @@ class RosterDrift:
             gone += [f"{name} {path}" for path in (cache.images_path, cache.mask_path) if not path.exists()]
         return gone
 
-    def complaints(self) -> list[str]:
+    def faults(self) -> list[str]:
         """Each drift, named with the action that clears it. Empty means the roster still describes disk."""
         found = [
             f"{name} is scoreable and in neither file — add a roster line or a decline with its reason"
@@ -228,7 +228,7 @@ class RosterDrift:
             f"against {len(self.checkpoints())} checkpoints: "
             f"{len(self.packaged())} packaged, {len(declined)} declined, {len(self.undocumented())} undocumented"
         )
-        return [*self.complaints(), *unreadable, summary]
+        return [*self.faults(), *unreadable, summary]
 
 
 def main() -> None:
@@ -247,9 +247,7 @@ def main() -> None:
     root = command.rooted(arguments)
     drift = RosterDrift(root.models(), arguments.roster or ROSTERS, arguments.declines, root.processed())
     command.report(drift.report())
-    if drift.complaints():
-        message = f"{len(drift.complaints())} member(s) the roster no longer describes"
-        raise SystemExit(message)
+    command.conclude(drift.faults(), "member(s) the roster no longer describes")
 
 
 if __name__ == "__main__":

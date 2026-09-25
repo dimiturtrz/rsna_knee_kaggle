@@ -282,16 +282,16 @@ def test_mismatched(tmp_path: Path):
     assert len(_census(tmp_path).mismatched({**LIVE, "1": None})) == 1, "recorded a score, the board holds none"
 
 
-def test_refusals(tmp_path: Path):
+def test_faults(tmp_path: Path):
     """Every defect at once, and the live half omitted entirely when no listing was taken."""
-    assert _census(tmp_path).refusals(LIVE) == []
-    assert _census(tmp_path).refusals(None) == []
-    assert len(_census(tmp_path).refusals({**LIVE, "99": 0.938})) == 1
-    assert _census(tmp_path).refusals({**LIVE, "99": None}) == [], "an entry in flight blocks nothing"
-    assert _census(tmp_path).refusals(None) == [], "without a listing the offline rules still pass"
+    assert _census(tmp_path).faults(LIVE) == []
+    assert _census(tmp_path).faults(None) == []
+    assert len(_census(tmp_path).faults({**LIVE, "99": 0.938})) == 1
+    assert _census(tmp_path).faults({**LIVE, "99": None}) == [], "an entry in flight blocks nothing"
+    assert _census(tmp_path).faults(None) == [], "without a listing the offline rules still pass"
 
     rawline = [*CLEAN, {**SEARCHED, "ref": "4", "offline": 0.8731}]
-    found = _census(tmp_path, rawline, prose="alpha beta greedy").refusals(None)
+    found = _census(tmp_path, rawline, prose="alpha beta greedy").faults(None)
     assert len(found) == 1 and "greedy_v1" in found[0], "a raw search-selected row refuses with no board listing"
 
 

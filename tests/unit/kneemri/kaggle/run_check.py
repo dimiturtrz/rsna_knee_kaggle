@@ -53,20 +53,20 @@ def test_fell_back():
     fallback = WHOLE + "his program did not produce a table - shipping our six alone\n"
     assert KernelLog.of(fallback).fell_back()
     assert not KernelLog.of(WHOLE).fell_back()
-    assert any("re-ship" in refusal for refusal in KernelLog.of(fallback).refusals())
+    assert any("re-ship" in refusal for refusal in KernelLog.of(fallback).faults())
 
     stage_one_died = WHOLE + "wrote fallback submission.csv\nhis program exited 0 after 153s\n"
-    assert any("stand-in" in refusal for refusal in KernelLog.of(stage_one_died).refusals())
+    assert any("stand-in" in refusal for refusal in KernelLog.of(stage_one_died).faults())
 
 
-def test_refusals():
+def test_faults():
     """A whole run refuses nothing; the farseat shape refuses on the drop, the mark and the count.
 
     That shape is `farseat_v1` verbatim (ref 55758082, 2026-08-25): six of seven members, scored under the
     seven-member name, and read for five days as evidence closing the cross-family diversity axis.
     """
-    assert KernelLog.of(WHOLE).refusals() == []
-    refusals = KernelLog.of(DROPPED).refusals()
+    assert KernelLog.of(WHOLE).faults() == []
+    refusals = KernelLog.of(DROPPED).faults()
     assert len(refusals) == 3, refusals
     assert any("vjepa_warm_s2026" in refusal for refusal in refusals)
     assert any("6 of 7" in refusal for refusal in refusals)

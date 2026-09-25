@@ -69,3 +69,21 @@ def test_report_accepts_a_generator_rather_than_a_built_list(command: cli.Comman
     with caplog.at_level(logging.INFO):
         command.report(f"line {index}" for index in range(2))
     assert [record.message for record in caplog.records] == ["line 0", "line 1"]
+
+
+def test_conclude(command: cli.Command, caplog: pytest.LogCaptureFixture):
+    with caplog.at_level(logging.ERROR), pytest.raises(SystemExit) as found:
+        command.conclude(["a", "b"], "fault(s)")
+    assert found.value.code == cli.Exit.FOUND
+    assert "2 fault(s)" in caplog.text
+
+
+def test_conclude_returns_quietly_on_no_faults(command: cli.Command):
+    assert command.conclude([], "fault(s)") is None
+
+
+def test_unknown(command: cli.Command):
+    with pytest.raises(SystemExit) as unknown:
+        command.unknown("nothing could be read")
+    assert unknown.value.code == cli.Exit.UNKNOWN
+    assert unknown.value.code != cli.Exit.FOUND

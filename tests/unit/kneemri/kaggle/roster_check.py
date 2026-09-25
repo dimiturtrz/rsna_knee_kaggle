@@ -217,9 +217,9 @@ def test_unreadable(tmp_path: Path):
     assert drift.unreadable() == [f"{SHIPPED} {images}"], "the mask survived and the member is still gone"
 
 
-def test_complaints(tmp_path: Path):
+def test_faults(tmp_path: Path):
     """A roster that describes disk raises nothing."""
-    assert _clean(tmp_path).complaints() == [], "every scoreable member is on one side or the other"
+    assert _clean(tmp_path).faults() == [], "every scoreable member is on one side or the other"
 
 
 def test_report(tmp_path: Path):

@@ -13,7 +13,6 @@ over-declaring costs mount seconds and under-declaring costs the slot.
 """
 
 import logging
-import sys
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -391,8 +390,7 @@ def main() -> None:
     if reading.unknown:
         # UNKNOWN, not REFUSED and not a clean pass: a partial listing answers the question wrongly
         # in BOTH directions, so the only honest report is that the live check did not run.
-        logger.error("live check UNKNOWN - %s", reading.unknown)
-        sys.exit(2)
+        command.unknown(f"live check - {reading.unknown}")
     if reading.unsettled:
         logger.error(
             "the live dataset never read complete: %d of %d members were absent at some point in the "
@@ -435,7 +433,7 @@ def main() -> None:
     empty = f"no kernel under {arguments.kernels} was checkable — every entry skipped, or none was found"
     Denominator(sweep.passed, empty).refuse_empty()
     if sweep.refused or absent or reading.unsettled or unresolved:
-        sys.exit(1)
+        raise SystemExit(cli.Exit.FOUND)
 
 
 if __name__ == "__main__":

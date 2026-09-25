@@ -93,7 +93,7 @@ class TwinDrift:
                 found[axis] = f"{axis}={there!r}->{here!r}"
         return list(found.values())
 
-    def complaints(self) -> list[str]:
+    def faults(self) -> list[str]:
         """Each pair carrying an unread second variable, named with the axes that carry it."""
         return [
             f"{deployed.stem} differs from its validated twin on {', '.join(drifted)} — "
@@ -107,7 +107,7 @@ class TwinDrift:
         """The survey, whether or not anything drifted."""
         allowance = ", ".join(sorted(self.allowed))
         surveyed = f"{len(self.pairs())} deployed/validated pair(s) compared; may differ on {allowance}"
-        return [*self.complaints(), surveyed]
+        return [*self.faults(), surveyed]
 
 
 def main() -> None:
@@ -122,9 +122,7 @@ def main() -> None:
 
     drift = TwinDrift(command.rooted(arguments).models(), strict=arguments.strict)
     command.report(drift.report())
-    if drift.complaints():
-        message = f"{len(drift.complaints())} deployed member(s) carry an axis nobody validated"
-        raise SystemExit(message)
+    command.conclude(drift.faults(), "deployed member(s) carry an axis nobody validated")
 
 
 if __name__ == "__main__":

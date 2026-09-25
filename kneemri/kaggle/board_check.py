@@ -40,7 +40,6 @@ and `uncorrected` below are that gate.
 import datetime as dt
 import json
 import logging
-import sys
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -417,7 +416,7 @@ class BoardCensus:
             if row.ref in live and row.disagrees(live[row.ref])
         ]
 
-    def refusals(self, live: Mapping[str, float | None] | None) -> list[str]:
+    def faults(self, live: Mapping[str, float | None] | None) -> list[str]:
         """Every defect found, in the order a reader should act on them; empty when the record is whole."""
         found = [f"{name} carries no ref, so no live listing can reach it" for name in self.refless()]
         found += [f"ref {ref} is recorded twice" for ref in self.duplicated()]
@@ -495,7 +494,7 @@ def main() -> None:
 
     census = BoardCensus(arguments.record, arguments.ledger, arguments.kernels)
     live = LiveBoard.taken().scores if arguments.live else None
-    refusals = census.refusals(live)
+    faults = census.faults(live)
     logger.info(
         "%d recorded submissions, %s",
         len(census.rows()),
@@ -503,10 +502,9 @@ def main() -> None:
     )
     for ref in census.pending(live) if live is not None else []:
         logger.warning("submission %s is still scoring - record it when it lands", ref)
-    for refusal in refusals:
-        logger.error("%s", refusal)
-    if refusals:
-        sys.exit(1)
+    for fault in faults:
+        logger.error("%s", fault)
+    command.conclude(faults, "defect(s) in the record")
 
 
 if __name__ == "__main__":

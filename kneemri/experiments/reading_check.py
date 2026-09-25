@@ -227,7 +227,7 @@ class ReadingDrift:
         """Dark arms with no ruler written down. GRADUATED 2026-09-04: this refuses now (knee-h1k0y)."""
         return [arm.name for arm in self.declarations() if arm.dark() and not arm.readings() and not arm.unmeasurable()]
 
-    def complaints(self) -> list[str]:
+    def faults(self) -> list[str]:
         """The findings that refuse: a declared reading never taken, and a dark arm with no ruler at all.
 
         The dark rule was advisory while thirteen arms fitted `--fold -1` with nothing written down. All
@@ -244,7 +244,7 @@ class ReadingDrift:
         declared = [arm for arm in declarations if arm.readings()]
         dark = self.undeclared()
         lines = [
-            *self.complaints(),
+            *self.faults(),
             *[f"{name} fits --fold -1 and declares no reading — no ruler can price it" for name in dark],
         ]
         lines.append(
@@ -269,15 +269,12 @@ def main() -> None:
     if arguments.only:
         taken = drift.already_taken(arguments.only)
         command.report(taken or [f"{arguments.only}: no declared reading is on disk yet"])
-        if taken and not arguments.anyway:
-            refusal = "the arm ran or its reading exists"
-            raise SystemExit(f"{len(taken)} refusal(s): {refusal} — re-take with --anyway '<why>'")
+        if not arguments.anyway:
+            command.conclude(taken, "refusal(s): the arm ran or its reading exists — re-take with --anyway '<why>'")
         return
 
     command.report(drift.report())
-    if drift.complaints():
-        message = f"{len(drift.complaints())} pre-registered reading(s) never taken"
-        raise SystemExit(message)
+    command.conclude(drift.faults(), "pre-registered reading(s) never taken")
 
 
 if __name__ == "__main__":

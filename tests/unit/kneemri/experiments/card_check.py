@@ -3,6 +3,7 @@ from typing import override
 
 import pytest
 
+from core.cli import Exit
 from kneemri.experiments.card_check import REPO, CardHolders, DeviceReport, Holder, main
 from kneemri.process_table import Probe, ProcessTable
 
@@ -147,7 +148,7 @@ def test_main_exits_when_the_driver_cannot_be_read(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr("sys.argv", ["card_check"])
     with pytest.raises(SystemExit) as exit_code:
         main()
-    assert exit_code.value.code == 1
+    assert exit_code.value.code == Exit.UNKNOWN
 
 
 def test_main_exits_on_a_fault(monkeypatch: pytest.MonkeyPatch):
@@ -159,7 +160,7 @@ def test_main_exits_on_a_fault(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr("sys.argv", ["card_check"])
     with pytest.raises(SystemExit) as exit_code:
         main()
-    assert exit_code.value.code == 2
+    assert exit_code.value.code == Exit.FOUND
 
 
 class _Fixed(Probe):

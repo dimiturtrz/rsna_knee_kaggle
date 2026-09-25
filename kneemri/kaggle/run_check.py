@@ -24,7 +24,6 @@ change a decision is between the kernel completing and the slot being spent.
 import json
 import logging
 import re
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -110,7 +109,7 @@ class KernelLog:
         """Whether a two-producer run shipped one producer's table because the other did not arrive."""
         return any(FALLBACK_MARK in line for line in self.lines)
 
-    def refusals(self) -> list[str]:
+    def faults(self) -> list[str]:
         """Every reason this run's output must not be submitted under the entry's name; empty when whole."""
         found = [f"the run DROPPED a seat: {drop}" for drop in self.dropped()]
         if any(FOREIGN_FALLBACK in line for line in self.lines):
@@ -149,11 +148,10 @@ def main() -> None:
         arguments.log,
         f"loaded {seats[0]} of {seats[1]} members" if seats else "no member census printed",
     )
-    refusals = log.refusals()
-    for refusal in refusals:
-        logger.error("%s", refusal)
-    if refusals:
-        sys.exit(1)
+    faults = log.faults()
+    for fault in faults:
+        logger.error("%s", fault)
+    command.conclude(faults, "refusal(s)")
 
 
 if __name__ == "__main__":
