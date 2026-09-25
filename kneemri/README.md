@@ -12,7 +12,9 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | command | what it answers |
 |---|---|
 | `python -m kneemri.embeddings.build_embeddings` | Encode a pixel cache into an embedding cache: `python -m kneemri.embeddings.build_embeddings`. |
+| `python -m kneemri.embeddings.build_medicalnet_embeddings` | Encode a pixel cache through MedicalNet's 3D ResNet-50. |
 | `python -m kneemri.embeddings.report_embeddings` | Embed each study's radiology report once, so the image model can be supervised by all of it. |
+| `python -m kneemri.embeddings.roi_cache` | The ROI cache: every sagittal stack again, cropped to the joint a tissue locator found, plus the box table. |
 
 ### evaluation
 
@@ -24,32 +26,49 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.attribution` | What is the model actually using — measured by taking things away, not by drawing heatmaps. |
 | `python -m kneemri.evaluation.attribution_faithfulness` | Is the slot-drop occlusion in `attribution` a faithful explanation, or just a number we trust? |
 | `python -m kneemri.evaluation.board_transfer` | Does our holdout ORDER entries the way the leaderboard does? `python -m kneemri.evaluation.board_transfer`. |
+| `python -m kneemri.evaluation.column_headroom` | What each finding's column is worth, now that the metric is known. `python -m |
+| `python -m kneemri.evaluation.column_mixing` | Mix the twelve prediction COLUMNS into each other, priced honestly. `python -m kneemri.evaluation.column_mixing`. |
+| `python -m kneemri.evaluation.column_spread` | A draw that spends the epoch on ONE column's positives: `python -m kneemri.evaluation.column_spread`. |
+| `python -m kneemri.evaluation.column_surface` | Per-column areas on the 4406-study corpus surface, and what the 896 frame was reading instead. |
 | `python -m kneemri.evaluation.competence_axis` | Whether the whole member pool differs along ONE trade-off axis — the question a seat search cannot ask. |
+| `python -m kneemri.evaluation.diversity_slope` | What does a UNIT of member diversity buy in ensemble margin — `python -m kneemri.evaluation.diversity_slope`. |
 | `python -m kneemri.evaluation.encoder_drift` | How far supervision actually moved the encoder away from the weights it was pretrained with. |
 | `python -m kneemri.evaluation.fault_ruler` | Which diversity statistic actually predicts ensemble gain HERE — the ruler this project selects on, checked. |
 | `python -m kneemri.evaluation.feature_probe` | How much of each trunk's answer is in its FROZEN features — the head removed. `knee-gd62`. |
 | `python -m kneemri.evaluation.foreign_gate` | The plumbing oracle for a foreign member: `python -m kneemri.evaluation.foreign_gate`. |
+| `python -m kneemri.evaluation.foreign_holdout` | A foreign trainer's out-of-fold arrays, rewritten as one of this repo's holdout records. |
 | `python -m kneemri.evaluation.foreign_member` | Serve a FOREIGN checkpoint through ITS OWN decode, and record the result as one of our members. |
 | `python -m kneemri.evaluation.foreign_overlap` | Did a foreign model train on our holdout? `python -m kneemri.evaluation.foreign_overlap`. |
+| `python -m kneemri.evaluation.foreign_price` | Price a foreign fold family honestly: each fold on the studies it held out. |
+| `python -m kneemri.evaluation.foreign_readout` | What each member we own loses under a real distribution shift: `kneemri.evaluation.foreign_readout`. |
 | `python -m kneemri.evaluation.foreign_ruler` | A foreign model and ours on ONE ruler: `python -m kneemri.evaluation.foreign_ruler`. |
+| `python -m kneemri.evaluation.foreign_split` | Which of our studies a foreign fold checkpoint has already seen. `python -m kneemri.evaluation.foreign_split`. |
 | `python -m kneemri.evaluation.gold_rows` | The radiologist-annotated rows of train.csv, and a report table read onto them. |
 | `python -m kneemri.evaluation.label_combine` | Combine members PER LABEL, and say honestly what that is worth. |
+| `python -m kneemri.evaluation.label_contradiction` | Which training labels the reader AND the model both contradict. `python -m kneemri.evaluation.label_contradiction`. |
 | `python -m kneemri.evaluation.label_errors` | Which (study, finding) cells does an INDEPENDENT signal say the reader got wrong? |
-| `python -m kneemri.evaluation.label_probe` | Whether a label interaction GENERALISES — the verdict half of the residual-coupling gate. |
 | `python -m kneemri.evaluation.label_stability` | Which weak labels are reproducible and which are the holdout's noise: `python -m kneemri.evaluation.label_stability`. |
+| `python -m kneemri.evaluation.ledger75` | The ledger's second ruler: `python -m kneemri.evaluation.ledger75 --holdouts <dir>`. |
 | `python -m kneemri.evaluation.level_calibration` | The report reader's confidence levels, re-mapped onto the rate at which they are actually positive. |
+| `python -m kneemri.evaluation.locator_audit` | Read a tissue locator two ways: landmark distance on SKM-TEA's test split, and overlays on RSNA studies. |
+| `python -m kneemri.evaluation.matched_axes` | Every one-variable A/B this project has ALREADY run: `python -m kneemri.evaluation.matched_axes`. |
 | `python -m kneemri.evaluation.member_axes` | The three distance rulers read TOGETHER, because each alone names a different member as the good one. |
 | `python -m kneemri.evaluation.member_curve` | What does each additional ensemble member actually buy? |
 | `python -m kneemri.evaluation.member_mahalanobis` | Distance between members with the POOL'S OWN COVARIANCE divided out — far only along an unspanned axis. |
+| `python -m kneemri.evaluation.neighbour_errors` | Does a cell's label disagree with the labels of its NEAREST NEIGHBOURS in a frozen trunk's feature space? |
 | `python -m kneemri.evaluation.noise_binding` | Does a member track the LEXICON or the RADIOLOGIST where the two disagree? |
+| `python -m kneemri.evaluation.oof_gold` | The honest 58-study gold read, stitched from a family's five folds. |
 | `python -m kneemri.evaluation.oof_oracle` | Does OUR pipeline hand a published member the same pixels its author did? |
+| `python -m kneemri.evaluation.oof_teacher` | OUR OWN pool's out-of-fold reading of the training studies, assembled into a teacher file. |
 | `python -m kneemri.evaluation.ordinal_signal` | Whether the graded YES levels in the report table carry ORDINAL information, or only certainty. |
+| `python -m kneemri.evaluation.padding_split` | Whether a member's decode toll concentrates in the studies whose field it had to PAD out to. |
 | `python -m kneemri.evaluation.paired_floor` | How tightly a per-label delta can be read when both arms saw the SAME studies. |
+| `python -m kneemri.evaluation.patch_maps` | Where each study's evidence sits, measured by blanking a grid of patches one at a time. |
 | `python -m kneemri.evaluation.pillar_gate` | The plumbing oracle for the Pillar-0 member: `python -m kneemri.evaluation.pillar_gate`. |
 | `python -m kneemri.evaluation.pool_census` | Is there a member in this pool that is STRONG and sees the knee DIFFERENTLY — or is that cell empty? |
 | `python -m kneemri.evaluation.population_split` | Whether the pool's residual concentrates in a KIND of study: `python -m kneemri.evaluation.population_split`. |
-| `python -m kneemri.evaluation.prevalence_match` | Is the medial-over-lateral deficit PREVALENCE, or is it vision? `python -m kneemri.evaluation.prevalence_match`. |
 | `python -m kneemri.evaluation.protocol_prior` | Does the ensemble already use ALL of the acquisition-protocol signal, or only part of it? |
+| `python -m kneemri.evaluation.rank_stability` | Is our offline ORDERING resolvable by 909 studies at all — `python -m kneemri.evaluation.rank_stability`. |
 | `python -m kneemri.evaluation.raptor_feed` | The raptor decode, reimplemented as OUR code from its published description. |
 | `python -m kneemri.evaluation.raptor_inventory` | What a directory of foreign checkpoints actually CONTAINS, read from the checkpoints themselves. |
 | `python -m kneemri.evaluation.raptor_model` | The raptor model, reimplemented as OUR code so a foreign checkpoint can be SERVED, not only measured. |
@@ -58,22 +77,30 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.ruler_check` | Does the choice of evaluation ruler change WHICH recipe wins? |
 | `python -m kneemri.evaluation.ruler_transfer` | Does a DELTA between two arms survive changing the ruler? `python -m kneemri.evaluation.ruler_transfer`. |
 | `python -m kneemri.evaluation.run_comparison` | Read several runs' metrics files side by side: `python -m kneemri.evaluation.run_comparison`. |
+| `python -m kneemri.evaluation.seat_add` | What one candidate adds to a NAMED pool: `python -m kneemri.evaluation.seat_add --pool <stems> --candidate <stem>`. |
 | `python -m kneemri.evaluation.seat_bonus` | What a seat is worth: the board gain of an ensemble over the SOLO entry of its own first member. |
 | `python -m kneemri.evaluation.seat_profile` | Per-member, per-finding AUC over the shared holdout: `python -m kneemri.evaluation.seat_profile`. |
+| `python -m kneemri.evaluation.seat_swap` | The D43 swap gate: does ONE seat move the champion block, and does it keep the block's diversity. |
+| `python -m kneemri.evaluation.seat_weight` | What a seat is worth at each WEIGHT, not just at one seat of n. `python -m kneemri.evaluation.seat_weight`. |
 | `python -m kneemri.evaluation.side_blindness` | Can the model tell the two compartments apart at all? `python -m kneemri.evaluation.side_blindness`. |
+| `python -m kneemri.evaluation.slotdrop_tta` | Serve a slot-dropout member over its own TRAINING masks: `python -m kneemri.evaluation.slotdrop_tta`. |
+| `python -m kneemri.evaluation.stack_combiner` | Does a LEARNED combiner beat the flat vote? `python -m kneemri.evaluation.stack_combiner --members a.pt b.pt` |
 | `python -m kneemri.evaluation.stack_coverage` | Does keeping 12 slices of a deep stack cost accuracy? `python -m kneemri.evaluation.stack_coverage`. |
 | `python -m kneemri.evaluation.stack_fit` | The measurement that judges a learned combiner against the fixed rules, on studies none of them fitted. |
 | `python -m kneemri.evaluation.study_attribution` | WHY are the wrong studies wrong? `python -m kneemri.evaluation.study_attribution --run <name>` |
 | `python -m kneemri.evaluation.study_errors` | Which HOLDOUT STUDIES does a run get wrong, and is the defect the model's or the label's? |
 | `python -m kneemri.evaluation.supervision_gap` | Is a finding held back by its LABELS or by the MODEL? `python -m kneemri.evaluation.supervision_gap`. |
+| `python -m kneemri.evaluation.suspect_teacher` | Write a CORRECTED score for the cells an independent signal says the reader got wrong. |
 | `python -m kneemri.evaluation.table_separation` | Are two label tables actually separated on the gold 58? `python -m kneemri.evaluation.table_separation`. |
-| `python -m kneemri.evaluation.teacher_distance` | How far foreign members sit from EACH OTHER, measured with no labels and no submission slot. |
+| `python -m kneemri.evaluation.teacher_witness` | Whether a distilled student tracks its teachers' IN-SAMPLE outputs on the fold it is scored on. |
 | `python -m kneemri.evaluation.tie_divergence` | When two series tie for a slot, do they SHOW the same thing? `python -m kneemri.evaluation.tie_divergence`. |
 | `python -m kneemri.evaluation.train_disagreement` | Which TRAINING studies the family cannot agree on: `python -m kneemri.evaluation.train_disagreement`. |
 | `python -m kneemri.evaluation.transduction` | Does adapting on the TEST set's own features buy anything? `knee-tta1`. |
+| `python -m kneemri.evaluation.transfer_strata` | WHERE in the holdout the board's ordering lives: `python -m kneemri.evaluation.transfer_strata`. |
 | `python -m kneemri.evaluation.uncertainty_split` | How much of what an ensemble does not know is REDUCIBLE: `python -m kneemri.evaluation.uncertainty_split`. |
 | `python -m kneemri.evaluation.unread_teacher` | Write a score for the cells the report never read, from a pool that never read them either. |
 | `python -m kneemri.evaluation.unsure_cost` | What an `UNK` cell is actually worth: `python -m kneemri.evaluation.unsure_cost`. |
+| `python -m kneemri.evaluation.vendor_ruler` | Whether member RANK survives a change of scanner: `python -m kneemri.evaluation.vendor_ruler`. |
 | `python -m kneemri.evaluation.vote_ceiling` | What is the VOTE worth, once the fitting is paid for? |
 | `python -m kneemri.evaluation.weights_gap` | Where do THEIR weights beat OURS, per label, on studies both held out? |
 
@@ -87,21 +114,32 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.experiments.budget_residuals` | What the VRAM cost model DERIVES against what the arms MEASURED: `python -m |
 | `python -m kneemri.experiments.card_check` | Is the GPU held by exactly one of our jobs? |
 | `python -m kneemri.experiments.claims_check` | Every score the prose attributes to a run, against what that run actually recorded: |
+| `python -m kneemri.experiments.control_check` | Whether an arm's CONTROL can carry the comparison: `python -m kneemri.experiments.control_check`. |
 | `python -m kneemri.experiments.convergence_check` | Which runs actually FINISHED: `python -m kneemri.experiments.convergence_check`. |
+| `python -m kneemri.experiments.default_drift` | Which of a finished run's settings the trainer would no longer give it: `python -m |
+| `python -m kneemri.experiments.foreign_run` | Run a foreign training script verbatim under this repo's interpreter. |
+| `python -m kneemri.experiments.geometry_check` | What this card has already trained: `python -m kneemri.experiments.geometry_check`. |
+| `python -m kneemri.experiments.his_labels_blend` | Blend his soft-label table toward our teacher, on his study set and in his column order. |
 | `python -m kneemri.experiments.ledger_check` | Every run that finished should appear in the ledger: `python -m kneemri.experiments.ledger_check`. |
 | `python -m kneemri.experiments.progress` | What the card is doing RIGHT NOW: `python -m kneemri.experiments.progress`. |
 | `python -m kneemri.experiments.queue_check` | Is every queued arm still gated by a live process? |
 | `python -m kneemri.experiments.reading_check` | Did the arm's pre-registered READING ever get taken? `python -m kneemri.experiments.reading_check`. |
+| `python -m kneemri.experiments.recipe_pairs` | What has this corpus actually PRICED: `python -m kneemri.experiments.recipe_pairs --holdouts <dir>`. |
+| `python -m kneemri.experiments.runs_table` | Every run on disk as one row: `python -m kneemri.experiments.runs_table`. |
 | `python -m kneemri.experiments.stale_gap` | What `--patience` would have to be, derived from every run's own curve instead of chosen. |
 | `python -m kneemri.experiments.trajectory_check` | Can a running arm still reach its branch: `python -m kneemri.experiments.trajectory_check`. |
+| `python -m kneemri.experiments.twin_check` | Does a deployed `_ff` member differ from its validated twin ONLY on fold? `python -m |
 | `python -m kneemri.experiments.vram_need` | What one arm's flags will reserve, in MiB, for the shell that decides whether to start it. |
 
 ### inference
 
 | command | what it answers |
 |---|---|
+| `python -m kneemri.inference.foreign_folds` | Serve mattiaangeli's five released fold checkpoints on OUR studies, through THEIR decode. |
 | `python -m kneemri.inference.foreign_holdout` | Give a published foreign checkpoint a holdout record: `python -m kneemri.inference.foreign_holdout`. |
+| `python -m kneemri.inference.foreign_source` | Lift named top-level symbols out of a foreign inference kernel, verbatim. Never retype their code. |
 | `python -m kneemri.inference.holdout_backfill` | Re-derive an already-finished run's holdout predictions: `python -m kneemri.inference.holdout_backfill`. |
+| `python -m kneemri.inference.pseudo_labels` | What our champions believe about a corpus nobody labelled: `python -m kneemri.inference.pseudo_labels`. |
 | `python -m kneemri.inference.serve_bench` | Does compiling the encoder pay at SERVING time? `python -m kneemri.inference.serve_bench`. |
 | `python -m kneemri.inference.teacher_readings` | Write an ensemble's ordering of the TRAINING studies for a student to be taught: |
 
@@ -113,6 +151,7 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.kaggle.board_read` | What are we actually behind? `python -m kneemri.kaggle.board_read --live`. |
 | `python -m kneemri.kaggle.champion_check` | Can the best entry this project has still be rebuilt? `python -m kneemri.kaggle.champion_check`. |
 | `python -m kneemri.kaggle.champion_uncertainty` | Is the champion's plateau reducible at all? `python -m kneemri.kaggle.champion_uncertainty`. |
+| `python -m kneemri.kaggle.column_lift` | What lifting MCL and Lateral OA would actually BUY, measured instead of assumed: `ColumnLift`. |
 | `python -m kneemri.kaggle.decode_entry` | The best roster a DECODE BUDGET can buy: `python -m kneemri.kaggle.decode_entry`. |
 | `python -m kneemri.kaggle.discussion_read` | What are the other competitors saying? `python -m kneemri.kaggle.discussion_read --live`. |
 | `python -m kneemri.kaggle.dry_run` | Run the SUBMISSION path over labelled studies: `python -m kneemri.kaggle.dry_run --studies 40`. |
@@ -121,13 +160,19 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.kaggle.kit_check` | Is the kit we are about to ship the code we are running? `python -m kneemri.kaggle.kit_check`. |
 | `python -m kneemri.kaggle.mount_check` | Does every kernel declare the mounts its members need? `python -m kneemri.kaggle.mount_check`. |
 | `python -m kneemri.kaggle.package_members` | Package our trained members for Kaggle: `python -m kneemri.kaggle.package_members`. |
+| `python -m kneemri.kaggle.pool_ceiling` | What the BEST LINEAR COMBINATION of this pool scores — the bound selection cannot answer. |
+| `python -m kneemri.kaggle.priceable_blend` | The best blend this project can PRICE, greedily, with no card and no slot. |
 | `python -m kneemri.kaggle.raptor_features` | The raptor member's READING of our corpus, written as a feature-teacher file. |
 | `python -m kneemri.kaggle.raptor_teacher` | The raptor member's ordering over OUR corpus, written as a teacher file. |
 | `python -m kneemri.kaggle.roster_check` | Is every scoreable member either packaged or explicitly declined? `python -m kneemri.kaggle.roster_check`. |
 | `python -m kneemri.kaggle.roster_reads` | How many decodes would a roster cost, and which members share each? `python -m kneemri.kaggle.roster_reads`. |
+| `python -m kneemri.kaggle.ruler_swap` | Does the SEAT ORDER move when the ruler changes? `RulerSwap`. |
 | `python -m kneemri.kaggle.run_check` | Did the kernel run the entry it was named for? `python -m kneemri.kaggle.run_check --log <path>`. |
+| `python -m kneemri.kaggle.seat_requirement` | What a member would have to BE to close the gap to first place — the inversion nothing here did. |
 | `python -m kneemri.kaggle.seat_value` | What a candidate member would add to the champion roster, card-free. |
+| `python -m kneemri.kaggle.slot_pace` | How many slots are left today and when they are due. `python -m kneemri.kaggle.slot_pace`. |
 | `python -m kneemri.kaggle.submit_check` | Has this entry already shipped? `python -m kneemri.kaggle.submit_check --kernel <dir>`. |
+| `python -m kneemri.kaggle.traversal_census` | Did the memo fire? `python -m kneemri.kaggle.traversal_census --studies 96`. |
 
 ### kneemri
 
@@ -141,6 +186,7 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 |---|---|
 | `python -m kneemri.models.load_check` | Does every registry entry actually RECEIVE its pretrained weights? |
 | `python -m kneemri.models.sam_drift` | Where a SAM fine-tune actually moved — per-region parameter drift between two releases. |
+| `python -m kneemri.models.weight_soup` | Average the WEIGHTS of runs that share an architecture: `python -m kneemri.models.weight_soup`. |
 
 ### runs
 
@@ -155,4 +201,5 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.training.fitted_encoder` | A fitted member, read back as an encoder another run can start from. |
 | `python -m kneemri.training.head_trial` | Fit the HEAD alone on cached encoder features: `python -m kneemri.training.head_trial`. |
 | `python -m kneemri.training.pretrain` | Adapt the encoder to knee MRI without labels: `python -m kneemri.training.pretrain --epochs N`. |
+| `python -m kneemri.training.pseudo_table` | A teacher's own predictions, written back as a label table: `python -m kneemri.training.pseudo_table`. |
 | `python -m kneemri.training.train` | Fit one member: `python -m kneemri.training.train --fold 0 --epochs 8`. |
