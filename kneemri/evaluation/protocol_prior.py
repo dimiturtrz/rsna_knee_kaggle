@@ -32,6 +32,7 @@ import numpy as np
 from jaxtyping import Float, Integer
 
 from core import cli
+from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -106,26 +107,26 @@ class Holdout:
     presence: Integer[np.ndarray, "n slots"]
 
     @classmethod
-    def load(cls, root: Path, names: tuple[str, ...]) -> "Holdout":
+    def load(cls, models: Path, processed: Path, names: tuple[str, ...]) -> "Holdout":
         """Rank-average `names`, then attach each study's slot presence from the cache mask.
 
-        The mask is aligned to its own index file rather than to the holdout, so the studies are
-        joined by UID. A member whose record is missing is a hard failure: silently averaging five
+        Members and mask are both joined by UID: the members to the first one's studies, the mask to its
+        own index file. A member whose record is missing is a hard failure: silently averaging five
         seats and calling it the champion is the class of mistake this project keeps paying for.
         """
-        records = [np.load(root / f"{name}.holdout.npz", allow_pickle=False) for name in names]
-        studies = [str(uid) for uid in records[0]["studies"]]
+        first, *rest = (HoldoutRecord(models / f"{name}.pt").required() for name in names)
+        readings = [first, *(reading.at(first.studies) for reading in rest)]
         stacked = np.stack(
             [
-                np.stack([Ordering.ranks(record["predictions"][:, j]) for j in range(len(TARGETS))], axis=1)
-                for record in records
+                np.stack([Ordering.ranks(reading.predictions[:, j]) for j in range(len(TARGETS))], axis=1)
+                for reading in readings
             ]
         )
-        mask = np.load(root / "mask_336px_20sl_0.1-0.9band.npy")
-        index = json.loads((root / "index_336px_20sl_0.1-0.9band.json").read_text())
+        mask = np.load(processed / "mask_336px_20sl_0.1-0.9band.npy")
+        index = json.loads((processed / "index_336px_20sl_0.1-0.9band.json").read_text())
         where = {uid: position for position, uid in enumerate(index)}
-        presence = np.stack([(mask[where[uid]] > 0).astype(np.int64) for uid in studies])
-        return cls(studies, stacked.mean(axis=0), records[0]["truth"].astype(np.float64), presence)
+        presence = np.stack([(mask[where[uid]] > 0).astype(np.int64) for uid in first.studies])
+        return cls(first.studies, stacked.mean(axis=0), first.truth.astype(np.float64), presence)
 
     def patterns(self) -> Integer[np.ndarray, " n"]:
         """A stratum id per study: the presence bits read as a binary number."""
@@ -175,7 +176,8 @@ def main() -> None:
     command.parser.add_argument("--members", nargs="*", default=list(CHAMPION))
     arguments = command.parsed()
 
-    holdout = Holdout.load(command.rooted(arguments).models(), tuple(arguments.members))
+    root = command.rooted(arguments)
+    holdout = Holdout.load(root.models(), root.processed(), tuple(arguments.members))
     table = holdout.report()
 
     header = "  ".join(f"w={weight:<5}" for weight in BLENDS)

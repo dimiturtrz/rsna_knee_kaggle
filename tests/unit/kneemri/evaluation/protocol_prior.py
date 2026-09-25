@@ -40,22 +40,24 @@ def test_auc_returns_nan_on_a_constant_label():
 
 
 def test_load(tmp_path: Path):
-    """Two members are rank-averaged and joined to the mask BY UID, not by row position — the mask's
-    index holds studies the holdout does not, and in a different order."""
-    studies = np.array(["b", "a"], dtype="<U64")
-    truth = np.array([[1.0] * len(TARGETS), [0.0] * len(TARGETS)], dtype=np.float32)
-    for name, column in (("one", [0.2, 0.8]), ("two", [0.3, 0.9])):
+    """Members are joined to each other and to the mask BY UID, not by row position — the second member
+    lists its studies in the other order, and the mask's index holds studies the holdout does not."""
+    for name, studies, column, labels in (
+        ("one", ["b", "a"], [0.2, 0.8], [1.0, 0.0]),
+        ("two", ["a", "b"], [0.9, 0.3], [0.0, 1.0]),
+    ):
         predictions = np.tile(np.array(column, dtype=np.float32).reshape(-1, 1), (1, len(TARGETS)))
-        np.savez(tmp_path / f"{name}.holdout.npz", studies=studies, predictions=predictions, truth=truth)
+        truth = np.tile(np.array(labels, dtype=np.float32).reshape(-1, 1), (1, len(TARGETS)))
+        np.savez(tmp_path / f"{name}.holdout.npz", studies=np.array(studies), predictions=predictions, truth=truth)
     np.save(tmp_path / "mask_336px_20sl_0.1-0.9band.npy", np.array([[1, 1, 1, 0, 0, 0], [1] * 6, [0] * 6]))
     (tmp_path / "index_336px_20sl_0.1-0.9band.json").write_text(json.dumps(["a", "b", "c"]), encoding="utf-8")
 
-    holdout = Holdout.load(tmp_path, ("one", "two"))
+    holdout = Holdout.load(tmp_path, tmp_path, ("one", "two"))
 
     assert holdout.studies == ["b", "a"]
     assert holdout.presence[0].tolist() == [1] * 6, "row 0 is study b, which is index row 1"
     assert holdout.presence[1].tolist() == [1, 1, 1, 0, 0, 0]
-    assert holdout.predictions.shape == (2, len(TARGETS))
+    assert holdout.predictions[:, 0].tolist() == [0.0, 1.0], "both members rank b below a once joined"
 
 
 def test_patterns():
