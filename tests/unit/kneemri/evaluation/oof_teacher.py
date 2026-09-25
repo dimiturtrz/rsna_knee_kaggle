@@ -15,7 +15,7 @@ TARGETS = 12
 def _fold(directory: Path, name: str, studies: list[str]) -> Path:
     path = directory / f"{name}.holdout.npz"
     scores = np.full((len(studies), TARGETS), float(len(studies)), dtype=np.float32)
-    np.savez(path, studies=np.asarray(studies, dtype="<U64"), predictions=scores)
+    np.savez(path, studies=np.asarray(studies, dtype="<U64"), predictions=scores, truth=np.zeros_like(scores))
     return path
 
 

@@ -40,6 +40,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from kneemri.runs.artefact import Artefact
+from kneemri.runs.holdout_record import HoldoutRecord
 from kneemri.teacher_file import TeacherFile
 
 logger = logging.getLogger(__name__)
@@ -51,15 +52,6 @@ FILL = "band_dense_s2026.holdout.npz"
 """The default fold-0 block for `--fill`, and it is a DIFFERENT teacher from the one this module writes
 by default — see `main`'s `--fill` help and the module docstring's hole paragraph, which still describes
 what `--out teacher_oof_corpus.npz` alone produces."""
-
-STUDIES = "studies"
-"""How a holdout reduction spells its study column; a teacher file spells the same thing `identifiers`."""
-
-PREDICTIONS = "predictions"
-"""And its score column, which a teacher file spells `scores`. The two formats are joined here."""
-
-TRUTH = "truth"
-"""The labels the block was scored against. Only the witness reads it; the teacher file carries scores."""
 
 TINY = 1e-9
 """A prevalence floor, so a label no study in a fold carries divides rather than explodes."""
@@ -89,9 +81,9 @@ class BlockStats:
     @classmethod
     def of(cls, part: Path) -> "BlockStats":
         """Summarise one holdout reduction, per label."""
-        stored = np.load(part, allow_pickle=True)
-        scores = stored[PREDICTIONS].astype(np.float64)
-        truth = stored[TRUTH].astype(np.float64)
+        reading = HoldoutRecord(part).required()
+        scores = reading.predictions
+        truth = reading.truth.astype(np.float64)
         return cls(
             Artefact.stem(part),
             scores.mean(axis=0),
@@ -159,9 +151,9 @@ class OutOfFoldTeacher:
         names: list[str] = []
         scores: list[NDArray[np.float64]] = []
         for part in self.parts:
-            stored = np.load(part, allow_pickle=True)
-            names.extend(str(name) for name in stored[STUDIES])
-            scores.append(stored[PREDICTIONS].astype(np.float64))
+            reading = HoldoutRecord(part).required()
+            names.extend(reading.studies)
+            scores.append(reading.predictions)
         repeated = len(names) - len(set(names))
         if repeated:
             message = f"{repeated} studies are read by more than one fold, so the folds are not disjoint"
@@ -172,7 +164,7 @@ class OutOfFoldTeacher:
         """Write the teacher file and report what went into it, per part."""
         names, scores = self.readings()
         TeacherFile.write(out, names, scores)
-        read = [len(np.load(part, allow_pickle=True)[STUDIES]) for part in self.parts]
+        read = [len(HoldoutRecord(part).required().studies) for part in self.parts]
         return [
             *[f"  {part.stem:28s} {count} studies" for part, count in zip(self.parts, read, strict=True)],
             f"{len(names)} training studies, {scores.shape[1]} targets, out of fold by construction -> {out}",

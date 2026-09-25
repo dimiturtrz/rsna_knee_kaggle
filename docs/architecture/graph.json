@@ -2961,6 +2961,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.oof_teacher",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_teacher",
       "target": "kneemri.teacher_file",
       "weight": 1
     },
@@ -18979,15 +18985,51 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_teacher.BlockStats.of",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_teacher.BlockStats.of",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.oof_teacher.BlockStats.outside",
       "target": "kneemri.evaluation.oof_teacher.BlockStats.axes",
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher.readings",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher.readings",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher.write",
       "target": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher.readings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher.write",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.oof_teacher.OutOfFoldTeacher.write",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -22132,6 +22174,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.stack_fit.MemberHoldout.loaded",
       "target": "kneemri.runs.artefact.Artefact.stem",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.stack_fit.MemberHoldout.loaded",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.stack_fit.MemberHoldout.loaded",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {

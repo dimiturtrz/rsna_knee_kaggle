@@ -24,7 +24,7 @@ from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.stacked import PENALTIES, STACK_PENALTY, StackedLogit
 from kneemri.inference.vote import LogitAverage, RankAverage, Vote
 from kneemri.runs.artefact import Artefact
-from kneemri.runs.holdout_record import SUFFIX
+from kneemri.runs.holdout_record import SUFFIX, HoldoutRecord
 
 FIT_SHARE = 0.5
 """Half the holdout fits, half scores. Half rather than a larger fitting share because the scoring half is
@@ -47,12 +47,12 @@ class MemberHoldout:
     @classmethod
     def loaded(cls, path: Path) -> "MemberHoldout":
         """Read a `<name>.holdout.npz`, binarising truth at the project's midpoint."""
-        held = np.load(path, allow_pickle=False)
+        reading = HoldoutRecord(path).required()
         return cls(
             name=Artefact.stem(path),
-            studies=held["studies"],
-            predictions=held["predictions"].astype(np.float64),
-            truth=(held["truth"] >= MIDPOINT).astype(np.int64),
+            studies=np.asarray(reading.studies),
+            predictions=reading.predictions,
+            truth=(reading.truth >= MIDPOINT).astype(np.int64),
         )
 
     @staticmethod
