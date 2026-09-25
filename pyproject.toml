@@ -23,10 +23,6 @@ dependencies = [
     # because every other platform gets Triton with torch itself, and the Kaggle kernel must not try
     # to install it.
     "triton-windows; sys_platform == 'win32'",
-    # Pillar-0's trunk (kneemri/inference/pillar_member.py) imports it from the pinned checkout under
-    # external/. Declared here because a `uv sync` removes anything undeclared, and its removal shows up
-    # as an ImportError deep inside a stranger's attention block rather than as a missing dependency.
-    "einops",
     # DICOM ingest (the corpus is 819,640 .dcm files). Already present in Kaggle's image at 3.0.2, so it
     # needs no wheel in the kit — it is declared here because the LOCAL data layer imports it.
     "pydicom>=3",
@@ -182,11 +178,6 @@ DEP002 = [
     # Never imported by us either: transformers loads it when `report_reader` asks for `device_map="auto"`,
     # and its absence surfaces only after the shards have been read off disk.
     "accelerate",
-    # Nor this one: the importer is Pillar-0's trunk inside the `external/` checkout, which is gitignored
-    # and put on `sys.path` at call time, so deptry never scans the file that needs it. Dropping the
-    # declaration would let `uv sync` remove it and surface as an ImportError inside a stranger's
-    # attention block; the dependency comment beside it in `[project]` carries the same argument.
-    "einops",
 ]
 # `diffusion_model` is the OrthoFoundation checkout under `external/`, gitignored and put on `sys.path` at
 # call time by `ortho_weights.factory` — never a package we depend on, and never installable, since the

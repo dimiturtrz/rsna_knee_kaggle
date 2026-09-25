@@ -18228,3 +18228,39 @@ decode against 50 GB free on D:, and the axis is flat — not armed. NVUM (knee-
 morning and declined without card: `dml_b` already ships a live-peer ranking distill (0.9078), the honest
 own-pool distill term is +0.0056 (README:8740), and a temporal self-teacher carries strictly less ensemble
 information than either.
+
+## Own-OOF distillation does not survive the labelwise head — 2026-09-25T08:17Z
+
+`labelwise_depth24_distill` (knee-bgvmd): the shipping recipe plus `--distill-weight 0.7 --teacher-targets
+teacher_clean.npz` (fold 0 excluded, leak-free), one variable. Same seed, 909 holdout studies:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_depth24_drop40_long_s2026 | 0.8679 | 0.9053 | 18 |
+| labelwise_depth24_distill_s2026 | 0.8702 | 0.9043 | 18 |
+
+**−0.0010 ledger75**, under the 0.9053 band: the +0.0056 the term read on the max line does not survive the
+head change. The midpoint reads +0.0023 and the recut −0.0010 — the soft targets move scores toward 0.5, which
+the midpoint cut rewards and the ledger75 cut does not. The early lead was the usual soft-target speedup
+(+0.026 at e2, +0.004 at e14, +0.000 at e15). The run died at the start of epoch 19 on HOST RAM
+(`_ArrayMemoryError: Unable to allocate 155. MiB`, 08:14Z, one minute after a commit plus push whose hooks
+both run pytest), so the score is a TRUNCATED floor. Not resumed: the control peaked at e18 and never beat it
+in e19-23 (max 0.8674 against 0.8679), so the five missing epochs price at ~25 min of card for P(clears 0.9115)
+~0.02.
+
+## Ghosting on the shipping line reads a tie on the blind ruler — 2026-09-25T09:37Z
+
+`labelwise_depth24_ghost` (knee-mum8w): the shipping recipe plus the ghosting augmentation, one variable. Same
+seed, 909 holdout studies:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_depth24_drop40_long_s2026 | 0.8679 | 0.9053 | 18 |
+| labelwise_depth24_ghost_s2026 | 0.8708 | 0.9049 | 17 |
+
+**−0.0004 ledger75, a tie.** The midpoint's +0.0029 is the soft-cut effect again (move +0.0342 against the
+control's +0.0374). This is the reading `docs/AXES.md` predicts for the axis: the holdout shares the training
+decode, so it cannot see an artefact-robustness gain, and the row prices ghosting on `decode_cost` — that
+reading is OWED and needs the card. As a fourth seat on the champion's three-member labelwise block (0.9100)
+it adds +0.0008, under the +0.0015 ADD bar. Two earlier attempts died on host-RAM commit (`_run1` e4 0.8561,
+`_run2` e7 0.8801) and are declined as floors; the finished run peaked at 21.74 GB reserved.

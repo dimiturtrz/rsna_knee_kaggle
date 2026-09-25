@@ -68,3 +68,6 @@ What this does NOT say:
 
 RE-OPEN BY: a Pillar-0 arm that changes what is being seated — its trunk under our head, not its head — or
 a 3D checkpoint whose gold-58 number is inside 0.02 of this pool's.
+
+The loader (`pillar_member`, `atlas_import`) and the oracle (`pillar_gate`) were retired 2026-09-25 with
+nothing left calling them; a re-open restores them from git history (`git log --all -- kneemri/inference/pillar_member.py`).

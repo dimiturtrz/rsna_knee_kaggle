@@ -99,6 +99,10 @@ Every board position or score below other than the header line is historical, da
   - 44→80 slices took 0.917→0.932. Ours, 24→36, was −0.0224 [M] ([AXES:91](../../docs/AXES.md)).
   - RadImageNet +0.020. Ours: RadImageNet DenseNet closed ([AXES:48](../../docs/AXES.md)).
   - "Fast Parent 0.957" is an in-sample gold58 score, **not a board score**.
+- **[U] Claims from 09-25** ([09-25](../deep_dives/2026-09-25_forum_sweep.md)):
+  - Report text generated from images cannot beat extraction: BGE-M3 probe 0.8423 vs regex 0.8843 on gold.
+  - 24→32 cached slices "worth more than labels" (2.5D feed). Ours 24→36 is −0.0224 [M] ([AXES:91](../../docs/AXES.md)).
+  - "Top 50 all over 0.95"; a 0.947 team trains on everything and trusts +0.002 board moves.
 
 ## 5. Latest public frontier (09-25; supersedes 08-31)
 
@@ -231,6 +235,7 @@ Every board position or score below other than the header line is historical, da
 - [2026-09-13_host_rulings_forum_sweep.md](../deep_dives/2026-09-13_host_rulings_forum_sweep.md)
 - [2026-09-18_kaggle-playbook-vs-our-ledger.md](../deep_dives/2026-09-18_kaggle-playbook-vs-our-ledger.md)
 - [2026-09-23_forum_sweep.md](../deep_dives/2026-09-23_forum_sweep.md)
+- [2026-09-25_forum_sweep.md](../deep_dives/2026-09-25_forum_sweep.md)
 - [2026-09-24_all-lanes-web-sweep.md](../deep_dives/2026-09-24_all-lanes-web-sweep.md)
 - [2026-09-25_frontier-sweep-for-a-0p95-mechanism.md](../deep_dives/2026-09-25_frontier-sweep-for-a-0p95-mechanism.md)
 - Cross-check: [docs/AXES.md](../../docs/AXES.md)

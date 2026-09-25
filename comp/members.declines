@@ -1810,3 +1810,7 @@ sam_ship_s2026              # SAM trunk, stopped by the owner at epoch 3: 0.8449
 orthodiff_ft_s2026          # OrthoDiffusion Stage II fine-tune (knee-mxz08): 0.8054 ledger75 @e4 vs control 0.9006, -0.0952; instrument, not a seat.
 shift4_lw12_s2026           # SliceShift on the 12-slice line (knee-ypu31): 0.9041 ledger75 @e18 vs control 0.9006, +0.0035 directional; under the 0.9053 line, and shift4_depth24 carries the mechanism onto it.
 shift4_depth24_s2026        # SliceShift on the shipping line (knee-6u1tq): 0.9037 ledger75 @e19 vs base 0.9053, -0.0016, no transfer; rank corr 0.954 with base, seat swap -0.0001 - a twin, not a diverse seat.
+labelwise_depth24_distill_s2026   # own-OOF distill on the shipping line (knee-bgvmd): 0.9043 ledger75 @e18 vs 0.9053, -0.0010, truncated floor (host-RAM death e19); +0.0004 as a fourth labelwise seat.
+labelwise_depth24_ghost_s2026     # ghosting on the shipping line (knee-mum8w): 0.9049 ledger75 @e17 vs 0.9053, -0.0004 tie; +0.0008 as a fourth labelwise seat, under the +0.0015 ADD bar. decode_cost reading owed.
+labelwise_depth24_ghost_s2026_run1 # first ghost attempt, died on host RAM at e4 (0.8561 ledger75): a killed run, a floor.
+labelwise_depth24_ghost_s2026_run2 # second ghost attempt, died on host RAM at e7 (0.8801 ledger75): a killed run, a floor.

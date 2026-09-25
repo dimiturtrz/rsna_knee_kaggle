@@ -51,6 +51,11 @@
 # control  labelwise_dense_s2026 = 0.8964 ledger75 @ epoch 7, 909 studies. No control run is owed.
 #
 # deliberate: --image-size 420 (the arm's thesis)
+# deliberate: --batch 6 --accumulate 2 — at batch 12 arm_check prices 420/20sl at ~30 GB, over the 22 GB
+#   cap. Accumulation restores the GRADIENT of batch 12, but --rank-weight's pairwise term is pooled
+#   per micro-batch and sees 6 studies, not 12. That is a second variable. It is accepted, not matched:
+#   a matched 336/batch-6 control costs ~1 h, and is owed only if this arm PASSES (a smaller rank pool
+#   is not known to help, but that is an assumption, not a measurement).
 #
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
@@ -59,5 +64,5 @@ require "$LABELS"
 run_train labelwise420 \
   $RECIPE --epochs 12 --slice-pooling labelwise --whole-stack $THROUGHPUT \
   --backbone-lr 4e-5 --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations \
-  --image-size 420 \
+  --image-size 420 --batch 6 --accumulate 2 \
   --labels "$LABELS" --out "$MODELS/labelwise420_s2026.pt"

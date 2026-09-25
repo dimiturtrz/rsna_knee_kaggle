@@ -64,7 +64,6 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.padding_split` | Whether a member's decode toll concentrates in the studies whose field it had to PAD out to. |
 | `python -m kneemri.evaluation.paired_floor` | How tightly a per-label delta can be read when both arms saw the SAME studies. |
 | `python -m kneemri.evaluation.patch_maps` | Where each study's evidence sits, measured by blanking a grid of patches one at a time. |
-| `python -m kneemri.evaluation.pillar_gate` | The plumbing oracle for the Pillar-0 member: `python -m kneemri.evaluation.pillar_gate`. |
 | `python -m kneemri.evaluation.pool_census` | Is there a member in this pool that is STRONG and sees the knee DIFFERENTLY — or is that cell empty? |
 | `python -m kneemri.evaluation.population_split` | Whether the pool's residual concentrates in a KIND of study: `python -m kneemri.evaluation.population_split`. |
 | `python -m kneemri.evaluation.protocol_prior` | Does the ensemble already use ALL of the acquisition-protocol signal, or only part of it? |
