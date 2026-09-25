@@ -56,6 +56,7 @@ class _FakeBackbone(torch.nn.Module):
         super().__init__()
         self.encoder = torch.nn.Module()
         self.encoder.layer = torch.nn.ModuleList([torch.nn.Linear(DIM, DIM) for _ in range(12)])
+        self.layernorm: torch.nn.Module = torch.nn.Identity()
         self.checkpointing: dict[str, object] | None = None
         # The PUBLIC flag transformers exposes, which is what `applied` reads — a double that recorded
         # only the call would let a check pass against an encoder that had ignored it.

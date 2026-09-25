@@ -89,6 +89,7 @@ A claim about an entry's score is written next to the entry — `dark6 reads 0.9
 — so proximity is what separates the two, and forty characters is the widest gap any true positive in
 the corpus spans."""
 
+SENTENCE_END = re.compile(r"[.!?;]\s")
 RANGE = re.compile(r"0\.\d{3,4}\s*[-–]\s*0\.\d{3,4}")
 """A pre-registered FLAT band, written as a range. Both ends are bars; neither is anyone's score."""
 
@@ -220,11 +221,16 @@ class BoardClaims:
 
     def about(self, line: str, name: str) -> set[str]:
         """The board scores written near enough to `name` on this line to be claims about that entry."""
-        windows = [(match.start() - WINDOW, match.end() + WINDOW) for match in self.stems[name].finditer(line)]
+        names = [(match.start(), match.end()) for match in self.stems[name].finditer(line)]
         near = [
             (start, text)
             for start, end, text in self.quoted(line)
-            if any(left <= start and end <= right for left, right in windows)
+            if any(
+                first - WINDOW <= start
+                and end <= last + WINDOW
+                and not SENTENCE_END.search(line[min(end, last) : max(start, first)])
+                for first, last in names
+            )
         ]
         lowered = line.lower()
         return {

@@ -63,7 +63,16 @@ def unfrozen(trunk: OrthoDiffusionTrunk) -> list[nn.Parameter]:
     return chosen
 
 
-def predict(model: OrthoClassifier, images: np.ndarray, mask: np.ndarray, rows: np.ndarray, batch: int, device: torch.device, *, precise: bool) -> np.ndarray:
+def predict(
+    model: OrthoClassifier,
+    images: np.ndarray,
+    mask: np.ndarray,
+    rows: np.ndarray,
+    batch: int,
+    device: torch.device,
+    *,
+    precise: bool,
+) -> np.ndarray:
     model.eval()
     out = []
     generator = torch.Generator(device=device).manual_seed(NOISE_SEED)
@@ -80,7 +89,11 @@ def predict(model: OrthoClassifier, images: np.ndarray, mask: np.ndarray, rows: 
 def auc(scores: np.ndarray, truth: np.ndarray) -> float:
     from sklearn.metrics import roc_auc_score
 
-    values = [roc_auc_score(truth[:, k] > 0.5, scores[:, k]) for k in range(truth.shape[1]) if 0 < (truth[:, k] > 0.5).sum() < len(truth)]
+    values = [
+        roc_auc_score(truth[:, k] > 0.5, scores[:, k])
+        for k in range(truth.shape[1])
+        if 0 < (truth[:, k] > 0.5).sum() < len(truth)
+    ]
     return float(np.mean(values))
 
 
@@ -104,16 +117,23 @@ def main() -> None:
     training, holdout = np.sort(training), np.sort(holdout)
     if arguments.limit:
         training, holdout = training[: arguments.limit], holdout[: arguments.limit // 4]
-    graded = Targets.load(rooted.processed() / "labels" / DEFAULT_LABELS, rooted.raw() / "train.csv", identifiers).scores
+    graded = Targets.load(
+        rooted.processed() / "labels" / DEFAULT_LABELS, rooted.raw() / "train.csv", identifiers
+    ).scores
     graded = np.asarray(graded, dtype=np.float32)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if device.type == "cuda":
-        torch.cuda.set_per_process_memory_fraction(arguments.vram_gb * 2**30 / torch.cuda.get_device_properties(0).total_memory)
+        torch.cuda.set_per_process_memory_fraction(
+            arguments.vram_gb * 2**30 / torch.cuda.get_device_properties(0).total_memory
+        )
     trunk = DenoiserWeights(rooted.kind("external") / "orthodiffusion").trunk(device)
     model = OrthoClassifier(trunk).to(device)
     optimizer = torch.optim.Adam(
-        [{"params": unfrozen(trunk), "lr": arguments.lr * arguments.trunk_scale}, {"params": model.head.parameters(), "lr": arguments.lr}]
+        [
+            {"params": unfrozen(trunk), "lr": arguments.lr * arguments.trunk_scale},
+            {"params": model.head.parameters(), "lr": arguments.lr},
+        ]
     )
     steps_per_epoch = math.ceil(len(training) / arguments.batch)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, arguments.epochs * steps_per_epoch)
@@ -134,19 +154,31 @@ def main() -> None:
                 loss = functional.binary_cross_entropy_with_logits(logits[known], target[known])
                 optimizer.zero_grad(set_to_none=True)
                 loss.backward()
-            broken = [name for name, parameter in model.named_parameters() if parameter.grad is not None and not torch.isfinite(parameter.grad).all()]
+            broken = [
+                name
+                for name, parameter in model.named_parameters()
+                if parameter.grad is not None and not torch.isfinite(parameter.grad).all()
+            ]
             if broken:
-                logger.info(f"  non-finite grads in {len(broken)}: {broken[:3]} rows {chunk.tolist()} target {target.tolist()}")
+                logger.info(
+                    f"  non-finite grads in {len(broken)}: {broken[:3]} rows {chunk.tolist()} target {target.tolist()}"
+                )
             optimizer.step()
             scheduler.step()
             total += float(loss)
             if step % 50 == 0 or not math.isfinite(float(loss)):
-                reserved = torch.cuda.max_memory_reserved() / 2**30 if device.type == 'cuda' else 0.0
-                logger.info(f"  step {step}/{steps_per_epoch} loss {float(loss):.4f} {reserved:.1f} GiB known {int(known.sum())} logit_nan {int(torch.isnan(logits).sum())}")
-        scores = predict(model, corpus.images, corpus.mask, holdout, arguments.batch * 2, device, precise=arguments.fp32)
+                reserved = torch.cuda.max_memory_reserved() / 2**30 if device.type == "cuda" else 0.0
+                logger.info(
+                    f"  step {step}/{steps_per_epoch} loss {float(loss):.4f} {reserved:.1f} GiB known {int(known.sum())} logit_nan {int(torch.isnan(logits).sum())}"
+                )
+        scores = predict(
+            model, corpus.images, corpus.mask, holdout, arguments.batch * 2, device, precise=arguments.fp32
+        )
         truth = np.nan_to_num(graded[holdout])
         value = auc(scores, truth)
-        logger.info(f"epoch {epoch}: loss {total / steps_per_epoch:.4f}  holdout mean AUC {value:.4f}  ({time.time() - started:.0f}s)")
+        logger.info(
+            f"epoch {epoch}: loss {total / steps_per_epoch:.4f}  holdout mean AUC {value:.4f}  ({time.time() - started:.0f}s)"
+        )
         if value > best:
             best = value
             HoldoutRecord(arguments.out.with_suffix(".holdout.npz")).write(
@@ -157,5 +189,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-
     main()

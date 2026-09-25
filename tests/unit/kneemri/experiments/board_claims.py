@@ -91,6 +91,8 @@ def test_about() -> None:
     assert check().about("`votefit_v1` scored 0.938", "votefit_v1") == {"0.938"}
     # Far enough away to be a claim about something else, and a number on the member's ruler.
     assert check().about("0.946 is what the target asks of any entry, so votefit_v1 is short", "votefit_v1") == set()
+    # A score in the sentence before the name belongs to that sentence's subject.
+    assert check().about("vjepaseat 0.943 was flat. GATED on votefit_v1", "votefit_v1") == set()
     assert check().about("votefit_v1's member holdout predicts 0.938", "votefit_v1") == set()
 
 
