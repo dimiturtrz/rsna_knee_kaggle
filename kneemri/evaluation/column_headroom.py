@@ -35,6 +35,7 @@ from core.findings import TARGETS
 from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.stack_fit import MemberHoldout
+from kneemri.inference.vote import Vote
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +80,7 @@ class ColumnHeadroom:
         probability scale is not information — and leaving it in lets one confident member dominate a
         column for a reason the score cannot see.
         """
-        ranked = [np.argsort(np.argsort(member.predictions, axis=0), axis=0).astype(np.float64) for member in members]
-        return np.mean(ranked, axis=0) / max(len(members[0].predictions) - 1, 1)
+        return np.mean([Vote.ranks(member.predictions) for member in members], axis=0)
 
     def scored(
         self,

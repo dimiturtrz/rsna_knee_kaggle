@@ -32,6 +32,7 @@ import numpy as np
 from jaxtyping import Float, Integer
 
 from core import cli
+from kneemri.inference.vote import Vote
 from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -78,11 +79,9 @@ class Ordering:
 
     @staticmethod
     def ranks(values: Float[np.ndarray, " n"]) -> Float[np.ndarray, " n"]:
-        """Ordinal ranks in [0, 1]. Ties are broken arbitrarily rather than averaged; the members'
-        predictions are continuous floats, so exact ties are vanishing and a tie-aware rank would buy
-        nothing for the cost of a second sort."""
-        order = np.argsort(np.argsort(values)).astype(np.float64)
-        return order / max(len(values) - 1, 1)
+        """Midranks in [0, 1] — `Vote.ranks` on one column, so ties share a rank and the AUC below is
+        the tie-correct Mann-Whitney."""
+        return Vote.ranks(values[:, None])[:, 0]
 
     @staticmethod
     def auc(scores: Float[np.ndarray, " n"], labels: Float[np.ndarray, " n"]) -> float:
@@ -116,12 +115,7 @@ class Holdout:
         """
         first, *rest = (HoldoutRecord(models / f"{name}.pt").required() for name in names)
         readings = [first, *(reading.at(first.studies) for reading in rest)]
-        stacked = np.stack(
-            [
-                np.stack([Ordering.ranks(reading.predictions[:, j]) for j in range(len(TARGETS))], axis=1)
-                for reading in readings
-            ]
-        )
+        stacked = np.stack([Vote.ranks(reading.predictions) for reading in readings])
         mask = np.load(processed / "mask_336px_20sl_0.1-0.9band.npy")
         index = json.loads((processed / "index_336px_20sl_0.1-0.9band.json").read_text())
         where = {uid: position for position, uid in enumerate(index)}

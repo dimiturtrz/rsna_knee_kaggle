@@ -11,6 +11,7 @@ import pytest
 from core.findings import TARGETS
 from kneemri.evaluation.column_mixing import ColumnMixing, MixingResult
 from kneemri.evaluation.mixing_rules import RULES, RidgeShrink, SparseGraph
+from kneemri.inference.vote import Vote
 
 STUDIES = 120
 FINDINGS = len(TARGETS)
@@ -26,28 +27,18 @@ def corpus() -> tuple[np.ndarray, np.ndarray]:
     return table, truth
 
 
-def test_column_mixing_ranks() -> None:
-    """Every column becomes its own rank on [0, 1], order preserved and endpoints hit."""
-    table = np.random.default_rng(1).normal(size=(STUDIES, FINDINGS))
-    normalised = ColumnMixing.ranks(table)
-    assert normalised.shape == table.shape
-    assert normalised.min() == 0.0
-    assert normalised.max() == 1.0
-    assert np.array_equal(np.argsort(normalised[:, 0]), np.argsort(table[:, 0]))
-
-
 def test_chosen_penalty() -> None:
     """The penalty comes from the rule's own candidates, chosen inside the fitting half."""
     table, truth = corpus()
-    penalty = ColumnMixing().chosen_penalty(ColumnMixing.ranks(table), truth, 0)
+    penalty = ColumnMixing().chosen_penalty(Vote.ranks(table), truth, 0)
     assert penalty in set(RidgeShrink.penalties)
-    assert ColumnMixing(fixed=7.0).chosen_penalty(ColumnMixing.ranks(table), truth, 0) == 7.0
+    assert ColumnMixing(fixed=7.0).chosen_penalty(Vote.ranks(table), truth, 0) == 7.0
 
 
 def test_sparse_rule_is_carried() -> None:
     """A rule handed in is the one fitted — the sparse matrix keeps its own zero diagonal weight of one."""
     table, truth = corpus()
-    matrix = ColumnMixing(rule=SparseGraph(), fixed=1.0).matrix(ColumnMixing.ranks(table), truth)
+    matrix = ColumnMixing(rule=SparseGraph(), fixed=1.0).matrix(Vote.ranks(table), truth)
     assert set(RULES) == {"ridge", "sparse"}
     assert np.allclose(np.diag(matrix), 1.0)
 
@@ -55,7 +46,7 @@ def test_sparse_rule_is_carried() -> None:
 def test_matrix() -> None:
     """The mixing matrix is square in the findings and finite everywhere."""
     table, truth = corpus()
-    matrix = ColumnMixing().matrix(ColumnMixing.ranks(table), truth)
+    matrix = ColumnMixing().matrix(Vote.ranks(table), truth)
     assert matrix.shape == (FINDINGS, FINDINGS)
     assert np.isfinite(matrix).all()
 

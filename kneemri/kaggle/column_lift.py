@@ -46,7 +46,7 @@ from core.findings import TARGETS
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
-from kneemri.inference.vote import RankAverage
+from kneemri.inference.vote import RankAverage, Vote
 from kneemri.kaggle.pool_ceiling import WEAK_COLUMNS
 from kneemri.kaggle.seat_requirement import DEFAULT_BASE, TARGET_GAIN
 
@@ -104,8 +104,7 @@ class ColumnLift:
         is confident, which changes the column by MAGNITUDE rather than by ORDER — and the metric only
         reads order.
         """
-        order = np.argsort(np.argsort(column, kind="mergesort"), kind="mergesort")
-        return order.astype(np.float64) / max(len(column) - 1, 1)
+        return Vote.ranks(column[:, None])[:, 0]
 
     def lifted(self, pool: Pool, strength: float) -> Float[np.ndarray, "studies targets"]:
         """The base blend with the named findings dragged `strength` of the way toward truth.

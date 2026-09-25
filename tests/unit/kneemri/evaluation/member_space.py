@@ -17,13 +17,6 @@ def _space() -> MemberSpace:
     return MemberSpace(Pool(["one", "two", "three"], predictions, np.zeros((STUDIES, TARGETS))))
 
 
-def test_ranked() -> None:
-    ranks = MemberSpace.ranked(np.array([[0.9], [0.1], [0.5]]))
-    assert ranks.min() == 0.0
-    assert ranks.max() == 1.0
-    assert ranks[1, 0] < ranks[2, 0] < ranks[0, 0]
-
-
 def test_matrix(space: MemberSpace) -> None:
     matrix = space.matrix()
     assert matrix.shape == (MEMBERS, STUDIES * TARGETS)

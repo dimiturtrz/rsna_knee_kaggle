@@ -43,6 +43,7 @@ from core.bootstrap import StudyBootstrap
 from core.data.corpus.anatomy import ANATOMY, Extent
 from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
+from kneemri.inference.vote import Vote
 from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -193,10 +194,11 @@ class HoldoutJoin:
         loaded = [HoldoutRecord(path).required() for path in members]
         shared = sorted(set.intersection(*[set(reading.studies) for reading in loaded]))
         joined = [reading.at(shared) for reading in loaded]
-        stacked = [
-            np.argsort(np.argsort(reading.predictions, axis=0), axis=0) / max(1, len(shared) - 1) for reading in joined
-        ]
-        return np.mean(stacked, axis=0), joined[0].truth, np.array(shared)
+        return (
+            np.mean([Vote.ranks(reading.predictions) for reading in joined], axis=0),
+            joined[0].truth,
+            np.array(shared),
+        )
 
     def aligned(self, spread_file: Path, studies: NDArray[np.str_]) -> NDArray[np.float32]:
         """This run's per-study spread, put in the same row order as the holdout records.

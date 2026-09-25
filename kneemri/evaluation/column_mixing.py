@@ -70,6 +70,7 @@ from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.mixing_rules import RULES, MixingRule, RidgeShrink
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.stack_fit import MemberHoldout
+from kneemri.inference.vote import Vote
 
 logger = logging.getLogger(__name__)
 
@@ -106,19 +107,6 @@ class MixingResult:
 
 class ColumnMixing:
     """Fit a 12x12 mixing matrix out of sample and report what it bought, per finding."""
-
-    @staticmethod
-    def ranks(
-        table: Float[NDArray[np.float64], "studies findings"],
-    ) -> Float[NDArray[np.float64], "studies findings"]:
-        """Each column replaced by its within-column rank, scaled to [0, 1].
-
-        The metric reads order and nothing else, so this throws away exactly the information the score
-        cannot see and keeps all of the information it can. It also makes the twelve columns
-        commensurable, which a single ridge across all of them needs and raw probabilities do not.
-        """
-        order = np.argsort(np.argsort(table, axis=0), axis=0).astype(np.float64)
-        return order / max(len(table) - 1, 1)
 
     def __init__(self, seed: int = SPLIT_SEED, rule: MixingRule | None = None, fixed: float | None = None) -> None:
         self.seed = seed
@@ -169,7 +157,7 @@ class ColumnMixing:
         Both directions because half of 909 is small enough that one direction's number is a coin as much
         as a reading, and averaging the two costs nothing once the fits are being done at all.
         """
-        normalised = self.ranks(table)
+        normalised = Vote.ranks(table)
         drawn = np.random.default_rng(self.seed).permutation(len(normalised))
         halves = np.zeros(len(normalised), dtype=bool)
         halves[drawn[: len(normalised) // 2]] = True
@@ -205,7 +193,7 @@ def main() -> None:
     parsed = parser.parse_args()
     names = MemberPool.at(parsed.holdouts).names(parsed.only)
     members = MemberHoldout.aligned([MemberHoldout.loaded(parsed.holdouts / f"{name}.holdout.npz") for name in names])
-    table = np.mean([ColumnMixing.ranks(member.predictions) for member in members], axis=0)
+    table = np.mean([Vote.ranks(member.predictions) for member in members], axis=0)
     rule = RULES[parsed.rule]
     fixed = list(rule.penalties) if parsed.sweep else [None]
     for penalty in fixed:

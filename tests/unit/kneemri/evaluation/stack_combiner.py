@@ -43,13 +43,13 @@ def test_ranked():
     ranks = StackCombiner(_pool()).ranked()
 
     assert ranks.shape == (STUDIES, MEMBERS, len(TARGETS))
-    assert ranks.min() == pytest.approx(0.0)
-    assert ranks.max() == pytest.approx(1.0)
+    assert 0.0 <= ranks.min() <= ranks.max() <= 1.0
     column = ranks[:, 0, 0]
     original = _pool().predictions[0][:, 0]
-    assert np.array_equal(column.argsort(), original.argsort()), (
+    assert np.all(np.diff(column[original.argsort()]) >= 0.0), (
         "ranking must not reorder a member; it only rescales what that member already said"
     )
+    assert len(np.unique(column)) == len(np.unique(original)), "tied predictions share one midrank"
 
 
 def test_design():

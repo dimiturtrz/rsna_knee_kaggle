@@ -10,6 +10,7 @@ import numpy as np
 from jaxtyping import Float
 
 from kneemri.evaluation.pool import Pool
+from kneemri.inference.vote import Vote
 
 
 class MemberSpace:
@@ -23,17 +24,11 @@ class MemberSpace:
     def __init__(self, pool: Pool) -> None:
         self.pool = pool
 
-    @staticmethod
-    def ranked(predictions: Float[np.ndarray, "studies targets"]) -> Float[np.ndarray, "studies targets"]:
-        """One member's predictions as per-label ranks in [0, 1] — scale-free, tie-stable, order-preserving."""
-        order = np.argsort(np.argsort(predictions, axis=0), axis=0).astype(np.float64)
-        return order / max(len(predictions) - 1, 1)
-
     def matrix(self) -> Float[np.ndarray, "members features"]:
         """Every member as one flattened rank vector, centred on the pool mean.
 
         Centring is what makes the covariance downstream the covariance OF THE POOL rather than of the
         origin, which is the whole claim: distance is measured against how this set of members varies.
         """
-        rows = np.stack([self.ranked(member).ravel() for member in self.pool.predictions])
+        rows = np.stack([Vote.ranks(member).ravel() for member in self.pool.predictions])
         return rows - rows.mean(axis=0, keepdims=True)

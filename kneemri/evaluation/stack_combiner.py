@@ -40,6 +40,7 @@ from core import cli
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.inference.vote import Vote
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +92,7 @@ class StackCombiner:
 
     def ranked(self) -> Float[np.ndarray, "studies members targets"]:
         """Every member's prediction as a rank in [0, 1], the space the flat vote also works in."""
-        stacked = np.stack([np.asarray(prediction, dtype=np.float64) for prediction in self.pool.predictions], axis=1)
-        order = stacked.argsort(axis=0).argsort(axis=0)
-        return order / max(stacked.shape[0] - 1, 1)
+        return np.stack([Vote.ranks(prediction) for prediction in self.pool.predictions], axis=1)
 
     def design(self, ranks: Float[np.ndarray, "studies members targets"], target: int) -> Float[np.ndarray, "s f"]:
         """The feature matrix for one finding: its own member columns, or every finding's when crossing."""

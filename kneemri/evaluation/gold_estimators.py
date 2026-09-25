@@ -54,6 +54,7 @@ from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.inference.vote import Vote
 
 RESOLVES = 2
 """Distinct labels a finding needs before an area under its curve means anything."""
@@ -83,8 +84,7 @@ class Cells:
         labels: Int[NDArray[np.int64], "studies targets"],
     ) -> "Cells":
         """Rank-normalise each finding onto [0, 1] so cells from different findings share one scale."""
-        order = np.argsort(np.argsort(scores, axis=0), axis=0).astype(np.float64)
-        return cls(scores=scores, ranked=order / max(scores.shape[0] - 1, 1), labels=labels)
+        return cls(scores=scores, ranked=Vote.ranks(scores), labels=labels)
 
     def rows(self, index: Int[NDArray[np.int64], " draw"]) -> "Cells":
         """The same cells restricted to a resample's studies, transform and all."""

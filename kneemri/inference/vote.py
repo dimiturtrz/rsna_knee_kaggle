@@ -95,7 +95,7 @@ class Vote(ABC):
         Per label because the metric ranks per label; one ordering across twelve unrelated findings mixes
         them into a single sequence and destroys exactly the information being scored.
         """
-        ranked = np.empty_like(member)
+        ranked = np.empty(member.shape, dtype=np.float64)
         studies = member.shape[0]
         for label in range(member.shape[1]):
             ranked[:, label] = Vote.midranks(member[:, label])
