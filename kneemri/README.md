@@ -57,7 +57,6 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.member_mahalanobis` | Distance between members with the POOL'S OWN COVARIANCE divided out — far only along an unspanned axis. |
 | `python -m kneemri.evaluation.neighbour_errors` | Does a cell's label disagree with the labels of its NEAREST NEIGHBOURS in a frozen trunk's feature space? |
 | `python -m kneemri.evaluation.noise_binding` | Does a member track the LEXICON or the RADIOLOGIST where the two disagree? |
-| `python -m kneemri.evaluation.oof_gold` | The honest 58-study gold read, stitched from a family's five folds. |
 | `python -m kneemri.evaluation.oof_oracle` | Does OUR pipeline hand a published member the same pixels its author did? |
 | `python -m kneemri.evaluation.oof_teacher` | OUR OWN pool's out-of-fold reading of the training studies, assembled into a teacher file. |
 | `python -m kneemri.evaluation.ordinal_signal` | Whether the graded YES levels in the report table carry ORDINAL information, or only certainty. |
@@ -65,11 +64,9 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.paired_floor` | How tightly a per-label delta can be read when both arms saw the SAME studies. |
 | `python -m kneemri.evaluation.patch_maps` | Where each study's evidence sits, measured by blanking a grid of patches one at a time. |
 | `python -m kneemri.evaluation.pool_census` | Is there a member in this pool that is STRONG and sees the knee DIFFERENTLY — or is that cell empty? |
-| `python -m kneemri.evaluation.population_split` | Whether the pool's residual concentrates in a KIND of study: `python -m kneemri.evaluation.population_split`. |
 | `python -m kneemri.evaluation.protocol_prior` | Does the ensemble already use ALL of the acquisition-protocol signal, or only part of it? |
 | `python -m kneemri.evaluation.rank_stability` | Is our offline ORDERING resolvable by 909 studies at all — `python -m kneemri.evaluation.rank_stability`. |
 | `python -m kneemri.evaluation.raptor_feed` | The raptor decode, reimplemented as OUR code from its published description. |
-| `python -m kneemri.evaluation.raptor_inventory` | What a directory of foreign checkpoints actually CONTAINS, read from the checkpoints themselves. |
 | `python -m kneemri.evaluation.raptor_model` | The raptor model, reimplemented as OUR code so a foreign checkpoint can be SERVED, not only measured. |
 | `python -m kneemri.evaluation.record_mix` | Score ensembles of members that are already on disk, with no card and no inference pass. |
 | `python -m kneemri.evaluation.residual_split` | What KIND of error the pool's residual is: `python -m kneemri.evaluation.residual_split`. `knee-y7v3`. |
@@ -77,14 +74,11 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.ruler_transfer` | Does a DELTA between two arms survive changing the ruler? `python -m kneemri.evaluation.ruler_transfer`. |
 | `python -m kneemri.evaluation.run_comparison` | Read several runs' metrics files side by side: `python -m kneemri.evaluation.run_comparison`. |
 | `python -m kneemri.evaluation.seat_add` | What one candidate adds to a NAMED pool: `python -m kneemri.evaluation.seat_add --pool <stems> --candidate <stem>`. |
-| `python -m kneemri.evaluation.seat_bonus` | What a seat is worth: the board gain of an ensemble over the SOLO entry of its own first member. |
 | `python -m kneemri.evaluation.seat_profile` | Per-member, per-finding AUC over the shared holdout: `python -m kneemri.evaluation.seat_profile`. |
 | `python -m kneemri.evaluation.seat_swap` | The D43 swap gate: does ONE seat move the champion block, and does it keep the block's diversity. |
 | `python -m kneemri.evaluation.seat_weight` | What a seat is worth at each WEIGHT, not just at one seat of n. `python -m kneemri.evaluation.seat_weight`. |
 | `python -m kneemri.evaluation.side_blindness` | Can the model tell the two compartments apart at all? `python -m kneemri.evaluation.side_blindness`. |
 | `python -m kneemri.evaluation.slotdrop_tta` | Serve a slot-dropout member over its own TRAINING masks: `python -m kneemri.evaluation.slotdrop_tta`. |
-| `python -m kneemri.evaluation.stack_combiner` | Does a LEARNED combiner beat the flat vote? `python -m kneemri.evaluation.stack_combiner --members a.pt b.pt` |
-| `python -m kneemri.evaluation.stack_coverage` | Does keeping 12 slices of a deep stack cost accuracy? `python -m kneemri.evaluation.stack_coverage`. |
 | `python -m kneemri.evaluation.stack_fit` | The measurement that judges a learned combiner against the fixed rules, on studies none of them fitted. |
 | `python -m kneemri.evaluation.study_attribution` | WHY are the wrong studies wrong? `python -m kneemri.evaluation.study_attribution --run <name>` |
 | `python -m kneemri.evaluation.study_errors` | Which HOLDOUT STUDIES does a run get wrong, and is the defect the model's or the label's? |
@@ -92,13 +86,11 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.evaluation.suspect_teacher` | Write a CORRECTED score for the cells an independent signal says the reader got wrong. |
 | `python -m kneemri.evaluation.table_separation` | Are two label tables actually separated on the gold 58? `python -m kneemri.evaluation.table_separation`. |
 | `python -m kneemri.evaluation.teacher_witness` | Whether a distilled student tracks its teachers' IN-SAMPLE outputs on the fold it is scored on. |
-| `python -m kneemri.evaluation.tie_divergence` | When two series tie for a slot, do they SHOW the same thing? `python -m kneemri.evaluation.tie_divergence`. |
 | `python -m kneemri.evaluation.train_disagreement` | Which TRAINING studies the family cannot agree on: `python -m kneemri.evaluation.train_disagreement`. |
 | `python -m kneemri.evaluation.transduction` | Does adapting on the TEST set's own features buy anything? `knee-tta1`. |
 | `python -m kneemri.evaluation.transfer_strata` | WHERE in the holdout the board's ordering lives: `python -m kneemri.evaluation.transfer_strata`. |
 | `python -m kneemri.evaluation.uncertainty_split` | How much of what an ensemble does not know is REDUCIBLE: `python -m kneemri.evaluation.uncertainty_split`. |
 | `python -m kneemri.evaluation.unread_teacher` | Write a score for the cells the report never read, from a pool that never read them either. |
-| `python -m kneemri.evaluation.unsure_cost` | What an `UNK` cell is actually worth: `python -m kneemri.evaluation.unsure_cost`. |
 | `python -m kneemri.evaluation.vendor_ruler` | Whether member RANK survives a change of scanner: `python -m kneemri.evaluation.vendor_ruler`. |
 | `python -m kneemri.evaluation.vote_ceiling` | What is the VOTE worth, once the fitting is paid for? |
 | `python -m kneemri.evaluation.weights_gap` | Where do THEIR weights beat OURS, per label, on studies both held out? |

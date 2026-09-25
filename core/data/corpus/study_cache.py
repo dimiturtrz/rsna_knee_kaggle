@@ -525,11 +525,11 @@ class CorpusSplit:
     """The shipped tables a decode reads before it can build: which studies, and each series' plane.
 
     Beside `StudyCache` because it is exactly the arguments `build` takes, and a dataclass rather than
-    three lines in a `main` because eight callers now assemble them: the build CLI, the smoke that
+    three lines in a `main` because seven callers now assemble them: the build CLI, the smoke that
     decodes a few dozen studies, the four audits (`crop_coverage`, `diagnose_laterality`,
-    `diagnose_matrix`, `decode_bench`) and the two evaluations (`oof_oracle`, `stack_coverage`) that
+    `diagnose_matrix`, `decode_bench`) and the evaluation (`oof_oracle`) that
     each used to spell out `train.csv`, `StudyInstanceUID` and
-    `train_series` for themselves. Assembled eight times they would drift on the one thing that must not:
+    `train_series` for themselves. Assembled seven times they would drift on the one thing that must not:
     which tables name the split — and an audit reading a different study list than the cache was built
     from is a measurement about a corpus nobody trained on.
     """

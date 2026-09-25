@@ -6,9 +6,10 @@ it — no labels, no leaderboard, no GPU.
 
 WHY IT IS ITS OWN MODULE. It lived as a method on `OutOfFoldOracle`, which compares one published
 member's recorded predictions against what our pipeline produces for the same studies. This compares
-nothing: it is a RULER, and four evaluations (`paired_floor`, `ruler_transfer`, `stack_coverage`,
-`supervision_gap`) were each constructing a residual-comparison oracle in order to reach it, three of
-them through a local import to dodge the module's CLI-only dependencies. One class, two products.
+nothing: it is a RULER, and four evaluations (`paired_floor`, `ruler_transfer`,
+`stack_coverage` (retired, last at e0611cc5), `supervision_gap`) were each constructing a
+residual-comparison oracle in order to reach it, three of them through a local import to dodge the
+module's CLI-only dependencies. One class, two products.
 
 WHY IT MATTERS. Our own ruler is one fold — 881 studies, 62 Fracture positives, a sampling noise floor
 of 0.0053 that has decided what counts as a result for this whole project. This one is the entire

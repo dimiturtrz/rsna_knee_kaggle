@@ -26,8 +26,9 @@ whether it cleared zero, which is a verdict decided by the random seed. At 1500 
 and the sign is stable. An interval whose own Monte Carlo error is larger than the effect is not an
 interval.
 
-The measurement was made on `stack_coverage`'s AUC delta, which is the widest of the quantities that
-quote this number, so the three narrower ones inherit a bound rather than an assumption.
+The measurement was made on `stack_coverage`'s (retired, last at e0611cc5) AUC delta, which is the
+widest of the quantities that quote this number, so the three narrower ones inherit a bound rather than
+an assumption.
 """
 
 RESAMPLE_SEED = 11
@@ -65,10 +66,10 @@ STUDY_RESAMPLES = 1000
 """Draws for the index bootstrap, kept at what every published interval here was read under.
 
 NOT the measured 1500 above, and the difference is not an oversight. `RESAMPLES` was raised after a
-measurement on `stack_coverage`'s AUC delta; this count has had no such measurement, and lowering or
-raising it would move the 0.0062 paired floor, the +/-0.0106 absolute band and every per-label interval
-already quoted in the ledger and the interpretations. The number is frozen until something re-reads
-those; the case for measuring it is knee-voa6.
+measurement on `stack_coverage`'s (retired, last at e0611cc5) AUC delta; this count has had no such
+measurement, and lowering or raising it would move the 0.0062 paired floor, the +/-0.0106 absolute
+band and every per-label interval already quoted in the ledger and the interpretations. The number is
+frozen until something re-reads those; the case for measuring it is knee-voa6.
 """
 
 STUDY_SEED = 2026

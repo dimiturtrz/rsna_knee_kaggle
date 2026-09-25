@@ -6,9 +6,10 @@ commands is a promise to update it forty-two times.
 
 IT EXISTS BECAUSE FOURTEEN OF THEM WERE INVISIBLE. `decode_bench`, `fetch_bench`, `serve_bench`,
 `diagnose_laterality`, `diagnose_matrix`, `slot_ties`, `build_embeddings`, `report_embeddings`,
-`encoder_drift`, `paired_floor`, `tie_divergence`, `holdout_backfill`, `dry_run` and `confident_labels`
-appeared in no markdown in the repository. A tool nobody can find is a tool somebody writes again, and
-each of those answers a question this project has already paid to answer once.
+`encoder_drift`, `paired_floor`, `tie_divergence` (retired, last at e0611cc5), `holdout_backfill`,
+`dry_run` and `confident_labels` appeared in no markdown in the repository. A tool nobody can find is
+a tool somebody writes again, and each of those answers a question this project has already paid to
+answer once.
 
 The one-line summary is the module's own docstring first line, never a second description kept beside
 it. That is what makes the index unable to drift: there is nothing to keep in sync.
