@@ -17433,13 +17433,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -21525,12 +21519,6 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.seat_add.SeatAdd.price",
-      "target": "kneemri.evaluation.seat_add.SeatAdd.reading",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
       "target": "kneemri.evaluation.seat_add.SeatAdd.relation",
       "weight": 1
     },
@@ -21548,32 +21536,14 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.evaluation.seat_add.SeatAdd.reading",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
       "target": "kneemri.runs.holdout_record.HoldoutRecord",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.seat_add.SeatAdd.reading",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.seat_add.SeatAdd.reading",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.seat_add.SeatAdd.stacked",
-      "target": "kneemri.evaluation.seat_add.SeatAdd._indices",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.seat_add.SeatAdd.truth",
-      "target": "kneemri.evaluation.seat_add.SeatAdd._indices",
+      "source": "kneemri.evaluation.seat_add.SeatAdd.price",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -21879,37 +21849,31 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.seat_profile.SeatProfile.population",
-      "target": "kneemri.evaluation.seat_profile.SeatProfile.reading",
+      "target": "kneemri.evaluation.ledger75.LedgerSeventyFive.reading",
       "weight": 1
     },
     {
       "kind": "construct",
-      "source": "kneemri.evaluation.seat_profile.SeatProfile.reading",
+      "source": "kneemri.evaluation.seat_profile.SeatProfile.readings",
       "target": "kneemri.runs.holdout_record.HoldoutRecord",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.seat_profile.SeatProfile.reading",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.seat_profile.SeatProfile.reading",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.evaluation.seat_profile.SeatProfile.readings",
-      "target": "kneemri.evaluation.seat_profile.SeatProfile.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.seat_profile.SeatProfile.scored",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.seat_profile.SeatProfile.scored",
-      "target": "kneemri.evaluation.seat_profile.SeatProfile.reading",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -22003,12 +21967,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.evaluation.seat_swap.SeatFrame.child",
-      "target": "kneemri.evaluation.seat_swap.SeatFrame.taken",
-      "weight": 1
-    },
-    {
       "kind": "construct",
       "source": "kneemri.evaluation.seat_swap.SeatFrame.macro",
       "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
@@ -22035,13 +21993,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.seat_swap.SeatFrame.record",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.seat_swap.SeatFrame.record",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -26248,12 +26200,6 @@
       "kind": "construct",
       "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
       "target": "kneemri.runs.holdout_record.HoldoutRecord",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.experiments.claims_check.ClaimsCheck.recorded_scores",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
       "weight": 1
     },
     {
@@ -35026,6 +34972,12 @@
       "kind": "calls",
       "source": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "target": "kneemri.runs.holdout_record.HoldoutRecord.exists",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.runs.holdout_record.HoldoutRecord.required",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "weight": 1
     },
     {
@@ -58610,14 +58562,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.seat_add.SeatAdd._indices",
-      "label": "_indices",
-      "level": "method",
-      "parent": "kneemri.evaluation.seat_add.SeatAdd",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.seat_add.SeatAdd.macro",
       "label": "macro",
       "level": "method",
@@ -58628,14 +58572,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.seat_add.SeatAdd.price",
       "label": "price",
-      "level": "method",
-      "parent": "kneemri.evaluation.seat_add.SeatAdd",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.seat_add.SeatAdd.reading",
-      "label": "reading",
       "level": "method",
       "parent": "kneemri.evaluation.seat_add.SeatAdd",
       "role": null
@@ -58890,14 +58826,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.seat_profile.SeatProfile.reading",
-      "label": "reading",
-      "level": "method",
-      "parent": "kneemri.evaluation.seat_profile.SeatProfile",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.seat_profile.SeatProfile.readings",
       "label": "readings",
       "level": "method",
@@ -59004,14 +58932,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.seat_swap.SeatFrame.record",
       "label": "record",
-      "level": "method",
-      "parent": "kneemri.evaluation.seat_swap.SeatFrame",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.seat_swap.SeatFrame.taken",
-      "label": "taken",
       "level": "method",
       "parent": "kneemri.evaluation.seat_swap.SeatFrame",
       "role": null
@@ -69234,6 +69154,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutReading.at",
+      "label": "at",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutReading",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.runs.holdout_record.HoldoutRecord.__init__",
       "label": "__init__",
       "level": "method",
@@ -69260,6 +69188,14 @@
       "descendants": 0,
       "id": "kneemri.runs.holdout_record.HoldoutRecord.read",
       "label": "read",
+      "level": "method",
+      "parent": "kneemri.runs.holdout_record.HoldoutRecord",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.runs.holdout_record.HoldoutRecord.required",
+      "label": "required",
       "level": "method",
       "parent": "kneemri.runs.holdout_record.HoldoutRecord",
       "role": null
