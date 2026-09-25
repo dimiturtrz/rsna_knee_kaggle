@@ -51,6 +51,7 @@ from kneemri.runs.run_record import EpochRow, RunRecord
 logger = logging.getLogger(__name__)
 
 EPOCHS = "epochs"
+STOP_AFTER_EPOCH = "stop_after_epoch"
 """The recipe key holding the epoch budget the arm ASKED for — the half of the question rows cannot answer."""
 STUDIES = "studies"
 """The recipe key a smoke caps. A smoke is short BY CONSTRUCTION and reporting it truncated would teach
@@ -163,11 +164,17 @@ class ConvergenceCheck:
         return asked is not None and asked <= 1
 
     def asked(self, run: RunRecord) -> int | None:
-        """The epoch budget the recipe requested, or None for a run that recorded no recipe."""
+        """The epochs the recipe's loop was asked to run, or None for a run that recorded no recipe.
+
+        `stop_after_epoch` ends the loop early while keeping the full anneal, so a run that stops there
+        finished what it was asked for — the budget `Fitting` itself runs (knee-o52mm).
+        """
         recipe = RecordedRun.of(run).recipe
         if recipe is None or EPOCHS not in recipe:
             return None
-        return int(recipe[EPOCHS])
+        epochs = int(recipe[EPOCHS])
+        stop = int(recipe.get(STOP_AFTER_EPOCH, 0))
+        return min(epochs, stop) if stop else epochs
 
     def stoppable(self, run: RunRecord) -> bool:
         """Whether a stopper was armed, which is the only innocent reason to end short.

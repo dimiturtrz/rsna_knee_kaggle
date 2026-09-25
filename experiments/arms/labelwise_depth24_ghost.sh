@@ -19,4 +19,4 @@ run_train labelwise_depth24_ghost \
   --backbone-lr 4e-5 --slices 24 --batch 10 --vram-gb 22 --band-low 0.1 --band-high 0.9 \
   --calibrated-targets --hold-annotations --slot-dropout 0.40 \
   --ghosting 0.040 \
-  --labels "$LABELS" --out "$MODELS/labelwise_depth24_ghost_s2026.pt"
+  --labels "$LABELS" --out "$MODELS/labelwise_depth24_ghost_s2026.pt" "$@"

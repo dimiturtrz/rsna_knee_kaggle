@@ -274,6 +274,7 @@ def main() -> None:
         lines.append(
             f"{row.name[:40]:40s} {row.ledger:8.4f} {row.ledger75:9.4f} {row.moved():+8.4f} {row.epoch:6d} "
             f"{row.studies:6d}{'  VOID - not a reading of held-out studies' if row.void else ''}"
+            f"{'  BLIND - no truth between the cuts, move is 0 by construction' if row.recut_blind() else ''}"
         )
     lines.append(f"{len(rows)} member(s) priced under both rulers")
     if arguments.price:

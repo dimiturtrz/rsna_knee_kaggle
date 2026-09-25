@@ -23,6 +23,7 @@ def write_run(
     fold: int = 0,
     patience: int = 0,
     first: int = 0,
+    stop_after: int = 0,
 ) -> RunMetrics:
     """A metrics file with `epochs` rows peaking at `peak`, describing a recipe that asked for `asked`.
 
@@ -34,7 +35,12 @@ def write_run(
     stopped.
     """
     path = directory / f"{name}.metrics.jsonl"
-    recipe = {"fold": str(fold), "epochs": str(asked), "patience": str(patience)}
+    recipe = {
+        "fold": str(fold),
+        "epochs": str(asked),
+        "patience": str(patience),
+        "stop_after_epoch": str(stop_after),
+    }
     lines = [json.dumps({"recipe": recipe})]
     lines += [
         json.dumps({"epoch": epoch, "loss": 1.0, "auc": 0.80 + (0.01 if epoch == peak else 0.0), "per_label": {}})
@@ -107,6 +113,7 @@ def test_asked(tmp_path: Path) -> None:
     """The budget comes from the recipe, and is None when the file predates recipes."""
     check = ConvergenceCheck()
     assert check.asked(write_run(tmp_path, "with_recipe", peak=1, epochs=4, asked=12)) == 12
+    assert check.asked(write_run(tmp_path, "stopped_at", peak=1, epochs=18, asked=24, stop_after=18)) == 18
 
     bare = tmp_path / "no_recipe.metrics.jsonl"
     bare.write_text(json.dumps({"epoch": 0, "loss": 1.0, "auc": 0.8, "per_label": {}}) + "\n", encoding="utf-8")
