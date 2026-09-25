@@ -29,13 +29,13 @@ The big label-correction axis is closed: the model already exceeds the supervisi
 
 - **Ensemble/seat axis.** Sixteen board entries spanning 6-12 seats and every mechanism the project owns fit inside **0.005** (`interpretations/kneemri/2026-08-31_the-board-names-its-own-price.md`, bead `knee-va22`).
 - **External-corpus seat axis.** One, two and four external-corpus seats read the same board value; six reads worse (`interpretations/kneemri/2026-09-02_the-external-corpus-seat-axis-closes.md`). Adding external studies as a *seating* lever is closed.
-- **OrthoFoundation-L as a 2D trunk.** `ortho_dense_s2026` read **0.8452** vs its DINOv2-base control **0.8502**; the frozen probe showed the knee-specific continuation **lost signal** vs. DINOv3-L itself (`research/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`).
+- **OrthoFoundation-L as a 2D trunk.** `ortho_dense_s2026` read **0.8452** vs its DINOv2-base control **0.8502**; the frozen probe showed the knee-specific continuation **lost signal** vs. DINOv3-L itself (`research/deep_dives/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`).
 
 ### What is still open
 
 1. **OrthoDiffusion (3D diffusion foundation model).** The first public knee-specific 3D foundation model with multi-label diagnosis weights: 15,948 knee MRIs, macro AUROC 0.908 on 8 abnormalities, 5 of 8 map directly to RSNA labels. It has not been smoke-tested in this repo. This is the single highest-impact untried public model.
-2. **Slice coverage.** The public frontier reads **64 slices** per study; this project's 137 arm scripts top out at **20 slices**. A 224 px probe that reads all slices is affordable (~24 GB VRAM) and is the one mechanism that cannot miss a thin finding between samples (`research/2026-08-31_public-frontier-sweep.md`).
-3. **External data as trunk pretraining, not seating.** The seat-count route is closed, but a trunk *continued* on external knee-MRI images is a different mechanism. The literature supports partial-label multi-task pretraining on MRNet + fastMRI+ + Rijeka with masked loss, LP-FT, L2-SP and domain mixing (`research/2026-09-02_using_external_knee_mri_data_to_improve_kaggle_score.md`). Expected mean-AUC gain **+0.005 to +0.012**.
+2. **Slice coverage.** The public frontier reads **64 slices** per study; this project's 137 arm scripts top out at **20 slices**. A 224 px probe that reads all slices is affordable (~24 GB VRAM) and is the one mechanism that cannot miss a thin finding between samples (`research/deep_dives/2026-08-31_public-frontier-sweep.md`).
+3. **External data as trunk pretraining, not seating.** The seat-count route is closed, but a trunk *continued* on external knee-MRI images is a different mechanism. The literature supports partial-label multi-task pretraining on MRNet + fastMRI+ + Rijeka with masked loss, LP-FT, L2-SP and domain mixing (`research/deep_dives/2026-09-02_using_external_knee_mri_data_to_improve_kaggle_score.md`). Expected mean-AUC gain **+0.005 to +0.012**.
 4. **Local vision-language re-read of reports.** Untried. Could help the four findings where the report reader loses, but only where the report actually contains text (Synovitis and Fracture are mostly silent; Baker's and Contusion are the realistic targets).
 
 ### Recommended priority
@@ -53,7 +53,7 @@ The big label-correction axis is closed: the model already exceeds the supervisi
 - `interpretations/kneemri/2026-09-02_report-to-label_audit.md`
 - `interpretations/kneemri/2026-09-02_the-external-corpus-seat-axis-closes.md`
 - `interpretations/kneemri/2026-09-01_external-data-state.md`
-- `research/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`
-- `research/2026-09-02_modern_3d_knee_mri_models_beyond_mrnet.md`
-- `research/2026-09-02_using_external_knee_mri_data_to_improve_kaggle_score.md`
-- `research/2026-08-31_public-frontier-sweep.md`
+- `research/deep_dives/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`
+- `research/deep_dives/2026-09-02_modern_3d_knee_mri_models_beyond_mrnet.md`
+- `research/deep_dives/2026-09-02_using_external_knee_mri_data_to_improve_kaggle_score.md`
+- `research/deep_dives/2026-08-31_public-frontier-sweep.md`

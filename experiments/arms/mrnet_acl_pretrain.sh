@@ -20,7 +20,7 @@ set -euo pipefail
 # ours. knee-ombx prices that mechanism at 1.5-3% and records that it has never been run in 107 arms.
 # The two are different experiments and the flat result of the first says nothing about the second.
 #
-# WHAT THE LITERATURE SAYS IT SHOULD DO (A-BV, `research/2026-09-02_qbv-layer-transfer-partial-label-overlap.md`):
+# WHAT THE LITERATURE SAYS IT SHOULD DO (A-BV, `research/deep_dives/2026-09-02_qbv-layer-transfer-partial-label-overlap.md`):
 # the transferable part is the REPRESENTATION in the early and middle blocks, not the head, so a gain
 # is not capped at ACL — it can reach labels MRNet has never seen. The same answer bounds the size:
 # MRNet is far too small for the deep-feature-reuse regime, and the DINOv2 init is already strong.

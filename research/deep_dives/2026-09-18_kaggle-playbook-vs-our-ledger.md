@@ -8,7 +8,7 @@ that we do not?
 
 Two sources, one domain-specific and one general:
 
-- `research/2026-09-02_qbp-top-1pct-vs-median-in-closed-medical-imaging-competitions.md` — nine top
+- `research/deep_dives/2026-09-02_qbp-top-1pct-vs-median-in-closed-medical-imaging-competitions.md` — nine top
   write-ups from RSNA 2022/2023/2024. Ranked separators: localize-then-classify (9/9), RNN/attention
   slice aggregation fitted on the metric (7/9), pseudo-labels / confident learning (4/9), auxiliary
   segmentation loss (4/9, +0.01-0.03 per model in RSNA 2023 1st), task-structure heads (5/9), large
@@ -22,9 +22,9 @@ Two sources, one domain-specific and one general:
 
 | lever | status here | where |
 |---|---|---|
-| localize-then-classify | tried heavily (44 ledger lines) | `research/2026-09-02_qbq-localizer-routes-for-knee-mri.md`, ledger |
+| localize-then-classify | tried heavily (44 ledger lines) | `research/deep_dives/2026-09-02_qbq-localizer-routes-for-knee-mri.md`, ledger |
 | pseudo-labels / confident learning | run on train and on KMAR-50K cross-site; flat | `experiments/README.md:12376-12394`, `:14392`, `:16312-16335` |
-| test-time pseudo-labels / TTA-style transduction | audited, knob-sized | `research/2026-09-01_transductive_test_time_adaptation_audit.md` |
+| test-time pseudo-labels / TTA-style transduction | audited, knob-sized | `research/deep_dives/2026-09-01_transductive_test_time_adaptation_audit.md` |
 | auxiliary objectives | twelve `--*-weight` terms at full budget, negative | `experiments/README.md:16620` (knee-evdfd) |
 | distil into one model | `distill`, `dml_*`: inside the 0.0053 floor | knee-8bmi2 |
 | full-data refit, multi-seed | done; refit term ~+0.005 | knee-yatne |

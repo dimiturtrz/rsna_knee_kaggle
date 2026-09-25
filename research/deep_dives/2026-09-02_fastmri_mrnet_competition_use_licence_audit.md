@@ -43,7 +43,7 @@ The non-commercial clause alone is commonly read as incompatible with Kaggle 2.6
 
 ### Verdict
 
-**High risk.** MRNet should not be shipped in a Kaggle submission without explicit host approval or a written licence clarification from Stanford. This aligns with the existing bead `knee-ombx` and the note in `research/2026-09-02_external_knee_mri_data_access_audit.md`.
+**High risk.** MRNet should not be shipped in a Kaggle submission without explicit host approval or a written licence clarification from Stanford. This aligns with the existing bead `knee-ombx` and the note in `research/deep_dives/2026-09-02_external_knee_mri_data_access_audit.md`.
 
 ---
 
@@ -101,4 +101,4 @@ The pathology annotations (`fastMRI+`) are hosted in the Microsoft `fastmri-plus
 - MRNet Research Use Agreement: [stanfordmlgroup.github.io commit `a07223d`](https://github.com/stanfordmlgroup/stanfordmlgroup.github.io/commit/a07223dfda18ebae2a09a8c43e11e7365c3ccc90.patch)
 - fastMRI paper: Knoll et al., "fastMRI: A Publicly Available Raw k-Space and DICOM Dataset of Knee Images for Accelerated MR Image Reconstruction Using Machine Learning" ([PMC6996599](https://pmc.ncbi.nlm.nih.gov/articles/PMC6996599/))
 - fastMRI+ repo: [microsoft/fastmri-plus](https://github.com/microsoft/fastmri-plus)
-- Existing project audit: `research/2026-09-02_external_knee_mri_data_access_audit.md`
+- Existing project audit: `research/deep_dives/2026-09-02_external_knee_mri_data_access_audit.md`

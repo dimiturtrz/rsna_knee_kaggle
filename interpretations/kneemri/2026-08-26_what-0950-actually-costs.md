@@ -42,7 +42,7 @@ target ensemble        0.950
 ```
 
 And against the frontier rather than against ourselves: a rival reports a **0.942 single model at
-224 px** (forum 735304, recorded in `research/2026-08-25_competitor-single-model-scores.md`). Ours is
+224 px** (forum 735304, recorded in `research/deep_dives/2026-08-25_competitor-single-model-scores.md`). Ours is
 0.925. That gap is **+0.017 board = +0.010 offline**, and closing *it alone* — changing nothing else,
 keeping the same six seats and the same vote — lands the ensemble at **≈0.954**, above the current
 leader.

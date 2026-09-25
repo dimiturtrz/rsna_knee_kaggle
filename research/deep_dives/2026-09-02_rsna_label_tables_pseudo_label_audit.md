@@ -97,4 +97,4 @@ The conservative reading: **using these tables as soft training targets is allow
 - `D:/data/volumetric/mri/raw/knee_label_tables/rayanbabur_rsna-knee-2026-calibrated-soft-targets/target_quality_audit.json`
 - `comp/COMPETITION_RULES.txt`, Section 2.6 (External Data and Tools)
 - `comp/board.jsonl`, entries `calibsix_v1` and `corpusfull_v1` for the external-data context
-- `research/2026-09-01_past_ensemble_plateau_mechanisms.md`, Section 4, for the RSNA 2024 pseudo-labeling precedent
+- `research/deep_dives/2026-09-01_past_ensemble_plateau_mechanisms.md`, Section 4, for the RSNA 2024 pseudo-labeling precedent

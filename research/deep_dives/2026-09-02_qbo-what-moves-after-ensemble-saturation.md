@@ -65,7 +65,7 @@ segmentation used only to find the ROI centre; the crop removes irrelevant backg
 pixel budget is spent inside the joint.
 
 **Slice sampling** has a smaller but clean number from a competitor forum ablation (topic 737597,
-captured in `research/2026-08-26_the-ablation-table-a-competitor-published.md`):
+captured in `research/deep_dives/2026-08-26_the-ablation-table-a-competitor-published.md`):
 
 | geometry | their fold-0 OOF |
 |---|---|
@@ -84,7 +84,7 @@ multi-condition analysis of knee MRI studies*, European Radiology 2026) resizes 
 **Reading for this project.** The repo already crops to a 130 mm physical FOV, so the ROI-crop delta
 is likely already captured. The genuinely unread cell is **slice coverage**: the public frontier
 sweep found top notebooks using **64 slices** per study, while repo arms use 12–20 slices because
-of VRAM (`research/2026-08-31_public-frontier-sweep.md`). A `stack224` arm was written to test more
+of VRAM (`research/deep_dives/2026-08-31_public-frontier-sweep.md`). A `stack224` arm was written to test more
 slices at lower resolution; this is the only input-side direction the literature points to that has
 not been priced here.
 
@@ -100,7 +100,7 @@ For knee MRI specifically, Astuto et al. (*Automatic deep learning-assisted dete
 abnormalities in knee MRI studies*, Radiology: Artificial Intelligence 2021) reports linear-weighted
 Cohen κ between attending radiologists of **0.55–0.72** across tissues. The repo's own consensus
 labels already reach ~0.90 macro AUC on the 58 gold studies
-(`research/2026-09-02_test_labels_report_derived_or_radiologist_reviewed_qao.md`), so the remaining
+(`research/deep_dives/2026-09-02_test_labels_report_derived_or_radiologist_reviewed_qao.md`), so the remaining
 label-quality headroom is likely small and hard to measure.
 
 Two additional signals:
@@ -134,7 +134,7 @@ However, **standard test-time augmentation is not a free lunch once an ensemble 
 place**. Medeiros (*I Can't Believe TTA Is Not Better: When Test-Time Augmentation Hurts Medical
 Image Classification*, arXiv:2604.09697, 2026) evaluated standard TTA on MedMNIST v2 and found that
 it usually *hurts*, with accuracy drops up to **31.6 percentage points** and only one modest **+1.6%**
-gain. The repo's own `research/2026-09-01_past_ensemble_plateau_mechanisms.md` notes that TTA gains
+gain. The repo's own `research/deep_dives/2026-09-01_past_ensemble_plateau_mechanisms.md` notes that TTA gains
 over an already-diverse ensemble are typically a few parts per thousand, not the half-percent
 needed here.
 
@@ -219,8 +219,8 @@ campaign.
   arXiv:2512.12887, 2025.
   [arXiv](https://arxiv.org/abs/2512.12887)
 - Repo prior art:
-  `research/2026-09-01_input_side_knee_mri_gains.md`,
-  `research/2026-09-01_past_ensemble_plateau_mechanisms.md`,
-  `research/2026-09-02_label_noise_pseudo_label_partial_labels_literature.md`,
-  `research/2026-08-31_public-frontier-sweep.md`,
-  `research/2026-08-26_the-ablation-table-a-competitor-published.md`.
+  `research/deep_dives/2026-09-01_input_side_knee_mri_gains.md`,
+  `research/deep_dives/2026-09-01_past_ensemble_plateau_mechanisms.md`,
+  `research/deep_dives/2026-09-02_label_noise_pseudo_label_partial_labels_literature.md`,
+  `research/deep_dives/2026-08-31_public-frontier-sweep.md`,
+  `research/deep_dives/2026-08-26_the-ablation-table-a-competitor-published.md`.

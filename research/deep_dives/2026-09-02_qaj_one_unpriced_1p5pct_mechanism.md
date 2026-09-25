@@ -19,9 +19,9 @@ calibrated targets/curriculum. The literature audit below was checked against th
 
 ## Candidate 1 — domain-specific SSL continuation (the best remaining bet)
 
-Existing notes: `research/2026-09-01_ssl_continuation_from_strong_init.md`,
-`research/2026-09-01_external_knee_mri_corpus_transfer.md`, and the new
-`research/2026-09-02_external_mri_data_merging_schemes.md`.
+Existing notes: `research/deep_dives/2026-09-01_ssl_continuation_from_strong_init.md`,
+`research/deep_dives/2026-09-01_external_knee_mri_corpus_transfer.md`, and the new
+`research/deep_dives/2026-09-02_external_mri_data_merging_schemes.md`.
 
 Published numbers closest to our shape:
 
@@ -57,7 +57,7 @@ Why it is NOT the answer:
 
 ## Candidate 3 — slice coverage beyond 20 slices
 
-`research/2026-09-01_input_side_knee_mri_gains.md` flags this as the only unread input-side cell,
+`research/deep_dives/2026-09-01_input_side_knee_mri_gains.md` flags this as the only unread input-side cell,
 but no published number prices it. It is an experiment, not a literature-backed mechanism.
 
 ## What to tell Claude

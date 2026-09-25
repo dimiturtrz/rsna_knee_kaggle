@@ -1,6 +1,6 @@
 # Using external knee-MRI data to improve the Kaggle score — research deep dive
 
-2026-09-02, Kimi. This note builds on `research/2026-09-02_external_data_format_mismatch_models_training.md` and asks a sharper question: *what is the published evidence that external knee-MRI corpora improve a multi-label AUC score on a target knee-MRI task, and what training mechanics actually deliver the gain?*
+2026-09-02, Kimi. This note builds on `research/deep_dives/2026-09-02_external_data_format_mismatch_models_training.md` and asks a sharper question: *what is the published evidence that external knee-MRI corpora improve a multi-label AUC score on a target knee-MRI task, and what training mechanics actually deliver the gain?*
 
 ## TL;DR
 
@@ -15,7 +15,7 @@ The literature strongly supports the first lever, gives conditional support to t
 
 **Recommended first experiment:** Scheme B — merged multi-task partial-label pretraining on MRNet + fastMRI+ + Rijeka + RSNA, with masked loss, external oversampling, LP-FT, L2-SP and MixStyle-style augmentation. Expected mean-AUC gain **+0.005 to +0.012**, with ACL/meniscus columns potentially **+0.010 to +0.020**.
 
-**Highest-ceiling single bet:** OrthoDiffusion — a public 3D knee-MRI diffusion foundation model (15,948 knee MRIs, macro AUROC 0.908 on 8 abnormalities, MIT-licensed code, HuggingFace weights). Its backbone is knee-specific and multi-plane, but only 5 of its 8 labels map to RSNA, so it needs a new 12-label head. See `research/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`.
+**Highest-ceiling single bet:** OrthoDiffusion — a public 3D knee-MRI diffusion foundation model (15,948 knee MRIs, macro AUROC 0.908 on 8 abnormalities, MIT-licensed code, HuggingFace weights). Its backbone is knee-specific and multi-plane, but only 5 of its 8 labels map to RSNA, so it needs a new 12-label head. See `research/deep_dives/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`.
 
 ## Why external data can move the score
 

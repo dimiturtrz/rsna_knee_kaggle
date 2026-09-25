@@ -26,7 +26,7 @@ learning). Every number carries its source URL. Anything without one is marked *
    No source found measures it on multilabel macro AUC. Domain-balanced batching has an
    out-of-distribution AUC result on chest X-ray.
 4. **The biggest published input-side number is still ROI localisation and cropping.** That
-   axis is already in `research/2026-09-01_input_side_knee_mri_gains.md` and is not
+   axis is already in `research/deep_dives/2026-09-01_input_side_knee_mri_gains.md` and is not
    repeated here.
 
 ## 1. Intensity normalisation

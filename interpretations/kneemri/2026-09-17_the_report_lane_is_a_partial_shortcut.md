@@ -45,7 +45,7 @@ pull toward a WHOLE-DOCUMENT embedding drags capacity toward text the metric nev
 baseline's shape is different and has never been run here: broadcast the text vector to all twelve
 targets, CONCATENATE with the pooled vision vector, one MLP, `binary_cross_entropy_with_logits` — no
 contrastive, no cosine, no auxiliary loss, and the text branch STAGED on rather than live from step zero
-(`research/2026-09-02_public_baseline_text_branch_objective.md`). Per the standing rule a refuting
+(`research/deep_dives/2026-09-02_public_baseline_text_branch_objective.md`). Per the standing rule a refuting
 experiment kills that USE of an asset, not the asset.
 
 ## The structural fact that made the concat lane look dead before it was measured

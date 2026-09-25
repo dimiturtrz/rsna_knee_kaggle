@@ -200,5 +200,5 @@ aggregation, label denoising) rather than from more models, more resolution, or 
 - lhwcv, RSNA 2024 Lumbar Spine — 7th place solution.
   [GitHub](https://github.com/lhwcv/solution-rsna-2024-lumbar-spine)
 - Repo prior art:
-  `research/2026-09-02_qbo-what-moves-after-ensemble-saturation.md`,
-  `research/2026-09-01_past_ensemble_plateau_mechanisms.md`.
+  `research/deep_dives/2026-09-02_qbo-what-moves-after-ensemble-saturation.md`,
+  `research/deep_dives/2026-09-01_past_ensemble_plateau_mechanisms.md`.

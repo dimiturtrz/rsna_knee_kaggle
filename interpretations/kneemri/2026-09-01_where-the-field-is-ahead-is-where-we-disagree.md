@@ -3,7 +3,7 @@
 This is a join, not a new measurement. Both columns already existed and neither was built with the other
 in mind:
 
-- **The deficit** is `research/2026-08-23_published-per-label-auc-vs-ours.md` — our annotation-ruler AUC
+- **The deficit** is `research/deep_dives/2026-08-23_published-per-label-auc-vs-ours.md` — our annotation-ruler AUC
   over the 58 gold studies against the best published per-label number, on other people's corpora.
 - **The unanimity** is `2026-09-01_a-quarter-of-the-residual-is-unanimous.md` — the share of the honest12
   pool's errors that all twelve members make, on our own 909-study fold-0 holdout, report ruler.

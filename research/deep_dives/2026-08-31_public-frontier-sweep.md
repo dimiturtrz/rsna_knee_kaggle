@@ -2,7 +2,7 @@
 
 2026-08-31. Thirty newest public notebooks on `rsna-knee-abnormality-detection` (`kaggle kernels list
 --competition ... --sort-by dateRun`), four pulled and read in full. The forum API answers 403 for
-discussion topics, so this sweep is notebooks only; `research/2026-08-25_competitor-single-model-scores.md`
+discussion topics, so this sweep is notebooks only; `research/deep_dives/2026-08-25_competitor-single-model-scores.md`
 remains the forum-side record.
 
 The point of the sweep was to find an axis we have not tried. Most of what it surfaced is a

@@ -3072,7 +3072,7 @@ under focus_mcl_s2026             rank 0.0445  solo 0.5332
 `focus_mcl` is the proof of the shape: the most decorrelated object the project owns, scoring 0.533.
 It is distinct because it is broken.
 
-Kimi's Q-F research (`research/2026-09-01_decorrelation_without_solo_cost.md`, 19 sources) says this is
+Kimi's Q-F research (`research/deep_dives/2026-09-01_decorrelation_without_solo_cost.md`, 19 sources) says this is
 the **expected** shape near the frontier rather than an artefact of this pool: no published method buys
 strong decorrelation without 1-3 points of solo cost, and Abe et al. 2024 measure diversity pressure
 dropping ImageNet ensemble accuracy 71.49 to 70.16. Their letter pre-committed the reading: *"If

@@ -65,5 +65,5 @@ The most relevant evidence is the project’s own: `vjepa_warm` seated at **-0.0
 - Baskota et al. glioma disagreement ensemble: [Frontiers in AI 2026](https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2026.1812932/full)
 - Filipiuk & Singh, NVIDIA safety-diversity: [CEUR-WS](https://ceur-ws.org/Vol-3215/16.pdf)
 - OrthoDiffusion: [arXiv:2602.20752](https://arxiv.org/abs/2602.20752), [GitHub (MIT)](https://github.com/lt-0123/OrthoDiffusion), [HuggingFace weights](https://huggingface.co/lanstat0123/orthodiffusion)
-- `research/2026-09-04_cnn-vs-vit-ensemble-decorrelation-medical-imaging.md`
-- `research/2026-09-02_modern_3d_knee_mri_models_beyond_mrnet.md`
+- `research/deep_dives/2026-09-04_cnn-vs-vit-ensemble-decorrelation-medical-imaging.md`
+- `research/deep_dives/2026-09-02_modern_3d_knee_mri_models_beyond_mrnet.md`

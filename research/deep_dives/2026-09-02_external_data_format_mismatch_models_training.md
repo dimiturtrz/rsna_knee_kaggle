@@ -219,7 +219,7 @@ The labelled external pool that honestly overlaps RSNA is roughly **3,300 studie
 
 **Pseudo-label variant.** KMAR-50K has no labels, so SSL is its only honest path. A stronger alternative is to run the champion ensemble on KMAR/OAI/SKM-TEA images to generate soft pseudo-labels, then train a student on RSNA + pseudo-labeled external images. This is the image-domain analogue of `distillation_from_pretrained.md` using BEATs to label real recordings.
 
-**Expected Kaggle impact.** Honest prior, from `research/2026-09-02_fastmri_continuation_arithmetic.md`:
+**Expected Kaggle impact.** Honest prior, from `research/deep_dives/2026-09-02_fastmri_continuation_arithmetic.md`:
 - Without OAI, ~122k slices sits near the low end of the positive regime (50k–300k images). Mean-AUC gain likely **+0.002 to +0.005**.
 - With OAI, the merged unlabeled pool approaches the scale where OrthoFoundation/PRISM saw gains (+1–2% on segmentation/accuracy). Mean-AUC gain could reach **+0.010 to +0.015**, but there is no knee-specific measurement.
 

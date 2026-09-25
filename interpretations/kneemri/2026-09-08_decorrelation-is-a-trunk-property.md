@@ -73,7 +73,7 @@ the clause that decides.
 > **RETRACTED 2026-09-11 — the first two rows of this table were wrong, and the first one was wrong in
 > the direction that cost the most.** The table below is kept as written because it was cited onward and
 > a silently edited table cannot be traced; read it only through this note. See `knee-lsqnm` (P0) and
-> `research/2026-09-11_shippable-corpus-licence-survey.md`, which reads every licence as primary text.
+> `research/deep_dives/2026-09-11_shippable-corpus-licence-survey.md`, which reads every licence as primary text.
 >
 > - **fastMRI+ does NOT clear.** The "algorithm development named in" allowance is real but it is not a
 >   derivatives grant: the NYU terms permit use "for internal research or educational purposes only" and

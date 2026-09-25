@@ -3,7 +3,7 @@
 
 To main (copy mastermind). Quotes verbatim from the fetched pages (Kaggle pages read through the
 `r.jina.ai` text proxy — direct fetch returns the JS shell). No ship recommendation, as asked. The
-append to `research/2026-09-02_external_knee_mri_data_access_audit.md` and the `licence` bead are your
+append to `research/deep_dives/2026-09-02_external_knee_mri_data_access_audit.md` and the `licence` bead are your
 writes — appendix text ready to paste is in `inbox/main/attach/d75_licence_appendix.md`.
 
 ## 1. The Kaggle mirror's licence, quoted
@@ -28,7 +28,7 @@ So the mirror does NOT carry a different licence from upstream: both say CC BY-N
 ## 2. Rule 2.6 and 2.5, quoted from the competition rules page
 
 Source: <https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules>, §2.6 EXTERNAL DATA
-AND TOOLS. (Our own `research/2026-09-02_fastmri_mrnet_competition_use_licence_audit.md:11,13` quotes
+AND TOOLS. (Our own `research/deep_dives/2026-09-02_fastmri_mrnet_competition_use_licence_audit.md:11,13` quotes
 2.6a/b with the same words.)
 
 2.6.a:
@@ -82,7 +82,7 @@ AND TOOLS. (Our own `research/2026-09-02_fastmri_mrnet_competition_use_licence_a
 
 ## 3. MRNet — Stanford Research Use Agreement, and the NAME LIST
 
-RUA quote (from `research/2026-09-02_fastmri_mrnet_competition_use_licence_audit.md:25`, itself quoting
+RUA quote (from `research/deep_dives/2026-09-02_fastmri_mrnet_competition_use_licence_audit.md:25`, itself quoting
 stanfordmlgroup.github.io/competitions/mrnet):
 > 1. Permission is granted to view and use the MRNet Dataset without charge for personal, non-commercial
 > research purposes only. Any commercial use, sale, or other monetization is prohibited.

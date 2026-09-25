@@ -103,7 +103,7 @@ This is a gap. The label-generation mechanism matters directly for choosing a no
 
 ### 4.2 Prior RSNA knee competitions
 
-There are **no RSNA 2023/2024 knee MRI competitor write-ups** because the **2026 Knee Abnormality Detection challenge is the first RSNA knee MRI AI challenge**. The immediately preceding RSNA competitions were 2023 Abdominal Trauma and 2024 Lumbar Spine, neither of which is knee MRI. (See `research/2026-09-04_qmw-rsna-knee-2026-metric-definition.md` for their metrics.)
+There are **no RSNA 2023/2024 knee MRI competitor write-ups** because the **2026 Knee Abnormality Detection challenge is the first RSNA knee MRI AI challenge**. The immediately preceding RSNA competitions were 2023 Abdominal Trauma and 2024 Lumbar Spine, neither of which is knee MRI. (See `research/deep_dives/2026-09-04_qmw-rsna-knee-2026-metric-definition.md` for their metrics.)
 
 ## 5. Implications for the project
 

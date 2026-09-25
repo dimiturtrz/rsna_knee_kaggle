@@ -42,7 +42,7 @@ So a FiLM/concat seat conditioning on these three fields would re-inject a bit t
 
 The metadata is **not a leak**: `test_series.csv` exists and contains the same three predictive fields for every test series. Using it is no different from using DICOM orientation or sequence tags that the test set also carries.
 
-The only leakage-shaped concern is if the *presence* of a series type were correlated with the underlying pathology because the ordering clinician selects sequences based on indication. That is well documented in protocol-selection literature, but here every study in the competition already has the same metadata columns, and the fields describe *which* sequence each series is, not *whether* it was ordered. So conditioning on the fields is safe; conditioning on "which series were present in this study" would need the same caution discussed in `research/2026-09-01_missing_sequences_knee_mri.md`.
+The only leakage-shaped concern is if the *presence* of a series type were correlated with the underlying pathology because the ordering clinician selects sequences based on indication. That is well documented in protocol-selection literature, but here every study in the competition already has the same metadata columns, and the fields describe *which* sequence each series is, not *whether* it was ordered. So conditioning on the fields is safe; conditioning on "which series were present in this study" would need the same caution discussed in `research/deep_dives/2026-09-01_missing_sequences_knee_mri.md`.
 
 ## Literature evidence
 

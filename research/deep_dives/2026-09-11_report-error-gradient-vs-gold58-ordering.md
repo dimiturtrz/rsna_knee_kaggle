@@ -1,7 +1,7 @@
 # Published report-level error rates vs our gold-58 column ordering — a consistency check
 
 Researcher lane, 2026-09-11. Background item offered in D332 (ii). Places the per-finding
-report-vs-truth error rates from `research/2026-09-11_label-noise-ceiling-and-report-vs-pixels-error.md`
+report-vs-truth error rates from `research/deep_dives/2026-09-11_label-noise-ceiling-and-report-vs-pixels-error.md`
 next to our two ruler orderings (ledger block README:14541: our per-column AUC on ledger896 vs gold58).
 
 ## Our two rulers (statistic: per-column ROC AUC; populations ledger896 / gold58; cut midpoint)

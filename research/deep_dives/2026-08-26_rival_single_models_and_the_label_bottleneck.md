@@ -143,7 +143,7 @@ hypothesis, not advice.
 
 **What still bites, for the third independent time.** Their ONE model reads 0.943 against our SEVEN-member
 0.946. Three ticks is what the entire mix buys us over a rival's single part. The gap is per-member quality,
-not mixing — stated here on 2026-08-26, in `research/2026-08-25_competitor-single-model-scores.md` the day
+not mixing — stated here on 2026-08-26, in `research/deep_dives/2026-08-25_competitor-single-model-scores.md` the day
 before, and again now with the spread unchanged.
 
 **The mechanism they name is not the one this repo closed.** Unprompted and repeatedly: *"labels are still my

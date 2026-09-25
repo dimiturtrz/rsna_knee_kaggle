@@ -1,6 +1,6 @@
 # Q7 (knee-brqy): external data usable for self-supervised pretraining
 
-2026-09-01, Kimi. Read-only audit. The corpus survey in `research/2026-09-01_knee-mri-corpora-survey.md` is the main source; this note adds the tooling and cost side.
+2026-09-01, Kimi. Read-only audit. The corpus survey in `research/deep_dives/2026-09-01_knee-mri-corpora-survey.md` is the main source; this note adds the tooling and cost side.
 
 ## What external knee-MRI data exists
 

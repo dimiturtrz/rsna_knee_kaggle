@@ -16,7 +16,7 @@
 #     reads it at this exact corner. Its own header predicts the first member above 0.860.
 #   `--ema` — `knee-56w5` pre-registered ≥0.8640 against `band_dense`'s 0.8578. A competitor's
 #     single-variable ablation of the same flag reads **+0.003**
-#     (`research/2026-08-26_the-ablation-table-a-competitor-published.md`), so the honest prior is half
+#     (`research/deep_dives/2026-08-26_the-ablation-table-a-competitor-published.md`), so the honest prior is half
 #     the bar and directional. `ema_dense` reads it at this corner.
 # They are mechanically INDEPENDENT — one changes what the targets say, the other changes which weights
 # are kept — which is the precondition for expecting a sum rather than a substitution.

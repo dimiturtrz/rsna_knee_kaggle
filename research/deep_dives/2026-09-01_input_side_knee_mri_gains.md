@@ -38,7 +38,7 @@ spent on the joint.
 
 **Whether it is still a lever here.** This repo already crops to a 130 mm
 physical FOV (`slot.crop_mm`), and a corpus audit found only 0.43% of series are
-narrower than that crop (`research/2026-08-31_public-frontier-sweep.md`). The
+narrower than that crop (`research/deep_dives/2026-08-31_public-frontier-sweep.md`). The
 project is therefore already operating at the ROI-cropped end of CoPAS's
 ladder. A tighter per-label ROI (ACL box, meniscus box, cartilage box) is not
 documented with a number in the accessible literature; it is an open experiment,
@@ -56,13 +56,13 @@ numbers are either confounded or point estimates:
 - **CoPAS** uses **224 × 224 × 24** cubic volumes as input (its own ResNet3D-18
   encoder).
 - A competitor forum post (topic 737597, reported in
-  `research/2026-08-26_the-ablation-table-a-competitor-published.md`) claimed
+  `research/deep_dives/2026-08-26_the-ablation-table-a-competitor-published.md`) claimed
   *"slice geometry mattered more than resolution"*, but the comparison was
   **192 px, no crop, 24 equal-spaced** (0.7695) vs **288 px, 140 mm crop,
   12 adjacent** (0.7777). Resolution and crop are not separated, so the number
   is uninterpretable as a resolution effect.
 - The public frontier includes self-reported single models at **224 px 0.942**
-  and **336 px 0.926** (`research/2026-08-25_competitor-single-model-scores.md`),
+  and **336 px 0.926** (`research/deep_dives/2026-08-25_competitor-single-model-scores.md`),
   but these are different recipes, not a controlled ablation.
 
 **What this means.** A resolution curve for knee MRI has not been published in
@@ -74,7 +74,7 @@ when the crop and slice axes are handled well.
 
 **Canonical literature.** MRNet pools per-slice CNN features with an
 **element-wise max over all slices**; this is the field's default aggregation
-(`research/2026-08-11_slice-aggregation-literature.md`). CoPAS keeps 24 slices
+(`research/deep_dives/2026-08-11_slice-aggregation-literature.md`). CoPAS keeps 24 slices
 per volume and uses 3D convolutions plus cross-plane attention.
 
 **Competitor ablation.** The same topic-737597 post reports a single-variable
@@ -91,7 +91,7 @@ Their setup: EfficientNet-B0, 4 sequence slots, weighted BCE. This is a
 count and crop, not the project's recipe.
 
 **Project's own measurement.** The repo already has a three-point span sweep at
-12 slices (`research/2026-08-26_the-ablation-table-a-competitor-published.md`):
+12 slices (`research/deep_dives/2026-08-26_the-ablation-table-a-competitor-published.md`):
 
 | span | ours |
 |---|---|
@@ -108,7 +108,7 @@ inside the good span rather than shrinking the span.
 
 **The unread cell: slice coverage.** The public frontier sweep found that
 top notebooks use **64 slices** per study, while every arm in this repo uses
-12–20 slices (`research/2026-08-31_public-frontier-sweep.md`). The repo has
+12–20 slices (`research/deep_dives/2026-08-31_public-frontier-sweep.md`). The repo has
 never tested reading the full stack; VRAM is the binding reason (20 slices at
 336 px already reserve ~27 GB of 32). A `stack224` arm was written to probe 36
 slices at 224 px because that is the only resolution where full coverage fits.
@@ -139,11 +139,11 @@ CSA (iv)→(v) = **+0.025** and CRM (v)→(vi) = **+0.013**. CSA is a
 **cross-sequence** (contrast) module, not a plane module, and CRM is a late
 correlation layer. The repo's own analysis concludes that the cross-plane
 attention residual is near zero once the crop is already in place
-(`research/2026-08-24_published_knee_mri_multilabel_sota.md`).
+(`research/deep_dives/2026-08-24_published_knee_mri_multilabel_sota.md`).
 
 **Counter-signal.** A 2025 multi-plane study reported single-plane sagittal
 ACL AUC **0.976** beating three-plane fusion **0.949**
-(`research/2026-08-11_slice-aggregation-literature.md`). More planes is not
+(`research/deep_dives/2026-08-11_slice-aggregation-literature.md`). More planes is not
 automatically more signal.
 
 **Whether it is a lever here.** The repo already routes each study into six
@@ -175,7 +175,7 @@ coronal. The repo's slot routing was built from the same anatomical mapping
 (`core/data/corpus/slots.py`).
 
 **Project relevance.** The repo's slot fill rates on 60 studies
-(`research/2026-08-31_public-frontier-sweep.md`):
+(`research/deep_dives/2026-08-31_public-frontier-sweep.md`):
 
 | slot | fill rate |
 |---|---|
@@ -213,8 +213,8 @@ twelve types of knee abnormalities," *Nature Communications* 15:7637 (2024).
 imaging," *PLOS Medicine* (2018).
 [PMC6258509](https://pmc.ncbi.nlm.nih.gov/articles/PMC6258509/)
 - Repo prior art:
-`research/2026-08-11_slice-aggregation-literature.md`,
-`research/2026-08-24_published_knee_mri_multilabel_sota.md`,
-`research/2026-08-26_the-ablation-table-a-competitor-published.md`,
-`research/2026-08-25_competitor-single-model-scores.md`,
-`research/2026-08-31_public-frontier-sweep.md`.
+`research/deep_dives/2026-08-11_slice-aggregation-literature.md`,
+`research/deep_dives/2026-08-24_published_knee_mri_multilabel_sota.md`,
+`research/deep_dives/2026-08-26_the-ablation-table-a-competitor-published.md`,
+`research/deep_dives/2026-08-25_competitor-single-model-scores.md`,
+`research/deep_dives/2026-08-31_public-frontier-sweep.md`.

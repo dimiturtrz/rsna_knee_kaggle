@@ -72,7 +72,7 @@ returns **zero hits** across `experiments/README.md`. This axis has never been t
 
 ## The prior art says do not reach for normalization
 
-`research/2026-09-05_cross-vendor-domain-shift-prior-art-cardiac-seg.md` records five independent
+`research/deep_dives/2026-09-05_cross-vendor-domain-shift-prior-art-cardiac-seg.md` records five independent
 confirmations from the sibling cardiac-seg project that harmonization/normalization does not move a
 cross-vendor result — Nyul null at -0.007, oracle blood-anchor null, the whole norm grid flat inside
 0.019 of single-seed scatter, N4 and bias-field augmentation both regressing. We already z-score and

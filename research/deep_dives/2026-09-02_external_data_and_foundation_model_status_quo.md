@@ -31,7 +31,7 @@ Key readings:
 
 - **OrthoFoundation-L is declined as a 2D trunk replacement.** The fitted member lost −0.0050 vs. its DINOv2-base control, and the frozen probe shows the knee continuation actually **subtracted signal** from its own DINOv3-L init (0.7387 vs. 0.7446). This is the catastrophic-forgetting shape reported for RAD-DINO on out-of-domain chest data.
 - **The size confound matters.** `v3large_dense` (DINOv3-L, no knee continuation) scored 0.8258, worse than `ortho_dense` 0.8452, so the low `ortho_dense` number is partly "ViT-L overfits 4,407 report-derived studies," not purely "knee continuation hurts." But neither beat the DINOv2-base control.
-- **The readout may be the real story.** DINOv2-L beats DINOv3-L and OrthoFoundation-L under the project's default max-pooled ridge probe. Q-AL literature (`research/2026-09-02_trunk_vs_readout_quality_medical_volumes_qal.md`) shows that the same frozen trunk can go from chance to near-perfect when the readout is made local, and learned attention pooling over slices can beat max/mean by up to +0.11 AUC. Bead `knee-02vn` tracks the re-probe.
+- **The readout may be the real story.** DINOv2-L beats DINOv3-L and OrthoFoundation-L under the project's default max-pooled ridge probe. Q-AL literature (`research/deep_dives/2026-09-02_trunk_vs_readout_quality_medical_volumes_qal.md`) shows that the same frozen trunk can go from chance to near-perfect when the readout is made local, and learned attention pooling over slices can beat max/mean by up to +0.11 AUC. Bead `knee-02vn` tracks the re-probe.
 
 ## 2. Exact external-data inventory (re-measured 2026-09-02)
 
@@ -119,10 +119,10 @@ Honest RSNA mappings:
 ## Sources
 
 - `interpretations/kneemri/2026-09-01_external-data-state.md`
-- `research/2026-09-02_using_external_knee_mri_data_to_improve_kaggle_score.md`
-- `research/2026-09-02_external_mri_data_merging_schemes.md`
-- `research/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`
-- `research/2026-09-02_trunk_vs_readout_quality_medical_volumes_qal.md`
+- `research/deep_dives/2026-09-02_using_external_knee_mri_data_to_improve_kaggle_score.md`
+- `research/deep_dives/2026-09-02_external_mri_data_merging_schemes.md`
+- `research/deep_dives/2026-09-02_sota_pretrained_knee_mri_models_2025_2026.md`
+- `research/deep_dives/2026-09-02_trunk_vs_readout_quality_medical_volumes_qal.md`
 - `logs/ortho_probe.log`
 - `logs/after_orthochain.log`
 - `logs/after_v3large_dense.log`

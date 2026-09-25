@@ -15,7 +15,7 @@
 
 The public RSNA Kaggle leaderboard is the only place where a non-DINO trunk has a number on the exact twelve-label task:
 
-- `hyakumanben2025/rsna-knee-dinosaur-v5-repro` (the raptor public lineage) reports **CoAtNet alone at 0.914 LB**, and **0.942 after tweaks**, still at 224 px (`research/2026-08-31_public-frontier-sweep.md`).
+- `hyakumanben2025/rsna-knee-dinosaur-v5-repro` (the raptor public lineage) reports **CoAtNet alone at 0.914 LB**, and **0.942 after tweaks**, still at 224 px (`research/deep_dives/2026-08-31_public-frontier-sweep.md`).
 - The same public notebook reports a three-family blend of **CoAtNet 384 / Swin-base 384 / EffNetV2-L 480** worth only **~+0.001 AUC** on the live board.
 - A Kaggle dataset publishes trained CoAtNet weights for twelve knee-MRI findings: [`dreaddevelopment/raptor-knee-widedense`](https://www.kaggle.com/datasets/dreaddevelopment/raptor-knee-widedense).
 
@@ -89,7 +89,7 @@ That is not a literature-derived threshold; it is a conservative operational rul
 
 ## Sources
 
-- CoAtNet public frontier / raptor lineage — internal: `research/2026-08-31_public-frontier-sweep.md`
+- CoAtNet public frontier / raptor lineage — internal: `research/deep_dives/2026-08-31_public-frontier-sweep.md`
 - Public trained CoAtNet weights — [Kaggle dataset `dreaddevelopment/raptor-knee-widedense`](https://www.kaggle.com/datasets/dreaddevelopment/raptor-knee-widedense)
 - MV2SwinNet knee MRI ablation — [Tanwar et al., PLOS ONE 2025 / PMC12385416](https://pmc.ncbi.nlm.nih.gov/articles/PMC12385416/)
 - EfficientNetV2 meniscus tear — [Güngör et al., Knee Surgery Sports Traumatology Arthroscopy 2025 / PMC11792105](https://pmc.ncbi.nlm.nih.gov/articles/PMC11792105/)

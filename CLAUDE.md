@@ -454,7 +454,10 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 - **Minimal comments** — prefer self-documenting names; a comment is a liability, not a default.
 - **Config objects over long arg lists**; strategy pattern over `if`/type dispatch.
 - **Doc layers** — `learning/<date>_<topic>.md` = the study ramp / general understanding;
-  `research/` = external / field synthesis (theirs); `interpretations/<task>/<date>_<topic>.md` =
+  `research/` = external / field synthesis (theirs), in two layers: `research/deep_dives/<date>_<topic>.md`
+  = one individual piece of research, and `research/summaries/<topic>.md` = the by-topic synthesis of the
+  deep dives with links to each. A new deep dive is not done until its topic summary is updated (or a new
+  topic is added to `research/summaries/README.md`); `interpretations/<task>/<date>_<topic>.md` =
   sense-making of *our own* results (per task, `converging/` for cross-task). The build log is git history;
   portfolio READMEs carry the result + link out.
 - **Before filing a finding, READ THE LEDGER AND THE INTERPRETATIONS** — `experiments/README.md` and

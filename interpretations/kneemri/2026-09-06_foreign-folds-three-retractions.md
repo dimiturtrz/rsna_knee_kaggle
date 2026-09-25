@@ -31,7 +31,7 @@ and at load time (`:2118`): `if cfg['cond'] == 'token': enc = ViTSlotToken(enc, 
 The token injected into the trunk is the **series slot type** — the same six-slot vocabulary
 (`SAG_FLUID_FS`, `COR_T1`, …) this project already carries through its own pipeline. `Net.__init__` never
 takes an `n_sites` argument; on the `token` path nothing consumes it. Kimi's
-`research/2026-09-04_qdu-foreign-architecture-census.md:37` already called it "slot-token conditioning",
+`research/deep_dives/2026-09-04_qdu-foreign-architecture-census.md:37` already called it "slot-token conditioning",
 correctly, two days ago — I read `n_sites: 109` off the cfg and invented a site axis around it.
 
 **What this costs and what it buys.** It costs the "site conditioning changes the objective" argument

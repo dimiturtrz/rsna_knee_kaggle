@@ -44,8 +44,8 @@ In general, **yes, when errors differ**. Müller et al. found that heterogeneous
 But heterogeneity is **not a free lunch**:
 
 - On this RSNA competition, a public three-family blend (CoAtNet 384 + Swin-base 384 + EffNetV2-L 480) reported that ensembling was worth only **~+0.001 AUC** on the live board, because the singles were already near ceiling and their errors were correlated.
-- Our own six-member DINO-family ensemble shows the same ~+0.001 board behavior (`research/2026-08-31_public-frontier-sweep.md`).
-- Self-reported rival single models sit at **0.942**, while our six-member ensemble was **0.939** at the time (later updated to **0.943–0.944**), so the *entire* mix was buying roughly what one better single member would (`research/2026-08-25_competitor-single-model-scores.md`).
+- Our own six-member DINO-family ensemble shows the same ~+0.001 board behavior (`research/deep_dives/2026-08-31_public-frontier-sweep.md`).
+- Self-reported rival single models sit at **0.942**, while our six-member ensemble was **0.939** at the time (later updated to **0.943–0.944**), so the *entire* mix was buying roughly what one better single member would (`research/deep_dives/2026-08-25_competitor-single-model-scores.md`).
 
 So while the *literature* says heterogeneity helps, the *field evidence on this task* says the ceiling is low enough that even a cross-family blend adds almost nothing.
 
@@ -73,5 +73,5 @@ For a generic panel of similar DINOv2 recipes, there is no reason to expect a me
 - [Hussain et al., "A calibrated deep learning ensemble for abnormality detection in musculoskeletal radiographs", Sci Rep 2021 / PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC8079683/)
 - [Bien et al., "Deep-learning-assisted diagnosis for knee magnetic resonance imaging", PLOS Medicine 2018 / PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC6258509/)
 - [Stanford ML Group MRNet competition leaderboard](https://stanfordmlgroup.github.io/competitions/mrnet/)
-- Internal: `research/2026-08-31_public-frontier-sweep.md`
-- Internal: `research/2026-08-25_competitor-single-model-scores.md`
+- Internal: `research/deep_dives/2026-08-31_public-frontier-sweep.md`
+- Internal: `research/deep_dives/2026-08-25_competitor-single-model-scores.md`

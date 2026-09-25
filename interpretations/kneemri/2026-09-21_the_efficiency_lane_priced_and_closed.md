@@ -59,7 +59,7 @@ record is untouched:
 maxAUC 0.957 the denominator is -0.457, so `d/dAUC = -2.188` per unit AUC and `d/dR = 3.086e-5` per
 second. One unit of AUC is worth **70,900 s**, i.e. **0.001 AUC = 70.9 s**. Call that a tick.
 
-Every cheapening we can price, at ~1300 test studies (estimate, `research/2026-09-04_qdu-foreign-
+Every cheapening we can price, at ~1300 test studies (estimate, `research/deep_dives/2026-09-04_qdu-foreign-
 architecture-census.md:163`) and a ~6x T4 penalty over this 5090 (estimate, unmeasured):
 
 | change | runtime saved | ticks gained | AUC cost | ticks lost | net |

@@ -6,7 +6,7 @@
 
 **OrthoFoundation-L is the standout.** It is a 2026 DINOv3-L-based model, MIT-licensed, with released weights, pretrained on **1.25 million knee images** (357k X-rays + 894k MRI slices) from OAI/fastMRI plus a private cohort. It reports strong knee-MRI downstream numbers (ACL AUROC 0.9849, MCL 0.9334, cartilage lesion 0.9338) and is exactly the "strong init + in-domain SSL" mechanism the project has been trying to price. It is **not yet referenced anywhere in this repo**.
 
-The repo already tracks RAD-DINO (knee-vp8q), DINOv3 (knee-8hn), and the MRNet/fMRI/KMAR-50K corpora in `docs/EXTERNAL_CORPORA.md` and `research/2026-09-01_knee-mri-corpora-survey.md`, but those are data sources or general encoders. OrthoFoundation is a *knee-specific* foundation model.
+The repo already tracks RAD-DINO (knee-vp8q), DINOv3 (knee-8hn), and the MRNet/fMRI/KMAR-50K corpora in `docs/EXTERNAL_CORPORA.md` and `research/deep_dives/2026-09-01_knee-mri-corpora-survey.md`, but those are data sources or general encoders. OrthoFoundation is a *knee-specific* foundation model.
 
 ## Candidate models
 
@@ -59,7 +59,7 @@ The repo already tracks RAD-DINO (knee-vp8q), DINOv3 (knee-8hn), and the MRNet/f
 ## What the project already knows
 
 * `docs/EXTERNAL_CORPORA.md` documents SKM-TEA, fastMRI, KMAR-50K, OAI/MOST, and segmentation-era datasets. It does not list foundation-model checkpoints.
-* `research/2026-09-01_ssl_continuation_from_strong_init.md` shows that continuing DINO/DINOv2/DINOv3 on in-domain unlabeled data can help, but only at large scale (30k–3.5M images). OrthoFoundation's 1.25M knee images sits at the high end of that evidence.
+* `research/deep_dives/2026-09-01_ssl_continuation_from_strong_init.md` shows that continuing DINO/DINOv2/DINOv3 on in-domain unlabeled data can help, but only at large scale (30k–3.5M images). OrthoFoundation's 1.25M knee images sits at the high end of that evidence.
 * Beads:
   * `knee-ombx` — MRNet as external data for supervised encoder pretraining, blocked on the owner licence call.
   * `knee-vp8q` — RAD-DINO (chest radiography init) as a partial-domain-match control.

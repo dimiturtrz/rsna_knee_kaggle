@@ -433,7 +433,7 @@ arrival, not session restarts.
   no-derivatives, RIDER Knee RETIRED. Highest-value null: no public corpus pairs knee MRI with reports —
   our own corpus is the only annotatable one. Synthesis: power-law ceiling and audit residual are the
   same unknown; labels are the scarce resource, not images.
-- Research file: research/2026-09-11_data-volume-power-law-and-knee-mri-corpora.md
+- Research file: research/deep_dives/2026-09-11_data-volume-power-law-and-knee-mri-corpora.md
 
 - D329 (M335-Q4): meniscus-residual notebooks dissected. The "repro" is BYTE-IDENTICAL (cmp clean) —
   one measurement, not two. Applied mechanism = one-column rank overlay (MedMen = 0.30·Transformer +
@@ -486,7 +486,7 @@ arrival, not session restarts.
   Bernhardt 4× vs random; ActiveLab). Gradient check: Spearman(gold AUC, published miss) = **−0.50,
   n=7, p=0.25** (−0.33 with Effusion); extremes agree (Synovitis/LatOA vs ACL/MedMen), middle does
   not (MedOA, Effusion counter-examples) — report weakness explains extremes only.
-- Research file: research/2026-09-11_extractor-repair-structured-noise-and-selective-repair.md
+- Research file: research/deep_dives/2026-09-11_extractor-repair-structured-noise-and-selective-repair.md
 
 ## PRIOR LATEST (12:25Z) — M331/M332 answered (D325); next free letter D326; main last seen M332 (09:55Z)
 Listener died silently again (~11:17Z–14:17Z local gap): M331/M332 sat unread for ~40 min. Supervisor
@@ -509,7 +509,7 @@ relaunched (pid 54220). `.status` staleness check: `python inbox/agents.py --lis
 - M332 repriced D323/D324: Synovitis & Lateral OA are ≤0.005 prizes; per-column axis closed by colhalf.
   ID fixes: Matsoukas = 2203.01825 (not 2204.02825); Azizi = 2101.05224.
 - Backlog fully discharged: M310/M311/M312/M315/M317/M322 all answered earlier (D311/D313–D316).
-- Research file: research/2026-09-11_broad-macro-gains-high-baseline-and-concordance-rulers.md
+- Research file: research/deep_dives/2026-09-11_broad-macro-gains-high-baseline-and-concordance-rulers.md
 
 ## PRIOR LATEST (10:05Z) — M327/M329/M330 answered (D322/D323/D324)
 Note: listener delivers without harness notification — on resume ALWAYS `ls inbox/researcher/read/`
@@ -530,7 +530,7 @@ for new M-letters first, don't trust the absence of a notification (missed M323�
   0.876), worst channel in MOAKS itself (cartilage κ=0.36), under-read from reports (Krakowski, LTC AUC
   0.578), BMLs invisible without fat-supp (physics). Geometry hypothesis (0.1–0.9 band under-samples
   lateral): plausible via Bloecker 59% vs 50% meniscal coverage + convex lateral plateau, but
-  UNMEASURED anywhere. Research file: research/2026-09-11_attention-pool-depth-saturation-and-lateral-oa-reads.md
+  UNMEASURED anywhere. Research file: research/deep_dives/2026-09-11_attention-pool-depth-saturation-and-lateral-oa-reads.md
 - D324 (M330 + M327-Q3): montages LOSE to few orthogonal high-res slices (SpatialMed 2603.13800,
   −20.75 pts for medical VLM; UCSF-PDGM-VQA 2605.17140); text-in-tile indices untested (MedBLINK:
   marks seen not reasoned about); grade prompts UNDER-CALL (Chetla PMC12411675, sens 0.028–0.040 for
@@ -541,7 +541,7 @@ for new M-letters first, don't trust the absence of a notification (missed M323�
   identification (2312.04601), confident learning (1911.00068), concordance-adjudicated ruler (Sorin).
   M327-Q3: NULL for the exact design; family = Whitehill AUC/log-loss oracles (1506.01339,
   1707.01825), validity pricing = Dwork Science 2015 + Blum-Hardt Ladder. Research file:
-  research/2026-09-11_vlm-montage-prompting-and-small-gold-validation.md
+  research/deep_dives/2026-09-11_vlm-montage-prompting-and-small-gold-validation.md
 
 ## PRIOR LATEST (09:10Z) — backlog cleared THROUGH M326
 - D319 (M323-Q1, measured from local artefacts): fastMRI has NO laterality anywhere — knee.csv has 8
@@ -560,7 +560,7 @@ for new M-letters first, don't trust the absence of a notification (missed M323�
   partial identification (Maia Polo 2312.04601) whose bound width IS the answer → gold or the board.
   Eval-on-own-generator confound: no canonical name; Lampert TIP-2016 measured inflation; remedy =
   swap ruler MODALITY (gold-58 is that). Research file:
-  research/2026-09-11_multi-source-label-merging-and-agreement-estimators.md.
+  research/deep_dives/2026-09-11_multi-source-label-merging-and-agreement-estimators.md.
 - D321 (M324 + M325): view-as-samples supported exactly in our regime (Gori 2505.01109, 710
   experiments: instance-MIL matches/beats embedding-MIL once the encoder is foundation-class; MRNet
   itself is per-plane view-as-samples). Channels-vs-samples at fixed labels = empty cell, ours unrun.
@@ -571,7 +571,7 @@ for new M-letters first, don't trust the absence of a notification (missed M323�
   small bags don't dilute; the max-pool suppression is argmax-suppression not classic dilution.
   Closest published model to this project found: Qiu et al. Nat Commun 2024 (PMC11368947), co-plane
   attention, 12 knee-abnormality labels. ID fixes: SAR=2302.12400; TransMIL no arXiv ID. Research
-  file: research/2026-09-11_views-consistency-tta-and-mil-aggregation.md.
+  file: research/deep_dives/2026-09-11_views-consistency-tta-and-mil-aggregation.md.
 Overnight main's new measurements: 2x2 input×head (M325: extended scheme +0.0010 labelwise / −0.0059
 max); label-table ranking on gold57 (M326: ours v2 is WORST at 0.2047 cell disagreement, FP:FN 3.4:1,
 Contusion 36-vs-18 over-call); M323: owner ruled all corpora downloaded, blocker is labels, don't drop
@@ -621,14 +621,14 @@ IN FLIGHT: nothing. Backlog CLEARED: M313–M322 all answered by D313–D318 (de
 - D317 (M314): licences — CONFIRMED NEGATIVE, no labelled knee corpus permits shipping weights.
   Only shippable MSK-MRI = TCIA Soft-tissue-Sarcoma (CC BY 3.0, 51 subj, no labels) + TCGA-SARC;
   M4Raw brain CC BY 4.0. SKM-TEA bans "derivative works" verbatim; OAI DUA research-only; K2S none;
-  RIDER Knee GONE from TCIA. Survey at research/2026-09-11_shippable-corpus-licence-survey.md.
+  RIDER Knee GONE from TCIA. Survey at research/deep_dives/2026-09-11_shippable-corpus-licence-survey.md.
   Site axis = permanently offline-only for shipped members.
 - D318 (M313-Q2): literature picks continued-SSL on fastMRI images over fastMRI+ supervised
   co-training. Cross-institution tax measured −0.07..−0.14 (Bien PMC6258509, Germann PubMed
   32168039, Lu 2409.04368 MRI worst modality −0.097). PU-learning caveat fits fastMRI+ structure.
   Organ-specific continuation distinction REAL (Azizi 2101.05224, RETFound, MoCo-CXR vs
   RadImageNet contested 2302.08272). Co-train-vs-pretrain order: NULL. Survey at
-  research/2026-09-11_fastmri-transfer-mechanisms.md. Both research/ files UNCOMMITTED (main's call).
+  research/deep_dives/2026-09-11_fastmri-transfer-mechanisms.md. Both research/ files UNCOMMITTED (main's call).
 
 ## Identity & rules (confirmed via HANDOVER_researcher_to_kimi_20260910.md, a prior instance)
 Researcher lane, kneemri (RSNA knee Kaggle). Main = only correspondent, owns card/ledger/bd/git/slot.
@@ -683,7 +683,7 @@ teacher_targets!=None): (1) 6x6 overlap matrix; (2) conditional deltas holding t
 overlap flag fixed; (3) date spans True vs False groups; (4) which flags the champion's members
 carry (comp/champion.json). "If all six set on champion, rest is academic, say so and stop."
 Stand down on VisualCheXbert per M304. Do NOT watch band arm.
-DONE 16:06Z: agent-21 mapping -> research/2026-09-10_unseen-candidates-mapped-onto-our-
+DONE 16:06Z: agent-21 mapping -> research/deep_dives/2026-09-10_unseen-candidates-mapped-onto-our-
 measurements.md (11-row cross-ref, interpretation-file numbers) + D308 to main CORRECTING
 D307 claim 1: joint multi-corpus pooling = merged3, built and null (-0.0024, ACL -0.0013 on
 1,248 expert reads; board dose bends down; fastMRI variant licence-blocked). Supported: frozen
@@ -702,8 +702,8 @@ Bien +0.087 = small-corpus-baseline in-domain-supervision price (n=1130 train, 1
 only), not a pool increment on 4406. Main standing: card on mae_unitfix till ~20:30Z, VRAM 97%.
 Main has read D303-D307; D308/D309/D310 unread in his box as of 16:20Z.
 Mail health: BOTH lanes alive — main re-armed 16:08Z (after D305), my supervisor holding.
-DONE 16:14Z: agent-22 round 2 + my own round 3 -> research/2026-09-10_round2-practitioner-
-and-access-terrain.md + research/2026-09-10_round3-local-unrun-and-evaluation-economics.md +
+DONE 16:14Z: agent-22 round 2 + my own round 3 -> research/deep_dives/2026-09-10_round2-practitioner-
+and-access-terrain.md + research/deep_dives/2026-09-10_round3-local-unrun-and-evaluation-economics.md +
 D309 to main. Round-2 top: arXiv 2606.11606 frozen-probe small-signal (global pooling AT
 CHANCE 0.500-0.524, patch-local recovers ~1.0, stratum gap +0.243) — lands on focal deficit +
 decode toll; lumbar winners = hand-fixed labels + SHAPE alignment + coordinate pretraining

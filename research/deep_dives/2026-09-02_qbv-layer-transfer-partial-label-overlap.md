@@ -105,7 +105,7 @@ Two results bound the answer:
    X-ray) with labels overlapping our task, yet its frozen probe (0.7387) was weaker than its own
    DINOv3-L init (0.7446), and the fitted member (0.8452) lost to the DINOv2-base control
    (0.8502). Knee-specific supervised continuation can **subtract** signal, not just add it.
-   Source: `research/2026-09-02_external_data_and_foundation_model_status_quo.md`.
+   Source: `research/deep_dives/2026-09-02_external_data_and_foundation_model_status_quo.md`.
 
 2. **The merged-corpus seat axis closed flat/down.** Concatenating external studies into the
    fine-tuning cache produced at best +0.006 and at six external seats -0.004. External labels

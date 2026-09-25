@@ -164,7 +164,7 @@ refuses all three by name. Anyone ranking public tables this way without that re
 
 Their Synovitis aside — *"only ~16% of reports mention synovitis in any of the nine languages, so it's
 largely inferred"* — is a real corpus fact and matches ours, but it prescribes nothing here:
-`research/2026-08-26_synovitis-is-not-our-weak-label.md` already records Synovitis at 0.8568, above our
+`research/deep_dives/2026-08-26_synovitis-is-not-our-weak-label.md` already records Synovitis at 0.8568, above our
 mean. Our weak labels are Fracture and MCL.
 
 **What the tick actually bought.** Not the table comparison, which was closed. Following it into the

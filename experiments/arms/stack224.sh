@@ -6,7 +6,7 @@
 # THE CELL NO MEMBER HAS EVER OCCUPIED. Across 137 arm scripts the slice count is 20 (95), 12 (43) or
 # 16 (1), and nothing above 20. A sagittal knee series holds 30-40 slices, so every member this project
 # owns has read a third to a half of the volume with a sampler choosing which half. The public frontier
-# fills its five slots with 64 slices (18+14+12+8+12, research/2026-08-23_published-per-label-auc-vs-ours.md).
+# fills its five slots with 64 slices (18+14+12+8+12, research/deep_dives/2026-08-23_published-per-label-auc-vs-ours.md).
 #
 # WHY THE SLICE-COUNT LEDGER DOES NOT ALREADY ANSWER IT. Every reading we hold is 12 -> 20: +0.0080,
 # +0.0013, -0.0001 under max pooling (knee-ezz), -0.0028 on the merged corpus. That is a change of WHICH

@@ -177,7 +177,7 @@ skip the term in about half of steps.
 | Source | What it says | Numbers read |
 |---|---|---|
 | NVUM, arXiv 2103.04053 (PDF pp4-9) | BCE + log(1−σ(tᵀp)) regulariser, where t = non-volatile running average of logits minus log π (β=0.9) | NIH→OPI mean AUC: BCE 82.91; +π in BCE 85.80; +π in REG 85.24; both 86.68; full NVUM 88.17±0.48. β=0.1 collapses; 0.5→0.9 is monotone up. **Table 3 (1,962 NIH images, ≥3 radiologists per image): BCE 87.0/84.3, ELR 87.1/83.2, NVUM 88.9/85.5, F-correction 80.8/84.8** |
-| BoMD Table 4 (via research/2026-09-11_loss-correction-with-measured-noise-matrix.md) | NIH×PDC, inherent NLP noise | BCE 85.65 / NVUM 87.89 / BoMD 89.76 |
+| BoMD Table 4 (via research/deep_dives/2026-09-11_loss-correction-with-measured-noise-matrix.md) | NIH×PDC, inherent NLP noise | BCE 85.65 / NVUM 87.89 / BoMD 89.76 |
 | Rep-GLS, arxiv.org/html/2508.02495 | (1−r)·CE + r·uniform with r∈(−1,1); negative r = SHARPENING of reliable report labels | MIMIC-CXR 14-label: BCE 79.63 → e2e 80.27 → no-sharpen 81.56 → full 84.14 |
 | ELR, arXiv 2007.00151 (abstract) | temporal-ensemble targets + log(1−⟨p,t⟩) | on CXR it is ~null (NVUM Table 3 above) |
 | LibAUC CheXpert example + docs | AUCM_MultiLabel + PESG, lr 0.1, margin 1.0, gamma 500, DenseNet121, 2 epochs; docs say "pretrain with regular loss, then switch to AUCMLoss for finetuning with a smaller lr" | 1st place on CheXpert 2020 (no ablation number read) |
@@ -251,7 +251,7 @@ They are not a lever the size of the gap on their own.
 
 # Data-pipeline lane: research sweep (2026-09-24)
 
-Scope: this covers preprocessing, normalisation, slice sampling, series selection, orientation, cropping, MRI augmentation, sampling and balancing, and missing-sequence handling at test time. It is read-only and does not include external training data, corpus expansion, or seed/fold sweeps. It builds past `research/2026-09-15_knee-mri-normalization-augmentation.md`, `research/2026-09-10_cross-decode-toll-shrinkers-ranked-by-measured-effect.md` and `research/2026-09-23_forum_sweep.md` and does not repeat them.
+Scope: this covers preprocessing, normalisation, slice sampling, series selection, orientation, cropping, MRI augmentation, sampling and balancing, and missing-sequence handling at test time. It is read-only and does not include external training data, corpus expansion, or seed/fold sweeps. It builds past `research/deep_dives/2026-09-15_knee-mri-normalization-augmentation.md`, `research/deep_dives/2026-09-10_cross-decode-toll-shrinkers-ranked-by-measured-effect.md` and `research/deep_dives/2026-09-23_forum_sweep.md` and does not repeat them.
 
 ## What the record already closes (this is why the lane is thin)
 

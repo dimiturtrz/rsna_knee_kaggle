@@ -289,4 +289,4 @@ parsing reports better. And it does not price the −0.049 as available: a defic
 banked, and nothing on this page has been shown to close any part of it.
 
 Beads: `knee-487l` (this page), `knee-2dk1` (the bottleneck reading), `knee-uj15` (the single-model frontier).
-Research: `research/2026-08-25_competitor-single-model-scores.md`.
+Research: `research/deep_dives/2026-08-25_competitor-single-model-scores.md`.

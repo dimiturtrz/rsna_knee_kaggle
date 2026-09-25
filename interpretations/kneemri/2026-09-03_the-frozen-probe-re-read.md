@@ -98,7 +98,7 @@ Neither finding is a score. Both are card-blocked, and the card is the owner's.
 
 ## A note on the public-baseline audit
 
-`research/2026-09-03_public_rsna_knee_baseline_audit.md` recommends keeping DINOv2-small and not
+`research/deep_dives/2026-09-03_public_rsna_knee_baseline_audit.md` recommends keeping DINOv2-small and not
 reaching for a larger DINOv2, citing a Kaggle Models tab where DINOv2-small reads 0.906 and
 DINOv2-large reads 0.500. That table is a maximum over whatever strangers uploaded, not a controlled
 comparison, and 0.500 is a collapsed head rather than a capacity result — the doc says so itself. On

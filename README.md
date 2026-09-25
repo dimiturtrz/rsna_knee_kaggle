@@ -23,7 +23,7 @@ leaderboard taught us, [what the labels
 contain](interpretations/kneemri/2026-08-13_what-the-labels-actually-contain.md), and [the day the
 ruler itself was
 wrong](interpretations/kneemri/2026-08-13_the-ruler-was-wrong-and-the-witness-earned-its-keep.md).
-What the public frontier does is in [research/](research/2026-08-11_public-notebooks.md).
+What the public frontier does is in [research/](research/deep_dives/2026-08-11_public-notebooks.md).
 
 Two numbers govern how the rest is read. The run-to-run **noise floor is 0.0062** (three seeds, one
 recipe, one split), which puts every knob-sized change out of reach at n=1 — and it is the holdout's own

@@ -10,7 +10,7 @@ scored the four against each other on one ruler. Scored now, with this repo's ow
 | table | net wrong | false positives | misses | silent |
 |---|---:|---:|---:|---:|
 | `local_reader_annotated.csv` | **121** | 83 | 38 | 21.0% |
-| Qwen3.8-27B NVFP4 (`research/2026-09-03_qwen38_reader_gate_result.md`) | 122 | 48 | 74 | 30.2% |
+| Qwen3.8-27B NVFP4 (`research/deep_dives/2026-09-03_qwen38_reader_gate_result.md`) | 122 | 48 | 74 | 30.2% |
 | `report_labels_v2.csv` — **what we train on** | 140 | 108 | 32 | 25.9% |
 | `local_medgemma4b_annotated.csv` | 143 | 103 | 40 | 7.3% |
 

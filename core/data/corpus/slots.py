@@ -330,7 +330,7 @@ WHAT THAT COSTS, STATED PLAINLY: NO merged member of any name can be shipped. Ri
 clause ALONE — the NC half was retired on 2026-09-13 when the host wrote that "readily accessible
 datasets with non-commercial use restrictions are generally acceptable... since receiving prize money
 does not constitute commercial exploitation" (discussion 733965); see
-`research/2026-09-13_host_rulings_forum_sweep.md`, which holds every host ruling in one place. MRNet's
+`research/deep_dives/2026-09-13_host_rulings_forum_sweep.md`, which holds every host ruling in one place. MRNet's
 Stanford agreement bars creating an adaptation, so `merged` and `merged3` were already blocked; this
 name was the exemption, and the exemption does not exist. `merged_span_cf` 0.8618 and every other
 `merged_*` number in this repo is an OFFLINE result about what more data does, and only that. The merge

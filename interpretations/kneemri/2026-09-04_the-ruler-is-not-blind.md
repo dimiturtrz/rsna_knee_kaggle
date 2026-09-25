@@ -21,7 +21,7 @@ wrong, and the module was built to tell the two apart without spending a slot.
 
 The slope is not flat and it is not zero anywhere. It rises from +0.44 on the easiest fifth of the
 holdout to +0.68..+0.81 across the hard three-fifths. Against Kimi's Q-TS discriminator
-(`research/2026-09-04_qts-offline-leaderboard-transfer-slope.md`), that is the **ceiling-saturation**
+(`research/deep_dives/2026-09-04_qts-offline-leaderboard-transfer-slope.md`), that is the **ceiling-saturation**
 signature — compression is worst where the cases are easy — and it is not the distribution-gap
 signature, which would have put the recovered slope in Q5 and left the easy bands looking normal.
 Nothing here reads near 1.0, so the "case-weighting / label-noise everywhere" branch is also out.

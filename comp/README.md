@@ -315,7 +315,7 @@ WEAKER prior here than it would be if 2026 had stayed consistent, which is why t
 treated as the measurement. `kernels/kneemri-colnull` submits a constant table to read the intercept
 directly: exactly 0.500 confirms a plain mean of per-column AUCs and prices `colmcl`'s drop as one
 twelfth; anything else and the whole per-label lane has to be re-derived. Full survey in
-`research/2026-09-04_qmw-rsna-knee-2026-metric-definition.md`.
+`research/deep_dives/2026-09-04_qmw-rsna-knee-2026-metric-definition.md`.
 
 **A note on where these numbers came from, because it is the same trap twice.** The efficiency board is
 not published by Kaggle as a board; it is the OUTPUT OF A NOTEBOOK, and it was read here as if it were
