@@ -22,7 +22,6 @@ minus 0.5, over twelve. Until such a pair exists for a column, a lift aimed by t
 ordering, and an arm justified by it has to say so.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,6 +30,7 @@ import numpy as np
 from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
+from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.scores import LabelScores
@@ -136,12 +136,13 @@ below is a target.
 
 def main() -> None:
     """Pool a directory of member holdouts and report the per-column map with its board arithmetic."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--holdouts", type=Path, required=True)
-    parser.add_argument("--only", nargs="+", default=None, help="member names; every recorded member by default")
-    parser.add_argument("--target", type=float, default=DEFAULT_TARGET)
-    parsed = parser.parse_args()
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--holdouts", type=Path, required=True)
+    command.parser.add_argument(
+        "--only", nargs="+", default=None, help="member names; every recorded member by default"
+    )
+    command.parser.add_argument("--target", type=float, default=DEFAULT_TARGET)
+    parsed = command.parsed()
     names = MemberPool.at(parsed.holdouts).names(parsed.only)
     members = MemberHoldout.aligned([MemberHoldout.loaded(parsed.holdouts / f"{name}.holdout.npz") for name in names])
     headroom = ColumnHeadroom(parsed.target)

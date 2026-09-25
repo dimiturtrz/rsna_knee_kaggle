@@ -56,7 +56,6 @@ is why this is worth one CPU run and no card: the mechanism is cheap to refute a
 informative about every future cross-label proposal.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -65,6 +64,7 @@ import numpy as np
 from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
+from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.mixing_rules import RULES, MixingRule, RidgeShrink
@@ -179,18 +179,19 @@ class ColumnMixing:
 
 def main() -> None:
     """Rank-average a directory of member holdouts into one table, then price mixing its columns."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--holdouts", type=Path, required=True)
-    parser.add_argument("--only", nargs="+", default=None, help="member names; every recorded member by default")
-    parser.add_argument("--seed", type=int, default=SPLIT_SEED)
-    parser.add_argument("--rule", choices=sorted(RULES), default=RidgeShrink.name)
-    parser.add_argument(
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--holdouts", type=Path, required=True)
+    command.parser.add_argument(
+        "--only", nargs="+", default=None, help="member names; every recorded member by default"
+    )
+    command.parser.add_argument("--seed", type=int, default=SPLIT_SEED)
+    command.parser.add_argument("--rule", choices=sorted(RULES), default=RidgeShrink.name)
+    command.parser.add_argument(
         "--sweep",
         action="store_true",
         help="price every fixed penalty instead of choosing one nested; the honest number is the nested run",
     )
-    parsed = parser.parse_args()
+    parsed = command.parsed()
     names = MemberPool.at(parsed.holdouts).names(parsed.only)
     members = MemberHoldout.aligned([MemberHoldout.loaded(parsed.holdouts / f"{name}.holdout.npz") for name in names])
     table = np.mean([Vote.ranks(member.predictions) for member in members], axis=0)

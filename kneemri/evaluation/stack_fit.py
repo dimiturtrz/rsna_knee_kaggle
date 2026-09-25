@@ -10,7 +10,6 @@ NESTED split inside the fitting half. An earlier reading picked the penalty by l
 and reported that the gain doubled with pool size; under honest selection that claim vanished.
 """
 
-import argparse
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,12 +18,15 @@ import numpy as np
 from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
+from core import cli
 from kneemri.evaluation.member_pool import MemberPool
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.stacked import PENALTIES, STACK_PENALTY, StackedLogit
 from kneemri.inference.vote import LogitAverage, RankAverage, Vote
 from kneemri.runs.artefact import Artefact
 from kneemri.runs.holdout_record import SUFFIX, HoldoutRecord
+
+logger = logging.getLogger(__name__)
 
 FIT_SHARE = 0.5
 """Half the holdout fits, half scores. Half rather than a larger fitting share because the scoring half is
@@ -193,14 +195,17 @@ class StackFit:
 
 def main() -> None:
     """Score the learned combiner against the fixed rules over a directory of holdout records."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--holdouts", type=Path, required=True)
-    parser.add_argument("--members", type=int, default=0)
-    parser.add_argument("--penalty", type=float, default=STACK_PENALTY)
-    parser.add_argument("--only", nargs="+", default=None, help="member names, in the order a kernel seats them")
-    parser.add_argument("--emit-weights", action="store_true", help="print shippable weights instead of a score")
-    parsed = parser.parse_args()
+    command = cli.Command(__doc__, logger)
+    command.parser.add_argument("--holdouts", type=Path, required=True)
+    command.parser.add_argument("--members", type=int, default=0)
+    command.parser.add_argument("--penalty", type=float, default=STACK_PENALTY)
+    command.parser.add_argument(
+        "--only", nargs="+", default=None, help="member names, in the order a kernel seats them"
+    )
+    command.parser.add_argument(
+        "--emit-weights", action="store_true", help="print shippable weights instead of a score"
+    )
+    parsed = command.parsed()
     names = MemberPool.at(parsed.holdouts).names(parsed.only)
     loaded = [
         MemberHoldout.loaded(parsed.holdouts / f"{name}{SUFFIX}") for name in names[: parsed.members or len(names)]
