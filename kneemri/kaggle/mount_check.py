@@ -27,7 +27,8 @@ from kneemri.inference.members import Member
 from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.kernel_sources import KernelSources
 from kneemri.kaggle.live_dataset import LiveDataset, LiveModel, TruncatedListingError
-from kneemri.models.backbone import MODEL_MOUNT, MountKind
+from kneemri.models.backbone import MountKind
+from kneemri.models.encoder import MODEL_MOUNT
 
 logger = logging.getLogger(__name__)
 

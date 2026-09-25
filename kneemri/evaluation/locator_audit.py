@@ -24,8 +24,9 @@ from torch import Tensor
 from core import cli
 from core.data.corpus.skmtea_slices import LOCATOR, SIZE
 from core.data.corpus.slots import SLOTS
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.locator import CLASSES, EVAL_BATCH, PRESENT, Locator, SliceCorpus
+from kneemri.models.variants import SMALL
 
 logger = logging.getLogger(__name__)
 

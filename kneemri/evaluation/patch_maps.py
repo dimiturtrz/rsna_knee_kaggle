@@ -41,7 +41,8 @@ from kneemri.device import VisibleCards
 from kneemri.evaluation.attribution import GRID, Attribution, Holdout
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.members import Member
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.variants import SMALL
 
 logger = logging.getLogger(__name__)
 

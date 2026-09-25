@@ -19,7 +19,7 @@ import torch
 from jaxtyping import Bool, Float
 from torch import Tensor, nn
 
-from kneemri.models.backbone import IMAGENET, Normalization
+from kneemri.models.encoder import IMAGENET, Normalization
 
 BYTE_RANGE = 255.0
 CHANNELS = 3

@@ -19,7 +19,8 @@ from torch import Tensor, nn
 
 from core.data.corpus.anatomy import ANATOMY, SlotAffinity
 from core.findings import TARGETS
-from kneemri.models.backbone import ENCODERS, IMAGENET, SMALL, Normalization
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.encoder import IMAGENET, Normalization
 from kneemri.models.encoder_surgery import NO_LAYER_DECAY, NO_OFFSET, BlockWindow, EncoderSurgery
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
@@ -27,6 +28,7 @@ from kneemri.models.slice_read import SliceRead
 from kneemri.models.slice_shift import SliceShift
 from kneemri.models.slot_head import ATTENDED, PRESENT, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS, TOKEN_POOLINGS
+from kneemri.models.variants import SMALL
 
 logger = logging.getLogger(__name__)
 

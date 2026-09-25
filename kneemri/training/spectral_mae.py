@@ -46,7 +46,7 @@ import torch
 from jaxtyping import Bool, Float
 from torch import Tensor, nn
 
-from kneemri.models.backbone import IMAGENET, Normalization
+from kneemri.models.encoder import IMAGENET, Normalization
 from kneemri.training.masked_objective import MaskConfig, MaskedObjective
 
 _VARIANCE_FLOOR = 1.0e-6

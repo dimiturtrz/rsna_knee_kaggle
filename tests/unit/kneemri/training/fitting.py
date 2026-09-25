@@ -14,7 +14,7 @@ import torch
 from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
-from kneemri.models.backbone import Encoder
+from kneemri.models.encoder import Encoder
 from kneemri.models.model import StudyModel
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.config_tree import TrainConfig

@@ -1,7 +1,8 @@
 """The foreign half of the registry: it merges into one namespace, and it keys itself honestly."""
 
-from kneemri.models.backbone import BASE, ENCODERS, LARGE, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.foreign_encoders import FOREIGN_ENCODERS
+from kneemri.models.variants import BASE, LARGE, SMALL
 
 DINO_VARIANTS = {SMALL, BASE, LARGE}
 

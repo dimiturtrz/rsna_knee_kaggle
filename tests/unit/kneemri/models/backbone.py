@@ -6,22 +6,18 @@ The type these entries are written in â€” `Encoder`, `Stage`, `Normalization` â€
 
 import pytest
 
-from kneemri.models.backbone import (
+from kneemri.models.backbone import ENCODERS, MountKind
+from kneemri.models.encoder import DATASET_MOUNT, IMAGENET, MODEL_MOUNT, Encoder
+from kneemri.models.variants import (
     BASE,
     CONVNEXT_BASE,
-    DATASET_MOUNT,
-    ENCODERS,
-    IMAGENET,
     LARGE,
-    MODEL_MOUNT,
     RAD_DINO,
     SMALL,
     V3_BASE,
     V3_SMALL,
     V3_SMALL_PLUS,
     VJEPA2_LARGE,
-    Encoder,
-    MountKind,
 )
 
 RAD_DINO_PREPROCESSOR = {

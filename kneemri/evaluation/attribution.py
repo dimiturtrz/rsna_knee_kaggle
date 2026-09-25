@@ -478,7 +478,8 @@ def main() -> None:
     from core.data.labels.targets import Targets  # noqa: PLC0415 - as above
     from core.wakelock import Wakelock  # noqa: PLC0415 - as above
     from kneemri.inference.members import Member  # noqa: PLC0415 - as above
-    from kneemri.models.backbone import ENCODERS, SMALL  # noqa: PLC0415 - as above
+    from kneemri.models.backbone import ENCODERS  # noqa: PLC0415 - as above
+    from kneemri.models.variants import SMALL  # noqa: PLC0415 - as above
 
     logger = logging.getLogger(__name__)
     command = cli.Command(__doc__, logger)

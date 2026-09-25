@@ -13,8 +13,9 @@ from torch import Tensor, nn
 
 from core.data.corpus.skmtea_boxes import SCAN_COLUMN
 from core.data.corpus.skmtea_slices import IMAGES, LABELS, SLICE_TABLE, SPLIT_COLUMN
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.locator import LAYERS, PATCH, Locator, SliceCorpus
+from kneemri.models.variants import SMALL
 
 WIDTH = 8
 CORPUS_SIDE = 28

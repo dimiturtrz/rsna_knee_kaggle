@@ -23,7 +23,8 @@ import pytest
 from huggingface_hub import hf_hub_download
 from huggingface_hub.errors import EntryNotFoundError, RepositoryNotFoundError
 
-from kneemri.models.backbone import ENCODERS, PREPROCESSOR_FILES, Encoder
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.encoder import PREPROCESSOR_FILES, Encoder
 
 
 def _published_document(encoder: Encoder) -> dict[str, object] | None:

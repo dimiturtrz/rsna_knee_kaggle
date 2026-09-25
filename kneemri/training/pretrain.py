@@ -31,7 +31,8 @@ from core import cli
 from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.study_cache import CachedCorpus
 from core.wakelock import Wakelock
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.variants import SMALL
 from kneemri.training.attention_health import AttentionHealth, AttentionProfile
 from kneemri.training.latent_mim import LatentMimConfig
 from kneemri.training.masked_objective import BYTE_RANGE, MaskConfig, MaskedObjective

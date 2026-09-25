@@ -31,8 +31,9 @@ from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.member_package import MemberPackage
 from kneemri.inference.vote import RankAverage
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.variants import SMALL
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.config_tree import TrainConfig
 

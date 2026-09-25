@@ -13,7 +13,8 @@ from kneemri.inference.test_time import SpatialViews
 from kneemri.inference.vote import LogitAverage
 from kneemri.kaggle import kernel_run
 from kneemri.kaggle.kernel_run import KernelRun
-from kneemri.models.backbone import BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.variants import BASE, SMALL, V3_BASE, V3_SMALL
 
 
 class _Package:

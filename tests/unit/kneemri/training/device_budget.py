@@ -10,7 +10,9 @@ import pytest
 import torch
 
 from kneemri.device import VisibleCards
-from kneemri.models.backbone import CONVNEXT_BASE, ENCODERS, SMALL, V3_BASE, V3_SMALL, Encoder
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.encoder import Encoder
+from kneemri.models.variants import CONVNEXT_BASE, SMALL, V3_BASE, V3_SMALL
 from kneemri.training.device_budget import (
     CAP_HEADROOM,
     CONTENTION_POLL_SECONDS,

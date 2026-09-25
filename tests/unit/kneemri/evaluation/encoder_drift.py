@@ -6,7 +6,7 @@ import pytest
 import torch
 
 from kneemri.evaluation.encoder_drift import STEM, EncoderDrift
-from kneemri.models.backbone import SMALL
+from kneemri.models.variants import SMALL
 
 
 def _checkpoint(into: Path, *, compiled: bool = False, variant: str = SMALL, unfreeze_last: int = 1) -> Path:

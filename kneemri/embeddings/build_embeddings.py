@@ -18,10 +18,11 @@ from core.data.corpus.cache_flags import CacheFlags
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
+from kneemri.models.variants import SMALL
 
 logger = logging.getLogger(__name__)
 

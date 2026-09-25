@@ -32,11 +32,12 @@ from core.data.corpus.study_cache import StudyCache
 from core.findings import TARGETS
 from core.paths import COMPETITION
 from kneemri.inference.members import Member, MemberConfig
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import MAXIMUM
 from kneemri.models.slot_head import AVERAGED, REPORT_DIMS
 from kneemri.models.token_pooling import CLS_MEAN, CLS_MEAN_FOCAL, POOL_PARTS
+from kneemri.models.variants import SMALL
 from kneemri.training import train as train_module
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import DeviceBudget

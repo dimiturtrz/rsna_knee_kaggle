@@ -3,7 +3,8 @@ from argparse import Namespace
 
 import pytest
 
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.variants import SMALL
 from kneemri.training.masked_objectives import Objectives
 
 # `Objectives.choices` reads as a draw to the size gate; seeded so a failure here is reproducible either way.

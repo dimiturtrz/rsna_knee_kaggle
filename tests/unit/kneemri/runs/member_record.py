@@ -6,7 +6,7 @@ import torch
 from core.data.corpus.crop_centre import CROP_MM
 from core.data.corpus.slot_reader import ADJACENT
 from core.data.corpus.slots import LAST_MAXIMAL
-from kneemri.models.backbone import Encoder
+from kneemri.models.encoder import Encoder
 from kneemri.runs.member_record import NOT_IN_CONFIG, RECORDED_AS, MemberRecord, StampedRun
 from kneemri.training.config_tree import TrainConfig
 

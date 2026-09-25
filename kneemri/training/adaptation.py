@@ -9,9 +9,10 @@ numbers with no behaviour, it is CONSTRUCTED by five modules that have no other 
 from dataclasses import dataclass
 from pathlib import Path
 
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.encoder_surgery import NO_OFFSET
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
+from kneemri.models.variants import SMALL
 from kneemri.training.config_leaf import ConfigLeaf
 from kneemri.training.init_scope import INIT_SCOPES
 from kneemri.training.pretrained_encoder import ALL_BLOCKS

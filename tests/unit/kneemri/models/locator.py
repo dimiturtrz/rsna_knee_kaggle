@@ -6,8 +6,9 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.locator import CLASSES, Locator, SliceCorpus
+from kneemri.models.variants import SMALL
 
 SIDE = 56
 CORPUS_SIDE = 28

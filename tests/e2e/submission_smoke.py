@@ -26,7 +26,8 @@ from core.paths import DataRoot
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.variants import SMALL
 
 STUDIES = 4
 PATHS = Path("paths.yaml")

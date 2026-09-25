@@ -7,7 +7,7 @@ import pytest
 import torch
 from torch import Tensor, nn
 
-from kneemri.models.backbone import IMAGENET, RAD_DINO
+from kneemri.models.encoder import IMAGENET
 from kneemri.models.encoder_surgery import (
     ADAPTERS,
     FROZEN_TOP,
@@ -28,6 +28,7 @@ from kneemri.models.model import (
 from kneemri.models.slice_pooling import ATTEND, LABELWISE, LABELWISE_PATCH, SLICE_POOLINGS
 from kneemri.models.slot_head import PRESENT, REPORT_DIMS, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN_FOCAL, MEAN, POOL_PARTS
+from kneemri.models.variants import RAD_DINO
 from kneemri.models.volume_read import VolumeRead
 
 SEED = 2026

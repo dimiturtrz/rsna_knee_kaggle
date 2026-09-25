@@ -25,7 +25,8 @@ from kneemri.inference.ensemble import Ensemble, Serving
 from kneemri.inference.member_package import MemberPackage
 from kneemri.inference.members import Member
 from kneemri.kaggle.submission import Submission
-from kneemri.models.backbone import ENCODERS, Encoder
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.encoder import Encoder
 
 WORKING = Path("/kaggle/working")
 

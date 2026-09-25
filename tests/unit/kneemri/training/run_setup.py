@@ -6,8 +6,9 @@ import pytest
 import torch
 
 from core.findings import TARGETS
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
+from kneemri.models.variants import SMALL
 from kneemri.training.adaptation import Adaptation
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths

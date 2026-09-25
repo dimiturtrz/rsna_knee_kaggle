@@ -14,7 +14,7 @@ from pathlib import Path
 
 import torch
 
-from kneemri.models.backbone import Encoder
+from kneemri.models.encoder import Encoder
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.config_tree import TrainConfig
 

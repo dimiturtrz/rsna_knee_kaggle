@@ -13,7 +13,8 @@ import numpy as np
 import torch
 from numpy.typing import NDArray
 
-from kneemri.models.backbone import ENCODERS, Encoder
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.encoder import Encoder
 from kneemri.models.model import StudyDesign, StudyModel
 from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import AugmentConfig

@@ -10,22 +10,19 @@ import pytest
 import torch
 from torch import nn
 
-from kneemri.models.backbone import (
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.encoder import IMAGENET, Encoder, Normalization, Stage
+from kneemri.models.trunk_tokens import TrunkAsTokens
+from kneemri.models.variants import (
     BASE,
     CONVNEXT_BASE,
-    ENCODERS,
-    IMAGENET,
     RAD_DINO,
     SMALL,
     SWIN_BASE,
     V3_SMALL,
     V3_SMALL_PLUS,
     VJEPA2_LARGE,
-    Encoder,
-    Normalization,
-    Stage,
 )
-from kneemri.models.trunk_tokens import TrunkAsTokens
 
 RAD_DINO_PREPROCESSOR = {
     "image_mean": [0.5307, 0.5307, 0.5307],

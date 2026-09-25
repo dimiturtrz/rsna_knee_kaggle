@@ -27,8 +27,9 @@ from kneemri.inference.ensemble import Ensemble
 from kneemri.kaggle import kernel_run as kernel_module
 from kneemri.kaggle.kernel_run import KernelRun
 from kneemri.kaggle.package_members import MemberManifest, PackagedMember
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import StudyModel
+from kneemri.models.variants import SMALL
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.config_tree import TrainConfig
 

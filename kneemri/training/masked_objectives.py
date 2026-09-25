@@ -12,7 +12,7 @@ and the parser's accepted values follow from the same table.
 from argparse import Namespace
 from collections.abc import Callable
 
-from kneemri.models.backbone import Encoder
+from kneemri.models.encoder import Encoder
 from kneemri.training.latent_mim import LatentMim, LatentMimConfig
 from kneemri.training.masked_objective import MaskConfig, MaskedObjective
 from kneemri.training.spectral_mae import SpectralMae, SpectralMaskConfig

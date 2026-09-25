@@ -11,7 +11,7 @@ from core.data.corpus.crop_centre import Crop
 from core.data.corpus.slot_reader import GROUP, Band
 from core.data.corpus.slots import Routing
 from core.findings import TARGETS
-from kneemri.models.backbone import Encoder
+from kneemri.models.encoder import Encoder
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.model import StudyModel
 

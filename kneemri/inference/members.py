@@ -24,8 +24,8 @@ from core.data.corpus.crop_centre import CROP_MM, DEFAULT_CENTRE, Crop
 from core.data.corpus.slot_reader import SPREAD, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, SCHEMES, Routing
 from core.data.corpus.study_cache import StudyCache
-from kneemri.models.backbone import SMALL
 from kneemri.models.model import StudyDesign
+from kneemri.models.variants import SMALL
 
 logger = logging.getLogger(__name__)
 

@@ -42,8 +42,9 @@ from core.data.corpus.crop_centre import CROP_MM
 from core.data.corpus.skmtea_slices import LOCATOR
 from core.data.corpus.slots import DETAIL_MM, ROI_SCHEME, SLOTS, Plane
 from core.data.corpus.study_cache import StudyCache
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.locator import BYTE, PRESENT, Locator
+from kneemri.models.variants import SMALL
 
 logger = logging.getLogger(__name__)
 

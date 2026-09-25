@@ -22,8 +22,9 @@ import torch
 from torch import Tensor
 
 from core import cli
-from kneemri.models.backbone import ENCODERS, SMALL
+from kneemri.models.backbone import ENCODERS
 from kneemri.models.model import COMPILED_PREFIX
+from kneemri.models.variants import SMALL
 
 logger = logging.getLogger(__name__)
 

@@ -30,7 +30,8 @@ import logging
 from dataclasses import dataclass
 
 from core import cli
-from kneemri.models.backbone import ENCODERS, Encoder
+from kneemri.models.backbone import ENCODERS
+from kneemri.models.encoder import Encoder
 
 logger = logging.getLogger(__name__)
 
