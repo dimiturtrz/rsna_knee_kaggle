@@ -18145,3 +18145,16 @@ interpolated toward `facebook/dinov2-small`, head untouched):
 | 0.50 | 0.8564 | 0.8895 | −0.0158 |
 
 Monotone; no interior optimum. Closed. The three soups are declined in `comp/members.declines`.
+
+## Gated block fusion is null on the labelwise line — 2026-09-25T00:45Z
+
+`fuse3_lw12` (knee-vivli, `--fuse-blocks 2`: the last two earlier encoder blocks gated into the final
+one) against `labelwise_ms_ctrl`, same 336px/12-slice cache, recipe and seed, 909 holdout studies:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_ms_ctrl_s2026 | 0.8637 | 0.9006 | 20 |
+| fuse3_lw12_s2026 | 0.8649 | 0.9014 | 18 |
+
++0.0008 ledger75: closed under the pre-registration (≤ +0.0061). Mid-level DINOv2 features carry
+nothing the last block plus labelwise pooling does not already read at this resolution.

@@ -37,6 +37,10 @@ class OrthoClassifier(nn.Module):
         super().__init__()
         self.trunk = trunk
         self.head = nn.Linear(len(SLOTS) * MIDDLE_WIDTH, len(TARGETS))
+        # 3D activations at 16x256x256 do not fit 22 GB at batch 4 without their own checkpointing.
+        for module in trunk.denoisers.modules():
+            if hasattr(module, "use_checkpoint"):
+                module.use_checkpoint = True
 
     def forward(self, pixels: torch.Tensor, mask: torch.Tensor, generator: torch.Generator | None) -> torch.Tensor:
         batch = len(pixels)
