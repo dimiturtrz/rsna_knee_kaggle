@@ -4,7 +4,6 @@ from pathlib import Path
 import h5py
 import numpy as np
 import pandas as pd
-import torch
 
 from core.data.corpus.fastmri_corpus import (
     ACQUISITION,
@@ -166,6 +165,15 @@ def test_spacing(tmp_path: Path):
     assert volumes[0].spacing == SPACING, "read from reconSpace, not the encoded acquisition grid"
 
 
+def test_pixels(tmp_path: Path):
+    """The emulated-single-coil array, as float32, in the h5's own slice order."""
+    pixels = _corpus(tmp_path).volumes()[0].pixels()
+
+    assert pixels.shape == (DEPTH, MATRIX, MATRIX)
+    assert pixels.dtype == np.float32
+    assert pixels[0, 0, 1] > pixels[0, 0, 0], "read in order, not re-sorted"
+
+
 def test_metadata(tmp_path: Path):
     """Each KNEE gets a row, and fat suppression follows the SLOTS its exams routed to.
 
@@ -190,39 +198,6 @@ def test_metadata_keeps_the_geometry_the_header_stated(tmp_path: Path):
     assert (row.matrix_px, row.field_of_view_mm) == (RECON_MATRIX, RECON_FOV)
     assert row.pixel_spacing_mm == SPACING
     assert row.field_strength_t is None, "the header carries it; this reader does not parse it"
-
-
-def test_stack(tmp_path: Path):
-    """A reconstruction becomes the cache's own shape, band-sampled and percentile-scaled by the shared reader."""
-    corpus = _corpus(tmp_path)
-    volume = np.arange(DEPTH * MATRIX * MATRIX, dtype=np.float32).reshape(DEPTH, MATRIX, MATRIX) * 1e-8
-
-    stacked = corpus.stack(volume, SPACING, slices=4)
-
-    assert stacked.shape == (4, 8, 8), "slices asked for, at the cache's in-plane size"
-    assert stacked.dtype == torch.uint8, "the cache holds eight bits per pixel and so must this"
-    assert int(stacked.max()) - int(stacked.min()) > 250, (
-        "scaled to its own 1st-99th percentiles — these magnitudes peak near 1e-4 and a fixed window "
-        "would return an empty image"
-    )
-
-
-def test_stack_crops_when_the_physical_extent_fits(tmp_path: Path):
-    """The physical crop is taken when the spacing admits one and skipped when it would exceed the frame.
-
-    Both branches matter: a wrong spacing that silently declined to crop would hand the encoder a
-    different mm/pixel than every member on disk was fitted at.
-    """
-    corpus = _corpus(tmp_path)
-    volume = np.arange(DEPTH * MATRIX * MATRIX, dtype=np.float32).reshape(DEPTH, MATRIX, MATRIX)
-
-    fine = corpus.stack(volume, SPACING, slices=4)
-    coarse = corpus.stack(volume, 130.0 / 20.0, slices=4)
-
-    assert coarse.shape == fine.shape == (4, 8, 8)
-    assert not np.array_equal(coarse.numpy(), fine.numpy()), (
-        "a 130 mm crop at 6.5 mm/px takes 20 of 32 pixels; at 0.4375 mm/px it wants 297 and cannot"
-    )
 
 
 def test_build(tmp_path: Path):
@@ -268,30 +243,6 @@ def test_build_writes_under_a_key_that_cannot_hit_our_own_corpus(tmp_path: Path)
     assert cache.slots == 2 < len(SLOTS)
 
 
-def test_read(tmp_path: Path):
-    """Every READ study appears, including the ones found clean — they are the negatives this corpus supplies.
-
-    Keying on the box table alone would drop them and raise every rate reported off this corpus.
-    """
-    seen = FastmriCorpus(_root(tmp_path), _annotations(tmp_path), _cache(tmp_path)).read()
-
-    assert set(seen) == {"file100", "file101", "file102", "file103"}
-    assert seen["file100"] == frozenset({"Ligament - ACL High Grade Sprain", "Meniscus Tear"})
-    assert seen["file102"] == frozenset(), "read and clean, not unread"
-
-
-def test_read_keeps_the_first_study_out_of_the_column_name(tmp_path: Path):
-    """`knee_file_list.csv` ships with NO header row, so a default read eats its first study.
-
-    One row, and it is the difference between a rate and a rate that is wrong — every rate in this
-    module's first draft was over 1,172 studies instead of 1,173 for exactly this reason.
-    """
-    seen = FastmriCorpus(_root(tmp_path), _annotations(tmp_path), _cache(tmp_path)).read()
-
-    assert "file100" in seen, "the first listed study is a study, not a column name"
-    assert len(seen) == 4
-
-
 def test_labels(tmp_path: Path):
     """Eleven findings, most carrying absence; the unlocatable ones carry no column for that study at all.
 
@@ -315,20 +266,6 @@ def test_labels(tmp_path: Path):
     assert table.loc[KNEE_B, "Medial Meniscus"] == NEGATIVE_LEVEL
     assert "Synovitis" not in table.columns, "the vocabulary has no synovial term; the readers were never asked"
     assert set(table["ACL__conf"]) == {READER_CONFIDENCE}
-
-
-def test_straddled(tmp_path: Path):
-    """A term boxed on BOTH sides of the compartment trough is located; one boxed on one side is not.
-
-    Keyed like `read`, so a study that was listed and never boxed answers with an empty set rather than
-    being absent — the same denominator rule, for the same reason.
-    """
-    straddling = FastmriCorpus(_root(tmp_path), _annotations(tmp_path), _cache(tmp_path)).straddled()
-
-    assert set(straddling) == {"file100", "file101", "file102", "file103"}
-    assert straddling["file100"] == frozenset({"Meniscus Tear"}), "boxed at 90 and at 240, either side of 165"
-    assert straddling["file101"] == frozenset(), "one box cannot straddle"
-    assert straddling["file102"] == frozenset(), "listed, never boxed"
 
 
 def test_verdict_keeps_blocking_the_negative_when_a_coarse_term_sits_on_one_side():

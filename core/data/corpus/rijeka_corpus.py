@@ -29,15 +29,15 @@ import io
 import logging
 import pickle
 import zipfile
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from jaxtyping import UInt8
 from numpy.typing import NDArray
-from torch import Tensor
 
+from core.data.corpus.foreign_build import ForeignBuild, SlotVolume
 from core.data.corpus.study_cache import StudyCache
 from core.data.corpus.study_metadata import StudyMetadata
 from core.findings import STUDY
@@ -46,9 +46,6 @@ logger = logging.getLogger(__name__)
 
 METADATA = "metadata.csv"
 VOLUME_SUFFIX = ".pck"
-
-PROGRESS_EVERY = 50
-"""Decoded volumes between progress lines — 736 of them at roughly a second each runs unattended."""
 
 RIJEKA_SPACING = 0.5
 """Millimetres per pixel in plane — DERIVED, because `metadata.csv` records no spacing.
@@ -205,47 +202,20 @@ class RijekaCorpus:
                 return name
         raise FileNotFoundError(f"{METADATA} is not in this archive")
 
-    def stack(self, volume: NDArray[np.float32], slices: int) -> UInt8[Tensor, "s h w"]:
-        """One pickled volume as the cache holds it: band-sampled, physically cropped, percentile-scaled.
-
-        Every step is `SlotReader`'s, called on an array instead of on a directory of DICOMs. That is the
-        whole point — a corpus normalised its own way would arrive at the encoder in a different
-        intensity space, and the transfer this exists for would be measuring the difference between two
-        normalisations rather than between two datasets.
-        """
-        reader = self.cache.reader()
-        sampled = volume[reader.band_indices(len(volume), slices)]
-        taken = reader.window(sampled, self.spacing)
-        cropped = sampled if taken is None else sampled[:, taken[0], taken[1]]
-        return reader.sized(cropped, self.cache.image_size)
-
     def build(self) -> None:
-        """Write `images_<key>.npy`, `index_<key>.json` and — last — `mask_<key>.npy`.
+        """Decode every exam through `ForeignBuild`, each into `SLOTS[0]`.
 
-        The mask goes last for the reason `StudyCache.build` writes it last: its presence is what says
-        the arrays beside it are complete, so a build that dies half way leaves a cache that reads as
-        unbuilt rather than as a corpus with black studies in it.
-
-        The mask itself is all ones. Every exam in this corpus acquired the one sequence it has, so there
+        The mask comes out all ones. Every exam in this corpus acquired the one sequence it has, so there
         is no slot for the presence mask to deny — and saying so explicitly is what lets the head's
         softmax renormalise over this corpus the same way it does over ours.
         """
         volumes = self.volumes()
-        self.cache.prepare()
-        images = np.lib.format.open_memmap(
-            self.cache.images_path, mode="w+", dtype=np.uint8, shape=self.cache.shape(len(volumes))
-        )
+        ForeignBuild(self.cache).write([volume.identifier for volume in volumes], self._studies(volumes))
+
+    def _studies(self, volumes: list[RijekaVolume]) -> Iterator[list[SlotVolume]]:
         with zipfile.ZipFile(self.archive) as archive:
-            for index, volume in enumerate(volumes):
-                images[index, 0] = self.stack(self._pixels(archive, volume), self.cache.slices).numpy()
-                if index % PROGRESS_EVERY == 0:
-                    logger.info(f"{index}/{len(volumes)} decoded")
-        images.flush()
-        self.cache.record([volume.identifier for volume in volumes])
-        mask = np.ones((len(volumes), self.cache.slots), dtype=np.float32)
-        self.cache.report(mask)
-        np.save(self.cache.mask_path, mask)
-        logger.info(f"wrote {self.cache.shape(len(volumes))} uint8 -> {self.cache.images_path}")
+            for volume in volumes:
+                yield [SlotVolume(0, self._pixels(archive, volume), self.spacing)]
 
     @staticmethod
     def _pixels(archive: zipfile.ZipFile, volume: RijekaVolume) -> NDArray[np.float32]:
@@ -274,7 +244,4 @@ class RijekaCorpus:
                 CONFIDENCE: EXPERT_CONFIDENCE,
             }
         )
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        table.to_csv(destination, index=False)
-        logger.info(f"{len(table)} rows -> {destination}")
-        logger.info(f"levels: {table[ACL].value_counts().sort_index().to_dict()}")
+        ForeignBuild.write_table(table, destination, [ACL])

@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 
 from core.data.corpus.mrnet_corpus import (
     ACL,
@@ -164,35 +163,6 @@ def test_m_r_net_corpus_metadata_leaves_the_sequence_absent(tmp_path: Path):
     assert row.fat_suppressed is None
     assert row.fluid_sensitive is None
     assert row.age_years is None
-
-
-def test_stack(tmp_path: Path):
-    """A plane becomes the cache's own shape, band-sampled and percentile-scaled by the shared reader."""
-    corpus = MRNetCorpus(_archive(tmp_path), _cache(tmp_path))
-    volume = np.arange(DEPTH * MATRIX * MATRIX, dtype=np.float32).reshape(DEPTH, MATRIX, MATRIX)
-
-    stacked = corpus.stack(volume, slices=4)
-
-    assert stacked.shape == (4, 8, 8), "slices asked for, at the cache's in-plane size"
-    assert stacked.dtype == torch.uint8, "the cache holds eight bits per pixel and so must this"
-    assert int(stacked.max()) - int(stacked.min()) > 250, "scaled to its own 1st-99th percentiles"
-
-
-def test_stack_crops_when_the_physical_extent_fits(tmp_path: Path):
-    """The physical crop is taken when the spacing admits one, and skipped when it would exceed the frame.
-
-    Both branches matter, and this corpus sits near the boundary: 130 mm is 208 px of 256 at 0.625 mm/px
-    and 260 px at 0.5, so a wrong spacing here silently declines to crop and hands the encoder a
-    different mm/pixel than every member was fitted at.
-    """
-    volume = np.arange(DEPTH * MATRIX * MATRIX, dtype=np.float32).reshape(DEPTH, MATRIX, MATRIX)
-    coarse = MRNetCorpus(_archive(tmp_path), _cache(tmp_path), spacing=130.0 / 20.0)
-    fine = MRNetCorpus(_archive(tmp_path), _cache(tmp_path), spacing=0.625)
-
-    assert coarse.stack(volume, slices=4).shape == (4, 8, 8)
-    assert not np.array_equal(coarse.stack(volume, slices=4).numpy(), fine.stack(volume, slices=4).numpy()), (
-        "a 130 mm crop at 6.5 mm/px takes 20 of 32 pixels; at 0.625 mm/px it wants 208 and cannot"
-    )
 
 
 def test_build(tmp_path: Path):

@@ -11,7 +11,6 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 import pytest
-import torch
 
 from core.data.corpus.kmar_corpus import ARTIFACT_DIRECTORY, CLEAN_DIRECTORY, KmarPair
 from core.data.corpus.kmar_studies import KMAR_CORPUS, KmarStudies, KmarStudy
@@ -114,17 +113,6 @@ def test_metadata(tmp_path: Path):
     assert rows["2020_105"].sequence == "T1", "the T1 subject is not described as proton density"
     assert rows["2020_105"].fat_suppressed is False
     assert rows["2020_104"].pixel_spacing_mm == SPACING, "recorded, not derived — unlike every other corpus"
-
-
-def test_stack(tmp_path: Path):
-    """A volume arrives at the cache's own size and dtype, through `SlotReader`'s steps and not ours."""
-    studies = _studies(tmp_path)
-    volume = np.zeros((DEPTH, MATRIX, MATRIX), dtype=np.float32)
-
-    stacked = studies.stack(volume, SPACING)
-
-    assert stacked.shape == (DEPTH, MATRIX, MATRIX)
-    assert stacked.dtype == torch.uint8, "the cache holds uint8, not the float the corpus ships"
 
 
 def test_build(tmp_path: Path):

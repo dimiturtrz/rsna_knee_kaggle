@@ -31,14 +31,11 @@ containing one (`2021_80-XXX_MR1202103160326`) would otherwise shift every field
 import logging
 import re
 from collections import Counter
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-import numpy as np
-from jaxtyping import UInt8
-from numpy.typing import NDArray
-from torch import Tensor
-
+from core.data.corpus.foreign_build import ForeignBuild, SlotVolume
 from core.data.corpus.kmar_corpus import KmarCorpus, KmarPair
 from core.data.corpus.slots import KMAR_SLOTS, Plane, Slot
 from core.data.corpus.study_cache import StudyCache
@@ -66,9 +63,6 @@ description naming neither is not routed at all rather than defaulted into one."
 
 FAT_SUPPRESSED = "_fs"
 """Fat suppression as this corpus spells it, in every variant (`pd_tse_fs_cor`, `qpd_tse_fs_sag`)."""
-
-PROGRESS_EVERY = 50
-"""Decoded studies between progress lines."""
 
 
 @dataclass(frozen=True)
@@ -189,49 +183,20 @@ class KmarStudies:
             for study in self.studies()
         ]
 
-    def stack(self, volume: NDArray[np.float32], spacing: float) -> UInt8[Tensor, "s h w"]:
-        """One volume as the cache holds it: band-sampled, physically cropped, percentile-scaled.
-
-        Every step is `SlotReader`'s, called on an array instead of on a directory of DICOMs — the same
-        argument `rijeka_corpus.stack` makes. A corpus normalised its own way would arrive at the encoder
-        in a different intensity space, and a transfer measured over it would be measuring the difference
-        between two normalisations rather than between two corpora.
-        """
-        reader = self.cache.reader()
-        sampled = volume[reader.band_indices(len(volume), self.cache.slices)]
-        taken = reader.window(sampled, spacing)
-        cropped = sampled if taken is None else sampled[:, taken[0], taken[1]]
-        return reader.sized(cropped, self.cache.image_size)
-
     def build(self) -> None:
-        """Write `images_<key>.npy`, `index_<key>.json` and — last — `mask_<key>.npy`.
+        """Decode every subject through `ForeignBuild`, each acquisition into the slot it routed to.
 
-        The mask goes last for the reason `StudyCache.build` writes it last: its presence is what says
-        the arrays beside it are complete, so a build that dies half way leaves a cache that reads as
-        unbuilt rather than as a corpus with black studies in it.
-
-        THE MASK IS NOT ALL ONES HERE, which is where this differs from every other foreign builder. Most
-        subjects fill one of the five slots, so the zeros are the majority of the array and they are the
-        honest statement of what was acquired.
+        THE MASK IS NOT ALL ONES HERE, which is where this differs from Rijeka. Most subjects fill one of
+        the five slots, so the zeros are the majority of the array and they are the honest statement of
+        what was acquired.
         """
         studies = self.studies()
-        self.cache.prepare()
-        images = np.lib.format.open_memmap(
-            self.cache.images_path, mode="w+", dtype=np.uint8, shape=self.cache.shape(len(studies))
-        )
-        mask = np.zeros((len(studies), self.cache.slots), dtype=np.float32)
-        for index, study in enumerate(studies):
-            for position, path in study.volumes.items():
-                if position < self.cache.slots:
-                    images[index, position] = self.stack(self.corpus.volume(path), study.spacing).numpy()
-            mask[index] = study.present(self.cache.slots)
-            if index % PROGRESS_EVERY == 0:
-                logger.info(f"{index}/{len(studies)} decoded")
-        images.flush()
-        self.cache.record([study.identifier for study in studies])
-        self.cache.report(mask)
-        np.save(self.cache.mask_path, mask)
-        logger.info(f"wrote {self.cache.shape(len(studies))} uint8 -> {self.cache.images_path}")
+        ForeignBuild(self.cache).write([study.identifier for study in studies], map(self._acquisitions, studies))
+
+    def _acquisitions(self, study: KmarStudy) -> Iterator[SlotVolume]:
+        for position, path in study.volumes.items():
+            if position < self.cache.slots:
+                yield SlotVolume(position, self.corpus.volume(path), study.spacing)
 
     @staticmethod
     def paired(pairs: list[KmarPair]) -> int:

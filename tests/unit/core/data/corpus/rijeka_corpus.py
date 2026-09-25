@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
 
 from core.data.corpus.rijeka_corpus import (
     ACL,
@@ -90,34 +89,6 @@ def test_metadata_leaves_what_the_corpus_cannot_say_absent(tmp_path: Path):
     assert row.sex is None
     assert row.scanner is None
     assert row.field_strength_t is None
-
-
-def test_stack(tmp_path: Path):
-    """A volume becomes the cache's own shape, band-sampled and percentile-scaled by the shared reader."""
-    corpus = RijekaCorpus(_archive(tmp_path), _cache(tmp_path))
-    volume = np.arange(DEPTH * MATRIX * MATRIX, dtype=np.float32).reshape(DEPTH, MATRIX, MATRIX)
-
-    stacked = corpus.stack(volume, slices=4)
-
-    assert stacked.shape == (4, 8, 8), "slices asked for, at the cache's in-plane size"
-    assert stacked.dtype == torch.uint8, "the cache holds eight bits per pixel and so must this"
-    assert int(stacked.max()) - int(stacked.min()) > 250, "scaled to its own 1st-99th percentiles"
-
-
-def test_stack_crops_when_the_physical_extent_fits(tmp_path: Path):
-    """The physical crop is taken when the spacing admits one, and skipped when it would exceed the frame.
-
-    Both branches matter: the real corpus at 0.5 mm/px crops 260 px of 320, and a wrong spacing that
-    silently declined to crop would hand the encoder a different mm/pixel than every member was fitted at.
-    """
-    volume = np.arange(DEPTH * MATRIX * MATRIX, dtype=np.float32).reshape(DEPTH, MATRIX, MATRIX)
-    coarse = RijekaCorpus(_archive(tmp_path), _cache(tmp_path), spacing=130.0 / 20.0)
-    fine = RijekaCorpus(_archive(tmp_path), _cache(tmp_path), spacing=0.5)
-
-    assert coarse.stack(volume, slices=4).shape == (4, 8, 8)
-    assert not np.array_equal(coarse.stack(volume, slices=4).numpy(), fine.stack(volume, slices=4).numpy()), (
-        "a 130 mm crop at 6.5 mm/px takes 20 of 32 pixels; at 0.5 mm/px it wants 260 and cannot"
-    )
 
 
 def test_build(tmp_path: Path):

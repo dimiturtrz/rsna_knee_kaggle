@@ -4,10 +4,10 @@ AS DRAWN is not the h5 frame. The readers labelled DICOMs made by flipping each 
 (the fastMRI+ README says so), and an overlay settles it: read unflipped, a `Meniscus Tear` box sits
 inside the femoral condyle; flipped, it sits on the meniscus, and an ACL box sits in the notch. So a
 box's native top row is `rows - y - height`, and `x` is untouched — which is why the x-only compartment
-rule in `FastmriCorpus.straddled` was never wrong about it.
+rule in `FastmriAnnotations.straddling` was never wrong about it.
 
 THE CACHE FRAME IS REACHED THROUGH `SlotReader` ITSELF — the band, the window and the resize that
-`FastmriCorpus.stack` takes — because the crop centre is a strategy, and a re-derived window that
+`ForeignBuild.stacked` takes — because the crop centre is a strategy, and a re-derived window that
 disagreed with the cache by one centre would place every box beside its lesion with every gate green.
 
 The ORIGINAL slice index is kept. The nearest kept band slice and its distance in original slices sit
@@ -19,34 +19,27 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-import h5py
 import numpy as np
 import pandas as pd
 from jaxtyping import Float
 
-from core.data.corpus.fastmri_corpus import (
+from core.data.corpus.fastmri_annotations import (
     FILE_COLUMN,
-    LABEL_COLUMN,
-    PATIENT,
-    PROGRESS_EVERY,
-    RECONSTRUCTION,
+    HEIGHT_COLUMN,
     SLICE_COLUMN,
     WIDTH_COLUMN,
     X_COLUMN,
-    FastmriVolume,
+    Y_COLUMN,
+    FastmriAnnotations,
 )
+from core.data.corpus.fastmri_corpus import PATIENT, FastmriVolume
+from core.data.corpus.foreign_build import PROGRESS_EVERY
 from core.data.corpus.study_cache import StudyCache
 
 logger = logging.getLogger(__name__)
 
-BOXES = "knee.csv"
-FILE_LIST = "knee_file_list.csv"
-FILE_LIST_FOOTER = "Knee data"
 BOX_TABLE = "fastmri_boxes_{key}.csv"
 STUDY_TABLE = "fastmri_box_studies_{key}.csv"
-Y_COLUMN = "y"
-HEIGHT_COLUMN = "height"
-GEOMETRY = (X_COLUMN, Y_COLUMN, WIDTH_COLUMN, HEIGHT_COLUMN)
 NATIVE = ("native_x0", "native_y0", "native_x1", "native_y1")
 CACHED = ("cache_x0", "cache_y0", "cache_x1", "cache_y1")
 
@@ -89,18 +82,6 @@ class FastmriBoxes:
         self.annotations = annotations
         self.cache = cache
 
-    def read(self) -> pd.DataFrame:
-        """Every box that carries geometry, as drawn: 16,154 of 16,167 rows, the rest study-level labels."""
-        boxes = pd.read_csv(self.annotations / BOXES)
-        boxes.columns = [str(column).strip() for column in boxes.columns]
-        located = boxes.dropna(subset=list(GEOMETRY))
-        return located[[FILE_COLUMN, SLICE_COLUMN, LABEL_COLUMN, *GEOMETRY]].reset_index(drop=True)
-
-    def listed(self) -> frozenset[str]:
-        """The studies a reader opened. The list has no header; its last line, `Knee data`, is a footer."""
-        listed = pd.read_csv(self.annotations / FILE_LIST, header=None).iloc[:, 0].astype(str)
-        return frozenset(listed) - {FILE_LIST_FOOTER}
-
     @staticmethod
     def native(boxes: pd.DataFrame, rows: int) -> pd.DataFrame:
         """Boxes with their corners in the h5 volume's own row order — the drawn image was flipped up/down."""
@@ -112,7 +93,7 @@ class FastmriBoxes:
         return flipped
 
     def frame(self, pixels: Float[np.ndarray, "depth rows columns"], spacing: float) -> BoxFrame:
-        """The frame `FastmriCorpus.stack` puts this volume in, asked of the same reader."""
+        """The frame `ForeignBuild.stacked` puts this volume in, asked of the same reader."""
         reader = self.cache.reader()
         kept = reader.band_indices(len(pixels), self.cache.slices)
         taken = reader.window(pixels[kept], spacing)
@@ -137,14 +118,14 @@ class FastmriBoxes:
         full address of a box is therefore `patient_id` (the row), `slot` (the channel) and `cache_slice`;
         joining on the filename alone lands on nothing.
         """
-        boxes = self.read()
+        annotations = FastmriAnnotations.read(self.annotations)
+        boxes = annotations.located()
         grouped = dict(tuple(boxes.groupby(FILE_COLUMN)))
-        listed = self.listed()
+        listed = annotations.studies()
         placed: list[pd.DataFrame] = []
         studies: list[dict[str, str | int | float]] = []
         for index, volume in enumerate(volume for volume in volumes if volume.identifier in listed):
-            with h5py.File(volume.path, "r") as handle:
-                pixels = np.asarray(handle[RECONSTRUCTION][:], dtype=np.float32)
+            pixels = volume.pixels()
             frame = self.frame(pixels, volume.spacing)
             own = grouped.get(volume.identifier, boxes.iloc[:0])
             placed.append(frame.place(self.native(own, pixels.shape[1])))

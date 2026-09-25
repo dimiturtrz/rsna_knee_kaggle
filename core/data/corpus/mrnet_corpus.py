@@ -26,15 +26,15 @@ figure — the denominator is the thing this project has got wrong most often.
 
 import io
 import logging
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from jaxtyping import UInt8
 from numpy.typing import NDArray
-from torch import Tensor
 
+from core.data.corpus.foreign_build import ForeignBuild, SlotVolume
 from core.data.corpus.mrnet_labels import SPLITS, ArchiveLabels, MRNetLabels
 from core.data.corpus.mrnet_source import VOLUME_SUFFIX, MRNetSource
 from core.data.corpus.study_cache import StudyCache
@@ -71,9 +71,6 @@ NESTED_DEPTH = 3
 """The depth at which `parts[-3]` could be a split rather than a wrapper directory. Both layouts put a
 directory there; only one of them puts a SPLIT there, which is why the name is checked and not the depth
 alone."""
-
-PROGRESS_EVERY = 50
-"""Decoded exams between progress lines — 1,250 of them at three planes each runs unattended."""
 
 MRNET_SPACING = 0.625
 """Millimetres per pixel in plane — DERIVED, because the corpus records no spacing.
@@ -217,45 +214,19 @@ class MRNetCorpus:
         stated = path.parts[-3] if len(path.parts) >= NESTED_DEPTH else ""
         return stated if stated in SPLITS else MRNetLabels.split_of(case)
 
-    def stack(self, volume: NDArray[np.float32], slices: int) -> UInt8[Tensor, "s h w"]:
-        """One plane's volume as the cache holds it: band-sampled, physically cropped, percentile-scaled.
-
-        Every step is `SlotReader`'s, called on an array instead of on a directory of DICOMs — so this
-        corpus arrives at the encoder in one geometry and one intensity space with ours, rather than
-        merely in one array shape.
-        """
-        reader = self.cache.reader()
-        sampled = volume[reader.band_indices(len(volume), slices)]
-        taken = reader.window(sampled, self.spacing)
-        cropped = sampled if taken is None else sampled[:, taken[0], taken[1]]
-        return reader.sized(cropped, self.cache.image_size)
-
     def build(self) -> None:
-        """Write `images_<key>.npy`, `index_<key>.json` and — last — `mask_<key>.npy`.
+        """Decode every exam through `ForeignBuild`, each plane into the slot `PLANES` puts it in.
 
-        The mask goes last for the reason every builder here writes it last: its presence is what says
-        the arrays beside it are complete, so a build that dies half way leaves a cache that reads as
-        unbuilt rather than as a corpus with black exams in it.
+        A plane the download is missing writes nothing, so its slot stays black AND unmarked — the mask is
+        what lets the head's softmax renormalise over what actually shipped.
         """
         exams = self.volumes()
-        self.cache.prepare()
-        images = np.lib.format.open_memmap(
-            self.cache.images_path, mode="w+", dtype=np.uint8, shape=self.cache.shape(len(exams))
-        )
-        mask = np.zeros((len(exams), self.cache.slots), dtype=np.float32)
-        for index, exam in enumerate(exams):
-            for position, plane in enumerate(PLANES[: self.cache.slots]):
-                if plane in exam.members:
-                    pixels = self._pixels(self.source, exam.members[plane])
-                    images[index, position] = self.stack(pixels, self.cache.slices).numpy()
-            mask[index] = exam.present(self.cache.slots)
-            if index % PROGRESS_EVERY == 0:
-                logger.info(f"{index}/{len(exams)} decoded")
-        images.flush()
-        self.cache.record([exam.identifier for exam in exams])
-        self.cache.report(mask)
-        np.save(self.cache.mask_path, mask)
-        logger.info(f"wrote {self.cache.shape(len(exams))} uint8 -> {self.cache.images_path}")
+        ForeignBuild(self.cache).write([exam.identifier for exam in exams], (self._planes(exam) for exam in exams))
+
+    def _planes(self, exam: MRNetExam) -> Iterator[SlotVolume]:
+        for position, plane in enumerate(PLANES[: self.cache.slots]):
+            if plane in exam.members:
+                yield SlotVolume(position, self._pixels(self.source, exam.members[plane]), self.spacing)
 
     @staticmethod
     def _pixels(source: MRNetSource, member: str) -> NDArray[np.float32]:
@@ -311,7 +282,4 @@ class MRNetCorpus:
                 CONFIDENCE: REPORT_CONFIDENCE,
             }
         )
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        table.to_csv(destination, index=False)
-        logger.info(f"{len(table)} rows -> {destination}")
-        logger.info(f"levels: {table[ACL].value_counts().sort_index().to_dict()}")
+        ForeignBuild.write_table(table, destination, [ACL])

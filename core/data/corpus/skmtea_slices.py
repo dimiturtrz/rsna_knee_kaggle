@@ -34,7 +34,7 @@ from nibabel.nifti1 import Nifti1Image
 from pydicom.dataset import Dataset
 
 from core import cli
-from core.data.corpus.fastmri_corpus import PROGRESS_EVERY
+from core.data.corpus.foreign_build import PROGRESS_EVERY
 from core.data.corpus.skmtea_boxes import ANNOTATIONS, SCAN_COLUMN, SKMTEA, SPLITS
 
 logger = logging.getLogger(__name__)

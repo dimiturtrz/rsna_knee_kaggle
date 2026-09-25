@@ -597,13 +597,37 @@
     {
       "kind": "import",
       "source": "core.data.corpus.fastmri_boxes",
+      "target": "core.data.corpus.fastmri_annotations",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.fastmri_boxes",
       "target": "core.data.corpus.fastmri_corpus",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "core.data.corpus.fastmri_boxes",
+      "target": "core.data.corpus.foreign_build",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.fastmri_boxes",
       "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.fastmri_corpus",
+      "target": "core.data.corpus.fastmri_annotations",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.fastmri_corpus",
+      "target": "core.data.corpus.foreign_build",
       "weight": 1
     },
     {
@@ -644,6 +668,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.foreign_build",
+      "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.foreign_cache",
       "target": "core.data.corpus.study_cache",
       "weight": 1
@@ -658,6 +688,12 @@
       "kind": "import",
       "source": "core.data.corpus.kmar_stats",
       "target": "core.data.corpus.kmar_corpus",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.kmar_studies",
+      "target": "core.data.corpus.foreign_build",
       "weight": 1
     },
     {
@@ -723,6 +759,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.mrnet_corpus",
+      "target": "core.data.corpus.foreign_build",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.mrnet_corpus",
       "target": "core.data.corpus.mrnet_labels",
       "weight": 1
     },
@@ -783,6 +825,12 @@
     {
       "kind": "import",
       "source": "core.data.corpus.rijeka_corpus",
+      "target": "core.data.corpus.foreign_build",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.rijeka_corpus",
       "target": "core.data.corpus.study_cache",
       "weight": 1
     },
@@ -807,13 +855,19 @@
     {
       "kind": "import",
       "source": "core.data.corpus.skmtea_boxes",
+      "target": "core.data.corpus.fastmri_annotations",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.skmtea_boxes",
       "target": "core.data.corpus.fastmri_boxes",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "core.data.corpus.skmtea_boxes",
-      "target": "core.data.corpus.fastmri_corpus",
+      "target": "core.data.corpus.foreign_build",
       "weight": 1
     },
     {
@@ -825,7 +879,7 @@
     {
       "kind": "import",
       "source": "core.data.corpus.skmtea_slices",
-      "target": "core.data.corpus.fastmri_corpus",
+      "target": "core.data.corpus.foreign_build",
       "weight": 1
     },
     {
@@ -9494,6 +9548,12 @@
     },
     {
       "kind": "references",
+      "source": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "target": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "core.data.corpus.fastmri_boxes.FastmriBoxes",
       "target": "core.data.corpus.fastmri_boxes.BoxFrame",
       "weight": 1
@@ -9525,25 +9585,19 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
+      "target": "core.data.corpus.fastmri_annotations.FastmriAnnotations.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
       "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.frame",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
-      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.listed",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
       "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.native",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.fastmri_boxes.FastmriBoxes.tables",
-      "target": "core.data.corpus.fastmri_boxes.FastmriBoxes.read",
       "weight": 1
     },
     {
@@ -9579,55 +9633,55 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
-      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.stack",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
       "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
       "weight": 1
     },
     {
-      "kind": "calls",
+      "kind": "construct",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.prepare",
+      "target": "core.data.corpus.foreign_build.ForeignBuild",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.record",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.write",
       "weight": 1
     },
     {
-      "kind": "calls",
+      "kind": "construct",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
-      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.read",
+      "target": "core.data.corpus.fastmri_annotations.FastmriAnnotations.read",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
-      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.straddled",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus._row",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
+      "target": "core.data.corpus.fastmri_corpus.FastmriCorpus._union",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
       "target": "core.data.corpus.fastmri_corpus.FastmriCorpus.studies",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.labels",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.write_table",
       "weight": 1
     },
     {
@@ -9640,12 +9694,6 @@
       "kind": "construct",
       "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.metadata",
       "target": "core.data.corpus.study_metadata.StudyMetadata",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.fastmri_corpus.FastmriCorpus.stack",
-      "target": "core.data.corpus.study_cache.StudyCache.reader",
       "weight": 1
     },
     {
@@ -9772,6 +9820,54 @@
       "kind": "construct",
       "source": "core.data.corpus.fetch_bench.main",
       "target": "core.data.corpus.window_reader.MappedReader",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.foreign_build.ForeignBuild",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "core.data.corpus.foreign_build.ForeignBuild",
+      "target": "core.data.corpus.study_cache.StudyCache",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_build.ForeignBuild.stacked",
+      "target": "core.data.corpus.study_cache.StudyCache.reader",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.stacked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "target": "core.data.corpus.study_cache.StudyCache.prepare",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "target": "core.data.corpus.study_cache.StudyCache.record",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "target": "core.data.corpus.study_cache.StudyCache.report",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "target": "core.data.corpus.study_cache.StudyCache.shape",
       "weight": 1
     },
     {
@@ -9961,6 +10057,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.kmar_studies.KmarStudies",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
+      "weight": 1
+    },
+    {
       "kind": "holds",
       "source": "core.data.corpus.kmar_studies.KmarStudies",
       "target": "core.data.corpus.kmar_corpus.KmarCorpus",
@@ -9997,45 +10099,33 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_studies.KmarStudies._acquisitions",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
+      "weight": 1
+    },
+    {
       "kind": "calls",
-      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "source": "core.data.corpus.kmar_studies.KmarStudies._acquisitions",
       "target": "core.data.corpus.kmar_corpus.KmarCorpus.volume",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
+      "target": "core.data.corpus.foreign_build.ForeignBuild",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.kmar_studies.KmarStudies.build",
-      "target": "core.data.corpus.kmar_studies.KmarStudies.stack",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.write",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.kmar_studies.KmarStudies.build",
       "target": "core.data.corpus.kmar_studies.KmarStudies.studies",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
-      "target": "core.data.corpus.study_cache.StudyCache.prepare",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
-      "target": "core.data.corpus.study_cache.StudyCache.record",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
-      "target": "core.data.corpus.study_cache.StudyCache.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.kmar_studies.KmarStudies.build",
-      "target": "core.data.corpus.study_cache.StudyCache.shape",
       "weight": 1
     },
     {
@@ -10054,12 +10144,6 @@
       "kind": "construct",
       "source": "core.data.corpus.kmar_studies.KmarStudies.position",
       "target": "core.data.corpus.slots.Slot",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.kmar_studies.KmarStudies.stack",
-      "target": "core.data.corpus.study_cache.StudyCache.reader",
       "weight": 1
     },
     {
@@ -10221,6 +10305,12 @@
     {
       "kind": "references",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus",
       "target": "core.data.corpus.mrnet_corpus.MRNetExam",
       "weight": 1
     },
@@ -10279,51 +10369,45 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus._planes",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus._planes",
+      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus._pixels",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus._split_at",
       "target": "core.data.corpus.mrnet_labels.MRNetLabels.split_of",
       "weight": 1
     },
     {
-      "kind": "calls",
+      "kind": "construct",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
-      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus._pixels",
+      "target": "core.data.corpus.foreign_build.ForeignBuild",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
-      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus.stack",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
+      "target": "core.data.corpus.mrnet_corpus.MRNetCorpus._planes",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
       "target": "core.data.corpus.mrnet_corpus.MRNetCorpus.volumes",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.prepare",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.record",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.shape",
       "weight": 1
     },
     {
@@ -10352,12 +10436,6 @@
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.stack",
-      "target": "core.data.corpus.study_cache.StudyCache.reader",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.volumes",
       "target": "core.data.corpus.mrnet_corpus.MRNetCorpus._members",
       "weight": 1
@@ -10378,6 +10456,12 @@
       "kind": "calls",
       "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.volumes",
       "target": "core.data.corpus.study_cache.StudyCache.enrolled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.mrnet_corpus.MRNetCorpus.write_labels",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.write_table",
       "weight": 1
     },
     {
@@ -10515,6 +10599,12 @@
     {
       "kind": "references",
       "source": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus",
       "target": "core.data.corpus.rijeka_corpus.RijekaVolume",
       "weight": 1
     },
@@ -10531,15 +10621,33 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus._studies",
+      "target": "core.data.corpus.foreign_build.SlotVolume",
+      "weight": 1
+    },
+    {
       "kind": "calls",
-      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus._studies",
       "target": "core.data.corpus.rijeka_corpus.RijekaCorpus._pixels",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.foreign_build.ForeignBuild",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
-      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus.stack",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
+      "target": "core.data.corpus.rijeka_corpus.RijekaCorpus._studies",
       "weight": 1
     },
     {
@@ -10550,26 +10658,8 @@
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.prepare",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.record",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.report",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
-      "target": "core.data.corpus.study_cache.StudyCache.shape",
+      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.labels",
+      "target": "core.data.corpus.foreign_build.ForeignBuild.write_table",
       "weight": 1
     },
     {
@@ -10588,12 +10678,6 @@
       "kind": "construct",
       "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.metadata",
       "target": "core.data.corpus.study_metadata.StudyMetadata",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.rijeka_corpus.RijekaCorpus.stack",
-      "target": "core.data.corpus.study_cache.StudyCache.reader",
       "weight": 1
     },
     {
@@ -36417,13 +36501,13 @@
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
-      "target": "kneemri.training.trainer.Trainer.harden",
+      "target": "kneemri.training.trainer.Trainer.one_cycle",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
-      "target": "kneemri.training.trainer.Trainer.one_cycle",
+      "target": "kneemri.training.trainer.Trainer.pace",
       "weight": 1
     },
     {
@@ -36442,12 +36526,6 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.resample_to",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup.trainer",
-      "target": "kneemri.training.trainer.Trainer.schedule_strength",
       "weight": 1
     },
     {
@@ -37281,6 +37359,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.trainer.Trainer._autocast",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.trainer.Trainer._harden",
       "weight": 1
     },
@@ -37371,6 +37455,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.predict",
+      "target": "kneemri.training.trainer.Trainer._autocast",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.predict",
       "target": "kneemri.training.trainer.Trainer.batches",
       "weight": 1
     },
@@ -37419,7 +37509,7 @@
   ],
   "nodes": [
     {
-      "descendants": 77,
+      "descendants": 79,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -37443,7 +37533,7 @@
       "role": null
     },
     {
-      "descendants": 67,
+      "descendants": 69,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -37451,7 +37541,7 @@
       "role": null
     },
     {
-      "descendants": 47,
+      "descendants": 49,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -37620,6 +37710,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_annotations",
+      "label": "fastmri_annotations",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fastmri_boxes",
       "label": "fastmri_boxes",
       "level": "module",
@@ -37646,6 +37744,14 @@
       "descendants": 0,
       "id": "core.data.corpus.folds",
       "label": "folds",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_build",
+      "label": "foreign_build",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -40716,6 +40822,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "label": "FastmriAnnotations",
+      "level": "class",
+      "parent": "core.data.corpus.fastmri_annotations",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fastmri_boxes.BoxFrame",
       "label": "BoxFrame",
       "level": "class",
@@ -40793,6 +40907,22 @@
       "level": "class",
       "parent": "core.data.corpus.folds",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_build.ForeignBuild",
+      "label": "ForeignBuild",
+      "level": "class",
+      "parent": "core.data.corpus.foreign_build",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_build.SlotVolume",
+      "label": "SlotVolume",
+      "level": "class",
+      "parent": "core.data.corpus.foreign_build",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -46844,6 +46974,46 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_annotations.FastmriAnnotations.located",
+      "label": "located",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_annotations.FastmriAnnotations.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_annotations.FastmriAnnotations.straddling",
+      "label": "straddling",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_annotations.FastmriAnnotations.studies",
+      "label": "studies",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_annotations.FastmriAnnotations.terms",
+      "label": "terms",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_annotations.FastmriAnnotations",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fastmri_boxes.BoxFrame.place",
       "label": "place",
       "level": "method",
@@ -46868,24 +47038,8 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.listed",
-      "label": "listed",
-      "level": "method",
-      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.native",
       "label": "native",
-      "level": "method",
-      "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.fastmri_boxes.FastmriBoxes.read",
-      "label": "read",
       "level": "method",
       "parent": "core.data.corpus.fastmri_boxes.FastmriBoxes",
       "role": null
@@ -46932,6 +47086,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus._row",
+      "label": "_row",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus._union",
+      "label": "_union",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.build",
       "label": "build",
       "level": "method",
@@ -46950,30 +47120,6 @@
       "descendants": 0,
       "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.metadata",
       "label": "metadata",
-      "level": "method",
-      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.read",
-      "label": "read",
-      "level": "method",
-      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.stack",
-      "label": "stack",
-      "level": "method",
-      "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.fastmri_corpus.FastmriCorpus.straddled",
-      "label": "straddled",
       "level": "method",
       "parent": "core.data.corpus.fastmri_corpus.FastmriCorpus",
       "role": null
@@ -47032,6 +47178,14 @@
       "label": "identifier",
       "level": "method",
       "parent": "core.data.corpus.fastmri_corpus.FastmriStudy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.fastmri_corpus.FastmriVolume.pixels",
+      "label": "pixels",
+      "level": "method",
+      "parent": "core.data.corpus.fastmri_corpus.FastmriVolume",
       "role": null
     },
     {
@@ -47144,6 +47298,30 @@
       "label": "holdout",
       "level": "method",
       "parent": "core.data.corpus.folds.ReportFolds",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_build.ForeignBuild.stacked",
+      "label": "stacked",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_build.ForeignBuild",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_build.ForeignBuild.write",
+      "label": "write",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_build.ForeignBuild",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.foreign_build.ForeignBuild.write_table",
+      "label": "write_table",
+      "level": "method",
+      "parent": "core.data.corpus.foreign_build.ForeignBuild",
       "role": null
     },
     {
@@ -47348,6 +47526,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.kmar_studies.KmarStudies._acquisitions",
+      "label": "_acquisitions",
+      "level": "method",
+      "parent": "core.data.corpus.kmar_studies.KmarStudies",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.kmar_studies.KmarStudies.build",
       "label": "build",
       "level": "method",
@@ -47374,14 +47560,6 @@
       "descendants": 0,
       "id": "core.data.corpus.kmar_studies.KmarStudies.position",
       "label": "position",
-      "level": "method",
-      "parent": "core.data.corpus.kmar_studies.KmarStudies",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.kmar_studies.KmarStudies.stack",
-      "label": "stack",
       "level": "method",
       "parent": "core.data.corpus.kmar_studies.KmarStudies",
       "role": null
@@ -47596,6 +47774,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.mrnet_corpus.MRNetCorpus._planes",
+      "label": "_planes",
+      "level": "method",
+      "parent": "core.data.corpus.mrnet_corpus.MRNetCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.mrnet_corpus.MRNetCorpus._share",
       "label": "_share",
       "level": "method",
@@ -47630,14 +47816,6 @@
       "descendants": 0,
       "id": "core.data.corpus.mrnet_corpus.MRNetCorpus.metadata",
       "label": "metadata",
-      "level": "method",
-      "parent": "core.data.corpus.mrnet_corpus.MRNetCorpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.mrnet_corpus.MRNetCorpus.stack",
-      "label": "stack",
       "level": "method",
       "parent": "core.data.corpus.mrnet_corpus.MRNetCorpus",
       "role": null
@@ -47892,6 +48070,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus._studies",
+      "label": "_studies",
+      "level": "method",
+      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.build",
       "label": "build",
       "level": "method",
@@ -47910,14 +48096,6 @@
       "descendants": 0,
       "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.metadata",
       "label": "metadata",
-      "level": "method",
-      "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.rijeka_corpus.RijekaCorpus.stack",
-      "label": "stack",
       "level": "method",
       "parent": "core.data.corpus.rijeka_corpus.RijekaCorpus",
       "role": null
@@ -69372,6 +69550,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer._autocast",
+      "label": "_autocast",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.trainer.Trainer._harden",
       "label": "_harden",
       "level": "method",
@@ -69500,16 +69686,16 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.harden",
-      "label": "harden",
+      "id": "kneemri.training.trainer.Trainer.one_cycle",
+      "label": "one_cycle",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.one_cycle",
-      "label": "one_cycle",
+      "id": "kneemri.training.trainer.Trainer.pace",
+      "label": "pace",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
@@ -69582,14 +69768,6 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.save_partial",
       "label": "save_partial",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.schedule_strength",
-      "label": "schedule_strength",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

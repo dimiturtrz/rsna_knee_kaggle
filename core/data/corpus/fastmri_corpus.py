@@ -73,10 +73,10 @@ from pathlib import Path
 import h5py
 import numpy as np
 import pandas as pd
-from jaxtyping import UInt8
-from numpy.typing import NDArray
-from torch import Tensor
+from jaxtyping import Float
 
+from core.data.corpus.fastmri_annotations import FastmriAnnotations
+from core.data.corpus.foreign_build import ForeignBuild, SlotVolume
 from core.data.corpus.study_cache import StudyCache
 from core.data.corpus.study_metadata import StudyMetadata
 from core.findings import STUDY, TARGETS
@@ -136,8 +136,6 @@ slot's own note in `slots.EXTENDED_SLOTS`, where coronal PD without fat suppress
 meniscus sequence. Getting this wrong would put half this corpus in a channel meant for T1 anatomy.
 """
 
-PROGRESS_EVERY = 50
-
 FOV_PATTERN = re.compile(
     r"<reconSpace>.*?<matrixSize>.*?<x>(\d+)</x>.*?<fieldOfView_mm>.*?<x>([\d.]+)</x>",
     re.DOTALL,
@@ -152,29 +150,6 @@ first matches nothing at all. It read that way here first and refused every file
 the reconstruction is 320 x 320, so the encoded field of view would give a spacing for pixels that are
 not the ones in `reconstruction_esc`. `reconSpace` follows `encodedSpace` in the document, so anchoring
 on it cannot capture the wrong one.
-"""
-
-FILE_COLUMN = "file"
-SLICE_COLUMN = "slice"
-LABEL_COLUMN = "label"
-X_COLUMN = "x"
-WIDTH_COLUMN = "width"
-
-COMPARTMENT_TROUGH = 165.0
-"""Where the medial and lateral compartments part, in reconstruction pixels of the 320-wide matrix.
-
-MEASURED, NOT CHOSEN. Every one of the 973 train exams is `CORPD_FBK` or `CORPDFS_FBK` — CORONAL, read
-off the `acquisition` attribute of all 973 files and confirmed by `protocolName` COR in the ISMRMRD
-header. So image x IS the medial-lateral axis, and the 5,658 meniscus box centres (`x + width/2`) fall in
-two clusters with a deep trough between them: over a 32-bin histogram the interior minimum sits at 165.0,
-against peaks near 90 and 235 carrying more than a thousand boxes each. The value is the argmin of that
-histogram between 100 and 220, not a midpoint and not a median — the median, 196.5, lies INSIDE the upper
-cluster and would cut it in half.
-
-This matters because the plane is what makes the axis mean anything. On a SAGITTAL knee the same centre-x
-would be the anterior-posterior axis and the two clusters would be the anterior and posterior horns of one
-meniscus, which is a different finding entirely. Check the acquisition before reusing this constant on
-another corpus; `Annotations/brain.csv` obviously has no compartments at all.
 """
 
 POSITIVE_LEVEL = 0.82
@@ -366,6 +341,11 @@ class FastmriVolume:
         """Millimetres per pixel in plane — the stated field of view over the stated matrix."""
         return self.field_of_view_mm / self.matrix_px
 
+    def pixels(self) -> Float[np.ndarray, "depth rows columns"]:
+        """The `RECONSTRUCTION` array as float32 — the one the boxes were drawn against."""
+        with h5py.File(self.path, "r") as handle:
+            return np.asarray(handle[RECONSTRUCTION][:], dtype=np.float32)
+
 
 @dataclass(frozen=True)
 class FastmriStudy:
@@ -521,29 +501,8 @@ class FastmriCorpus:
             raise ValueError(f"{path.name} carries no reconSpace field of view")
         return int(found.group(1)), float(found.group(2))
 
-    def stack(self, volume: NDArray[np.float32], spacing: float, slices: int) -> UInt8[Tensor, "s h w"]:
-        """One reconstructed volume as the cache holds it: band-sampled, physically cropped, percentile-scaled.
-
-        Every step is `SlotReader`'s, called on an array instead of a directory of DICOMs — a corpus
-        normalised its own way would arrive at the encoder in a different intensity space, and the
-        transfer this exists to measure would be measuring the two normalisations against each other.
-
-        The percentile scaling is also what makes the raw magnitudes safe to ignore: these
-        reconstructions run to a maximum near 8.5e-4 rather than to a DICOM integer range, and a
-        fixed-window scaling would return an empty image.
-        """
-        reader = self.cache.reader()
-        sampled = volume[reader.band_indices(len(volume), slices)]
-        taken = reader.window(sampled, spacing)
-        cropped = sampled if taken is None else sampled[:, taken[0], taken[1]]
-        return reader.sized(cropped, self.cache.image_size)
-
     def build(self) -> None:
-        """Write `images_<key>.npy`, `index_<key>.json` and — last — `mask_<key>.npy`.
-
-        The mask goes last for the reason `StudyCache.build` writes it last: its presence is what says the
-        arrays beside it are complete, so a build that dies half way leaves a cache that reads as unbuilt
-        rather than as a corpus with black studies in it.
+        """Decode every KNEE through `ForeignBuild`, each exam into the slot its acquisition routed to.
 
         UNLIKE RIJEKA'S, THIS MASK IS NOT ALL ONES, AND UNLIKE THIS BUILD'S OWN FIRST VERSION IT IS NOT
         ONE SLOT EITHER. An EXAM is acquired with fat suppression or without, never both — but a KNEE is
@@ -555,68 +514,13 @@ class FastmriCorpus:
         empty input reads flat" are the same measurement there and are two different ones here.
         """
         studies = self.studies()
-        self.cache.prepare()
-        images = np.lib.format.open_memmap(
-            self.cache.images_path, mode="w+", dtype=np.uint8, shape=self.cache.shape(len(studies))
+        ForeignBuild(self.cache).write(
+            [study.identifier for study in studies],
+            (
+                [SlotVolume(volume.slot, volume.pixels(), volume.spacing) for volume in study.volumes]
+                for study in studies
+            ),
         )
-        mask = np.zeros((len(studies), self.cache.slots), dtype=np.float32)
-        for index, study in enumerate(studies):
-            for volume in study.volumes:
-                with h5py.File(volume.path, "r") as handle:
-                    pixels = np.asarray(handle[RECONSTRUCTION][:], dtype=np.float32)
-                images[index, volume.slot] = self.stack(pixels, volume.spacing, self.cache.slices).numpy()
-                mask[index, volume.slot] = 1.0
-            if index % PROGRESS_EVERY == 0:
-                logger.info(f"{index}/{len(studies)} decoded")
-        images.flush()
-        self.cache.record([study.identifier for study in studies])
-        self.cache.report(mask)
-        np.save(self.cache.mask_path, mask)
-        logger.info(f"wrote {self.cache.shape(len(studies))} uint8 -> {self.cache.images_path}")
-
-    def read(self) -> dict[str, frozenset[str]]:
-        """Per study that was READ, the set of vocabulary terms boxed anywhere in it.
-
-        Keyed by every identifier in the file list, so a study read and found clean appears with an empty
-        set and earns negatives — the 199 studies that separate this corpus's 1,173 read exams from the
-        974 that carry a box. Dropping them would raise every reported rate by a fifth.
-
-        `header=None` is load-bearing. The file has no header row, so a default read promotes the first
-        study into the column name and loses it — the one-row error that made every rate in this module
-        wrong on its first draft.
-        """
-        boxes = pd.read_csv(self.annotations / "knee.csv")
-        listed = pd.read_csv(self.annotations / "knee_file_list.csv", header=None)
-        seen: dict[str, frozenset[str]] = {str(name): frozenset() for name in listed.iloc[:, 0]}
-        for identifier, group in boxes.groupby(FILE_COLUMN):
-            seen[str(identifier)] = frozenset(str(label) for label in group[LABEL_COLUMN])
-        logger.info(f"{len(seen)} studies read, {sum(1 for terms in seen.values() if terms)} carrying a box")
-        return seen
-
-    def straddled(self) -> dict[str, frozenset[str]]:
-        """Per study, the terms boxed on BOTH sides of `COMPARTMENT_TROUGH` — located without a laterality.
-
-        Keyed like `read`, so a study with no box appears with an empty set rather than absent, and a term
-        boxed only once cannot straddle by arithmetic. Boxes with no coordinates are dropped: 13 of the
-        16,167 rows carry a study-level label and no geometry, and averaging a NaN into a centre would make
-        every term in those studies vanish from both sides at once.
-
-        The 16,167 box coordinates were read and discarded here until 2026-09-11 (knee-1w6t), which is why
-        `Medial Meniscus` and `Lateral Meniscus` shipped holding not one positive between them.
-        """
-        boxes = pd.read_csv(self.annotations / "knee.csv")
-        boxes.columns = [str(column).strip() for column in boxes.columns]
-        listed = pd.read_csv(self.annotations / "knee_file_list.csv", header=None)
-        straddling: dict[str, frozenset[str]] = {str(name): frozenset() for name in listed.iloc[:, 0]}
-        located = boxes[boxes[X_COLUMN].notna() & boxes[WIDTH_COLUMN].notna()].copy()
-        located["centre"] = located[X_COLUMN] + located[WIDTH_COLUMN] / 2
-        for identifier, group in located.groupby(FILE_COLUMN):
-            below = set(group.loc[group["centre"] < COMPARTMENT_TROUGH, LABEL_COLUMN].astype(str))
-            above = set(group.loc[group["centre"] >= COMPARTMENT_TROUGH, LABEL_COLUMN].astype(str))
-            straddling[str(identifier)] = frozenset(below & above)
-        carrying = sum(1 for terms in straddling.values() if terms)
-        logger.info(f"{len(located)} located boxes, {carrying} studies carry a term in both compartments")
-        return straddling
 
     def metadata(self) -> list[StudyMetadata]:
         """What each exam was acquired with — the corpus whose geometry is STATED rather than derived.
@@ -662,32 +566,26 @@ class FastmriCorpus:
         is. The intersection would let the weaker read veto the stronger one; it is the other arm of this
         experiment and this method does not hide that it was not taken.
         """
-        seen = self.read()
-        straddling = self.straddled()
-        rows = []
-        disagreeing = 0
-        for study in self.studies():
-            read_files = [name for name in study.files() if name in seen]
-            if not read_files:
-                continue
-            boxed = [name for name in read_files if seen[name]]
-            if len(read_files) > 1 and 0 < len(boxed) < len(read_files):
-                disagreeing += 1
-            terms = frozenset().union(*(seen[name] for name in read_files))
-            located = frozenset().union(*(straddling.get(name, frozenset()) for name in read_files))
-            row: dict[str, str | float] = {STUDY: study.identifier}
-            for target in TARGETS:
-                reading = READINGS.get(target)
-                level = None if reading is None else reading.verdict(terms, located)
-                if level is not None:
-                    row[target] = level
-                    row[f"{target}__conf"] = self.confidence
-            rows.append(row)
-        table = pd.DataFrame(rows)
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        table.to_csv(destination, index=False)
-        logger.info(f"{len(table)} rows -> {destination}")
+        annotations = FastmriAnnotations.read(self.annotations)
+        seen, straddling = annotations.terms(), annotations.straddling()
+        knees = {study.identifier: [name for name in study.files() if name in seen] for study in self.studies()}
+        read = {knee: files for knee, files in knees.items() if files}
+        disagreeing = sum(1 for files in read.values() if len({bool(seen[name]) for name in files}) > 1)
         logger.info(f"{disagreeing} knees where one exam was boxed and another read clean")
-        for target in TARGETS:
-            if target in table:
-                logger.info(f"{target}: {table[target].value_counts().sort_index().to_dict()}")
+        rows = [
+            self._row(knee, self._union(seen, files), self._union(straddling, files)) for knee, files in read.items()
+        ]
+        ForeignBuild.write_table(pd.DataFrame(rows), destination, TARGETS)
+
+    @staticmethod
+    def _union(table: dict[str, frozenset[str]], files: list[str]) -> frozenset[str]:
+        return frozenset().union(*(table.get(name, frozenset()) for name in files))
+
+    def _row(self, knee: str, terms: frozenset[str], located: frozenset[str]) -> dict[str, str | float]:
+        row: dict[str, str | float] = {STUDY: knee}
+        for target, reading in ((target, READINGS.get(target)) for target in TARGETS):
+            level = None if reading is None else reading.verdict(terms, located)
+            if level is not None:
+                row[target] = level
+                row[f"{target}__conf"] = self.confidence
+        return row

@@ -78,19 +78,6 @@ def test_place():
     assert placed["slice"].tolist() == [3, 9], "the original slice index survives"
 
 
-def test_read(tmp_path: Path):
-    """Rows with geometry only — a study-level label has no box to place."""
-    boxes = _boxes(tmp_path).read()
-
-    assert len(boxes) == 3
-    assert "study_level" not in boxes
-
-
-def test_listed(tmp_path: Path):
-    """The first line is a study and the footer is not: three studies, `Knee data` not among them."""
-    assert _boxes(tmp_path).listed() == frozenset({"file100", "file101", "file102"})
-
-
 def test_native():
     """The drawn image was flipped up/down: a box drawn at the top sits at the bottom of the volume, x unmoved."""
     drawn = pd.DataFrame({"x": [8.0], "y": [2.0], "width": [4.0], "height": [6.0]})

@@ -31,8 +31,9 @@ from jaxtyping import UInt8
 from nibabel.nifti1 import Nifti1Image
 
 from core import cli
+from core.data.corpus.fastmri_annotations import LABEL_COLUMN, SLICE_COLUMN
 from core.data.corpus.fastmri_boxes import NATIVE
-from core.data.corpus.fastmri_corpus import LABEL_COLUMN, PROGRESS_EVERY, SLICE_COLUMN
+from core.data.corpus.foreign_build import PROGRESS_EVERY
 
 logger = logging.getLogger(__name__)
 
