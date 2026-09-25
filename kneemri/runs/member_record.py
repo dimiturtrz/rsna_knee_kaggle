@@ -228,8 +228,8 @@ class RunStamp:
 
     A value rather than the config tree itself, so this module does not import the CLI that produces it:
     train.py imports this one, and serving reads `StampedRun` from here without ever touching training.
-    `TrainConfig.stamp` is the one place that fills it, so a knob a rebuild must know is added there
-    and here together or the constructor refuses. It also lets a test build one without a command line.
+    `TrainConfig.stamp` fills it BY FIELD NAME from the config's leaves, so a knob a rebuild must know is
+    added here alone, and a field naming no leaf refuses. It also lets a test build one without a command line.
     """
 
     recipe: dict[str, str]

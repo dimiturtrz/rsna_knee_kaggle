@@ -484,40 +484,10 @@ class TrainConfig:
     @property
     def stamp(self) -> RunStamp:
         """What a checkpoint records about this run beyond its recipe — the values a rebuild must know."""
-        data, model, encoder = self.data, self.model, self.encoder
-        return RunStamp(
-            recipe=self.recipe,
-            image_size=data.image_size,
-            crop=data.crop,
-            band=data.band,
-            spacing=data.spacing,
-            routing=data.routing,
-            train_size=data.train_size,
-            cache_studies=data.cache_studies,
-            slices=data.slices,
-            pool=model.pool,
-            slice_pooling=model.slice_pooling,
-            slice_regions=model.slice_regions,
-            slot_pooling=model.slot_pooling,
-            encoder_layer=encoder.encoder_layer,
-            fuse_blocks=encoder.fuse_blocks,
-            slice_shift=encoder.slice_shift,
-            through_plane=encoder.through_plane,
-            anatomical_prior=encoder.anatomical_prior,
-            lora_rank=encoder.lora_rank,
-            report_weight=encoder.report_weight,
-            whole_stack=encoder.whole_stack,
-            unfreeze_last=encoder.unfreeze_last,
-            unfreeze_offset=encoder.unfreeze_offset,
-            unfreeze_stem=encoder.unfreeze_stem,
-            head_lr=encoder.head_lr,
-            backbone_lr=encoder.backbone_lr,
-            layer_decay=encoder.layer_decay,
-            ema=self.optim.ema,
-            bf16=self.run.bf16,
-            rank_weight=self.targets.rank_weight,
-            pair_memory=self.targets.pair_memory,
-        )
+        data = self.data
+        known = {**self.flat, "recipe": self.recipe, "crop": data.crop, "band": data.band, "routing": data.routing}
+        # pyrefly: ignore[bad-argument-type] - each field is filled from the leaf of its own name and type
+        return RunStamp(**{stamped.name: known[stamped.name] for stamped in fields(RunStamp)})
 
     @classmethod
     def of_recipe(cls, recipe: Mapping[str, str]) -> "TrainConfig":
