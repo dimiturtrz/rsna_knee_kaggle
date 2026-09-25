@@ -33,16 +33,17 @@ should agree, and a disagreement worth hearing about.
 
 import json
 import logging
+import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from core import cli
+from kneemri.kaggle.kaggle_api import SLUG, Kaggle
 
 logger = logging.getLogger(__name__)
 
-COMPETITION = "rsna-knee-abnormality-detection"
 """The slug. A WRONG one answers 403 rather than 404, which reads as a permissions problem."""
 
 RECORD = Path("comp/leaderboard.json")
@@ -103,15 +104,9 @@ class PublicBoard:
         is named `﻿Rank` and every reader raises `KeyError: 'Rank'` against a header that LOOKS right
         in a log.
         """
-        import zipfile  # noqa: PLC0415
-
-        from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
-
         into.mkdir(parents=True, exist_ok=True)
-        api = KaggleApi()
-        api.authenticate()
-        api.competition_leaderboard_download(COMPETITION, str(into))
-        archive = max(into.glob(f"{COMPETITION}*.zip"), key=lambda path: path.stat().st_mtime)
+        Kaggle.authenticated().competition_leaderboard_download(SLUG, str(into))
+        archive = max(into.glob(f"{SLUG}*.zip"), key=lambda path: path.stat().st_mtime)
         try:
             with zipfile.ZipFile(archive) as held:
                 return held.read(held.namelist()[0]).decode("utf-8-sig")
@@ -211,7 +206,7 @@ class LeaderboardRead:
         """
         rows = viewer() if viewer is not None else cls._kaggle()
         if not rows:
-            message = f"the leaderboard for {COMPETITION} came back empty, so no standing can be read"
+            message = f"the leaderboard for {SLUG} came back empty, so no standing can be read"
             raise ValueError(message)
         best = sorted((row.score for row in rows), reverse=True)[:TOP]
         return cls(

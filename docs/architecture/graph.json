@@ -5499,6 +5499,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.board_check",
+      "target": "kneemri.kaggle.kaggle_api",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.board_check",
       "target": "kneemri.kaggle.kernel_script",
       "weight": 1
     },
@@ -5506,6 +5512,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.board_read",
       "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.board_read",
+      "target": "kneemri.kaggle.kaggle_api",
       "weight": 1
     },
     {
@@ -5666,6 +5678,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.discussion_read",
+      "target": "kneemri.kaggle.kaggle_api",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.dry_run",
       "target": "core.cli",
       "weight": 1
@@ -5728,6 +5746,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.efficiency_read",
       "target": "kneemri.kaggle.board_read",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.efficiency_read",
+      "target": "kneemri.kaggle.kaggle_api",
       "weight": 1
     },
     {
@@ -38937,7 +38961,7 @@
       "role": null
     },
     {
-      "descendants": 308,
+      "descendants": 309,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -40217,7 +40241,7 @@
       "role": null
     },
     {
-      "descendants": 40,
+      "descendants": 41,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -40316,6 +40340,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.foreign_entry",
       "label": "foreign_entry",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kaggle_api",
+      "label": "kaggle_api",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -64014,6 +64046,14 @@
       "label": "table",
       "level": "method",
       "parent": "kneemri.kaggle.foreign_entry.ForeignEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kaggle_api.authenticated",
+      "label": "authenticated",
+      "level": "method",
+      "parent": "kneemri.kaggle.kaggle_api",
       "role": null
     },
     {

@@ -48,6 +48,7 @@ from pathlib import Path
 from core import cli
 from kneemri.evaluation.board_transfer import EXCLUDED, SCOPES
 from kneemri.evaluation.selection_bias import SELECTION_BIAS, SelectionBias
+from kneemri.kaggle.kaggle_api import SLUG, Kaggle
 from kneemri.kaggle.kernel_script import KernelScript
 
 logger = logging.getLogger(__name__)
@@ -55,7 +56,6 @@ logger = logging.getLogger(__name__)
 RECORD = Path("comp/board.jsonl")
 LEDGER = Path("comp/SUBMISSIONS.md")
 KERNELS = Path("comp/kernels")
-COMPETITION = "rsna-knee-abnormality-detection"
 PAGE = 100
 """How many submissions the live listing reaches, and it is a CEILING on the API rather than a page size.
 
@@ -475,11 +475,7 @@ class LiveBoard:
         listing's horizon is a property of the API, and the fix belongs in `phantom`, which now declines
         to call a record missing when it sits BEHIND that horizon.
         """
-        from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
-
-        api = KaggleApi()
-        api.authenticate()
-        batch = api.competition_submissions(COMPETITION, page_size=PAGE) or []
+        batch = Kaggle.authenticated().competition_submissions(SLUG, page_size=PAGE) or []
         return [(str(sub.ref), str(sub.public_score or ""), str(sub.date or "")) for sub in batch if sub is not None]
 
 

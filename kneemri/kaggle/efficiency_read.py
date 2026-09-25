@@ -37,6 +37,7 @@ import pandas as pd
 
 from core import cli
 from kneemri.kaggle import board_read
+from kneemri.kaggle.kaggle_api import Kaggle
 
 logger = logging.getLogger(__name__)
 
@@ -195,12 +196,8 @@ class EfficiencyBoard:
         archive that module reads, and one home means the next surprise in its shape (a BOM, last time)
         is fixed once. What stays here is the efficiency kernel's output, which nothing else wants.
         """
-        from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
-
         into.mkdir(parents=True, exist_ok=True)
-        api = KaggleApi()
-        api.authenticate()
-        api.kernels_output(EFFICIENCY_KERNEL, str(into))
+        Kaggle.authenticated().kernels_output(EFFICIENCY_KERNEL, str(into))
         return board_read.PublicBoard.text(into), into / EFFICIENCY_FILE
 
 

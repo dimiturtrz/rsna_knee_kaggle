@@ -24,10 +24,10 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 from core import cli
+from kneemri.kaggle.kaggle_api import SLUG, Kaggle
 
 logger = logging.getLogger(__name__)
 
-COMPETITION = "rsna-knee-abnormality-detection"
 """The slug. A WRONG one answers 403 rather than 404, which reads as a permissions problem."""
 
 PAGES = 3
@@ -132,11 +132,7 @@ class Discussion:
     @staticmethod
     def _kaggle_topics(page: int) -> Sequence[object]:
         """The real round trip, kept in one place so every other path is credential-free."""
-        from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
-
-        api = KaggleApi()
-        api.authenticate()
-        return Discussion._items(api.competition_list_topics(COMPETITION, page=page), "topics")
+        return Discussion._items(Kaggle.authenticated().competition_list_topics(SLUG, page=page), "topics")
 
     @staticmethod
     def _items(listed: object, field: str) -> list[object]:
@@ -160,11 +156,7 @@ class Discussion:
     @staticmethod
     def _kaggle_posts(identifier: int) -> Sequence[object]:
         """The real round trip for one thread's messages."""
-        from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: PLC0415
-
-        api = KaggleApi()
-        api.authenticate()
-        listed = api.competition_list_topic_messages(COMPETITION, topic_id=identifier)
+        listed = Kaggle.authenticated().competition_list_topic_messages(SLUG, topic_id=identifier)
         return Discussion._items(listed, "messages")
 
 
