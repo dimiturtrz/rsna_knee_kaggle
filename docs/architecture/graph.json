@@ -6326,6 +6326,60 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "core.mounts",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.device",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.evaluation.raptor_model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.inference.budget",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.inference.ensemble",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.kaggle.kernel_run",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.kaggle.raptor_run",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.seated_entry",
+      "target": "kneemri.kaggle.raptor_seat",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.slot_pace",
       "target": "core.cli",
       "weight": 1
@@ -29906,14 +29960,38 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._keyword",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript._strings",
       "target": "kneemri.kaggle.kernel_script.KernelScript._assigned",
       "weight": 1
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript.call",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript.foreign_seats",
       "target": "kneemri.kaggle.kernel_script.KernelScript._filenames",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript.foreign_seats",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._seats",
       "weight": 1
     },
     {
@@ -31810,6 +31888,108 @@
       "kind": "calls",
       "source": "kneemri.kaggle.seat_value.main",
       "target": "kneemri.kaggle.seat_value.SeatValue.report",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry",
+      "target": "kneemri.inference.budget.Budget",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry",
+      "target": "kneemri.inference.vote.Vote",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry._left",
+      "target": "kneemri.inference.budget.Budget",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "core.mounts.Mounts",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "core.mounts.Mounts.one",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.device.VisibleCards",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.device.VisibleCards.device",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.evaluation.raptor_model.RaptorMember.loaded",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.inference.ensemble.Serving",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.kernel_run.KernelRun",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.kernel_run.KernelRun.run",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry.run",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.raptor_run.RaptorEntry.weights",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.raptor_seat.RaptorSeat",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.raptor_seat.RaptorSeat.blended",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "target": "kneemri.kaggle.seated_entry.SeatedEntry._left",
       "weight": 1
     },
     {
@@ -38215,7 +38395,7 @@
       "role": null
     },
     {
-      "descendants": 302,
+      "descendants": 303,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -39447,7 +39627,7 @@
       "role": null
     },
     {
-      "descendants": 41,
+      "descendants": 42,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -39738,6 +39918,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.seat_value",
       "label": "seat_value",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seated_entry",
+      "label": "seated_entry",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -44621,6 +44809,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.seat_value",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seated_entry.SeatedEntry",
+      "label": "SeatedEntry",
+      "level": "class",
+      "parent": "kneemri.kaggle.seated_entry",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -62840,8 +63036,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._keyword",
+      "label": "_keyword",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_script.KernelScript._looped",
       "label": "_looped",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._named",
+      "label": "_named",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._seats",
+      "label": "_seats",
       "level": "method",
       "parent": "kneemri.kaggle.kernel_script.KernelScript",
       "role": null
@@ -64188,6 +64408,22 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.seat_value",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seated_entry.SeatedEntry._left",
+      "label": "_left",
+      "level": "method",
+      "parent": "kneemri.kaggle.seated_entry.SeatedEntry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.seated_entry.SeatedEntry.run",
+      "label": "run",
+      "level": "method",
+      "parent": "kneemri.kaggle.seated_entry.SeatedEntry",
       "role": null
     },
     {

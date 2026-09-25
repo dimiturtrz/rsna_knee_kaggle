@@ -143,51 +143,20 @@ def boot() -> Path:
 
 # <<< KERNEL-BOOTSTRAP
 
-PAIR_WEIGHT = 0.5
-"""One seat each. Two members, equal on the board to three decimals; see the module docstring."""
-
 
 def main() -> None:
     boot()
 
-    import time  # noqa: PLC0415 - the bootstrap block above is byte-identical across kernels
-
-    import pandas as pd  # noqa: PLC0415 - the kit is on sys.path only after boot
-    import torch  # noqa: PLC0415 - same
-
-    from core.mounts import Mounts  # noqa: PLC0415 - same
-    from kneemri.device import VisibleCards  # noqa: PLC0415 - same
-    from kneemri.evaluation.raptor_model import RaptorMember  # noqa: PLC0415 - same
-    from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415 - same
-    from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
-    from kneemri.inference.vote import LogitAverage  # noqa: PLC0415 - same
-    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
-    from kneemri.kaggle.raptor_run import WORKING, RaptorEntry  # noqa: PLC0415 - same
-    from kneemri.kaggle.raptor_seat import RaptorSeat  # noqa: PLC0415 - same
-
-    # The raptor member runs FIRST and into a scratch directory, because both producers write a file
-    # called `submission.csv` and the one that runs last is the one Kaggle would otherwise score.
-    scratch = WORKING / "raptor"
-    scratch.mkdir(parents=True, exist_ok=True)
-    started = time.time()
-    mounts = Mounts()
-    device = str(VisibleCards().device())
-    member = RaptorMember.loaded(RaptorEntry.weights(mounts=mounts), device)
-    theirs = RaptorEntry(mounts.one("sample_submission.csv", "competition data"), working=scratch).run(member, device)
-    del member
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    from kneemri.kaggle.seated_entry import SeatedEntry  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     # `final_ws_cf` and nothing else: the member `calibsolo` served alone for 0.923, so the pair's
     # our-side quality is a MEASURED board number rather than an assumption about the roster's average.
     chosen = ("final_ws_cf",)
-    spent = time.time() - started
-    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the single member gets what is left")
-    left = Budget(seconds=max(KERNEL_SECONDS - spent, 0.0))
-    KernelRun(names=chosen, overlap=False, serving=Serving(vote=LogitAverage(), budget=left)).run()
-    ours = pd.read_csv(WORKING / "submission.csv")
-
-    RaptorSeat(weight=PAIR_WEIGHT).blended(ours, theirs).to_csv(WORKING / "submission.csv", index=False)
+    SeatedEntry(
+        names=chosen,
+        # One seat each. Two members, equal on the board to three decimals; see the module docstring.
+        weight=0.5,
+    ).run()
 
 
 if __name__ == "__main__":

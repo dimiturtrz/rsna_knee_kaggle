@@ -1,4 +1,4 @@
-"""Which members a kernel will ask for, read from the `KernelRun(...)` call in its script.
+"""Which members a kernel will ask for, read from the `KernelRun(...)` or `SeatedEntry(...)` call in its script.
 
 The sibling of `kernel_sources`: that module reads what a kernel DECLARES it will have attached, this
 one reads what it will actually load, and `mount_check` is where the two meet. Both read the kernel
@@ -7,15 +7,25 @@ free and no Kaggle session — the whole point is to make it cheap enough to run
 """
 
 import ast
+from collections.abc import Iterator
 from pathlib import Path
+from typing import TypeGuard
 
 from kneemri.kaggle.raptor_run import DEFAULT_WEIGHTS
 
 KERNEL_RUN = "KernelRun"
-"""The call every entry that runs OUR package makes, and the only place its member selection appears."""
+SEATED_ENTRY = "SeatedEntry"
+SEAT_ENTRIES = frozenset({SEATED_ENTRY})
+ENTRY_CALLS = frozenset({KERNEL_RUN}) | SEAT_ENTRIES
+"""The calls an entry that runs OUR package makes, and the only places its member selection appears.
+`SeatedEntry` builds its `KernelRun` inside the kit, so the kernel script shows only the outer call."""
 
 RAPTOR_WEIGHTS = "weights"
-"""`RaptorEntry.weights(...)`, the one call a foreign seat is loaded through, outside the `KernelRun` selection."""
+"""`RaptorEntry.weights(...)`, the one call a foreign seat is loaded through, outside the `KernelRun` selection.
+It is also `SeatedEntry`'s keyword for the same filename, which that class hands to `RaptorEntry.weights`."""
+
+WEIGHTS_FILENAME = "filename"
+"""`RaptorEntry.weights`' own keyword for the checkpoint filename, when it is not passed positionally."""
 
 BOARD_NAMES = {"raptor_ft_coatnet_v4_full_swa": "raptor_v4_swa"}
 """A checkpoint stem the board records under another name; every other stem is its own board name."""
@@ -38,7 +48,7 @@ class KernelScript:
         self.tree = ast.parse(script.read_text(encoding="utf-8"))
 
     def call(self) -> ast.Call | None:
-        """The script's `KernelRun(...)`, or None when it never builds one.
+        """The script's `KernelRun(...)` or `SeatedEntry(...)`, or None when it builds neither.
 
         None is not "runs nothing": `kneemri-graft` loads whatever package the mount happens to hold via
         `MemberPackage.find`, and `kneemri-probe` loads no weights at all. Neither can be checked against
@@ -46,7 +56,7 @@ class KernelScript:
         on a kernel that is right.
         """
         for node in ast.walk(self.tree):
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == KERNEL_RUN:
+            if self._named(node, ENTRY_CALLS):
                 return node
         return None
 
@@ -69,20 +79,34 @@ class KernelScript:
 
         A raptor seat is blended in beside `KernelRun`, never through its `names`, so a check that reads
         only the selection sees seven of eight seats and calls a re-ship new (`tripleseatclean` against
-        `tripleseat_v2`, ref 56232529). A call with no filename loads `DEFAULT_WEIGHTS`.
+        `tripleseat_v2`, ref 56232529). A `SeatedEntry(...)` loads its `weights=` the same way, so it counts
+        as one such call. A call with no filename loads `DEFAULT_WEIGHTS`.
         """
         stems = {
-            Path(filename).stem
-            for call in ast.walk(self.tree)
-            if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == RAPTOR_WEIGHTS
-            for filename in self._filenames(call)
+            Path(filename).stem for call, argument in self._seats() for filename in self._filenames(call, argument)
         }
         return {BOARD_NAMES.get(stem, stem) for stem in stems}
 
-    def _filenames(self, call: ast.Call) -> list[str]:
-        """The checkpoint filenames one `weights(...)` call can open, through a variable or a loop over one."""
-        given = next((keyword.value for keyword in call.keywords if keyword.arg == "filename"), None)
-        argument = call.args[0] if call.args else given
+    def _seats(self) -> Iterator[tuple[ast.Call, ast.expr | None]]:
+        """Every call that loads a foreign seat, with the filename expression it passes (None: the default)."""
+        for node in ast.walk(self.tree):
+            if self._named(node, SEAT_ENTRIES):
+                yield node, self._keyword(node, RAPTOR_WEIGHTS)
+            elif (
+                isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == RAPTOR_WEIGHTS
+            ):
+                yield node, node.args[0] if node.args else self._keyword(node, WEIGHTS_FILENAME)
+
+    @staticmethod
+    def _named(node: ast.AST, names: frozenset[str]) -> TypeGuard[ast.Call]:
+        return isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in names
+
+    @staticmethod
+    def _keyword(call: ast.Call, name: str) -> ast.expr | None:
+        return next((keyword.value for keyword in call.keywords if keyword.arg == name), None)
+
+    def _filenames(self, call: ast.Call, argument: ast.expr | None) -> list[str]:
+        """The checkpoint filenames one seat call can open, through a variable or a loop over one."""
         if argument is None:
             return [DEFAULT_WEIGHTS]
         if isinstance(argument, ast.Constant) and isinstance(argument.value, str):

@@ -123,49 +123,12 @@ def boot() -> Path:
 
 # <<< KERNEL-BOOTSTRAP
 
-FOREIGN_WEIGHT = 1.0 / 3.0
-"""The foreign side's share of the rank blend. `raptorseat_v1` shipped 1/7 = 0.1429 as a convention about
-SEAT COUNT; this is a quality-weighted share of two SYSTEMS, named before the number and never fitted.
-
-Below the bootstrap block rather than above it: the block opens with imports, and a constant in front of
-them makes every one of them E402. The kernel that RAN carried it above and the ruff gate caught it after
-the fact — the number is identical either way.
-"""
-
 
 def main() -> None:
     boot()
 
-    import time  # noqa: PLC0415 - the bootstrap block above is byte-identical across kernels
-
-    import pandas as pd  # noqa: PLC0415 - the kit is on sys.path only after boot
-    import torch  # noqa: PLC0415 - same
-
-    from core.mounts import Mounts  # noqa: PLC0415 - same
-    from kneemri.device import VisibleCards  # noqa: PLC0415 - same
-    from kneemri.evaluation.raptor_model import RaptorMember  # noqa: PLC0415 - same
-    from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415 - same
-    from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
-    from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - same
-    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
-    from kneemri.kaggle.raptor_run import WORKING, RaptorEntry  # noqa: PLC0415 - same
-    from kneemri.kaggle.raptor_seat import RaptorSeat  # noqa: PLC0415 - same
-
-    # The raptor member runs FIRST and into a scratch directory, because both producers write a file
-    # called `submission.csv` and the one that runs last is the one Kaggle would otherwise score.
-    scratch = WORKING / "raptor"
-    scratch.mkdir(parents=True, exist_ok=True)
-    started = time.time()
-    mounts = Mounts()
-    device = str(VisibleCards().device())
-    member = RaptorMember.loaded(RaptorEntry.weights(mounts=mounts), device)
-    theirs = RaptorEntry(mounts.one("sample_submission.csv", "competition data"), working=scratch).run(member, device)
-    # The six that follow load onto the same T4. Dropping the reference is not enough on its own —
-    # torch keeps the freed blocks in its caching allocator, and a seventh model's worth of them is
-    # exactly the margin an OOM would eat, in a kernel whose whole point is running both.
-    del member
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from kneemri.kaggle.seated_entry import SeatedEntry  # noqa: PLC0415 - same
 
     chosen = (
         "final_ws_cf",
@@ -175,20 +138,12 @@ def main() -> None:
         "lr4e-5_ws_cf",
         "through_dense_cf",
     )
-    # What the raptor pass cost, handed to the six so their nine-hour budget is the SESSION's and not
-    # a fresh one. Without it both producers aim at the same ceiling and the kernel is killed at the
-    # real one with no submission — a budget defeated by its own assumption that it starts at zero.
-    spent = time.time() - started
-    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the six get what is left")
-    left = Budget(seconds=max(KERNEL_SECONDS - spent, 0.0))
-    KernelRun(
+    SeatedEntry(
         names=chosen,
-        overlap=False,
-        serving=Serving(vote=RankAverage(), budget=left),
+        vote=RankAverage(),
+        # A quality-weighted share of two SYSTEMS, not `raptorseat_v1`'s 1/7 seat-count convention.
+        weight=1.0 / 3.0,
     ).run()
-    ours = pd.read_csv(WORKING / "submission.csv")
-
-    RaptorSeat(weight=FOREIGN_WEIGHT).blended(ours, theirs).to_csv(WORKING / "submission.csv", index=False)
 
 
 if __name__ == "__main__":

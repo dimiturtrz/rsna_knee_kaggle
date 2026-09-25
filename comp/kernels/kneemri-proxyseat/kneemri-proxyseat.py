@@ -136,8 +136,6 @@ def boot() -> Path:
 
 # <<< KERNEL-BOOTSTRAP
 
-FOREIGN_WEIGHT = 1.0 / 3.0
-"""The champion's foreign share, unchanged. This entry moves seats and nothing else."""
 
 CHOSEN = (
     # raptorweight_v1's six, in its order. Not one of them moves.
@@ -164,47 +162,14 @@ to match their solo order — a fact about these three and not a rule this proje
 def main() -> None:
     boot()
 
-    import time  # noqa: PLC0415 - the bootstrap block above is byte-identical across kernels
-
-    import pandas as pd  # noqa: PLC0415 - the kit is on sys.path only after boot
-    import torch  # noqa: PLC0415 - same
-
-    from core.mounts import Mounts  # noqa: PLC0415 - same
-    from kneemri.device import VisibleCards  # noqa: PLC0415 - same
-    from kneemri.evaluation.raptor_model import RaptorMember  # noqa: PLC0415 - same
-    from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415 - same
-    from kneemri.inference.ensemble import Serving  # noqa: PLC0415 - same
-    from kneemri.inference.vote import LogitAverage  # noqa: PLC0415 - same
-    from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415 - same
-    from kneemri.kaggle.raptor_run import WORKING, RaptorEntry  # noqa: PLC0415 - same
-    from kneemri.kaggle.raptor_seat import RaptorSeat  # noqa: PLC0415 - same
-
-    # The raptor member runs FIRST and into a scratch directory, because both producers write a file
-    # called `submission.csv` and the one that runs last is the one Kaggle would otherwise score.
-    scratch = WORKING / "raptor"
-    scratch.mkdir(parents=True, exist_ok=True)
-    started = time.time()
-    mounts = Mounts()
-    device = str(VisibleCards().device())
-    member = RaptorMember.loaded(RaptorEntry.weights(mounts=mounts), device)
-    theirs = RaptorEntry(mounts.one("sample_submission.csv", "competition data"), working=scratch).run(member, device)
-    # Dropping the reference is not enough on its own — torch keeps the freed blocks in its caching
-    # allocator, and with NINE of ours to follow rather than six that margin is exactly what an OOM eats.
-    del member
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    from kneemri.kaggle.seated_entry import SeatedEntry  # noqa: PLC0415 - the kit is on sys.path only after boot
 
     chosen = CHOSEN
-    # What the raptor pass cost, handed to the nine so their nine-hour budget is the SESSION's and not a
-    # fresh one. Nine members at 336 px is the largest our-side load this project has shipped, so the
-    # budget is doing real work here rather than carrying a convention forward.
-    spent = time.time() - started
-    logging.getLogger(__name__).info(f"the raptor pass cost {spent:.0f}s; the nine get what is left")
-    left = Budget(seconds=max(KERNEL_SECONDS - spent, 0.0))
-    KernelRun(names=chosen, overlap=False, serving=Serving(vote=LogitAverage(), budget=left)).run()
-    ours = pd.read_csv(WORKING / "submission.csv")
-
-    RaptorSeat(weight=FOREIGN_WEIGHT).blended(ours, theirs).to_csv(WORKING / "submission.csv", index=False)
+    SeatedEntry(
+        names=chosen,
+        # The champion's foreign share, unchanged. This entry moves seats and nothing else.
+        weight=1.0 / 3.0,
+    ).run()
 
 
 if __name__ == "__main__":

@@ -15,6 +15,7 @@ def test_call(tmp_path: Path):
     """The `KernelRun(...)` a script builds, and None when it builds none rather than a guess."""
     assert _script(tmp_path, "KernelRun(members=1).run()\n").call() is not None
     assert _script(tmp_path, "MemberPackage.find(mounts)\n").call() is None, "graft picks members another way"
+    assert _script(tmp_path, "SeatedEntry(names=chosen).run()\n").call() is not None, "builds its KernelRun in the kit"
 
 
 def test_member_names(tmp_path: Path):
@@ -29,6 +30,9 @@ def test_member_names(tmp_path: Path):
     assert _script(tmp_path, indirect).member_names() == ["res392_ws_s2026", "sliceattn_s2026"], (
         "the chosen entry names its members through a variable"
     )
+
+    seated = "chosen = ('final_ws_cf', 'dense_cf')\nSeatedEntry(names=chosen, weight=1.0 / 3.0).run()\n"
+    assert _script(tmp_path, seated).member_names() == ["final_ws_cf", "dense_cf"]
 
     assert _script(tmp_path, "KernelRun(members=2).run()\n").member_names() is None
     assert _script(tmp_path, "KernelRun().run()\n").member_names() is None
@@ -54,6 +58,12 @@ def test_foreign_seats(tmp_path: Path):
     assert _script(tmp_path, looped).foreign_seats() == {"raptor_v4_swa", "raptor_ft_effv2l480"}, (
         "the loop AROUND the call binds the name, not another loop reusing it"
     )
+
+    seated = "SeatedEntry(names=('a',)).run()\n"
+    assert _script(tmp_path, seated).foreign_seats() == {"raptor_v4_swa"}, "a seated entry with no weights= is default"
+
+    chosen = 'SeatedEntry(names=("a",), weights="raptor_ft_effv2l480.pt").run()\n'
+    assert _script(tmp_path, chosen).foreign_seats() == {"raptor_ft_effv2l480"}
 
     assert _script(tmp_path, "KernelRun(names=('a',)).run()\n").foreign_seats() == set()
     assert _script(tmp_path, "RaptorEntry.weights(picked(), mounts)\n").foreign_seats() == set(), "not a literal"
