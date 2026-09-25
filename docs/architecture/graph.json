@@ -16029,7 +16029,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.foreign_member.main",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -23061,7 +23061,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.study_attribution.AttributionCorpus.ranked",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -25077,7 +25077,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.weights_gap.MatchedRuler.compared",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -28551,7 +28551,7 @@
     {
       "kind": "calls",
       "source": "kneemri.inference.foreign_holdout.ForeignHoldout.borrowed",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
@@ -37377,7 +37377,7 @@
     {
       "kind": "calls",
       "source": "kneemri.training.pseudo_table.main",
-      "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
+      "target": "kneemri.runs.holdout_record.HoldoutRecord.required",
       "weight": 1
     },
     {
