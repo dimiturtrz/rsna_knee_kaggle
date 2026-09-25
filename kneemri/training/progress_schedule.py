@@ -27,6 +27,14 @@ OVERLAP = (
     "a progress schedule needs 0 <= ramp, 0 <= tail and ramp + tail <= 1 — the plateau cannot end before it begins"
 )
 
+ROLES = {
+    "start": "strength at progress 0",
+    "mid": "strength on the plateau",
+    "end": "strength at progress 1",
+    "ramp": "share of the run climbing start -> mid",
+    "tail": "share of the run descending mid -> end",
+}
+
 
 class Scheduled(Protocol):
     """What a progress schedule drives: one multiplier on whatever the consumer was configured with."""
@@ -60,6 +68,11 @@ class ProgressSchedule:
         if progress > closing:
             return self.mid + (self.end - self.mid) * (progress - closing) / self.tail
         return self.mid
+
+    @staticmethod
+    def knob_help(knob: str, subject: str) -> str:
+        """A knob's flag help: its role in the schedule, then what that schedule drives."""
+        return f"{ROLES[knob]} of {subject}; defaults are the ledger"
 
     def recorded(self) -> tuple[float, ...]:
         """The five knobs in flag order — what a landed-check compares and a log line prints."""

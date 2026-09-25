@@ -23,7 +23,12 @@ from kneemri.models.slot_dropout import SlotDropout
 from kneemri.training.config_leaf import ConfigLeaf
 from kneemri.training.ghosting import Ghosting
 from kneemri.training.mixup import OFF
-from kneemri.training.progress_schedule import FULL
+from kneemri.training.progress_schedule import FULL, ProgressSchedule
+
+AUG_SUBJECT = (
+    "the ONE progress schedule scaling every regulariser at once (geometric and intensity widths, ghosting, "
+    "slot dropout, mixup alpha, stochastic depth)"
+)
 
 PATCH_ERASE = "patch_erase"
 """The key patch erasing answers under when a run checks its switches landed (`kneemri.training.landed`).
@@ -462,41 +467,21 @@ class RegularisationConfig:
     )
     aug_start: float = ConfigLeaf.of(
         default=1.0,
-        says=(
-            "strength at progress 0 of the ONE progress schedule scaling every regulariser at once (geometric"
-            " and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); defaults are the "
-            "ledger"
-        ),
+        says=ProgressSchedule.knob_help("start", AUG_SUBJECT),
     )
     aug_mid: float = ConfigLeaf.of(
         default=1.0,
-        says=(
-            "strength on the plateau of the ONE progress schedule scaling every regulariser at once "
-            "(geometric and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); "
-            "defaults are the ledger"
-        ),
+        says=ProgressSchedule.knob_help("mid", AUG_SUBJECT),
     )
     aug_end: float = ConfigLeaf.of(
         default=1.0,
-        says=(
-            "strength at progress 1 of the ONE progress schedule scaling every regulariser at once (geometric"
-            " and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); defaults are the "
-            "ledger"
-        ),
+        says=ProgressSchedule.knob_help("end", AUG_SUBJECT),
     )
     aug_ramp: float = ConfigLeaf.of(
         default=0.0,
-        says=(
-            "share of the run climbing start -> mid of the ONE progress schedule scaling every regulariser at"
-            " once (geometric and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); "
-            "defaults are the ledger"
-        ),
+        says=ProgressSchedule.knob_help("ramp", AUG_SUBJECT),
     )
     aug_tail: float = ConfigLeaf.of(
         default=0.0,
-        says=(
-            "share of the run descending mid -> end of the ONE progress schedule scaling every regulariser at"
-            " once (geometric and intensity widths, ghosting, slot dropout, mixup alpha, stochastic depth); "
-            "defaults are the ledger"
-        ),
+        says=ProgressSchedule.knob_help("tail", AUG_SUBJECT),
     )

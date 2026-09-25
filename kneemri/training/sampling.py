@@ -33,6 +33,13 @@ from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
 from kneemri.training.config_leaf import ConfigLeaf
+from kneemri.training.progress_schedule import ProgressSchedule
+
+HARD_SUBJECT = (
+    "the same progress schedule over EXAMPLE HARDNESS: label trust (0 = every weighted cell at the confidence "
+    "floor, 1 = the certainty table) and the --sample-spread tilt (0 = flat, 1 = --sample-alpha). Supersedes "
+    "--certainty-ramp and --sample-ramp, which cannot be combined with it"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -342,46 +349,21 @@ class SamplingConfig:
     )
     hard_start: float = ConfigLeaf.of(
         default=1.0,
-        says=(
-            "strength at progress 0 of the same progress schedule over EXAMPLE HARDNESS: label trust (0 = "
-            "every weighted cell at the confidence floor, 1 = the certainty table) and the --sample-spread "
-            "tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes --certainty-ramp and "
-            "--sample-ramp, which cannot be combined with it"
-        ),
+        says=ProgressSchedule.knob_help("start", HARD_SUBJECT),
     )
     hard_mid: float = ConfigLeaf.of(
         default=1.0,
-        says=(
-            "strength on the plateau of the same progress schedule over EXAMPLE HARDNESS: label trust (0 = "
-            "every weighted cell at the confidence floor, 1 = the certainty table) and the --sample-spread "
-            "tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes --certainty-ramp and "
-            "--sample-ramp, which cannot be combined with it"
-        ),
+        says=ProgressSchedule.knob_help("mid", HARD_SUBJECT),
     )
     hard_end: float = ConfigLeaf.of(
         default=1.0,
-        says=(
-            "strength at progress 1 of the same progress schedule over EXAMPLE HARDNESS: label trust (0 = "
-            "every weighted cell at the confidence floor, 1 = the certainty table) and the --sample-spread "
-            "tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes --certainty-ramp and "
-            "--sample-ramp, which cannot be combined with it"
-        ),
+        says=ProgressSchedule.knob_help("end", HARD_SUBJECT),
     )
     hard_ramp: float = ConfigLeaf.of(
         default=0.0,
-        says=(
-            "share of the run climbing start -> mid of the same progress schedule over EXAMPLE HARDNESS: "
-            "label trust (0 = every weighted cell at the confidence floor, 1 = the certainty table) and the "
-            "--sample-spread tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes "
-            "--certainty-ramp and --sample-ramp, which cannot be combined with it"
-        ),
+        says=ProgressSchedule.knob_help("ramp", HARD_SUBJECT),
     )
     hard_tail: float = ConfigLeaf.of(
         default=0.0,
-        says=(
-            "share of the run descending mid -> end of the same progress schedule over EXAMPLE HARDNESS: "
-            "label trust (0 = every weighted cell at the confidence floor, 1 = the certainty table) and the "
-            "--sample-spread tilt (0 = flat, 1 = --sample-alpha); defaults are the ledger. Supersedes "
-            "--certainty-ramp and --sample-ramp, which cannot be combined with it"
-        ),
+        says=ProgressSchedule.knob_help("tail", HARD_SUBJECT),
     )

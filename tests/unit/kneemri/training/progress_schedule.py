@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from kneemri.training.progress_schedule import FULL, NEGATIVE, OVERLAP, ProgressSchedule
+from kneemri.training.progress_schedule import FULL, NEGATIVE, OVERLAP, ROLES, ProgressSchedule
 
 RAMPED = ProgressSchedule(start=0.0, mid=1.0, end=0.0, ramp=0.3, tail=0.15)
 
@@ -53,3 +53,9 @@ def test_invalid_schedules_are_refused(knobs: dict[str, float], message: str) ->
 
 def test_recorded() -> None:
     assert RAMPED.recorded() == (0.0, 1.0, 0.0, 0.3, 0.15)
+
+
+def test_knob_help() -> None:
+    texts = {knob: ProgressSchedule.knob_help(knob, "the subject") for knob in ROLES}
+    assert set(ROLES) == {"start", "mid", "end", "ramp", "tail"}
+    assert all(text.startswith(ROLES[knob]) and "the subject" in text for knob, text in texts.items())
