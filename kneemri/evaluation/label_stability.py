@@ -22,6 +22,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ def main() -> None:
     models = command.rooted(arguments).models()
     runs: dict[str, dict[str, float]] = {}
     for metrics in sorted(models.glob("*.metrics.jsonl")):
-        name = metrics.name.removesuffix(".metrics.jsonl")
+        name = Artefact.stem(metrics)
         scores = None if THROUGHPUT in name else stability.best(metrics)
         if scores:
             runs[name] = scores

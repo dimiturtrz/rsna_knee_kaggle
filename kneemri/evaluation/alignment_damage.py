@@ -43,6 +43,7 @@ from core.bootstrap import StudyBootstrap
 from core.data.corpus.anatomy import ANATOMY, Extent
 from core.findings import TARGETS
 from kneemri.evaluation.scores import LabelScores
+from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -189,18 +190,13 @@ class HoldoutJoin:
         order, and averaging them positionally would silently mix one study's prediction with another's
         truth — which reads as a weak model rather than as the bug it is.
         """
-        loaded = [np.load(path, allow_pickle=True) for path in members]
-        shared = sorted(set.intersection(*[set(record["studies"].tolist()) for record in loaded]))
-        stacked = []
-        for record in loaded:
-            order = {name: row for row, name in enumerate(record["studies"].tolist())}
-            rows = np.array([order[name] for name in shared])
-            values = record["predictions"][rows].astype(np.float64)
-            stacked.append(np.argsort(np.argsort(values, axis=0), axis=0) / max(1, len(shared) - 1))
-        first = loaded[0]
-        truth_order = {name: row for row, name in enumerate(first["studies"].tolist())}
-        truth = first["truth"][np.array([truth_order[name] for name in shared])]
-        return np.mean(stacked, axis=0), truth, np.array(shared)
+        loaded = [HoldoutRecord(path).required() for path in members]
+        shared = sorted(set.intersection(*[set(reading.studies) for reading in loaded]))
+        joined = [reading.at(shared) for reading in loaded]
+        stacked = [
+            np.argsort(np.argsort(reading.predictions, axis=0), axis=0) / max(1, len(shared) - 1) for reading in joined
+        ]
+        return np.mean(stacked, axis=0), joined[0].truth, np.array(shared)
 
     def aligned(self, spread_file: Path, studies: NDArray[np.str_]) -> NDArray[np.float32]:
         """This run's per-study spread, put in the same row order as the holdout records.

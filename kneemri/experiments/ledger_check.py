@@ -46,6 +46,7 @@ import torch
 
 from core import cli
 from core.denominator import Denominator
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.recorded_run import RecordedRun
 from kneemri.runs.run_record import METRICS_SUFFIX, RunRecord
 
@@ -120,7 +121,7 @@ class LedgerCheck:
         for metrics in sorted(models.glob("*.metrics.jsonl")):
             score = self.best(metrics)
             if score is not None:
-                scores[metrics.name.removesuffix(".metrics.jsonl")] = score
+                scores[Artefact.stem(metrics)] = score
         return {
             name: score
             for name, score in scores.items()

@@ -28,6 +28,7 @@ from core.findings import TARGETS
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.evaluation.member_pool import DECLINES, MemberPool
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.holdout_record import SUFFIX, HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -92,9 +93,7 @@ class SeatProfile:
 
     def readings(self, paths: list[Path]) -> dict[str, HoldoutReading]:
         """Every member's kept arrays, checked onto one ruler, keyed by the member name the ledger quotes."""
-        readings = {
-            path.name.removesuffix(SUFFIX).removesuffix(".pt"): HoldoutRecord(path).required() for path in paths
-        }
+        readings = {Artefact.stem(path): HoldoutRecord(path).required() for path in paths}
         first = next(iter(readings.values()))
         for reading in readings.values():
             first.aligned(reading)

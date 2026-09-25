@@ -39,6 +39,7 @@ from pathlib import Path
 from core import cli
 from kneemri.evaluation.run_comparison import RunComparison
 from kneemri.experiments.arm_header import ArmHeader
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.run_record import METRICS_SUFFIX, RunRecord
 
 logger = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ class ArmRead:
         if direct.exists() or RunRecord(direct).exists():
             return direct
         records = models.glob(f"{named}_*{METRICS_SUFFIX}.jsonl")
-        runs = [models / f"{record.name.removesuffix(f'{METRICS_SUFFIX}.jsonl')}.pt" for record in records]
+        runs = [models / f"{Artefact.stem(record)}.pt" for record in records]
         best = ((run, RunRecord(run).best()) for run in runs)
         scored = {run: row["auc"] for run, row in best if row is not None}
         if declared is not None:

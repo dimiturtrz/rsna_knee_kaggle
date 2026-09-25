@@ -58,6 +58,7 @@ from core.data.labels.report_reader import UNSURE
 from core.findings import TARGETS
 from kneemri.evaluation.scores import MIDPOINT
 from kneemri.evaluation.study_errors import StudyDamage, StudyErrors
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.holdout_record import SUFFIX, HoldoutRecord
 
 LOGGER = logging.getLogger(__name__)
@@ -390,7 +391,7 @@ class AttributionCorpus:
         every = sorted(self.models.glob(f"*{SUFFIX}"))
         chosen = [self.models / f"{name}{SUFFIX}" for name in named] if named else every
         for path in chosen:
-            name = path.name.removesuffix(SUFFIX)
+            name = Artefact.stem(path)
             if name == run or len(found) >= wanted:
                 continue
             member = HoldoutRecord(self.models / f"{name}.pt").read()

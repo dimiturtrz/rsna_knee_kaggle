@@ -39,6 +39,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
+from kneemri.runs.artefact import Artefact
 from kneemri.teacher_file import TeacherFile
 
 logger = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ class BlockStats:
         scores = stored[PREDICTIONS].astype(np.float64)
         truth = stored[TRUTH].astype(np.float64)
         return cls(
-            part.stem.removesuffix(".holdout"),
+            Artefact.stem(part),
             scores.mean(axis=0),
             scores.std(axis=0),
             (scores > POSITIVE).mean(axis=0),

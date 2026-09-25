@@ -42,6 +42,7 @@ from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
+from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -97,14 +98,8 @@ class FoldReadings:
     @staticmethod
     def aligned(record: Path, names: list[str]) -> tuple[Reading, Reading]:
         """A run's own holdout record, its rows put in the order the card read them, joined by NAME."""
-        saved = np.load(record, allow_pickle=True)
-        position = {str(name): index for index, name in enumerate(saved["studies"])}
-        missing = [name for name in names if name not in position]
-        if missing:
-            message = f"{record.name} does not hold {len(missing)} of the studies read, the first {missing[0]}"
-            raise ValueError(message)
-        order = np.array([position[name] for name in names], dtype=np.int64)
-        return saved["predictions"].astype(np.float64)[order], saved["truth"].astype(np.float64)[order]
+        reading = HoldoutRecord(record).required().at(names)
+        return reading.predictions, reading.truth.astype(np.float64)
 
     @staticmethod
     def mean(read: list[tuple[Path, Reading]], group: tuple[Path, ...]) -> Reading:

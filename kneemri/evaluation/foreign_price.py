@@ -30,7 +30,7 @@ from core import cli
 from core.findings import STUDY, TARGETS
 from kneemri.evaluation.foreign_split import FOLDS, ForeignSplit
 from kneemri.evaluation.protocol_prior import Ordering
-from kneemri.runs.holdout_record import FOREIGN
+from kneemri.runs.holdout_record import FOREIGN, HoldoutRecord
 from kneemri.teacher_file import TeacherFile
 
 logger = logging.getLogger(__name__)
@@ -110,11 +110,11 @@ class ForeignPrice:
                 message = f"{absent:.3%} of the truth cells are nan: this table does not label these studies"
                 raise ValueError(message)
             return truth
-        ours = np.load(holdout, allow_pickle=True)
-        if studies != [str(one) for one in ours["studies"]]:
+        ours = HoldoutRecord(holdout).required()
+        if studies != ours.studies:
             message = "the served studies are not our holdout's studies, in order"
             raise ValueError(message)
-        return ours["truth"].astype(np.float32)
+        return ours.truth.astype(np.float32)
 
     def lines(self) -> list[str]:
         """The reading, with the denominator on every row because that is what makes it quotable."""

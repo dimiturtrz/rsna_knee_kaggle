@@ -49,6 +49,7 @@ import numpy as np
 from core import cli
 from kneemri.evaluation.record_mix import VOTE_RULES, RecordMix
 from kneemri.evaluation.scores import LabelScores
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -99,7 +100,7 @@ class PriceableBlend:
     def candidates(self) -> list[Path]:
         """Every checkpoint with a holdout record whose name does not mark it as full-fit."""
         records = sorted(self.models.glob("*.holdout.npz"))
-        names = [record.name.removesuffix(".holdout.npz") for record in records]
+        names = [Artefact.stem(record) for record in records]
         kept = [name for name in names if not any(marker in name for marker in IN_SAMPLE_MARKERS)]
         return [self.models / f"{name}.pt" for name in kept if (self.models / f"{name}.pt").exists()]
 

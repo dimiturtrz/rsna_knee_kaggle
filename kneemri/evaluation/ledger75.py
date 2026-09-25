@@ -42,6 +42,7 @@ from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.member_pool import DECLINES, MemberDeclines, MemberPool
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.holdout_record import SUFFIX, HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -178,7 +179,7 @@ class LedgerSeventyFive:
         """One member under both rulers, with the epoch and the row count that priced it."""
         reading = self.reading(path)
         ledger = float(np.nanmean(list(self.midpoint.per_label(reading.predictions, reading.truth).values())))
-        name = path.name.removesuffix(SUFFIX).removesuffix(".pt")
+        name = Artefact.stem(path)
         return Ledger75Row(
             name=name,
             ledger=ledger,

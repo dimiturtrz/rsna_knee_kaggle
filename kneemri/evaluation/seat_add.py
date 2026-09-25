@@ -44,6 +44,7 @@ from core import cli
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.inference.vote import LogitAverage, Vote
+from kneemri.runs.artefact import Artefact
 from kneemri.runs.holdout_record import SUFFIX, HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -157,7 +158,7 @@ class SeatAdd:
             raise ValueError(message)
         rows = self.shared([*seated, contender])
         return SeatAddRow(
-            candidate=candidate.name.removesuffix(SUFFIX).removesuffix(".pt"),
+            candidate=Artefact.stem(candidate),
             relation=relation,
             pool_size=len(seated),
             rows=len(rows),

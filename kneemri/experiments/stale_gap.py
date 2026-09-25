@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.runs.artefact import Artefact
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class StaleRun:
             return None
         best = max(range(len(scores)), key=lambda epoch: scores[epoch])
         return cls(
-            name=path.name.removesuffix(METRICS_SUFFIX),
+            name=Artefact.stem(path),
             epochs=len(scores),
             best_epoch=best,
             survived=cls._survived(scores),

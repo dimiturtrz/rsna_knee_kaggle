@@ -98,11 +98,11 @@ def test_combined(tmp_path: Path):
     names = np.array(["b", "a", "c"], dtype="<U64")
     truth = np.tile(np.array([[1.0], [0.0], [1.0]], dtype=np.float32), (1, len(TARGETS)))
     predictions = np.tile(np.array([[0.9], [0.1], [0.8]]), (1, len(TARGETS)))
-    first = tmp_path / "first.npz"
+    first = tmp_path / "first.holdout.npz"
     np.savez(first, studies=names, predictions=predictions, truth=truth)
 
     shuffle = np.array([1, 0, 2])
-    second = tmp_path / "second.npz"
+    second = tmp_path / "second.holdout.npz"
     np.savez(second, studies=names[shuffle], predictions=predictions[shuffle], truth=truth[shuffle])
 
     mixed, mixed_truth, studies = HoldoutJoin().combined([first, second])
