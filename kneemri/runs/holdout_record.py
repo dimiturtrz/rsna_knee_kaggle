@@ -16,7 +16,7 @@ moved; a paired comparison across that boundary would be arithmetic on two diffe
 `aligned` refuses it rather than averaging over it.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -110,6 +110,20 @@ class HoldoutReading:
             message = f"the two runs were scored by different label tables over their {len(shared)} shared studies"
             raise ValueError(message)
         return self.predictions[here], other.predictions[there], truth
+
+    def at(self, studies: list[str]) -> "HoldoutReading":
+        """This reading over `studies`, in THEIR order, joined by NAME.
+
+        Positional alignment is the failure with no symptom: two members recorded over different
+        holdouts line up perfectly under it and every number after is nonsense.
+        """
+        where = {study: position for position, study in enumerate(self.studies)}
+        missing = [study for study in studies if study not in where]
+        if missing:
+            message = f"{len(missing)} studies are absent from the record ({missing[0]} first)"
+            raise ValueError(message)
+        rows = np.asarray([where[study] for study in studies], dtype=np.int64)
+        return replace(self, studies=list(studies), predictions=self.predictions[rows], truth=self.truth[rows])
 
 
 class HoldoutRecord:
@@ -208,3 +222,11 @@ class HoldoutRecord:
             epoch=int(stored["epoch"]) if "epoch" in held else UNKNOWN_EPOCH,
             source=str(stored["source"]) if "source" in held else PROBE,
         )
+
+    def required(self) -> HoldoutReading:
+        """What this run predicted, or a refusal naming the run that kept nothing."""
+        reading = self.read()
+        if reading is None:
+            message = f"{self.path} left no holdout record - a --fold -1 member has none and can never have one"
+            raise FileNotFoundError(message)
+        return reading

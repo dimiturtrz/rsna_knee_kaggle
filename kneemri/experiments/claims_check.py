@@ -397,8 +397,7 @@ class ClaimsCheck:
             metrics = RunRecord(processed / f"{name}.pt")
             if metrics.exists():
                 known.update(f"{float(row['auc']):.4f}" for row in metrics.rows() if row.get("auc") is not None)
-            record = HoldoutRecord(processed / f"{name}{HOLDOUT_SUFFIX}")
-            reading = record.read() if record.exists() else None
+            reading = HoldoutRecord(processed / f"{name}{HOLDOUT_SUFFIX}").read()
             if reading is not None:
                 known.add(f"{ruler.macro(reading):.4f}")
             scores[name] = known

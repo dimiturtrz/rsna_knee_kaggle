@@ -163,3 +163,22 @@ def test_aligned_refuses_runs_with_nothing_in_common():
     """An empty overlap is a mismatched split, not an interval of width zero."""
     with pytest.raises(ValueError, match="no study is held out by both"):
         _reading(["a", "b"]).aligned(_reading(["y", "z"]))
+
+
+def test_at():
+    """Rows come back in the ASKED order by name, and a study the record lacks is refused, not zero-filled."""
+    reading = _reading(["a", "b", "c"])
+    taken = reading.at(["c", "a"])
+    assert taken.studies == ["c", "a"]
+    assert taken.predictions[:, 0] == pytest.approx([0.2, 0.0])
+    assert taken.truth.shape == (2, LABELS)
+    with pytest.raises(ValueError, match="absent"):
+        reading.at(["z"])
+
+
+def test_required(tmp_path: Path):
+    """A kept record reads back; a run that kept none is refused by name instead of arriving as None."""
+    HoldoutRecord(tmp_path / "m.pt").write(["a"], np.zeros((1, LABELS)), np.zeros((1, LABELS), dtype=np.float32), 2)
+    assert HoldoutRecord(tmp_path / "m.pt").required().studies == ["a"]
+    with pytest.raises(FileNotFoundError, match="dark"):
+        HoldoutRecord(tmp_path / "dark.pt").required()

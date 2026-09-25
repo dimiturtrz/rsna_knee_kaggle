@@ -95,15 +95,6 @@ class SeatAdd:
         self.scores = scores if scores is not None else LedgerSeventyFive().scorer()
         self.vote = vote if vote is not None else LogitAverage()
 
-    def reading(self, path: Path) -> HoldoutReading:
-        """One member's holdout record, or a refusal naming the member that has none."""
-        record = HoldoutRecord(path)
-        reading = record.read() if record.exists() else None
-        if reading is None:
-            message = f"{path} left no holdout record - a --fold -1 member has none and can never have one"
-            raise FileNotFoundError(message)
-        return reading
-
     def shared(self, readings: list[HoldoutReading]) -> list[str]:
         """The studies EVERY reading covers, in a stable order so two runs of this agree."""
         common = set(readings[0].studies)
@@ -132,10 +123,7 @@ class SeatAdd:
         array while leaving its shape plausible — which is the same argument `HoldoutReading.aligned`
         makes for two members and this makes for many.
         """
-        return [
-            np.asarray([reading.predictions[index] for index in self._indices(reading, studies)], dtype=np.float64)
-            for reading in readings
-        ]
+        return [reading.at(studies).predictions for reading in readings]
 
     def truth(self, readings: list[HoldoutReading], studies: list[str]) -> Float[NDArray[np.float32], "studies labels"]:
         """The one truth table every reading agrees on, or a refusal when they do not.
@@ -144,10 +132,7 @@ class SeatAdd:
         failure a matched delta cannot detect for itself: the arithmetic succeeds and the answer is to a
         question nobody asked.
         """
-        tables = [
-            np.asarray([reading.truth[index] for index in self._indices(reading, studies)], dtype=np.float32)
-            for reading in readings
-        ]
+        tables = [reading.at(studies).truth for reading in readings]
         for reading, table in zip(readings[1:], tables[1:], strict=True):
             if float(np.abs(table - tables[0]).max()) > TRUTH_TOLERANCE:
                 message = f"{reading.source} carries a different truth table on the shared studies - different rulers"
@@ -161,8 +146,8 @@ class SeatAdd:
 
     def price(self, pool: list[Path], candidate: Path) -> SeatAddRow:
         """The candidate's add into the pool, base recomputed on the studies the candidate covers."""
-        seated = [self.reading(path) for path in pool]
-        contender = self.reading(candidate)
+        seated = [HoldoutRecord(path).required() for path in pool]
+        contender = HoldoutRecord(candidate).required()
         relation = self.relation(contender, self.shared(seated))
         if relation is Relation.PARTIAL:
             message = (
@@ -181,11 +166,6 @@ class SeatAdd:
             solo=self.macro([contender], rows),
             ruler=self.scores.name(),
         )
-
-    def _indices(self, reading: HoldoutReading, studies: list[str]) -> list[int]:
-        """Where each named study sits in this reading, by name."""
-        position = {study: index for index, study in enumerate(reading.studies)}
-        return [position[study] for study in studies]
 
 
 def main() -> None:

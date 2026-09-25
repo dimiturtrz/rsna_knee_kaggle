@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 from core.findings import TARGETS
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.evaluation.seat_add import BOARD_RESOLVABLE, Relation, SeatAdd, SeatAddRow
-from kneemri.runs.holdout_record import HoldoutRecord
+from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 
 POOL_STUDIES = ["s1", "s2", "s3", "s4", "s5"]
 GRADES = [0.94, 0.68, 0.68, 0.08, 0.94]
@@ -37,6 +37,11 @@ def _member(directory: Path, name: str, studies: list[str], grades: list[float] 
     return path
 
 
+def _read(path: Path) -> HoldoutReading:
+    """One member's kept arrays."""
+    return HoldoutRecord(path).required()
+
+
 def _pool(directory: Path) -> list[Path]:
     """Two seated members, both on the full frame."""
     return [_member(directory, "seat1", POOL_STUDIES), _member(directory, "seat2", POOL_STUDIES)]
@@ -55,32 +60,20 @@ def test_clears() -> None:
     assert not SeatAddRow("c", Relation.EXACT, with_candidate=BOARD_RESOLVABLE / 2, **fields).clears()
 
 
-def test_reading(tmp_path: Path) -> None:
-    """The kept arrays come back under their own study names."""
-    reading = SeatAdd().reading(_member(tmp_path, "m1", POOL_STUDIES))
-    assert reading.studies == POOL_STUDIES
-
-
-def test_reading_refuses_a_member_with_no_record(tmp_path: Path) -> None:
-    """A dark arm held nothing out, and no add over it can ever exist."""
-    with pytest.raises(FileNotFoundError, match="no holdout record"):
-        SeatAdd().reading(tmp_path / "dark.pt")
-
-
 def test_shared(tmp_path: Path) -> None:
     """The shared frame is what EVERY reading covers, in an order two runs of this agree on."""
     instrument = SeatAdd()
-    readings = [instrument.reading(path) for path in (_member(tmp_path, "wide", POOL_STUDIES),)]
-    readings.append(instrument.reading(_member(tmp_path, "narrow", ["s3", "s1"])))
+    readings = [_read(path) for path in (_member(tmp_path, "wide", POOL_STUDIES),)]
+    readings.append(_read(_member(tmp_path, "narrow", ["s3", "s1"])))
     assert instrument.shared(readings) == ["s1", "s3"]
 
 
 def test_relation(tmp_path: Path) -> None:
     """Covering the frame exactly, sitting inside it, and spilling outside it are three findings."""
     instrument = SeatAdd()
-    exact = instrument.reading(_member(tmp_path, "exact", POOL_STUDIES))
-    nested = instrument.reading(_member(tmp_path, "nested", POOL_STUDIES[:4]))
-    partial = instrument.reading(_member(tmp_path, "partial", ["s1", "s2", "outside"]))
+    exact = _read(_member(tmp_path, "exact", POOL_STUDIES))
+    nested = _read(_member(tmp_path, "nested", POOL_STUDIES[:4]))
+    partial = _read(_member(tmp_path, "partial", ["s1", "s2", "outside"]))
     assert instrument.relation(exact, POOL_STUDIES) is Relation.EXACT
     assert instrument.relation(nested, POOL_STUDIES) is Relation.NESTED
     assert instrument.relation(partial, POOL_STUDIES) is Relation.PARTIAL
@@ -89,8 +82,8 @@ def test_relation(tmp_path: Path) -> None:
 def test_stacked(tmp_path: Path) -> None:
     """Predictions are joined by study NAME, so a reading written in another order still aligns."""
     instrument = SeatAdd()
-    forward = instrument.reading(_member(tmp_path, "forward", POOL_STUDIES))
-    backward = instrument.reading(_member(tmp_path, "backward", list(reversed(POOL_STUDIES))))
+    forward = _read(_member(tmp_path, "forward", POOL_STUDIES))
+    backward = _read(_member(tmp_path, "backward", list(reversed(POOL_STUDIES))))
     stacked = instrument.stacked([forward, backward], ["s2", "s4"])
     assert np.allclose(stacked[0], stacked[1])
     assert stacked[0][:, 0] == pytest.approx([SCORES[1], SCORES[3]])
@@ -99,7 +92,7 @@ def test_stacked(tmp_path: Path) -> None:
 def test_truth(tmp_path: Path) -> None:
     """The one truth table both readings agree on, over exactly the studies asked for."""
     instrument = SeatAdd()
-    readings = [instrument.reading(path) for path in _pool(tmp_path)]
+    readings = [_read(path) for path in _pool(tmp_path)]
     assert instrument.truth(readings, ["s1", "s4"])[:, 0] == pytest.approx([GRADES[0], GRADES[3]])
 
 
@@ -107,7 +100,7 @@ def test_truth_refuses_two_rulers(tmp_path: Path) -> None:
     """Two records disagreeing on a shared study were scored against different truths, not one."""
     instrument = SeatAdd()
     theirs = _member(tmp_path, "theirs", POOL_STUDIES, grades=[0.08, 0.94, 0.68, 0.68, 0.94])
-    readings = [instrument.reading(_member(tmp_path, "ours", POOL_STUDIES)), instrument.reading(theirs)]
+    readings = [_read(_member(tmp_path, "ours", POOL_STUDIES)), _read(theirs)]
     with pytest.raises(ValueError, match="different truth table"):
         instrument.truth(readings, POOL_STUDIES)
 
@@ -115,7 +108,7 @@ def test_truth_refuses_two_rulers(tmp_path: Path) -> None:
 def test_macro(tmp_path: Path) -> None:
     """The pool's macro is this instrument's own vote and cut over the stacked arrays."""
     instrument = SeatAdd()
-    readings = [instrument.reading(path) for path in _pool(tmp_path)]
+    readings = [_read(path) for path in _pool(tmp_path)]
     combined = instrument.vote.combine(instrument.stacked(readings, POOL_STUDIES))
     expected = instrument.scores.mean(combined, instrument.truth(readings, POOL_STUDIES))
     assert instrument.macro(readings, POOL_STUDIES) == pytest.approx(expected)

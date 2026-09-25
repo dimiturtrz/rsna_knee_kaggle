@@ -114,15 +114,6 @@ def test_record(tmp_path: Path) -> None:
         SeatFrame.record(tmp_path, "ghost")
 
 
-def test_taken(tmp_path: Path) -> None:
-    """Values joined by study NAME, and a refusal when the frame asks for a study the record lacks."""
-    reading = SeatFrame.record(_holdouts(tmp_path), "p0")
-    taken = SeatFrame.taken(reading, ["s002", "s000"], reading.predictions)
-    assert taken[0].tolist() == reading.predictions[2].tolist()
-    with pytest.raises(ValueError, match="absent"):
-        SeatFrame.taken(reading, ["s999"], reading.predictions)
-
-
 def test_child(tmp_path: Path) -> None:
     """A candidate's ranks over the frame — and a refusal when its truth is a different table."""
     frame = _frame(tmp_path)

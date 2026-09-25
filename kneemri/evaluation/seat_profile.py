@@ -40,18 +40,9 @@ class SeatProfile:
         """`scores` defaults to LEDGER75, the cut the seat instruments answer on."""
         self.scores = scores if scores is not None else LedgerSeventyFive().scorer()
 
-    def reading(self, path: Path) -> HoldoutReading:
-        """One member's kept predictions, its truth and the epoch they came from."""
-        record = HoldoutRecord(path)
-        reading = record.read() if record.exists() else None
-        if reading is None:
-            message = f"{path} left no holdout record - a --fold -1 member has none and can never have one"
-            raise FileNotFoundError(message)
-        return reading
-
     def scored(self, path: Path) -> dict[str, float]:
         """One member's twelve AUCs, keyed by finding."""
-        reading = self.reading(path)
+        reading = HoldoutRecord(path).required()
         return self.scores.per_label(reading.predictions, reading.truth)
 
     def margins(
@@ -101,7 +92,9 @@ class SeatProfile:
 
     def readings(self, paths: list[Path]) -> dict[str, HoldoutReading]:
         """Every member's kept arrays, checked onto one ruler, keyed by the member name the ledger quotes."""
-        readings = {path.name.removesuffix(SUFFIX).removesuffix(".pt"): self.reading(path) for path in paths}
+        readings = {
+            path.name.removesuffix(SUFFIX).removesuffix(".pt"): HoldoutRecord(path).required() for path in paths
+        }
         first = next(iter(readings.values()))
         for reading in readings.values():
             first.aligned(reading)
@@ -117,8 +110,8 @@ class SeatProfile:
         this drops is one no ledger row ever ranked against the baseline either.
         """
         ruler = LedgerSeventyFive()
-        wanted = ruler.population(self.reading(next(path for path in paths if against in path.name)))
-        kept = [path for path in paths if ruler.population(self.reading(path)) == wanted]
+        wanted = ruler.population(ruler.reading(next(path for path in paths if against in path.name)))
+        kept = [path for path in paths if ruler.population(ruler.reading(path)) == wanted]
         if len(kept) < len(paths):
             logger.info(f"population @{wanted}: {len(kept)} of {len(paths)} members answer {against}'s question")
         return kept

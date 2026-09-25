@@ -40,21 +40,6 @@ def test_scores_defaults_to_ledger75() -> None:
     assert LabelScores().name() != "ledger75", "the midpoint has to stay reachable and distinguishable"
 
 
-def test_reading(tmp_path: Path) -> None:
-    """The kept arrays come back under the study names and the epoch they were written with."""
-    path = _member(tmp_path, "m1", LEADER)
-    reading = SeatProfile().reading(path)
-    assert reading.studies == STUDIES
-    assert reading.epoch == 3
-    assert reading.predictions.shape == (len(STUDIES), len(TARGETS))
-
-
-def test_reading_refuses_a_member_with_no_record(tmp_path: Path) -> None:
-    """A `--fold -1` member held nothing out, and the profile must say so rather than score nothing."""
-    with pytest.raises(FileNotFoundError, match="no holdout record"):
-        SeatProfile().reading(tmp_path / "dark.pt")
-
-
 def test_scored(tmp_path: Path) -> None:
     """One member's twelve AUCs, at the endpoints the fixture was built to land on."""
     scored = SeatProfile().scored(_member(tmp_path, "m1", LEADER))
@@ -88,7 +73,7 @@ def test_population(tmp_path: Path) -> None:
     """A member graded by another table answers another question, so it is dropped before anything ranks it."""
     ours = _member(tmp_path, "m1", LEADER)
     moved = _member(tmp_path, "moved", LEADER)
-    kept = SeatProfile().reading(moved)
+    kept = HoldoutRecord(moved).required()
     HoldoutRecord(moved).write(STUDIES, kept.predictions, _truth() * 0.5, epoch=3)
     assert SeatProfile().population([ours, moved], "m1") == [ours]
 

@@ -149,13 +149,12 @@ class SeatFrame:
         """
         readings = {name: cls.record(holdouts, name) for name in (*parents, anchor)}
         frame = sorted(set.intersection(*[set(reading.studies) for reading in readings.values()]))
-        truth = cls.taken(readings[anchor], frame, readings[anchor].truth)
+        truth = readings[anchor].at(frame).truth
         keep = ~np.all(np.isin(truth, GOLD_LEVELS), axis=1)
         studies = [study for study, kept in zip(frame, keep, strict=True) if kept]
         rows = studies if rank_kept else frame
         ranks = {
-            name: cls.ranked(cls.taken(reading, rows, reading.predictions).astype(np.float64))
-            for name, reading in readings.items()
+            name: cls.ranked(reading.at(rows).predictions.astype(np.float64)) for name, reading in readings.items()
         }
         return cls(
             studies=studies,
@@ -170,30 +169,7 @@ class SeatFrame:
     @staticmethod
     def record(holdouts: Path, name: str) -> HoldoutReading:
         """One member's held-out reading, refusing a member that never wrote one."""
-        record = HoldoutRecord(holdouts / f"{name}.pt")
-        reading = record.read() if record.exists() else None
-        if reading is None:
-            message = f"{name} left no holdout record under {holdouts} - a --fold -1 member has none and never will"
-            raise FileNotFoundError(message)
-        return reading
-
-    @staticmethod
-    def taken(
-        reading: HoldoutReading,
-        studies: list[str],
-        values: Float[np.ndarray, "held targets"],
-    ) -> Float[np.ndarray, "studies targets"]:
-        """`values` in the frame's order, joined by study NAME.
-
-        Positional alignment is the failure with no symptom: two members recorded over different
-        holdouts line up perfectly under it and every number after is nonsense.
-        """
-        where = {study: position for position, study in enumerate(reading.studies)}
-        missing = [study for study in studies if study not in where]
-        if missing:
-            message = f"{len(missing)} frame studies are absent from the record ({missing[0]} first)"
-            raise ValueError(message)
-        return values[np.asarray([where[study] for study in studies], dtype=np.int64)]
+        return HoldoutRecord(holdouts / f"{name}.pt").required()
 
     def child(self, name: str) -> Float[NDArray[np.float64], "studies targets"]:
         """A candidate member's ranks over this frame, asserted to be scored by the same truth.
@@ -206,8 +182,8 @@ class SeatFrame:
         if not set(self.studies) <= set(reading.studies):
             message = f"{name} does not cover the frame ({len(self.studies)} studies); a partial member is refused"
             raise ValueError(message)
-        truth = self.taken(reading, self.studies, reading.truth)
-        moved = float(np.mean(~np.isclose(truth, self.truth)))
+        kept = reading.at(self.studies)
+        moved = float(np.mean(~np.isclose(kept.truth, self.truth)))
         if moved > 0.0:
             message = (
                 f"{name} was scored against a different label table than {self.anchor}: {moved:.1%} of cells differ. "
@@ -217,7 +193,7 @@ class SeatFrame:
             if not self.allow_ruler_move:
                 raise ValueError(message)
             logger.warning("%s", message)
-        return self.ranked(self.taken(reading, self.studies, reading.predictions).astype(np.float64))
+        return self.ranked(kept.predictions.astype(np.float64))
 
     def proxy(
         self, block: list[Float[NDArray[np.float64], "studies targets"]], *, with_anchor: bool = True

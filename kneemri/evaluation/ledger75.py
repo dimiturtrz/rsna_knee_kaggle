@@ -162,12 +162,7 @@ class LedgerSeventyFive:
 
     def reading(self, path: Path) -> HoldoutReading:
         """One member's kept predictions and the truth they were scored against."""
-        record = HoldoutRecord(path)
-        reading = record.read() if record.exists() else None
-        if reading is None:
-            message = f"{path} left no holdout record - a --fold -1 member has none and can never have one"
-            raise FileNotFoundError(message)
-        return reading
+        return HoldoutRecord(path).required()
 
     def per_label(self, reading: HoldoutReading) -> dict[str, float]:
         """The twelve AUCs under the mixed cut, each column read where its own coin-flip rung sits."""
