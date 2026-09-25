@@ -18190,3 +18190,41 @@ same cache, recipe and seed, 909 holdout studies:
 0.053 per block and direction after training from zero, largest at the earliest hooked block — for +5%
 epoch time. Kept as free and mechanism-sound; composed onto the shipping line as `shift4_depth24`
 (knee-6u1tq).
+
+## SliceShift does not transfer to the shipping line — 2026-09-25T05:04Z
+
+`shift4_depth24` (knee-6u1tq): `labelwise_depth24_drop40_long` plus `--slice-shift 4`, all other flags
+byte for byte, same cache and seed, 909 holdout studies:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_depth24_drop40_long_s2026 | 0.8679 | 0.9053 | 18 |
+| shift4_depth24_s2026 | 0.8672 | 0.9037 | 19 |
+
+−0.0016 ledger75, inside the seed floor: no transfer. The mechanism fired (mean |gate| 0.043), so this
+is not a plumbing null. Midpoint tracked the base within ±0.004 at every epoch from e8 to e23. Rank
+correlation with the base is 0.954 and swapping it into the base's seat reads −0.0001, so it is a near
+twin, not a diverse member. The +0.0035 on the 12-slice line does not carry to 24 slices; one reading:
+at 24 slices the neighbour-slice context the gates add is already reachable through the deeper stack's
+labelwise pooling, so the gain was the 12-slice line's missing context rather than a general one. The
+full-data twin `shift4_depth24_ff` was not armed, per its own gate. Declined in `comp/members.declines`.
+
+## Extended slots are flat under labelwise too — 2026-09-25T05:14Z
+
+AXES carried `extended_slots` as UNREAD on the max-pooling ruler. A matched labelwise read was already on
+disk: both arms are 336px, 20 slices, 0.1-0.9 band, `--calibrated-targets --hold-annotations
+--slot-dropout 0.40`, 24 epochs, same seed; the extended arm alone adds `--scheme extended` (and batch 4×3
+accumulation for VRAM), 909 holdout studies, card-free:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_dense_drop40_long_s2026 | 0.8672 | 0.9048 | 23 |
+| labelwise_ext_drop40_long_s2026 | 0.8672 | 0.9045 | 23 |
+
+**−0.0003 ledger75.** Three more slots on 34.2% of studies (COR PD non-FS, AX T1, AX PD non-FS) buy nothing
+under labelwise either. The depth step at six slots, 20 → 24 slices, reads +0.0005
+(`labelwise_depth24_drop40_long_s2026` 0.9053). Composing extended with 24 slices would need a ~107 GB
+decode against 50 GB free on D:, and the axis is flat — not armed. NVUM (knee-qpmqz) was scoped the same
+morning and declined without card: `dml_b` already ships a live-peer ranking distill (0.9078), the honest
+own-pool distill term is +0.0056 (README:8740), and a temporal self-teacher carries strictly less ensemble
+information than either.

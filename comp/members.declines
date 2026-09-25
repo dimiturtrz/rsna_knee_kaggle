@@ -1809,3 +1809,4 @@ fuse3_lw12_s2026_run1       # superseded partial of fuse3_lw12: best epoch 3, 0.
 sam_ship_s2026              # SAM trunk, stopped by the owner at epoch 3: 0.8449 ledger75, a truncated floor far under the 0.9053 line.
 orthodiff_ft_s2026          # OrthoDiffusion Stage II fine-tune (knee-mxz08): 0.8054 ledger75 @e4 vs control 0.9006, -0.0952; instrument, not a seat.
 shift4_lw12_s2026           # SliceShift on the 12-slice line (knee-ypu31): 0.9041 ledger75 @e18 vs control 0.9006, +0.0035 directional; under the 0.9053 line, and shift4_depth24 carries the mechanism onto it.
+shift4_depth24_s2026        # SliceShift on the shipping line (knee-6u1tq): 0.9037 ledger75 @e19 vs base 0.9053, -0.0016, no transfer; rank corr 0.954 with base, seat swap -0.0001 - a twin, not a diverse seat.
