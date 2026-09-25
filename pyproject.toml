@@ -99,16 +99,6 @@ fastmri = ["h5py"]
 # volumes and nibabel is the reader for them. An extra for the same reason `fastmri` is: the measurement
 # runs on this machine, and a shipped kit never opens a .nii.
 motion = ["nibabel"]
-# Scoring an attribution rather than producing one (`kneemri.evaluation.attribution_faithfulness`).
-# The occlusion diagnostics in `kneemri.evaluation.attribution` have never been checked by anything, and
-# captum ships the two metrics that check them — `infidelity` (does the attribution predict what the
-# occlusion actually costs?) and `sensitivity_max` (does it survive a perturbation that should not move
-# it?) — plus `FeatureAblation`, which is the per-study form of the slot drop we already do by hand.
-# PIXEL-SPACE SALIENCY IS STILL DECLINED and the library does not change that argument: nothing in this
-# supervision says WHERE a finding is, so a heatmap has no ground truth here (see `attribution`'s
-# docstring, knee-wgaa). An extra rather than a base dependency because nothing in a shipped kit scores
-# an attribution.
-attribution = ["captum"]
 # Confident learning over out-of-fold predictions (`kneemri.evaluation.label_errors`). cleanlab is the
 # reference implementation of Northcutt et al. 2021 (JAIR 70:1373-1411) — the confident-joint estimator,
 # its calibration, and the per-example self-confidence ranking. Hand-rolling that arithmetic is how a

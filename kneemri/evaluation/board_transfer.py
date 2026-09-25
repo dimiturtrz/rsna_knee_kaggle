@@ -1,9 +1,10 @@
 """Does our holdout ORDER entries the way the leaderboard does? `python -m kneemri.evaluation.board_transfer`.
 
-`ruler_transfer` measures the report-versus-radiologist half of the same question and says plainly what
-it cannot reach: "It is not the local-to-LEADERBOARD compression of knee-7d1. That needs the board."
-This is that half. The board has now scored nine entries whose offline number is our own ruler on our
-own members, which is enough to stop quoting a compression factor fitted to two of them.
+`ruler_transfer` (retired, last at 1812b96e) measured the report-versus-radiologist half of the same
+question and said plainly what it could not reach: "It is not the local-to-LEADERBOARD compression of
+knee-7d1. That needs the board." This is that half. The board has now scored nine entries whose offline
+number is our own ruler on our own members, which is enough to stop quoting a compression factor fitted
+to two of them.
 
 PAIRS, NOT A REGRESSION. A line through nine points would be a claim about the LEVEL of two scores that
 were never meant to agree - one is measured against LLM-read report labels on a 58-study holdout, the
@@ -76,7 +77,7 @@ RECORD = Path("comp/board.jsonl")
 """The machine-readable half of `comp/SUBMISSIONS.md`, which holds the same numbers as prose."""
 
 DELTA_FLOOR = 0.002
-"""An offline gap smaller than this contributes no ratio, the same guard `ruler_transfer` applies.
+"""An offline gap smaller than this contributes no ratio, the same guard `ruler_transfer` applied.
 
 Dividing a board delta by a holdout delta that has nearly vanished reports the denominator rather than
 the transfer, and two of these entries sit 0.0002 apart.

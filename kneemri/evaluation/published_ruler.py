@@ -6,7 +6,7 @@ it — no labels, no leaderboard, no GPU.
 
 WHY IT IS ITS OWN MODULE. It lived as a method on `OutOfFoldOracle`, which compares one published
 member's recorded predictions against what our pipeline produces for the same studies. This compares
-nothing: it is a RULER, and four evaluations (`paired_floor`, `ruler_transfer`,
+nothing: it is a RULER, and four evaluations (`paired_floor`, `ruler_transfer` (retired, last at 1812b96e),
 `stack_coverage` (retired, last at e0611cc5), `supervision_gap`) were each constructing a
 residual-comparison oracle in order to reach it, three of them through a local import to dodge the
 module's CLI-only dependencies. One class, two products.

@@ -7735,7 +7735,7 @@ nothing to reverse.
 
 ### neighbour_errors — the SimiFeat replacement is BUILT and MEASURED, and it does not reopen the lane — 2026-09-05
 
-No card, no slot. `python -m kneemri.evaluation.neighbour_errors --against-confident`, full output in
+No card, no slot. (retired, last at 1812b96e) `python -m kneemri.evaluation.neighbour_errors --against-confident`, full output in
 `logs/neighbour_errors_combined.log`. A similarity-weighted 10-neighbour vote over six frozen 336 px trunks
 (ortholarge, v3large, large, small, radnet121, vjepa2l), read on the SAME gate, the SAME 58-study census and
 the SAME budgets confident learning is read at, so the three rankings below are directly comparable.
@@ -9820,7 +9820,7 @@ one.
 
 ## D87 — the strong teacher's lead is 3/4 signal and 1/4 ruler, and it is NOT strong everywhere: it LOSES the two fluid columns — 2026-09-08
 
-Zero card, CPU, ~15 s. `python -m kneemri.evaluation.column_surface --surface raptor_teacher.npz --against
+Zero card, CPU, ~15 s. (retired, last at 1812b96e) `python -m kneemri.evaluation.column_surface --surface raptor_teacher.npz --against
 teacher_clean_full.npz` (`logs/raptor_teacher_midpoint.log`).
 
 Researcher's D86 found `raptor_teacher.npz` on disk at **0.9432@896 / 0.9460@4407** on the **L75mid rank**
@@ -10632,7 +10632,7 @@ five families — that hole is still open, and it is now a smaller-step question
 
 ## 2026-09-08 — blindness above 0.870 is REFUTED; the band-to-band slope spread is an artefact, not saturation
 
-`python -m kneemri.evaluation.transfer_strata`, run 09:12Z, output at `logs/transfer_strata.log`. 37
+(retired, last at 1812b96e) `python -m kneemri.evaluation.transfer_strata`, run 09:12Z, output at `logs/transfer_strata.log`. 37
 rebuildable ensemble entries, 5 difficulty bands of ~182 studies cut on member disagreement across a fixed
 41-member reference pool, 12 of 12 findings scoreable in every band. **Correlation and spread columns added
 09:35Z; the slope-only version of this row, published 09:20Z, carried a mechanism that is now retracted.**
