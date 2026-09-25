@@ -28,7 +28,7 @@ def test_of_a_file_that_is_not_dicom_reads_as_an_empty_header(tmp_path: Path):
     predicates decline the series — which is what a series nothing can be said about deserves.
     """
     junk = tmp_path / "junk.dcm"
-    junk.write_bytes(b"not a dicom")
+    junk.write_bytes(b"junk")
 
     header = SeriesHeader.of(junk)
 
@@ -127,7 +127,7 @@ def test_column_axis_x(tmp_path: Path):
     assert sagittal.column_axis_x == 0.0
 
     junk = tmp_path / "junk.dcm"
-    junk.write_bytes(b"not a dicom")
+    junk.write_bytes(b"junk")
     assert SeriesHeader.of(junk).column_axis_x is None
 
 

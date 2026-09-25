@@ -85,5 +85,5 @@ def test_borrowed(tmp_path: Path):
 
     assert ForeignHoldout.borrowed(tmp_path, "mine").studies == adopted.studies
 
-    with pytest.raises(ValueError, match="no holdout record"):
+    with pytest.raises(FileNotFoundError, match="no holdout record"):
         ForeignHoldout.borrowed(tmp_path, "absent")

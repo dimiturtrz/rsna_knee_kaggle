@@ -198,7 +198,7 @@ def test_ranked(tmp_path: Path) -> None:
     assert back.shape == truth.shape
     assert rows[0].damage >= rows[-1].damage, "the ranking is worst-first or every tail below is the wrong end"
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(FileNotFoundError, match="no holdout record"):
         AttributionCorpus(models=tmp_path, raw=tmp_path, processed=tmp_path).ranked("absent")
 
 

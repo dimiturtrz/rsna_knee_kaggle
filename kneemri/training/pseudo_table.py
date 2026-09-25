@@ -106,10 +106,7 @@ def main() -> None:
     command.parser.add_argument("--out", type=Path, required=True, help="where the pseudo table is written")
     arguments = command.parsed()
 
-    reading = HoldoutRecord(arguments.record).read()
-    if reading is None:
-        message = f"{arguments.record} holds no predictions, so there is no teacher to write down"
-        raise FileNotFoundError(message)
+    reading = HoldoutRecord(arguments.record).required()
     pseudo = PseudoTable(pd.read_csv(arguments.base), reading.studies, reading.predictions)
     command.report(pseudo.coverage())
 

@@ -202,10 +202,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     processed, raw = root.processed(), root.raw()
-    reading = HoldoutRecord(processed / f"{arguments.like}.pt").read()
-    if reading is None:
-        message = f"no holdout record for {arguments.like} — nothing names the studies to score"
-        raise FileNotFoundError(message)
+    reading = HoldoutRecord(processed / f"{arguments.like}.pt").required()
 
     grouped: dict[str, list[Mapping[str, object]]] = {}
     with (raw / "train_series.csv").open(newline="", encoding="utf-8") as handle:

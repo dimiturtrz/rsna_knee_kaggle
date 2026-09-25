@@ -129,10 +129,7 @@ class MatchedRuler:
 
     def compared(self, record: Path) -> list[WeightsGap]:
         """Per-label AUC for our run and for theirs, over our run's holdout studies."""
-        reading = HoldoutRecord(record).read()
-        if reading is None:
-            message = f"no holdout predictions beside {record}"
-            raise ValueError(message)
+        reading = HoldoutRecord(record).required()
         members = self.theirs(reading.studies)
         if not members:
             message = f"no published seed covers all {len(reading.studies)} of this run's studies"

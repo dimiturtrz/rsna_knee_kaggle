@@ -368,10 +368,7 @@ class AttributionCorpus:
         Float[NDArray[np.floating], "studies findings"],
     ]:
         """One run's ranking, its damage table, its study order and its truth — all four are needed."""
-        reading = HoldoutRecord(self.models / f"{run}.pt").read()
-        if reading is None:
-            message = f"no holdout record beside {run}"
-            raise SystemExit(message)
+        reading = HoldoutRecord(self.models / f"{run}.pt").required()
         errors = StudyErrors()
         table = errors.damages(reading.predictions, reading.truth)
         return errors.ranked(reading.studies, table, reading.truth), table, list(reading.studies), reading.truth

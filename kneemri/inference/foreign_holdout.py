@@ -58,11 +58,7 @@ class ForeignHoldout:
     @staticmethod
     def borrowed(processed: Path, like: str) -> HoldoutReading:
         """The record this foreign reading will adopt, or a refusal naming the member that lacks one."""
-        reading = HoldoutRecord(processed / f"{like}.pt").read()
-        if reading is None:
-            message = f"{like} has no holdout record, so there is no study list or ruler to borrow"
-            raise ValueError(message)
-        return reading
+        return HoldoutRecord(processed / f"{like}.pt").required()
 
     def reading(self, borrowed: HoldoutReading, order: list[str]) -> HoldoutReading:
         """The foreign member's probabilities over the borrowed studies, under the borrowed truth."""
