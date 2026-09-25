@@ -18174,3 +18174,19 @@ Mean AUC by epoch 0.719 → 0.738 → 0.763 → 0.772 → 0.780 → 0.779: a pla
 the budget did not bind. Stage II lifts the frozen probe (0.7435 midpoint) by +0.037 and stays −0.095
 ledger75 under our trunk. Not ruled out: their three-block LSE fusion and three timesteps; each would
 need a sixfold recovery to reach the bar. Closed; declined in `comp/members.declines`.
+
+## SliceShift is directional on the labelwise line — 2026-09-25T03:20Z
+
+`shift4_lw12` (knee-ypu31, `--slice-shift 4`: the previous and next slice's tokens added per channel
+through zero-initialised gates before each of the last four encoder blocks) against `labelwise_ms_ctrl`,
+same cache, recipe and seed, 909 holdout studies:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_ms_ctrl_s2026 | 0.8637 | 0.9006 | 20 |
+| shift4_lw12_s2026 | 0.8686 | 0.9041 | 18 |
+
++0.0035 ledger75: directional, under the 0.0062 seed floor. The mechanism fired — mean |gate| 0.039 to
+0.053 per block and direction after training from zero, largest at the earliest hooked block — for +5%
+epoch time. Kept as free and mechanism-sound; composed onto the shipping line as `shift4_depth24`
+(knee-6u1tq).
