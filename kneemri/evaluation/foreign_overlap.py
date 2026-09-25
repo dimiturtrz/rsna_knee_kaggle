@@ -98,7 +98,7 @@ def main() -> None:
 
     root: DataRoot = command.rooted(arguments)
     overlap = ForeignOverlap()
-    holdout = overlap.holdout(root.raw() / "train.csv", arguments.fold)
+    holdout = overlap.holdout(root.train_table(), arguments.fold)
     covered = overlap.covered(holdout, arguments.foreign)
     header = f"{arguments.foreign.name} vs fold-{arguments.fold} holdout"
     command.report([header, *overlap.verdict(len(covered), len(holdout))])

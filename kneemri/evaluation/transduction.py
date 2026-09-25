@@ -85,6 +85,7 @@ from core import cli
 from core.data.corpus.folds import ReportFolds
 from core.denominator import Denominator
 from core.findings import TARGETS
+from core.paths import TRAIN_TABLE
 from kneemri.evaluation.feature_probe import HOLDOUT_FOLD, TRUNKS, FeatureProbe, ProbeCorpus
 from kneemri.evaluation.labelling import FIXED_TAIL, LABELLINGS, Labelling
 from kneemri.evaluation.scores import LabelScores
@@ -215,7 +216,7 @@ def main() -> None:
     for name in arguments.trunks:
         stem = TRUNKS[name]
         identifiers = corpus.identifiers(stem)
-        training, holdout = folds.holdout(folds.assign(str(corpus.raw / "train.csv"), identifiers), HOLDOUT_FOLD)
+        training, holdout = folds.holdout(folds.assign(str(corpus.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
         truth = corpus.truth(identifiers)
         features = FeatureProbe.pooled(corpus.features(stem), READOUTS[SliceMean.name])
         penalty = arguments.penalty or FeatureProbe.chosen(features, truth, training)

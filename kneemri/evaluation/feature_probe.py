@@ -32,10 +32,10 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.corpus.folds import ReportFolds
-from core.data.labels.ruler import DEFAULT_LABELS
 from core.data.labels.targets import Targets
 from core.denominator import Denominator
 from core.findings import TARGETS
+from core.paths import LABEL_TABLE, TRAIN_TABLE
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.evaluation.slice_readout import READOUTS, SliceMean, SliceReadout
 from kneemri.runs.holdout_record import PROBE, UNKNOWN_EPOCH, HoldoutRecord
@@ -270,7 +270,7 @@ class ProbeCorpus:
 
     def truth(self, identifiers: list[str]) -> Int[NDArray[np.int64], "studies findings"]:
         """Binarised report labels in corpus order, aligned to the feature index by study id."""
-        table = pd.read_csv(self.processed / "labels" / "report_labels_v2.csv").set_index("StudyInstanceUID")
+        table = pd.read_csv(self.processed / "labels" / LABEL_TABLE).set_index("StudyInstanceUID")
         aligned = table.reindex(identifiers)
         return (aligned[list(TARGETS)].to_numpy(dtype=np.float64) > MIDPOINT).astype(np.int64)
 
@@ -285,7 +285,7 @@ class ProbeCorpus:
         second step is 13 of 909 studies here — 156 cells, every one of them invisible to a rounding
         check, which is exactly the size of defect the ruler guard exists to catch.
         """
-        return Targets.load(self.processed / "labels" / DEFAULT_LABELS, self.raw / "train.csv", identifiers).scores
+        return Targets.load(self.processed / "labels" / LABEL_TABLE, self.raw / TRAIN_TABLE, identifiers).scores
 
     def identifiers(self, stem: str) -> list[str]:
         """The study order a feature cache was written in."""
@@ -336,7 +336,7 @@ def main() -> None:
     for name in arguments.trunks:
         stem = TRUNKS[name]
         identifiers = corpus.identifiers(stem)
-        training, holdout = folds.holdout(folds.assign(str(corpus.raw / "train.csv"), identifiers), HOLDOUT_FOLD)
+        training, holdout = folds.holdout(folds.assign(str(corpus.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
         truth = corpus.truth(identifiers)
         for readout in arguments.slice_readout:
             features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])

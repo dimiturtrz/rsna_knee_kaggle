@@ -279,8 +279,8 @@ def main() -> None:
     readings = MemberReadings(Member.held_out_from(arguments.fold, arguments.checkpoints), root.processed())
     corpus, reference = readings.reference()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), reference), arguments.fold)
-    truth = Targets.load(arguments.labels, root.raw() / "train.csv", reference).scores[holdout]
+    _, holdout = folds.holdout(folds.assign(str(root.train_table()), reference), arguments.fold)
+    truth = Targets.load(arguments.labels, root.train_table(), reference).scores[holdout]
 
     # His pixels for exactly the holdout studies, in the reference order, so his rows and the truth
     # vector line up by construction rather than by a join nobody checks.

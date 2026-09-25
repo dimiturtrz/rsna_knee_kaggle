@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from core.paths import COMPETITION, DataRoot
+from core.paths import COMPETITION, LABEL_TABLE, TRAIN_TABLE, DataRoot
 
 
 @pytest.fixture
@@ -56,6 +56,15 @@ def test_raw(tmp_path: Path):
 
 def test_raw_defaults_to_the_competition(tmp_path: Path):
     assert DataRoot(tmp_path).raw() == tmp_path / "raw" / COMPETITION
+
+
+def test_train_table(tmp_path: Path):
+    assert DataRoot(tmp_path).train_table() == tmp_path / "raw" / COMPETITION / TRAIN_TABLE
+
+
+def test_labels(tmp_path: Path):
+    assert DataRoot(tmp_path).labels() == tmp_path / "processed" / COMPETITION / "labels" / LABEL_TABLE
+    assert DataRoot(tmp_path).labels("other.csv").name == "other.csv"
 
 
 def test_processed(tmp_path: Path):

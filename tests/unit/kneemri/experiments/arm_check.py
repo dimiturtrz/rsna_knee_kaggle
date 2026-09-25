@@ -6,8 +6,8 @@ import pytest
 from core.data.corpus.crop_centre import Crop
 from core.data.corpus.slot_reader import Reading
 from core.data.corpus.study_cache import StudyCache
-from core.data.labels.ruler import DEFAULT_LABELS, STUDY_COLUMN
-from core.paths import COMPETITION
+from core.data.labels.ruler import STUDY_COLUMN
+from core.paths import COMPETITION, LABEL_TABLE, TRAIN_TABLE
 from kneemri.experiments.arm_check import ArmCheck
 from tests.unit.conftest import write_series
 
@@ -106,7 +106,7 @@ def test_moving_ruler(tmp_path: Path):
     `recal_holdannot`'s shape verbatim (knee-8wa0): `--labels report_labels_v3.csv`, no `--eval-labels`,
     a printed 0.8964 against a 0.8487 control that is two rulers rather than a +0.0477.
     """
-    ruler = _label_table(tmp_path / DEFAULT_LABELS, [0.82, 0.28])
+    ruler = _label_table(tmp_path / LABEL_TABLE, [0.82, 0.28])
     crossed = _label_table(tmp_path / "report_labels_v3.csv", [0.42, 0.28])
     base = "--fold 0 --epochs 12 --one-cycle --slice-pooling max --whole-stack"
     moved = ArmCheck().moving_ruler(
@@ -227,7 +227,7 @@ def _corpus(tmp_path: Path, studies: int) -> None:
     identifiers = [f"study{index}" for index in range(studies)]
     for identifier in identifiers:
         write_series(raw / "train_series" / identifier / "sag", slices=4, size=32)
-    pd.DataFrame({"StudyInstanceUID": identifiers}).to_csv(raw / "train.csv", index=False)
+    pd.DataFrame({"StudyInstanceUID": identifiers}).to_csv(raw / TRAIN_TABLE, index=False)
     # Keyed by the series DIRECTORY, which is what `Study.from_directory` looks the plane up by — a
     # table naming anything else routes every series nowhere and the decode reports a corpus of zeros.
     pd.DataFrame({"SeriesInstanceUID": ["sag"], "Anatomical_Plane": ["Sagittal"]}).to_csv(

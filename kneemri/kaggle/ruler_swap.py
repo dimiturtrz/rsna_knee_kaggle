@@ -180,7 +180,7 @@ def main() -> None:
     arguments = command.parsed()
     root = command.rooted(arguments)
     members = RulerSwap.roster_members(arguments.roster)
-    swap = RulerSwap(root.models(), root.raw() / "train.csv", members, seats=arguments.seats)
+    swap = RulerSwap(root.models(), root.train_table(), members, seats=arguments.seats)
     command.report(swap.report(arguments.table))
 
 

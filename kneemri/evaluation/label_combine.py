@@ -189,8 +189,8 @@ def main() -> None:
     # number rather than an error.
     corpus, identifiers = readings.reference()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
-    truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores[holdout]
+    _, holdout = folds.holdout(folds.assign(str(root.train_table()), identifiers), arguments.fold)
+    truth = Targets.load(arguments.labels, root.train_table(), identifiers).scores[holdout]
 
     predictions = HoldoutPredictions(torch.device(arguments.device))
     store = PredictionCache(

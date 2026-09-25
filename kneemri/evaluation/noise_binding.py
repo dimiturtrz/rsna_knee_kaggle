@@ -239,12 +239,12 @@ def main() -> None:
     from kneemri.evaluation.supervision_gap import SupervisionGap  # noqa: PLC0415 - CLI-only
 
     root = command.rooted(arguments)
-    table = arguments.labels or (root.processed() / "labels" / "report_labels_v2.csv")
-    annotated = pd.read_csv(root.raw() / "train.csv")
+    table = arguments.labels or (root.labels())
+    annotated = pd.read_csv(root.train_table())
     read = pd.read_csv(table)
     cells = ReaderAgreement().cells(annotated, read)
 
-    identifiers = SupervisionGap().annotated(root.raw() / "train.csv")[0]
+    identifiers = SupervisionGap().annotated(root.train_table())[0]
     reader = AnnotatedReadings(root, torch.device(arguments.device))
     names, per_member = reader.readings(arguments.checkpoints, identifiers)
 

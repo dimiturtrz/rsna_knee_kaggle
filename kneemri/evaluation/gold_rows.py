@@ -74,7 +74,7 @@ def main() -> None:
     command.parser.add_argument("--out", type=Path, required=True, help="where to write the identifiers")
     arguments = command.parsed()
 
-    identifiers, _ = GoldRows().annotated(command.rooted(arguments).raw() / "train.csv")
+    identifiers, _ = GoldRows().annotated(command.rooted(arguments).train_table())
     arguments.out.write_text("\n".join(identifiers) + "\n", encoding="utf-8")
     logger.info(f"wrote {len(identifiers)} annotated identifiers to {arguments.out}")
 

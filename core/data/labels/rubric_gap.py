@@ -371,8 +371,8 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    truth = pd.read_csv(root.raw() / "train.csv")
-    labels = pd.read_csv(arguments.labels or root.processed() / "labels" / "report_labels_v2.csv")
+    truth = pd.read_csv(root.train_table())
+    labels = pd.read_csv(arguments.labels or root.labels())
 
     gap = RubricGap()
     reports = truth[[STUDY, "Report"]]

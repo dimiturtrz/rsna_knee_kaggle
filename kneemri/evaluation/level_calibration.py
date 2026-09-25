@@ -166,7 +166,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    identifiers, gold = GoldRows().annotated(root.raw() / "train.csv")
+    identifiers, gold = GoldRows().annotated(root.train_table())
     reader = GoldRows().reported(arguments.labels, identifiers)
 
     table = pd.read_csv(arguments.labels)

@@ -233,7 +233,7 @@ def main() -> None:
     errors = StudyErrors()
     table = errors.damages(reading.predictions, reading.truth)
     rows = errors.ranked(reading.studies, table, reading.truth)
-    annotated, _ = GoldRows().annotated(root.raw() / "train.csv")
+    annotated, _ = GoldRows().annotated(root.train_table())
     gold = set(annotated)
     LOGGER.info(f"{arguments.run} epoch {reading.epoch}: {len(rows)} studies, mean damage {np.mean(table):.4f}")
     for row in rows[:REPORTED_TAIL]:

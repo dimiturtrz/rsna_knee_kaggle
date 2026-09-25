@@ -110,9 +110,9 @@ def main() -> None:
     # misaligned against the truth vector.
     corpus, identifiers = readings.reference()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    _, holdout = folds.holdout(folds.assign(str(root.train_table()), identifiers), arguments.fold)
 
-    train_table = root.raw() / "train.csv"
+    train_table = root.train_table()
     truth = Targets.load(arguments.labels, train_table, identifiers).scores[holdout]
     # Weight zero is exactly "the reader did not read this", which is what has to be dropped rather
     # than scored — see the module docstring for why scoring it as a negative is worse than not

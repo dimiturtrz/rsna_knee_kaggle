@@ -69,6 +69,13 @@ CHECKPOINT_SUFFIX = ".pt"
 reads it, and a literal spelled in two layers is a literal that will one day disagree with itself."""
 
 
+TRAIN_TABLE = "train.csv"
+"""The competition's study table, under `raw/`."""
+
+LABEL_TABLE = "report_labels_v2.csv"
+"""The label table every ruler in this project is written against, by basename — the root varies per machine."""
+
+
 class DataRoot:
     """The data root. Datasets sit under `raw/` untouched; derived artefacts go to `processed/`."""
 
@@ -111,6 +118,14 @@ class DataRoot:
         destination = self.kind(PROCESSED) / dataset
         destination.mkdir(parents=True, exist_ok=True)
         return destination
+
+    def train_table(self) -> Path:
+        """The competition's `train.csv`: study ids, reports and the annotated gold rows."""
+        return self.raw() / TRAIN_TABLE
+
+    def labels(self, name: str = LABEL_TABLE) -> Path:
+        """A label table under `processed/labels/`, by basename; the corpus reader's own by default."""
+        return self.processed() / "labels" / name
 
     def models(self, dataset: str = COMPETITION) -> Path:
         """Where a dataset's trained members and their run records go. Created on demand."""

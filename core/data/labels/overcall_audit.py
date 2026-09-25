@@ -58,6 +58,7 @@ from core.data.labels.finding_mentions import FindingMentions
 from core.data.labels.negation_scope import NegationScope
 from core.data.labels.reader_agreement import MIDPOINT, POSITIVE, ReaderAgreement
 from core.data.labels.report_language import ReportLanguages
+from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
 
@@ -552,10 +553,10 @@ class OvercallAudit:
         ]
 
     @staticmethod
-    def _cells(root: object, table: Path) -> tuple[pd.DataFrame, dict[str, str]]:
+    def _cells(root: DataRoot, table: Path) -> tuple[pd.DataFrame, dict[str, str]]:
         """The scored cells and the report text they were read from, joined on the study."""
         agreement = ReaderAgreement()
-        annotated = agreement.annotated(root)  # type: ignore[arg-type]
+        annotated = agreement.annotated(root)
         read = pd.read_csv(table)
         cells = agreement.cells(annotated, read)
         text = zip(annotated["StudyInstanceUID"], annotated["Report"], strict=True)
@@ -571,7 +572,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    table = arguments.labels or (root.processed() / "labels" / "report_labels_v2.csv")
+    table = arguments.labels or (root.labels())
     audit = OvercallAudit()
     cells, reports = audit._cells(root, table)  # noqa: SLF001 - the module's own entrypoint
 

@@ -80,7 +80,6 @@ from core.findings import STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
-LABELS = "report_labels_v2.csv"
 TOLERANCE = 1e-6
 """Levels are written as decimals by the reader and read back as floats; this compares them as levels."""
 
@@ -300,8 +299,8 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    reader = pd.read_csv(arguments.labels or root.processed() / "labels" / LABELS).set_index(STUDY)
-    annotated = pd.read_csv(root.raw() / "train.csv").set_index(STUDY).dropna(subset=TARGETS, how="all")
+    reader = pd.read_csv(arguments.labels or root.labels()).set_index(STUDY)
+    annotated = pd.read_csv(root.train_table()).set_index(STUDY).dropna(subset=TARGETS, how="all")
 
     agreement = LevelAgreement()
     rates = agreement.rates(reader, annotated)

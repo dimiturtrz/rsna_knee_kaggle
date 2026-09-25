@@ -152,7 +152,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    truth = pd.read_csv(arguments.truth or root.raw() / "train.csv")
+    truth = pd.read_csv(arguments.truth or root.train_table())
     annotated = truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]
 
     boundary = SeverityBoundary()

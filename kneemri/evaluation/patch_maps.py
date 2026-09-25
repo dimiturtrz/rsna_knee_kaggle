@@ -253,13 +253,13 @@ def main() -> None:
     member = Member.from_checkpoint(arguments.checkpoint)
     corpus, identifiers = member.cache(root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    train, held = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    train, held = folds.holdout(folds.assign(str(root.train_table()), identifiers), arguments.fold)
     # Blocking bounds the SUBSET COPY below, not the cache load, which is the whole corpus either way:
     # all 3636 train studies of (6, 20, 336, 336) copy 49 GB on top of it and do not fit.
     chosen = train if arguments.split == "train" else held
     holdout = chosen[arguments.offset : arguments.offset + arguments.studies]
 
-    truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores[holdout]
+    truth = Targets.load(arguments.labels, root.train_table(), identifiers).scores[holdout]
     saved = torch.load(arguments.checkpoint, map_location="cpu", weights_only=True)
     encoder = ENCODERS[str(saved.get("config", {}).get("variant", SMALL))]
 

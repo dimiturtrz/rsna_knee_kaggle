@@ -27,7 +27,7 @@ from numpy.typing import NDArray
 from core import cli
 from core.data.labels.report_language import ReportLanguages
 from core.findings import STUDY, TARGETS
-from core.paths import DataRoot
+from core.paths import LABEL_TABLE, DataRoot
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,6 @@ SILENT = "UNK"
 """The verdict that is an abstention rather than a read — the whole subject of `silence`."""
 
 VERDICT_SUFFIX = "__verdict"
-DEFAULT_TABLE = "report_labels_v2.csv"
 BASE = "__base"
 OTHER = "__other"
 BLIND = 3
@@ -91,7 +90,7 @@ class ReaderAgreement:
         if not (spoken and moved):
             return ""
         return (
-            f"this table's verdicts are {DEFAULT_TABLE}'s while its numbers differ on {len(moved)} of "
+            f"this table's verdicts are {LABEL_TABLE}'s while its numbers differ on {len(moved)} of "
             f"{len(TARGETS)} findings ({', '.join(moved[:3])}...), so every line below would be about the "
             "DEFAULT table and say so in the language of a reading — score the numeric column with "
             "`kneemri.evaluation.table_separation` or `supervision_gap` instead"
@@ -104,7 +103,7 @@ class ReaderAgreement:
         Lives beside `cells` rather than in each caller because it is the JOIN KEY of every reading of
         the reader — a second copy is a second definition of which studies count.
         """
-        truth = pd.read_csv(root.raw() / "train.csv")
+        truth = pd.read_csv(root.train_table())
         return truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]
 
     def cells(self, annotated: pd.DataFrame, read: pd.DataFrame) -> pd.DataFrame:
@@ -349,7 +348,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    fallback = root.processed() / "labels" / DEFAULT_TABLE
+    fallback = root.labels()
     read = pd.read_csv(arguments.labels or fallback)
 
     agreement = ReaderAgreement()

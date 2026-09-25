@@ -174,7 +174,7 @@ class HoldoutBackfill:
         takes a slab: everything expensive sits behind it, so a run whose predictions are already cached
         costs no decode at all — and this half can then be tested without 35 GB of pixels.
         """
-        train_table = self.root.raw() / "train.csv"
+        train_table = self.root.train_table()
         holdout = backfill.split(identifiers, train_table)
         truth = backfill.ruler(identifiers, train_table).scores[holdout]
         studies = HoldoutRecord.named(identifiers, holdout)

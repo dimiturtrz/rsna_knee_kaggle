@@ -205,8 +205,8 @@ def main() -> None:
     arguments = command.parsed()
     root = command.rooted(arguments)
 
-    annotated = pd.read_csv(root.raw() / "train.csv")
-    read = pd.read_csv(root.processed() / "labels" / "report_labels_v2.csv")
+    annotated = pd.read_csv(root.train_table())
+    read = pd.read_csv(root.labels())
     cells = ReaderAgreement().cells(annotated, read)
     command.report(FindingCalibration().report(FindingCalibration.valued(cells, read)))
 

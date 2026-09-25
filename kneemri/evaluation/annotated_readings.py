@@ -65,7 +65,7 @@ import torch
 from numpy.typing import NDArray
 
 from core import cli
-from core.paths import DataRoot
+from core.paths import LABEL_TABLE, DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.evaluation.gold_rows import GoldRows
@@ -83,9 +83,6 @@ logger = logging.getLogger(__name__)
 HELD = "True"
 """What a run recorded for a flag it was given, the options table storing every flag as a string."""
 
-CORPUS_LABELS = "report_labels_v2.csv"
-"""The report-derived corpus table. Any OTHER table a run was handed is derived, and every derived table
-this project has built was derived using the gold cells — so the unknown one is flagged, not cleared."""
 
 READABLE_MIN = 5
 """Cases a finding needs on BOTH sides of 58 studies before a per-label AUC is printed at all.
@@ -143,8 +140,8 @@ class AnnotatedReadings:
         if str(options.get("finding_calibration", "")) == HELD:
             return "--finding-calibration (per-finding rates fitted on these cells)"
         table = Path(str(options.get("labels", ""))).name
-        if table and table != CORPUS_LABELS:
-            return f"--labels {table} (derived, not the corpus {CORPUS_LABELS})"
+        if table and table != LABEL_TABLE:
+            return f"--labels {table} (derived, not the corpus {LABEL_TABLE})"
         return None
 
     def rows(self, reference: list[str], annotated: list[str]) -> NDArray[np.int64]:
@@ -345,7 +342,7 @@ def main() -> None:
     from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - CLI-only
 
     root = command.rooted(arguments)
-    identifiers, truth = GoldRows().annotated(root.raw() / "train.csv")
+    identifiers, truth = GoldRows().annotated(root.train_table())
     views = SpatialViews() if arguments.tta else None
     reader = AnnotatedReadings(root, torch.device(arguments.device), views)
     names, per_member = reader.readings(arguments.checkpoints, identifiers, overlap=arguments.overlap)

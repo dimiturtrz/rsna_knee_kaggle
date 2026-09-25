@@ -29,7 +29,7 @@ import torch
 from core import cli
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
-from core.paths import DataRoot
+from core.paths import TRAIN_TABLE, DataRoot
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.ensemble import Ensemble
 from kneemri.inference.member_package import MemberPackage
@@ -56,9 +56,9 @@ class DryRun:
         being taught to take a limit — the point is to run the SHIPPED code, not a variant of it.
         """
         into.mkdir(parents=True, exist_ok=True)
-        studies = pd.read_csv(self.root.raw() / "train.csv")
+        studies = pd.read_csv(self.root.train_table())
         series = pd.read_csv(self.root.raw() / "train_series.csv")
-        studies[studies["StudyInstanceUID"].isin(identifiers)].to_csv(into / "train.csv", index=False)
+        studies[studies["StudyInstanceUID"].isin(identifiers)].to_csv(into / TRAIN_TABLE, index=False)
         series[series["StudyInstanceUID"].isin(identifiers)].to_csv(into / "train_series.csv", index=False)
         return into
 
@@ -73,7 +73,7 @@ class DryRun:
         Scored through the same `LabelScores` the ledger uses, so the number is comparable to a holdout
         number rather than a new kind of measurement.
         """
-        truth = Targets.load(labels, self.root.raw() / "train.csv", list(frame["StudyInstanceUID"])).scores
+        truth = Targets.load(labels, self.root.train_table(), list(frame["StudyInstanceUID"])).scores
         predictions = frame[list(TARGETS)].to_numpy()
         scores = LabelScores()
         return {"mean": scores.mean(predictions, truth), **scores.per_label(predictions, truth)}
@@ -110,7 +110,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     package = MemberPackage(arguments.members)
-    identifiers = pd.read_csv(root.raw() / "train.csv")["StudyInstanceUID"].tolist()[: arguments.studies]
+    identifiers = pd.read_csv(root.train_table())["StudyInstanceUID"].tolist()[: arguments.studies]
 
     logger.info("running %d labelled studies through the submission path", len(identifiers))
 

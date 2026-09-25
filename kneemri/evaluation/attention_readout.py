@@ -261,7 +261,7 @@ def main() -> None:
     member = Member.from_checkpoint(arguments.checkpoint)
     corpus, identifiers = member.cache(root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    _, holdout = folds.holdout(folds.assign(str(root.train_table()), identifiers), arguments.fold)
     holdout = holdout[: arguments.studies]
 
     device = VisibleCards().device() if arguments.device == "auto" else torch.device(arguments.device)

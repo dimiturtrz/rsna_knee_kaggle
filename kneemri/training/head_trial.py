@@ -372,9 +372,9 @@ def main() -> None:
         slice_read=arguments.slice_read,
     )
     corpus, identifiers = EmbeddingCache(root.processed(), spec).load()
-    targets = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers)
+    targets = Targets.load(arguments.labels, root.train_table(), identifiers)
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    split = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    split = folds.holdout(folds.assign(str(root.train_table()), identifiers), arguments.fold)
 
     features = HeadTrial().features(corpus.features)
     mask = torch.from_numpy(corpus.mask)

@@ -173,7 +173,7 @@ def main() -> None:
     readings = MemberReadings(Member.held_out_from(arguments.fold, arguments.checkpoints), root.processed())
     corpus, reference = readings.reference()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    training, _ = folds.holdout(folds.assign(str(root.raw() / "train.csv"), reference), arguments.fold)
+    training, _ = folds.holdout(folds.assign(str(root.train_table()), reference), arguments.fold)
     Denominator(len(training), "this fold has no training studies to score").refuse_empty()
 
     cache = PredictionCache(

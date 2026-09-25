@@ -710,8 +710,8 @@ def main() -> None:
     # silently misaligned against the truth vector, which is a wrong number rather than an error.
     corpus, reference = readings.reference()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), reference), arguments.fold)
-    truth = Targets.load(arguments.labels, root.raw() / "train.csv", reference).scores[holdout]
+    _, holdout = folds.holdout(folds.assign(str(root.train_table()), reference), arguments.fold)
+    truth = Targets.load(arguments.labels, root.train_table(), reference).scores[holdout]
 
     # Keyed on the studies actually scored, so a different fold or split cannot hand back these rows.
     cache = PredictionCache(

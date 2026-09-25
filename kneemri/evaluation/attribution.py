@@ -505,10 +505,10 @@ def main() -> None:
     member = Member.from_checkpoint(arguments.checkpoint)
     corpus, identifiers = member.cache(root.processed()).load()
     folds = ReportFolds(arguments.folds, arguments.split_seed)
-    _, holdout = folds.holdout(folds.assign(str(root.raw() / "train.csv"), identifiers), arguments.fold)
+    _, holdout = folds.holdout(folds.assign(str(root.train_table()), identifiers), arguments.fold)
     holdout = holdout[: arguments.studies]
 
-    truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores[holdout]
+    truth = Targets.load(arguments.labels, root.train_table(), identifiers).scores[holdout]
     saved = torch.load(arguments.checkpoint, map_location="cpu", weights_only=True)
     encoder = ENCODERS[str(saved.get("config", {}).get("variant", SMALL))]
 

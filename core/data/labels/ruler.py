@@ -30,9 +30,6 @@ STUDY_COLUMN = "StudyInstanceUID"
 DERIVED_COLUMNS = ("__conf", "__verdict")
 """A label table's graded columns are every column but the study id and these two per-target companions."""
 
-DEFAULT_LABELS = "report_labels_v2.csv"
-"""The table every ruler in this project is written against, by basename — the root varies per machine."""
-
 
 @dataclass(frozen=True)
 class Ruler:

@@ -67,8 +67,6 @@ from kneemri.evaluation.scores import LabelScores
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_LABELS = Path("labels") / "report_labels_v2.csv"
-"""The reader's table, under the processed root. The one every trained member was fitted against."""
 
 VERDICT_SUFFIX = "__verdict"
 
@@ -493,7 +491,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    labels = arguments.labels or root.processed() / DEFAULT_LABELS
+    labels = arguments.labels or root.labels()
     logger.info(f"auditing {labels} against the published out-of-fold ruler")
     audit = LabelErrorAudit(pd.read_csv(labels), ReaderAgreement.annotated(root), root.processed() / "published")
     found = audit.detected()

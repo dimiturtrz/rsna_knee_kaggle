@@ -31,9 +31,9 @@ from pathlib import Path
 
 from core import cli
 from core.data.corpus.study_cache import CorpusSplit, StudyCache
-from core.data.labels.ruler import DEFAULT_LABELS, Ruler
+from core.data.labels.ruler import Ruler
 from core.denominator import Denominator
-from core.paths import DataRoot
+from core.paths import LABEL_TABLE, DataRoot
 from kneemri.experiments.arm_budget import ArmBudget
 from kneemri.experiments.arm_diff import ArmDiff
 from kneemri.experiments.arm_header import ARMS, ArmHeader
@@ -590,10 +590,10 @@ class ArmCheck:
         moved: dict[str, str] = {}
         for name, flags in invocations.items():
             values = ArmDiff.values(flags)
-            table = Path(values.get("--labels", DEFAULT_LABELS))
-            if table.name == DEFAULT_LABELS or "--eval-labels" in values:
+            table = Path(values.get("--labels", LABEL_TABLE))
+            if table.name == LABEL_TABLE or "--eval-labels" in values:
                 continue
-            ruler = table.with_name(DEFAULT_LABELS)
+            ruler = table.with_name(LABEL_TABLE)
             if not (ruler.is_file() and table.is_file()):
                 # SILENT WITHOUT THE TABLES, like `readings`: they are gitignored, so every clone and CI
                 # would fail this check on the absence of data rather than on a defect. The moment this
@@ -603,7 +603,7 @@ class ArmCheck:
             if cells:
                 moved[name] = (
                     f"--labels names {table.name} with no --eval-labels, and that table scores {cells} "
-                    f"holdout cells differently from {DEFAULT_LABELS} — so its score is measured against "
+                    f"holdout cells differently from {LABEL_TABLE} — so its score is measured against "
                     f"a ruler no other run was measured against, and differs for that reason alone"
                 )
         return moved

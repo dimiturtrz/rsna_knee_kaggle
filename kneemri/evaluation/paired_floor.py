@@ -152,7 +152,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     identifiers, per_seed = PublishedRuler(root.processed() / "published").per_seed()
-    truth = Targets.load(arguments.labels, root.raw() / "train.csv", identifiers).scores
+    truth = Targets.load(arguments.labels, root.train_table(), identifiers).scores
     floor = PairedFloor(LabelPower(arguments.labels))
 
     # A NULL PAIR: two seeds of one recipe, so the true per-label difference is zero and the interval

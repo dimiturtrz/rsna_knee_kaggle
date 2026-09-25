@@ -16,6 +16,7 @@ from core.data.corpus.slots import FOREIGN_SCHEMES
 from core.data.corpus.study import Study
 from core.data.corpus.study_cache import CorpusSplit
 from core.data.corpus.study_metadata import StudyMetadata
+from core.paths import TRAIN_TABLE
 from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
@@ -85,7 +86,7 @@ def main() -> None:
         # A whole-corpus cache at 32 slices would be 95 GB to answer a question about one fold's
         # holdout. Restricting to the studies actually being scored keeps it at 20 GB.
         folds = ReportFolds()
-        _, holdout = folds.holdout(folds.assign(str(raw / "train.csv"), identifiers), arguments.holdout_fold)
+        _, holdout = folds.holdout(folds.assign(str(raw / TRAIN_TABLE), identifiers), arguments.holdout_fold)
         identifiers = [identifiers[index] for index in holdout]
         logger.info(f"restricted to fold {arguments.holdout_fold}'s holdout: {len(identifiers)} studies")
 

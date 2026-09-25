@@ -89,7 +89,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    labels = arguments.labels or root.processed() / "labels" / "report_labels_v2.csv"
+    labels = arguments.labels or root.labels()
     ForeignHoldout(source=arguments.oof, labels=labels).written(arguments.out)
 
 

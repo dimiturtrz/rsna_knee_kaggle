@@ -12,11 +12,11 @@ from core.data.corpus.cache_flags import CacheFlags
 from core.data.corpus.merged_cache import MergedCache
 from core.data.corpus.slots import MERGED_SCHEME, RIJEKA_SCHEME, SCHEMES
 from core.data.corpus.study_metadata import StudyMetadata
+from core.paths import LABEL_TABLE
 from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
-LABELS = "report_labels_v2.csv"
 EXTRA_LABELS = "rijeka_acl.csv"
 MERGED_LABELS = "merged_labels.csv"
 METADATA = "metadata"
@@ -39,7 +39,7 @@ def main() -> None:
             "corpus without growing the cache every merged member on disk was fitted on."
         ),
     )
-    command.parser.add_argument("--labels", type=Path, default=None, help=f"our labels table (default: {LABELS})")
+    command.parser.add_argument("--labels", type=Path, default=None, help=f"our labels table (default: {LABEL_TABLE})")
     command.parser.add_argument("--extra-labels", type=Path, default=None, help=f"theirs (default: {EXTRA_LABELS})")
     command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
     command.parser.add_argument(
@@ -90,7 +90,7 @@ def main() -> None:
     merger = MergedCache(base, base.under(arguments.extra_scheme), base.under(arguments.merged_scheme))
 
     merger.labels(
-        arguments.labels or root.processed() / "labels" / LABELS,
+        arguments.labels or root.labels(),
         arguments.extra_labels or root.processed() / "labels" / EXTRA_LABELS,
         arguments.labels_out or root.processed() / "labels" / f"{arguments.merged_scheme}_labels.csv",
         base_name=arguments.scheme,

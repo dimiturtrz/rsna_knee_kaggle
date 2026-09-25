@@ -595,13 +595,13 @@ def main() -> None:
         if arguments.labels is None:
             message = "--split measures the report labels against the annotations, so it needs --labels"
             raise SystemExit(message)
-        split = SupervisionGap().measured(arguments.labels, root.raw() / "train.csv", root.processed() / "published")
+        split = SupervisionGap().measured(arguments.labels, root.train_table(), root.processed() / "published")
     # WHY A FLAG AND NOT A DEFAULT. Between two of our own runs the gold studies are held out by both
     # and dropping them would throw away 58 of the fold's rows for nothing. It earns its keep against a
     # FOREIGN arm whose trainer validated on gold-58 and kept its best epoch by that number: every gold
     # study inside our holdout then chose that arm's weights, and the delta credits it with a selection
     # it made. Which studies overlap is read from train.csv, never assumed to be a count.
-    excluded = frozenset(GoldRows().annotated(root.raw() / "train.csv")[0]) if arguments.exclude_gold else None
+    excluded = frozenset(GoldRows().annotated(root.train_table())[0]) if arguments.exclude_gold else None
     ruler = HoldoutMetrics(LabelScores(arguments.cut), excluded)
     logger.info("%s", RunComparison(control, arms, arguments.labels, split, ruler).report())
 

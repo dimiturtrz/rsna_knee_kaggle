@@ -56,6 +56,7 @@ from core.data.labels.negation_scope import NegationScope
 from core.data.labels.report_language import ReportLanguages
 from core.data.labels.rubric_gap import RUBRIC, RubricGap
 from core.findings import STUDY, TARGETS
+from core.paths import LABEL_TABLE
 
 logger = logging.getLogger(__name__)
 
@@ -261,7 +262,7 @@ CONSTRAINED by the shipped table — every one of the 559 cells the graft moves 
 CORRECTIONS: dict[str, Correction] = {
     FRACTURE_CONTUSION: PartnerLift("Fracture", "Contusion", 0.25),
     RUBRIC_SUBTHRESHOLD: RubricPull(0.15),
-    EFFUSION_REREAD: ColumnGraft("Effusion", "report_labels_v4.csv", "report_labels_v2.csv", EFFUSION_LEVELS),
+    EFFUSION_REREAD: ColumnGraft("Effusion", "report_labels_v4.csv", LABEL_TABLE, EFFUSION_LEVELS),
     MISSED_NEGATION: NegationPull(0.15),
 }
 
@@ -289,7 +290,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    truth = pd.read_csv(root.raw() / "train.csv")
+    truth = pd.read_csv(root.train_table())
     sources = LabelSources(pd.read_csv(arguments.base), truth[[STUDY, "Report"]], truth, arguments.base.parent)
     table = CorrectionSequence(tuple(arguments.rule)).applied(sources)
 

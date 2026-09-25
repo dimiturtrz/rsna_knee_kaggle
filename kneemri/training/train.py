@@ -68,7 +68,7 @@ def main() -> None:
     targets, evaluation = Targets.pair(
         arguments.run.labels,
         arguments.run.eval_labels,
-        root.raw() / "train.csv",
+        root.train_table(),
         identifiers,
         arguments.targets.supervision,
     )
@@ -78,7 +78,7 @@ def main() -> None:
     # was scoring a model on 717 studies it had trained on.
     folds = ReportFolds(arguments.run.folds, arguments.run.split_seed)
     training, holdout = folds.holdout(
-        folds.assign(str(root.raw() / "train.csv"), identifiers),
+        folds.assign(str(root.train_table()), identifiers),
         arguments.run.fold,
         arguments.run.exclude_fold,
         arguments.run.pseudo_fold,

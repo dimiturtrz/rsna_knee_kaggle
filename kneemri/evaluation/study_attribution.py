@@ -56,6 +56,7 @@ from core.data.labels.overcall_audit import CATEGORIES, GENUINE, LATERALITY, UNL
 from core.data.labels.report_language import ReportLanguages
 from core.data.labels.report_reader import UNSURE
 from core.findings import TARGETS
+from core.paths import LABEL_TABLE, TRAIN_TABLE
 from kneemri.evaluation.scores import MIDPOINT
 from kneemri.evaluation.study_errors import StudyDamage, StudyErrors
 from kneemri.runs.artefact import Artefact
@@ -402,7 +403,7 @@ class AttributionCorpus:
 
     def reports(self) -> dict[str, str]:
         """Study id to report text, which is the evidence every label category is read out of."""
-        frame = pd.read_csv(self.raw / "train.csv")
+        frame = pd.read_csv(self.raw / TRAIN_TABLE)
         return dict(zip(frame["StudyInstanceUID"].astype(str), frame["Report"].astype(str), strict=True))
 
     def verdicts(self) -> pd.DataFrame:
@@ -411,7 +412,7 @@ class AttributionCorpus:
         The truth array cannot carry this: `NO` and `UNK` both binarise to a negative label, and the
         distinction between a read zero and a defaulted one is destroyed by the threshold.
         """
-        frame = pd.read_csv(self.processed / "labels" / "report_labels_v2.csv")
+        frame = pd.read_csv(self.processed / "labels" / LABEL_TABLE)
         return frame.assign(StudyInstanceUID=frame["StudyInstanceUID"].astype(str)).set_index("StudyInstanceUID")
 
     def series(self) -> pd.DataFrame:

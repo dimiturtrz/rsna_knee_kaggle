@@ -32,6 +32,7 @@ from core.data.corpus.slots import SCHEMES, Routing
 from core.data.corpus.study import SlotPipeline, Study
 from core.data.corpus.window_reader import FileReader, MappedReader, WindowReader
 from core.denominator import Denominator
+from core.paths import TRAIN_TABLE
 
 logger = logging.getLogger(__name__)
 
@@ -545,7 +546,7 @@ class CorpusSplit:
     @property
     def studies_table(self) -> Path:
         """The per-STUDY table: one row per study, and where the labels join."""
-        return self.raw / ("train.csv" if self.split == "train_series" else "test.csv")
+        return self.raw / (TRAIN_TABLE if self.split == "train_series" else "test.csv")
 
     @property
     def series_table(self) -> Path:

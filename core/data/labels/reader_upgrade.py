@@ -32,7 +32,6 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.labels.reader_agreement import (
-    DEFAULT_TABLE,
     INTERVAL,
     MIDPOINT,
     POSITIVE,
@@ -217,7 +216,7 @@ def main() -> None:
     root = command.rooted(arguments)
     agreement = ReaderAgreement()
     annotated = agreement.annotated(root)
-    lexicon = agreement.cells(annotated, pd.read_csv(arguments.labels or root.processed() / "labels" / DEFAULT_TABLE))
+    lexicon = agreement.cells(annotated, pd.read_csv(arguments.labels or root.labels()))
     candidate = agreement.cells(annotated, pd.read_csv(arguments.candidate))
 
     command.report(ReaderUpgrade(lexicon, candidate).report())

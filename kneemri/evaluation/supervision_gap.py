@@ -343,7 +343,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     gap = SupervisionGap()
-    train_table = root.raw() / "train.csv"
+    train_table = root.train_table()
     if arguments.records:
         import torch  # noqa: PLC0415 - CLI-only, and the published path must not pay for a GPU import
 

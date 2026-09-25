@@ -164,7 +164,7 @@ def main() -> None:
     arguments = command.parsed()
 
     root = command.rooted(arguments)
-    reports = pd.read_csv(root.raw() / "train.csv")["Report"].fillna("").astype(str).tolist()
+    reports = pd.read_csv(root.train_table())["Report"].fillna("").astype(str).tolist()
     command.report(ReportLanguages().census(reports))
 
 

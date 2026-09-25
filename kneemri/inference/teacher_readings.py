@@ -71,7 +71,7 @@ class TeacherReadings:
         """
         if fold < 0:
             return np.arange(len(identifiers), dtype=np.int64)
-        training, _ = folds.holdout(folds.assign(str(self.root.raw() / "train.csv"), identifiers), fold)
+        training, _ = folds.holdout(folds.assign(str(self.root.train_table()), identifiers), fold)
         return training
 
     def _read(self, member: Member, positions: NDArray[np.int64]) -> Float[np.ndarray, "studies targets"]:

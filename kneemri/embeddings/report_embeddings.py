@@ -103,7 +103,7 @@ def main() -> None:
     from transformers import AutoModel, AutoTokenizer  # noqa: PLC0415 - a 90 MB import only this CLI needs
 
     root = command.rooted(arguments)
-    table = pd.read_csv(root.raw() / "train.csv")
+    table = pd.read_csv(root.train_table())
     identifiers = table["StudyInstanceUID"].astype(str).tolist()
     reports = table["Report"].astype(str).tolist()
     logger.info("embedding %d reports with %s", len(reports), arguments.encoder)
