@@ -97,20 +97,6 @@ def test_readings_drops_a_foreign_record_unless_asked(tmp_path: Path):
     assert [name for name, _ in asked.readings()] == ["ours.pt", "theirs.pt"], "a shipped entry is reproducible"
 
 
-def test_foreign_dropped(tmp_path: Path):
-    """What was refused is NAMED, so the pool that ran is checkable against the paths handed in."""
-    studies = [f"s{index}" for index in range(8)]
-    _record(tmp_path / "ours.pt", studies)
-    theirs = _record(tmp_path / "theirs.pt", studies)
-    reading = HoldoutRecord(theirs).read()
-    assert reading is not None
-    HoldoutRecord(theirs).write(reading.studies, reading.predictions, reading.truth, reading.epoch, source=FOREIGN)
-
-    assert RecordMix([tmp_path / "ours.pt"]).foreign_dropped() == [], "a clean pool refuses nothing"
-    assert RecordMix([tmp_path / "ours.pt", theirs]).foreign_dropped() == ["theirs.pt"]
-    assert RecordMix([tmp_path / "ours.pt", theirs], foreign=True).foreign_dropped() == [], "nothing was refused"
-
-
 def test_dropped(tmp_path: Path):
     """A healthy pool drops nothing, so the warning means what it says on the day it fires."""
     studies = [f"s{index}" for index in range(8)]

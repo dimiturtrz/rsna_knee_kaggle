@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from kneemri.training.mixup import OFF, UNMIXED, Blend, Mixup
+from kneemri.training.mixup import UNMIXED, Blend, Mixup
 
 SEED = 2026
 
@@ -61,13 +61,6 @@ def test_rows():
     assert np.array_equal(a_blend(UNMIXED).rows(rows), rows)
 
 
-def test_enabled():
-    """Off is off. The witness asks this rather than the trainer's loop, so the flag has a positive report."""
-    assert not Mixup().enabled(), "the default must be the loop every ledger number was measured under"
-    assert not Mixup(OFF).enabled()
-    assert Mixup(0.2).enabled()
-
-
 def test_draw():
     """A draw folds to the dominant half and permutes the batch, from the epoch's own generator.
 
@@ -94,4 +87,3 @@ def test_strengthen():
     identity = scaled.draw(3, np.random.default_rng(SEED))
     assert identity.weight == UNMIXED
     assert identity.order.tolist() == [0, 1, 2]
-    assert scaled.enabled(), "the switch reports what the run asked for, not the current strength"

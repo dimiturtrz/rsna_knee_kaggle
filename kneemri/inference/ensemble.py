@@ -536,30 +536,6 @@ class Ensemble:
             raise RuntimeError(message)
         return (self.serving.vote or RankAverage()).combine(combined)
 
-    def predict_members(
-        self,
-        members: list[Member],
-        chunks: Iterable[SizedBag],
-        *,
-        overlap: bool = True,
-    ) -> list[NDArray[np.float64]]:
-        """One array per member, over every chunk — UNCOMBINED, so groups can be combined together.
-
-        A chunk arrives as {decoded size: (images, mask)} from ONE read, and each member is handed the
-        size it was fitted from — which lets members of different resolutions share a decode without any
-        of them being fed pixels it never saw. Uncombined, for the reason `predict_groups` gives.
-        """
-        per_member: dict[str, list[NDArray[np.float64]]] = {member.identifier: [] for member in members}
-        failed: set[str] = set()
-        for sized in chunks:
-            self.absorb(members, sized, per_member, failed, overlap=overlap)
-            self.afford(members, failed)
-        arrays = self.survived(members, per_member, failed)
-        if not arrays:
-            message = f"every member of this group failed: {sorted(failed)}"
-            raise RuntimeError(message)
-        return arrays
-
     def absorb(
         self,
         members: list[Member],
@@ -571,8 +547,7 @@ class Ensemble:
     ) -> None:
         """ONE chunk through one group's members, appending each survivor's predictions.
 
-        The unit of work both traversals are built from: `predict_members` loops it over the chunks of a
-        single read, and `predict_groups` loops the groups inside one chunk. A member already in `failed`
+        The unit of work `predict_groups` loops over the groups inside one chunk. A member already in `failed`
         is skipped rather than retried — a member that raised once raises again, and the retries were
         measured costing more than the member was worth.
         """

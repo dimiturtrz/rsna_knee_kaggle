@@ -14,7 +14,6 @@ spent leaving it, so `ramp=0.3, tail=0.15` climbs over the first 30%, holds, and
 """
 
 from dataclasses import astuple, dataclass
-from typing import Protocol
 
 FULL = 1.0
 """The identity strength: every consumer at its configured value."""
@@ -34,13 +33,6 @@ ROLES = {
     "ramp": "share of the run climbing start -> mid",
     "tail": "share of the run descending mid -> end",
 }
-
-
-class Scheduled(Protocol):
-    """What a progress schedule drives: one multiplier on whatever the consumer was configured with."""
-
-    def strengthen(self, strength: float) -> None:
-        """Take this multiplier of the configured value from now on; 1.0 is the configured value exactly."""
 
 
 @dataclass(frozen=True)

@@ -102,7 +102,6 @@ class RecordMix:
         self.foreign = foreign
         self._readings: list[tuple[str, HoldoutReading]] | None = None
         self._dead: list[str] = []
-        self._foreign: list[str] = []
         self._narrowed: list[str] = []
 
     def readings(self) -> list[tuple[str, HoldoutReading]]:
@@ -162,7 +161,6 @@ class RecordMix:
                 logger.info("%s: no holdout record, skipped", path.name)
                 continue
             if reading.source == FOREIGN and not self.foreign:
-                self._foreign.append(path.name)
                 logger.warning(
                     "%s: someone else's weights through someone else's decode — dropped, pass --foreign to seat it",
                     path.name,
@@ -183,16 +181,6 @@ class RecordMix:
             found.append((path.name, reading))
         self._readings = found
         return found
-
-    def foreign_dropped(self) -> list[str]:
-        """The foreign records this pool refused, in the order they were given.
-
-        Named for the same reason `dropped` is: the pool that ran IS the denominator, and a search
-        silently shorter than the paths handed to it is the wrong-denominator failure. Empty when the
-        caller asked for foreign members, since then nothing was refused.
-        """
-        self.readings()
-        return self._foreign
 
     def dropped(self) -> list[str]:
         """The records that had no checkpoint, in the order they were given — what left the pool, and why.

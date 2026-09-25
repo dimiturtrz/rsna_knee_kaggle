@@ -866,18 +866,18 @@ def test_plan():
         assert start == int(per_step.integers(0, corpus.slices - trainer.window + 1))
 
 
-def test_loss_quantiles():
+def test_fit_epoch_leaves_loss_quantiles():
     """An epoch leaves the per-study loss distribution behind it, keyed the same way every time.
 
     The keys are fixed rather than derived so two epochs are the same instrument read twice; a fresh
     trainer has nothing to report and must still answer with the full key set.
     """
     trainer = _trainer()
-    assert trainer.loss_quantiles == {}, "nothing has been fitted, so there is no distribution yet"
+    assert trainer.trace.quantiles == {}, "nothing has been fitted, so there is no distribution yet"
 
     trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
 
-    quantiles = trainer.loss_quantiles
+    quantiles = trainer.trace.quantiles
     assert tuple(quantiles) == LOSS_QUANTILES
     assert all(np.isfinite(level) for level in quantiles.values())
     assert quantiles["q25"] <= quantiles["q50"] <= quantiles["q75"] <= quantiles["q90"] <= quantiles["q95"]

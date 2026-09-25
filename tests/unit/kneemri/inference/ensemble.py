@@ -271,18 +271,6 @@ def test_agreed(tmp_path: Path):
         )
 
 
-def test_predict_members(tmp_path: Path):
-    """One array per member, uncombined — groups must be rank-averaged together, not group by group."""
-    ensemble = _ensemble(tmp_path / "members")
-    member = ensemble.package.members[0]
-    images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
-    mask = torch.ones(2, len(SLOTS))
-
-    arrays = ensemble.predict_members([member], [{member.image_size: (images, mask)}], overlap=False)
-    assert len(arrays) == 1
-    assert arrays[0].shape == (2, len(TARGETS))
-
-
 def test_absorb(tmp_path: Path):
     """One chunk through a group: a survivor accumulates, a member already failed is not retried."""
     ensemble = _ensemble(tmp_path / "absorb")
@@ -606,7 +594,7 @@ def _broken() -> StudyModel:
     return _BrokenModel(_FakeBackbone(), DIM, len(SLOTS), StudyDesign())
 
 
-def test_predict_members_drops_a_member_that_fails_instead_of_the_entry(tmp_path: Path):
+def test_predict_groups_drops_a_member_that_fails_instead_of_the_entry(tmp_path: Path):
     """One member failing mid-prediction costs that member, not the submission.
 
     Three entries died because any single failure took the whole run down, and a run that fails writes
@@ -622,13 +610,12 @@ def test_predict_members_drops_a_member_that_fails_instead_of_the_entry(tmp_path
     images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
     chunk = {good.image_size: (images, torch.ones(2, len(SLOTS)))}
 
-    arrays = ensemble.predict_members([good, bad], [chunk], overlap=False)
+    combined = ensemble.predict_groups(lambda _: [[chunk]], overlap=False)
 
-    assert len(arrays) == 1, "the working member still votes"
-    assert arrays[0].shape == (2, len(TARGETS))
+    assert combined.shape == (2, len(TARGETS)), "the working member still votes"
 
 
-def test_predict_members_does_not_retry_a_member_that_already_failed(tmp_path: Path):
+def test_predict_groups_does_not_retry_a_member_that_already_failed(tmp_path: Path):
     """A member that failed on one chunk is not asked about the next, or the failure costs the whole run.
 
     Dropping is per RUN, not per chunk. A card that ran out of memory on chunk one will do it again on
@@ -654,13 +641,13 @@ def test_predict_members_does_not_retry_a_member_that_already_failed(tmp_path: P
     images = torch.randint(0, 256, (2, len(SLOTS), 6, 14, 14), dtype=torch.uint8)
     chunk = {good.image_size: (images, torch.ones(2, len(SLOTS)))}
 
-    ensemble.predict_members([good, bad], [chunk, chunk, chunk], overlap=False)
+    ensemble.predict_groups(lambda _: [[chunk]] * 3, overlap=False)
 
     assert attempts.count("doomed") == 1, "a member that failed is asked once, not once per chunk"
     assert attempts.count(good.identifier) == 3, "and the survivors still see every chunk"
 
 
-def test_predict_members_raises_when_every_member_fails(tmp_path: Path):
+def test_predict_groups_raises_when_every_member_fails(tmp_path: Path):
     """All of them failing is a broken run, and a broken run must write NO submission.
 
     The difference matters: dropping some members is a real answer from the rest, while dropping all of
@@ -673,7 +660,7 @@ def test_predict_members_raises_when_every_member_fails(tmp_path: Path):
     chunk = {member.image_size: (torch.zeros(2, len(SLOTS), 6, 14, 14, dtype=torch.uint8), torch.ones(2, len(SLOTS)))}
 
     with pytest.raises(RuntimeError, match="every member"):
-        ensemble.predict_members([member], [chunk], overlap=False)
+        ensemble.predict_groups(lambda _: [[chunk]], overlap=False)
 
 
 def test_predict_member_redoes_a_non_finite_pass(tmp_path: Path):

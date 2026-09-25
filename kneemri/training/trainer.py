@@ -213,15 +213,6 @@ class Trainer:
         # What the current epoch's steps did; read by `Fitting` once the epoch returns.
         self.trace = StepTrace()
 
-    @property
-    def loss_quantiles(self) -> dict[str, float]:
-        """The last epoch's per-study loss quantiles, keyed q25/q50/q75/q90/q95.
-
-        Empty before the first `fit_epoch`. NaN when no study contributed a loss, so a final fit that
-        never calls `fit_epoch` still records a number of the right shape.
-        """
-        return self.trace.quantiles
-
     def policies(self) -> dict[str, object]:
         """WHICH OPTIONAL POLICIES ARE ATTACHED, read off this trainer rather than off the run's flags.
 

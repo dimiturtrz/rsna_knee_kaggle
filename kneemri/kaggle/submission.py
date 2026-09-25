@@ -241,7 +241,7 @@ class Submission:
         """Decoded chunks, with the NEXT chunk already decoding while this one is on the GPU.
 
         THE OVERLAP THIS DOCSTRING USED TO CLAIM DID NOT EXIST. The body was `sized = self.decode(...)`
-        followed by `yield`, and `Ensemble.predict_members` consumes it with a plain `for`: so the run
+        followed by `yield`, and `Ensemble.predict_groups` consumes it with a plain `for`: so the run
         was decode(1), forward every member on (1), decode(2), forward on (2). The GPU idled through
         every decode and the CPUs idled through every forward, for the whole hidden test set.
 

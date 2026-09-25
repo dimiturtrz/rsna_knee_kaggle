@@ -115,10 +115,6 @@ class Mixup:
     strength: float = UNMIXED
     """The progress schedule's current multiplier on `alpha`; 1.0 draws at `alpha` exactly."""
 
-    def enabled(self) -> bool:
-        """Is any blending going to happen? The witness asks this, not the trainer's loop."""
-        return self.alpha > OFF
-
     def strengthen(self, strength: float) -> None:
         """Draw at this multiple of `alpha` from now on; zero is the identity blend with no draw."""
         self.strength = strength

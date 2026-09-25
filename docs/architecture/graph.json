@@ -1286,18 +1286,6 @@
     },
     {
       "kind": "import",
-      "source": "core.data.labels.vision_prompt",
-      "target": "core.findings",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "core.data.labels.vision_reader",
-      "target": "core.data.labels.vision_prompt",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "core.paths",
       "target": "core.native_path",
       "weight": 1
@@ -3400,18 +3388,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.record_mix",
       "target": "kneemri.runs.holdout_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.residual_coupling",
-      "target": "core.findings",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.residual_coupling",
-      "target": "kneemri.evaluation.scores",
       "weight": 1
     },
     {
@@ -13250,102 +13226,6 @@
     },
     {
       "kind": "calls",
-      "source": "core.data.labels.vision_prompt.AclPrompt.turns",
-      "target": "core.data.labels.vision_prompt.AclPrompt.system",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "core.data.labels.vision_reader.LocalReader",
-      "target": "core.data.labels.vision_prompt.AclPrompt",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "core.data.labels.vision_reader.LocalReader",
-      "target": "core.data.labels.vision_reader.Reader",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.vision_reader.LocalReader.answer",
-      "target": "core.data.labels.vision_prompt.AclPrompt.turns",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.vision_reader.LocalReader.answer",
-      "target": "core.data.labels.vision_reader.LocalReader.parts",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.vision_reader.PngImage.encoded",
-      "target": "core.data.labels.vision_reader.PngImage.chunk",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.vision_reader.PngImage.url",
-      "target": "core.data.labels.vision_reader.PngImage.encoded",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "core.data.labels.vision_reader.Reader",
-      "target": "core.data.labels.vision_prompt.AclPrompt",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "core.data.labels.vision_reader.Reader",
-      "target": "core.data.labels.vision_reader.Reader",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.labels.vision_reader.Reader.for_model",
-      "target": "core.data.labels.vision_reader.LocalReader",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.labels.vision_reader.Reader.for_model",
-      "target": "core.data.labels.vision_reader.ServedReader",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "core.data.labels.vision_reader.ServedReader",
-      "target": "core.data.labels.vision_prompt.AclPrompt",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "core.data.labels.vision_reader.ServedReader",
-      "target": "core.data.labels.vision_reader.Reader",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.vision_reader.ServedReader.answer",
-      "target": "core.data.labels.vision_prompt.AclPrompt.turns",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "core.data.labels.vision_reader.ServedReader.answer",
-      "target": "core.data.labels.vision_reader.PngImage",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.vision_reader.ServedReader.answer",
-      "target": "core.data.labels.vision_reader.PngImage.url",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "core.mounts.Mounts.every",
       "target": "core.mounts.Mounts.walk",
       "weight": 1
@@ -20990,12 +20870,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.record_mix.RecordMix.foreign_dropped",
-      "target": "kneemri.evaluation.record_mix.RecordMix.readings",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.evaluation.record_mix.RecordMix.narrow",
       "target": "kneemri.evaluation.record_mix.RecordMix._largest_ruler_group",
       "weight": 1
@@ -21112,30 +20986,6 @@
       "kind": "construct",
       "source": "kneemri.evaluation.record_mix.main",
       "target": "kneemri.evaluation.scores.LabelScores",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.residual_coupling.LabelCoupling",
-      "target": "kneemri.evaluation.residual_coupling.CouplingReading",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
-      "target": "kneemri.evaluation.residual_coupling.CouplingReading",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
-      "target": "kneemri.evaluation.residual_coupling.LabelCoupling.correlation",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.residual_coupling.LabelCoupling.pairs",
-      "target": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
       "weight": 1
     },
     {
@@ -29138,24 +28988,6 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_members",
-      "target": "kneemri.inference.ensemble.Ensemble.absorb",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_members",
-      "target": "kneemri.inference.ensemble.Ensemble.afford",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.inference.ensemble.Ensemble.predict_members",
-      "target": "kneemri.inference.ensemble.Ensemble.survived",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "kneemri.inference.ensemble.Ensemble.read_of",
       "target": "kneemri.inference.ensemble.Ensemble.agreed",
       "weight": 1
@@ -30868,12 +30700,6 @@
       "kind": "calls",
       "source": "kneemri.inference.trainer_record.TrainerRecord.instead_of",
       "target": "kneemri.runs.holdout_record.HoldoutRecord.read",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.inference.vote.ColumnWeightedLogit",
-      "target": "kneemri.inference.vote.Vote",
       "weight": 1
     },
     {
@@ -40005,7 +39831,7 @@
   ],
   "nodes": [
     {
-      "descendants": 80,
+      "descendants": 78,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -40029,7 +39855,7 @@
       "role": null
     },
     {
-      "descendants": 70,
+      "descendants": 68,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -40421,7 +40247,7 @@
       "role": null
     },
     {
-      "descendants": 21,
+      "descendants": 19,
       "id": "core.data.labels",
       "label": "labels",
       "level": "module",
@@ -40582,22 +40408,6 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.vision_prompt",
-      "label": "vision_prompt",
-      "level": "module",
-      "parent": "core.data.labels",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader",
-      "label": "vision_reader",
-      "level": "module",
-      "parent": "core.data.labels",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.denominator",
       "label": "denominator",
       "level": "module",
@@ -40653,7 +40463,7 @@
       "role": null
     },
     {
-      "descendants": 324,
+      "descendants": 323,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -40725,7 +40535,7 @@
       "role": null
     },
     {
-      "descendants": 108,
+      "descendants": 107,
       "id": "kneemri.evaluation",
       "label": "evaluation",
       "level": "module",
@@ -41264,14 +41074,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.record_mix",
       "label": "record_mix",
-      "level": "module",
-      "parent": "kneemri.evaluation",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling",
-      "label": "residual_coupling",
       "level": "module",
       "parent": "kneemri.evaluation",
       "role": null
@@ -44294,46 +44096,6 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.vision_prompt.AclPrompt",
-      "label": "AclPrompt",
-      "level": "class",
-      "parent": "core.data.labels.vision_prompt",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.LocalReader",
-      "label": "LocalReader",
-      "level": "class",
-      "parent": "core.data.labels.vision_reader",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.PngImage",
-      "label": "PngImage",
-      "level": "class",
-      "parent": "core.data.labels.vision_reader",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.Reader",
-      "label": "Reader",
-      "level": "class",
-      "parent": "core.data.labels.vision_reader",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.ServedReader",
-      "label": "ServedReader",
-      "level": "class",
-      "parent": "core.data.labels.vision_reader",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
       "id": "core.denominator.Denominator",
       "label": "Denominator",
       "level": "class",
@@ -45674,22 +45436,6 @@
       "label": "RecordMix",
       "level": "class",
       "parent": "kneemri.evaluation.record_mix",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling.CouplingReading",
-      "label": "CouplingReading",
-      "level": "class",
-      "parent": "kneemri.evaluation.residual_coupling",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling.LabelCoupling",
-      "label": "LabelCoupling",
-      "level": "class",
-      "parent": "kneemri.evaluation.residual_coupling",
       "role": "primary"
     },
     {
@@ -47147,14 +46893,6 @@
       "level": "class",
       "parent": "kneemri.inference.trainer_record",
       "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.vote.ColumnWeightedLogit",
-      "label": "ColumnWeightedLogit",
-      "level": "class",
-      "parent": "kneemri.inference.vote",
-      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -48995,14 +48733,6 @@
       "level": "class",
       "parent": "kneemri.training.progress_schedule",
       "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.progress_schedule.Scheduled",
-      "label": "Scheduled",
-      "level": "class",
-      "parent": "kneemri.training.progress_schedule",
-      "role": "primary"
     },
     {
       "descendants": 0,
@@ -53802,126 +53532,6 @@
       "label": "supervised",
       "level": "method",
       "parent": "core.data.labels.targets.Targets",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_prompt.AclPrompt.system",
-      "label": "system",
-      "level": "method",
-      "parent": "core.data.labels.vision_prompt.AclPrompt",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_prompt.AclPrompt.turns",
-      "label": "turns",
-      "level": "method",
-      "parent": "core.data.labels.vision_prompt.AclPrompt",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.LocalReader.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.LocalReader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.LocalReader.answer",
-      "label": "answer",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.LocalReader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.LocalReader.label",
-      "label": "label",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.LocalReader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.LocalReader.parts",
-      "label": "parts",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.LocalReader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.PngImage.chunk",
-      "label": "chunk",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.PngImage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.PngImage.encoded",
-      "label": "encoded",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.PngImage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.PngImage.url",
-      "label": "url",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.PngImage",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.Reader.answer",
-      "label": "answer",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.Reader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.Reader.for_model",
-      "label": "for_model",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.Reader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.Reader.label",
-      "label": "label",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.Reader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.ServedReader.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.ServedReader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.ServedReader.answer",
-      "label": "answer",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.ServedReader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.vision_reader.ServedReader.label",
-      "label": "label",
-      "level": "method",
-      "parent": "core.data.labels.vision_reader.ServedReader",
       "role": null
     },
     {
@@ -59310,14 +58920,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.record_mix.RecordMix.foreign_dropped",
-      "label": "foreign_dropped",
-      "level": "method",
-      "parent": "kneemri.evaluation.record_mix.RecordMix",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.record_mix.RecordMix.narrow",
       "label": "narrow",
       "level": "method",
@@ -59362,46 +58964,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.evaluation.record_mix",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.correlation",
-      "label": "correlation",
-      "level": "method",
-      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.decided",
-      "label": "decided",
-      "level": "method",
-      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.pair",
-      "label": "pair",
-      "level": "method",
-      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.residual_coupling.LabelCoupling.pairs",
-      "label": "pairs",
-      "level": "method",
-      "parent": "kneemri.evaluation.residual_coupling.LabelCoupling",
       "role": null
     },
     {
@@ -64918,14 +64480,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.inference.ensemble.Ensemble.predict_members",
-      "label": "predict_members",
-      "level": "method",
-      "parent": "kneemri.inference.ensemble.Ensemble",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.inference.ensemble.Ensemble.read_of",
       "label": "read_of",
       "level": "method",
@@ -66418,22 +65972,6 @@
       "label": "instead_of",
       "level": "method",
       "parent": "kneemri.inference.trainer_record.TrainerRecord",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.vote.ColumnWeightedLogit.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.inference.vote.ColumnWeightedLogit",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.inference.vote.ColumnWeightedLogit.combine",
-      "label": "combine",
-      "level": "method",
-      "parent": "kneemri.inference.vote.ColumnWeightedLogit",
       "role": null
     },
     {
@@ -73062,14 +72600,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.mixup.Mixup.enabled",
-      "label": "enabled",
-      "level": "method",
-      "parent": "kneemri.training.mixup.Mixup",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.mixup.Mixup.strengthen",
       "label": "strengthen",
       "level": "method",
@@ -73626,14 +73156,6 @@
       "label": "value",
       "level": "method",
       "parent": "kneemri.training.progress_schedule.ProgressSchedule",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.progress_schedule.Scheduled.strengthen",
-      "label": "strengthen",
-      "level": "method",
-      "parent": "kneemri.training.progress_schedule.Scheduled",
       "role": null
     },
     {
@@ -74640,14 +74162,6 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.harden",
       "label": "harden",
-      "level": "method",
-      "parent": "kneemri.training.trainer.Trainer",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.trainer.Trainer.loss_quantiles",
-      "label": "loss_quantiles",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null
