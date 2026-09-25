@@ -19,17 +19,23 @@ from pathlib import Path
 ENTRYPOINT = "kneemri/kaggle/kernel_run.py"
 """What a kernel script builds: everything after the wheels are installed hangs off `KernelRun`."""
 
+KERNELS = "comp/kernels"
+"""Where the kernel scripts live. Each is a root too: `KernelRun` is not the only thing a kernel imports
+from the kit — the champion reaches `raptor_run`, `raptor_seat` and `raptor_model` from its own body, and
+rooting at `kernel_run.py` alone left those outside every freshness check (knee-qx0dh.23)."""
+
 PACKAGES = ("kneemri", "core")
 """The roots a kit ships. An import outside them is a dependency, versioned by the wheel, not by us."""
 
 
 class KernelClosure:
-    """The transitive import closure of the kernel entrypoint, confined to the shipped packages."""
+    """The transitive import closure of the kernel entrypoint and every kernel script, confined to our packages."""
 
-    def __init__(self, repo: Path, entrypoint: str = ENTRYPOINT) -> None:
+    def __init__(self, repo: Path, entrypoint: str = ENTRYPOINT, kernels: str = KERNELS) -> None:
         """Anchored at the repository root; every path this produces is relative to it, posix-separated."""
         self.repo = repo
         self.entrypoint = entrypoint
+        self.kernels = kernels
 
     def module_file(self, module: str) -> str | None:
         """The repo-relative file a dotted module names, or None when it is not ours.
@@ -64,9 +70,13 @@ class KernelClosure:
         return modules
 
     def files(self) -> list[str]:
-        """Every file of ours a kernel loads, sorted, the entrypoint included."""
+        """Every file of ours a kernel loads, sorted, the entrypoint included and the kernel scripts not.
+
+        A script is a root but not a kit file: it ships as the kernel's `code_file`, never in the kit.
+        """
+        scripts = [path.relative_to(self.repo).as_posix() for path in self.repo.glob(f"{self.kernels}/*/*.py")]
         reached = {self.entrypoint}
-        pending = [self.entrypoint]
+        pending = [self.entrypoint, *scripts]
         while pending:
             for module in self.imported(pending.pop()):
                 found = self.module_file(module)

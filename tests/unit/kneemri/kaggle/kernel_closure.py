@@ -64,3 +64,17 @@ def test_files(tmp_path: Path) -> None:
         "kneemri/kaggle/kernel_run.py",
         "kneemri/models/model.py",
     ]
+
+
+def test_files_roots_kernel_scripts(tmp_path: Path) -> None:
+    """A module only a kernel script imports is in the closure; the script itself is not."""
+    closure = _repo(tmp_path)
+    script = tmp_path / "comp/kernels/entry/entry.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("def main():\n    from kneemri.kaggle.raptor_run import RaptorEntry\n", encoding="utf-8")
+    (tmp_path / "kneemri/kaggle/raptor_run.py").write_text("", encoding="utf-8")
+
+    files = closure.files()
+
+    assert "kneemri/kaggle/raptor_run.py" in files
+    assert "comp/kernels/entry/entry.py" not in files
