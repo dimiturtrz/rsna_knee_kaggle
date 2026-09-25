@@ -1804,3 +1804,6 @@ labelwise_ms_s2026          # 0.8593 midpoint / 0.8960 ledger75 vs its control 0
 wisepull85_lw24_s2026       # WiSE-FT alpha 0.85: 0.9061 ledger75 vs parent 0.9053, +0.0008, null.
 wisepull70_lw24_s2026       # WiSE-FT alpha 0.70: 0.9038 ledger75 vs parent 0.9053, -0.0015.
 wisepull50_lw24_s2026       # WiSE-FT alpha 0.50: 0.8895 ledger75 vs parent 0.9053, -0.0158.
+fuse3_lw12_s2026            # gated block fusion (knee-vivli): 0.9014 ledger75 @e18 vs control 0.9006, +0.0008, null; below the 0.9053 line.
+fuse3_lw12_s2026_run1       # superseded partial of fuse3_lw12: best epoch 3, 0.8471 ledger75 — a killed run, a floor.
+sam_ship_s2026              # SAM trunk, stopped by the owner at epoch 3: 0.8449 ledger75, a truncated floor far under the 0.9053 line.
