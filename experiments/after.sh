@@ -16,6 +16,9 @@
 # gating on the PID is the only thing left that is true. Second choice, not first: a PID says a
 # process ended, never that it succeeded.
 #
+# Or `artefact:<path>|pid:<n>` (either part alone too): released by whichever holds first. That is the
+# gate for a `foreign_run` producer, which writes no marker ever - see `wait_for_any` in lib.sh.
+#
 # An arm may carry its own arguments as ONE argv element: "experiments/arms/resolution.sh 448".
 # CHECK THAT ENTRY BEFORE QUEUEING IT, in the same spelling — arm_check runs the arm files bare, so an
 # argument-carrying rung is otherwise queued on flags nothing has parsed or smoked:
@@ -50,6 +53,7 @@ echo "waiting for '$MARKER' in $WATCH before running: $*"
 # rather than allowed to propagate so the queue still runs on a freed card.
 GATE=0
 case "$MARKER" in
+  *'|'*|artefact:*) wait_for_any "$MARKER" || exit 1 ;;
   pid:*) wait_for_pid "${MARKER#pid:}" ;;
   *) wait_for "$MARKER" "$WATCH" || GATE=$? ;;
 esac

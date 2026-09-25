@@ -32,6 +32,12 @@ def test_of_not_a_watcher(tmp_path: Path):
     assert Watch.of(tmp_path / "after_gates.log") is None, "a gate log next door is not a broken queue"
 
 
+def test_of_chained_watcher_is_a_gate(tmp_path: Path):
+    watch = Watch.of(_log(tmp_path, "after_c.log", MARKER, "experiments/after_room.sh 23000 experiments/arms/a.sh"))
+    assert watch is not None
+    assert watch.arms == ("experiments/arms/a.sh",), "the wrapper is a gate; the arm it wraps is the work"
+
+
 def test_waiting(tmp_path: Path):
     watch = Watch.of(_log(tmp_path, "after_chain.log", MARKER, ARMS, started=1))
     assert watch is not None

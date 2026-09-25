@@ -855,6 +855,25 @@ wait_for() {
   done
 }
 
+wait_for_any() {
+  # wait_for_any 'artefact:<path>|pid:<n>' - release on the FIRST alternative that holds.
+  #
+  # For a producer that writes no `ARM DONE` line at all - a `foreign_run` arm never calls `_mark`. Its
+  # own success artefact is the primary gate, but alone it holds the card forever on a silent death, and
+  # the pid alone fires the next arm the instant a crash frees the card. Either ending frees the card.
+  local alternatives alternative
+  IFS='|' read -ra alternatives <<< "$1"
+  while true; do
+    for alternative in "${alternatives[@]}"; do
+      case "$alternative" in
+        artefact:*) [ -f "${alternative#artefact:}" ] && return 0 ;;
+        pid:*) _alive "${alternative#pid:}" || return 0 ;;
+        *) echo "wait_for_any: '$alternative' is neither artefact:<path> nor pid:<n>"; return 2 ;;
+      esac
+    done
+    sleep 60
+  done
+}
 wait_for_pid() {
   # Block until a process exits. The gate of LAST resort - `wait_for` on a marker is the default.
   #

@@ -46,7 +46,7 @@
 #
 # ARM_CHECK NOTE. Nothing here calls `run_train`, so under `stub_lib.sh` both `uv run` steps are no-ops
 # and `arm_check` SKIPS this arm (prints nothing, does not fail). The flags below are A′'s verbatim
-# (`experiments/after_cellc.sh:39-46`) with two changes: `--tag` and `--labels`.
+# (`experiments/after_cellc.sh:39-46`, retired, last at ca9113ee) with two changes: `--tag` and `--labels`.
 #
 # deliberate: --labels labels_llm_soft_distill0.3 (the single moving variable vs A′; his script unchanged)
 # deliberate: weight 0.3 (chosen on the marginal, see above; 0.7 is a relabel)

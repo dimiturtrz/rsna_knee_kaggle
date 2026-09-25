@@ -59226,6 +59226,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.queue_check.Watch._is_arm",
+      "label": "_is_arm",
+      "level": "method",
+      "parent": "kneemri.experiments.queue_check.Watch",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.queue_check.Watch.of",
       "label": "of",
       "level": "method",

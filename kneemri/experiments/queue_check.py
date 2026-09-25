@@ -131,9 +131,19 @@ class Watch:
             log=path.name,
             marker=marker,
             watched=head.rsplit(WATCHED, 1)[1].strip() if WATCHED in head else "",
-            arms=tuple(entry for entry in tail.split() if entry.endswith(ARM_SUFFIX)),
+            arms=tuple(entry for entry in tail.split() if cls._is_arm(entry)),
             started=sum(1 for line in lines if line.startswith(STARTED)),
         )
+
+    @staticmethod
+    def _is_arm(entry: str) -> bool:
+        """A chained `.sh` that is WORK — a chained watcher (`after_room.sh <mib> <arm>`) is a gate.
+
+        MEASURED 2026-09-25: `after_labelcut.log` chained `after_room.sh 23000 labelcut_v3_ema.sh`, and the
+        wrapper read as an owed arm, STRANDED, four days after the arm it wrapped had run under another
+        watcher. The work is the arm the gate wraps, which that chain names too.
+        """
+        return entry.endswith(ARM_SUFFIX) and not PurePosixPath(entry).name.startswith(WATCHER_PREFIX)
 
     def waiting(self) -> tuple[str, ...]:
         """The arms this watcher still owes, which is every one it has not announced.

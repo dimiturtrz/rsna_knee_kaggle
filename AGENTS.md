@@ -437,7 +437,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
   (`raptor_ft_<tag>_swa.holdout.npz`) **OR** Windows-pid liveness, `ps -W | grep -q "[^0-9]$PID[^0-9]"` —
   never `kill -0`, the MSYS pid is a different number. The OR is the point: the artefact alone hangs
   forever on a silent exit-0 death, and the pid alone fires the next arm the instant a crash frees the
-  card. `experiments/after_weakdraw.sh` is the worked example.
+  card. `experiments/after.sh 'artefact:<path>|pid:<n>' - <arm.sh>` is the form (`wait_for_any`).
 - **And that log is NOT under `logs/` — a `run_train` arm's full log lives under `$MODELS/experiments/`.**
   `lib.sh` re-runs an arm launched from the repo tree "from a snapshot", and the snapshot's `tee` writes
   `$MODELS/experiments/<checkpoint>.full.log` (measured 2026-09-07 off the live process table:
