@@ -117,7 +117,7 @@ def test_saturation(tmp_path: Path):
 
 def test_knee(tmp_path: Path):
     """The fewest seats within the board's resolution of the best; the rest is unpaid runtime."""
-    # Two seats reach 0.013, inside BOARD_RESOLVABLE (0.0040) of the 0.016 four seats reach, so the
+    # Two seats reach 0.013, inside CURVE_RESOLVABLE (0.0040) of the 0.016 four seats reach, so the
     # two extra decodes buy a spread the board cannot order. At the old 0.0015 this read 4 seats.
     assert SeatBonus(_record(tmp_path)).knee().entry.seats == 2
 

@@ -54,7 +54,7 @@ them on the current disk — and the decision this reading serves is where the c
 ledger puts inside the first ten. The tail is the same members in a fixed order scoring monotonically
 worse and reading it has never changed a roster."""
 
-BOARD_RESOLVABLE = 0.0040
+CURVE_RESOLVABLE = 0.0040
 """The offline seat delta below which this ruler has been MEASURED to order the board backwards.
 
 IT IS A SPENDING GUARD, NOT A TARGET, and the distinction is the one thing to keep straight about it.
@@ -279,7 +279,7 @@ class MemberCurve:
         -0.004 and -0.0023 became -0.005. So `BOARD_COST_MULTIPLE` is what a negative is reported at, and
         a delta inside the noise floor is an argument for NOT spending the slot rather than a free look.
 
-        `BOARD_RESOLVABLE` IS WHERE A POSITIVE STOPS MEANING ANYTHING, and the report says so rather than
+        `CURVE_RESOLVABLE` IS WHERE A POSITIVE STOPS MEANING ANYTHING, and the report says so rather than
         leaving the reader to remember it. It is 0.0040 as of 2026-09-02, raised from 0.0015 because the
         old value was inside the band where this ruler is measured to invert: across the 34 board rows
         carrying an honest offline number — 561 ordered pairs — 35 invert, and the largest offline
@@ -312,7 +312,7 @@ class MemberCurve:
             score, displaced = max(seats, key=lambda pair: pair[0])
             priced.append((score, name, displaced))
         lines = [f"holding {len(roster)} members, the best seat each candidate could take:"]
-        resolvable = sum(1 for score, _, _ in priced if score - base >= BOARD_RESOLVABLE)
+        resolvable = sum(1 for score, _, _ in priced if score - base >= CURVE_RESOLVABLE)
         best = max(score for score, _, _ in priced) - base
         return [
             *lines,
@@ -320,7 +320,7 @@ class MemberCurve:
                 f"  {name} for {displaced}: {score:.4f}  ({score - base:+.4f})"
                 for score, name, displaced in sorted(priced, key=lambda priced: -priced[0])
             ),
-            f"{resolvable} of {len(priced)} clear +{BOARD_RESOLVABLE:.4f}, under which this ruler has "
+            f"{resolvable} of {len(priced)} clear +{CURVE_RESOLVABLE:.4f}, under which this ruler has "
             f"never been shown to pick a board tick",
             self.board_cost(best),
         ]
@@ -335,10 +335,10 @@ class MemberCurve:
         times the offline number (knee-c0u9), which turns that -0.0010 into roughly -0.003, still short of
         the +0.0040 the same ruler needs before it stops ordering the board backwards.
         """
-        if best >= BOARD_RESOLVABLE:
-            return f"best clears +{BOARD_RESOLVABLE:.4f}; above that this ruler orders correctly but saturates"
+        if best >= CURVE_RESOLVABLE:
+            return f"best clears +{CURVE_RESOLVABLE:.4f}; above that this ruler orders correctly but saturates"
         if best >= 0:
-            return f"best is +{best:.4f}, inside +{BOARD_RESOLVABLE:.4f}: this ruler cannot tell it from the incumbent"
+            return f"best is +{best:.4f}, inside +{CURVE_RESOLVABLE:.4f}: this ruler cannot tell it from the incumbent"
         return (
             f"best is {best:+.4f} and NEGATIVE, which the board charges at about {BOARD_COST_MULTIPLE}x, "
             f"so roughly {best * BOARD_COST_MULTIPLE:+.4f} — not a free look (knee-c0u9)"
