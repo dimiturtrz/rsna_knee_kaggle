@@ -8114,6 +8114,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.sampling",
+      "target": "kneemri.training.progress_schedule",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.side_ranking",
       "target": "core.findings",
       "weight": 1
@@ -73594,6 +73600,14 @@
       "descendants": 0,
       "id": "kneemri.training.progress_schedule.ProgressSchedule.__post_init__",
       "label": "__post_init__",
+      "level": "method",
+      "parent": "kneemri.training.progress_schedule.ProgressSchedule",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.progress_schedule.ProgressSchedule.knob_help",
+      "label": "knob_help",
       "level": "method",
       "parent": "kneemri.training.progress_schedule.ProgressSchedule",
       "role": null
