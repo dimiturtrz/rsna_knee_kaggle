@@ -12,7 +12,6 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | command | what it answers |
 |---|---|
 | `python -m kneemri.embeddings.build_embeddings` | Encode a pixel cache into an embedding cache: `python -m kneemri.embeddings.build_embeddings`. |
-| `python -m kneemri.embeddings.build_ortho_embeddings` | Encode a pixel cache through OrthoDiffusion's three plane denoisers. |
 | `python -m kneemri.embeddings.report_embeddings` | Embed each study's radiology report once, so the image model can be supervised by all of it. |
 
 ### evaluation

@@ -1406,48 +1406,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.embeddings.build_ortho_embeddings",
-      "target": "core.cli",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_ortho_embeddings",
-      "target": "core.data.corpus.cache_flags",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_ortho_embeddings",
-      "target": "core.wakelock",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_ortho_embeddings",
-      "target": "kneemri.device",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_ortho_embeddings",
-      "target": "kneemri.embeddings.embedding_cache",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_ortho_embeddings",
-      "target": "kneemri.models.ortho_diffusion",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_ortho_embeddings",
-      "target": "kneemri.models.ortho_weights",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.embeddings.embedding_cache",
       "target": "core.data.corpus.study_cache",
       "weight": 1
@@ -7006,24 +6964,6 @@
       "kind": "import",
       "source": "kneemri.models.model",
       "target": "kneemri.models.token_pooling",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.ortho_diffusion",
-      "target": "core.data.corpus.slots",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.ortho_diffusion",
-      "target": "kneemri.models.diffusion_schedule",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.models.ortho_weights",
-      "target": "kneemri.models.ortho_diffusion",
       "weight": 1
     },
     {
@@ -13702,66 +13642,6 @@
       "kind": "calls",
       "source": "kneemri.embeddings.build_medicalnet_embeddings.main",
       "target": "kneemri.models.medicalnet_weights.MedicalNetWeights.trunk",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "core.data.corpus.cache_flags.CacheFlags.cache",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "core.wakelock.Wakelock",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "kneemri.device.VisibleCards",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "kneemri.device.VisibleCards.device",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "kneemri.embeddings.embedding_cache.EmbeddingCache.build",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "kneemri.embeddings.embedding_cache.EmbeddingSpec",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "kneemri.models.ortho_weights.DenoiserWeights",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.embeddings.build_ortho_embeddings.main",
-      "target": "kneemri.models.ortho_weights.DenoiserWeights.trunk",
       "weight": 1
     },
     {
@@ -34891,12 +34771,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.models.diffusion_schedule.DiffusionSchedule.__init__",
-      "target": "kneemri.models.diffusion_schedule.DiffusionSchedule._alphas_cumulative",
-      "weight": 1
-    },
-    {
       "kind": "inherits",
       "source": "kneemri.models.ema.WeightAverage",
       "target": "kneemri.models.ema.LiveWeights",
@@ -35446,66 +35320,6 @@
       "kind": "calls",
       "source": "kneemri.models.model.StudyModel.window",
       "target": "kneemri.models.encoder_surgery.EncoderSurgery.window",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "target": "kneemri.models.diffusion_schedule.DiffusionSchedule",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.__init__",
-      "target": "kneemri.models.diffusion_schedule.DiffusionSchedule",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.encoded",
-      "target": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.pooled",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.encoded",
-      "target": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.prepared",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.slice_features",
-      "target": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.encoded",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.models.ortho_weights.DenoiserWeights",
-      "target": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.ortho_weights.DenoiserWeights.loaded",
-      "target": "kneemri.models.ortho_weights.DenoiserWeights.factory",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.ortho_weights.DenoiserWeights.loaded",
-      "target": "kneemri.models.ortho_weights.DenoiserWeights.stripped",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.models.ortho_weights.DenoiserWeights.trunk",
-      "target": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.models.ortho_weights.DenoiserWeights.trunk",
-      "target": "kneemri.models.ortho_weights.DenoiserWeights.loaded",
       "weight": 1
     },
     {
@@ -40833,7 +40647,7 @@
       "role": null
     },
     {
-      "descendants": 328,
+      "descendants": 324,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -40857,7 +40671,7 @@
       "role": null
     },
     {
-      "descendants": 6,
+      "descendants": 5,
       "id": "kneemri.embeddings",
       "label": "embeddings",
       "level": "module",
@@ -40876,14 +40690,6 @@
       "descendants": 0,
       "id": "kneemri.embeddings.build_medicalnet_embeddings",
       "label": "build_medicalnet_embeddings",
-      "level": "module",
-      "parent": "kneemri.embeddings",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.embeddings.build_ortho_embeddings",
-      "label": "build_ortho_embeddings",
       "level": "module",
       "parent": "kneemri.embeddings",
       "role": null
@@ -42577,7 +42383,7 @@
       "role": null
     },
     {
-      "descendants": 40,
+      "descendants": 37,
       "id": "kneemri.models",
       "label": "models",
       "level": "module",
@@ -42604,14 +42410,6 @@
       "descendants": 0,
       "id": "kneemri.models.depth_window",
       "label": "depth_window",
-      "level": "module",
-      "parent": "kneemri.models",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.diffusion_schedule",
-      "label": "diffusion_schedule",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -42740,22 +42538,6 @@
       "descendants": 0,
       "id": "kneemri.models.moment_pooling",
       "label": "moment_pooling",
-      "level": "module",
-      "parent": "kneemri.models",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion",
-      "label": "ortho_diffusion",
-      "level": "module",
-      "parent": "kneemri.models",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_weights",
-      "label": "ortho_weights",
       "level": "module",
       "parent": "kneemri.models",
       "role": null
@@ -47978,14 +47760,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.models.diffusion_schedule.DiffusionSchedule",
-      "label": "DiffusionSchedule",
-      "level": "class",
-      "parent": "kneemri.models.diffusion_schedule",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.models.drop_path.DropPath",
       "label": "DropPath",
       "level": "class",
@@ -48166,30 +47940,6 @@
       "label": "MomentPooling",
       "level": "class",
       "parent": "kneemri.models.moment_pooling",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "label": "OrthoDiffusionTrunk",
-      "level": "class",
-      "parent": "kneemri.models.ortho_diffusion",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion.PlaneRead",
-      "label": "PlaneRead",
-      "level": "class",
-      "parent": "kneemri.models.ortho_diffusion",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_weights.DenoiserWeights",
-      "label": "DenoiserWeights",
-      "level": "class",
-      "parent": "kneemri.models.ortho_weights",
       "role": "primary"
     },
     {
@@ -54470,14 +54220,6 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.embeddings.build_medicalnet_embeddings",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.embeddings.build_ortho_embeddings.main",
-      "label": "main",
-      "level": "method",
-      "parent": "kneemri.embeddings.build_ortho_embeddings",
       "role": null
     },
     {
@@ -69634,30 +69376,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.models.diffusion_schedule.DiffusionSchedule.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.models.diffusion_schedule.DiffusionSchedule",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.diffusion_schedule.DiffusionSchedule._alphas_cumulative",
-      "label": "_alphas_cumulative",
-      "level": "method",
-      "parent": "kneemri.models.diffusion_schedule.DiffusionSchedule",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.diffusion_schedule.DiffusionSchedule.noised",
-      "label": "noised",
-      "level": "method",
-      "parent": "kneemri.models.diffusion_schedule.DiffusionSchedule",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.models.drop_path.DropPath.__init__",
       "label": "__init__",
       "level": "method",
@@ -70542,86 +70260,6 @@
       "label": "forward",
       "level": "method",
       "parent": "kneemri.models.moment_pooling.MomentPooling",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.encoded",
-      "label": "encoded",
-      "level": "method",
-      "parent": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.pooled",
-      "label": "pooled",
-      "level": "method",
-      "parent": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.prepared",
-      "label": "prepared",
-      "level": "method",
-      "parent": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk.slice_features",
-      "label": "slice_features",
-      "level": "method",
-      "parent": "kneemri.models.ortho_diffusion.OrthoDiffusionTrunk",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_weights.DenoiserWeights.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.models.ortho_weights.DenoiserWeights",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_weights.DenoiserWeights.factory",
-      "label": "factory",
-      "level": "method",
-      "parent": "kneemri.models.ortho_weights.DenoiserWeights",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_weights.DenoiserWeights.loaded",
-      "label": "loaded",
-      "level": "method",
-      "parent": "kneemri.models.ortho_weights.DenoiserWeights",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_weights.DenoiserWeights.stripped",
-      "label": "stripped",
-      "level": "method",
-      "parent": "kneemri.models.ortho_weights.DenoiserWeights",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.models.ortho_weights.DenoiserWeights.trunk",
-      "label": "trunk",
-      "level": "method",
-      "parent": "kneemri.models.ortho_weights.DenoiserWeights",
       "role": null
     },
     {

@@ -65,17 +65,9 @@ TRUNKS: dict[str, str] = {
     # instrument, and the instrument is the flag set, so only this pair's own delta is controlled.
     "v3large": "features_v3large_336px_12sl_r256_mean_max",
     "ortholarge": "features_ortholarge_336px_12sl_r256_mean_max",
-    # The only VOLUMETRIC trunk in this table (`knee-6hfi`). OrthoDiffusion reads a whole (16, 256, 256)
-    # stack through three plane-specific 3D U-Nets, so its row is NOT controlled against the ones above:
-    # different read size, different pooling (`gap256` over a volume, not `mean_max` over slices), and a
-    # denoising objective rather than a discriminative one. That is why the model's own docstring says a
-    # ridge probe here is width-sensitive and a LOSS is confounded with capacity -- only a WIN is clean.
-    # Read it against dinov2-large 0.7852 / v3large 0.7446 / ortholarge 0.7387 on that understanding.
-    "orthodiff": "features_orthodiff_336px_12sl_r256_gap256_volume",
-    # The SECOND volumetric trunk, and it exists to disambiguate the first. MedicalNet/Med3D reads the
-    # same (16, 256, 256) stacks at the same depth and size, so `orthodiff` is the only row it is
-    # controlled against -- and its readout is 2048 wide, WIDER than dinov2-large's 1024. That removes
-    # the capacity confound the row above could not read past: `orthodiff`'s loss was measured at 256.
+    # The VOLUMETRIC trunk. MedicalNet/Med3D reads (16, 256, 256) stacks through a 3D ResNet whose readout
+    # is 2048 wide, WIDER than dinov2-large's 1024, so a loss here is not a capacity confound. OrthoDiffusion
+    # was the other volumetric row, closed at Stage II (docs/AXES.md) and removed with its cache.
     # Bands are pre-registered in `kneemri.models.medicalnet` and are read against ortholarge 0.8170.
     "medicalnet": "features_medicalnet_336px_12sl_r256_gap2048_volume",
     # The same trunk read one stage shallower. `layer4` runs at dilation 4 and `layer3` at dilation 2 —
