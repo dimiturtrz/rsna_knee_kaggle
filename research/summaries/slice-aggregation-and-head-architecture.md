@@ -206,8 +206,9 @@ where the source names them. An unmarked number of ours is midpoint (knee-f9aao)
 - Labelwise depth step (12→20 slices on the 224 cache): UNREAD. It is blocked by the cache, not by VRAM
   [AXES:83][axes].
 - Resolution 420 under labelwise: UNREAD [AXES:76][axes].
-- Moments/variance pooling as a trained head on the shipping line. The frozen-probe gap (0.071) was 85% head
-  [sm] [vs]. No trained arm on the labelwise line is recorded in these sources.
+- Moments pooling TRAINED is measured on the max line: `moment_dense` 0.8516 (−0.0118, width collapse), `moment_wide`
+  0.8600 (−0.0034, flat) ([experiments/README.md ~15298-15390](../../experiments/README.md)). Only a labelwise × moments
+  composition is unrun, with a flat prior.
 - Views-as-samples (instance-MIL over series) vs channels: the samples half is unrun here and unmeasured
   anywhere [vc].
 - An anatomy-indexed slice sampler to replace fraction-of-stack (knee-bps3x): no measurement yet.

@@ -42,6 +42,8 @@ The later or measured side wins. Each summary explains its own resolution; this 
 | Transfer slope 0.82, or +4.67 / +2.14 / +1.55 / +1.82 (`qts` and others) | Read `board_check` live; on ledger75 ~+1.10, resid sd ~0.0013–0.0017 |
 | TTA and threshold calibration help (`past_ensemble_plateau`) | `qbo`: TTA can cost up to −31.6 pp; AXES: calibration is worth 0 for AUC |
 | +0.031 F1 from a CNN family (`qi`) | `qel`, `qem`: public three-family blend ≈ +0.001 |
+| In-domain pseudo-labelling never run here (`rival_single_models`) | Own-OOF self-distillation measured, +0.0056 sub-floor (experiments/README ~8566, knee-zwcyk) |
+| Trained moments pooling unrun | `moment_dense` −0.0118, `moment_wide` −0.0034 (experiments/README ~15298) |
 | No public notebook above 0.926 publishes a method (08-31) | 0.943 Hisernberg lineage is published (09-25) |
 
 Still open, where the facts themselves disagree:

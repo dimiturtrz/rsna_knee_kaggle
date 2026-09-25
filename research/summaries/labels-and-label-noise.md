@@ -135,12 +135,13 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
   - Modality dropout: 0.000 AUC.
   - Denoising ranking by measured delta ([qbr](../deep_dives/2026-09-02_qbr-label-denoising-with-58-gold-studies.md)): better labeler > OOF relabel > sample selection > smoothing. 58 gold is "almost certainly too few" for CL transition matrices.
 
-## 8. Manufacturing labels (pseudo-labels, blends) — the one open mechanism
+## 8. Manufacturing labels (pseudo-labels, blends, self-distillation)
 
 - **[lit]** Semi-supervised pseudo-labelling on ChestX-ray14 at 20% labelled gains **+2.64%** mean AUC (70.81 vs 68.17), closing about 1/3 of the gap to full supervision ([pseudo_label_partial](../deep_dives/2026-09-02_label_noise_pseudo_label_partial_labels_literature.md)).
 - **[lit]** Medical VLP (MedCLIP) decouples image and text and is data-efficient at 20k pairs. It is not priced for us ([missing_gold_labels](../deep_dives/2026-09-02_missing_gold_labels_and_medical_vlp_axis.md)).
 - **[unv]** Forum: "labels are still my greatest lever, especially pseudo labeling and blending different labels". Two entries trained on LLM output labels only reach 0.926–0.929 five-fold. The best single claim is 0.943 against our 0.946 champion. A quoted "0.949 small ResNet" is not in the thread and was withdrawn ([rival_single_models](../deep_dives/2026-08-26_rival_single_models_and_the_label_bottleneck.md), 09-16 re-read).
 - **[ours]** AXES:157: `noisy_student` scored 0.8548 and `pool_specialise` was FLAT. That run used *external* data as labelled augmentation, not in-domain pseudo-labels on the 4,349 report-only studies.
+- **[ours]** In-domain soft pseudo-labels HAVE run: `--teacher-targets` from our own out-of-fold predictions over the 4,349 studies, `--distill-weight 0.7`. The leak-free student `seat_clean_distill` reads 0.8634 vs `band_dense` 0.8578 = **+0.0056**, under the 0.0062 floor; gen-2 teachers add +0.0007 ([experiments/README.md ~8566, ~14050](../../experiments/README.md); knee-zwcyk). The ensemble-teacher headroom is 0.002 on the board (AXES:160). So pseudo-labelling is measured and sub-floor, not unrun.
 
 ---
 
@@ -158,13 +159,12 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
 3. **Qwen3.8.** [vlm_shortlist](../deep_dives/2026-09-03_local_vlm_shortlist.md) calls it the "best single-model candidate". [qwen38_gate](../deep_dives/2026-09-03_qwen38_reader_gate_result.md) finds it does not beat the local reader on net errors (122 vs 121).
 4. **MedGemma.** [vlm_shortlist](../deep_dives/2026-09-03_local_vlm_shortlist.md) withdraws it and then partly retracts the withdrawal inside the same file.
 5. **SE of a gold-58 AUC.** [vlm-montage](../deep_dives/2026-09-11_vlm-montage-prompting-and-small-gold-validation.md) gives ≈0.12. [report-error-gradient](../deep_dives/2026-09-11_report-error-gradient-vs-gold58-ordering.md) gives ≈0.055, with different n+ and AUC.
-6. **Is pseudo-labelling measured?** [rival_single_models](../deep_dives/2026-08-26_rival_single_models_and_the_label_bottleneck.md) (09-16) calls it untested. AXES:157 records `noisy_student` 0.8548, but on external data.
+6. **Is pseudo-labelling measured?** [rival_single_models](../deep_dives/2026-08-26_rival_single_models_and_the_label_bottleneck.md) (09-16) calls it untested. It is measured: own-OOF self-distillation +0.0056, sub-floor (§8).
 7. **Test-label protocol.** [qao](../deep_dives/2026-09-02_test_labels_report_derived_or_radiologist_reviewed_qao.md) and [qap](../deep_dives/2026-09-02_qap_adjudication_protocol_and_58_gold_pricing.md) agree the test is radiologist-read. Neither gives a reader count.
 8. **Labeler gains.** [visualchexbert](../deep_dives/2026-09-06_visualchexbert-mechanism-and-noisy-label-pricing.md) and [qec](../deep_dives/2026-09-04_qec-parser-vs-label-noise.md) reconcile: the gain comes from replacing a *weak rule* labeler, which we do not have.
 
 ## Open questions
 
-- In-domain pseudo-labelling or label blending on the 4,349 report-only studies. This is the one mechanism the field names that has never been run here ([rival_single_models](../deep_dives/2026-08-26_rival_single_models_and_the_label_bottleneck.md)).
 - Why does Effusion rank third-worst on gold when the literature expects it clean? Candidates: a threshold mismatch, since the annotator wants moderate/large ([report-error-gradient](../deep_dives/2026-09-11_report-error-gradient-vs-gold58-ordering.md)).
 - Is test-label noise masking the gap? AUC_obs = (1−ρ)·AUC* + ρ/2 ([label-noise-ceiling](../deep_dives/2026-09-11_label-noise-ceiling-and-report-vs-pixels-error.md)).
 - Per-column forward correction with a gold-measured T is unpublished and untested ([loss-correction](../deep_dives/2026-09-11_loss-correction-with-measured-noise-matrix.md)).
