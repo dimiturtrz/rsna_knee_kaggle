@@ -124,6 +124,7 @@ def main() -> None:
         anatomical_prior=arguments.encoder.anatomical_prior,
         layer=arguments.encoder.encoder_layer,
         fuse_blocks=arguments.encoder.fuse_blocks,
+        slice_shift=arguments.encoder.slice_shift,
     )
     encoder = ENCODERS[arguments.encoder.variant]
     # Before the weights are fetched and the cache is mapped: a read size the patch grid cannot tile is

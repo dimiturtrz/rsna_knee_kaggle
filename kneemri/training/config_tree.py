@@ -501,6 +501,7 @@ class TrainConfig:
             slot_pooling=model.slot_pooling,
             encoder_layer=encoder.encoder_layer,
             fuse_blocks=encoder.fuse_blocks,
+            slice_shift=encoder.slice_shift,
             through_plane=encoder.through_plane,
             anatomical_prior=encoder.anatomical_prior,
             lora_rank=encoder.lora_rank,

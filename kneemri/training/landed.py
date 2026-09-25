@@ -169,6 +169,7 @@ NOT_A_SWITCH = {
     "variant": "chosen by CONSTRUCTION: the registry raises on a name it cannot build",
     "encoder_layer": "constructed, and the width check above raises when the registry and weights disagree",
     "fuse_blocks": "constructed — the gates exist only when it is non-zero, so a load against the wrong value raises",
+    "slice_shift": "constructed — the gates exist only when it is non-zero, so a load against the wrong value raises",
     "pool": "constructed — `POOL_PARTS[self.pool]` raises on a pooling that does not exist",
     "slice_pooling": "constructed — `SLICE_POOLINGS[...]` raises before any weight is fetched",
     "through_plane": "constructed into `StudyDesign` and stamped into the manifest: the encoder's three "

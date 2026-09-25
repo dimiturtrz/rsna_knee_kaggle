@@ -24,6 +24,7 @@ from kneemri.models.encoder_surgery import NO_LAYER_DECAY, NO_OFFSET, BlockWindo
 from kneemri.models.fingerprint import FINGERPRINT
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slice_read import SliceRead
+from kneemri.models.slice_shift import SliceShift
 from kneemri.models.slot_head import ATTENDED, PRESENT, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS, TOKEN_POOLINGS
 
@@ -133,6 +134,10 @@ class StudyDesign:
     a zero gate instead starts byte-identical to the control and lets the head pull in finer, less
     pretraining-specialised features only as far as the loss asks for them. Costs no extra forward pass."""
 
+    slice_shift: int = 0
+    """How many of the last blocks first mix in each slice's neighbours' tokens — see `SliceShift`. 0 is
+    every member so far."""
+
     @staticmethod
     def lora_rank_of(config: Mapping[str, object]) -> int:
         """The rank of a config's adapters, or zero — read WITH the design, though not a field of it.
@@ -165,6 +170,7 @@ class StudyDesign:
             through_plane=bool(config.get("through_plane", False)),
             layer=int(str(config.get("encoder_layer", -1))),
             fuse_blocks=int(str(config.get("fuse_blocks", 0))),
+            slice_shift=int(str(config.get("slice_shift", 0))),
         )
 
 
@@ -251,6 +257,8 @@ class StudyModel(nn.Module):
         self.head = SLOT_POOLINGS[self.design.slot_pooling](self.head_width, n_slot, len(TARGETS), prior)
         if self.design.fuse_blocks:
             self.fusion = nn.Parameter(torch.zeros(self.design.fuse_blocks, dim))
+        if self.design.slice_shift:
+            self.shift = SliceShift(self.surgery.blocks()[-self.design.slice_shift :], dim)
         # PERSISTENT, so they ride in the state dict — which is what makes fixing the default safe:
         # every member already on disk keeps the constants it was actually fitted under, whatever the
         # registry now says, and only a fresh fit moves.
@@ -441,6 +449,8 @@ class StudyModel(nn.Module):
         batch, slots, group = imgs.shape[:3]
         per_slice = self.per_slice
         x = self.reading.pixels(imgs, self.mean, self.std, img_size, per_slice=per_slice)
+        if self.design.slice_shift:
+            self.shift.group = group if per_slice else 1
         tokens = self._tokens(x)
         self.reading.check_tokens(x, tokens)
         pooled = self._pool(tokens)

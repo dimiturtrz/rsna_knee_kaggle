@@ -99,6 +99,14 @@ class EncoderConfig:
             "member so far. Costs no extra forward pass."
         ),
     )
+    slice_shift: int = ConfigLeaf.of(
+        default=0,
+        says=(
+            "how many of the last blocks first add, per channel, the previous and next slice's tokens to each"
+            " slice's own, through zero-initialised gates, so the run starts exactly at the control. 0 is every"
+            " member so far. Costs no extra forward pass."
+        ),
+    )
     through_plane: bool = ConfigLeaf.of(
         default=StudyDesign().through_plane,
         says=(

@@ -68,6 +68,7 @@ ARCHITECTURE = (
     "band_high",
     "encoder_layer",
     "fuse_blocks",
+    "slice_shift",
     "lora_rank",
 )
 """The options that decide what the tensors MEAN, so two checkpoints agreeing on all of them can be added.

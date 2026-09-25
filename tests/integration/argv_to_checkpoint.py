@@ -248,6 +248,7 @@ def test_every_design_switch_survives_argv_to_rebuild(corpus: Path, monkeypatch:
         "--anatomical-prior",
         "--through-plane",
         *("--fuse-blocks", "2"),
+        *("--slice-shift", "2"),
     )
 
     rebuilt = StudyDesign.from_config(_nested(payload, "config"))
@@ -260,6 +261,7 @@ def test_every_design_switch_survives_argv_to_rebuild(corpus: Path, monkeypatch:
         slice_regions=2,
         through_plane=True,
         fuse_blocks=2,
+        slice_shift=2,
     )
     for field in fields(StudyDesign):
         assert getattr(rebuilt, field.name) != field.default, (

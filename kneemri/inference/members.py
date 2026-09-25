@@ -66,6 +66,9 @@ class MemberConfig(TypedDict):
     fuse_blocks: NotRequired[int]
     """How many earlier blocks were gated into the last; absent on every member fitted before fusion."""
 
+    slice_shift: NotRequired[int]
+    """How many last blocks mix in their neighbouring slices' tokens; absent on every member before it."""
+
     bf16: NotRequired[bool]
     """Whether the run's autocast was bfloat16; absent on every member fitted before the flag existed."""
 

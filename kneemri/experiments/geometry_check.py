@@ -91,6 +91,7 @@ GEOMETRY_KEYS = (
     "through_plane",
     "encoder_layer",
     "fuse_blocks",
+    "slice_shift",
     "whole_stack",
     "labels",
     "studies",

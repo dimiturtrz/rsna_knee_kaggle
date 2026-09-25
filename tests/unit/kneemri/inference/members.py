@@ -588,6 +588,7 @@ CONSUMED: dict[str, tuple[object, Callable[[Member], object], object]] = {
     "through_plane": (True, lambda member: StudyDesign.from_config(member.config).through_plane, True),
     "encoder_layer": (-4, lambda member: member.layer, -4),
     "fuse_blocks": (3, lambda member: StudyDesign.from_config(member.config).fuse_blocks, 3),
+    "slice_shift": (2, lambda member: StudyDesign.from_config(member.config).slice_shift, 2),
     "lora_rank": (8, lambda member: member.lora_rank, 8),
     "whole_stack": (True, lambda member: member.whole_stack, True),
     "bf16": (True, lambda member: member.precision, torch.bfloat16),
