@@ -370,9 +370,10 @@ class Trainer:
         self.dropped_paths = self.depth.applied(self.model.backbone)
         self.drop_path_rate = rate
 
-    def schedule_strength(self, schedule: ProgressSchedule, epochs: int) -> None:
-        """Drive every regulariser's strength by this schedule over a run of `epochs` epochs."""
-        self.progress = schedule
+    def pace(self, epochs: int, *, strength: ProgressSchedule, hardness: ProgressSchedule) -> None:
+        """Drive regulariser strength and example hardness (label trust, the draw's tilt) over `epochs` epochs."""
+        self.progress = strength
+        self.hardness = hardness
         self.planned_epochs = max(epochs, 1)
 
     def _strengthen(self, progress: float) -> float:
@@ -381,10 +382,8 @@ class Trainer:
             consumer.strengthen(strength)
         return strength
 
-    def harden(self, schedule: ProgressSchedule, epochs: int) -> None:
-        """Drive example hardness — label trust and the draw's tilt — by this schedule over `epochs` epochs."""
-        self.hardness = schedule
-        self.planned_epochs = max(epochs, 1)
+    def _autocast(self) -> torch.autocast:
+        return torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda")
 
     def _harden(self, progress: float) -> float:
         strength = self.hardness.value(progress / self.planned_epochs)
@@ -409,7 +408,7 @@ class Trainer:
         self.warmup = fraction
 
     def ramp_certainty(self, epochs: int) -> None:
-        """SUPERSEDED by `harden` (its float translation is not bit-equal): whole epochs from floor to full trust."""
+        """SUPERSEDED by `pace(hardness=)`, not bit-equal: whole epochs from floor to full trust."""
         self.certainty_ramp = epochs
 
     def _trust(self, progress: float) -> float:
@@ -582,7 +581,7 @@ class Trainer:
                 batch: NDArray[np.int64] = batch,
             ) -> tuple[Tensor, Predicted]:
                 score, weight = rows
-                with torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
+                with self._autocast():
                     # Both readouts from ONE encoder pass. The report head costs a small Linear and gets
                     # no gradient when report supervision is off, so the loop needs no branch for it.
                     readout = self.model.supervised(pixels, flags, self.read_size or corpus.image_size)
@@ -691,7 +690,7 @@ class Trainer:
             for batch in batches
         ]
         reader = Prefetch(corpus, plan, self.window, pin=self.device.type == "cuda")
-        with torch.no_grad(), torch.autocast("cuda", dtype=self.autocast_dtype, enabled=self.device.type == "cuda"):
+        with torch.no_grad(), self._autocast():
             for (padded, fetched), rows in zip(reader, kept, strict=True):
                 pixels = fetched.to(self.device, non_blocking=True)
                 flags = torch.from_numpy(corpus.mask[padded]).to(self.device)

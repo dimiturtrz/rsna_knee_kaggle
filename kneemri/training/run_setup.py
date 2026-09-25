@@ -536,16 +536,6 @@ class RunSetup:
         # BEFORE the optimiser groups are read by anything downstream is not a constraint here: stochastic
         # depth registers no parameter, so the groups built in the constructor still name every tensor.
         trainer.drop_paths(options.regularisation.stochastic_depth)
-        trainer.schedule_strength(
-            ProgressSchedule(
-                options.regularisation.aug_start,
-                options.regularisation.aug_mid,
-                options.regularisation.aug_end,
-                options.regularisation.aug_ramp,
-                options.regularisation.aug_tail,
-            ),
-            options.optim.epochs,
-        )
         # ATTACHED UNCONDITIONALLY, unlike the policies above it, because the null here is an object and
         # not an absence — and because a policy only some runs attach is a policy the options-to-policies
         # walk cannot see. ALIGNED AGAINST `identifiers`, the corpus's own study order, and not against
@@ -556,7 +546,17 @@ class RunSetup:
         # reads again and the run would anneal on 0.15 while its config recorded the value asked for.
         trainer.warm_up(options.optim.warmup)
         trainer.ramp_certainty(options.optim.certainty_ramp)
-        trainer.harden(self.hardness(), options.optim.epochs)
+        trainer.pace(
+            options.optim.epochs,
+            strength=ProgressSchedule(
+                options.regularisation.aug_start,
+                options.regularisation.aug_mid,
+                options.regularisation.aug_end,
+                options.regularisation.aug_ramp,
+                options.regularisation.aug_tail,
+            ),
+            hardness=self.hardness(),
+        )
         if options.optim.one_cycle:
             # FLOOR now, and it was ceil for a real reason that no longer holds: the batcher used to
             # KEEP the final partial batch, so a floor undercounted by one step per epoch and OneCycleLR

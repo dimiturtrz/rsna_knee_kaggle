@@ -919,7 +919,9 @@ def test_harden():
     assert trainer._ramped_weights(weights, 0.0) is weights, "the default touches nothing"
     assert trainer._harden(0.0) == 1.0
 
-    trainer.harden(ProgressSchedule(start=0.0, mid=1.0, end=0.5, ramp=0.5, tail=0.25), 4)
+    trainer.pace(
+        4, strength=ProgressSchedule(), hardness=ProgressSchedule(start=0.0, mid=1.0, end=0.5, ramp=0.5, tail=0.25)
+    )
     assert trainer.policies()[HARD_SCHEDULE] == (0.0, 1.0, 0.5, 0.5, 0.25)
     assert trainer._harden(0.0) == 0.0
     assert trainer._harden(1.0) == pytest.approx(0.5)
@@ -935,7 +937,7 @@ def test_harden():
     legacy = _trainer()
     legacy.ramp_certainty(4)
     scheduled = _trainer()
-    scheduled.harden(ProgressSchedule(start=0.0, mid=1.0, end=1.0, ramp=1.0, tail=0.0), 4)
+    scheduled.pace(4, strength=ProgressSchedule(), hardness=ProgressSchedule(start=0.0, mid=1.0, end=1.0, ramp=1.0))
     for epoch in range(5):
         assert np.allclose(
             legacy._ramped_weights(weights, epoch), scheduled._ramped_weights(weights, epoch), atol=1e-6
@@ -952,19 +954,21 @@ def test_harden_leaves_the_draw_unchanged_by_default():
     trainer._harden(0.0)
     assert np.array_equal(trainer.sampling.drawn(positions, np.random.default_rng(7)), today)
 
-    trainer.harden(ProgressSchedule(start=0.0, ramp=0.5), 4)
+    trainer.pace(4, strength=ProgressSchedule(), hardness=ProgressSchedule(start=0.0, ramp=0.5))
     trainer._harden(0.0)
     assert trainer.sampling.alpha == 0.0
     assert trainer.sampling.tilt() == 0.5, "the switch check still reads the configured tilt"
 
 
-def test_schedule_strength():
-    """One schedule drives every consumer; the default reports the constant schedule the ledger ran."""
+def test_pace():
+    """One strength schedule drives every consumer; the default reports the constant schedule the ledger ran."""
     trainer = _trainer()
     assert trainer.policies()[AUG_SCHEDULE] == (1.0, 1.0, 1.0, 0.0, 0.0)
     trainer.augmentation = Augmentation(AugmentConfig(slot_dropout=0.4))
     trainer.blend(0.2)
-    trainer.schedule_strength(ProgressSchedule(start=0.0, mid=1.0, end=0.0, ramp=0.5, tail=0.5), 4)
+    trainer.pace(
+        4, strength=ProgressSchedule(start=0.0, mid=1.0, end=0.0, ramp=0.5, tail=0.5), hardness=ProgressSchedule()
+    )
     assert trainer.policies()[AUG_SCHEDULE] == (0.0, 1.0, 0.0, 0.5, 0.5)
     assert trainer._strengthen(0) == 0.0
     assert trainer.augmentation.config.slot_dropout == 0.0
