@@ -1807,3 +1807,4 @@ wisepull50_lw24_s2026       # WiSE-FT alpha 0.50: 0.8895 ledger75 vs parent 0.90
 fuse3_lw12_s2026            # gated block fusion (knee-vivli): 0.9014 ledger75 @e18 vs control 0.9006, +0.0008, null; below the 0.9053 line.
 fuse3_lw12_s2026_run1       # superseded partial of fuse3_lw12: best epoch 3, 0.8471 ledger75 — a killed run, a floor.
 sam_ship_s2026              # SAM trunk, stopped by the owner at epoch 3: 0.8449 ledger75, a truncated floor far under the 0.9053 line.
+orthodiff_ft_s2026          # OrthoDiffusion Stage II fine-tune (knee-mxz08): 0.8054 ledger75 @e4 vs control 0.9006, -0.0952; instrument, not a seat.

@@ -18158,3 +18158,19 @@ one) against `labelwise_ms_ctrl`, same 336px/12-slice cache, recipe and seed, 90
 
 +0.0008 ledger75: closed under the pre-registration (≤ +0.0061). Mid-level DINOv2 features carry
 nothing the last block plus labelwise pooling does not already read at this resolution.
+
+## OrthoDiffusion Stage II fine-tune is ~0.10 under the trunk — 2026-09-25T02:20Z
+
+`orthodiff_ft_s2026` (knee-mxz08, `research/scripts/ortho_finetune.py`): the three plane denoisers'
+input and middle blocks unfrozen at lr ×0.05, one linear head over six slots, 6 epochs, fresh noise per
+step. Same 909 holdout studies as the control:
+
+| member | LEDGER | LEDGER75 | epoch |
+|---|---|---|---|
+| labelwise_ms_ctrl_s2026 | 0.8637 | 0.9006 | 20 |
+| orthodiff_ft_s2026 | 0.7800 | 0.8054 | 4 |
+
+Mean AUC by epoch 0.719 → 0.738 → 0.763 → 0.772 → 0.780 → 0.779: a plateau before the cosine end, so
+the budget did not bind. Stage II lifts the frozen probe (0.7435 midpoint) by +0.037 and stays −0.095
+ledger75 under our trunk. Not ruled out: their three-block LSE fusion and three timesteps; each would
+need a sixfold recovery to reach the bar. Closed; declined in `comp/members.declines`.

@@ -20,7 +20,7 @@ Top 0.958 (Scott Willis, rhoskeri), 0.956 ×2, 0.955 ×8, 0.954 ×7, #20 0.953. 
 | Slice DENSITY, not span: 44→80 slices 0.917→0.932 (737696, Raptor CoAtNet window reader) | Slice count 12→24 flat, 24→36 −0.0224 on our DINOv2 whole-stack (AXES:87-88). Architecture-bound claim. |
 | Eval windows 48→72 → board 0.944 (737696) | Window TTA; our whole-stack members gain nothing from overlap TTA (ledger). |
 | Train/inference pooling mismatch costs ~0.02 (737696) | Serving matches training by fingerprint + witness checks. |
-| RadImageNet R50, centre slice ×3 beats adjacent-slice channels +0.020 (Ziad, fold 0, 737696) | CNN lane closed; the owner restricts us to DINOv2. |
+| RadImageNet R50, centre slice ×3 beats adjacent-slice channels +0.020 (Ziad, fold 0, 737696) | CNN lane closed on measurement (`interpretations/kneemri/2026-09-05_the-cnn-axis-is-maximally-distinct-and-still-worthless.md`); there is no DINOv2-only rule. |
 | InstanceNumber against position in >1/3 of series; laterality missing in ~half (741310) | Already handled: order by `ImagePositionPatient·normal`, InstanceNumber only as fallback (`core/data/corpus/acquisition.py:340-372`); laterality is Type 2C-aware (`:12`). |
 | Flip aug must swap medial/lateral labels (741310) | We don't flip-augment across laterality (no flip in `core`/`kneemri`). |
 | Fracture back into RadImageNet blend, +0.0118 Fracture AUC (notebook) | Ensemble-blend knob; not a solo mechanism. |
