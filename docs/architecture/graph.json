@@ -29431,6 +29431,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_check.LiveBoard._kaggle",
+      "target": "kneemri.kaggle.kaggle_api.Kaggle.authenticated",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.kaggle.board_check.main",
       "target": "kneemri.kaggle.board_check.BoardCensus",
@@ -29560,6 +29566,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.board_read.LeaderboardRead.written",
       "target": "kneemri.kaggle.board_read.LeaderboardRead.row",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.board_read.PublicBoard.text",
+      "target": "kneemri.kaggle.kaggle_api.Kaggle.authenticated",
       "weight": 1
     },
     {
@@ -30038,8 +30050,20 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.discussion_read.Discussion._kaggle_posts",
+      "target": "kneemri.kaggle.kaggle_api.Kaggle.authenticated",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.discussion_read.Discussion._kaggle_topics",
       "target": "kneemri.kaggle.discussion_read.Discussion._items",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.discussion_read.Discussion._kaggle_topics",
+      "target": "kneemri.kaggle.kaggle_api.Kaggle.authenticated",
       "weight": 1
     },
     {
@@ -30208,6 +30232,12 @@
       "kind": "references",
       "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
       "target": "kneemri.kaggle.efficiency_read.EfficiencyBoard",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.efficiency_read.EfficiencyBoard._kaggle",
+      "target": "kneemri.kaggle.kaggle_api.Kaggle.authenticated",
       "weight": 1
     },
     {
@@ -45215,6 +45245,14 @@
       "level": "class",
       "parent": "kneemri.kaggle.foreign_entry",
       "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kaggle_api.Kaggle",
+      "label": "Kaggle",
+      "level": "class",
+      "parent": "kneemri.kaggle.kaggle_api",
+      "role": "primary"
     },
     {
       "descendants": 0,
@@ -64050,10 +64088,10 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.kaggle_api.authenticated",
+      "id": "kneemri.kaggle.kaggle_api.Kaggle.authenticated",
       "label": "authenticated",
       "level": "method",
-      "parent": "kneemri.kaggle.kaggle_api",
+      "parent": "kneemri.kaggle.kaggle_api.Kaggle",
       "role": null
     },
     {
