@@ -20,32 +20,35 @@ from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import DeviceBudget
-from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
+from kneemri.training.feature_distillation import FeatureDistillation, Widths
 from kneemri.training.grades import Grades, OrdinalGrades
 from kneemri.training.label_focus import LabelFocus
 from kneemri.training.landed import Request
-from kneemri.training.objective import (
-    ContrastiveObjective,
-    DecorrelatedObjective,
-    DistilledObjective,
-    LabelStructure,
-    MarginObjective,
-    Objective,
-    RankedObjective,
-    Shaping,
-)
+from kneemri.training.objective import LabelStructure, Objective, Shaping
 from kneemri.training.objective_checks import ObjectiveChecks
 from kneemri.training.patch_erasing import PatchErasing
 from kneemri.training.pretrained_encoder import PretrainedEncoder
 from kneemri.training.progress_schedule import ProgressSchedule
-from kneemri.training.remembered_contrast import RememberedContrast
-from kneemri.training.remembered_margin import RememberedMargin
-from kneemri.training.remembered_ranking import RememberedRanking
+from kneemri.training.remembered import Remembered
 from kneemri.training.report_supervision import ReportSupervision
 from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Sampling, Uniform
 from kneemri.training.side_ranking import PairedSides, SideRanking
 from kneemri.training.teacher_features import TeacherFeatures
 from kneemri.training.teacher_targets import TeacherTargets
+from kneemri.training.terms import (
+    CONTRAST_TERM,
+    DISSENT_TERM,
+    DISTILL_TERM,
+    FEATURE_TERM,
+    MARGIN_TERM,
+    Contrast,
+    Dissent,
+    Distillation,
+    Margin,
+    Pooled,
+    Ranking,
+    Term,
+)
 from kneemri.training.trainer import Trainer
 
 logger = logging.getLogger(__name__)
@@ -304,73 +307,68 @@ class RunSetup:
             per_label=options.targets.per_label_loss,
             structure=structure,
         )
+        terms = self.terms(widths)
         if options.targets.auc_margin:
-            if options.targets.pair_memory:
-                return RememberedMargin(options.targets.auc_margin, shaping, capacity=options.targets.pair_memory)
-            return MarginObjective(options.targets.auc_margin, shaping)
-        if options.teacher.dissent_weight:
-            return DecorrelatedObjective(options.teacher.dissent_weight, shaping)
-        if options.teacher.distill_weight:
-            # BEFORE the ranking branch, and carrying `rank_weight` through rather than excluding it:
-            # the owner's design is one training that runs both terms, so this is the composed objective
-            # rather than a third alternative to the other two.
-            return DistilledObjective(options.teacher.distill_weight, shaping, rank_weight=options.targets.rank_weight)
-        if options.teacher.feature_weight:
-            return self._features(shaping, widths)
-        if options.targets.contrast_weight:
-            return self._contrastive(shaping)
+            return Objective(base=terms[-1], terms=terms[:-1], shaping=shaping)
+        return Objective(terms=terms, shaping=shaping)
+
+    def terms(self, widths: Widths | None = None) -> list[Term]:
+        """The terms these flags ask for: the ranking term if weighted, then at most ONE exclusive term.
+
+        REFUSES two exclusive terms rather than picking one. The chain this replaced checked margin,
+        dissent, distill, feature and contrast in that order and returned the first it found, so an arm
+        asking for two trained one under both names. `ObjectiveChecks.composed` names each pair it has
+        a reason for; this is the backstop for a pair nobody has argued yet.
+
+        `rank_weight` is carried beside whichever exclusive term is asked, for `Distillation`'s reason:
+        the house recipe passes --rank-weight 1.0, so excluding it would make every such arm a
+        two-variable change against the control it is measured on. The remembered pool widens the LAST
+        term — the exclusive one when there is one, the ranking term otherwise.
+        """
+        options = self.options
+        exclusive = {
+            MARGIN_TERM: (options.targets.auc_margin, lambda: Margin(options.targets.auc_margin)),
+            DISSENT_TERM: (options.teacher.dissent_weight, lambda: Dissent(options.teacher.dissent_weight)),
+            DISTILL_TERM: (options.teacher.distill_weight, lambda: Distillation(options.teacher.distill_weight)),
+            FEATURE_TERM: (options.teacher.feature_weight, lambda: self._features(widths)),
+            CONTRAST_TERM: (options.targets.contrast_weight, lambda: Contrast(options.targets.contrast_weight)),
+        }
+        asked = [key for key, (value, _) in exclusive.items() if value]
+        if len(asked) > 1:
+            message = (
+                f"{' and '.join(asked)} are each an exclusive loss term and this run asks for {len(asked)} of "
+                "them — the objective builder used to keep the first and silently drop the rest"
+            )
+            raise ValueError(message)
+        parts: list[Term] = [Ranking(options.targets.rank_weight)] if options.targets.rank_weight else []
+        parts += [exclusive[key][1]() for key in asked]
         if options.targets.pair_memory:
-            return RememberedRanking(options.targets.rank_weight, shaping, capacity=options.targets.pair_memory)
-        if options.targets.rank_weight:
-            return RankedObjective(options.targets.rank_weight, shaping)
-        return Objective(shaping)
+            parts[-1] = Remembered(self._pooled(parts[-1]), options.targets.pair_memory)
+        return parts
 
-    def _features(self, shaping: Shaping, widths: Widths | None) -> FeatureDistilledObjective:
-        """The feature-distillation objective, built against the two widths it projects between.
+    def _pooled(self, term: Term) -> Pooled:
+        """`term` as one a remembered pool can widen, or a refusal naming it."""
+        if not isinstance(term, Pooled):
+            message = f"--pair-memory {self.options.targets.pair_memory} cannot widen {term.key}, which pools nothing"
+            raise ValueError(message)
+        return term
 
-        A METHOD RATHER THAN A BRANCH WITH A GUARD IN IT, for `_contrastive`'s reason: the chain above
-        sits at the complexity ceiling and this is one term with one precondition.
+    def _features(self, widths: Widths | None) -> FeatureDistillation:
+        """The feature term, built against the two widths it projects between.
 
         RAISES when the widths are absent rather than assuming they are equal. A caller asking which
         objective a recipe wants — `arm_check`, `vram_need` — never reaches here because the flag it
         dispatches on is off; a caller that reached here with no widths is one that will fit, and
         guessing on its behalf would build a projection between two numbers nobody measured.
-
-        `rank_weight` is carried through, for `DistilledObjective`'s reason: the house recipe passes
-        --rank-weight 1.0, so excluding it would make every feature arm a two-variable change.
         """
-        options = self.options
         if widths is None:
             message = (
-                f"--feature-weight {options.teacher.feature_weight} builds a projection from the student's "
+                f"--feature-weight {self.options.teacher.feature_weight} builds a projection from the student's "
                 "context width to the teacher's, and neither was supplied — this call cannot know "
                 "either number, so it must not guess one"
             )
             raise ValueError(message)
-        return FeatureDistilledObjective(
-            widths, options.teacher.feature_weight, shaping, rank_weight=options.targets.rank_weight
-        )
-
-    def _contrastive(self, shaping: Shaping) -> ContrastiveObjective:
-        """The contrastive objective these flags ask for, widened by a remembered pool or not.
-
-        A METHOD RATHER THAN TWO MORE BRANCHES IN `objective`. That chain sits at the complexity ceiling
-        already, and the choice here is not a fifth alternative to the other terms — it is one term with
-        one option, so it reads as one branch up there and its own question down here.
-
-        `rank_weight` is carried through in both, for `DistilledObjective`'s reason: the house recipe
-        passes --rank-weight 1.0, so excluding it would make every contrastive arm a two-variable change
-        against the control it is measured on.
-        """
-        options = self.options
-        if options.targets.pair_memory:
-            return RememberedContrast(
-                options.targets.contrast_weight,
-                shaping,
-                rank_weight=options.targets.rank_weight,
-                capacity=options.targets.pair_memory,
-            )
-        return ContrastiveObjective(options.targets.contrast_weight, shaping, rank_weight=options.targets.rank_weight)
+        return FeatureDistillation(widths, self.options.teacher.feature_weight)
 
     def reports(self, identifiers: list[str]) -> ReportSupervision | None:
         """The report-embedding supervision this run asked for, or None — and never half of it.
@@ -396,7 +394,7 @@ class RunSetup:
 
         Both halves raise, not just the missing file: a `--teacher-targets` with no `--distill-weight`
         loads an array nothing reads, and the arm would report the plain recipe under a distilling name
-        just as surely as the other way round. `DistilledObjective` raises on an absent teacher too, but
+        just as surely as the other way round. `Distillation` raises on an absent teacher too, but
         it raises on the first BATCH — this raises before the card is touched.
         """
         options = self.options

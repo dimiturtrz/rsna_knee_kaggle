@@ -15,8 +15,8 @@ LONE_BATCH = 1
 
 Not a threshold and not a floor picked for comfort: at two studies a label still forms one pair, and one
 thin pair is a recipe judgement. At ONE study there is no second study to compare against, so the term is
-absent rather than weak — `RankedObjective.pairs(batch, batch)` forms only the self-pair, which carries
-`s_i - s_j = 0` and drops out, and `MarginObjective.auc_margin` finds no label holding both a positive and
+absent rather than weak — `PairMass.between(batch, batch)` forms only the self-pair, which carries
+`s_i - s_j = 0` and drops out, and `Margin` finds no label holding both a positive and
 a negative and returns its zero. `--accumulate` does not repair it: accumulation sums the gradients of
 micro-batch losses each computed alone, so it never forms a cross-micro-batch pair."""
 
@@ -63,7 +63,7 @@ class ObjectiveChecks:
             )
             raise ValueError(message)
         if options.teacher.distill_weight and options.targets.pair_memory:
-            # LOUD for the same reason as above. `RememberedRanking` widens the LABEL term's pair pool
+            # LOUD for the same reason as above. `Remembered` widens a pooled term
             # and knows nothing about a teacher, so the two together would train a distilling arm whose
             # remembered pairs silently carry no teacher at all — half the mechanism, under its name.
             message = (
@@ -145,7 +145,7 @@ class ObjectiveChecks:
         `--distill-weight` reads the same teacher to pull the member TOWARD the pool's ordering, which is
         the opposite of what this term spends the member on; running both descends a sum whose result
         says nothing about either. `--rank-weight` is the same label ordering at a flat pair mass, and
-        `DecorrelatedObjective` deliberately holds it at zero — passing it would be silently ignored,
+        `Dissent` replaces it — passing it would be silently ignored,
         which is the exact failure the whole flag vocabulary here exists to prevent. `--pair-memory`
         widens the label term's pool with remembered readouts that carry no teacher, so every remembered
         pair would enter at an emphasis this term cannot compute.
@@ -169,16 +169,15 @@ class ObjectiveChecks:
         """The two flags `--contrast-weight` cannot be composed with, each LOUD for `objective`'s reason.
 
         Not because the terms disagree — a representation term and a pairwise ordering term compose fine,
-        and `--rank-weight` is deliberately absent from this list because `ContrastiveObjective` extends
-        `RankedObjective` and carries it — but because the DISPATCH here is a single chain returning one
-        class, and each of these two returns a different subclass that this branch would silently lose.
-        A run passing both would train the other term's recipe under this arm's name and report a number
-        about the wrong mechanism, which is the failure every guard in this file exists to prevent.
+        and `--rank-weight` is deliberately absent from this list because it is carried beside `Contrast`
+        — but because each of these two is an EXCLUSIVE term, one the builder refuses to pair. A run
+        passing both would otherwise have trained one term's recipe under the other arm's name, which is
+        the failure every guard in this file exists to prevent.
 
         `--pair-memory` WAS on this list and is not any more, and it was never a rejected idea: the pool
         is the named fix for this term's small-batch weakness — `contrast_dense` pre-registered exactly
         that suspect against its own -0.0087 — and it was refused only because the chain returned before
-        reaching `RememberedRanking`. `contrastive` now dispatches on the pair, so the composition the
+        reaching the remembered ranking term. `Remembered(Contrast)` now wraps the pair, so the composition the
         ledger asked for is the one that runs.
         """
         options = self.options
@@ -199,11 +198,10 @@ class ObjectiveChecks:
         """The four flags `--feature-weight` cannot be composed with, each LOUD for `objective`'s reason.
 
         Not because a representation target and a pairwise one disagree — `--rank-weight` is deliberately
-        absent from this list, since `FeatureDistilledObjective` extends `RankedObjective` and carries it
-        — but because the DISPATCH is a single chain returning one class. `--distill-weight` and
-        `--dissent-weight` are ahead of this branch and would win; `--contrast-weight` and `--pair-memory`
-        are behind it and would be lost. Either way a run would train one mechanism under the other's
-        name, which is what every guard in this file exists to prevent.
+        absent from this list, since it is carried beside `FeatureDistillation` — but because the other
+        three are EXCLUSIVE terms the builder refuses to pair, and `--pair-memory` has no pooled form of
+        this term to widen. Each would otherwise train one mechanism under the other's name, which is
+        what every guard in this file exists to prevent.
         """
         options = self.options
         conflicts = {

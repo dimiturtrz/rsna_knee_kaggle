@@ -24,26 +24,14 @@ from kneemri.training.augmentation import (
     Augmentation,
     AugmentConfig,
 )
-from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
+from kneemri.training.feature_distillation import FeatureDistillation, Widths
 from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import GRADE_LADDER, Predicted
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.label_focus import FOCUS, UNFOCUSED
 from kneemri.training.loss_quantiles import LOSS_QUANTILES
 from kneemri.training.mixup import OFF, UNMIXED
-from kneemri.training.objective import (
-    CONTRAST_TERM,
-    COUNT_NORMALISED,
-    DISSENT_TERM,
-    DISTILL_TERM,
-    FEATURE_TERM,
-    MARGIN_TERM,
-    PAIR_POOL,
-    PER_LABEL,
-    RANK_TERM,
-    Objective,
-    RankedObjective,
-)
+from kneemri.training.objective import COUNT_NORMALISED, PER_LABEL, Objective
 from kneemri.training.patch_erasing import PatchErasing
 from kneemri.training.progress_schedule import ProgressSchedule
 from kneemri.training.report_supervision import ReportSupervision
@@ -52,6 +40,16 @@ from kneemri.training.sharpness import FLAT
 from kneemri.training.side_ranking import SIDE_TERM
 from kneemri.training.teacher_features import FEATURE_TEACHER, TeacherFeatures
 from kneemri.training.teacher_targets import TEACHER, TeacherTargets
+from kneemri.training.terms import (
+    CONTRAST_TERM,
+    DISSENT_TERM,
+    DISTILL_TERM,
+    FEATURE_TERM,
+    MARGIN_TERM,
+    PAIR_POOL,
+    RANK_TERM,
+    Ranking,
+)
 from kneemri.training.trainer import (
     ACCUMULATION,
     AUG_SCHEDULE,
@@ -467,7 +465,8 @@ def test_optimiser_steps_a_parameter_the_objective_owns():
     `Trainer.__init__`, so there is no later place to repair it. Unattached it would stay at its
     initialisation for the whole arm and the cosine would report a fact about a random map (knee-7gyw).
     """
-    objective = FeatureDistilledObjective(Widths(DIM, 7))
+    feature = FeatureDistillation(Widths(DIM, 7))
+    objective = Objective(terms=[feature])
     trainer = Trainer(
         StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
         torch.device("cpu"),
@@ -475,7 +474,7 @@ def test_optimiser_steps_a_parameter_the_objective_owns():
     )
 
     stepped = {id(parameter) for group in trainer.optimiser.param_groups for parameter in group["params"]}
-    assert id(objective.projection.weight) in stepped
+    assert id(feature.projection.weight) in stepped
 
 
 def test_policies():
@@ -491,7 +490,7 @@ def test_policies():
     trainer = Trainer(
         StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
         torch.device("cpu"),
-        objective=RankedObjective(0.3),
+        objective=Objective(terms=[Ranking(0.3)]),
     )
     constructed = {
         RANK_TERM: 0.3,
@@ -677,7 +676,9 @@ def test_loss_uses_the_objective_the_run_was_given():
     weights = torch.full((2, len(TARGETS)), 0.25)
 
     torch.manual_seed(SEED)
-    ranked = Trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"), objective=RankedObjective(1.0))
+    ranked = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"), objective=Objective(terms=[Ranking(1.0)])
+    )
     judged = Predicted(logits, scores, weights)
     assert float(ranked.objective(judged)) != float(_trainer().objective(judged))
     assert float(_trainer().objective(judged)) == float(Objective()(judged)), (

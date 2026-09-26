@@ -11,24 +11,23 @@ from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
 from kneemri.models.variants import SMALL
 from kneemri.training.adaptation import Adaptation
 from kneemri.training.config_tree import TrainConfig
-from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
+from kneemri.training.feature_distillation import FeatureDistillation, Widths
 from kneemri.training.landed import Request
-from kneemri.training.objective import (
+from kneemri.training.progress_schedule import ProgressSchedule
+from kneemri.training.remembered import Remembered
+from kneemri.training.run_setup import RunSetup
+from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Uniform
+from kneemri.training.terms import (
     DISSENT_TERM,
     FEATURE_TERM,
     MARGIN_TERM,
     RANK_TERM,
-    ContrastiveObjective,
-    MarginObjective,
-    Objective,
-    RankedObjective,
+    Contrast,
+    CrossEntropy,
+    Distillation,
+    Margin,
+    Ranking,
 )
-from kneemri.training.progress_schedule import ProgressSchedule
-from kneemri.training.remembered_contrast import RememberedContrast
-from kneemri.training.remembered_margin import RememberedMargin
-from kneemri.training.remembered_ranking import RememberedRanking
-from kneemri.training.run_setup import RunSetup
-from kneemri.training.sampling import Disagreed, MixedCorpus, Ramped, Uniform
 
 
 def _setup(**asked: object) -> RunSetup:
@@ -49,12 +48,14 @@ def test_objective():
     Checked without a GPU, a corpus or a downloaded encoder on purpose: the ranking arm sits behind a
     queue, and a miswired objective would otherwise surface only after the card had been waited on.
     """
-    assert type(_setup().objective()) is Objective
-    assert not _setup().objective().normalise_by_count
+    plain = _setup().objective()
+    assert type(plain.base) is CrossEntropy
+    assert plain.terms == ()
+    assert not plain.normalise_by_count
 
     ranked = _setup(rank_weight=0.5).objective()
-    assert isinstance(ranked, RankedObjective)
-    assert ranked.weight == 0.5
+    assert [type(term) for term in ranked.terms] == [Ranking]
+    assert ranked.terms[0].weight == 0.5
 
     assert _setup(rank_weight=0.5, normalise_by_count=True).objective().normalise_by_count
     assert _setup(per_label_loss=True).objective().per_label, "a per-label loss is a different objective"
@@ -68,8 +69,9 @@ def test_objective_pair_memory():
     plain recipe under the memory arm's name and gets read as a refutation of the mechanism. A refusal at
     flag-parse time costs nothing; the silent no-op costs a queue slot and a wrong conclusion.
     """
-    remembered = _setup(rank_weight=0.5, pair_memory=64).objective()
-    assert isinstance(remembered, RememberedRanking)
+    (remembered,) = _setup(rank_weight=0.5, pair_memory=64).objective().terms
+    assert isinstance(remembered, Remembered)
+    assert isinstance(remembered.term, Ranking)
     assert remembered.memory.remembered.maxlen == 64, "the flag must reach the pool it sizes"
     assert remembered.weight == 0.5
 
@@ -80,33 +82,49 @@ def test_objective_pair_memory():
 def test_objective_composes_the_pool_with_the_contrastive_term():
     """The pool composes with the contrastive term, and the flag has to REACH the memory it sizes.
 
-    `--pair-memory` was refused beside `--contrast-weight` until today, and not because the terms
-    disagree: the chain returned one class and lost whichever branch came second. The composition is the
-    fix `contrast_dense` pre-registered against its own reading, so what this pins is that asking for it
-    builds the widened class AND that the capacity is the one the flag named — a memory silently left at
-    the default would make the arm a reading about `PAIR_MEMORY` instead.
+    What this pins is that asking for it widens the CONTRASTIVE term, keeps the ranking term beside it,
+    and that the capacity is the one the flag named — a memory silently left at the default would make
+    the arm a reading about `PAIR_MEMORY` instead.
     """
-    widened = _setup(contrast_weight=1.0, rank_weight=1.0, pair_memory=32).objective()
-    assert isinstance(widened, RememberedContrast)
+    ranking, widened = _setup(contrast_weight=1.0, rank_weight=1.0, pair_memory=32).objective().terms
+    assert isinstance(widened, Remembered)
+    assert isinstance(widened.term, Contrast)
     assert widened.memory.capacity() == 32, "the flag must reach the pool it sizes"
-    assert widened.contrast_weight == 1.0
-    assert widened.weight == 1.0, "the house recipe's ranking term survives, or the arm is two changes"
+    assert widened.weight == 1.0
+    assert isinstance(ranking, Ranking), "the house recipe's ranking term survives, or the arm is two changes"
+    assert ranking.weight == 1.0
 
-    plain = _setup(contrast_weight=1.0).objective()
-    assert isinstance(plain, ContrastiveObjective)
-    assert not isinstance(plain, RememberedContrast), "no memory asked for, no memory built"
+    (plain,) = _setup(contrast_weight=1.0).objective().terms
+    assert type(plain) is Contrast, "no memory asked for, no memory built"
 
 
 def test_objective_composes_the_pool_with_the_margin_term():
     """The pool composes with the AUC-margin term, widening the class-mean comparison across steps."""
     widened = _setup(auc_margin=0.8, pair_memory=32).objective()
-    assert isinstance(widened, RememberedMargin)
-    assert widened.memory.capacity() == 32, "the flag must reach the pool it sizes"
-    assert widened.margin == 0.8
+    assert isinstance(widened.base, Remembered)
+    assert isinstance(widened.base.term, Margin)
+    assert widened.base.memory.capacity() == 32, "the flag must reach the pool it sizes"
+    assert widened.base.weight == 0.8
+    assert widened.terms == ()
 
     plain = _setup(auc_margin=0.8).objective()
-    assert isinstance(plain, MarginObjective)
-    assert not isinstance(plain, RememberedMargin), "no memory asked for, no memory built"
+    assert type(plain.base) is Margin, "no memory asked for, no memory built"
+
+
+def test_terms():
+    """Two exclusive terms REFUSE rather than one being kept, and a pool refuses a term that pools nothing.
+
+    The chain this replaced returned the first exclusive class it matched, so `--distill-weight` beside
+    `--contrast-weight` trained distillation alone under both names. Called directly, past
+    `ObjectiveChecks`, because this is the backstop for a pair nobody has written a reason for yet.
+    """
+    assert _setup().terms() == []
+    assert [type(term) for term in _setup(rank_weight=1.0, distill_weight=0.3).terms()] == [Ranking, Distillation]
+
+    with pytest.raises(ValueError, match="exclusive loss term and this run asks for 2"):
+        _setup(distill_weight=0.3, contrast_weight=1.0).terms()
+    with pytest.raises(ValueError, match="cannot widen distill_weight, which pools nothing"):
+        _setup(distill_weight=0.3, pair_memory=8).terms()
 
 
 def test_adaptation():
@@ -271,11 +289,13 @@ def test_objective_builds_the_feature_term_only_against_measured_widths():
     """
     widths = Widths(8, 5)
     chosen = _setup(feature_weight=20.0, rank_weight=1.0).objective(widths)
+    ranking, feature = chosen.terms
 
-    assert isinstance(chosen, FeatureDistilledObjective)
+    assert isinstance(feature, FeatureDistillation)
     assert chosen.settings()[FEATURE_TERM] == 20.0
-    assert chosen.weight == 1.0, "the house recipe's ranking term survives, or the arm is two changes"
-    assert (chosen.projection.in_features, chosen.projection.out_features) == (8, 5)
+    assert chosen.settings()[RANK_TERM] == 1.0, "the house recipe's ranking term survives, or the arm is two changes"
+    assert isinstance(ranking, Ranking)
+    assert (feature.projection.in_features, feature.projection.out_features) == (8, 5)
 
     with pytest.raises(ValueError, match="must not guess"):
         _setup(feature_weight=20.0).objective()
@@ -297,7 +317,7 @@ def test_objective_refuses_to_compose_the_feature_term_with_the_terms_the_chain_
 def test_objective_refuses_to_compose_dissent_with_the_terms_it_replaces():
     """A dissenting arm that also passes one of these would have that flag SILENTLY dropped.
 
-    `DecorrelatedObjective` holds the flat-mass ranking term at zero on purpose, and neither the teacher
+    `Dissent` holds the flat-mass ranking term at zero on purpose, and neither the teacher
     pull nor the remembered pool is composed with it. Each of the three would otherwise be recorded in
     the config and ignored by the consumer — the failure mode this whole file is written against, and one
     this repo has now paid a full card slot for once.
@@ -340,7 +360,7 @@ def test_objective_refuses_to_compose_the_margin_with_the_term_it_replaces():
             _setup(auc_margin=1.0, **conflict).objective()
 
     chosen = _setup(auc_margin=0.8).objective()
-    assert isinstance(chosen, MarginObjective)
+    assert isinstance(chosen.base, Margin)
     assert chosen.settings()[MARGIN_TERM] == 0.8
 
 

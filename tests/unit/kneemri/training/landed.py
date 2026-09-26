@@ -31,8 +31,9 @@ from kneemri.training.config_tree import TrainConfig
 from kneemri.training.gradient_clip import UNCLIPPED
 from kneemri.training.landed import NOT_A_SWITCH, Landed, Request
 from kneemri.training.mixup import OFF
-from kneemri.training.objective import PAIR_POOL, PER_LABEL, RANK_TERM
-from kneemri.training.remembered_ranking import RememberedRanking
+from kneemri.training.objective import PER_LABEL, Objective
+from kneemri.training.remembered import Remembered
+from kneemri.training.terms import PAIR_POOL, RANK_TERM, Ranking
 from kneemri.training.trainer import (
     AUTOCAST,
     AVERAGING,
@@ -254,7 +255,9 @@ def test_missing_loss() -> None:
     assert [line.split(":")[0] for line in wrong] == [RANK_TERM, PAIR_POOL, PER_LABEL]
 
     remembered = Landed(
-        model, Trainer(model, torch.device("cpu"), objective=RememberedRanking(0.3, capacity=8)), _targets()
+        model,
+        Trainer(model, torch.device("cpu"), objective=Objective(terms=[Remembered(Ranking(0.3), capacity=8)])),
+        _targets(),
     )
 
     assert remembered.missing(ranked) == [f"{PER_LABEL}: asked True, the model shows False"], (

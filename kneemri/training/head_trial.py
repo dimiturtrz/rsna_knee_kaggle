@@ -50,7 +50,8 @@ from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 from kneemri.training.grades import Predicted
-from kneemri.training.objective import Objective, RankedObjective
+from kneemri.training.objective import Objective
+from kneemri.training.terms import Ranking
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +231,7 @@ class HeadTrial:
             anatomical_prior=self.anatomical_prior,
         )
         optimiser = torch.optim.AdamW(head.parameters(), lr=HEAD_LR)
-        objective: Objective = RankedObjective(self.rank_weight) if self.rank_weight else Objective()
+        objective = Objective(terms=[Ranking(self.rank_weight)] if self.rank_weight else [])
         scores = LabelScores()
         generator = np.random.default_rng(self.seed)
         best = 0.0

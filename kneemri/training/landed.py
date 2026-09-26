@@ -61,21 +61,20 @@ from kneemri.training.augmentation import (
 from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import GRADE_LADDER
 from kneemri.training.label_focus import FOCUS, UNFOCUSED
-from kneemri.training.objective import (
+from kneemri.training.objective import COUNT_NORMALISED, PER_LABEL
+from kneemri.training.sharpness import FLAT
+from kneemri.training.side_ranking import SIDE_TERM
+from kneemri.training.teacher_features import FEATURE_TEACHER
+from kneemri.training.teacher_targets import TEACHER
+from kneemri.training.terms import (
     CONTRAST_TERM,
-    COUNT_NORMALISED,
     DISSENT_TERM,
     DISTILL_TERM,
     FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
-    PER_LABEL,
     RANK_TERM,
 )
-from kneemri.training.sharpness import FLAT
-from kneemri.training.side_ranking import SIDE_TERM
-from kneemri.training.teacher_features import FEATURE_TEACHER
-from kneemri.training.teacher_targets import TEACHER
 from kneemri.training.trainer import (
     ACCUMULATION,
     AUG_SCHEDULE,

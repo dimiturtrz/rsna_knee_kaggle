@@ -37,8 +37,8 @@ class Predicted:
     shaped: bool = False
     """Whether a label policy has already re-weighted these columns, so a second pass leaves them alone.
 
-    `LabelFocus` is applied at two entries by design (`RankedObjective.__call__` delegates to a base
-    `__call__` that focuses again), which a zero/one mask survives because zero and one square to
+    `LabelFocus` may be applied at more than one entry (a caller focusing a batch before handing it to
+    an `Objective` that focuses again), which a zero/one mask survives because zero and one square to
     themselves. An UNFOCUSED WEIGHT strictly between them does not: applying 0.25 twice descends 0.0625,
     a mechanism landing at the wrong strength with every gate green. The marker makes the contract
     explicit rather than accidental.
@@ -53,7 +53,7 @@ class Predicted:
     than silently descending cross-entropy under a distilling arm's name.
 
     It is the TEACHER'S SCORES, in the same [0, 1] space as `scores`, and it is judged against the same
-    `logits`: `Objective.pairs` reads separation from scores and the gap from logits, so pointing it at
+    `logits`: `PairMass.between` reads separation from scores and the gap from logits, so pointing it at
     this field asks the student to reproduce the teacher's ORDER rather than its probabilities — which
     is the only part of a teacher an AUC can read.
     """
@@ -76,7 +76,7 @@ class Predicted:
     SEPARATE from `teacher`, and not a widening of it, because the two are different objects: that one
     is twelve scores in [0, 1] and this one is a `d`-wide representation whose width is the teacher's
     own and has no reason to equal the student's. A term reading this must project before it compares,
-    which is why `FeatureDistilledObjective` owns a linear map and every other term here owns none.
+    which is why `FeatureDistillation` owns a linear map and every other term here owns none.
 
     One vector per STUDY rather than one per finding. The teacher pools its windows once per finding
     and this is the mean over that axis, so the target is what the teacher read about the knee rather

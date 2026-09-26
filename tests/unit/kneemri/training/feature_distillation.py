@@ -3,9 +3,10 @@
 import pytest
 import torch
 
-from kneemri.training.feature_distillation import FeatureDistilledObjective, Widths
+from kneemri.training.feature_distillation import FeatureDistillation, Widths
 from kneemri.training.grades import Predicted
-from kneemri.training.objective import FEATURE_TERM
+from kneemri.training.objective import Objective
+from kneemri.training.terms import FEATURE_TERM
 
 FINDINGS = 3
 STUDENT_WIDTH = 4
@@ -13,10 +14,10 @@ TEACHER_WIDTH = 6
 BATCH = 2
 
 
-def _objective(weight: float = 1.0) -> FeatureDistilledObjective:
+def _objective(weight: float = 1.0) -> FeatureDistillation:
     """The objective over a fixed projection, seeded so two constructions in one test are comparable."""
     torch.manual_seed(0)
-    return FeatureDistilledObjective(Widths(STUDENT_WIDTH, TEACHER_WIDTH), weight)
+    return FeatureDistillation(Widths(STUDENT_WIDTH, TEACHER_WIDTH), weight)
 
 
 def _batch(teacher: torch.Tensor | None = None) -> Predicted:
@@ -48,7 +49,7 @@ def test_widths() -> None:
     )
 
 
-def test_imitation() -> None:
+def test_feature_distillation() -> None:
     """One minus the cosine: zero when the projected student already points the teacher's way.
 
     Pinned against a teacher CONSTRUCTED from the projection's own output rather than against a
@@ -61,14 +62,14 @@ def test_imitation() -> None:
     assert batch.embedding is not None
     projected = objective.projection(batch.embedding.mean(dim=1))
 
-    aligned = objective.imitation(_batch(teacher=projected.detach() * 3.0))
+    aligned = objective(_batch(teacher=projected.detach() * 3.0))
     assert float(aligned) == pytest.approx(0.0, abs=1e-6), "scale is not part of a cosine"
 
-    opposed = objective.imitation(_batch(teacher=-projected.detach()))
+    opposed = objective(_batch(teacher=-projected.detach()))
     assert float(opposed) == pytest.approx(2.0, abs=1e-6)
 
 
-def test_imitation_raises_when_either_side_never_arrived() -> None:
+def test_feature_distillation_raises_when_either_side_never_arrived() -> None:
     """A missing half must RAISE, not contribute zero — the arm would otherwise be its own control.
 
     A feature-distilling run whose teacher never joined would descend the plain recipe under this
@@ -86,7 +87,7 @@ def test_imitation_raises_when_either_side_never_arrived() -> None:
 
     for batch in (neither, student_only, teacher_only):
         with pytest.raises(ValueError, match="plumbing failure"):
-            _objective().imitation(batch)
+            _objective()(batch)
 
 
 def test_attached() -> None:
@@ -119,7 +120,9 @@ def test_call() -> None:
     batch = _batch()
     weak = _objective(weight=1.0)
     strong = _objective(weight=3.0)
-    cosine = float(weak.imitation(batch))
+    cosine = float(weak(batch))
 
-    assert float(strong(batch)) - float(weak(batch)) == pytest.approx(2.0 * cosine, abs=1e-5)
+    assert float(Objective(terms=[strong])(batch)) - float(Objective(terms=[weak])(batch)) == pytest.approx(
+        2.0 * cosine, abs=1e-5
+    )
     assert cosine > 0.0, "a random projection against a random teacher is not already aligned"

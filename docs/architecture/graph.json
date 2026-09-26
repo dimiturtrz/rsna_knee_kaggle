@@ -7203,7 +7203,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.feature_distillation",
-      "target": "kneemri.training.objective",
+      "target": "kneemri.training.terms",
       "weight": 1
     },
     {
@@ -7376,6 +7376,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.head_trial",
+      "target": "kneemri.training.terms",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.heartbeat",
       "target": "kneemri.training.card_memory",
       "weight": 1
@@ -7479,6 +7485,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.landed",
+      "target": "kneemri.training.terms",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.landed",
       "target": "kneemri.training.trainer",
       "weight": 1
     },
@@ -7544,6 +7556,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.objective",
+      "target": "kneemri.training.terms",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.objective_checks",
       "target": "kneemri.training.config_tree",
       "weight": 1
@@ -7557,7 +7575,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.pair_memory",
-      "target": "kneemri.training.objective",
+      "target": "kneemri.training.terms",
       "weight": 1
     },
     {
@@ -7646,56 +7664,20 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.training.remembered_contrast",
+      "source": "kneemri.training.remembered",
       "target": "kneemri.training.grades",
       "weight": 1
     },
     {
       "kind": "import",
-      "source": "kneemri.training.remembered_contrast",
-      "target": "kneemri.training.objective",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.remembered_contrast",
+      "source": "kneemri.training.remembered",
       "target": "kneemri.training.pair_memory",
       "weight": 1
     },
     {
       "kind": "import",
-      "source": "kneemri.training.remembered_margin",
-      "target": "kneemri.training.grades",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.remembered_margin",
-      "target": "kneemri.training.objective",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.remembered_margin",
-      "target": "kneemri.training.pair_memory",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.remembered_ranking",
-      "target": "kneemri.training.grades",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.remembered_ranking",
-      "target": "kneemri.training.objective",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.remembered_ranking",
-      "target": "kneemri.training.pair_memory",
+      "source": "kneemri.training.remembered",
+      "target": "kneemri.training.terms",
       "weight": 1
     },
     {
@@ -7809,19 +7791,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
-      "target": "kneemri.training.remembered_contrast",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.run_setup",
-      "target": "kneemri.training.remembered_margin",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.run_setup",
-      "target": "kneemri.training.remembered_ranking",
+      "target": "kneemri.training.remembered",
       "weight": 1
     },
     {
@@ -7852,6 +7822,12 @@
       "kind": "import",
       "source": "kneemri.training.run_setup",
       "target": "kneemri.training.teacher_targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.terms",
       "weight": 1
     },
     {
@@ -7954,6 +7930,12 @@
       "kind": "import",
       "source": "kneemri.training.teacher_targets",
       "target": "kneemri.training.config_leaf",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.terms",
+      "target": "kneemri.training.grades",
       "weight": 1
     },
     {
@@ -34802,32 +34784,26 @@
     },
     {
       "kind": "references",
-      "source": "kneemri.training.feature_distillation.FeatureDistilledObjective",
+      "source": "kneemri.training.feature_distillation.FeatureDistillation",
       "target": "kneemri.training.feature_distillation.Widths",
       "weight": 1
     },
     {
       "kind": "references",
-      "source": "kneemri.training.feature_distillation.FeatureDistilledObjective",
+      "source": "kneemri.training.feature_distillation.FeatureDistillation",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
       "kind": "inherits",
-      "source": "kneemri.training.feature_distillation.FeatureDistilledObjective",
-      "target": "kneemri.training.objective.RankedObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.feature_distillation.FeatureDistilledObjective",
-      "target": "kneemri.training.objective.Shaping",
+      "source": "kneemri.training.feature_distillation.FeatureDistillation",
+      "target": "kneemri.training.terms.Term",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.feature_distillation.FeatureDistilledObjective.__call__",
-      "target": "kneemri.training.feature_distillation.FeatureDistilledObjective.imitation",
+      "source": "kneemri.training.feature_distillation.FeatureDistillation.__call__",
+      "target": "kneemri.training.terms.Term.arrived",
       "weight": 1
     },
     {
@@ -35319,7 +35295,7 @@
     {
       "kind": "construct",
       "source": "kneemri.training.head_trial.HeadTrial.run",
-      "target": "kneemri.training.objective.RankedObjective",
+      "target": "kneemri.training.terms.Ranking",
       "weight": 1
     },
     {
@@ -35671,102 +35647,6 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.objective.ContrastiveObjective",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.training.objective.ContrastiveObjective",
-      "target": "kneemri.training.objective.RankedObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.objective.ContrastiveObjective",
-      "target": "kneemri.training.objective.Shaping",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.ContrastiveObjective.__call__",
-      "target": "kneemri.training.objective.ContrastiveObjective.contrast",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.ContrastiveObjective.contrast",
-      "target": "kneemri.training.objective.ContrastiveObjective.supcon",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.objective.DecorrelatedObjective",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.training.objective.DecorrelatedObjective",
-      "target": "kneemri.training.objective.RankedObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.objective.DecorrelatedObjective",
-      "target": "kneemri.training.objective.Shaping",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.DecorrelatedObjective.__call__",
-      "target": "kneemri.training.objective.DecorrelatedObjective.dissent",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.DecorrelatedObjective.dissent",
-      "target": "kneemri.training.objective.RankedObjective.pairs",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.objective.DistilledObjective",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.training.objective.DistilledObjective",
-      "target": "kneemri.training.objective.RankedObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.objective.DistilledObjective",
-      "target": "kneemri.training.objective.Shaping",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.DistilledObjective.__call__",
-      "target": "kneemri.training.objective.DistilledObjective.imitation",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.objective.DistilledObjective.imitation",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.DistilledObjective.imitation",
-      "target": "kneemri.training.objective.RankedObjective.pairs",
-      "weight": 1
-    },
-    {
       "kind": "holds",
       "source": "kneemri.training.objective.LabelStructure",
       "target": "kneemri.training.grades.Grades",
@@ -35828,30 +35708,6 @@
     },
     {
       "kind": "references",
-      "source": "kneemri.training.objective.MarginObjective",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.training.objective.MarginObjective",
-      "target": "kneemri.training.objective.Objective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.objective.MarginObjective",
-      "target": "kneemri.training.objective.Shaping",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.MarginObjective.__call__",
-      "target": "kneemri.training.objective.MarginObjective.auc_margin",
-      "weight": 1
-    },
-    {
-      "kind": "references",
       "source": "kneemri.training.objective.Objective",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
@@ -35863,9 +35719,9 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.training.objective.Objective.__call__",
-      "target": "kneemri.training.objective.Objective.cross_entropy",
+      "kind": "references",
+      "source": "kneemri.training.objective.Objective",
+      "target": "kneemri.training.terms.Term",
       "weight": 1
     },
     {
@@ -35875,33 +35731,9 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.training.objective.RankedObjective",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.training.objective.RankedObjective",
-      "target": "kneemri.training.objective.Objective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.objective.RankedObjective",
-      "target": "kneemri.training.objective.Shaping",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.RankedObjective.__call__",
-      "target": "kneemri.training.objective.RankedObjective.ranking",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.objective.RankedObjective.ranking",
-      "target": "kneemri.training.objective.RankedObjective.pairs",
+      "kind": "construct",
+      "source": "kneemri.training.objective.Objective.__init__",
+      "target": "kneemri.training.terms.CrossEntropy",
       "weight": 1
     },
     {
@@ -36272,188 +36104,92 @@
     },
     {
       "kind": "references",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast",
+      "source": "kneemri.training.remembered.Remembered",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
-      "kind": "inherits",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast",
-      "target": "kneemri.training.objective.ContrastiveObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast",
-      "target": "kneemri.training.objective.Shaping",
+      "kind": "holds",
+      "source": "kneemri.training.remembered.Remembered",
+      "target": "kneemri.training.pair_memory.PairMemory",
       "weight": 1
     },
     {
       "kind": "holds",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast",
-      "target": "kneemri.training.pair_memory.PairMemory",
+      "source": "kneemri.training.remembered.Remembered",
+      "target": "kneemri.training.terms.Pooled",
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.__init__",
-      "target": "kneemri.training.pair_memory.PairMemory",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
-      "target": "kneemri.training.objective.ContrastiveObjective.supcon",
+      "kind": "inherits",
+      "source": "kneemri.training.remembered.Remembered",
+      "target": "kneemri.training.terms.Term",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
+      "source": "kneemri.training.remembered.Remembered.__call__",
       "target": "kneemri.training.pair_memory.PairMemory.pooled",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
+      "source": "kneemri.training.remembered.Remembered.__call__",
       "target": "kneemri.training.pair_memory.PairMemory.remember",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
-      "target": "kneemri.training.remembered_contrast.RememberedContrast.widened",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.settings",
-      "target": "kneemri.training.pair_memory.PairMemory.capacity",
+      "source": "kneemri.training.remembered.Remembered.__call__",
+      "target": "kneemri.training.terms.Pooled.across",
       "weight": 1
     },
     {
       "kind": "construct",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.widened",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.remembered_contrast.RememberedContrast.widened",
-      "target": "kneemri.training.remembered_contrast.RememberedContrast.joined",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.remembered_margin.RememberedMargin",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.training.remembered_margin.RememberedMargin",
-      "target": "kneemri.training.objective.MarginObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.remembered_margin.RememberedMargin",
-      "target": "kneemri.training.objective.Shaping",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.training.remembered_margin.RememberedMargin",
-      "target": "kneemri.training.pair_memory.PairMemory",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.remembered_margin.RememberedMargin.__init__",
+      "source": "kneemri.training.remembered.Remembered.__init__",
       "target": "kneemri.training.pair_memory.PairMemory",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.remembered_margin.RememberedMargin.auc_margin",
+      "source": "kneemri.training.remembered.Remembered.attached",
+      "target": "kneemri.training.terms.Term.attached",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered.Remembered.graded",
       "target": "kneemri.training.pair_memory.PairMemory.pooled",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.remembered_margin.RememberedMargin.auc_margin",
+      "source": "kneemri.training.remembered.Remembered.graded",
       "target": "kneemri.training.pair_memory.PairMemory.remember",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.remembered_margin.RememberedMargin.auc_margin",
-      "target": "kneemri.training.remembered_margin.RememberedMargin.widened",
+      "source": "kneemri.training.remembered.Remembered.graded",
+      "target": "kneemri.training.terms.Pooled.widened",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.remembered_margin.RememberedMargin.settings",
+      "source": "kneemri.training.remembered.Remembered.graded",
+      "target": "kneemri.training.terms.Term.graded",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.remembered.Remembered.settings",
       "target": "kneemri.training.pair_memory.PairMemory.capacity",
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.training.remembered_margin.RememberedMargin.widened",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
-      "kind": "inherits",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking",
-      "target": "kneemri.training.objective.RankedObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking",
-      "target": "kneemri.training.objective.Shaping",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking",
-      "target": "kneemri.training.pair_memory.PairMemory",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking.__init__",
-      "target": "kneemri.training.pair_memory.PairMemory",
-      "weight": 1
-    },
-    {
       "kind": "calls",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
-      "target": "kneemri.training.objective.RankedObjective.pairs",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
-      "target": "kneemri.training.pair_memory.PairMemory.pooled",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
-      "target": "kneemri.training.pair_memory.PairMemory.remember",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.remembered_ranking.RememberedRanking.settings",
-      "target": "kneemri.training.pair_memory.PairMemory.capacity",
+      "source": "kneemri.training.remembered.Remembered.settings",
+      "target": "kneemri.training.terms.Term.settings",
       "weight": 1
     },
     {
@@ -36531,7 +36267,7 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
-      "target": "kneemri.training.feature_distillation.FeatureDistilledObjective",
+      "target": "kneemri.training.feature_distillation.FeatureDistillation",
       "weight": 1
     },
     {
@@ -36549,19 +36285,7 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
-      "target": "kneemri.training.objective.ContrastiveObjective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.objective.Objective",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.training.run_setup.RunSetup",
-      "target": "kneemri.training.objective.Shaping",
       "weight": 1
     },
     {
@@ -36609,25 +36333,25 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.terms.Pooled",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.terms.Term",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.trainer.Trainer",
       "weight": 1
     },
     {
       "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup._contrastive",
-      "target": "kneemri.training.objective.ContrastiveObjective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup._contrastive",
-      "target": "kneemri.training.remembered_contrast.RememberedContrast",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup._features",
-      "target": "kneemri.training.feature_distillation.FeatureDistilledObjective",
+      "target": "kneemri.training.feature_distillation.FeatureDistillation",
       "weight": 1
     },
     {
@@ -36741,37 +36465,13 @@
     {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.objective.DecorrelatedObjective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.objective.DistilledObjective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.LabelStructure",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.objective.MarginObjective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
       "target": "kneemri.training.objective.Objective",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.objective.RankedObjective",
       "weight": 1
     },
     {
@@ -36793,27 +36493,9 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.remembered_margin.RememberedMargin",
-      "weight": 1
-    },
-    {
-      "kind": "construct",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.remembered_ranking.RememberedRanking",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.run_setup.RunSetup._contrastive",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.training.run_setup.RunSetup.objective",
-      "target": "kneemri.training.run_setup.RunSetup._features",
+      "target": "kneemri.training.run_setup.RunSetup.terms",
       "weight": 1
     },
     {
@@ -36856,6 +36538,54 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.teacher_embeddings",
       "target": "kneemri.training.teacher_features.TeacherFeatures.from_file",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.remembered.Remembered",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.run_setup.RunSetup._features",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.run_setup.RunSetup._pooled",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.terms.Contrast",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.terms.Dissent",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.terms.Distillation",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.terms.Margin",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.terms.Ranking",
       "weight": 1
     },
     {
@@ -37282,6 +37012,192 @@
       "kind": "calls",
       "source": "kneemri.training.teacher_targets.TeacherTargets.from_file",
       "target": "kneemri.teacher_file.TeacherFile.aligned",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.Contrast",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.Contrast",
+      "target": "kneemri.training.terms.Pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Contrast.__call__",
+      "target": "kneemri.training.terms.Contrast.supcon",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Contrast.across",
+      "target": "kneemri.training.terms.Contrast.supcon",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Contrast.across",
+      "target": "kneemri.training.terms.Pooled.widened",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Contrast.supcon",
+      "target": "kneemri.training.terms.Term.arrived",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.CrossEntropy",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.CrossEntropy",
+      "target": "kneemri.training.terms.Term",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.Dissent",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.Dissent",
+      "target": "kneemri.training.terms.Term",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Dissent.__call__",
+      "target": "kneemri.training.terms.PairMass.between",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Dissent.__call__",
+      "target": "kneemri.training.terms.Term.arrived",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.Distillation",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.Distillation",
+      "target": "kneemri.training.terms.Term",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.terms.Distillation.__call__",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Distillation.__call__",
+      "target": "kneemri.training.terms.PairMass.between",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Distillation.__call__",
+      "target": "kneemri.training.terms.Term.arrived",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.Margin",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.Margin",
+      "target": "kneemri.training.terms.Pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Margin.across",
+      "target": "kneemri.training.terms.Pooled.widened",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.PairMass",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.PairMass",
+      "target": "kneemri.training.terms.PairMass",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.Pooled",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.Pooled",
+      "target": "kneemri.training.terms.Term",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.terms.Pooled.widened",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Pooled.widened",
+      "target": "kneemri.training.terms.Pooled.joined",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.Ranking",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.Ranking",
+      "target": "kneemri.training.terms.Pooled",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Ranking.__call__",
+      "target": "kneemri.training.terms.PairMass.between",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.Ranking.across",
+      "target": "kneemri.training.terms.PairMass.between",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.terms.Term",
+      "target": "kneemri.training.grades.Predicted",
       "weight": 1
     },
     {
@@ -38659,7 +38575,7 @@
       "role": null
     },
     {
-      "descendants": 303,
+      "descendants": 302,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -40651,7 +40567,7 @@
       "role": null
     },
     {
-      "descendants": 54,
+      "descendants": 53,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -40948,24 +40864,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.remembered_contrast",
-      "label": "remembered_contrast",
-      "level": "module",
-      "parent": "kneemri.training",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_margin",
-      "label": "remembered_margin",
-      "level": "module",
-      "parent": "kneemri.training",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_ranking",
-      "label": "remembered_ranking",
+      "id": "kneemri.training.remembered",
+      "label": "remembered",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -41054,6 +40954,14 @@
       "descendants": 0,
       "id": "kneemri.training.teacher_targets",
       "label": "teacher_targets",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms",
+      "label": "terms",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -46020,8 +45928,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.feature_distillation.FeatureDistilledObjective",
-      "label": "FeatureDistilledObjective",
+      "id": "kneemri.training.feature_distillation.FeatureDistillation",
+      "label": "FeatureDistillation",
       "level": "class",
       "parent": "kneemri.training.feature_distillation",
       "role": "primary"
@@ -46276,40 +46184,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.objective.ContrastiveObjective",
-      "label": "ContrastiveObjective",
-      "level": "class",
-      "parent": "kneemri.training.objective",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DecorrelatedObjective",
-      "label": "DecorrelatedObjective",
-      "level": "class",
-      "parent": "kneemri.training.objective",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DistilledObjective",
-      "label": "DistilledObjective",
-      "level": "class",
-      "parent": "kneemri.training.objective",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.objective.LabelStructure",
       "label": "LabelStructure",
-      "level": "class",
-      "parent": "kneemri.training.objective",
-      "role": "satellite"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.MarginObjective",
-      "label": "MarginObjective",
       "level": "class",
       "parent": "kneemri.training.objective",
       "role": "satellite"
@@ -46321,14 +46197,6 @@
       "level": "class",
       "parent": "kneemri.training.objective",
       "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.RankedObjective",
-      "label": "RankedObjective",
-      "level": "class",
-      "parent": "kneemri.training.objective",
-      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -46428,26 +46296,10 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.remembered_contrast.RememberedContrast",
-      "label": "RememberedContrast",
+      "id": "kneemri.training.remembered.Remembered",
+      "label": "Remembered",
       "level": "class",
-      "parent": "kneemri.training.remembered_contrast",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_margin.RememberedMargin",
-      "label": "RememberedMargin",
-      "level": "class",
-      "parent": "kneemri.training.remembered_margin",
-      "role": "primary"
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_ranking.RememberedRanking",
-      "label": "RememberedRanking",
-      "level": "class",
-      "parent": "kneemri.training.remembered_ranking",
+      "parent": "kneemri.training.remembered",
       "role": "primary"
     },
     {
@@ -46608,6 +46460,78 @@
       "label": "TeacherTargets",
       "level": "class",
       "parent": "kneemri.training.teacher_targets",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Contrast",
+      "label": "Contrast",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.CrossEntropy",
+      "label": "CrossEntropy",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Dissent",
+      "label": "Dissent",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Distillation",
+      "label": "Distillation",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Margin",
+      "label": "Margin",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.PairMass",
+      "label": "PairMass",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Pooled",
+      "label": "Pooled",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Ranking",
+      "label": "Ranking",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Term",
+      "label": "Term",
+      "level": "class",
+      "parent": "kneemri.training.terms",
       "role": "primary"
     },
     {
@@ -68068,42 +67992,26 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.feature_distillation.FeatureDistilledObjective.__call__",
+      "id": "kneemri.training.feature_distillation.FeatureDistillation.__call__",
       "label": "__call__",
       "level": "method",
-      "parent": "kneemri.training.feature_distillation.FeatureDistilledObjective",
+      "parent": "kneemri.training.feature_distillation.FeatureDistillation",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.feature_distillation.FeatureDistilledObjective.__init__",
+      "id": "kneemri.training.feature_distillation.FeatureDistillation.__init__",
       "label": "__init__",
       "level": "method",
-      "parent": "kneemri.training.feature_distillation.FeatureDistilledObjective",
+      "parent": "kneemri.training.feature_distillation.FeatureDistillation",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.feature_distillation.FeatureDistilledObjective.attached",
+      "id": "kneemri.training.feature_distillation.FeatureDistillation.attached",
       "label": "attached",
       "level": "method",
-      "parent": "kneemri.training.feature_distillation.FeatureDistilledObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.feature_distillation.FeatureDistilledObjective.imitation",
-      "label": "imitation",
-      "level": "method",
-      "parent": "kneemri.training.feature_distillation.FeatureDistilledObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.feature_distillation.FeatureDistilledObjective.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.feature_distillation.FeatureDistilledObjective",
+      "parent": "kneemri.training.feature_distillation.FeatureDistillation",
       "role": null
     },
     {
@@ -68892,110 +68800,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.objective.ContrastiveObjective.__call__",
-      "label": "__call__",
-      "level": "method",
-      "parent": "kneemri.training.objective.ContrastiveObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.ContrastiveObjective.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.objective.ContrastiveObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.ContrastiveObjective.contrast",
-      "label": "contrast",
-      "level": "method",
-      "parent": "kneemri.training.objective.ContrastiveObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.ContrastiveObjective.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.objective.ContrastiveObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.ContrastiveObjective.supcon",
-      "label": "supcon",
-      "level": "method",
-      "parent": "kneemri.training.objective.ContrastiveObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DecorrelatedObjective.__call__",
-      "label": "__call__",
-      "level": "method",
-      "parent": "kneemri.training.objective.DecorrelatedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DecorrelatedObjective.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.objective.DecorrelatedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DecorrelatedObjective.dissent",
-      "label": "dissent",
-      "level": "method",
-      "parent": "kneemri.training.objective.DecorrelatedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DecorrelatedObjective.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.objective.DecorrelatedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DistilledObjective.__call__",
-      "label": "__call__",
-      "level": "method",
-      "parent": "kneemri.training.objective.DistilledObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DistilledObjective.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.objective.DistilledObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DistilledObjective.imitation",
-      "label": "imitation",
-      "level": "method",
-      "parent": "kneemri.training.objective.DistilledObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.DistilledObjective.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.objective.DistilledObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.objective.LabelStructure.focused",
       "label": "focused",
       "level": "method",
@@ -69028,38 +68832,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.objective.MarginObjective.__call__",
-      "label": "__call__",
-      "level": "method",
-      "parent": "kneemri.training.objective.MarginObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.MarginObjective.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.objective.MarginObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.MarginObjective.auc_margin",
-      "label": "auc_margin",
-      "level": "method",
-      "parent": "kneemri.training.objective.MarginObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.MarginObjective.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.objective.MarginObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.objective.Objective.__call__",
       "label": "__call__",
       "level": "method",
@@ -69084,58 +68856,10 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.objective.Objective.cross_entropy",
-      "label": "cross_entropy",
-      "level": "method",
-      "parent": "kneemri.training.objective.Objective",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.training.objective.Objective.settings",
       "label": "settings",
       "level": "method",
       "parent": "kneemri.training.objective.Objective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.RankedObjective.__call__",
-      "label": "__call__",
-      "level": "method",
-      "parent": "kneemri.training.objective.RankedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.RankedObjective.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.objective.RankedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.RankedObjective.pairs",
-      "label": "pairs",
-      "level": "method",
-      "parent": "kneemri.training.objective.RankedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.RankedObjective.ranking",
-      "label": "ranking",
-      "level": "method",
-      "parent": "kneemri.training.objective.RankedObjective",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.objective.RankedObjective.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.objective.RankedObjective",
       "role": null
     },
     {
@@ -69532,98 +69256,42 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.remembered_contrast.RememberedContrast.__init__",
+      "id": "kneemri.training.remembered.Remembered.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.remembered.Remembered",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.remembered.Remembered.__init__",
       "label": "__init__",
       "level": "method",
-      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "parent": "kneemri.training.remembered.Remembered",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.remembered_contrast.RememberedContrast.contrast",
-      "label": "contrast",
+      "id": "kneemri.training.remembered.Remembered.attached",
+      "label": "attached",
       "level": "method",
-      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "parent": "kneemri.training.remembered.Remembered",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.remembered_contrast.RememberedContrast.joined",
-      "label": "joined",
+      "id": "kneemri.training.remembered.Remembered.graded",
+      "label": "graded",
       "level": "method",
-      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
+      "parent": "kneemri.training.remembered.Remembered",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.remembered_contrast.RememberedContrast.settings",
+      "id": "kneemri.training.remembered.Remembered.settings",
       "label": "settings",
       "level": "method",
-      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_contrast.RememberedContrast.widened",
-      "label": "widened",
-      "level": "method",
-      "parent": "kneemri.training.remembered_contrast.RememberedContrast",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_margin.RememberedMargin.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.remembered_margin.RememberedMargin",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_margin.RememberedMargin.auc_margin",
-      "label": "auc_margin",
-      "level": "method",
-      "parent": "kneemri.training.remembered_margin.RememberedMargin",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_margin.RememberedMargin.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.remembered_margin.RememberedMargin",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_margin.RememberedMargin.widened",
-      "label": "widened",
-      "level": "method",
-      "parent": "kneemri.training.remembered_margin.RememberedMargin",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_ranking.RememberedRanking.__init__",
-      "label": "__init__",
-      "level": "method",
-      "parent": "kneemri.training.remembered_ranking.RememberedRanking",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_ranking.RememberedRanking.ranking",
-      "label": "ranking",
-      "level": "method",
-      "parent": "kneemri.training.remembered_ranking.RememberedRanking",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.training.remembered_ranking.RememberedRanking.settings",
-      "label": "settings",
-      "level": "method",
-      "parent": "kneemri.training.remembered_ranking.RememberedRanking",
+      "parent": "kneemri.training.remembered.Remembered",
       "role": null
     },
     {
@@ -69700,16 +69368,16 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._contrastive",
-      "label": "_contrastive",
+      "id": "kneemri.training.run_setup.RunSetup._features",
+      "label": "_features",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.training.run_setup.RunSetup._features",
-      "label": "_features",
+      "id": "kneemri.training.run_setup.RunSetup._pooled",
+      "label": "_pooled",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
@@ -69806,6 +69474,14 @@
       "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup.teacher_embeddings",
       "label": "teacher_embeddings",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup.terms",
+      "label": "terms",
       "level": "method",
       "parent": "kneemri.training.run_setup.RunSetup",
       "role": null
@@ -70320,6 +69996,238 @@
       "label": "rows",
       "level": "method",
       "parent": "kneemri.training.teacher_targets.TeacherTargets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Contrast.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Contrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Contrast.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Contrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Contrast.across",
+      "label": "across",
+      "level": "method",
+      "parent": "kneemri.training.terms.Contrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Contrast.supcon",
+      "label": "supcon",
+      "level": "method",
+      "parent": "kneemri.training.terms.Contrast",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.CrossEntropy.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.CrossEntropy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.CrossEntropy.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.terms.CrossEntropy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.CrossEntropy.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.terms.CrossEntropy",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Dissent.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Dissent",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Dissent.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Dissent",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Distillation.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Distillation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Distillation.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Distillation",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Margin.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Margin",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Margin.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Margin",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Margin.across",
+      "label": "across",
+      "level": "method",
+      "parent": "kneemri.training.terms.Margin",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.PairMass.__add__",
+      "label": "__add__",
+      "level": "method",
+      "parent": "kneemri.training.terms.PairMass",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.PairMass.between",
+      "label": "between",
+      "level": "method",
+      "parent": "kneemri.training.terms.PairMass",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.PairMass.ratio",
+      "label": "ratio",
+      "level": "method",
+      "parent": "kneemri.training.terms.PairMass",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Pooled.across",
+      "label": "across",
+      "level": "method",
+      "parent": "kneemri.training.terms.Pooled",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Pooled.joined",
+      "label": "joined",
+      "level": "method",
+      "parent": "kneemri.training.terms.Pooled",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Pooled.widened",
+      "label": "widened",
+      "level": "method",
+      "parent": "kneemri.training.terms.Pooled",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Ranking.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Ranking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Ranking.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Ranking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Ranking.across",
+      "label": "across",
+      "level": "method",
+      "parent": "kneemri.training.terms.Ranking",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Term.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Term",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Term.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.terms.Term",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Term.arrived",
+      "label": "arrived",
+      "level": "method",
+      "parent": "kneemri.training.terms.Term",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Term.attached",
+      "label": "attached",
+      "level": "method",
+      "parent": "kneemri.training.terms.Term",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Term.graded",
+      "label": "graded",
+      "level": "method",
+      "parent": "kneemri.training.terms.Term",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.Term.settings",
+      "label": "settings",
+      "level": "method",
+      "parent": "kneemri.training.terms.Term",
       "role": null
     },
     {
