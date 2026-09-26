@@ -570,12 +570,15 @@ class FastmriCorpus:
         seen, straddling = annotations.terms(), annotations.straddling()
         knees = {study.identifier: [name for name in study.files() if name in seen] for study in self.studies()}
         read = {knee: files for knee, files in knees.items() if files}
-        disagreeing = sum(1 for files in read.values() if len({bool(seen[name]) for name in files}) > 1)
-        logger.info(f"{disagreeing} knees where one exam was boxed and another read clean")
+        logger.info(f"{self._disagreeing(seen, read)} knees where one exam was boxed and another read clean")
         rows = [
             self._row(knee, self._union(seen, files), self._union(straddling, files)) for knee, files in read.items()
         ]
         ForeignBuild.write_table(pd.DataFrame(rows), destination, TARGETS)
+
+    @staticmethod
+    def _disagreeing(seen: dict[str, frozenset[str]], read: dict[str, list[str]]) -> int:
+        return sum(1 for files in read.values() if len({bool(seen[name]) for name in files}) > 1)
 
     @staticmethod
     def _union(table: dict[str, frozenset[str]], files: list[str]) -> frozenset[str]:

@@ -467,36 +467,19 @@ class Targets:
                 "hold_annotation_studies with annotations on would write the gold values into cells "
                 "whose weight is then zeroed: a no-op wearing a contradiction. Pass --hold-annotations too."
             )
-        floor = supervision.floor
         index = pd.Index(identifiers)
         derived = pd.read_csv(report_labels).set_index("StudyInstanceUID").reindex(index)
         annotated = pd.read_csv(train_table).set_index("StudyInstanceUID").reindex(index)
 
         scores = np.full((len(identifiers), len(TARGETS)), 0.5, dtype=np.float32)
         weights = np.zeros((len(identifiers), len(TARGETS)), dtype=np.float32)
-        # float64 for the confidence arithmetic, not float32. The loop this replaces computed
-        # `floor + (1 - floor) * raw` in Python floats and stored the float32 result; doing the
-        # multiply in float32 instead lands one ULP away on 22,102 of the pairs. Harmless to training,
-        # but it would make this refactor unprovable, and an equality oracle is worth more than an ULP.
-        ones = np.ones(len(identifiers), dtype=np.float64)
         read_by_radiologist = np.zeros((len(identifiers), len(TARGETS)), dtype=np.bool_)
         for column, target in enumerate(TARGETS):
             if target in derived.columns:
-                value = derived[target].to_numpy(dtype=np.float32)
-                confidence = f"{target}__conf"
-                # A missing confidence COLUMN and a missing confidence CELL both mean "fully
-                # confident": the reader either does not report confidence at all, or reported none
-                # for this row. Neither is evidence of doubt.
-                raw = derived[confidence].to_numpy(dtype=np.float64) if confidence in derived.columns else ones
-                # READ OFF THE LEVEL THE READER WROTE, which is why this precedes `applied`: a
-                # calibration rewrites 0.68 to 0.378 in place, and a grade looked up afterwards would
-                # match nothing and silently fall back to `__conf`. The two switches compose only in
-                # this order.
-                trust = supervision.trusted(value, np.nan_to_num(raw, nan=1.0))
-                value = supervision.per_finding(supervision.applied(value), target)
+                value, weight = cls._reported(derived, target, supervision)
                 said = ~np.isnan(value)
                 scores[said, column] = value[said]
-                weights[said, column] = floor + (1.0 - floor) * trust[said]
+                weights[said, column] = weight[said]
             if supervision.annotations and target in annotated.columns:
                 truth = annotated[target].to_numpy(dtype=np.float32)
                 read = ~np.isnan(truth)
@@ -512,15 +495,40 @@ class Targets:
         # LAST, and after the prune, because it is the only switch that overrides the radiologist rather
         # than deferring to them: withholding the STUDY means the annotated cells are exactly the ones
         # that must stop pulling, so `~read_by_radiologist` would invert the intent.
-        if supervision.withheld:
-            # The columns PRESENT, not all twelve: a foreign-corpus or smoke table carries a subset, and
-            # asking for a column it has no row for would kill the run on a property of the sample.
-            graded = [target for target in TARGETS if target in annotated.columns]
-            weights[annotated[graded].notna().to_numpy(dtype=np.bool_).any(axis=1)] = 0.0
-        corpus = None
-        if CORPUS in derived.columns:
-            corpus = derived[CORPUS].fillna("").to_numpy(dtype=str)
+        weights[cls._withheld(annotated, supervision)] = 0.0
+        corpus = derived[CORPUS].fillna("").to_numpy(dtype=str) if CORPUS in derived.columns else None
         return cls(scores, weights, identifiers, supervision, corpus=corpus)
+
+    @staticmethod
+    def _reported(
+        derived: pd.DataFrame, target: str, supervision: "Supervision"
+    ) -> tuple[NDArray[np.float32], NDArray[np.float64]]:
+        value = derived[target].to_numpy(dtype=np.float32)
+        confidence = f"{target}__conf"
+        # A missing confidence COLUMN and a missing confidence CELL both mean "fully confident": the
+        # reader either does not report confidence at all, or reported none for this row. float64, not
+        # float32: the multiply in float32 lands one ULP away on 22,102 pairs, which would make the
+        # vectorised refactor unprovable against the scalar loop it replaced.
+        raw = (
+            derived[confidence].to_numpy(dtype=np.float64)
+            if confidence in derived.columns
+            else np.ones(len(derived), dtype=np.float64)
+        )
+        # READ OFF THE LEVEL THE READER WROTE, which is why this precedes `applied`: a calibration
+        # rewrites 0.68 to 0.378 in place, and a grade looked up afterwards would match nothing and
+        # silently fall back to `__conf`. The two switches compose only in this order.
+        trust = supervision.trusted(value, np.nan_to_num(raw, nan=1.0))
+        value = supervision.per_finding(supervision.applied(value), target)
+        return value, supervision.floor + (1.0 - supervision.floor) * trust
+
+    @staticmethod
+    def _withheld(annotated: pd.DataFrame, supervision: "Supervision") -> NDArray[np.bool_]:
+        if not supervision.withheld:
+            return np.zeros(len(annotated), dtype=np.bool_)
+        # The columns PRESENT, not all twelve: a foreign-corpus or smoke table carries a subset, and
+        # asking for a column it has no row for would kill the run on a property of the sample.
+        graded = [target for target in TARGETS if target in annotated.columns]
+        return np.asarray(annotated[graded].notna().to_numpy(dtype=np.bool_).any(axis=1), dtype=np.bool_)
 
     @classmethod
     def pair(

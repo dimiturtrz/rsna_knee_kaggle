@@ -8,7 +8,7 @@ import torch
 from numpy.typing import NDArray
 
 from core.findings import TARGETS
-from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, LedgerSeventyFive
+from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, Ledger75Row, LedgerSeventyFive
 from kneemri.evaluation.member_pool import MemberDeclines
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -207,3 +207,41 @@ def test_price(tmp_path: Path) -> None:
     torch.save({"model": {}, "holdout": 0.5}, path)
     assert not row.price(path), "a recorded price is never silently replaced by a ruler"
     assert float(torch.load(path, weights_only=True)["holdout"]) == pytest.approx(0.5)
+
+
+def _plain(name: str, population: str = "p1", *, void: bool = False) -> Ledger75Row:
+    return Ledger75Row(
+        name=name, ledger=0.8, ledger75=0.85, epoch=3, studies=12, between_cut=4, population=population, void=void
+    )
+
+
+def test_line() -> None:
+    """A row prints its pair and move, and carries a marker only when it is VOID or BLIND."""
+    assert _plain("m").line().split() == ["m", "0.8000", "0.8500", "+0.0500", "3", "12"]
+    assert "VOID" in _plain("m", void=True).line()
+    assert "BLIND" in Ledger75Row(name="m", ledger=0.8, ledger75=0.8, epoch=3, studies=12, between_cut=0).line()
+
+
+def test_lines() -> None:
+    """One header, one divider per population, one line per row, and the count."""
+    lines = LedgerSeventyFive.lines([_plain("a"), _plain("b"), _plain("c", "p2")])
+    assert sum(line.startswith("-- population") for line in lines) == 2
+    assert len(lines) == 1 + 2 + 3 + 1
+    assert lines[-1] == "3 member(s) priced under both rulers"
+
+
+def test_priced(tmp_path: Path) -> None:
+    """A VOID row is never written, and a row with no checkpoint on disk is skipped rather than raised on."""
+    torch.save({"model": {}, "holdout": float("nan")}, tmp_path / "m.pt")
+    rows = [_plain("m"), _plain("gone"), _plain("insample", void=True)]
+    assert LedgerSeventyFive.priced(rows, tmp_path) == "priced 1 checkpoint(s) that carried no holdout: m"
+    assert LedgerSeventyFive.priced([], tmp_path).endswith("none")
+
+
+def test_refusal() -> None:
+    """VOID always refuses; a span of populations refuses only when a comparison was asked for."""
+    spanning = [_plain("a"), _plain("b", "p2")]
+    assert not LedgerSeventyFive.refusal(spanning, Path("declines"), compared=False)
+    assert LedgerSeventyFive.refusal(spanning, Path("declines"), compared=True).startswith("--only spans 2")
+    assert "VOID" in LedgerSeventyFive.refusal([_plain("x", void=True)], Path("declines"), compared=False)
+    assert not LedgerSeventyFive.refusal([_plain("a")], Path("declines"), compared=True)

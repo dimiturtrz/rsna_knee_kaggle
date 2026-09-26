@@ -408,36 +408,11 @@ class Request:
             GRADE_LADDER: self.grade_ladder,
             SIDE_TERM: self.side_weight,
             FOCUS: self.focus_label,
-            # RE-DERIVED FROM THE FLAG PAIR, as SAMPLING is: an unfocused weight with no findings named
-            # scales nothing, so the honest request is the 0.0 the null policy accounts for.
-            UNFOCUSED: self.unfocused_weight if self.focus_label else 0.0,
-            # RE-DERIVED FROM THE FLAG PAIR, the way WINDOW is: an alpha without a spread file weights
-            # nothing, so the honest request there is the uniform draw the run will actually get.
-            #
-            # AND FROM THE OTHER DRAW POLICY TOO. `MixedCorpus.tilt` reports its FACTOR on this same key
-            # — deliberately, since tilt is "how much of the draw the weight controls" and for that
-            # policy the weight IS the factor. Modelling only the spread policy here made every
-            # `--corpus-oversample` arm die in its first second on `sampling_tilt: asked 0.0, the model
-            # shows 2.22`, a run refused for landing exactly what it asked for (knee-zya5d follow-on).
-            # The order mirrors `run_setup.drawing`, which builds `MixedCorpus` first and refuses the
-            # two flags together, so no request can want both.
-            SAMPLING: self.corpus_oversample or (self.sample_alpha if self.sample_spread is not None else 0.0),
-            SAMPLING_RAMP: self.sample_ramp if self.sample_spread is not None else 0,
-            CORPUS_OVERSAMPLE: self.corpus_oversample,
-            TARGET_CORPUS: self.target_corpus if self.corpus_oversample > 0.0 else "",
+            **self._drawing(),
             CERTAINTY_RAMP: self.certainty_ramp,
             AUG_SCHEDULE: (self.aug_start, self.aug_mid, self.aug_end, self.aug_ramp, self.aug_tail),
             HARD_SCHEDULE: (self.hard_start, self.hard_mid, self.hard_end, self.hard_ramp, self.hard_tail),
-            OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
-            # WHERE the window sits, which the count above cannot see: an offset that reached
-            # nothing opens the same NUMBER of blocks in the wrong place and reads as a null on
-            # a mechanism that never ran. Zero whenever no base block is open at all.
-            FROZEN_TOP: 0 if self.lora_rank or not self.unfreeze_last else self.unfreeze_offset,
-            # WHETHER THE PIXEL-READING LAYERS OPENED, which neither key above can see: both count
-            # BLOCKS, and the stem is not one. Under LoRA the honest request is False for the reason
-            # OPENED_BLOCKS asks zero there — `backbone_groups` takes the adapter branch, which opens
-            # exactly the adapters and never reaches the freezing this switch rides on.
-            STEM_OPEN: False if self.lora_rank else self.unfreeze_stem,
+            **self._opened(),
             ACCUMULATION: self.accumulate,
             LAYER_DECAY: self.layer_decay,
             MIXUP: self.mixup,
@@ -466,4 +441,39 @@ class Request:
             # group at this rate whether the depth flag opened four blocks, zero, or an adapter set,
             # so there is no configuration under which the honest request is anything but the flag.
             BACKBONE_RATE: self.backbone_lr,
+        }
+
+    def _drawing(self) -> dict[str, object]:
+        return {
+            # RE-DERIVED FROM THE FLAG PAIR, as SAMPLING is: an unfocused weight with no findings named
+            # scales nothing, so the honest request is the 0.0 the null policy accounts for.
+            UNFOCUSED: self.unfocused_weight if self.focus_label else 0.0,
+            # RE-DERIVED FROM THE FLAG PAIR, the way WINDOW is: an alpha without a spread file weights
+            # nothing, so the honest request there is the uniform draw the run will actually get.
+            #
+            # AND FROM THE OTHER DRAW POLICY TOO. `MixedCorpus.tilt` reports its FACTOR on this same key
+            # — deliberately, since tilt is "how much of the draw the weight controls" and for that
+            # policy the weight IS the factor. Modelling only the spread policy here made every
+            # `--corpus-oversample` arm die in its first second on `sampling_tilt: asked 0.0, the model
+            # shows 2.22`, a run refused for landing exactly what it asked for (knee-zya5d follow-on).
+            # The order mirrors `run_setup.drawing`, which builds `MixedCorpus` first and refuses the
+            # two flags together, so no request can want both.
+            SAMPLING: self.corpus_oversample or (self.sample_alpha if self.sample_spread is not None else 0.0),
+            SAMPLING_RAMP: self.sample_ramp if self.sample_spread is not None else 0,
+            CORPUS_OVERSAMPLE: self.corpus_oversample,
+            TARGET_CORPUS: self.target_corpus if self.corpus_oversample > 0.0 else "",
+        }
+
+    def _opened(self) -> dict[str, object]:
+        return {
+            OPENED_BLOCKS: 0 if self.lora_rank else self.unfreeze_last,
+            # WHERE the window sits, which the count above cannot see: an offset that reached
+            # nothing opens the same NUMBER of blocks in the wrong place and reads as a null on
+            # a mechanism that never ran. Zero whenever no base block is open at all.
+            FROZEN_TOP: 0 if self.lora_rank or not self.unfreeze_last else self.unfreeze_offset,
+            # WHETHER THE PIXEL-READING LAYERS OPENED, which neither key above can see: both count
+            # BLOCKS, and the stem is not one. Under LoRA the honest request is False for the reason
+            # OPENED_BLOCKS asks zero there — `backbone_groups` takes the adapter branch, which opens
+            # exactly the adapters and never reaches the freezing this switch rides on.
+            STEM_OPEN: False if self.lora_rank else self.unfreeze_stem,
         }

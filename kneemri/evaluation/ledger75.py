@@ -131,6 +131,17 @@ class Ledger75Row:
         """
         return self.between_cut == 0
 
+    def line(self) -> str:
+        """The row as the table prints it, with the VOID and BLIND markers that stop it being quoted bare."""
+        markers = (
+            (self.void, "  VOID - not a reading of held-out studies"),
+            (self.recut_blind(), "  BLIND - no truth between the cuts, move is 0 by construction"),
+        )
+        return (
+            f"{self.name[:40]:40s} {self.ledger:8.4f} {self.ledger75:9.4f} {self.moved():+8.4f} {self.epoch:6d} "
+            f"{self.studies:6d}" + "".join(text for flagged, text in markers if flagged)
+        )
+
 
 class LedgerSeventyFive:
     """The mixed-cut ruler: ten findings at 0.75, two at the midpoint, scored off the kept arrays."""
@@ -239,6 +250,45 @@ class LedgerSeventyFive:
         main = leading[0][0] if leading else ""
         return sorted(rows, key=lambda row: (row.population != main, row.population, -row.ledger75))
 
+    @staticmethod
+    def lines(rows: list[Ledger75Row]) -> list[str]:
+        """The table: a header, one divider per population so no rank is read across it, and the count."""
+        lines = [f"{'member':40s} {'LEDGER':>8s} {'LEDGER75':>9s} {'move':>8s} {'epoch':>6s} {'rows':>6s}"]
+        seen = ""
+        for row in rows:
+            if row.population != seen:
+                seen = row.population
+                lines.append(f"-- population {seen}, {row.studies} studies - ranks below do NOT cross this line --")
+            lines.append(row.line())
+        lines.append(f"{len(rows)} member(s) priced under both rulers")
+        return lines
+
+    @staticmethod
+    def priced(rows: list[Ledger75Row], holdouts: Path) -> str:
+        """Price every non-VOID row's NaN-holdout checkpoint; a VOID number is not a held-out reading."""
+        written = [row.name for row in rows if not row.void and row.price(holdouts / f"{row.name}.pt")]
+        return f"priced {len(written)} checkpoint(s) that carried no holdout: {', '.join(written) or 'none'}"
+
+    @staticmethod
+    def refusal(rows: list[Ledger75Row], declines: Path, *, compared: bool) -> str:
+        """Why the table may not be quoted, or "" when it may.
+
+        A VOID row refuses always. A span of populations refuses only when `compared`: a default sweep
+        across populations is a survey the dividers make honest, but `--only a b` asks for a comparison,
+        and across two study sets there is none to hand back.
+        """
+        voided = [row.name for row in rows if row.void]
+        if voided:
+            return f"{len(voided)} row(s) VOID by {declines} and unrankable: {', '.join(voided)}"
+        asked = {(row.population, row.studies) for row in rows if compared}
+        if len(asked) <= 1:
+            return ""
+        spans = ", ".join(f"{name} ({studies} studies)" for name, studies in sorted(asked))
+        return (
+            f"--only spans {len(asked)} populations - a population is the studies AND the table that graded "
+            f"them, so equal counts still answer different questions: {spans}"
+        )
+
 
 def main() -> None:
     """Print every member on disk under the midpoint macro and LEDGER75, and the move between them."""
@@ -261,41 +311,14 @@ def main() -> None:
     paths = [arguments.holdouts / f"{name}{SUFFIX}" for name in pool.names(arguments.only)]
     rows = LedgerSeventyFive(declines=pool.declines).table(paths)
 
-    lines = [f"{'member':40s} {'LEDGER':>8s} {'LEDGER75':>9s} {'move':>8s} {'epoch':>6s} {'rows':>6s}"]
-    seen = ""
-    for row in rows:
-        if row.population != seen:
-            seen = row.population
-            lines.append(f"-- population {seen}, {row.studies} studies - ranks below do NOT cross this line --")
-        lines.append(
-            f"{row.name[:40]:40s} {row.ledger:8.4f} {row.ledger75:9.4f} {row.moved():+8.4f} {row.epoch:6d} "
-            f"{row.studies:6d}{'  VOID - not a reading of held-out studies' if row.void else ''}"
-            f"{'  BLIND - no truth between the cuts, move is 0 by construction' if row.recut_blind() else ''}"
-        )
-    lines.append(f"{len(rows)} member(s) priced under both rulers")
+    lines = LedgerSeventyFive.lines(rows)
     if arguments.price:
-        # Only a VOID row is skipped: its number is not a reading of held-out studies, so writing it
-        # into the checkpoint would put an in-sample price where seat ranking reads a holdout one.
-        written = [row.name for row in rows if not row.void and row.price(arguments.holdouts / f"{row.name}.pt")]
-        lines.append(f"priced {len(written)} checkpoint(s) that carried no holdout: {', '.join(written) or 'none'}")
+        lines.append(LedgerSeventyFive.priced(rows, arguments.holdouts))
     command.report(lines)
 
-    voided = [row.name for row in rows if row.void]
-    if voided:
-        message = f"{len(voided)} row(s) VOID by {arguments.declines} and unrankable: {', '.join(voided)}"
-        raise SystemExit(message)
-
-    # Only the EXPLICIT ask refuses. A default sweep spanning populations is a survey and the dividers
-    # make it honest, but `--only a b` is a caller asking for a comparison, and across two study sets
-    # there is no comparison to hand back.
-    asked = {(row.population, row.studies) for row in rows} if arguments.only else set()
-    if len(asked) > 1:
-        spans = ", ".join(f"{name} ({studies} studies)" for name, studies in sorted(asked))
-        message = (
-            f"--only spans {len(asked)} populations - a population is the studies AND the table that graded "
-            f"them, so equal counts still answer different questions: {spans}"
-        )
-        raise SystemExit(message)
+    refusal = LedgerSeventyFive.refusal(rows, arguments.declines, compared=bool(arguments.only))
+    if refusal:
+        raise SystemExit(refusal)
 
 
 if __name__ == "__main__":

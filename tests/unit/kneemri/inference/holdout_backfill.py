@@ -10,7 +10,7 @@ import torch
 from core.data.corpus.study_cache import CachedCorpus
 from core.findings import TARGETS
 from core.paths import DataRoot
-from kneemri.inference.holdout_backfill import Backfill, HoldoutBackfill, ReadSize, UnbackfillableError
+from kneemri.inference.holdout_backfill import Backfill, HoldoutBackfill, Reading, ReadSize, UnbackfillableError
 from kneemri.inference.members import RESIZED_FROM, Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
@@ -192,7 +192,7 @@ def test_read(tmp_path: Path):
     assert RESIZED_FROM in priced.config, "so the trainer's own array is refused for it"
 
 
-def test_destination(tmp_path: Path):
+def test_read_size_destination(tmp_path: Path):
     """A priced record is named for its size, because the unsized name is the one everything reads.
 
     `HoldoutRecord` derives its path from whatever it is handed, so writing a 224-px pass against the
@@ -205,6 +205,13 @@ def test_destination(tmp_path: Path):
 
     assert destination == tmp_path / "member_r224.pt"
     assert HoldoutRecord(destination).path != HoldoutRecord(checkpoint).path, "the native record survives a price"
+
+
+def test_reading_destination(tmp_path: Path):
+    """A sized reading writes beside the member; a native one writes the member's own record."""
+    checkpoint = tmp_path / "member.pt"
+    assert Reading(sizing=ReadSize(224)).destination(checkpoint) == tmp_path / "member_r224.pt"
+    assert Reading().destination(checkpoint) == checkpoint
 
 
 def test_stamp(tmp_path: Path):
@@ -220,3 +227,38 @@ def test_stamp(tmp_path: Path):
     witnessed = tmp_path / "witnessed.pt"
     torch.save({"model": {}, "fingerprint": [0.1, 0.2], "holdout": 0.87}, witnessed)
     assert not backfill.stamp(_member(tmp_path / "ignored.pt"), witnessed), "a witness is never recomputed silently"
+
+
+def _fitted(checkpoint: Path) -> Path:
+    torch.save({"model": {}, "config": _member(checkpoint).config, "fingerprint": [0.1], "holdout": 0.8}, checkpoint)
+    return checkpoint
+
+
+def test_native():
+    """Only the reading a member was fitted at may stamp its checkpoint's price."""
+    assert Reading().native()
+    assert not Reading(sizing=ReadSize(224)).native(), "a sized pass prices something else"
+
+
+def test_load(tmp_path: Path):
+    """The member comes back at the priced size, over the cache it was FITTED on."""
+    checkpoint = _fitted(tmp_path / "fitted.pt")
+    cache = Member.from_checkpoint(checkpoint).cache(tmp_path)
+    cache.prepare()
+    np.save(cache.images_path, np.zeros((2, 2, 4, 1, 1), np.uint8))
+    np.save(cache.mask_path, np.ones((2, 2), np.float32))
+    cache.record(["s0", "s1"])
+
+    member, corpus, identifiers = Reading(sizing=ReadSize(224)).load(checkpoint, tmp_path)
+
+    assert member.read_size == 224
+    assert identifiers == ["s0", "s1"]
+    assert corpus.slices == 4
+
+
+def test_visit(tmp_path: Path):
+    """A walk steps over a checkpoint it cannot re-derive rather than dying on it."""
+    checkpoint = _metrics(_fitted(tmp_path / "old.pt"), None, [_epoch(0, 0.80)])
+    backfill = HoldoutBackfill(DataRoot(tmp_path), torch.device("cpu"))
+
+    assert not backfill.visit(checkpoint, Reading(sizing=ReadSize(224))), "no recipe, so nothing re-derived"

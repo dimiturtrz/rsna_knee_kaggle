@@ -125,7 +125,9 @@ class MountCheck:
         sources = KernelSources(kernel / METADATA)
         if not sources.covers(self.dataset):
             return f"skipped - mounts a weights package other than {self.dataset}, which this sweep is not holding"
-        names = script.member_names()
+        return self._served(script.member_names(), sources)
+
+    def _served(self, names: list[str] | None, sources: KernelSources) -> str:
         try:
             wanted = self.package.named(names) if names else self.package.members
             mounts = self.package.mounts(wanted)
@@ -138,16 +140,20 @@ class MountCheck:
         # to break: a shelf it does not declare is a smaller pool, not a dropped seat, and refusing it
         # would make seven correct kernels permanently red — which is how a real refusal stops being read.
         shelves: list[str] = sorted({self.shelf(member) for member in wanted}) if names else []
+        return self._undeclared(names, shelves, mounts, sources) or f"ok - declares all of {', '.join(mounts)}"
+
+    def _undeclared(
+        self, names: list[str] | None, shelves: list[str], mounts: list[str], sources: KernelSources
+    ) -> str:
         unmounted = [shelf for shelf in shelves if not sources.covers(shelf)]
-        if unmounted:
-            return f"REFUSED - serves members from {', '.join(shelves)} and does not declare {', '.join(unmounted)}"
         undeclared = sources.undeclared(mounts)
-        if undeclared:
-            return f"REFUSED - needs {', '.join(mounts)} and does not declare {', '.join(undeclared)}"
         unpushed = self.unpushed(names)
-        if unpushed:
-            return f"REFUSED - names {', '.join(unpushed)}, which the LIVE members dataset does not hold"
-        return f"ok - declares all of {', '.join(mounts)}"
+        refusals = (
+            (unmounted, f"serves members from {', '.join(shelves)} and does not declare {', '.join(unmounted)}"),
+            (undeclared, f"needs {', '.join(mounts)} and does not declare {', '.join(undeclared)}"),
+            (unpushed, f"names {', '.join(unpushed)}, which the LIVE members dataset does not hold"),
+        )
+        return next((f"REFUSED - {reason}" for missing, reason in refusals if missing), "")
 
     def absent(self) -> list[str]:
         """Every member the manifest names that the LIVE dataset does not hold — the package question.

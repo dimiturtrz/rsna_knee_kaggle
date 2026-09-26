@@ -28,6 +28,7 @@ asking for the gradient a short distance uphill instead of the gradient here.
 """
 
 import logging
+import math
 
 import torch
 from torch import Tensor
@@ -81,29 +82,39 @@ class Sharpness:
         undone by subtracting a `nan` back, so the model would be destroyed by one unlucky batch. On a
         non-finite norm this declines to move at all and the step proceeds as an ordinary one.
         """
-        if not self.radius:
-            return False
-        gradients = {name: parameter.grad for name, parameter in model.named_parameters() if parameter.grad is not None}
+        gradients = self._gradients(model)
         if not gradients:
             return False
-        norm = torch.linalg.vector_norm(
-            torch.stack([torch.linalg.vector_norm(gradient.detach().float()) for gradient in gradients.values()])
+        norm = float(
+            torch.linalg.vector_norm(
+                torch.stack([torch.linalg.vector_norm(gradient.detach().float()) for gradient in gradients.values()])
+            )
         )
-        if not bool(torch.isfinite(norm)) or not float(norm):
-            self.declines += 1
-            if self.declines == 1 or not self.declines % DECLINE_REPORT:
-                logger.warning("sharpness declined %d step(s): %s", self.declines, FINITE_ONLY)
-            return False
+        if not math.isfinite(norm) or not norm:
+            return self._declined()
+        self._ascend(model, gradients, self.radius / norm)
+        return True
+
+    def _gradients(self, model: torch.nn.Module) -> dict[str, Tensor]:
+        if not self.radius:
+            return {}
+        return {name: parameter.grad for name, parameter in model.named_parameters() if parameter.grad is not None}
+
+    def _declined(self) -> bool:
+        self.declines += 1
+        if self.declines == 1 or not self.declines % DECLINE_REPORT:
+            logger.warning("sharpness declined %d step(s): %s", self.declines, FINITE_ONLY)
+        return False
+
+    def _ascend(self, model: torch.nn.Module, gradients: dict[str, Tensor], scale: float) -> None:
         self.climbs += 1
         if self.climbs == 1:
             logger.info("sharpness climbing at radius %g — the ascent fired", self.radius)
-        scale = self.radius / float(norm)
         self._climb = {name: gradient.detach() * scale for name, gradient in gradients.items()}
         with torch.no_grad():
             for name, parameter in model.named_parameters():
                 if name in self._climb:
                     parameter.add_(self._climb[name])
-        return True
 
     def descended(self, model: torch.nn.Module) -> None:
         """Put the weights back exactly where `climbed` found them, before the optimiser steps.

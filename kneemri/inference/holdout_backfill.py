@@ -155,6 +155,36 @@ class ReadSize:
         return checkpoint.with_name(f"{checkpoint.stem}_r{self.pixels}{checkpoint.suffix}")
 
 
+@dataclass(frozen=True)
+class Reading:
+    """Which reading a walk prices: the member's native one, or a size and a depth it was not fitted at."""
+
+    sizing: ReadSize | None = None
+    regroup: SharedRead | None = None
+
+    def native(self) -> bool:
+        """Is this the reading the member was fitted at — the only one whose price may be stamped?"""
+        return not (self.sizing or self.regroup)
+
+    def destination(self, checkpoint: Path) -> Path:
+        """The checkpoint whose record this reading writes, sized and re-grouped as asked."""
+        sized = self.sizing.destination(checkpoint) if self.sizing else checkpoint
+        return self.regroup.beside(sized) if self.regroup else sized
+
+    def load(self, checkpoint: Path, processed: Path) -> tuple[Member, CachedCorpus, list[str]]:
+        """The member at this reading and the decoded corpus it reads from.
+
+        The re-group runs BEFORE the cache is resolved and the resize after it, because the two
+        overrides act on different halves of the read: slices and band decide WHICH files are decoded,
+        so they name a different cache; a size is applied to pixels already decoded, so it must not
+        move the cache the member shares (knee-d2fc).
+        """
+        member = Member.from_checkpoint(checkpoint)
+        member = self.regroup.regrouped(member) if self.regroup else member
+        corpus, identifiers = member.cache(processed).load()
+        return (self.sizing.read(member) if self.sizing else member), corpus, identifiers
+
+
 class HoldoutBackfill:
     """The inference pass that gives an already-run arm the per-study record it never kept."""
 
@@ -236,6 +266,41 @@ class HoldoutBackfill:
         logger.info("%s: stamped weight fingerprint", checkpoint.stem)
         return True
 
+    def visit(self, checkpoint: Path, reading: Reading, *, refresh: bool = False, restamp: bool = False) -> bool:
+        """One checkpoint of the walk, returning whether its holdout was re-derived."""
+        destination = reading.destination(checkpoint)
+        # Before the holdout gate, not inside it. `stamp` is a no-op for a checkpoint already witnessed,
+        # so the walk costs nothing — and a soup of FULL-DATA fits holds nothing out, so it refuses
+        # backfill below and reaches no other stamping path in the repo (knee-emyky).
+        if reading.native():
+            self.stamp(Member.from_checkpoint(checkpoint), destination)
+        # A restamp is only ever asked of a record that EXISTS, so it passes this gate for the same
+        # reason a refresh does — the gate keeps a plain walk from re-deriving what is done.
+        if HoldoutRecord(destination).exists() and not (refresh or restamp):
+            logger.info("%s: already keeps its predictions", checkpoint.stem)
+            return False
+        try:
+            plan = Backfill.of(checkpoint)
+        except UnbackfillableError as refusal:
+            logger.info("skipped %s", refusal)
+            return False
+        if restamp:
+            moved = HoldoutRecord(checkpoint).restamp(plan.epoch)
+            logger.info("%s: epoch %s", checkpoint.stem, f"restamped to {plan.epoch}" if moved else "already right")
+            return False
+        return self._derived(checkpoint, replace(plan, checkpoint=destination), reading)
+
+    def _derived(self, checkpoint: Path, plan: Backfill, reading: Reading) -> bool:
+        member, corpus, identifiers = reading.load(checkpoint, self.root.processed())
+        written = self.derive(member, plan, corpus, identifiers)
+        logger.info("%s: %d studies re-derived at epoch %d", checkpoint.stem, written, plan.epoch)
+        # NATIVE PASSES ONLY. A sized or re-grouped record prices the member at a reading it was not
+        # fitted at, and stamping the checkpoint's `holdout` from one would replace the number every
+        # ensemble and seat search reads with a price of something else.
+        if reading.native():
+            self.stamp(member, plan.checkpoint)
+        return True
+
 
 def main() -> None:
     """Back-fill the arms already run: `python -m kneemri.inference.holdout_backfill --checkpoints *.pt`."""
@@ -263,56 +328,17 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    sizing = ReadSize(arguments.read_size) if arguments.read_size else None
     band = (arguments.served_band[0], arguments.served_band[1]) if arguments.served_band else SLICE_BAND
-    regroup = SharedRead(arguments.served_slices, band) if arguments.served_slices else None
+    reading = Reading(
+        ReadSize(arguments.read_size) if arguments.read_size else None,
+        SharedRead(arguments.served_slices, band) if arguments.served_slices else None,
+    )
     backfill = HoldoutBackfill(command.rooted(arguments), torch.device(arguments.device), overlap=arguments.overlap)
     # The walk, not each member: a suspend between two members costs the same wall-clock as one inside
     # a member, and the walk over 55 of them is what runs for hours unattended (knee-wyzj).
     with Wakelock():
         for checkpoint in arguments.checkpoints:
-            # A restamp is only ever asked of a record that EXISTS, so it passes this gate for the same
-            # reason a refresh does — the gate keeps a plain walk from re-deriving what is done.
-            destination = sizing.destination(checkpoint) if sizing else checkpoint
-            destination = regroup.beside(destination) if regroup else destination
-            # Before the holdout gate, not inside it. `stamp` is a no-op for a checkpoint already
-            # witnessed, so the walk costs nothing — and a soup of FULL-DATA fits holds nothing out,
-            # so it refuses backfill below and reaches no other stamping path in the repo. Under the
-            # gate, a fingerprint was available only to a member that could also be scored, which made
-            # every dark soup unshippable for a reason unrelated to shipping (knee-emyky is the same
-            # defect one branch earlier).
-            if not (sizing or regroup):
-                backfill.stamp(Member.from_checkpoint(checkpoint), destination)
-            if HoldoutRecord(destination).exists() and not (arguments.refresh or arguments.restamp):
-                logger.info("%s: already keeps its predictions", checkpoint.stem)
-                continue
-            try:
-                plan = Backfill.of(checkpoint)
-            except UnbackfillableError as refusal:
-                logger.info("skipped %s", refusal)
-                continue
-            if arguments.restamp:
-                moved = HoldoutRecord(checkpoint).restamp(plan.epoch)
-                logger.info("%s: epoch %s", checkpoint.stem, f"restamped to {plan.epoch}" if moved else "already right")
-                continue
-            member = Member.from_checkpoint(checkpoint)
-            # The re-group runs BEFORE the cache is resolved and the resize after it, because the two
-            # overrides act on different halves of the read: slices and band decide WHICH files are
-            # decoded, so they name a different cache; a size is applied to pixels already decoded, so
-            # it must not move the cache the member shares (knee-d2fc).
-            member = regroup.regrouped(member) if regroup else member
-            corpus, identifiers = member.cache(backfill.root.processed()).load()
-            if sizing:
-                member = sizing.read(member)
-            if sizing or regroup:
-                plan = replace(plan, checkpoint=destination)
-            written = backfill.derive(member, plan, corpus, identifiers)
-            logger.info("%s: %d studies re-derived at epoch %d", checkpoint.stem, written, plan.epoch)
-            # NATIVE PASSES ONLY. A sized or re-grouped record prices the member at a reading it was
-            # not fitted at, and stamping the checkpoint's `holdout` from one would replace the number
-            # every ensemble and seat search reads with a price of something else.
-            if not (sizing or regroup):
-                backfill.stamp(member, destination)
+            backfill.visit(checkpoint, reading, refresh=arguments.refresh, restamp=arguments.restamp)
 
 
 if __name__ == "__main__":
