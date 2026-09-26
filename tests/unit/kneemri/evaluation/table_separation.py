@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from core.findings import TARGETS
+from kneemri.evaluation.scores import ArmPair
 from kneemri.evaluation.table_separation import TableSeparation
 
 STUDIES = 12
@@ -77,12 +78,12 @@ def test_separation(tmp_path: Path):
     )
 
     point, (floor, ceiling) = separation.separation(
-        readings["perfect"], readings["inverted"], annotations, resamples=DRAWS
+        ArmPair(readings["perfect"], readings["inverted"], annotations, DRAWS)
     )
     assert point == -1.0
     assert ceiling < 0.0, "a reader that inverts every finding is resolvable on any draw"
 
-    same, (low, high) = separation.separation(readings["perfect"], readings["copy"], annotations, resamples=DRAWS)
+    same, (low, high) = separation.separation(ArmPair(readings["perfect"], readings["copy"], annotations, DRAWS))
     assert (same, low, high) == (0.0, 0.0, 0.0), "the same table twice differs by nothing on every draw"
 
 

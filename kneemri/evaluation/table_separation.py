@@ -45,11 +45,10 @@ from pathlib import Path
 
 import numpy as np
 from jaxtyping import Float
-from numpy.typing import NDArray
 
 from core import cli
-from core.bootstrap import STUDY_RESAMPLES, StudyBootstrap
-from kneemri.evaluation.scores import LabelScores
+from core.bootstrap import STUDY_RESAMPLES
+from kneemri.evaluation.scores import ArmPair, LabelScores
 from kneemri.evaluation.supervision_gap import SupervisionGap
 
 logger = logging.getLogger(__name__)
@@ -77,23 +76,11 @@ class TableSeparation:
         self, values: Float[np.ndarray, "studies targets"], annotations: Float[np.ndarray, "studies targets"]
     ) -> float:
         """One table's mean AUC over the twelve findings, the number `table_blend` quotes bare."""
-        return self.scores.mean_of(self.gap.against(values, annotations))
+        return self.scores.mean(values, annotations)
 
-    def separation(
-        self,
-        first: Float[np.ndarray, "studies targets"],
-        second: Float[np.ndarray, "studies targets"],
-        annotations: Float[np.ndarray, "studies targets"],
-        resamples: int = STUDY_RESAMPLES,
-    ) -> tuple[float, tuple[float, float]]:
+    def separation(self, pair: ArmPair) -> tuple[float, tuple[float, float]]:
         """`second` minus `first` on the full sample, and that difference's 95% paired interval."""
-
-        def delta(drawn: NDArray[np.int64]) -> float:
-            truth = annotations[drawn]
-            return self.mean(second[drawn], truth) - self.mean(first[drawn], truth)
-
-        point = self.mean(second, annotations) - self.mean(first, annotations)
-        return point, StudyBootstrap(resamples).interval(annotations.shape[0], delta)
+        return pair.difference(self.mean), self.scores.paired_mean_interval(pair)
 
     def report(
         self,
@@ -105,7 +92,7 @@ class TableSeparation:
         lines = [f"{annotations.shape[0]} annotated studies, {len(readings)} tables, {resamples} draws"]
         lines.extend(f"{name:34s} {self.mean(values, annotations):.4f}" for name, values in readings.items())
         for left, right in combinations(readings, 2):
-            point, (floor, ceiling) = self.separation(readings[left], readings[right], annotations, resamples)
+            point, (floor, ceiling) = self.separation(ArmPair(readings[left], readings[right], annotations, resamples))
             verdict = "SEPARATED" if floor > 0 or ceiling < 0 else "unresolved"
             lines.append(f"{right} - {left}: {point:+.4f}  95% [{floor:+.4f}, {ceiling:+.4f}]  {verdict}")
         return lines

@@ -12,7 +12,7 @@ from core.data.corpus.anatomy import ScaleProfile
 from core.data.labels.label_power import FOLDS, LabelPower
 from kneemri.evaluation.gold_rows import GoldRows
 from kneemri.evaluation.holdout_metrics import HoldoutMetrics, ScoredEpoch
-from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.evaluation.scores import MIDPOINT, ArmPair, LabelScores
 from kneemri.evaluation.supervision_gap import Bottleneck, SupervisionGap
 from kneemri.runs.holdout_record import TRAINED, HoldoutRecord
 from kneemri.runs.recorded_run import RecordedRun
@@ -390,7 +390,7 @@ class RunComparison:
         # THE SAME STUDIES the deltas were taken on. A floor measured over rows the delta above does not
         # include is a floor for a different comparison, and it would be quoted beside this one.
         first, second, truth = self.holdout.kept(control).aligned(self.holdout.kept(theirs))
-        interval = self.scores.paired_interval(first, second, truth)
+        interval = self.scores.paired_interval(ArmPair(first, second, truth))
         return PairedWidths(
             widths={label: (high - low) / 2 for label, (low, high) in interval.items()},
             exact=control.source == TRAINED and theirs.source == TRAINED,

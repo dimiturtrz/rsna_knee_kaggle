@@ -9,6 +9,7 @@ import pytest
 from core.data.labels.label_power import LabelPower
 from core.findings import TARGETS
 from kneemri.evaluation.paired_floor import PairedFloor
+from kneemri.evaluation.scores import ArmPair
 
 STUDIES = 200
 RESAMPLES = 60
@@ -38,7 +39,7 @@ def test_paired(tmp_path: Path) -> None:
     floor = PairedFloor(_power(tmp_path))
     signal = _signal()
 
-    widths = floor.paired(signal, signal, _truth(), RESAMPLES)
+    widths = floor.paired(ArmPair(signal, signal, _truth(), RESAMPLES))
 
     assert set(widths) == set(TARGETS)
     assert widths["MCL"] == pytest.approx(0.0)
@@ -65,7 +66,7 @@ def test_absolute(tmp_path: Path) -> None:
     width = floor.absolute(signal, _truth(), RESAMPLES)
 
     assert width > 0.0, "an absolute mean has sampling error the paired construction cannot cancel"
-    assert width > floor.paired(signal, signal, _truth(), RESAMPLES)["MCL"]
+    assert width > floor.paired(ArmPair(signal, signal, _truth(), RESAMPLES))["MCL"]
 
 
 def test_tightening(tmp_path: Path) -> None:
@@ -99,7 +100,7 @@ def test_report(tmp_path: Path) -> None:
     floor = PairedFloor(_power(tmp_path))
     signal = _signal()
 
-    reported = floor.report(signal, signal, _truth(), RESAMPLES)
+    reported = floor.report(ArmPair(signal, signal, _truth(), RESAMPLES))
 
     assert reported["MCL"] == pytest.approx(0.0)
 

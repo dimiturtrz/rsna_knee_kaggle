@@ -29,7 +29,7 @@ from core.data.labels.label_power import LabelPower
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
-from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.evaluation.scores import MIDPOINT, ArmPair, LabelScores
 
 logger = logging.getLogger(__name__)
 
@@ -52,15 +52,9 @@ class PairedFloor:
         self.power = power
         self.scores = scores or LabelScores()
 
-    def paired(
-        self,
-        first: NDArray[np.float64],
-        second: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        resamples: int = STUDY_RESAMPLES,
-    ) -> dict[str, float]:
+    def paired(self, pair: ArmPair) -> dict[str, float]:
         """Each label's paired 95% interval WIDTH, by bootstrap over the studies both arms scored."""
-        interval = self.scores.paired_interval(first, second, targets, resamples)
+        interval = self.scores.paired_interval(pair)
         return {target: high - low for target, (low, high) in interval.items()}
 
     def unpaired(self, targets: NDArray[np.float32]) -> dict[str, float]:
@@ -111,16 +105,10 @@ class PairedFloor:
         generator = np.random.default_rng(SUBSET_SEED)
         return generator.choice(total, size=min(studies, total), replace=False)
 
-    def report(
-        self,
-        first: NDArray[np.float64],
-        second: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        resamples: int = STUDY_RESAMPLES,
-    ) -> dict[str, float]:
+    def report(self, pair: ArmPair) -> dict[str, float]:
         """Log both widths and their ratio per label, and hand back the paired widths."""
-        paired = self.paired(first, second, targets, resamples)
-        unpaired = self.unpaired(targets)
+        paired = self.paired(pair)
+        unpaired = self.unpaired(pair.targets)
         tighter = self.tightening(paired, unpaired)
         logger.info("%-18s %9s %9s %8s", "label", "paired", "unpaired", "tighter")
         for target in TARGETS:
@@ -133,13 +121,8 @@ class PairedFloor:
             self.mean_width(unpaired),
             float(np.mean(finite)),
         )
-        logger.info(
-            "%-18s %9.4f %9s %8s",
-            "ABSOLUTE MEAN",
-            self.absolute(first, targets, resamples),
-            "-",
-            "-",
-        )
+        absolute = self.absolute(pair.first, pair.targets, pair.resamples)
+        logger.info("%-18s %9.4f %9s %8s", "ABSOLUTE MEAN", absolute, "-", "-")
         return paired
 
 
@@ -157,15 +140,15 @@ def main() -> None:
 
     # A NULL PAIR: two seeds of one recipe, so the true per-label difference is zero and the interval
     # measured is the instrument's own width rather than a mixture of width and effect.
-    first, second = per_seed[0], per_seed[1]
+    pair = ArmPair(per_seed[0], per_seed[1], truth, arguments.resamples)
 
     logger.info("corpus: %d studies, %d resamples", len(identifiers), arguments.resamples)
-    floor.report(first, second, truth, arguments.resamples)
+    floor.report(pair)
 
     drawn = floor.subset(FOLD_STUDIES, len(identifiers))
     logger.info("")
     logger.info("our ruler's size: %d studies, %d resamples", len(drawn), arguments.resamples)
-    floor.report(first[drawn], second[drawn], truth[drawn], arguments.resamples)
+    floor.report(pair.drawn(drawn))
 
 
 if __name__ == "__main__":

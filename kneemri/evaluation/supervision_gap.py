@@ -50,7 +50,7 @@ from core.bootstrap import STUDY_RESAMPLES
 from core.findings import TARGETS
 from kneemri.evaluation.gold_rows import PRESENT, GoldRows
 from kneemri.evaluation.published_ruler import PublishedRuler
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import ArmPair, LabelScores
 from kneemri.inference.vote import RankAverage
 
 logger = logging.getLogger(__name__)
@@ -254,11 +254,12 @@ class SupervisionGap:
         twelve bands read together are twelve chances to exclude zero, so the count is a shape of the
         evidence and never twelve findings. The AGGREGATE is the one comparison named in advance.
         """
-        low, high = self.scores.paired_mean_interval(predictions, values, truth, resamples)
-        bands = self.scores.paired_interval(predictions, values, truth, resamples)
+        pair = ArmPair(predictions, values, truth, resamples)
+        low, high = self.scores.paired_mean_interval(pair)
+        bands = self.scores.paired_interval(pair)
         resolved = [target for target, (lower, upper) in bands.items() if lower > 0.0 or upper < 0.0]
         return [
-            f"labels - model: {self.scores.mean(values, truth) - self.scores.mean(predictions, truth):+.4f}  "
+            f"labels - model: {pair.difference(self.scores.mean):+.4f}  "
             f"[{low:+.4f}, {high:+.4f}]  over {truth.shape[0]} studies",
             self.verdict(low, high),
             f"  {len(resolved)} of {len(bands)} per-finding bands exclude zero — twelve reads, so a shape, "

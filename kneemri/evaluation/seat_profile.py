@@ -27,7 +27,7 @@ from core import cli
 from core.findings import TARGETS
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.evaluation.member_pool import DECLINES, MemberPool
-from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.evaluation.scores import MIDPOINT, ArmPair, LabelScores
 from kneemri.runs.artefact import Artefact
 from kneemri.runs.holdout_record import SUFFIX, HoldoutReading, HoldoutRecord
 
@@ -71,7 +71,7 @@ class SeatProfile:
                 # `paired_interval` reports SECOND minus FIRST, so the baseline goes first for the
                 # interval to bracket `best - table[against]` rather than its negative.
                 intervals[name] = self.scores.paired_interval(
-                    baseline.predictions, readings[name].predictions, baseline.truth
+                    ArmPair(baseline.predictions, readings[name].predictions, baseline.truth)
                 )
             margins[target] = (name, best - table[against][target], intervals[name][target])
         return margins

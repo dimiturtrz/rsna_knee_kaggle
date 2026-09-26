@@ -10,9 +10,11 @@ is deliberately no calibration, no threshold, and no probability transform anywh
 is invariant under any strictly increasing map, so such a step could only add a bug.
 """
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 
 import numpy as np
+from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
 from core.bootstrap import STUDY_RESAMPLES, StudyBootstrap
@@ -20,6 +22,24 @@ from core.findings import TARGETS
 
 MIDPOINT = 0.5
 """Where a graded target is cut so a holdout AUC exists at all — never a submitted threshold."""
+
+
+@dataclass(frozen=True)
+class ArmPair:
+    """Two arms scored on the SAME studies against the same targets — what every paired interval reads."""
+
+    first: Float[np.ndarray, "studies targets"]
+    second: Float[np.ndarray, "studies targets"]
+    targets: Float[np.ndarray, "studies targets"]
+    resamples: int = STUDY_RESAMPLES
+
+    def drawn(self, rows: Int[np.ndarray, " rows"]) -> "ArmPair":
+        """The same pair on a subset of its studies, both arms and the targets selected together."""
+        return ArmPair(self.first[rows], self.second[rows], self.targets[rows], self.resamples)
+
+    def difference(self, measure: Callable[[NDArray[np.float64], NDArray[np.float32]], float]) -> float:
+        """`second` minus `first` under one measure, so the order is stated once rather than per caller."""
+        return measure(self.second, self.targets) - measure(self.first, self.targets)
 
 
 class LabelScores:
@@ -116,13 +136,7 @@ class LabelScores:
             for column, target in enumerate(TARGETS)
         }
 
-    def paired_interval(
-        self,
-        first: NDArray[np.float64],
-        second: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        resamples: int = STUDY_RESAMPLES,
-    ) -> dict[str, tuple[float, float]]:
+    def paired_interval(self, pair: ArmPair) -> dict[str, tuple[float, float]]:
         """The 95% interval of the per-label DIFFERENCE between two arms, by bootstrap over studies.
 
         The unpaired bound - each label's own sampling error from its positive count - is what
@@ -140,20 +154,14 @@ class LabelScores:
         unit-test gate refuses unseeded randomness, for the same reason.
         """
 
-        def delta(drawn: NDArray[np.int64]) -> dict[str, float]:
-            left = self.per_label(first[drawn], targets[drawn])
-            right = self.per_label(second[drawn], targets[drawn])
+        def delta(rows: NDArray[np.int64]) -> dict[str, float]:
+            draw = pair.drawn(rows)
+            left, right = (self.per_label(arm, draw.targets) for arm in (draw.first, draw.second))
             return {target: right[target] - left[target] for target in TARGETS}
 
-        return StudyBootstrap(resamples).per_label(targets.shape[0], delta)
+        return StudyBootstrap(pair.resamples).per_label(pair.targets.shape[0], delta)
 
-    def paired_mean_interval(
-        self,
-        first: NDArray[np.float64],
-        second: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        resamples: int = STUDY_RESAMPLES,
-    ) -> tuple[float, float]:
+    def paired_mean_interval(self, pair: ArmPair) -> tuple[float, float]:
         """The 95% interval of the difference in the COMPETITION SCORE between two arms, paired.
 
         The metric every decision here turns on is the mean of twelve AUCs, and until now nothing
@@ -179,10 +187,9 @@ class LabelScores:
         Seeded, and over STUDIES rather than labels, for the reasons `paired_interval` gives.
         """
 
-        def delta(drawn: NDArray[np.int64]) -> float:
-            return self.mean(second[drawn], targets[drawn]) - self.mean(first[drawn], targets[drawn])
-
-        return StudyBootstrap(resamples).interval(targets.shape[0], delta)
+        return StudyBootstrap(pair.resamples).interval(
+            pair.targets.shape[0], lambda rows: pair.drawn(rows).difference(self.mean)
+        )
 
     def mean_interval(
         self,

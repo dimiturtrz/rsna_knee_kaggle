@@ -58,7 +58,6 @@ refuse, because the reason above has not changed. See knee-vrioa.
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import numpy as np
 import torch
@@ -69,14 +68,12 @@ from core.paths import LABEL_TABLE, DataRoot
 from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.evaluation.gold_rows import GoldRows
+from kneemri.evaluation.scores import ArmPair, LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
-
-if TYPE_CHECKING:
-    from kneemri.evaluation.scores import LabelScores
 
 logger = logging.getLogger(__name__)
 
@@ -217,7 +214,7 @@ class AnnotatedReadings:
 
     def per_label_table(
         self,
-        scores: "LabelScores",
+        scores: LabelScores,
         per_member: list[tuple[Path, NDArray[np.float64]]],
         annotations: NDArray[np.float32],
         *,
@@ -251,7 +248,7 @@ class AnnotatedReadings:
 
     def cross(
         self,
-        scores: "LabelScores",
+        scores: LabelScores,
         values: NDArray[np.float64],
         annotations: NDArray[np.float32],
         *,
@@ -290,7 +287,7 @@ class AnnotatedReadings:
 
     def paired(
         self,
-        scores: "LabelScores",
+        scores: LabelScores,
         per_member: list[tuple[Path, NDArray[np.float64]]],
         baseline: Path,
         annotations: NDArray[np.float32],
@@ -318,8 +315,9 @@ class AnnotatedReadings:
         for member, values in per_member:
             if member == baseline:
                 continue
-            low, high = scores.paired_mean_interval(reference, values, annotations)
-            delta = scores.mean(values, annotations) - scores.mean(reference, annotations)
+            pair = ArmPair(reference, values, annotations)
+            low, high = scores.paired_mean_interval(pair)
+            delta = pair.difference(scores.mean)
             separates = "clears" if low > 0.0 or high < 0.0 else "INSIDE the interval — no pairwise claim"
             lines.append(f"  {member.stem:28s} {delta:+.4f} [{low:+.4f}, {high:+.4f}] {separates}")
         return lines
@@ -338,7 +336,6 @@ def main() -> None:
     command.parser.add_argument("--cross", action="store_true", help="each posterior column against every gold column")
     arguments = command.parsed()
 
-    from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - CLI-only
     from kneemri.inference.vote import RankAverage  # noqa: PLC0415 - CLI-only
 
     root = command.rooted(arguments)

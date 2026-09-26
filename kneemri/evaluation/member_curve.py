@@ -33,7 +33,7 @@ from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.evaluation.label_combine import LabelCombine
 from kneemri.evaluation.pool import Pool
-from kneemri.evaluation.scores import MIDPOINT, LabelScores
+from kneemri.evaluation.scores import MIDPOINT, ArmPair, LabelScores
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.member_readings import MemberReadings
 from kneemri.inference.members import Member
@@ -372,7 +372,7 @@ class MemberCurve:
         added = []
         for candidate, name in zip(candidates.predictions, candidates.names, strict=True):
             widened = RankAverage().combine([*roster.predictions, candidate])
-            band = self.scores.paired_mean_interval(combined, widened, truth)
+            band = self.scores.paired_mean_interval(ArmPair(combined, widened, truth))
             added.append((self.scores.mean(widened, truth), name, band))
         lines = [f"roster of {len(roster)}: {base:.4f}"]
         lines += [
@@ -503,7 +503,7 @@ class MemberCurve:
         for index in range(1, len(pool)):
             control = self.scores.per_label(pool.predictions[0], truth)
             observed = self.scores.per_label(pool.predictions[index], truth)
-            interval = self.scores.paired_interval(pool.predictions[0], pool.predictions[index], truth)
+            interval = self.scores.paired_interval(ArmPair(pool.predictions[0], pool.predictions[index], truth))
             lines.append(f"paired deltas, {pool.names[index]} against {pool.names[0]}:")
             for label, (low, high) in interval.items():
                 clears = "*" if low > 0.0 or high < 0.0 else ""

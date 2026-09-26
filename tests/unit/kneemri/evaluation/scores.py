@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import ArmPair, LabelScores
 
 
 def test_area_under_curve():
@@ -114,13 +114,13 @@ def test_paired_interval():
     second = (signal + generator.normal(0, 0.05, truth.shape)).astype(np.float64)
 
     scores = LabelScores()
-    interval = scores.paired_interval(first, second, truth, resamples=120)
+    interval = scores.paired_interval(ArmPair(first, second, truth, 120))
     observed = scores.per_label(second, truth)["ACL"] - scores.per_label(first, truth)["ACL"]
     low, high = interval["ACL"]
 
     assert low <= observed <= high, "the band must bracket the delta it bounds"
     assert (high - low) < 0.067, "a paired band must beat the unpaired bound it replaces"
-    assert scores.paired_interval(first, second, truth, resamples=120) == interval, "seeded, so it is quotable"
+    assert scores.paired_interval(ArmPair(first, second, truth, 120)) == interval, "seeded, so it is quotable"
 
 
 def test_mean_interval():
@@ -142,7 +142,7 @@ def test_mean_interval():
 
     scores = LabelScores()
     low, high = scores.mean_interval(first, truth, resamples=120)
-    paired = scores.paired_interval(first, second, truth, resamples=120)["ACL"]
+    paired = scores.paired_interval(ArmPair(first, second, truth, 120))["ACL"]
 
     assert low <= scores.mean(first, truth) <= high, "the band must bracket the mean it bounds"
     assert (high - low) > (paired[1] - paired[0]), "an unpaired band cannot be tighter than a paired one"
@@ -167,13 +167,13 @@ def test_paired_mean_interval():
     near = (first + generator.normal(0, 0.02, truth.shape)).astype(np.float64)
 
     scores = LabelScores()
-    low, high = scores.paired_mean_interval(first, distant, truth, resamples=120)
+    low, high = scores.paired_mean_interval(ArmPair(first, distant, truth, 120))
     observed = scores.mean(distant, truth) - scores.mean(first, truth)
-    tight = scores.paired_mean_interval(first, near, truth, resamples=120)
+    tight = scores.paired_mean_interval(ArmPair(first, near, truth, 120))
 
     assert low <= observed <= high, "the band must bracket the delta it bounds"
     assert (tight[1] - tight[0]) < (high - low), "a near-identical arm must read a narrower band"
-    assert scores.paired_mean_interval(first, distant, truth, resamples=120) == (low, high), "seeded"
+    assert scores.paired_mean_interval(ArmPair(first, distant, truth, 120)) == (low, high), "seeded"
 
 
 def test_cut_for():
@@ -206,3 +206,22 @@ def test_name():
     assert LabelScores().name() == "cut0.5"
     assert LabelScores(0.75).name() == "cut0.75"
     assert LabelScores(0.75, {TARGETS[0]: 0.5}).name() == "ledger75", "a mixed cut is the project's ruler"
+
+
+def test_drawn():
+    """A draw takes the same rows from all three arrays and keeps the resample count."""
+    first = np.arange(12, dtype=np.float64).reshape(4, 3)
+    pair = ArmPair(first, first * 2, (first > 5).astype(np.float32), 7)
+    drawn = pair.drawn(np.array([3, 0], dtype=np.int64))
+    assert np.array_equal(drawn.first, first[[3, 0]])
+    assert np.array_equal(drawn.second, first[[3, 0]] * 2)
+    assert np.array_equal(drawn.targets, pair.targets[[3, 0]])
+    assert drawn.resamples == 7
+
+
+def test_difference():
+    """Second minus first under the same measure, so a better second arm reads positive."""
+    predictions = np.tile(np.array([[0.1], [0.9]]), (1, len(TARGETS)))
+    targets = np.tile(np.array([[0.0], [1.0]], dtype=np.float32), (1, len(TARGETS)))
+    pair = ArmPair(1 - predictions, predictions, targets)
+    assert pair.difference(LabelScores().mean) == 1.0
