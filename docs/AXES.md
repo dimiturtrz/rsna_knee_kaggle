@@ -161,6 +161,7 @@ now a solo — so a loss that buys diversity and costs solo quality buys nothing
 | foreign WEIGHTS as members | **CLOSED** — released foreign weights are not a member lever; a cross-program equal-weight join is negative | README:9094, :8940 |
 | **training on Rijeka / MRNet / fastMRI / SKM-TEA** | **BARRED, not refuted.** A competition winner must publish weights as a public Kaggle dataset (COMPETITION_RULES.txt:187-196); a foreign-fitted member's weights are a distribution all four licences forbid. **Measurement-only use is clean** and named in the rules (:144) | `docs/EXTERNAL_CORPORA.md`; README:15671 |
 | KneeCoT | **BARRED** — never shipped, in any form | owner ruling 2026-09-14 |
+| transduction (pseudo-labelled holdout in training) | **CLOSED at zero shift** — ridge head: 40 cells, none clears +0.0005 (knee-tta1). Member head: six seeds, mean 0.9075 vs parent 0.9078 = TIE; the +0.0012 over control is the control's own −0.0015 drift. Shift is unsimulatable, so the real-test-set version is untested, not refuted (knee-nchjt) | README §Member-head transduction (2026-09-27) |
 
 ## F. Weight space
 

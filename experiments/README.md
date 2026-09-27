@@ -18264,3 +18264,28 @@ decode, so it cannot see an artefact-robustness gain, and the row prices ghostin
 reading is OWED and needs the card. As a fourth seat on the champion's three-member labelwise block (0.9100)
 it adds +0.0008, under the +0.0015 ADD bar. Two earlier attempts died on host-RAM commit (`_run1` e4 0.8561,
 `_run2` e7 0.8801) and are declined as floors; the finished run peaked at 21.74 GB reserved.
+
+## Member-head transduction ties its parent; it only beats a control that loses score — 2026-09-27T19:05Z
+
+Arms `transduce_dmlb.sh` + `transduce_dmlb_more.sh`, bead knee-nchjt. Six 4-epoch continuations of
+`dml_b_s2026` with the holdout fold IN training under pseudo-labels read off the parent
+(`--pseudo-fold 0 --labels pseudo_dmlb_fold0.csv --eval-labels report_labels_v2.csv`), scored on the same
+909 studies under true labels. Control: `basinsoup_dmlb_c401`-`c406`, the same continuation without the
+holdout in training. `ledger75`, population eb3ba199, 909 studies:
+
+| member | ledger75 | best epoch |
+|---|---|---|
+| `dml_b_s2026` (parent) | 0.9078 | 18 |
+| treated c407 / c408 / c409 / c410 / c411 | 0.9066 / 0.9080 / 0.9067 / 0.9077 / 0.9089 | 3 / 3 / 1 / 1 / 3 |
+| treated c412 (TRUNCATED, OOM in epoch 3 under card contention — a FLOOR) | 0.9072 | 2 |
+| control c401-c406 | 0.9061-0.9065, mean 0.90632 | — |
+
+Treated mean 0.90752. Against the pre-registered control: **+0.0012**, past the +0.0010 band, and all six
+treated sit above all six controls. Against the PARENT: **−0.0003, a tie**. The control is not neutral —
+four more epochs on the training fold cost the parent 0.0015 — so the pre-registered comparison measures
+how well pseudo-labels on the holdout PROTECT the parent from that drift, not a gain over not
+continuing. Suspect (1) of knee-tta1 is answered: a member head does not collapse into the ridge's
+circularity (it does not lose), but it adds nothing at zero shift. Suspect (2), shift, is unsimulatable
+on our own holdout and is NOT ruled out; only a kernel-time run on the real test set can read it, and
+this result gives no licence to price one above the bar. Each treated member is a TWIN of the pool
+(rank 0.951-0.955), so no seat either.
