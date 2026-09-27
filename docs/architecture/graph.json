@@ -13555,6 +13555,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage",
+      "target": "kneemri.evaluation.scores.ScoredArm",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
       "target": "core.bootstrap.StudyBootstrap",
@@ -13588,6 +13594,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
       "target": "kneemri.evaluation.alignment_damage.AlignmentDamage.split",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.alignment_damage.AlignmentDamage.interval",
+      "target": "kneemri.evaluation.scores.ScoredArm.drawn",
       "weight": 1
     },
     {
@@ -13678,6 +13690,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.alignment_damage.main",
       "target": "kneemri.evaluation.alignment_damage.HoldoutJoin.combined",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.alignment_damage.main",
+      "target": "kneemri.evaluation.scores.ScoredArm",
       "weight": 1
     },
     {
@@ -18853,6 +18871,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.padding_split.PaddingSplit.subset",
+      "target": "kneemri.evaluation.scores.ScoredArm",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.padding_split.main",
       "target": "kneemri.evaluation.padding_split.Coverage.measured",
@@ -18901,6 +18925,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.paired_floor.PairedFloor",
+      "target": "kneemri.evaluation.scores.ScoredArm",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.paired_floor.PairedFloor.__init__",
       "target": "kneemri.evaluation.scores.LabelScores",
@@ -18934,6 +18964,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.paired_floor.PairedFloor.report",
       "target": "kneemri.evaluation.paired_floor.PairedFloor.unpaired",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.paired_floor.PairedFloor.report",
+      "target": "kneemri.evaluation.scores.ArmPair.first_arm",
       "weight": 1
     },
     {
@@ -20672,8 +20708,26 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.evaluation.scores.ArmPair",
+      "target": "kneemri.evaluation.scores.ScoredArm",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.scores.ArmPair.first_arm",
+      "target": "kneemri.evaluation.scores.ScoredArm",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.evaluation.scores.LabelScores",
       "target": "kneemri.evaluation.scores.ArmPair",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.scores.LabelScores",
+      "target": "kneemri.evaluation.scores.ScoredArm",
       "weight": 1
     },
     {
@@ -20758,6 +20812,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.scores.LabelScores.per_label",
       "target": "kneemri.evaluation.scores.LabelScores.cut_for",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.scores.ScoredArm",
+      "target": "kneemri.evaluation.scores.ScoredArm",
       "weight": 1
     },
     {
@@ -43360,6 +43420,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.scores.ScoredArm",
+      "label": "ScoredArm",
+      "level": "class",
+      "parent": "kneemri.evaluation.scores",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.seat_add.Relation",
       "label": "Relation",
       "level": "class",
@@ -56544,6 +56612,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.scores.ArmPair.first_arm",
+      "label": "first_arm",
+      "level": "method",
+      "parent": "kneemri.evaluation.scores.ArmPair",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.scores.LabelScores.__init__",
       "label": "__init__",
       "level": "method",
@@ -56620,6 +56696,14 @@
       "label": "per_label",
       "level": "method",
       "parent": "kneemri.evaluation.scores.LabelScores",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.scores.ScoredArm.drawn",
+      "label": "drawn",
+      "level": "method",
+      "parent": "kneemri.evaluation.scores.ScoredArm",
       "role": null
     },
     {
