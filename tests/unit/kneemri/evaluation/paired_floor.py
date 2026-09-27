@@ -9,7 +9,7 @@ import pytest
 from core.data.labels.label_power import LabelPower
 from core.findings import TARGETS
 from kneemri.evaluation.paired_floor import PairedFloor
-from kneemri.evaluation.scores import ArmPair
+from kneemri.evaluation.scores import ArmPair, ScoredArm
 
 STUDIES = 200
 RESAMPLES = 60
@@ -63,7 +63,7 @@ def test_absolute(tmp_path: Path) -> None:
     signal = _signal()
     signal[:40] = 0.5
 
-    width = floor.absolute(signal, _truth(), RESAMPLES)
+    width = floor.absolute(ScoredArm(signal, _truth(), RESAMPLES))
 
     assert width > 0.0, "an absolute mean has sampling error the paired construction cannot cancel"
     assert width > floor.paired(ArmPair(signal, signal, _truth(), RESAMPLES))["MCL"]

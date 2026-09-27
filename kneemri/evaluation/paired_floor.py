@@ -29,7 +29,7 @@ from core.data.labels.label_power import LabelPower
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
-from kneemri.evaluation.scores import MIDPOINT, ArmPair, LabelScores
+from kneemri.evaluation.scores import MIDPOINT, ArmPair, LabelScores, ScoredArm
 
 logger = logging.getLogger(__name__)
 
@@ -74,12 +74,7 @@ class PairedFloor:
         """How many times tighter the paired interval is, per label. The bead's claim is about eleven."""
         return {target: unpaired[target] / paired[target] if paired.get(target) else float("nan") for target in TARGETS}
 
-    def absolute(
-        self,
-        predictions: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        resamples: int = STUDY_RESAMPLES,
-    ) -> float:
+    def absolute(self, arm: ScoredArm) -> float:
         """The 95% width of ONE arm's absolute mean — the ruler for a claim that has no pair.
 
         The two widths this class already prints are both about a DIFFERENCE between arms scored on the
@@ -89,7 +84,7 @@ class PairedFloor:
         something measured elsewhere, and the paired floor - the narrowest of the three - is the wrong
         ruler for every one of them.
         """
-        low, high = self.scores.mean_interval(predictions, targets, resamples)
+        low, high = self.scores.mean_interval(arm)
         return high - low
 
     def mean_width(self, widths: dict[str, float]) -> float:
@@ -121,7 +116,7 @@ class PairedFloor:
             self.mean_width(unpaired),
             float(np.mean(finite)),
         )
-        absolute = self.absolute(pair.first, pair.targets, pair.resamples)
+        absolute = self.absolute(pair.first_arm())
         logger.info("%-18s %9.4f %9s %8s", "ABSOLUTE MEAN", absolute, "-", "-")
         return paired
 

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.scores import ArmPair, LabelScores
+from kneemri.evaluation.scores import ArmPair, LabelScores, ScoredArm
 
 
 def test_area_under_curve():
@@ -141,12 +141,12 @@ def test_mean_interval():
     second = (signal + generator.normal(0, 0.05, truth.shape)).astype(np.float64)
 
     scores = LabelScores()
-    low, high = scores.mean_interval(first, truth, resamples=120)
+    low, high = scores.mean_interval(ScoredArm(first, truth, 120))
     paired = scores.paired_interval(ArmPair(first, second, truth, 120))["ACL"]
 
     assert low <= scores.mean(first, truth) <= high, "the band must bracket the mean it bounds"
     assert (high - low) > (paired[1] - paired[0]), "an unpaired band cannot be tighter than a paired one"
-    assert scores.mean_interval(first, truth, resamples=120) == (low, high), "seeded, so it is quotable"
+    assert scores.mean_interval(ScoredArm(first, truth, 120)) == (low, high), "seeded, so it is quotable"
 
 
 def test_paired_mean_interval():
@@ -208,7 +208,7 @@ def test_name():
     assert LabelScores(0.75, {TARGETS[0]: 0.5}).name() == "ledger75", "a mixed cut is the project's ruler"
 
 
-def test_drawn():
+def test_arm_pair_drawn():
     """A draw takes the same rows from all three arrays and keeps the resample count."""
     first = np.arange(12, dtype=np.float64).reshape(4, 3)
     pair = ArmPair(first, first * 2, (first > 5).astype(np.float32), 7)
@@ -217,6 +217,26 @@ def test_drawn():
     assert np.array_equal(drawn.second, first[[3, 0]] * 2)
     assert np.array_equal(drawn.targets, pair.targets[[3, 0]])
     assert drawn.resamples == 7
+
+
+def test_scored_arm_drawn():
+    """One arm draws the same rows from predictions and targets and keeps the resample count."""
+    predictions = np.arange(12, dtype=np.float64).reshape(4, 3)
+    drawn = ScoredArm(predictions, (predictions > 5).astype(np.float32), 7).drawn(np.array([3, 0], dtype=np.int64))
+    assert np.array_equal(drawn.predictions, predictions[[3, 0]])
+    assert np.array_equal(drawn.targets, (predictions[[3, 0]] > 5).astype(np.float32))
+    assert drawn.resamples == 7
+
+
+def test_first_arm():
+    """The pair's first arm alone keeps its targets and resample count, so an unpaired read matches."""
+    first = np.arange(12, dtype=np.float64).reshape(4, 3)
+    pair = ArmPair(first, first * 2, (first > 5).astype(np.float32), 7)
+    alone = pair.first_arm()
+    assert isinstance(alone, ScoredArm)
+    assert alone.predictions is pair.first, "the first arm, never the second"
+    assert alone.targets is pair.targets
+    assert alone.resamples == 7
 
 
 def test_difference():

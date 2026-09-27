@@ -6,6 +6,7 @@ import pytest
 from core.data.corpus.anatomy import ANATOMY, Extent
 from core.findings import TARGETS
 from kneemri.evaluation.alignment_damage import AlignmentDamage, HoldoutJoin
+from kneemri.evaluation.scores import ScoredArm
 
 FOCAL = [target for target in TARGETS if ANATOMY[target].extent == Extent.FOCAL]
 REGIONAL = [target for target in TARGETS if ANATOMY[target].extent == Extent.REGIONAL]
@@ -39,14 +40,14 @@ def test_label_gaps():
     predictions, targets = separable(studies)
     spread = np.linspace(1.0, 10.0, studies).astype(np.float32)
     damage = AlignmentDamage()
-    flat = damage.label_gaps(predictions, targets, damage.split(spread))
+    flat = damage.label_gaps(ScoredArm(predictions, targets), damage.split(spread))
     assert set(flat) == set(TARGETS)
     assert flat["ACL"] == pytest.approx(0.0), "identical skill on both halves must read as no gap"
 
     broken = predictions.copy()
     column = TARGETS.index("ACL")
     broken[studies // 2 :, column] = 0.5
-    hurt = damage.label_gaps(broken, targets, damage.split(spread))
+    hurt = damage.label_gaps(ScoredArm(broken, targets), damage.split(spread))
     assert hurt["ACL"] > 0.0, "scoring worse where the slots disagree must give a POSITIVE gap"
 
 
@@ -77,9 +78,9 @@ def test_interval():
     studies = 60
     predictions, targets = separable(studies)
     spread = np.linspace(1.0, 10.0, studies).astype(np.float32)
-    first = AlignmentDamage().interval(predictions, targets, spread, resamples=40)
+    first = AlignmentDamage().interval(ScoredArm(predictions, targets, 40), spread)
     assert first[0] <= 0.0 <= first[1], "no planted damage, so the interval must contain zero"
-    assert AlignmentDamage().interval(predictions, targets, spread, resamples=40) == first
+    assert AlignmentDamage().interval(ScoredArm(predictions, targets, 40), spread) == first
 
 
 def test_report():
@@ -87,7 +88,7 @@ def test_report():
     studies = 40
     predictions, targets = separable(studies)
     spread = np.linspace(1.0, 10.0, studies).astype(np.float32)
-    lines = AlignmentDamage().report(predictions, targets, spread, resamples=20)
+    lines = AlignmentDamage().report(ScoredArm(predictions, targets, 20), spread)
     assert any("DIFFERENTIAL" in line for line in lines)
     assert all(any(target in line for line in lines) for target in TARGETS)
     assert any("well-agreeing studies" in line for line in lines), "the split's denominators must be printed"

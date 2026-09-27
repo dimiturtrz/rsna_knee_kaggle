@@ -35,7 +35,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.corpus.study_metadata import IDENTIFIER
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import LabelScores, ScoredArm
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,7 @@ class PaddingSplit:
             studies=int(mask.sum()),
             kept=self.scores.mean(kept[mask], self.truth[mask]),
             foreign=self.scores.mean(foreign[mask], self.truth[mask]),
-            interval=self.scores.mean_interval(foreign[mask], self.truth[mask]),
+            interval=self.scores.mean_interval(ScoredArm(foreign[mask], self.truth[mask])),
         )
 
     def read(self, name: str, kept: NDArray[np.float64], foreign: NDArray[np.float64]) -> list[SubsetToll]:

@@ -25,6 +25,19 @@ MIDPOINT = 0.5
 
 
 @dataclass(frozen=True)
+class ScoredArm:
+    """One arm's predictions against its targets, with the bootstrap draws any interval on it takes."""
+
+    predictions: Float[np.ndarray, "studies targets"]
+    targets: Float[np.ndarray, "studies targets"]
+    resamples: int = STUDY_RESAMPLES
+
+    def drawn(self, rows: Int[np.ndarray, " rows"]) -> "ScoredArm":
+        """The same arm on a subset of its studies, predictions and targets selected together."""
+        return ScoredArm(self.predictions[rows], self.targets[rows], self.resamples)
+
+
+@dataclass(frozen=True)
 class ArmPair:
     """Two arms scored on the SAME studies against the same targets — what every paired interval reads."""
 
@@ -40,6 +53,10 @@ class ArmPair:
     def difference(self, measure: Callable[[NDArray[np.float64], NDArray[np.float32]], float]) -> float:
         """`second` minus `first` under one measure, so the order is stated once rather than per caller."""
         return measure(self.second, self.targets) - measure(self.first, self.targets)
+
+    def first_arm(self) -> ScoredArm:
+        """`first` alone, for the unpaired question the pair cannot answer."""
+        return ScoredArm(self.first, self.targets, self.resamples)
 
 
 class LabelScores:
@@ -191,12 +208,7 @@ class LabelScores:
             pair.targets.shape[0], lambda rows: pair.drawn(rows).difference(self.mean)
         )
 
-    def mean_interval(
-        self,
-        predictions: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        resamples: int = STUDY_RESAMPLES,
-    ) -> tuple[float, float]:
+    def mean_interval(self, arm: ScoredArm) -> tuple[float, float]:
         """The 95% interval of ONE arm's own mean, by bootstrap over studies.
 
         This is the UNPAIRED companion to `paired_interval`, and it answers a different question. The
@@ -216,8 +228,8 @@ class LabelScores:
         same 909 studies, so resampling labels would treat one sample as twelve. Seeded for the same
         reason `paired_interval` is seeded.
         """
-        return StudyBootstrap(resamples).interval(
-            targets.shape[0], lambda drawn: self.mean(predictions[drawn], targets[drawn])
+        return StudyBootstrap(arm.resamples).interval(
+            arm.targets.shape[0], lambda rows: self.mean(arm.predictions[rows], arm.targets[rows])
         )
 
     def mean(self, predictions: NDArray[np.float64], targets: NDArray[np.float32]) -> float:

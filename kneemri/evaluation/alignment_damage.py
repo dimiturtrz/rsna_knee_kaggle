@@ -42,7 +42,7 @@ from core import cli
 from core.bootstrap import StudyBootstrap
 from core.data.corpus.anatomy import ANATOMY, Extent
 from core.findings import TARGETS
-from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.scores import LabelScores, ScoredArm
 from kneemri.inference.vote import Vote
 from kneemri.runs.holdout_record import HoldoutRecord
 
@@ -93,19 +93,14 @@ class AlignmentDamage:
         boundary = float(np.median(spread[measurable]))
         return SpreadSplit(measurable & (spread <= boundary), measurable & (spread > boundary), boundary)
 
-    def label_gaps(
-        self,
-        predictions: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        split: SpreadSplit,
-    ) -> dict[str, float]:
+    def label_gaps(self, arm: ScoredArm, split: SpreadSplit) -> dict[str, float]:
         """Per finding, the AUC on well-agreeing studies minus the AUC on poorly-agreeing ones.
 
         Positive means the finding is scored better where the slots agree, which is the direction
         misregistration damage would take.
         """
-        low = self.scores.per_label(predictions[split.low], targets[split.low])
-        high = self.scores.per_label(predictions[split.high], targets[split.high])
+        low = self.scores.per_label(arm.predictions[split.low], arm.targets[split.low])
+        high = self.scores.per_label(arm.predictions[split.high], arm.targets[split.high])
         return {target: low[target] - high[target] for target in TARGETS}
 
     def by_extent(self, gaps: dict[str, float]) -> dict[Extent, float]:
@@ -123,13 +118,7 @@ class AlignmentDamage:
         """Focal gap minus regional gap: the part a general-difficulty confound cannot produce."""
         return grouped[Extent.FOCAL] - grouped[Extent.REGIONAL]
 
-    def interval(
-        self,
-        predictions: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        spread: NDArray[np.float32],
-        resamples: int = RESAMPLES,
-    ) -> tuple[float, float]:
+    def interval(self, arm: ScoredArm, spread: NDArray[np.float32]) -> tuple[float, float]:
         """The differential's 95% interval, by bootstrap over studies.
 
         The split is RECOMPUTED inside each draw rather than fixed once. Its median boundary is itself
@@ -139,26 +128,18 @@ class AlignmentDamage:
         """
 
         def differential(index: NDArray[np.int64]) -> float:
-            return self.differential(
-                self.by_extent(self.label_gaps(predictions[index], targets[index], self.split(spread[index])))
-            )
+            return self.differential(self.by_extent(self.label_gaps(arm.drawn(index), self.split(spread[index]))))
 
-        return StudyBootstrap(resamples).interval(targets.shape[0], differential)
+        return StudyBootstrap(arm.resamples).interval(arm.targets.shape[0], differential)
 
-    def report(
-        self,
-        predictions: NDArray[np.float64],
-        targets: NDArray[np.float32],
-        spread: NDArray[np.float32],
-        resamples: int = RESAMPLES,
-    ) -> list[str]:
+    def report(self, arm: ScoredArm, spread: NDArray[np.float32]) -> list[str]:
         """Every number this analysis produces, with the denominators it was computed over."""
         split = self.split(spread)
         low, high = split.sizes()
-        gaps = self.label_gaps(predictions, targets, split)
+        gaps = self.label_gaps(arm, split)
         grouped = self.by_extent(gaps)
         value = self.differential(grouped)
-        floor, ceiling = self.interval(predictions, targets, spread, resamples)
+        floor, ceiling = self.interval(arm, spread)
         lines = [
             f"{low} well-agreeing studies and {high} poorly-agreeing, split at {split.boundary:.2f} mm "
             f"of mean pairwise cross-slot spread; {int(np.isnan(spread).sum())} abstained with one slot",
@@ -223,7 +204,7 @@ def main() -> None:
     predictions, truth, studies = join.combined(arguments.members)
     spread = join.aligned(arguments.spread, studies)
     logger.info(f"{len(studies)} studies shared by {len(arguments.members)} members")
-    for line in AlignmentDamage().report(predictions, truth, spread, arguments.resamples):
+    for line in AlignmentDamage().report(ScoredArm(predictions, truth, arguments.resamples), spread):
         logger.info(line)
 
 
