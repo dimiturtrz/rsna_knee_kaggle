@@ -93,7 +93,7 @@ class ShiftedReading:
 
     @property
     def slot_cost(self) -> float:
-        """The plumbing self-check: our own pixels through the shifted path. Must read ~0."""
+        """Our own pixels through the shifted path: ~0 when every slot is in `KEPT`, else the withheld slots' price."""
         return self.kept - self.native
 
     @property
