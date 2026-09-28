@@ -20,6 +20,7 @@ from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.device_budget import DeviceBudget
+from kneemri.training.early_targets import EarlyTargets
 from kneemri.training.feature_distillation import FeatureDistillation, Widths
 from kneemri.training.grades import Grades, OrdinalGrades
 from kneemri.training.label_focus import LabelFocus
@@ -44,6 +45,7 @@ from kneemri.training.terms import (
     Contrast,
     Dissent,
     Distillation,
+    EarlyLearning,
     Margin,
     Pooled,
     Ranking,
@@ -151,6 +153,7 @@ class RunSetup:
             accumulate=options.optim.accumulate,
             reports=options.run.report_vectors is not None,
             rank_weight=options.targets.rank_weight,
+            early_weight=options.targets.early_weight,
             distill_weight=options.teacher.distill_weight,
             feature_weight=options.teacher.feature_weight,
             dissent_weight=options.teacher.dissent_weight,
@@ -340,7 +343,8 @@ class RunSetup:
                 "them — the objective builder used to keep the first and silently drop the rest"
             )
             raise ValueError(message)
-        parts: list[Term] = [Ranking(options.targets.rank_weight)] if options.targets.rank_weight else []
+        parts: list[Term] = [EarlyLearning(options.targets.early_weight)] if options.targets.early_weight else []
+        parts += [Ranking(options.targets.rank_weight)] if options.targets.rank_weight else []
         parts += [exclusive[key][1]() for key in asked]
         if options.targets.pair_memory:
             parts[-1] = Remembered(self._pooled(parts[-1]), options.targets.pair_memory)
@@ -467,6 +471,11 @@ class RunSetup:
             model.compile_encoder()
         return model
 
+    def early(self, identifiers: list[str]) -> EarlyTargets | None:
+        """An empty per-study history for the early-learning term, or `None` for a run that has no such term."""
+        targets = self.options.targets
+        return EarlyTargets(len(identifiers), targets.early_beta) if targets.early_weight else None
+
     def trainer(
         self,
         model: StudyModel,
@@ -518,6 +527,7 @@ class RunSetup:
             trainer.teach_from(teacher)
         if features is not None:
             trainer.teach_features_from(features)
+        trainer.remember_early(self.early(identifiers))
         if options.optim.ema:
             trainer.exponential_average()
         erasing = self.erasing(identifiers)

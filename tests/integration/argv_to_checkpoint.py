@@ -496,12 +496,14 @@ def test_every_flag_a_run_can_pass_is_read_by_something(corpus: Path, monkeypatc
     stamped — the recipe string is built from `vars()` — and still configure nothing at all.
     """
     identifiers = _corpus(corpus)
-    # Two terms are read only when a SECOND flag turns them on, so the run has to ask for both — an argv
+    # Three terms are read only when a SECOND flag turns them on, so the run has to ask for both — an argv
     # that leaves either off would report its dependent field as dead: report supervision's vectors, and
-    # the depth that scopes an encoder adaptation.
+    # the depth that scopes an encoder adaptation, and the early-learning memory.
     vectors = corpus / "reports.npz"
     np.savez(vectors, identifiers=np.array(identifiers), vectors=np.zeros((len(identifiers), REPORT_DIMS), np.float32))
     shaping = (
+        "--early-weight",
+        "1.0",
         "--whole-stack",
         "--slice-pooling",
         "max",

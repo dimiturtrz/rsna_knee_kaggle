@@ -10,6 +10,7 @@ from pathlib import Path
 
 from core.data.labels.targets import CONFIDENCE_FLOOR, Supervision
 from kneemri.training.config_leaf import ConfigLeaf
+from kneemri.training.early_targets import EARLY_BETA
 
 
 @dataclass(frozen=True)
@@ -147,6 +148,19 @@ class TargetConfig:
             "by VRAM, so without this the pair pool is chosen by the card. Requires --rank-weight, since it "
             "changes that term and nothing else."
         ),
+    )
+    early_weight: float = ConfigLeaf.of(
+        default=0.0,
+        says=(
+            "add Liu et al.'s early-learning regulariser at this strength (0 = off; 3.0 is their published "
+            "value). Each study is held near a running average of the model's OWN earlier readings of it, "
+            "which carries the clean early fit and pulls against a late jump onto a noisy label. Every other "
+            "label-noise lever here changed the targets; this one changes the loss. Composes with every term."
+        ),
+    )
+    early_beta: float = ConfigLeaf.of(
+        default=EARLY_BETA,
+        says="how much of a study's past early-learning average survives each visit (Liu et al.'s 0.7)",
     )
     side_weight: float = ConfigLeaf.of(
         default=0.0,

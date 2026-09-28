@@ -90,7 +90,12 @@ implementation ships. Taken as published rather than tuned, because a temperatur
 with twelve batch members would be fitting the sweep, not the temperature.
 """
 
+EARLY_FLOOR = 1e-4
+"""How close to certain a probability or an agreement may come before the log reads it — Liu et al.'s
+clamp, which keeps `log(1 - agreement)` finite when a study has been read identically every epoch."""
+
 RANK_TERM = "rank_weight"
+EARLY_TERM = "early_weight"
 DISTILL_TERM = "distill_weight"
 FEATURE_TERM = "feature_weight"
 DISSENT_TERM = "dissent_weight"
@@ -436,6 +441,43 @@ class Dissent(Term):
         teacher = self.arrived(batch.teacher, "teacher readings").detach()
         emphasis = nn.functional.softplus(-(teacher.unsqueeze(1) - teacher.unsqueeze(0)))
         return PairMass.between(batch, batch, emphasis).ratio()
+
+
+class EarlyLearning(Term):
+    """Liu et al.'s early-learning regulariser: each study held near what the model said about it EARLIER.
+
+    WHY A LOSS AND NOT ANOTHER TARGET. Every label-noise arm this project ran changed the targets —
+    calibration, relabelling, pruning, distillation, transduction. None changed what the loss does with a
+    target it cannot trust. The reader over-calls: on the 58 radiologist-read studies 108 of its 140 wrong
+    cells are false positives, concentrated on mild or hedged findings that are image-plausible, so a
+    network can memorise them late in a run and then rank them high on a radiologist-read test.
+
+    THE MECHANISM (Liu et al., NeurIPS 2020, eq. 6, written for twelve sigmoids rather than one softmax).
+    A network fits the clean part of a noisy table first and the noise afterwards. The target here is a
+    running average of the network's own past readings of each study, so it carries the early, clean fit;
+    `log(1 - agreement)` falls as the current reading moves toward it, which pulls against a late jump onto
+    a noisy label. For one sigmoid the inner product over the two outcomes is
+    `p * positive + (1 - p) * negative`, where the two components are the averaged past `p` and `1 - p`.
+
+    UNNORMALISED, AS PUBLISHED. Both components start at zero, so a study's first visit contributes exactly
+    nothing and the term's strength grows with `1 - beta ** visits`: an epoch-scale warm-up the paper gets
+    from its zero initialisation and that normalising the average would throw away.
+
+    The pair mass is the FOCUS MASK, for `Distillation`'s reason: this term does not judge the reports, so
+    their confidence has no say in it.
+    """
+
+    key = EARLY_TERM
+
+    @override
+    def __call__(self, batch: Predicted) -> Float[Tensor, ""]:
+        """The mean of `log(1 - agreement)` over the cells the focus policy kept."""
+        remembered = self.arrived(batch.early, "early-learning targets")
+        probability = batch.logits.sigmoid().clamp(EARLY_FLOOR, 1.0 - EARLY_FLOOR)
+        agreement = probability * remembered[..., 0] + (1.0 - probability) * remembered[..., 1]
+        kept = (batch.weights > 0).to(probability.dtype)
+        pulled = torch.log((1.0 - agreement).clamp(min=EARLY_FLOOR)) * kept
+        return pulled.sum() / kept.sum().clamp(min=1.0)
 
 
 class Margin(Pooled):

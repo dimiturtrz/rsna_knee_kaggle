@@ -7172,6 +7172,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.training.early_targets",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.training.epoch_probes",
       "target": "core.findings",
       "weight": 1
@@ -7737,6 +7743,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
+      "target": "kneemri.training.early_targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.run_setup",
       "target": "kneemri.training.feature_distillation",
       "weight": 1
     },
@@ -7906,6 +7918,12 @@
       "kind": "import",
       "source": "kneemri.training.target_config",
       "target": "kneemri.training.config_leaf",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.target_config",
+      "target": "kneemri.training.early_targets",
       "weight": 1
     },
     {
@@ -8092,6 +8110,12 @@
       "kind": "import",
       "source": "kneemri.training.trainer",
       "target": "kneemri.training.durable",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.trainer",
+      "target": "kneemri.training.early_targets",
       "weight": 1
     },
     {
@@ -35503,12 +35527,6 @@
       "weight": 1
     },
     {
-      "kind": "construct",
-      "source": "kneemri.training.label_focus.LabelFocus.focused",
-      "target": "kneemri.training.grades.Predicted",
-      "weight": 1
-    },
-    {
       "kind": "holds",
       "source": "kneemri.training.landed.Landed",
       "target": "core.data.labels.targets.Targets",
@@ -36327,6 +36345,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.run_setup.RunSetup",
+      "target": "kneemri.training.early_targets.EarlyTargets",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.run_setup.RunSetup",
       "target": "kneemri.training.feature_distillation.FeatureDistillation",
       "weight": 1
     },
@@ -36448,6 +36472,12 @@
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.drawing",
       "target": "kneemri.training.sampling.Uniform",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.early",
+      "target": "kneemri.training.early_targets.EarlyTargets",
       "weight": 1
     },
     {
@@ -36639,6 +36669,12 @@
     {
       "kind": "construct",
       "source": "kneemri.training.run_setup.RunSetup.terms",
+      "target": "kneemri.training.terms.EarlyLearning",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.run_setup.RunSetup.terms",
       "target": "kneemri.training.terms.Margin",
       "weight": 1
     },
@@ -36688,6 +36724,12 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.run_setup.RunSetup.drawing",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.run_setup.RunSetup.early",
       "weight": 1
     },
     {
@@ -36796,6 +36838,12 @@
       "kind": "calls",
       "source": "kneemri.training.run_setup.RunSetup.trainer",
       "target": "kneemri.training.trainer.Trainer.ramp_certainty",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.run_setup.RunSetup.trainer",
+      "target": "kneemri.training.trainer.Trainer.remember_early",
       "weight": 1
     },
     {
@@ -37178,6 +37226,24 @@
     },
     {
       "kind": "references",
+      "source": "kneemri.training.terms.EarlyLearning",
+      "target": "kneemri.training.grades.Predicted",
+      "weight": 1
+    },
+    {
+      "kind": "inherits",
+      "source": "kneemri.training.terms.EarlyLearning",
+      "target": "kneemri.training.terms.Term",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.terms.EarlyLearning.__call__",
+      "target": "kneemri.training.terms.Term.arrived",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "kneemri.training.terms.Margin",
       "target": "kneemri.training.grades.Predicted",
       "weight": 1
@@ -37456,6 +37522,12 @@
       "kind": "holds",
       "source": "kneemri.training.trainer.Trainer",
       "target": "kneemri.training.augmentation.Augmentation",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.training.trainer.Trainer",
+      "target": "kneemri.training.early_targets.EarlyTargets",
       "weight": 1
     },
     {
@@ -37756,6 +37828,18 @@
       "kind": "calls",
       "source": "kneemri.training.trainer.Trainer.fit_epoch",
       "target": "kneemri.training.augmentation.Augmentation.dropped",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.early_targets.EarlyTargets.learn",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.trainer.Trainer.fit_epoch",
+      "target": "kneemri.training.early_targets.EarlyTargets.rows",
       "weight": 1
     },
     {
@@ -38635,7 +38719,7 @@
       "role": null
     },
     {
-      "descendants": 302,
+      "descendants": 303,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -40627,7 +40711,7 @@
       "role": null
     },
     {
-      "descendants": 53,
+      "descendants": 54,
       "id": "kneemri.training",
       "label": "training",
       "level": "module",
@@ -40702,6 +40786,14 @@
       "descendants": 0,
       "id": "kneemri.training.durable",
       "label": "durable",
+      "level": "module",
+      "parent": "kneemri.training",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.early_targets",
+      "label": "early_targets",
       "level": "module",
       "parent": "kneemri.training",
       "role": null
@@ -45932,6 +46024,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.early_targets.EarlyTargets",
+      "label": "EarlyTargets",
+      "level": "class",
+      "parent": "kneemri.training.early_targets",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.epoch_probes.ClockProbe",
       "label": "ClockProbe",
       "level": "class",
@@ -46558,6 +46658,14 @@
       "descendants": 0,
       "id": "kneemri.training.terms.Distillation",
       "label": "Distillation",
+      "level": "class",
+      "parent": "kneemri.training.terms",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.terms.EarlyLearning",
+      "label": "EarlyLearning",
       "level": "class",
       "parent": "kneemri.training.terms",
       "role": "satellite"
@@ -67996,6 +68104,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.early_targets.EarlyTargets.__init__",
+      "label": "__init__",
+      "level": "method",
+      "parent": "kneemri.training.early_targets.EarlyTargets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.early_targets.EarlyTargets.learn",
+      "label": "learn",
+      "level": "method",
+      "parent": "kneemri.training.early_targets.EarlyTargets",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.early_targets.EarlyTargets.rows",
+      "label": "rows",
+      "level": "method",
+      "parent": "kneemri.training.early_targets.EarlyTargets",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.epoch_probes.ClockProbe.read",
       "label": "read",
       "level": "method",
@@ -69492,6 +69624,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.run_setup.RunSetup.early",
+      "label": "early",
+      "level": "method",
+      "parent": "kneemri.training.run_setup.RunSetup",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.run_setup.RunSetup.erasing",
       "label": "erasing",
       "level": "method",
@@ -70172,6 +70312,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.terms.EarlyLearning.__call__",
+      "label": "__call__",
+      "level": "method",
+      "parent": "kneemri.training.terms.EarlyLearning",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.terms.Margin.__call__",
       "label": "__call__",
       "level": "method",
@@ -70518,6 +70666,14 @@
       "descendants": 0,
       "id": "kneemri.training.trainer.Trainer.ramp_certainty",
       "label": "ramp_certainty",
+      "level": "method",
+      "parent": "kneemri.training.trainer.Trainer",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.trainer.Trainer.remember_early",
+      "label": "remember_early",
       "level": "method",
       "parent": "kneemri.training.trainer.Trainer",
       "role": null

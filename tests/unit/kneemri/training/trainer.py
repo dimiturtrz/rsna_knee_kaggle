@@ -24,6 +24,7 @@ from kneemri.training.augmentation import (
     Augmentation,
     AugmentConfig,
 )
+from kneemri.training.early_targets import EarlyTargets
 from kneemri.training.feature_distillation import FeatureDistillation, Widths
 from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import GRADE_LADDER, Predicted
@@ -44,10 +45,12 @@ from kneemri.training.terms import (
     CONTRAST_TERM,
     DISSENT_TERM,
     DISTILL_TERM,
+    EARLY_TERM,
     FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
     RANK_TERM,
+    EarlyLearning,
     Ranking,
 )
 from kneemri.training.trainer import (
@@ -434,6 +437,34 @@ def test_teach_from():
     assert trainer.teacher.rows(np.array([1])).shape == (1, len(TARGETS))
 
 
+def test_remember_early():
+    """An early-learning history, once attached, is what the trainer reads and folds each step into."""
+    trainer = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+    )
+    assert trainer.early is None
+
+    history = EarlyTargets(6)
+    trainer.remember_early(history)
+
+    assert trainer.early is history
+
+
+def test_fit_epoch_folds_every_visited_study_into_the_early_history():
+    """READ then LEARNED: after one epoch every study the batches visited carries a nonzero average."""
+    trainer = Trainer(
+        StudyModel(_FakeBackbone(), DIM, SLOTS, StudyDesign(slice_pooling="max")),
+        torch.device("cpu"),
+        objective=Objective(terms=[EarlyLearning(3.0)]),
+    )
+    trainer.remember_early(EarlyTargets(6))
+    trainer.fit_epoch(_corpus(), _targets(), np.arange(6, dtype=np.int64), 3, np.random.default_rng(SEED))
+
+    assert trainer.early is not None
+    assert (trainer.early.positive + trainer.early.negative > 0).all()
+
+
 def test_teach_features_from():
     """A SEPARATE witness from `teach_from`, because a run may carry one teacher file, the other, or both.
 
@@ -494,6 +525,7 @@ def test_policies():
     )
     constructed = {
         RANK_TERM: 0.3,
+        EARLY_TERM: 0.0,
         DISTILL_TERM: 0.0,
         FEATURE_TERM: 0.0,
         DISSENT_TERM: 0.0,

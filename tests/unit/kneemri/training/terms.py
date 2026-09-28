@@ -13,12 +13,14 @@ from kneemri.training.terms import (
     CONTRAST_TERM,
     DISSENT_TERM,
     DISTILL_TERM,
+    EARLY_TERM,
     POSITIVE_AT,
     RANK_TERM,
     Contrast,
     CrossEntropy,
     Dissent,
     Distillation,
+    EarlyLearning,
     Margin,
     PairMass,
     Pooled,
@@ -264,6 +266,47 @@ def test_distillation_carries_a_gradient_to_every_study_it_misorders():
     assert bool((logits.grad.abs() > 0).all()), "a study with no gradient is a study the term cannot fix"
 
 
+def _remembered(order: list[float], past: float) -> Predicted:
+    """One label's logits in `order`, each study remembered at probability `past` on every earlier visit."""
+    labelled = _batch(order)
+    early = torch.stack([torch.full_like(labelled.logits, past), torch.full_like(labelled.logits, 1.0 - past)], dim=-1)
+    return Predicted(labelled.logits, labelled.scores, labelled.weights, early=early)
+
+
+def test_early_learning():
+    """Agreeing with the past costs less than contradicting it — the term is a pull toward the history."""
+    confident = [3.0] * STUDIES
+    agreeing = EarlyLearning(1.0)(_remembered(confident, 0.99))
+    contradicting = EarlyLearning(1.0)(_remembered(confident, 0.01))
+
+    assert float(agreeing) < float(contradicting)
+
+
+def test_early_learning_owes_nothing_on_a_first_visit():
+    """An empty history is exactly zero agreement, so the term is silent until a study has been seen."""
+    labelled = _batch([3.0, 2.0, 1.0, -1.0, -2.0, -3.0])
+    empty = torch.zeros(*labelled.logits.shape, 2)
+    first = Predicted(labelled.logits, labelled.scores, labelled.weights, early=empty)
+
+    assert float(EarlyLearning(1.0)(first)) == 0.0
+
+
+def test_early_learning_raises_when_no_history_arrived():
+    """A run whose history never attached must FAIL, not descend the plain recipe under its name."""
+    with pytest.raises(ValueError, match="early-learning targets"):
+        EarlyLearning(1.0)(_batch([3.0, 2.0, 1.0, -1.0, -2.0, -3.0]))
+
+
+def test_early_learning_carries_a_gradient_toward_the_history():
+    """The gradient moves each logit TOWARD what the study was read as before."""
+    labelled = _remembered([3.0, 2.0, 1.0, -1.0, -2.0, -3.0], 0.99)
+    logits = labelled.logits.clone().requires_grad_(True)
+    EarlyLearning(1.0)(Predicted(logits, labelled.scores, labelled.weights, early=labelled.early)).backward()
+
+    assert logits.grad is not None
+    assert (logits.grad < 0).all(), "descending the term raises every logit toward the remembered 0.99"
+
+
 def test_dissent():
     """Ordering the labels' way costs less than contradicting them, whatever the teacher emphasises."""
     teacher = [0.9, 0.5, 0.1, 0.2, 0.2, 0.2]
@@ -392,6 +435,7 @@ def test_term_settings():
     assert Distillation(0.4).settings() == {DISTILL_TERM: 0.4}
     assert Dissent(0.5).settings() == {DISSENT_TERM: 0.5}
     assert Contrast(0.6).settings() == {CONTRAST_TERM: 0.6}
+    assert EarlyLearning(3.0).settings() == {EARLY_TERM: 3.0}
 
 
 def test_cross_entropy_settings():

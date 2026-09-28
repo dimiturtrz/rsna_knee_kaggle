@@ -30,6 +30,7 @@ from kneemri.training.terms import (
     CONTRAST_TERM,
     DISSENT_TERM,
     DISTILL_TERM,
+    EARLY_TERM,
     FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
@@ -134,6 +135,7 @@ class Objective:
         """
         account: dict[str, object] = {
             RANK_TERM: 0.0,
+            EARLY_TERM: 0.0,
             DISTILL_TERM: 0.0,
             FEATURE_TERM: 0.0,
             DISSENT_TERM: 0.0,

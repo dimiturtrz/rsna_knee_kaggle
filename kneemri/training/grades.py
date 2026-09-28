@@ -70,6 +70,10 @@ class Predicted:
     member in the ledger constructs the identical readout it always did.
     """
 
+    early: Float[Tensor, "b o 2"] | None = None
+    """What the model itself said about these studies on EARLIER visits — `None` unless a run regularises
+    toward it. The last axis holds the running averages of `p` and of `1 - p`; see `EarlyLearning`."""
+
     teacher_embedding: Float[Tensor, "b d"] | None = None
     """What a TEACHER read from these same studies, pooled to one vector per study — `None` otherwise.
 

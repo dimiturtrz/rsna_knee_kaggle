@@ -9,6 +9,7 @@ from kneemri.training.terms import (
     CONTRAST_TERM,
     DISSENT_TERM,
     DISTILL_TERM,
+    EARLY_TERM,
     FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
@@ -44,6 +45,7 @@ def test_objective_settings():
     """
     assert Objective(shaping=Shaping(per_label=True)).settings() == {
         RANK_TERM: 0.0,
+        EARLY_TERM: 0.0,
         DISTILL_TERM: 0.0,
         FEATURE_TERM: 0.0,
         DISSENT_TERM: 0.0,
@@ -63,6 +65,7 @@ def test_objective_reports_each_term_at_its_real_strength():
     """A composed objective reports each term's real strength, not the flag that asked for it."""
     assert Objective(terms=[Ranking(0.3)], shaping=Shaping(normalise_by_count=True)).settings() == {
         RANK_TERM: 0.3,
+        EARLY_TERM: 0.0,
         DISTILL_TERM: 0.0,
         FEATURE_TERM: 0.0,
         DISSENT_TERM: 0.0,

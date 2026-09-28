@@ -29,7 +29,7 @@ evidence — it won despite the starvation — and a LOSS ambiguous between "joi
 an upweight rather than a mask, which starves nothing.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import torch
 
@@ -106,14 +106,7 @@ class LabelFocus:
         mask = torch.full_like(batch.weights, self.unfocused)
         for finding in self.findings:
             mask[:, TARGETS.index(finding)] = KEPT
-        return Predicted(
-            logits=batch.logits,
-            scores=batch.scores,
-            weights=batch.weights * mask,
-            teacher=batch.teacher,
-            embedding=batch.embedding,
-            shaped=True,
-        )
+        return replace(batch, weights=batch.weights * mask, shaped=True)
 
     def settings(self) -> dict[str, object]:
         """This policy's account, so a checkpoint records WHICH findings were leaned on and HOW HARD."""

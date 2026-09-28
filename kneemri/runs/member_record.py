@@ -183,6 +183,9 @@ NOT_IN_CONFIG = {
     "contrast_weight": "objective policy — it shapes the head's per-finding context vector inside the "
     "loss, and that vector is already computed on every forward pass; the term adds no parameter and "
     "the head a rebuild serves is byte-identical",
+    "early_weight": "objective policy — it pulls the SAME twelve logits toward the run's own earlier "
+    "readings inside the loss and adds no parameter, so the head a rebuild serves is byte-identical",
+    "early_beta": "the memory of that same objective policy, equally absent from the function served",
     "dissent_weight": "objective policy — it re-weights the mass of the SAME label-ordering term by how "
     "badly a teacher pool orders each pair, inside the loss, adding no parameter; the head a rebuild "
     "serves is byte-identical",

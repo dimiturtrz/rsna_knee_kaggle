@@ -435,7 +435,7 @@ def test_requested():
     cpu = torch.device("cpu")
     shared = {field.name for field in dataclasses.fields(Request)} & {leaf.name for leaf, _ in TrainConfig.leaves()}
 
-    assert len(shared) == 63, "pinned, because a renamed flag would otherwise drop silently out of the walk"
+    assert len(shared) == 64, "pinned, because a renamed flag would otherwise drop silently out of the walk"
 
     plain = _setup().requested(cpu)
     for name in sorted(shared):
@@ -560,3 +560,12 @@ def test_drawing_mixed_corpus_requires_corpus_column() -> None:
 def test_drawing_mixed_corpus_conflicts_with_disagreed() -> None:
     with pytest.raises(ValueError, match="sample-spread"):
         _setup(corpus_oversample=3.0, sample_spread=Path("x.npz")).drawing(["a", "b"])
+
+
+def test_early():
+    """A history sized to the corpus when the term is on, and none at all when it is off."""
+    assert _setup().early(["a", "b"]) is None
+    history = _setup(early_weight=3.0, early_beta=0.5).early(["a", "b", "c"])
+    assert history is not None
+    assert history.positive.shape[0] == 3
+    assert history.beta == 0.5

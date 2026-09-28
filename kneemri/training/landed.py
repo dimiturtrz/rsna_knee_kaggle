@@ -70,6 +70,7 @@ from kneemri.training.terms import (
     CONTRAST_TERM,
     DISSENT_TERM,
     DISTILL_TERM,
+    EARLY_TERM,
     FEATURE_TERM,
     MARGIN_TERM,
     PAIR_POOL,
@@ -108,6 +109,7 @@ did not land misses by its whole magnitude; a switch that did misses by the last
 NOT_A_SWITCH = {
     "paths": "the data root, machine-specific and gitignored",
     "labels": "the label table, an input rather than a policy",
+    "early_beta": "the memory of the early-learning history, held by `EarlyTargets` and read by no objective",
     "eval_labels": "the holdout table, same",
     "out": "where the run writes, set per invocation",
     "config": "the recipe file; every value it sets lands in its own field, which is what gets compared",
@@ -324,6 +326,9 @@ class Request:
     stochastic_depth: float = NO_DROP
     """Rate the deepest block drops at — zero, the intact trunk, for every arm before 2026-09-12."""
 
+    early_weight: float = 0.0
+    """Strength of the early-learning term — zero, the term absent, for every arm before 2026-09-28."""
+
     sample_spread: Path | None = None
     sample_alpha: float = 0.0
     certainty_ramp: int = 0
@@ -382,6 +387,7 @@ class Request:
             SCHEDULED: self.one_cycle,
             REPORTS: self.reports,
             RANK_TERM: self.rank_weight,
+            EARLY_TERM: self.early_weight,
             DISTILL_TERM: self.distill_weight,
             FEATURE_TERM: self.feature_weight,
             DISSENT_TERM: self.dissent_weight,

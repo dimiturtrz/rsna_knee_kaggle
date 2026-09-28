@@ -48,6 +48,7 @@ from kneemri.training.augmentation import (
     AugmentConfig,
 )
 from kneemri.training.durable import Durable
+from kneemri.training.early_targets import EarlyTargets
 from kneemri.training.ghosting import GHOSTING
 from kneemri.training.grades import Predicted
 from kneemri.training.gradient_clip import GradientClip
@@ -207,6 +208,8 @@ class Trainer:
         # distil logits, features, both or neither, and folding them together would make "which of the
         # two arrived" unanswerable at exactly the moment `landed` asks it.
         self.feature_teacher: TeacherFeatures | None = None
+        # None for the teacher's reason: an early-learning objective handed no history must raise.
+        self.early: EarlyTargets | None = None
         # None means "read the cache at its own resolution", which is what every run did before
         # resampling existed. See `resample_to`.
         self.read_size: int | None = None
@@ -269,6 +272,10 @@ class Trainer:
     def teach_from(self, teacher: TeacherTargets) -> None:
         """Carry an ensemble's readings of these same studies into every batch, for a distilling term."""
         self.teacher = teacher
+
+    def remember_early(self, early: EarlyTargets | None) -> None:
+        """Keep each study's running average of its own past readings, for the early-learning term."""
+        self.early = early
 
     def teach_features_from(self, teacher: TeacherFeatures) -> None:
         """Carry a teacher's REPRESENTATIONS of these same studies into every batch, for a cosine term."""
@@ -601,6 +608,15 @@ class Trainer:
                         else torch.from_numpy(blend.rows(self.teacher.rows(batch))).to(self.device)
                     ),
                     embedding=readout.context.float(),
+                    # BLENDED BY THE SAME DRAW as the labels, which is the mixed target Liu et al.'s ELR+
+                    # regularises toward.
+                    early=(
+                        None
+                        if self.early is None
+                        else torch.from_numpy(
+                            np.stack([blend.rows(side) for side in self.early.rows(batch).transpose(2, 0, 1)], axis=-1)
+                        ).to(self.device)
+                    ),
                     # BLENDED BY THE SAME DRAW, for the reason the teacher table above is: an un-mixed
                     # target would pull the blended reading onto the first study's features alone, which
                     # is the feature arm silently descending toward a study it is not looking at.
@@ -613,6 +629,8 @@ class Trainer:
                 return self.objective(judged) + self.reports(readout.report.float(), batch), judged
 
             loss, judged = forward()
+            if self.early is not None:
+                self.early.learn(batch, judged.logits)
             self.trace.judged(judged)
             self.scaler.scale(self.accumulation.share(loss)).backward()
             steps += 1
