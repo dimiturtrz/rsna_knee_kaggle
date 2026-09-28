@@ -81,6 +81,22 @@ The ranking is unchanged:
 Everything read this round is either already closed in `docs/AXES.md`, out of scope, or dominated by knee-bpuei.
 The one fact that could change the plan is a host answer on 743416. It is external and not ours to force.
 
+## 5. Round four (13:45Z): every candidate already has a verdict
+
+| candidate | source | record |
+|---|---|---|
+| label-graph / co-occurrence head | Srivastava label-graph refinement; ML-GCN family | NULL twice: co-occurrence tail +0.017 ± 0.021 (interpretations 09-02), serve-time column mixing null (09-04) |
+| hierarchical BCE (parent-child penalty) | CheXpert HBCE, 0.892 on 5 labels | the same inter-label constraint as the label graph; no new mechanism |
+| per-label reliability + K-NN relabel | LRC-CXR (ESWA 2026) | relabel / prune is CLOSED; dropping UNK cells (confident224) −0.0071 |
+| ASL | — | CLOSED on the record; ASL −0.139 in a competitor's ablation |
+| in-domain SSL continuation | OrthoDiffusion (arXiv 2602.20752, no weights, no AUCs in abstract) | CLOSED (AXES:142, :159); multi-plane fusion is already consumed (AXES:95) |
+| bone segmentation ROI | TotalSegmentator MRI | non-commercial licence, so not shippable; ROI crop is CLOSED anyway (AXES:87) |
+
+**Nothing new is filed.** The one action this round is readiness: `experiments/arms/elr_hold.sh` is the
+knee-bpuei gate (a held control plus ELR at 3.0, `--hold-annotation-studies`, so gold-58 is out of sample).
+`arm_check` refuses neither arm. It needs the owner's GPU go: ~3.7 h of card, and it cannot share the card
+(knee-l2d7o).
+
 ## Sources
 
 - Kaggle discussion topics 743148, 740610, 742926, 743374, 743416, 743420, 743916 and 740164, read through
