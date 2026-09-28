@@ -215,3 +215,5 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
 ## 2026-09-28: the loss side of label noise was never tried
 
 Every label-noise lever so far changed the targets, or masked them (masking is loss-side, and CLOSED). No noise-ROBUST loss (ELR, GCE, SCE) has run. Follow-up [scored-target](../deep_dives/2026-09-28_scored-target-and-loss-side-noise.md): the test is radiologist-read, so ELR aims at the right target. Read it on gold-58 as well as ledger75; T-correction is dead on ranking theory. ELR is unrun; it is priced at P ~0.08 in knee-bpuei. Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).
+
+LNMBench (arXiv 2512.09315) measured losses on real medical label noise. Only SCE and CDR beat CE there, but the metric is last-epoch accuracy on single-label tasks, and ELR was not run. SCE is the same anti-memorisation class as ELR and weaker. It is gated on the ELR reading and not filed. See [forum and noisy-loss sweep](../deep_dives/2026-09-28_forum-and-noisy-loss-sweep.md).

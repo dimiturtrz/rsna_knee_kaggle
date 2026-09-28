@@ -252,3 +252,7 @@ Every board position or score below other than the header line is historical, da
 - **Verdict unchanged:** still no public mechanism above 0.946.
 
 Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).
+
+## 2026-09-28 forum sweep (18 threads since 09-25)
+
+No posted mechanism above 0.946 solo. A competitor measured gold-58 extraction at 207 of 240 positives found, and 22 of the 33 misses are reports that never name the finding. A host has not yet answered the external-data yes/no thread (743416). Board: leader 0.960, gap 0.014. Deep dive: [forum and noisy-loss sweep](../deep_dives/2026-09-28_forum-and-noisy-loss-sweep.md).
