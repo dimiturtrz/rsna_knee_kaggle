@@ -18265,6 +18265,30 @@ reading is OWED and needs the card. As a fourth seat on the champion's three-mem
 it adds +0.0008, under the +0.0015 ADD bar. Two earlier attempts died on host-RAM commit (`_run1` e4 0.8561,
 `_run2` e7 0.8801) and are declined as floors; the finished run peaked at 21.74 GB reserved.
 
+### The owed `decode_cost`, read on CPU — 2026-09-28T22:48Z: NULL on the shipping line
+
+`foreign_readout --device cpu`, fold 0, 909 studies, `raptor-corpus`, both members in one process (card
+untouched; ~3.3 h per member). The control reproduces its 09-20 GPU row to the fourth decimal, so the CPU
+path is the same instrument:
+
+```
+  labelwise_depth24_drop40_long_s2026  native 0.8679 kept 0.8680 foreign 0.8457 | slots +0.0001 decode -0.0223
+  labelwise_depth24_ghost_s2026        native 0.8708 kept 0.8707 foreign 0.8457 | slots -0.0001 decode -0.0249
+```
+
+**Delta −0.0026: NULL** in the band pre-registered on knee-mum8w at 19:45Z, before the ghost number existed
+(≥ +0.0065 clears · +0.0030..+0.0064 directional · ±0.0029 null · ≤ −0.0030 harmful; knee-bwqi9's absolute
+bands were set on the max-pool control's −0.0361 and do not transfer). The two members land on the SAME
+foreign score, 0.8457: ghosting's midpoint native lead is exactly the part that does not survive the decode
+shift. So on this line, at the KMAR-measured dose 0.040, the operator buys no cross-site robustness, and the
+ghostseat instrument slot is not spent.
+
+What this does NOT rule out: the max-pool line's +0.0057 still stands as a separate point, so the operator's
+effect is recipe-dependent rather than absent. The labelwise head plus slot dropout 0.40 may already buy
+whatever ghosting bought there; slot dropout's own gain is cross-site, +0.0132 on this ruler. A dose other
+than 0.040, and a decode other than raptor's, are both untested. Neither is priced: the shipping line shows
+no slope to follow.
+
 ## Member-head transduction ties its parent; it only beats a control that loses score — 2026-09-27T19:05Z
 
 Arms `transduce_dmlb.sh` + `transduce_dmlb_more.sh`, bead knee-nchjt. Six 4-epoch continuations of
