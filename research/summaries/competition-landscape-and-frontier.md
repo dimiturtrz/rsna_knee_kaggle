@@ -239,3 +239,14 @@ Every board position or score below other than the header line is historical, da
 - [2026-09-24_all-lanes-web-sweep.md](../deep_dives/2026-09-24_all-lanes-web-sweep.md)
 - [2026-09-25_frontier-sweep-for-a-0p95-mechanism.md](../deep_dives/2026-09-25_frontier-sweep-for-a-0p95-mechanism.md)
 - Cross-check: [docs/AXES.md](../../docs/AXES.md)
+
+## 2026-09-28 sweep: newly surfaced public write-ups, all below our rank
+
+- **[U] HF blog "rank 18" (bishnoiyash, posted 2026-08-09):** public LB **0.903**, taken early in the competition (18 of 792 teams).
+  - Recipe: EfficientNet-B3 at 288 px, 12 slices, max-MIL over slices, mean over series, BCE on soft labels, 8 epochs, 5-fold averaging.
+  - Labels: from a local Qwen extractor, 0.833 per-class accuracy against gold58.
+  - Their own leak correction took gold58 from 0.9357 to 0.8568. They state the ceiling is report extraction, not architecture.
+  - Nothing here is not already ours. We also read it as confirming the no-horizontal-flip rule.
+  - Source: https://huggingface.co/blog/bishnoiyash/rsna-competetion
+- **[U] GitHub repos Alherma7, Amrin24, niha1905:** listed by search, none with a stated score above ours. ShivenKhurana1 (0.935) is already in the [09-25 sweep](../deep_dives/2026-09-25_frontier-sweep-for-a-0p95-mechanism.md).
+- **Verdict unchanged:** still no public mechanism above 0.946.
