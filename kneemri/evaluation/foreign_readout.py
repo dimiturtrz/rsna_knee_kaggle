@@ -189,7 +189,7 @@ class ForeignReadout:
         self.dump = dump
 
     def rebuilt(self, member: Member) -> StudyModel:  # devtools-ignore: test-mirror (needs an encoder download)
-        """The member's own network. Both shifted passes miss every cache, so it is loaded once."""
+        """The member's own network, rebuilt for every pass: both shifted passes miss every cache anyway."""
         encoder = ENCODERS[member.variant]
         return self.predictions.load(member.file, encoder.load(), encoder.dim, member.slot_count)
 
