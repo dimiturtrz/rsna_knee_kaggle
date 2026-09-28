@@ -165,3 +165,14 @@ Ruler: a number is on the repo-default midpoint cut unless it says `ledger75`. T
 - [2026-09-05_ood-vit-finetune-schedules](../deep_dives/2026-09-05_ood-vit-finetune-schedules.md)
 - [2026-09-06_efficiency-formula-and-mars-census](../deep_dives/2026-09-06_efficiency-formula-and-mars-census.md)
 - `docs/AXES.md` §A-§D rows cited inline (not a deep dive).
+
+## KneePreM (arXiv 2609.31461, 2026-09-25): barred twice, and weak on its own numbers
+
+- **[L] What it is:** a 3D U-Net masked autoencoder pretrained on 19,011 unlabelled OAI knee MRI series (4,791 participants).
+- **[L] Reported numbers:**
+  - fastMRI+ classification: ROC AUC 0.722, using 50% of the training data.
+  - APM eight-target classification: 0.740, using 70% of the data.
+  - Compared against random init and SuPreM. Weights and code are not stated on the abstract page.
+- **Barred for shipping:** OAI is under an NDA/DUA, not public domain ([external data and licensing summary](external-data-and-licensing.md)). An OAI-derived trunk therefore falls under the 09-15 ruling that anything derived from a foreign corpus is instrument-only.
+- **Weak as an instrument:** it is the same class as the OrthoDiffusion 3D U-Net trunk. That trunk was CLOSED at Stage II: 0.8054 against 0.9006 on ledger75 (docs/AXES.md), and it was fine-tuned. KneePreM's own AUCs of ~0.72-0.74 give no reason to expect it to do better.
+- **Verdict:** do not queue it. Re-open only if weights ship under a licence the owner clears AND a reported knee number is within ~0.02 of our trunk.
