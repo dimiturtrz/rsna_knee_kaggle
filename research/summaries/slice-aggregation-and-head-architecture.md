@@ -250,3 +250,14 @@ where the source names them. An unmarked number of ours is midpoint (knee-f9aao)
 [ig]: ../deep_dives/2026-09-01_input_side_knee_mri_gains.md
 [ceil]: ../deep_dives/2026-09-10_single-model-ceiling-interventions-medical-grading-ranked.md
 [axes]: ../../docs/AXES.md
+
+## MST-style slice transformer: already answered by our own order-aware operators (2026-09-28)
+
+A 2026-09-28 web sweep re-surfaced MST (DINOv2 + a slice transformer). What it adds over our heads is
+letting slices see each other along depth. We have measured that twice. `depth` pooling (DepthAttention,
+span 3) read `depth_true` 0.8461, the second-worst of four operators spanning 0.0019
+(`experiments/README.md` §"the pool is order-blind", ~:11258). `slice_shift` (gated neighbour tokens
+inside the last blocks) is +0.0035 on the 12-slice labelwise line and −0.0016 on the 24-slice shipping
+line (docs/AXES.md, slice_shift row). So do not queue a slice transformer as new. Re-open it only with a
+mechanism neither of those tested, such as long-range attention across the whole stack with positional
+encoding. Note that MST's own ablation found no positional encoding worked best.
