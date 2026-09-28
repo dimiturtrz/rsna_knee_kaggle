@@ -160,14 +160,14 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
 4. **MedGemma.** [vlm_shortlist](../deep_dives/2026-09-03_local_vlm_shortlist.md) withdraws it and then partly retracts the withdrawal inside the same file.
 5. **SE of a gold-58 AUC.** [vlm-montage](../deep_dives/2026-09-11_vlm-montage-prompting-and-small-gold-validation.md) gives ≈0.12. [report-error-gradient](../deep_dives/2026-09-11_report-error-gradient-vs-gold58-ordering.md) gives ≈0.055, with different n+ and AUC.
 6. **Is pseudo-labelling measured?** [rival_single_models](../deep_dives/2026-08-26_rival_single_models_and_the_label_bottleneck.md) (09-16) calls it untested. It is measured: own-OOF self-distillation +0.0056, sub-floor (§8).
-7. **Test-label protocol.** [qao](../deep_dives/2026-09-02_test_labels_report_derived_or_radiologist_reviewed_qao.md) and [qap](../deep_dives/2026-09-02_qap_adjudication_protocol_and_58_gold_pricing.md) agree the test is radiologist-read. Neither gives a reader count.
+7. **Test-label protocol.** [qao](../deep_dives/2026-09-02_test_labels_report_derived_or_radiologist_reviewed_qao.md) and [qap](../deep_dives/2026-09-02_qap_adjudication_protocol_and_58_gold_pricing.md) agree the test is radiologist-read. Neither gives a reader count. `README:15833` says the opposite ("the scored target is THE READER"), but its evidence is two flat board entries whose treatment touched 7.8% of the defect. That is under the board's 0.001 resolution under either hypothesis, so it cannot decide the question; the primary source stands ([scored-target](../deep_dives/2026-09-28_scored-target-and-loss-side-noise.md)). The AXES correction closure stands on its other grounds.
 8. **Labeler gains.** [visualchexbert](../deep_dives/2026-09-06_visualchexbert-mechanism-and-noisy-label-pricing.md) and [qec](../deep_dives/2026-09-04_qec-parser-vs-label-noise.md) reconcile: the gain comes from replacing a *weak rule* labeler, which we do not have.
 
 ## Open questions
 
 - Why does Effusion rank third-worst on gold when the literature expects it clean? Candidates: a threshold mismatch, since the annotator wants moderate/large ([report-error-gradient](../deep_dives/2026-09-11_report-error-gradient-vs-gold58-ordering.md)).
 - Is test-label noise masking the gap? AUC_obs = (1−ρ)·AUC* + ρ/2 ([label-noise-ceiling](../deep_dives/2026-09-11_label-noise-ceiling-and-report-vs-pixels-error.md)).
-- Per-column forward correction with a gold-measured T is unpublished and untested ([loss-correction](../deep_dives/2026-09-11_loss-correction-with-measured-noise-matrix.md)).
+- ~~Per-column forward correction with a gold-measured T is unpublished and untested~~ — RETIRED on theory 2026-09-28. A per-label T is class-conditional noise, which leaves the ranking unchanged (Menon 2015), so its AUC ceiling is ~0 ([scored-target](../deep_dives/2026-09-28_scored-target-and-loss-side-noise.md)).
 
 ## Sources
 
@@ -214,4 +214,4 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
 
 ## 2026-09-28: the loss side of label noise was never tried
 
-Every label-noise lever so far changed the targets. A noise-robust LOSS (ELR) is unrun; it is priced at P ~0.08 in knee-bpuei. Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).
+Every label-noise lever so far changed the targets, or masked them (masking is loss-side, and CLOSED). No noise-ROBUST loss (ELR, GCE, SCE) has run. Follow-up [scored-target](../deep_dives/2026-09-28_scored-target-and-loss-side-noise.md): the test is radiologist-read, so ELR aims at the right target. Read it on gold-58 as well as ledger75; T-correction is dead on ranking theory. ELR is unrun; it is priced at P ~0.08 in knee-bpuei. Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).
