@@ -250,3 +250,5 @@ Every board position or score below other than the header line is historical, da
   - Source: https://huggingface.co/blog/bishnoiyash/rsna-competetion
 - **[U] GitHub repos Alherma7, Amrin24, niha1905:** listed by search, none with a stated score above ours. ShivenKhurana1 (0.935) is already in the [09-25 sweep](../deep_dives/2026-09-25_frontier-sweep-for-a-0p95-mechanism.md).
 - **Verdict unchanged:** still no public mechanism above 0.946.
+
+Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).

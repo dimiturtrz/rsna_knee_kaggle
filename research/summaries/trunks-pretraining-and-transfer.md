@@ -176,3 +176,5 @@ Ruler: a number is on the repo-default midpoint cut unless it says `ledger75`. T
 - **Barred for shipping:** OAI is under an NDA/DUA, not public domain ([external data and licensing summary](external-data-and-licensing.md)). An OAI-derived trunk therefore falls under the 09-15 ruling that anything derived from a foreign corpus is instrument-only.
 - **Weak as an instrument:** it is the same class as the OrthoDiffusion 3D U-Net trunk. That trunk was CLOSED at Stage II: 0.8054 against 0.9006 on ledger75 (docs/AXES.md), and it was fine-tuned. KneePreM's own AUCs of ~0.72-0.74 give no reason to expect it to do better.
 - **Verdict:** do not queue it. Re-open only if weights ship under a licence the owner clears AND a reported knee number is within ~0.02 of our trunk.
+
+Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).

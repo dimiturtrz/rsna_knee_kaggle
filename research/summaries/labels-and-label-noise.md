@@ -211,3 +211,7 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
 - [2026-09-01_text_supervision_mechanism_audit](../deep_dives/2026-09-01_text_supervision_mechanism_audit.md)
 - [2026-09-02_public_baseline_text_branch_objective](../deep_dives/2026-09-02_public_baseline_text_branch_objective.md)
 - [2026-09-02_text_as_privileged_information_qac](../deep_dives/2026-09-02_text_as_privileged_information_qac.md)
+
+## 2026-09-28: the loss side of label noise was never tried
+
+Every label-noise lever so far changed the targets. A noise-robust LOSS (ELR) is unrun; it is priced at P ~0.08 in knee-bpuei. Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).

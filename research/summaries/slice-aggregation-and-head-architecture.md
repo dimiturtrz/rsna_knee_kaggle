@@ -261,3 +261,5 @@ inside the last blocks) is +0.0035 on the 12-slice labelwise line and −0.0016 
 line (docs/AXES.md, slice_shift row). So do not queue a slice transformer as new. Re-open it only with a
 mechanism neither of those tested, such as long-range attention across the whole stack with positional
 encoding. Note that MST's own ablation found no positional encoding worked best.
+
+Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).
