@@ -86,6 +86,14 @@ The gold panel describes our training noise [M, `README:15800-15812`]:
 
   The +0.02 threshold is sized off gold-58's SE: ≈0.055 per column from `report-error-gradient`, and roughly /√12 ≈ 0.016 on the macro.
 
+**CORRECTION, same day: as written above, that gold-58 read is IN-SAMPLE.**
+- Every member fits the 58 annotated studies at weight 3.0 (`annotated_readings.py` docstring).
+- `--hold-annotations` withholds the annotator's value, but all 58 rows still train. On fold 0 that makes a read 78% in-sample (knee-x4muo).
+- The flag that actually removes those rows is `--hold-annotation-studies`, and **no arm in `experiments/arms/` has ever used it**.
+- So an honest gold-58 read needs BOTH arms fitted with `--hold-annotation-studies`: the ELR arm and a matched parent control. The shipping parent cannot be the control, because it trained on those rows.
+- That adds a control arm, about +2.5 h of card. It also makes the pair the project's FIRST clean full-58 gold reading, an instrument in its own right.
+- The only honest gold rows until then are the 13 annotated studies in the fold-0 holdout (D48), and n=13 is too thin to gate anything.
+
 ## 3. Correction to this project's own 09-28 note
 
 The 09-28 gap-audit summary said "the loss side of label noise was never tried". That is too broad.
