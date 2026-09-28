@@ -202,7 +202,7 @@ The deliverable is a **single solo checkpoint**. This class is kept for the mech
 | serve-time column mixing | **NULL** | `2026-09-04_serve-time-column-mixing-is-a-null.md` |
 | calibration / thresholds | **worth zero by construction** — AUC reads order only (`docs/PLAN.md`) | knee-e8a |
 | efficiency lane | **CLOSED.** 0.001 AUC = 70.9 s; full-runtime-to-zero gains ~16 ticks | `2026-09-21_the_efficiency_lane_priced_and_closed.md` |
-| rot3 TTA | returned COMPLETE with a blank score — **untested, not measured** | knee-c9q4 |
+| rot3 TTA | **CLOSED on the board at two views: 0.925 with views vs 0.925 without, identical members** (`kneemri-topviews` 55607795 vs `kneemri-solotop` 55607054). The earlier blank score was an uncatchable OOM in `SpatialViews._warp`, fixed by `WARP_CHUNK=512`, not a timeout. Three views were never re-fired; with two views at 0.000 that is not a lever (P(clears) ~0.02) | knee-c9q4 |
 
 ## I. Rulers and floors — not levers, but every row above is read through them
 
