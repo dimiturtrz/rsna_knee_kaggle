@@ -100,6 +100,42 @@ The 09-28 gap-audit summary said "the loss side of label noise was never tried".
 Label MASKING is a loss-side treatment, and it is CLOSED (AXES:155). The accurate statement is:
 **no noise-ROBUST loss (ELR, GCE, SCE) has run.**
 
+## 4. Gold-row weight and radiologist values in training: priced, not filed
+
+**Question.** The test set is radiologist-read. Should the 58 gold studies train at their radiologist
+values, or at a weight above `ANNOTATED_WEIGHT = 3.0` (`core/data/labels/targets.py:80`)?
+
+**What the shipping recipe does today** [M].
+- `experiments/arms/basinsoup_ff.sh:75` passes `--calibrated-targets --hold-annotations`.
+- So the solo trains the 58 studies at REPORT values. It never sees a radiologist value.
+
+**The only measurement is on the wrong ruler** [M, `README:14188-14250`, 336/20sl]:
+
+| arm | ledger | vs control |
+|---|---|---|
+| control | 0.8578 | — |
+| hold only | 0.8573 | −0.0005 |
+| calib only (gold at radiologist values) | 0.8562 | −0.0016 |
+| calib + hold (gold at report values) | 0.8634 | +0.0056 |
+
+- The calib×hold interaction is +0.0077, and it favours REPORT values.
+- The ruler is reader-built, though, so it scores radiologist alignment as a loss. Its sign for the board is unknown.
+
+**Ceiling, by the same arithmetic as §1.**
+- Training at radiologist values changes the 140 wrong gold cells, 1.3% of the ~10,840 wrong cells.
+- That is a sixth of the 7.8% that `relabel7` touched, whose member effect was already ~0.0006.
+- Raising the weight does not help either. It amplifies 58 studies, which is 5.61% of the training weight, and it adds no new information.
+- Expected board move: ≪ 0.001, below the board's resolution.
+
+**No offline read can adjudicate it.**
+- A gold read needs those rows held out, and holding them out is exactly the arm that cannot train on them.
+- Splitting the 58 studies into folds is banned, and n=58 is too thin anyway.
+- Only a board slot could read it, and at an effect below 0.001 the slot would read noise.
+
+**Price.** ~4 h card + 1 slot. P(solo clears 0.947) ≈ **0.01**. **Not filed.** The gold-row question
+that CAN be read is whether a model generalises to held-out radiologist reads. That is already the
+`--hold-annotation-studies` control inside knee-bpuei's gate.
+
 ## Verdict
 
 - The record's claim that the board scores the reader rests on an underpowered test, and it contradicts the primary source.
