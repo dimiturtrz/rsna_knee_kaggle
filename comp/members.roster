@@ -121,7 +121,7 @@ band_dense_long_s2026.pt    # 0.8587 — band_dense's recipe at 24 epochs; the L
 # shape and it is the member that carried 0.929; here it is sharper, because the arm's PREMISE was
 # refuted and the checkpoint it dropped out is still the largest improvement available to the champion.
 # A run that answers "no" still produces a checkpoint, and the checkpoint is not bound by the answer.
-dinov3_base_lora_s2026.pt   # 0.8268 — the only DINOv3-BASE member, and the pool's only encoder diversity
+dinov3_base_lora_s2026.pt   # 0.8268 — the only DINOv3-BASE member, and the pool's only encoder diversity  # licence: dinov3
 # Added 2026-08-20 for the axis the pool has never varied ON THE BOARD. Every one of the seven entries
 # scored so far is 100% DINOv2-small; `lora_r8_v3small_224` has been mounted since 2026-08-16 and no
 # kernel has ever named it. The encoder weights are already served — `dimiturnt/dinov3-hf/vitb16` has sat
@@ -434,7 +434,7 @@ small_batch6_ff.pt          # DARK. small_batch6_s2026's flags plus --fold -1 --
 # and held the swapped seat in lastseat at 0.937, so this member's behaviour is a measured control.
 #
 # Added 2026-08-25 00:47Z, card-free, on the second item of the goal-pricing note.
-v3base_dense_s2026.pt       # 0.8455 — the STRONG end of the DINOv3-BASE family, which the package has
+v3base_dense_s2026.pt       # 0.8455 — the STRONG end of the DINOv3-BASE family, which the package has  # licence: dinov3
 # never held. Until now the only DINOv3-base member shipped was dinov3_base_lora_s2026 at 0.8268, and
 # that gap is not an architecture fact: it is LoRA-over-frozen against full adaptation on the same trunk,
 # +0.0187 for the adaptation, one of the two inherited-hyperparameter defects the 2026-08-24 audit found
