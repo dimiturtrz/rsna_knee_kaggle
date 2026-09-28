@@ -58,11 +58,15 @@ real-world medical noise, not on synthetic flips.
 - **Where it touches us:**
   - A head that attends over patch tokens with label queries could have its attention captured by artifact tokens.
   - MRI has large low-information regions (air, background), which is exactly where artifacts form.
-  - Nothing in the record has tried `dinov2_vits14_reg`.
+  - `dinov2_vits14_reg` itself is untried. **Correction (same day):** registers as a MECHANISM already ran.
+    DINOv3 carries four register tokens, and its head strips them from the patch mean
+    (`kneemri/models/backbone.py:97-99`). The DINOv3 trunk row is CLOSED in `docs/AXES.md`. That test is
+    confounded with patch 16 and a new pretraining, so it bounds registers rather than isolating them. The
+    residual prior is lower still.
 - **Against:** the trunk is fine-tuned end to end, which lets it re-learn where the artifacts go. And the published
   gains are on dense tasks and linear probes (classification +0.1–0.5 pt on ImageNet), not on fine-tuned
   classifiers.
-- **Pricing:** one trunk-init swap arm, ~40 min of card. P(clears +0.015) ~0.03.
+- **Pricing:** one trunk-init swap arm, ~40 min of card. P(clears +0.015) ~0.02 (lowered after the DINOv3-registers correction above).
 - **Decision: not filed as a lever.** It is worth one line as an **instrument** only: if an attention-map read of
   the shipped solo shows high-norm tokens on background patches, the prior rises and it gets priced again.
   That read is CPU-cheap and has not been done.

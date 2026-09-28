@@ -242,6 +242,6 @@ Rulers are quoted where named. An unmarked number of ours is midpoint (knee-f9aa
 ## 2026-09-28: SCE and DINOv2 registers priced, not filed
 
 - SCE: P ~0.03. It is conditional on ELR (knee-bpuei) reading non-null.
-- DINOv2-reg: P ~0.03. It is an instrument first: read the attention maps of the shipped solo for background artifact tokens.
+- DINOv2-reg: P ~0.02, because DINOv3 (four registers) is already CLOSED. It is an instrument first: read the attention maps of the shipped solo for background artifact tokens.
 
 See [forum and noisy-loss sweep](../deep_dives/2026-09-28_forum-and-noisy-loss-sweep.md).
