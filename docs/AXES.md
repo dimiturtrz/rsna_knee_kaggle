@@ -178,7 +178,7 @@ forfeits the averaged point in full.
 | — soft fork (¼ the weight movement) | **CLOSED, and it fails its own null diagnostic.** Degradation got WORSE, premium halved | knee-grkrv — *reading in §Unread below* |
 | — K sweep | **CLOSED** — k4 → k7 lands in the pre-registered "weak or decaying, record and stop" branch | README:17847; knee-gxu5r |
 | `--fold -1` refit | **CLOSED** — the +0.008 was an EMA misattribution; it is ~+0.004 with spread as wide as the mean, capped below the champion. All five best bases refit and shipped | README:17492, :14296 |
-| SWA | **not implemented** — no `--swa` anywhere in the tree | — |
+| SWA | **not implemented, and priced UNDER THE BAR (2026-09-28) — do not build it as a score lever.** No `--swa` exists in our tree. The only reading we have is from a foreign recipe: variants `_swa` / `_epens` score 0.8880 against the best epoch's 0.8875, i.e. +0.0005 (README:8901). The ledger75 sweep has `raptor_v4_swa` 0.9425 against `raptor_v4` 0.9399, i.e. +0.0026 (README:9142), but that family's solo read was voided as in-sample. On our own stack the same averaging is already paid for twice: EMA is CLOSED where a holdout picks the epoch (above), and the basin-soup premium is +0.0014. Both are temporal or weight averaging over the same basin. The ceiling is therefore ~+0.001 to +0.003 on a parent, and less once it goes through a soup, since the rule above says averaging must be the LAST operation. P(solo clears 0.947) ~0.03. Re-open only as SWA *replacing* the soup's final step, measured against the soup | README:8868-8901, :9142 |
 
 ## G. Ensemble / seats / combiners — OUT OF SCOPE
 
