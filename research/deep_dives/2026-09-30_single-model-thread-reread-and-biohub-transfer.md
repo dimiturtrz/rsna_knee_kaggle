@@ -66,6 +66,19 @@ unfitted FORM. The target-blend form on the shipping line, read on the board, ha
 (relabelling CLOSED) does not cover it. That row is about correcting the report table toward the 58.
 This is a model-derived soft target over all 4,349 studies.
 
+**Correction 18:19Z: the form HAS run once, off the shipping line.** `hisrecipe_distill` trained a foreign
+`coatnet_rmlp_2_rw_384` on `(1−w)·y + w·teacher_clean_full` (`kneemri/experiments/his_labels_blend.py`),
+train rows only.
+- Result: ledger75 0.8880 on 896 rows, at the bottom of our band.
+- Its correlation with the pool ROSE to ~0.89, above our own members' 0.871
+  ([supervision sets correlation](../../interpretations/kneemri/2026-09-08_supervision-not-architecture-sets-correlation.md)).
+  Blending toward our own teacher pulls a model onto the pool.
+- Also, `report_labels_v2` is already soft (YES 0.82 / UNK 0.28 / NO 0.08). The forum's silent cells are our
+  UNK rows, so some of the "keep it fractional" gain is already in the table.
+
+What stays unrun is the form on OUR recipe, read on the board. knee-p0s4f carries the revised prior: ~0.10
+solo > 0.946, ~0.02 clears.
+
 **Honest prior.** P(clears +0.015) is low. The same teacher's ranking term is sub-floor, Nicolai reports
 no LB transfer at 50/50, and ensemble-teacher headroom on the board is 0.002. It is worth one arm and one
 instrument slot because the ruler it was killed on is blind to the axis. It is not worth a sweep.
