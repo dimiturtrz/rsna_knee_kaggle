@@ -50,13 +50,14 @@ def _priced(encoder: Encoder, size: int, *, slices: int = 12, batch: int = FITTE
     )
 
 
-def test_select():
+def test_select(monkeypatch: pytest.MonkeyPatch):
     """An uncapped budget still yields a device; the cap is applied only where there is a card.
 
-    The unit suite runs without a GPU, so this pins the contract that matters here — `select` is the
-    one place a run's device is decided, and it must work with no CUDA present rather than being a
-    CUDA-only path that silently never runs.
+    `select` is the one place a run's device is decided, and it must work with no CUDA present rather
+    than being a CUDA-only path that silently never runs. The headroom is pinned to an idle card: the
+    live one is shared, and a co-tenant holding it failed this test on 2026-09-30 with nothing wrong.
     """
+    monkeypatch.setattr(DeviceBudget, "headroom", lambda _: (31.0, 32.0))
     device = DeviceBudget().select()
 
     assert device.type in {"cuda", "cpu"}
