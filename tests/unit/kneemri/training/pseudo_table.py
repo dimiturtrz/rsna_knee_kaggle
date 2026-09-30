@@ -1,7 +1,10 @@
 """A teacher's predictions written over the studies it held out, leaving every other row's labels alone."""
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
+import pytest
 from numpy.typing import NDArray
 
 from core.findings import STUDY, TARGETS
@@ -44,6 +47,24 @@ def test_written() -> None:
     assert rows.loc["s2", finding] == 0.2
     assert rows.loc["s2", f"{finding}{CONFIDENCE_SUFFIX}"] == PSEUDO_CONFIDENCE
     assert rows.loc["s2", f"{finding}{VERDICT_SUFFIX}"] == PSEUDO_VERDICT
+
+
+def test_written_blends_at_the_weight() -> None:
+    """At weight 0.7 a covered cell sits 70% of the way from its label to the teacher (knee-p0s4f)."""
+    teacher = ["s2"]
+    written = PseudoTable(_base(), teacher, _predictions(teacher, 0.2)).written(PSEUDO_CONFIDENCE, 0.7)
+    rows = written.set_index(STUDY)
+    assert rows.loc["s2", TARGETS[0]] == pytest.approx(0.3 * TRUE_LABEL + 0.7 * 0.2)
+    assert rows.loc["s1", TARGETS[0]] == TRUE_LABEL
+
+
+def test_from_scores(tmp_path: Path) -> None:
+    """An identifiers+scores table reads as a teacher over exactly the studies it names."""
+    path = tmp_path / "teacher.npz"
+    np.savez(path, identifiers=np.array(["s3", "s1"]), scores=_predictions(["s3", "s1"], 0.2))
+    pseudo = PseudoTable.from_scores(_base(), path)
+    assert pseudo.covered() == ["s3", "s1"]
+    assert pseudo.predictions.shape == (2, len(TARGETS))
 
 
 def test_written_leaves_the_untouched_rows_true() -> None:

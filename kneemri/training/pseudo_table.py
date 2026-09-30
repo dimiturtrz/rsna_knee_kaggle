@@ -29,6 +29,12 @@ constant so the arm that chooses it has to say so in its own line.
 `__verdict` IS SET TO `PSEUDO` ON EVERY REPLACED CELL. It is prose that nothing reads, which is exactly
 why it is the right place to make the table self-identifying: a pseudo table that got mistaken for a
 reading would be undetectable from its numbers alone, since both live on [0, 1].
+
+`--weight` BLENDS rather than replaces: the cell becomes `(1 - w) * label + w * teacher`. BCE is linear in
+its target, so that is the report loss and a distillation toward the teacher at weight `w`, in the
+TARGET rather than beside it (knee-p0s4f). `w = 1` is the replacement above, exactly. `--teacher` reads
+an out-of-fold table (`teacher_clean.npz`: `identifiers`, `scores` in `TARGETS` order) in place of a
+holdout record; its rows are the train folds only, so the holdout keeps its labels by construction.
 """
 
 import logging
@@ -71,13 +77,20 @@ class PseudoTable:
         present = set(self.base[STUDY])
         return [study for study in self.studies if study in present]
 
-    def written(self, confidence: float) -> pd.DataFrame:
-        """The base table with the covered rows' twelve targets replaced by the teacher's predictions."""
+    @classmethod
+    def from_scores(cls, base: pd.DataFrame, path: Path) -> "PseudoTable":
+        """A teacher stored as `identifiers` + `scores`, the out-of-fold layout `teacher_clean.npz` uses."""
+        with np.load(path, allow_pickle=True) as stored:
+            return cls(base, [str(name) for name in stored["identifiers"]], stored["scores"].astype(np.float64))
+
+    def written(self, confidence: float, weight: float = 1.0) -> pd.DataFrame:
+        """The base table with the covered rows' twelve targets moved `weight` of the way to the teacher."""
         table = self.base.set_index(STUDY)
         ordered = pd.DataFrame(self.predictions, index=pd.Index(self.studies, name=STUDY), columns=list(TARGETS))
         covered = self.covered()
         for finding in TARGETS:
-            table.loc[covered, finding] = ordered.loc[covered, finding]
+            label = table.loc[covered, finding].astype(np.float64)
+            table.loc[covered, finding] = (1.0 - weight) * label + weight * ordered.loc[covered, finding]
             table.loc[covered, f"{finding}{CONFIDENCE_SUFFIX}"] = confidence
             table.loc[covered, f"{finding}{VERDICT_SUFFIX}"] = PSEUDO_VERDICT
         return table.reset_index()
@@ -99,20 +112,27 @@ def main() -> None:
     """Write a label table whose covered studies carry a teacher's predictions instead of their labels."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--base", type=Path, required=True, help="the true table whose rows lead")
-    command.parser.add_argument("--record", type=Path, required=True, help="the teacher's .holdout.npz")
+    source = command.parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--record", type=Path, help="the teacher's .holdout.npz")
+    source.add_argument("--teacher", type=Path, help="an out-of-fold identifiers+scores table")
     command.parser.add_argument(
         "--confidence", type=float, required=True, help="the loss weight every pseudo cell carries"
     )
+    command.parser.add_argument("--weight", type=float, default=1.0, help="how far each cell moves to the teacher")
     command.parser.add_argument("--out", type=Path, required=True, help="where the pseudo table is written")
     arguments = command.parsed()
 
-    reading = HoldoutRecord(arguments.record).required()
-    pseudo = PseudoTable(pd.read_csv(arguments.base), reading.studies, reading.predictions)
+    base = pd.read_csv(arguments.base)
+    if arguments.teacher:
+        pseudo = PseudoTable.from_scores(base, arguments.teacher)
+    else:
+        reading = HoldoutRecord(arguments.record).required()
+        pseudo = PseudoTable(base, reading.studies, reading.predictions)
     command.report(pseudo.coverage())
 
     destination = arguments.out
     destination.parent.mkdir(parents=True, exist_ok=True)
-    table = pseudo.written(arguments.confidence)
+    table = pseudo.written(arguments.confidence, arguments.weight)
     table.to_csv(destination, index=False)
     command.report([f"{len(table)} rows -> {destination}"])
 
