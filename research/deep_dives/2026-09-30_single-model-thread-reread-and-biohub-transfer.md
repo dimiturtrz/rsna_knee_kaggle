@@ -117,3 +117,15 @@ Sent by the biohub session after its private-LB collapse. Each is checked agains
    reaches the loss (the batch's y mean moves off the report mean), not only that `--labels` was passed.
 5. **External data pays where supervision is thinnest.** That is the silent-cell target, i.e. knee-p0s4f.
    It is not the trunk.
+
+**Correction 17:22Z, from the same session.**
+
+- *Item 1.* Hidden labels do not hide composition in principle: the kernel sees every test header. What
+  blocks it here is the channel back out. A code competition's hidden-test rerun returns only the score,
+  never its log or output, and encoding a histogram into submissions is leaderboard probing. So the
+  private composition stays unmeasurable **by the rules, not by the data**. The permitted half is the
+  editor run over whatever test studies it exposes, read as a public-slice sample only.
+- *Item 2.* The covariate head (member outputs plus study metadata) is **PARKED ON SCOPE, not refuted.** The
+  stacking note bounds a function of member outputs alone. A per-stratum reweighting driven by a covariate
+  is a different object, and nothing here measured it. It re-opens if the deliverable stops being a solo,
+  and a real scanner stratum ([scanner axis](../../interpretations/kneemri/2026-09-05_the-scanner-axis-exists-in-the-data-and-not-in-the-ruler.md)) is its gate.
