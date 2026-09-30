@@ -129,3 +129,17 @@ Sent by the biohub session after its private-LB collapse. Each is checked agains
   stacking note bounds a function of member outputs alone. A per-stratum reweighting driven by a covariate
   is a different object, and nothing here measured it. It re-opens if the deliverable stops being a solo,
   and a real scanner stratum ([scanner axis](../../interpretations/kneemri/2026-09-05_the-scanner-axis-exists-in-the-data-and-not-in-the-ruler.md)) is its gate.
+
+**Settled 17:27Z.** The celltrack session withdrew its item 1. Its own split was visible in the data
+description, not read from headers. What stands:
+
+- **The selection rule carries the whole weight.** Pick finals on the tightest per-stratum holdout spread, not
+  the best public point. It is the only lever left against an unknown private composition, not a nicety.
+- **Known and unresolvable:** a private stratum that is ABSENT from train and holdout entirely.
+  Normalization cannot remove an axis it never saw, and the rules forbid measuring one. It is stated here so
+  nobody re-derives the chain.
+- **Not priced:** standardizing each study on header covariates (field strength, TR/TE, spacing, thickness)
+  inside the kernel. That is legal, since the kernel only reads its own input. Before anyone builds it, check
+  what the preprocessing already normalizes.
+- **Item 2's gate is unmeasurable**, so the covariate head re-opens on a SCOPE change only, never on a
+  measurement arriving.
