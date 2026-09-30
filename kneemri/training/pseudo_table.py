@@ -46,10 +46,13 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
+from core.data.labels.targets import Supervision
 from core.findings import STUDY, TARGETS
 from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
+RAW_LEVELS = Supervision()
+"""Labels mixed as the reader wrote them."""
 
 CONFIDENCE_SUFFIX = "__conf"
 VERDICT_SUFFIX = "__verdict"
@@ -83,13 +86,17 @@ class PseudoTable:
         with np.load(path, allow_pickle=True) as stored:
             return cls(base, [str(name) for name in stored["identifiers"]], stored["scores"].astype(np.float64))
 
-    def written(self, confidence: float, weight: float = 1.0) -> pd.DataFrame:
-        """The base table with the covered rows' twelve targets moved `weight` of the way to the teacher."""
+    def written(self, confidence: float, weight: float = 1.0, supervision: Supervision = RAW_LEVELS) -> pd.DataFrame:
+        """The base table with the covered rows' twelve targets moved `weight` of the way to the teacher.
+
+        The label is read through `supervision` BEFORE the mix: a calibrated trainer remaps only exact reader
+        levels, so a blended cell would otherwise keep the raw level's weight (knee-p0s4f).
+        """
         table = self.base.set_index(STUDY)
         ordered = pd.DataFrame(self.predictions, index=pd.Index(self.studies, name=STUDY), columns=list(TARGETS))
         covered = self.covered()
         for finding in TARGETS:
-            label = table.loc[covered, finding].astype(np.float64)
+            label = supervision.applied(table.loc[covered, finding].to_numpy(dtype=np.float32)).astype(np.float64)
             table.loc[covered, finding] = (1.0 - weight) * label + weight * ordered.loc[covered, finding]
             table.loc[covered, f"{finding}{CONFIDENCE_SUFFIX}"] = confidence
             table.loc[covered, f"{finding}{VERDICT_SUFFIX}"] = PSEUDO_VERDICT
@@ -119,6 +126,9 @@ def main() -> None:
         "--confidence", type=float, required=True, help="the loss weight every pseudo cell carries"
     )
     command.parser.add_argument("--weight", type=float, default=1.0, help="how far each cell moves to the teacher")
+    command.parser.add_argument(
+        "--calibrated", action="store_true", help="blend from each level's measured rate, not the raw level"
+    )
     command.parser.add_argument("--out", type=Path, required=True, help="where the pseudo table is written")
     arguments = command.parsed()
 
@@ -132,7 +142,7 @@ def main() -> None:
 
     destination = arguments.out
     destination.parent.mkdir(parents=True, exist_ok=True)
-    table = pseudo.written(arguments.confidence, arguments.weight)
+    table = pseudo.written(arguments.confidence, arguments.weight, Supervision(calibrated=arguments.calibrated))
     table.to_csv(destination, index=False)
     command.report([f"{len(table)} rows -> {destination}"])
 

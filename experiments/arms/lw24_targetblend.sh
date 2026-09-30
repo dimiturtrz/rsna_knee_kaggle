@@ -4,7 +4,7 @@
 #
 # WHAT THIS ARM IS
 #   `labelwise_depth24_drop40_long` with ONE variable moved: the TRAINING target. `--labels` is
-#   `blend_oof_a07.csv` = 0.3 * report_labels_v2 + 0.7 * teacher_clean on the 3497 train rows
+#   `blend_oof_a07_cal.csv` = 0.3 * report_labels_v2 + 0.7 * teacher_clean on the 3497 train rows
 #   (`python -m kneemri.training.pseudo_table --teacher ... --weight 0.7 --confidence 1.0`); the 909
 #   fold-0 holdout rows are the report's own, untouched. `--eval-labels` pins the ruler to
 #   report_labels_v2, so the score is against readings, never against the teacher.
@@ -24,12 +24,12 @@
 #   would overwrite the blend and this arm would be its control. Assert the blend LANDS first (a batch's
 #   target mean off the report mean), or drop the flag and say so.
 #
-# deliberate: --labels blend_oof_a07.csv --eval-labels report_labels_v2 — the one variable.
+# deliberate: --labels blend_oof_a07_cal.csv --eval-labels report_labels_v2 — the one variable.
 # deliberate: every other flag verbatim from labelwise_depth24_drop40_long.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 require "$LABELS"
-BLEND="$(dirname "$LABELS")/blend_oof_a07.csv"
+BLEND="$(dirname "$LABELS")/blend_oof_a07_cal.csv"
 require "$BLEND"
 
 run_train lw24_targetblend \

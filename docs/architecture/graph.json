@@ -7659,6 +7659,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.pseudo_table",
+      "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.pseudo_table",
       "target": "core.findings",
       "weight": 1
     },
@@ -36117,6 +36123,12 @@
     {
       "kind": "references",
       "source": "kneemri.training.pseudo_table.PseudoTable",
+      "target": "core.data.labels.targets.Supervision",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.training.pseudo_table.PseudoTable",
       "target": "kneemri.training.pseudo_table.PseudoTable",
       "weight": 1
     },
@@ -36129,7 +36141,19 @@
     {
       "kind": "calls",
       "source": "kneemri.training.pseudo_table.PseudoTable.written",
+      "target": "core.data.labels.targets.Supervision.applied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.pseudo_table.PseudoTable.written",
       "target": "kneemri.training.pseudo_table.PseudoTable.covered",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.training.pseudo_table.main",
+      "target": "core.data.labels.targets.Supervision",
       "weight": 1
     },
     {

@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 from numpy.typing import NDArray
 
+from core.data.labels.targets import Supervision
 from core.findings import STUDY, TARGETS
 from kneemri.training.pseudo_table import CONFIDENCE_SUFFIX, PSEUDO_VERDICT, VERDICT_SUFFIX, PseudoTable
 
@@ -14,6 +15,8 @@ STUDIES = ["s1", "s2", "s3", "s4"]
 TRUE_LABEL = 1.0
 TRUE_CONFIDENCE = 0.9
 PSEUDO_CONFIDENCE = 0.4
+REPORT_LEVEL = 0.82
+MEASURED_RATE = 0.688
 
 
 def _base() -> pd.DataFrame:
@@ -56,6 +59,17 @@ def test_written_blends_at_the_weight() -> None:
     rows = written.set_index(STUDY)
     assert rows.loc["s2", TARGETS[0]] == pytest.approx(0.3 * TRUE_LABEL + 0.7 * 0.2)
     assert rows.loc["s1", TARGETS[0]] == TRUE_LABEL
+
+
+def test_written_calibrates_before_blending() -> None:
+    """A reader level is replaced by its measured rate before the mix, so 0.82 blends as 0.688."""
+    base = _base()
+    base[TARGETS[0]] = REPORT_LEVEL
+    teacher = ["s2"]
+    table = PseudoTable(base, teacher, _predictions(teacher, 0.2))
+    written = table.written(PSEUDO_CONFIDENCE, 0.7, Supervision(calibrated=True)).set_index(STUDY)
+    assert written.loc["s2", TARGETS[0]] == pytest.approx(0.3 * MEASURED_RATE + 0.7 * 0.2)
+    assert written.loc["s1", TARGETS[0]] == pytest.approx(REPORT_LEVEL)
 
 
 def test_from_scores(tmp_path: Path) -> None:
