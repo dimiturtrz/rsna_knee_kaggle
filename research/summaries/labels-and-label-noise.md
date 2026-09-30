@@ -142,6 +142,10 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
 - **[unv]** Forum: "labels are still my greatest lever, especially pseudo labeling and blending different labels". Two entries trained on LLM output labels only reach 0.926–0.929 five-fold. The best single claim is 0.943 against our 0.946 champion. A quoted "0.949 small ResNet" is not in the thread and was withdrawn ([rival_single_models](../deep_dives/2026-08-26_rival_single_models_and_the_label_bottleneck.md), 09-16 re-read).
 - **[ours]** AXES:157: `noisy_student` scored 0.8548 and `pool_specialise` was FLAT. That run used *external* data as labelled augmentation, not in-domain pseudo-labels on the 4,349 report-only studies.
 - **[ours]** In-domain soft pseudo-labels HAVE run: `--teacher-targets` from our own out-of-fold predictions over the 4,349 studies, `--distill-weight 0.7`. The leak-free student `seat_clean_distill` reads 0.8634 vs `band_dense` 0.8578 = **+0.0056**, under the 0.0062 floor; gen-2 teachers add +0.0007 ([experiments/README.md ~8566, ~14050](../../experiments/README.md); knee-zwcyk). The ensemble-teacher headroom is 0.002 on the board (AXES:160). So pseudo-labelling is measured and sub-floor, not unrun.
+- **[unv → ours, 2026-09-30] The FORM and the RULER of that measurement are not the forum's.** The 0.949 small-ResNet claim IS in the thread now (Scott Willis, 09-05), which corrects the "withdrawn" line above. Two single-fold 0.950 claims name one recipe: an out-of-fold soft bootstrap of the BCE TARGET, `(1−a)·y + a·p_oof`, weighted toward the model, kept fractional, with its gain in the report-silent cells. One counter-report says it lifted CV and gold but not the LB.
+  - Ours is a pairwise ranking term BESIDE an untouched target (`terms.py:354`).
+  - It was read only on report-derived rulers, which are blind to a move toward annotation truth (README ~3885).
+  - Unrun in that form on the shipping line; priced as one arm plus one board instrument slot ([thread_reread](../deep_dives/2026-09-30_single-model-thread-reread-and-biohub-transfer.md)).
 
 ---
 

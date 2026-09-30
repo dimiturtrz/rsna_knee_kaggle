@@ -256,3 +256,7 @@ Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_ga
 ## 2026-09-28 forum sweep (18 threads since 09-25)
 
 No posted mechanism above 0.946 solo. A competitor measured gold-58 extraction at 207 of 240 positives found, and 22 of the 33 misses are reports that never name the finding. A host has not yet answered the external-data yes/no thread (743416). Board: leader 0.960, gap 0.014. Deep dive: [forum and noisy-loss sweep](../deep_dives/2026-09-28_forum-and-noisy-loss-sweep.md).
+
+## 2026-09-30 re-read of topic 735304 (Sep posts)
+
+New self-reported single-model claims: 0.950 (CoAtNet 224, OOF soft-bootstrapped targets), 0.950 (Qwen 3.5 2B VLM LoRA at 384), 0.949 (small ResNet, own labels), 0.954 (five-fold ResNet 224). The thread converges on the training TARGET, not the trunk. The biohub private post-mortem says the same from outside: a 0.002-flat knob fleet, with the gap upstream. Deep dive: [thread re-read and biohub transfer](../deep_dives/2026-09-30_single-model-thread-reread-and-biohub-transfer.md).
