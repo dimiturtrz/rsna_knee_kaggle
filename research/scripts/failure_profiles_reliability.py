@@ -17,7 +17,7 @@ import numpy as np
 from scipy.stats import rankdata, spearmanr
 from sklearn.metrics import roc_auc_score
 
-ROOT = "D:/models/rsna_knee_abnormality"
+ROOT = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
 REF = os.path.join(ROOT, "band_span_s2026.holdout.npz")
 VOID = {
     "raptor_v4_swa", "raptor_v4", "raptor_v9", "raptor_effv2l480",

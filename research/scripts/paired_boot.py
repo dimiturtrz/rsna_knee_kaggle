@@ -11,7 +11,7 @@ from core.findings import TARGETS
 from kneemri.runs.holdout_record import HoldoutRecord
 
 CUT = 0.5
-BASE = Path("D:/models/rsna_knee_abnormality")
+BASE = Path("D:/data/volumetric/mri/models/rsna_knee_abnormality")
 rng = np.random.default_rng(20260911)
 
 

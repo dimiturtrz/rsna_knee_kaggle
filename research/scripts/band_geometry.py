@@ -32,7 +32,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import rankdata
 
-ROOT = "D:/models/rsna_knee_abnormality"
+ROOT = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
 META = "D:/data/volumetric/mri/processed/rsna_knee_abnormality/metadata/canonical_metadata.csv"
 COLS = ["ACL", "MCL", "Medial Meniscus", "Lateral Meniscus", "Medial OA",
         "Lateral OA", "PF OA", "Effusion", "Synovitis", "Baker's",

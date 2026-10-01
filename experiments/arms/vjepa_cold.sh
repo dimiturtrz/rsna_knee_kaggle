@@ -38,7 +38,7 @@
 #                  transferred, which is the exact confound D118 §2 names
 #
 # bead: knee-s9e03
-# reading: D:/models/rsna_knee_abnormality/vjepa_cold_s2026.holdout.npz
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/vjepa_cold_s2026.holdout.npz
 #
 # `arm_check` REFUSES NOTHING HERE AND WARNS CORRECTLY: this is `vjepa_member` flag for flag, up to
 # `--out` (knee-7uoq). That is the point rather than a defect, and it is the one thing to be honest about

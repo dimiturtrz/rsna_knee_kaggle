@@ -49,7 +49,7 @@ read_budget() {
   echo "=== BUDGET $tag : lr $lr steps $steps ==="
   UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
     --checkpoints "$MODELS/fovjitter160_s2026.pt" \
-    --labels "$LABELS" --foreign D:/kaggle/input/raptor-corpus --device cuda \
+    --labels "$LABELS" --foreign D:/data/volumetric/mri/processed/raptor/raptor-corpus --device cuda \
     --adapt --adapt-lr "$lr" --adapt-steps "$steps" \
     --per-study "$MODELS/carve_budget_$tag.npz"
 }

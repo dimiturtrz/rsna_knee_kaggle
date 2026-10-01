@@ -11,7 +11,7 @@ and `d26_contusion.py` (`d26_contusion.out`); the letters in `inbox/mastermind/r
 |---|---|---|---|
 | **gold-58** | the 58 `train.csv` rows with all twelve labels (n+ per column 9–35; 57 of them in v2) | radiologist, image-read | the only pixel ruler; expert-annotated like the hidden test |
 | **LEDGER-896** | each member's `<name>.holdout.npz`, 909 studies minus the 13 gold rows | `report_labels_v2` soft value binarised at the midpoint, `targets > 0.5` (`kneemri/evaluation/scores.py:19`) | our own text reader, binarised |
-| **HIS** | `D:/data/external/raptor/labels/labels_llm_soft.csv`, 4,349 studies, all 896 present, 0 of the 58 | a second text reader of the same reports; 14 values with a gap 0.45–0.76, so >0.5 ≡ ≥0.75 | provenance: nothing on disk beyond the filename (D24 job 3) |
+| **HIS** | `D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft.csv`, 4,349 studies, all 896 present, 0 of the 58 | a second text reader of the same reports; 14 values with a gap 0.45–0.76, so >0.5 ≡ ≥0.75 | provenance: nothing on disk beyond the filename (D24 job 3) |
 
 Members: the 30 with both a 58-row reading cache and a holdout npz; 10 of them hold the 58 out honestly.
 Agreement between two rulers = Spearman across the 30 members of the per-column AUC. v2's soft values take

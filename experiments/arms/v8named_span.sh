@@ -53,7 +53,7 @@
 # that does not move is the cleanest refutation available, since 72% of the cells are in it.
 # PLUMBING first: assert `labels` names v8named and `eval-labels` names v2 before writing any number.
 #
-# reading: D:/models/rsna_knee_abnormality/v8named_span_s2026*.holdout.npz
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/v8named_span_s2026*.holdout.npz
 # bead: knee-lv4fx
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 

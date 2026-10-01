@@ -41,7 +41,7 @@
 # second sample of one.
 #
 # bead: knee-rag9t
-# reading: D:/models/rsna_knee_abnormality/base_lr2e5_s2026.holdout.npz
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/base_lr2e5_s2026.holdout.npz
 #
 # deliberate: --backbone-lr 2e-5 (the swept knob, the only difference from base_clean)
 # deliberate: --variant base (explicit; the default is SMALL, encoder_flags.py:52-56, which is the

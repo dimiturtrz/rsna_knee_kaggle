@@ -803,7 +803,7 @@ foreign_labels_dense_s2026.pt  # his 12-finding LABELS on our dense recipe, fold
 # while every gate in this repo reported green.
 #
 # All numbers are LEDGER75 on the repo per-column cut, read 2026-09-08 01:51Z over
-# D:/models/rsna_knee_abnormality. Seat values, where quoted, are SWAPS (displace the weakest seat, k
+# D:/data/volumetric/mri/models/rsna_knee_abnormality. Seat values, where quoted, are SWAPS (displace the weakest seat, k
 # held) from D145/D147/D148 - never adds; the two differ by ~40% and D147 section 0 says why.
 #
 # --- The published raptor weights: VOID, and not on a threshold. -------------------------------------

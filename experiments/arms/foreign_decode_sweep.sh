@@ -36,7 +36,7 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 FOREIGN_KERNEL="$REPO/external/dinov3folds/bend_the_knee_to_dinov3_ensembled.py"
-FOREIGN_WEIGHTS="D:/data/external/kaggle_foreign/mattiaangeli_dinov3"
+FOREIGN_WEIGHTS="D:/data/volumetric/mri/models/foreign/kaggle_foreign/mattiaangeli_dinov3"
 RAW="$(dirname "$PROCESSED")/../raw/rsna_knee_abnormality"
 HOLDOUT="$MODELS/band_dense_s2026.holdout.npz"
 

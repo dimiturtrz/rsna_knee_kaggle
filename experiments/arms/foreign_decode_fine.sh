@@ -43,7 +43,7 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 FOREIGN_KERNEL="$REPO/external/dinov3folds/bend_the_knee_to_dinov3_ensembled.py"
-FOREIGN_WEIGHTS="D:/data/external/kaggle_foreign/mattiaangeli_dinov3"
+FOREIGN_WEIGHTS="D:/data/volumetric/mri/models/foreign/kaggle_foreign/mattiaangeli_dinov3"
 RAW="$(dirname "$PROCESSED")/../raw/rsna_knee_abnormality"
 # HOLDOUT is the arm's to set, not lib.sh's — `foreign_decode_sweep.sh:41` sets the same file, and this
 # arm inherited its `require` line without it. Under `set -u` that is an unbound variable, and the arm dies

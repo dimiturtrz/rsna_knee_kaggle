@@ -37,7 +37,7 @@ def main() -> None:
         )
 
     HoldoutPredictions.predict = traced  # type: ignore[method-assign]
-    models = "D:/models/rsna_knee_abnormality"
+    models = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
     processed = "D:/data/volumetric/mri/processed/rsna_knee_abnormality"
     sys.argv = [
         "foreign_readout",
@@ -46,7 +46,7 @@ def main() -> None:
         "--labels",
         f"{processed}/labels/report_labels_v2.csv",
         "--foreign",
-        "D:/kaggle/input/raptor-corpus",
+        "D:/data/volumetric/mri/processed/raptor/raptor-corpus",
         "--device",
         "cuda",
     ]

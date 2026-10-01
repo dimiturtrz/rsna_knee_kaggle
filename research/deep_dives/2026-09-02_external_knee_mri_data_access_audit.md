@@ -146,7 +146,7 @@ writes — appendix text ready to paste is in `inbox/main/attach/d75_licence_app
 
 ## 1. The Kaggle mirror's licence, quoted
 
-Local copy: `D:/data/external/kneemri_rijeka/kneemridataset.zip` (no `dataset-metadata.json` beside it;
+Local copy: `D:/data/volumetric/mri/models/foreign/kneemri_rijeka/kneemridataset.zip` (no `dataset-metadata.json` beside it;
 slug recovered from the zip name). Page: <https://www.kaggle.com/datasets/sohaibanwaar1203/kneemridataset>
 (title "kneeMRIdataset", owner Sohaib Anwaar). Licence field and description:
 
@@ -228,7 +228,7 @@ plus (:40) "non-commercial + no redistribution + no derivative works".
 
 Members whose training set includes MRNet images or MRNet-derived labels:
 
-| member | how MRNet enters | on disk (`D:/models/rsna_knee_abnormality`) | roster / declines |
+| member | how MRNet enters | on disk (`D:/data/volumetric/mri/models/rsna_knee_abnormality`) | roster / declines |
 |---|---|---|---|
 | `mrnet_acl_pretrain_s2026` | trunk pre-trained on MRNet ACL task | yes | neither |
 | `mrnet_warm_s2026` | `mrnet_warm.sh:52 --init mrnet_acl_pretrain_s2026.pt --init-scope trunk` | yes | declines:298 |
@@ -254,10 +254,10 @@ are our own fold twins.
 | mattiaangeli | `mattiaangeli/rsna-knee-coat-resgated-ep10-top3` | "CC0: Public Domain" |
 | pilkwang LLM labels | `pilkwang/rsna-knee-llm-labels` | "CC0: Public Domain" |
 
-`D:/data/external/raptor/fetch.sh:5-6` pulls `dreaddevelopment/$d`, so
+`D:/data/volumetric/mri/models/foreign/raptor/fetch.sh:5-6` pulls `dreaddevelopment/$d`, so
 `raptor/labels/labels_llm_soft.csv` (consumed by `foreign_labels_dense.sh:53`, `hisrecipe_distill*.sh:62`)
 is a dreaddevelopment (CC0) artefact. Our own re-upload `dimiturnt/mattia-all-public` declares
-`"licenses": [{"name": "CC0-1.0"}]` (`D:/data/external/mattia_all_public/dataset-metadata.json`). No
+`"licenses": [{"name": "CC0-1.0"}]` (`D:/data/volumetric/mri/models/foreign/mattia_all_public/dataset-metadata.json`). No
 `dataset-metadata.json` exists under `kaggle_foreign/*` — licences above are from the live pages.
 
 ## 5. Inventory — where a Rijeka/MRNet-trained member sits

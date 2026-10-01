@@ -441,7 +441,7 @@ tests — this repo's tests cover only ITS packages. Consumer-specific detector 
 - **And that log is NOT under `logs/` — a `run_train` arm's full log lives under `$MODELS/experiments/`.**
   `lib.sh` re-runs an arm launched from the repo tree "from a snapshot", and the snapshot's `tee` writes
   `$MODELS/experiments/<checkpoint>.full.log` (measured 2026-09-07 off the live process table:
-  `tee D:/models/rsna_knee_abnormality/experiments/clean_calib_s2026.full.log`). `logs/` holds the
+  `tee D:/data/volumetric/mri/models/rsna_knee_abnormality/experiments/clean_calib_s2026.full.log`). `logs/` holds the
   `foreign_run` arms — his script, a different launcher — and misc, which is why the spelling looks right
   until the one time it is not. Two watchers were gated on `logs/<checkpoint>.full.log`, a path that does
   not exist and never will; one of them would have held the card idle from the moment its arm finished.

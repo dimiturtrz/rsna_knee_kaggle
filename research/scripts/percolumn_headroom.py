@@ -1,7 +1,7 @@
 import numpy as np, glob, os, json
 from kneemri.evaluation.scores import LabelScores
 from sklearn.metrics import roc_auc_score
-MODELS = "D:/models/rsna_knee_abnormality"
+MODELS = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
 files = sorted(glob.glob(os.path.join(MODELS, "**", "*.holdout.npz"), recursive=True))
 canon = None
 rows = []

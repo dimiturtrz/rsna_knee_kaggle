@@ -57,4 +57,4 @@ UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
     "$MODELS/warm224_long_s2026.pt" \
     "$MODELS/native224_s2026.pt" \
     "$MODELS/latent_register_dense_s2026.pt" \
-  --labels "$LABELS" --foreign D:/kaggle/input/raptor-corpus --device cuda
+  --labels "$LABELS" --foreign D:/data/volumetric/mri/processed/raptor/raptor-corpus --device cuda

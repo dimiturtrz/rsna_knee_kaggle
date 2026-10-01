@@ -99,7 +99,7 @@ def test_found_in_models(tmp_path: Path) -> None:
 def test_found_absolute(tmp_path: Path) -> None:
     """An ABSOLUTE declaration resolves directly — `Path.glob` raises on one, which killed the whole check.
 
-    Five arms declare `D:/models/…holdout.npz`, and from 2026-09-07 `84660bf5` every invocation of
+    Five arms declare `D:/data/volumetric/mri/models/…holdout.npz`, and from 2026-09-07 `84660bf5` every invocation of
     `reading_check` exited 1 on `NotImplementedError: Non-relative patterns are unsupported`, reporting
     nothing at all (D193 §1).
     """

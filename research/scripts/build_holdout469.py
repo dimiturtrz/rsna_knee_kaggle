@@ -9,7 +9,7 @@ SEED = 20260911
 OUT = "C:/Users/User/AppData/Local/Temp/claude/D--personal-projects-rsna-knee-kaggle/3dc4cc46-abdd-4d38-b0dc-f1461a5b836a/scratchpad/audit400/holdout469"
 
 sel = pd.read_csv("D:/data/volumetric/mri/processed/rsna_knee_abnormality/labels/v2_lone_dissent.csv")
-ref = np.load("D:/models/rsna_knee_abnormality/band_span_s2026.holdout.npz")
+ref = np.load("D:/data/volumetric/mri/models/rsna_knee_abnormality/band_span_s2026.holdout.npz")
 studies = set(ref["studies"].astype(str))
 key = sel[sel.study_uid.isin(studies)].reset_index(drop=True)
 assert len(key) == 469, len(key)

@@ -34,7 +34,7 @@ first half of a 12-epoch one-cycle schedule:
 | lr4e-5_ws_ramp | not started | — | — | — | — | — | — |
 | calib_span_ramp | not started | — | — | — | — | — | — |
 
-Sources: `D:/models/rsna_knee_abnormality/*_s2026.metrics.jsonl` and `ramp_dense_gate.metrics.jsonl`.
+Sources: `D:/data/volumetric/mri/models/rsna_knee_abnormality/*_s2026.metrics.jsonl` and `ramp_dense_gate.metrics.jsonl`.
 
 ## Counts
 

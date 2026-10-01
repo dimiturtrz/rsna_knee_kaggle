@@ -31,7 +31,7 @@
 #                  ABOVE it, not below. That is a finding about the lane, not a null.
 #
 # bead: knee-mv093
-# reading: D:/models/rsna_knee_abnormality/resnet50d_lr_s2026.holdout.npz
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/resnet50d_lr_s2026.holdout.npz
 #
 # deliberate: --backbone-lr 1.26e-4 (the swept knob, the only difference from resnet50d_short)
 # deliberate: --image-size 224 (the revision's own resolution; changing it would move two things)

@@ -100,3 +100,19 @@ def test_ran_refuses_a_silent_death(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError, match="without writing any artefact"):
         ForeignRun(script=script, argv=("--tag", TAG)).ran()
+
+
+def test_mapped(tmp_path: Path) -> None:
+    """Only a path under his `/kaggle/input` moves, and it moves to the directory the run was given."""
+    run = ForeignRun(script=tmp_path / "foreign.py", argv=(), kaggle_input=tmp_path)
+    assert run.mapped("/kaggle/input/raptor-corpus") == f"{tmp_path.as_posix()}/raptor-corpus"
+    assert run.mapped("/elsewhere/raptor-corpus") == "/elsewhere/raptor-corpus"
+
+
+def test_walked(tmp_path: Path) -> None:
+    """His `_find` walk over `/kaggle/input` lands on the corpus wherever this machine keeps it."""
+    (tmp_path / "raptor-corpus").mkdir()
+    (tmp_path / "raptor-corpus" / "all_vols.npy").write_text("x", encoding="utf-8")
+    run = ForeignRun(script=tmp_path / "foreign.py", argv=(), kaggle_input=tmp_path)
+    found = [name for _, _, names in run.walked("/kaggle/input") for name in names]
+    assert found == ["all_vols.npy"]

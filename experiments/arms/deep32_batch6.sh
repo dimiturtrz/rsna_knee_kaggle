@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Depth past the batch-12 VRAM ceiling: 32 slices over the SAME 0.10-0.90 band, paid for with batch 6.
 #
-# reading: D:/models/rsna_knee_abnormality/deep32_batch6_s2026.holdout.npz
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/deep32_batch6_s2026.holdout.npz
 # bead: knee-12ckm
 #
 # THE QUESTION. Depth density on the anatomy that carries the finding is the only mechanism class in

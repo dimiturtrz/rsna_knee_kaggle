@@ -1,7 +1,7 @@
 # The corner is a PLATEAU of twelve members, and the midpoint ruler cannot resolve which one is on top
 
 2026-09-17. Bead knee-wbwq. No card spent: one `ledger75` pass over every holdout record on disk
-(`--holdouts D:/models/rsna_knee_abnormality`, 428 of 447 records, 19 VOID), parsed for the 363 rows on
+(`--holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`, 428 of 447 records, 19 VOID), parsed for the 363 rows on
 population `66c6f231`, 909 studies.
 
 **The answer, stated first: twelve distinct members sit between 0.8998 and 0.9053 on ledger75 — a 0.0055

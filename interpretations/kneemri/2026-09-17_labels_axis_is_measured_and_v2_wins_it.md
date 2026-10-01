@@ -14,7 +14,7 @@ line — `$RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT --ba
 --band-low 0.1 --band-high 0.9` — differing only in `--labels`, and every challenger carries
 `--eval-labels report_labels_v2.csv` so all eight are scored against one truth. Single-knob, one ruler.
 
-`ledger75 --holdouts D:/models/rsna_knee_abnormality`, population 66c6f231, 909 studies:
+`ledger75 --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`, population 66c6f231, 909 studies:
 
 ```
 band_span_s2026        report_labels_v2.csv (the default)   0.8851   peak e6

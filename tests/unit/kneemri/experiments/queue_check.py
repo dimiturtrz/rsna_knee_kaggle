@@ -111,7 +111,7 @@ def test_doubled(tmp_path: Path):
     assert QueuedArms(tmp_path, LIVE + LIVE).doubled() == ARMS.split(), "both arms would start twice"
 
 
-PRODUCER = "User 22188 1 ? python -m kneemri.train --out /d/models/ortho_pool_read_s2026.pt\n"
+PRODUCER = "User 22188 1 ? python -m kneemri.train --out /d/data/volumetric/mri/models/ortho_pool_read_s2026.pt\n"
 BY_PID = "experiments/arms/cnx_ladder.sh"
 BY_NAME = "experiments/arms/radiodino_corpus.sh"
 ONE_JOB = (
@@ -136,7 +136,9 @@ def test_producer(tmp_path: Path):
 
 def test_producer_will_not_match_a_pid_inside_another_column(tmp_path: Path):
     _two_watchers(tmp_path)
-    unrelated = "User 9 1 ? python -m kneemri.train --seed 22188999 --out /d/models/other_s2026.pt\n"
+    unrelated = (
+        "User 9 1 ? python -m kneemri.train --seed 22188999 --out /d/data/volumetric/mri/models/other_s2026.pt\n"
+    )
     queue = QueuedArms(tmp_path, ONE_JOB.replace(PRODUCER, unrelated))
     assert queue.producer(queue.watches()[0]) == "", "a pid is a FIELD; digits inside a seed are not it"
 

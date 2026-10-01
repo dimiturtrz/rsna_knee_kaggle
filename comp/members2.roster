@@ -107,7 +107,7 @@ warm_calib_lowlr_s2026.pt            # 0.8577 solo; seated on decorrelation, +0.
 labelwise_dense_ff.pt                # no offline number by construction, --fold -1; twin reads 0.8959
 
 # ADDED 2026-09-08 02:00Z - six members that had a holdout record and no line anywhere (knee-s39kk).
-# LEDGER75 on the repo ruler, --holdouts D:/models/rsna_knee_abnormality, read 01:51Z. A macro quoted
+# LEDGER75 on the repo ruler, --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality, read 01:51Z. A macro quoted
 # without its binarization is not a number, so the cut is named once here and applies to every line.
 recal_calib_s2026.pt                 # LEDGER75 0.8945, epoch 8, 909 rows - fourth-best solo the project
 # owns, behind labelwise_dense 0.8964 / stackfit 0.8962 / calib_dense_hold 0.8949. Unfiled since 09-07
@@ -419,7 +419,7 @@ dml_b_ff_long36.pt          # DARK BY CONSTRUCTION -- `--fold -1 --ema`. dml_b_f
 # ---- the operator pair, five members found already on disk and priced 2026-09-13 ----
 # `roster_check` named seven undocumented checkpoints and five of them were `drop40_long` runs nobody had
 # priced. So the pair (`--slot-dropout 0.40` + `--epochs 12 -> 24`) had already been run far wider than the
-# five bases the labelwise work knew about. ledger75, 909 rows, `--holdouts D:/models/rsna_knee_abnormality`:
+# five bases the labelwise work knew about. ledger75, 909 rows, `--holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`:
 #
 #   band_dense_drop40_long 0.8918 @e16  vs band_dense 0.8877 @e8   +0.0041
 #   base224_drop40_long    0.8865 @e17  vs base224    0.8795 @e9   +0.0070

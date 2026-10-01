@@ -66,7 +66,7 @@
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
-HIS_LABELS="D:/data/external/raptor/labels/labels_llm_soft.csv"
+HIS_LABELS="D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft.csv"
 ENCODER="$MODELS/encoders/calib_dense_hold.enc.pt"
 require "$LABELS"
 require "$HIS_LABELS"

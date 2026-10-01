@@ -106,7 +106,7 @@ single-knob read. Some of those twenty-two may be closed wrongly for this reason
 
 ## Evidence
 
-* `kneemri/evaluation/ledger75 --holdouts D:/models/rsna_knee_abnormality --only <29 stems>` — run
+* `kneemri/evaluation/ledger75 --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality --only <29 stems>` — run
   2026-09-18T09:36Z, two calls, every number above. Population `eb3ba199`, 909 studies, fold 0.
 * Arm headers naming each control: `llrd224.sh:91`, `band_dense_llrd.sh:51`, `band_deep224.sh:65-66`,
   `band_deep_matched.sh:69-70`, `blendhold_drop40_long.sh:34`, `band_dense_long.sh:20`, `band224.sh:44`,

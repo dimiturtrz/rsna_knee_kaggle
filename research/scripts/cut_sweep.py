@@ -1,6 +1,6 @@
 """Which cut of our own holdout tracks the BOARD best, over every solo entry we have ever shipped?
 
-`python research/scripts/cut_sweep.py --holdouts D:/models/rsna_knee_abnormality`
+`python research/scripts/cut_sweep.py --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`
 
 WHY. `headlrsolo_v1` (2026-09-18) made three members at offline75 0.9045 / 0.9053 / 0.9059 read board
 0.937 / 0.941 / 0.937. Those three are an offline TIE (spread 0.0014 against a 0.0062 paired floor), so

@@ -59,9 +59,10 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 
 SCRIPT="$REPO/external/raptor/knee-mri-training-the-twelve-finding-model.py"
 FOLDS="$REPO/external/raptor/fold0_909.json"
-HIS_LABELS="D:/data/external/raptor/labels/labels_llm_soft.csv"
+RAPTOR_CORPUS="D:/data/volumetric/mri/processed/raptor/raptor-corpus"
+HIS_LABELS="D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft.csv"
 TEACHER="$PROCESSED/teacher_clean_full.npz"
-BLEND="D:/data/external/raptor/labels/labels_llm_soft_distill0.3"
+BLEND="D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft_distill0.3"
 require "$SCRIPT"
 require "$FOLDS"
 require "$HIS_LABELS"
@@ -85,6 +86,7 @@ uv run --no-sync --project "$REPO" python -m kneemri.experiments.foreign_run \
   --arch coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k \
   --res 384 --epochs 16 --bs 8 --k 12 --k_eval 24 --grad_ckpt --ckpt timm \
   --tag hisrecipe_distill \
+  --kaggle-input "$RAPTOR_CORPUS" \
   --labels "$BLEND.parquet" \
   --folds 1 --fold 0 --fold_file "$FOLDS" \
   --workers 4

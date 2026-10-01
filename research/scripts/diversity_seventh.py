@@ -21,7 +21,7 @@ from collections import Counter
 import numpy as np
 from scipy.stats import rankdata, spearmanr
 
-ROOT = "D:/models/rsna_knee_abnormality"
+ROOT = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
 REF = os.path.join(ROOT, "band_span_s2026.holdout.npz")
 ROSTER = "comp/members.roster"
 FIXED_SIX = [

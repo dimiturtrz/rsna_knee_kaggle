@@ -16,7 +16,7 @@ warm start contributes about zero, and no warm member has ever been the best sol
 
 ## The four numbers, one ruler, all converged
 
-`ledger75 --holdouts D:/models/rsna_knee_abnormality --only …`, population `66c6f231`, 909 studies.
+`ledger75 --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality --only …`, population `66c6f231`, 909 studies.
 `convergence_check` flags none of these four, so every epoch quoted is a real peak and not a killed
 process.
 

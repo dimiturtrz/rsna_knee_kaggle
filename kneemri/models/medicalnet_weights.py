@@ -6,7 +6,7 @@ fit. A loader that quietly falls back is the failure mode every foreign-weight b
 taken.
 
     git clone https://github.com/Tencent/MedicalNet external/MedicalNet   # pinned 20f76aaa
-    # their Google-Drive/Kaggle mirror of `pretrain/` -> D:/data/external/medicalnet
+    # their Google-Drive/Kaggle mirror of `pretrain/` -> D:/data/volumetric/mri/models/foreign/medicalnet
 """
 
 import importlib.util

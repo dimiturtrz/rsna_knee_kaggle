@@ -7,7 +7,7 @@
 # was pretrained on — and moving only the architecture.
 #
 # bead: knee-7niv7
-# reading: D:/models/rsna_knee_abnormality/resnet50d_short_s2026.holdout.npz
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/resnet50d_short_s2026.holdout.npz
 #
 # WHAT IT BUYS, SAID AS A PRICE. ~1 card-hour that would otherwise be idle, and an expected board gain
 # tonight of ZERO — D53 closed the width axis at nine seats (a tenth is worth <= +0.0004 and every

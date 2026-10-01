@@ -8850,7 +8850,7 @@ measures processes(4) at 0.12 s/study at 12 slices over 4407 studies = 9 min, sc
 rebuild is ~15 min and the worst array is well under an hour. `atime` cannot rank the arrays — every file
 reads the same timestamp, so access-time updates are off on this volume, and the member mapping above is
 the only honest test. No process of ours holds any of them open: A', cell C and effv2l all read dread's
-corpora under `D:/kaggle/input/`, not a processed cache.
+corpora under `D:/kaggle/input/` (since 2026-10-01 `processed/raptor/`), not a processed cache.
 
 ## A' replicates his recipe at 0.8307 out of sample, and every number it was going to be compared against is in-sample — 2026-09-07
 
@@ -8924,7 +8924,7 @@ table. Column order is read from the file on every table from here.
 
 ## His training table calls positives at half our rate on eleven columns, and double on Synovitis — 2026-09-07
 
-A' and cell C train on `D:/data/external/raptor/labels/labels_llm_soft.parquet` (identical csv beside it),
+A' and cell C train on `D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft.parquet` (identical csv beside it),
 his LLM read of the same reports: **4,349 of our 4,406 studies**, the same twelve column names, joined on
 `StudyInstanceUID` with 4,349 of 4,349 matching. They are then scored against `report_labels_v2.csv`.
 Positive rate at a 0.5 cut, **ours ÷ his**:
@@ -8971,7 +8971,7 @@ written off. Set arithmetic on `StudyInstanceUID`:
 | set | n |
 |---|---|
 | ours, `report_labels_v2.csv` | 4,406 |
-| his, `D:/data/external/raptor/labels/labels_llm_soft.csv` | 4,349 |
+| his, `D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft.csv` | 4,349 |
 | ours − his | **57** |
 | of those 57, gold-annotated in `train.csv` (all twelve columns non-null) | **57 of 57** |
 | non-gold rows absent from his table | **0** |
@@ -16041,7 +16041,7 @@ runs on disk), the 0.75 re-rank (answered by `l75seat_v1`'s board test), and lab
 
 `foreign_readout` over four checkpoints in one invocation, one split, one foreign decode
 (`experiments/after_fieldwide.sh`, log `logs/after_fieldwide.log`, per-study
-`D:/models/rsna_knee_abnormality/fieldwide_decode.npz`).
+`D:/data/volumetric/mri/models/rsna_knee_abnormality/fieldwide_decode.npz`).
 
 | member | native | kept | foreign | slot_cost | decode |
 |---|---|---|---|---|---|
@@ -16116,7 +16116,7 @@ repo, which is the exact inversion of this project's own audit rule.
 **THE MEASUREMENT.** 120 pairs sampled evenly through 1,339, 109 measured, 11 refused on a shape
 mismatch (9%: the filenames joined and the arrays did not -- counted, not swallowed). Per-pixel
 |artifact - clean| in the [0, 1] space the cache holds images in, windowed on the CLEAN volume's own 1st
-and 99th percentiles; quantiles over PAIRS. Report at `D:/models/rsna_knee_abnormality/kmar_residual.json`.
+and 99th percentiles; quantiles over PAIRS. Report at `D:/data/volumetric/mri/models/rsna_knee_abnormality/kmar_residual.json`.
 
 | statistic | p10 | p50 | p90 |
 |---|---|---|---|
@@ -17763,7 +17763,7 @@ solo needs to beat the pinned 0.946 champion. The gap is 0.0028 and souping no l
 ## Souping is two terms, and the one everyone named was the wrong one — 2026-09-21
 
 Card: zero. Five members already on disk, priced together for the first time (`ledger75 --holdouts
-D:/models/rsna_knee_abnormality`, population eb3ba199, 909 studies).
+D:/data/volumetric/mri/models/rsna_knee_abnormality`, population eb3ba199, 909 studies).
 
 | round | children | child mean | parent | soup |
 |---|---|---|---|---|
@@ -17888,7 +17888,7 @@ as "the highest fold-0 number this project owns". It no longer is.
 
 Card: ~1.7 h (`base_labelwise224_dense_drop40_long36`, 36 epochs at 224/12sl, ~108 s/epoch warm, not
 the 171 s I priced). Zero decode, zero slots. Priced with `ledger75 --holdouts
-D:/models/rsna_knee_abnormality`, population eb3ba199, 909 studies.
+D:/data/volumetric/mri/models/rsna_knee_abnormality`, population eb3ba199, 909 studies.
 
 | member | LEDGER | LEDGER75 | move | epoch |
 |---|---|---|---|---|

@@ -21,7 +21,7 @@ with a longer training schedule -0.003 old result is not a problem"*.
 Sources:
 - Midpoint deltas are the ledger's own (`experiments/README.md`).
 - The ledger75 column was measured for this note: `python -m kneemri.evaluation.ledger75 --holdouts
-  D:/models/rsna_knee_abnormality --only …`, CPU, holdout909.
+  D:/data/volumetric/mri/models/rsna_knee_abnormality --only …`, CPU, holdout909.
 
 ## The ledger75 re-read
 

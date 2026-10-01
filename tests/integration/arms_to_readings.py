@@ -3,8 +3,9 @@
 A CHECK WITH NO TEST THAT IT RUNS IS A CHECK THAT CAN DIE SILENTLY, and this one did. From 2026-09-07
 `84660bf5` until 2026-09-08 `813c6d56`, every invocation of `reading_check` exited 1 on
 `NotImplementedError: Non-relative patterns are unsupported` — `pathlib.Path.glob` refuses an absolute
-pattern, and five arms declare their ruler as an absolute `D:/models/...holdout.npz`. It reported nothing
-at all for a day, and every gate stayed green throughout, because nothing in `noxfile.py` invokes it.
+pattern, and five arms declare their ruler as an absolute
+`D:/data/volumetric/mri/models/...holdout.npz`. It reported nothing at all for a day, and every gate
+stayed green throughout, because nothing in `noxfile.py` invokes it.
 
 The unit mirror could not have caught that. `devtools.hygiene.small` forbids a unit test from reading an
 external data root, so every case there runs against a `tmp_path` the test itself built — which is exactly

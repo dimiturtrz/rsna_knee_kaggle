@@ -19,7 +19,7 @@ COLS = ["ACL", "MCL", "Medial Meniscus", "Lateral Meniscus", "Medial OA", "Later
         "PF OA", "Effusion", "Synovitis", "Baker's", "Contusion", "Fracture"]
 TEAR = ["ACL", "MCL", "Medial Meniscus", "Lateral Meniscus"]
 ROOT = "D:/data/volumetric/mri/processed/rsna_knee_abnormality/audit400/holdout469"
-MODELS = "D:/models/rsna_knee_abnormality"
+MODELS = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
 
 
 def verdicts() -> pd.DataFrame:

@@ -2,7 +2,7 @@
 
 *2026-09-17, morning. CPU arithmetic over 391 `.holdout.npz` files already on disk. No GPU, no
 submission. `python -m kneemri.evaluation.tail_screen --run labelwise_depth24_drop40_long_s2026`
-joined against `python -m kneemri.evaluation.ledger75 --holdouts D:/models/rsna_knee_abnormality`.*
+joined against `python -m kneemri.evaluation.ledger75 --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`.*
 
 ## The question, and why the three earlier closures did not answer it
 

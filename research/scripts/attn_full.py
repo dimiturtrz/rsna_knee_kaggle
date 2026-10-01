@@ -17,7 +17,7 @@ from transformers import AutoModel
 sys.path.insert(0, "D:/personal_projects/rsna_knee_kaggle")
 from kneemri.evaluation.encoder_drift import EncoderDrift  # noqa: E402
 
-ROOT = "D:/models/rsna_knee_abnormality/"
+ROOT = "D:/data/volumetric/mri/models/rsna_knee_abnormality/"
 CKPTS = [
     "adapt_null",
     "adapt_small_e6_lr1e5",

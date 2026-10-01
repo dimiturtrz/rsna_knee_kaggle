@@ -1,6 +1,6 @@
 """How many held-out studies would our ruler need to separate the members we actually choose between?
 
-`python research/scripts/ruler_ceiling.py --holdouts D:/models/rsna_knee_abnormality`
+`python research/scripts/ruler_ceiling.py --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`
 
 WHY. The three highest members this project owns sit at offline75 0.9045 / 0.9053 / 0.9059 — a spread of
 0.0014 against a paired floor of 0.0062 on 909 studies. `cut_sweep.py` ruled out the threshold as the

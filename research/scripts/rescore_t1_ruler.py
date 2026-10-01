@@ -29,7 +29,7 @@ from sklearn.metrics import roc_auc_score
 MIDPOINT = 0.5
 """The cut this script scores on, so membership is decided on the same positive set it grades."""
 
-MODELS_ROOT = "D:/models/rsna_knee_abnormality"
+MODELS_ROOT = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
 REFERENCE_NPZ = os.path.join(MODELS_ROOT, "band_span_s2026.holdout.npz")
 SELECTOR_CSV = (
     "D:/data/volumetric/mri/processed/rsna_knee_abnormality/labels/v2_lone_dissent.csv"

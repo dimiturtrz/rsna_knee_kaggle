@@ -15,7 +15,7 @@ grand    --config base.toml --config grand.toml --config probe224.toml
 differs in `grand.toml`'s **fragment block alone** — `ema`, `warmup`, `patience_from_progress`,
 `stochastic_depth`, `ghosting`, `intensity_aug`, `mixup`, `scale_jitter`, `padding_mode`, the `aug_*`
 ramp and the `hard_*` ramp. Nine arms, all fold 0, all 909 holdout rows, priced with
-`python -m kneemri.evaluation.ledger75 --holdouts D:/models/rsna_knee_abnormality`:
+`python -m kneemri.evaluation.ledger75 --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`:
 
 | arm | ledger75 | midpoint | vs control |
 |---|---|---|---|

@@ -5,7 +5,7 @@ Invocation: `python -m kneemri.experiments.foreign_run --script <path> -- <its o
 WHY A RUNNER AND NOT A COPY. `external/raptor/knee-mri-training-the-twelve-finding-model.py` is the
 published script the dread member was trained by, and the point of running it is that it is HIS recipe,
 not ours. Editing it to fit our environment would make the number a reading about our edit. So the file
-is executed unchanged and exactly one environment difference is bridged here, where it is visible.
+is executed unchanged and the environment differences are bridged here, where they are visible.
 
 THE ONE SHIM. His labels arrive as a parquet and `pd.read_parquet` has no engine in this venv - neither
 `pyarrow` nor `fastparquet` is a dependency of this project, and adding one means `uv` rewriting the
@@ -13,6 +13,10 @@ environment, which is the exit-127 failure that has already killed two arms mid-
 sits beside the parquet as a csv (his own export), so `pd.read_parquet` is pointed at it for the life of
 the run. The shim is announced in the log: a silent one would make a labels swap invisible in exactly
 the cell that prices labels.
+
+THE SECOND SHIM. His `_find` walks `/kaggle/input`, which Windows resolves against the root of whatever
+drive the process stands on - so the corpus had to sit in a `kaggle/` folder at the root of `D:`. Every
+`os.walk` whose root is `/kaggle/input` is re-rooted at `--kaggle-input` instead, and nothing else is.
 
 THE GUARD ON BOTH ENDS, AND WHY IT IS HERE AND NOT IN THE ARM. His script names its outputs from `--tag`
 alone and overwrites them silently, and it writes no `ARM DONE` line, so the artefacts beside it are the
@@ -27,9 +31,11 @@ and the fold hold-out are the caller's, spelled in the arm.
 """
 
 import logging
+import os
 import runpy
 import sys
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -43,6 +49,12 @@ PARQUET = ".parquet"
 """The suffix his labels are spelled with, and the only one the csv beside it stands in for."""
 
 CSV = ".csv"
+
+KAGGLE_INPUT = "/kaggle/input"
+"""The root his `_find` walks. On Kaggle it holds the attached datasets; here it names nothing."""
+
+WALK = os.walk
+"""The real `os.walk`, held before the shim replaces it so the shim can call through."""
 
 TAG = "--tag"
 DEFAULT_TAG = "dev"
@@ -77,6 +89,7 @@ class ForeignRun:
     script: Path
     argv: tuple[str, ...]
     anyway: str = ""
+    kaggle_input: Path = Path(KAGGLE_INPUT)
 
     def tagged(self) -> str:
         """The `--tag` HIS argv carries, or the default he would fall back to — never declared twice here."""
@@ -104,6 +117,15 @@ class ForeignRun:
         logger.info("reading %s in place of %s - no parquet engine in this environment", beside, wanted)
         return pd.read_csv(beside)
 
+    def mapped(self, top: str | os.PathLike[str]) -> str:
+        """`top` with a leading `/kaggle/input` re-rooted at `kaggle_input`; any other path as given."""
+        text = Path(top).as_posix()
+        return text.replace(KAGGLE_INPUT, self.kaggle_input.as_posix(), 1) if text.startswith(KAGGLE_INPUT) else text
+
+    def walked(self, top: str | os.PathLike[str]) -> Iterator[tuple[str, list[str], list[str]]]:
+        """`os.walk` as his script sees it: the real walk, over the re-rooted path."""
+        return WALK(self.mapped(top))
+
     def ran(self) -> None:
         """Execute the script as `__main__` with the shim in place, guarded on both ends by its artefacts.
 
@@ -124,12 +146,14 @@ class ForeignRun:
         started = time.time()
         was = pd.read_parquet
         pd.read_parquet = self.csv_instead  # type: ignore[assignment]
+        os.walk = self.walked  # type: ignore[assignment]
         sys.argv = [str(self.script), *self.argv]
         logger.info("running %s with %d argument(s)", self.script, len(self.argv))
         try:
             runpy.run_path(str(self.script), run_name="__main__")
         finally:
             pd.read_parquet = was
+            os.walk = WALK
         written = artefacts.found(started)
         if not written:
             message = f"{self.script.name} returned without writing any artefact for tag {artefacts.tag!r}"
@@ -142,9 +166,12 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--script", type=Path, required=True, help="the foreign script to run")
     command.parser.add_argument("--anyway", default="", help="why this run may overwrite an existing tag")
+    command.parser.add_argument(
+        "--kaggle-input", type=Path, default=Path(KAGGLE_INPUT), help="the directory his /kaggle/input names"
+    )
     arguments, rest = command.parser.parse_known_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    ForeignRun(script=arguments.script, argv=tuple(rest), anyway=arguments.anyway).ran()
+    ForeignRun(arguments.script, tuple(rest), arguments.anyway, arguments.kaggle_input).ran()
 
 
 if __name__ == "__main__":

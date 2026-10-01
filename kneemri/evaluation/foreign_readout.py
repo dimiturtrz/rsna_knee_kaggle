@@ -1,7 +1,7 @@
 """What each member we own loses under a real distribution shift: `kneemri.evaluation.foreign_readout`.
 
 `python -m kneemri.evaluation.foreign_readout --checkpoints a.pt b.pt --labels labels.csv
---foreign D:/kaggle/input/raptor-corpus`
+--foreign D:/data/volumetric/mri/processed/raptor/raptor-corpus`
 
 WHY. Every offline number this project owns is read on 909 studies from OUR corpus, through OUR decode,
 under OUR label table — the same three things every candidate was fitted under, so an offline seat ADD

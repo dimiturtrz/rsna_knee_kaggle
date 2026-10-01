@@ -1,7 +1,7 @@
 # The member pool is exhausted, and the holdout says so honestly
 
 2026-09-20, card-free, 389 members of population `eb3ba199` (909 studies, one truth vector verified
-element-wise). Reproduce with `kneemri.evaluation.ledger75 --holdouts D:/models/rsna_knee_abnormality`
+element-wise). Reproduce with `kneemri.evaluation.ledger75 --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`
 and the split-half script recorded in `knee-f8nwd`.
 
 ## The bar

@@ -91,4 +91,4 @@ UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
     "$MODELS/fovjitter160_s2026.pt" \
     "$MODELS/crop160_span_s2026.pt" \
     "$MODELS/band_dense_hold_s2026.pt" \
-  --labels "$LABELS" --foreign D:/kaggle/input/raptor-corpus --device cuda --adapt
+  --labels "$LABELS" --foreign D:/data/volumetric/mri/processed/raptor/raptor-corpus --device cuda --adapt

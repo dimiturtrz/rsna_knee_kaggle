@@ -37,4 +37,4 @@ require "$LABELS"
 # `experiments/lib.sh` points `uv` at, before the switch.
 UV_NO_SYNC=1 uv run python -m kneemri.evaluation.foreign_readout \
   --checkpoints "$MODELS/aug_long_s2026.pt" "$MODELS/band_dense_hold_s2026.pt" \
-  --labels "$LABELS" --foreign D:/kaggle/input/raptor-corpus --device cuda
+  --labels "$LABELS" --foreign D:/data/volumetric/mri/processed/raptor/raptor-corpus --device cuda

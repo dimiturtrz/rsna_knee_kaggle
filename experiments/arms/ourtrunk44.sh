@@ -13,7 +13,7 @@
 #
 # WHAT IT COSTS AND WHAT IT BUYS. ~1.5-1.8 h of card (cell A' ran 16 epochs at ~400 s/epoch on a
 # coatnet at 384; dinov2-small at 336 is lighter), and NO decode at all — the corpus is on disk at
-# `/d/kaggle/input/raptor-corpus`, which is what prices `deep32` (a 95 GB cache build) out of the same
+# `/d/data/volumetric/mri/processed/raptor/raptor-corpus`, which is what prices `deep32` (a 95 GB cache build) out of the same
 # slot. It produces a candidate member as a by-product, so a null still leaves a scored seat.
 #
 # PRE-REGISTERED, before it starts. D147 §2 reads the shared-trunk floor at nn-corr 0.89-0.91 between
@@ -30,11 +30,10 @@
 #   - Either way it is an INSTRUMENT first and a member second. It is not queued as an improvement.
 #
 # WHICH CORPUS IT ACTUALLY OPENS, asserted rather than assumed. His `_find` (T:86) walks
-# `/kaggle/input` — an absolute path on the CURRENT DRIVE, so the drive the arm runs from selects the
-# corpus, and D: holds BOTH (`raptor-corpus` = 44 slots, `raptor-maxspan` = 64). The walk returns the
-# first match and nothing in his log records which one it read, so a wrong-drive launch is a silently
-# mislabelled cell. The guard below replicates `_find` and refuses unless it resolves to the 44-slot
-# part. That is the same class of defect as the cache-key collisions `slots.py` records escaping three
+# `/kaggle/input`, which `foreign_run --kaggle-input` re-roots at `$RAPTOR_CORPUS` (the 44-slot part;
+# `raptor-maxspan` = 64 sits beside it). The walk returns the first match and nothing in his log records
+# which one it read, so a mis-rooted walk is a silently mislabelled cell. The guard below replicates
+# `_find` over that root and refuses unless it resolves to the 44-slot part. That is the same class of defect as the cache-key collisions `slots.py` records escaping three
 # times.
 #
 # --norm imagenet IS NOT OPTIONAL. Cell A' was launched without it, fed [0,1] to a timm-pretrained
@@ -44,20 +43,19 @@ set -u
 REPO="D:/personal_projects/rsna_knee_kaggle"
 # THROUGH `uv`, AS AN ARRAY: `arm_check` RUNS every arm file to read its flags, and the only thing
 # making that a lint is a stub shadowing `uv` alone — a direct interpreter walks past it and the lint
-# becomes a card job (measured 2026-09-09). `--project` is required because this arm `cd`s to
-# /d/kaggle; it resolves the same `$REPO/.venv` this line used to name, since this arm does not source
+# becomes a card job (measured 2026-09-09). `--project` pins the env whatever the caller's cwd; it resolves the same `$REPO/.venv` this line used to name, since this arm does not source
 # `experiments/lib.sh` and so nothing points `uv` at `.venv-arm`. An array, because the invocation is
 # several words and `nohup $PY` would split it wrong.
 PY_RUN=(env UV_NO_SYNC=1 uv run --project "$REPO" python)
 SCRIPT="$REPO/external/raptor/knee-mri-training-the-twelve-finding-model.py"
 LOG="$REPO/logs/ourtrunk44.full.log"
+RAPTOR_CORPUS="D:/data/volumetric/mri/processed/raptor/raptor-corpus"
 
-cd /d/kaggle || exit 1
 export PYTHONPATH="$REPO"
 
-"${PY_RUN[@]}" - <<'GUARD' >> "$LOG" 2>&1 || { echo "ARM REFUSED ourtrunk44 (wrong corpus resolved)" >> "$LOG"; exit 1; }
+RAPTOR_CORPUS="$RAPTOR_CORPUS" "${PY_RUN[@]}" - <<'GUARD' >> "$LOG" 2>&1 || { echo "ARM REFUSED ourtrunk44 (wrong corpus resolved)" >> "$LOG"; exit 1; }
 import os, sys
-def find(name, root="/kaggle/input"):
+def find(name, root=os.environ["RAPTOR_CORPUS"]):
     for d, _, fs in os.walk(root):
         if name in fs:
             return os.path.join(d, name)
@@ -77,7 +75,8 @@ nohup "${PY_RUN[@]}" -m kneemri.experiments.foreign_run \
   --arch vit_small_patch14_dinov2.lvd142m \
   --res 336 --epochs 16 --bs 8 --k 12 --k_eval 24 --grad_ckpt --ckpt timm --norm imagenet \
   --tag ourtrunk44 \
-  --labels "D:/data/external/raptor/labels/labels_llm_soft.parquet" \
+  --kaggle-input "$RAPTOR_CORPUS" \
+  --labels "D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft.parquet" \
   --folds 1 --fold 0 --fold_file "$REPO/external/raptor/fold0_909.json" \
   --workers 4 >> "$LOG" 2>&1 &
 echo "ourtrunk44 launched as pid $! at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$LOG"

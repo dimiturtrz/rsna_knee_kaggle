@@ -12,9 +12,9 @@ OUT = "D:/data/volumetric/mri/processed/rsna_knee_abnormality/audit400/imagesel5
 LBL = "D:/data/volumetric/mri/processed/rsna_knee_abnormality/labels/"
 MEMBERS = ["band_span_s2026", "chainfour_s2026", "foreign_labels_dense_s2026", "recal_dense_s2026"]
 
-ref = np.load("D:/models/rsna_knee_abnormality/band_span_s2026.holdout.npz")
+ref = np.load("D:/data/volumetric/mri/models/rsna_knee_abnormality/band_span_s2026.holdout.npz")
 studies = ref["studies"].astype(str)
-P = np.stack([np.load(f"D:/models/rsna_knee_abnormality/{s}.holdout.npz")["predictions"] for s in MEMBERS])
+P = np.stack([np.load(f"D:/data/volumetric/mri/models/rsna_knee_abnormality/{s}.holdout.npz")["predictions"] for s in MEMBERS])
 npos = (P >= 0.5).astype(int).sum(axis=0)
 v2 = pd.read_csv(LBL + "report_labels_v2.csv").set_index("StudyInstanceUID")[COLS].loc[studies]
 v2b = (v2.to_numpy() >= 0.5).astype(int)

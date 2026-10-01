@@ -40,7 +40,7 @@ tensor of weights fitted on it is a different kind of thing that merely happened
 """
 
 MODELS = "models"
-"""Trained weights and the record of the run that produced them. NOT under the data root by default.
+"""Trained weights and the record of the run that produced them, under `<data>/models/`.
 
 A model is not data: nothing trains on a checkpoint, and a corpus does not stop being a corpus when a
 member is deleted. They shared `processed/` here for one reason only — 250 checkpoints happened to be
@@ -52,10 +52,8 @@ separate records root. They describe one model, they are named after it, and thi
 derive them with `checkpoint.with_name(...)` — a split would break every one of those to relocate ten
 megabytes.
 
-Redirected in paths.yaml like any other kind, which is what keeps it off the data disk:
-
-    data: D:/data/volumetric/mri
-    models: D:/models
+A sibling of `processed/` rather than a child of it, the same way `data/audio/models` sits beside its
+corpus. Redirected in paths.yaml like any other kind only when the weights live elsewhere.
 """
 
 REFERENCE = "reference"

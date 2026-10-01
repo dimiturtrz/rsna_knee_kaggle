@@ -17,7 +17,7 @@ lead to nothing, and the two numbers were never put beside each other until now.
 
 ## The measurement
 
-Their published label table `D:/data/external/raptor/labels/labels_llm_soft.csv` against our own fold
+Their published label table `D:/data/volumetric/mri/processed/raptor/labels/labels_llm_soft.csv` against our own fold
 assignment (`ReportFolds`, 5 folds, seed 2026):
 
 ```

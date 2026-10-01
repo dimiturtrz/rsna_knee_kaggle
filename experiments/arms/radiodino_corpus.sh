@@ -79,7 +79,7 @@
 # are not — those are request-gated at source and publish no licence, which is what withdrew
 # `dimiturnt/radimagenet-densenet121`.
 #
-# THE WEIGHTS ARE ALREADY LOCAL at `D:/models/hf/RadioDino-b16`, fetched 2026-09-03. They were pulled
+# THE WEIGHTS ARE ALREADY LOCAL at `D:/data/volumetric/mri/models/foreign/hf/RadioDino-b16`, fetched 2026-09-03. They were pulled
 # with `local_dir`, which does NOT populate the HF cache, so the first load may fetch again. That is a
 # minute of network, not a failure, but it is the kind of thing the smoke exists to surface.
 #

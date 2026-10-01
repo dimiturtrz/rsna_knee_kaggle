@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 LABELS = "D:/data/volumetric/mri/processed/rsna_knee_abnormality/labels"
-MODELS = "D:/models/rsna_knee_abnormality"
+MODELS = "D:/data/volumetric/mri/models/rsna_knee_abnormality"
 COLS = ["ACL", "MCL", "Medial Meniscus", "Lateral Meniscus", "Medial OA",
         "Lateral OA", "PF OA", "Effusion", "Synovitis", "Baker's",
         "Contusion", "Fracture"]

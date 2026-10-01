@@ -55,7 +55,7 @@
 #
 # deliberate: --eval-labels pins the uncorrected table so the arm is comparable to band_span and the
 #             measured gain is a floor (knee-df7t).
-# reading: D:/models/rsna_knee_abnormality/v2_corrected_s2026*.holdout.npz
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/v2_corrected_s2026*.holdout.npz
 # bead: knee-nz6r7
 set -euo pipefail
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"

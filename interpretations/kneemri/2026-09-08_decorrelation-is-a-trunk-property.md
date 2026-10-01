@@ -144,7 +144,7 @@ reading the paragraph.
 ## 7. Infrastructure facts learned, worth more than they look
 
 **A `run_train` arm's checkpoint lands in the MODELS ROOT while its log lands in `experiments/`.**
-`$MODELS` is `D:/models/rsna_knee_abnormality/`, so `calib_dense_s2026.pt` (89 MB), its `.holdout.npz`
+`$MODELS` is `D:/data/volumetric/mri/models/rsna_knee_abnormality/`, so `calib_dense_s2026.pt` (89 MB), its `.holdout.npz`
 and its `.metrics.jsonl` are at the root and only `calib_dense_s2026.full.log` is under `experiments/`.
 An `ARM DONE` marker with no checkpoint beside the log therefore looks like a dead arm and is not one.
 This cost a false alarm; CLAUDE.md's rule (*the success marker is the CHECKPOINT on disk*) is right and

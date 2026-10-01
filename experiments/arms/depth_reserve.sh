@@ -7,7 +7,7 @@
 # and a second one would make the reading unattributable.
 set -u
 cd "$(dirname "$0")/../.."
-MODELS="D:/models/rsna_knee_abnormality"
+MODELS="D:/data/volumetric/mri/models/rsna_knee_abnormality"
 
 for depth in 24 40; do
 # THROUGH `uv`: `arm_check` RUNS every arm file to read its flags, and the only thing making that a

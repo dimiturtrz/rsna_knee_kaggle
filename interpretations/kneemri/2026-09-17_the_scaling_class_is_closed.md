@@ -1,7 +1,7 @@
 # The scaling class is closed: depth, schedule and trunk are all flat-to-negative on our stack
 
 *2026-09-17. Measured entirely off checkpoints already on disk — zero card cost. The numbers are
-`ledger75` over `D:/models/rsna_knee_abnormality`, 909 held-out studies, fold 0 / split_seed 2026.*
+`ledger75` over `D:/data/volumetric/mri/models/rsna_knee_abnormality`, 909 held-out studies, fold 0 / split_seed 2026.*
 
 ## Why this class and not another
 
