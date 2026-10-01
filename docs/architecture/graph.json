@@ -25297,6 +25297,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.experiments.foreign_run.ForeignRun.walked",
+      "target": "kneemri.experiments.foreign_run.ForeignRun.mapped",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.experiments.foreign_run.main",
       "target": "kneemri.experiments.foreign_run.ForeignRun",
@@ -59716,6 +59722,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignRun.mapped",
+      "label": "mapped",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run.ForeignRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.foreign_run.ForeignRun.ran",
       "label": "ran",
       "level": "method",
@@ -59726,6 +59740,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.foreign_run.ForeignRun.tagged",
       "label": "tagged",
+      "level": "method",
+      "parent": "kneemri.experiments.foreign_run.ForeignRun",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.foreign_run.ForeignRun.walked",
+      "label": "walked",
       "level": "method",
       "parent": "kneemri.experiments.foreign_run.ForeignRun",
       "role": null
