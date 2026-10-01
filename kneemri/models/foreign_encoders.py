@@ -455,7 +455,7 @@ FOREIGN_ENCODERS: dict[str, Encoder] = {
         # FLAT, NAMED FOR ITS OWN LEAF — `dimiturnt/vjepa2-hf`, not a `vjepa2-vitl/` directory under it.
         # This line said the latter from the mount until 2026-08-30 and the member could not load on
         # Kaggle for a single day of that. The staging tree on disk is correct
-        # (`kaggle_upload/vjepa2-hf/vjepa2-vitl/`) and the upload flattened it: `--dir-mode zip` zips a
+        # (`models/kaggle_uploads/vjepa2-hf/vjepa2-vitl/`) and the upload flattened it: `--dir-mode zip` zips a
         # subdirectory and Kaggle unpacks it into the ROOT, so the published dataset holds `config.json`
         # at top level and the segment `locates` matches on does not exist. That is the SAME trap
         # `rad-dino` hit and documented one day earlier, and V-JEPA2 was uploaded into it anyway, so the
