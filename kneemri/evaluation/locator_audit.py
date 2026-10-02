@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 MILLIMETRES = 0.3125 * 512 / SIZE
 """SKM-TEA's 0.3125 mm pixel on a 512 grid, resized to `SIZE`."""
-CACHE = "336px_20sl_0.1-0.9band"
+CACHE = "336px_20sl_0.1-0.9band_extended"
 STUDIES = 50
 PER_GRID = 10
 TILE_SLICES = (5, 10, 15)

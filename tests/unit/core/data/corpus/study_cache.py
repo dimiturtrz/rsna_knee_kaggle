@@ -313,6 +313,49 @@ def test_load(tmp_path: Path):
     assert isinstance(corpus.images, np.memmap)
 
 
+def _wider_on_disk(tmp_path: Path) -> tuple[StudyCache, NDArray[np.uint8]]:
+    """A canonical cache whose images are absent, beside an extended cache over the same studies."""
+    canonical = StudyCache(tmp_path, slices=2, image_size=4)
+    extended = canonical.under("extended")
+    written = np.random.default_rng(0).integers(0, 255, size=extended.shape(3), dtype=np.uint8)
+    np.save(extended.images_path, written)
+    for cache in (canonical, extended):
+        cache.record(["a", "b", "c"])
+        np.save(cache.mask_path, np.ones((3, cache.slots), dtype=np.float32))
+    return canonical, written
+
+
+def test_wider(tmp_path: Path):
+    """The extended cache serves the canonical one, and only while both index the same studies."""
+    canonical, _ = _wider_on_disk(tmp_path)
+    assert canonical.wider() == canonical.under("extended")
+    assert canonical.under("extended").wider() is None, "nothing is wider than the widest"
+
+    canonical.record(["c", "b", "a"])
+    assert canonical.wider() is None, "rows in another order are other studies"
+
+
+def test_pixels(tmp_path: Path):
+    """Its own file when there is one; else the leading slots of the wider file, byte for byte."""
+    canonical, written = _wider_on_disk(tmp_path)
+    assert canonical.pixels().shape == canonical.shape(3)
+    assert np.array_equal(canonical.pixels(), written[:, : canonical.slots])
+    assert canonical.decoded()
+
+    canonical.under("extended").images_path.unlink()
+    with pytest.raises(FileNotFoundError):
+        canonical.pixels()
+    assert not canonical.decoded()
+
+
+def test_load_serves_leading_slots(tmp_path: Path):
+    """A trainer windowing the served cache reads the canonical slots through the explicit file reader."""
+    canonical, written = _wider_on_disk(tmp_path)
+    corpus, studies = canonical.load()
+    assert studies == ["a", "b", "c"]
+    assert np.array_equal(corpus.window(np.array([2, 0]), start=1, width=1), written[[2, 0], : canonical.slots, 1:2])
+
+
 def test_image_size(tmp_path: Path):
     """The corpus reports its own resolution, so no consumer has to assume the default."""
     corpus = _built(tmp_path)

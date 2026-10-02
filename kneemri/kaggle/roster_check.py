@@ -188,7 +188,7 @@ class RosterDrift:
             if not member.reads_pixels:
                 continue
             cache = member.cache(self.pixels)
-            gone += [f"{name} {path}" for path in (cache.images_path, cache.mask_path) if not path.exists()]
+            gone += [] if cache.decoded() else [f"{name} {cache.images_path}"]
         return gone
 
     def faults(self) -> list[str]:

@@ -148,7 +148,7 @@ class RoiCache:
         if written.exists():
             raise FileExistsError(written)
         studies = self.source.recorded()[: self.destination.first or None]
-        source = np.load(self.source.images_path, mmap_mode="r")
+        source = self.source.pixels()
         present = np.load(self.source.mask_path)[: len(studies)]
         rule = BoxRule.at(self.destination.image_size)
         self.destination.prepare()

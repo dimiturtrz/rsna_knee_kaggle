@@ -194,10 +194,11 @@ def test_duplicated(tmp_path: Path):
 
 
 def _pixels(root: Path) -> Path:
-    """Write the arrays the fixture's packaged member names, so its cache resolves on disk."""
+    """Write the files the fixture's packaged member names, so its cache resolves on disk."""
     cache = Member.from_checkpoint(root / f"{SHIPPED}.pt").cache(root)
     cache.images_path.write_bytes(b"")
     cache.mask_path.write_bytes(b"")
+    cache.index_path.write_text("[]", encoding="utf-8")
     return cache.images_path
 
 

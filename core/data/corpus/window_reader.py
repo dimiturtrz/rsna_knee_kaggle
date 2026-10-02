@@ -77,6 +77,7 @@ class FileReader:
         self.path = path
         self.offset = images.offset
         self.shape = images.shape
+        self.strides = images.strides
         self.dtype = images.dtype
         self.threads = threads
         self.pool = ThreadPoolExecutor(max_workers=threads, thread_name_prefix="fetch")
@@ -88,8 +89,12 @@ class FileReader:
 
     @property
     def per_study(self) -> int:
-        """Bytes in one study, which is what its position is a multiple of."""
-        return int(self.shape[1] * self.shape[2] * self.per_slot)
+        """Bytes between one study and the next IN THE FILE — the map's stride, not its shape.
+
+        A map served as the leading slots of a wider cache has fewer slots than the rows on disk hold,
+        and a stride read off the shape would walk into the next study's pixels without a word.
+        """
+        return int(self.strides[0])
 
     def read(self, batch: NDArray[np.int64], *, start: int, width: int) -> NDArray[np.uint8]:
         """The window for every position in the batch, the rows shared out over the handles."""
@@ -120,5 +125,5 @@ class FileReader:
                     handle.readinto(window[row].reshape(-1).data)
                     continue
                 for slot in range(self.shape[1]):
-                    handle.seek(base + (slot * self.shape[2] + start) * self.per_slot)
+                    handle.seek(base + slot * self.strides[1] + start * self.per_slot)
                     handle.readinto(window[row, slot].reshape(-1).data)

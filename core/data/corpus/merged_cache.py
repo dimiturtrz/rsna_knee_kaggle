@@ -107,11 +107,9 @@ class MergedCache:
             self.merged.images_path, mode="w+", dtype=np.uint8, shape=self.merged.shape(total)
         )
         whole = list(range(self.merged.slots))
-        self._copy(images, 0, np.load(self.base.images_path, mmap_mode="r"), sources=whole, slots=whole)
+        self._copy(images, 0, self.base.pixels(), sources=whole, slots=whole)
         sources, slots = self.positions()
-        self._copy(
-            images, len(base_studies), np.load(self.extra.images_path, mmap_mode="r"), sources=sources, slots=slots
-        )
+        self._copy(images, len(base_studies), self.extra.pixels(), sources=sources, slots=slots)
         images.flush()
         self.merged.record(base_studies + extra_studies)
         mask = self._mask(len(base_studies), len(extra_studies))

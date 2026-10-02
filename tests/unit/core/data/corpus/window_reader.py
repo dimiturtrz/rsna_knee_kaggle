@@ -58,3 +58,16 @@ def test_per_study(tmp_path: Path):
     """One study, which is what its position in the cache is a multiple of."""
     np.save(tmp_path / "images.npy", np.zeros((5, 2, 6, 4, 3), dtype=np.uint8))
     assert FileReader(np.load(tmp_path / "images.npy", mmap_mode="r"), tmp_path / "images.npy").per_study == 2 * 6 * 12
+
+
+def test_file_reader_read_on_leading_slots(tmp_path: Path):
+    """A map sliced to the leading slots of a wider file reads THOSE slots, never the next study's bytes."""
+    written = np.random.default_rng(3).integers(0, 255, size=(4, 5, 6, 3, 3), dtype=np.uint8)
+    np.save(tmp_path / "images.npy", written)
+    leading = np.load(tmp_path / "images.npy", mmap_mode="r")[:, :3]
+
+    reader = FileReader(leading, tmp_path / "images.npy")
+    assert reader.per_study == 5 * 6 * 9, "the stride on disk, not the width of the view"
+    for start, width in [(0, 6), (2, 3)]:
+        batch = np.array([3, 0, 2])
+        assert np.array_equal(reader.read(batch, start=start, width=width), written[batch, :3, start : start + width])

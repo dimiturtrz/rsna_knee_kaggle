@@ -129,7 +129,7 @@ def main() -> None:
     root = command.rooted(arguments)
     cache = CacheFlags.cache(arguments, root.processed())
     identifiers, positions = PseudoLabels.rows(arguments.identifiers, arguments.offset)
-    corpus = CachedCorpus(np.load(cache.images_path, mmap_mode="r"), np.load(cache.mask_path).astype(np.float32))
+    corpus = CachedCorpus(cache.pixels(), np.load(cache.mask_path).astype(np.float32))
     slab = HoldoutSlab(corpus, positions)
 
     labels = PseudoLabels(HoldoutPredictions(torch.device(arguments.device)))

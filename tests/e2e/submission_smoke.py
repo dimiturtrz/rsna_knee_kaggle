@@ -43,6 +43,14 @@ def _root() -> DataRoot:
     return root
 
 
+def _cache(root: DataRoot) -> StudyCache:
+    """The historic 12-slice cache, or a skip when it is not decoded here."""
+    cache = StudyCache(root.processed(), slices=12)
+    if not cache.decoded():
+        pytest.skip(f"{cache.images_path} absent — the 12-slice cache is not decoded on this machine")
+    return cache
+
+
 def _member(root: DataRoot) -> Path:
     """Any trained member on this machine, or a skip."""
     members = sorted(root.processed().glob("*_fold0.pt"))
@@ -54,7 +62,7 @@ def _member(root: DataRoot) -> Path:
 def test_a_real_study_becomes_a_submission_row():
     """Cache, member, prediction and target order all agree on real data."""
     root = _root()
-    corpus, identifiers = StudyCache(root.processed(), slices=12).load()
+    corpus, identifiers = _cache(root).load()
     assert len(identifiers) > STUDIES, "the cached corpus is smaller than this smoke test's sample"
 
     checkpoint = _member(root)
@@ -86,7 +94,7 @@ def test_the_cached_corpus_has_the_shape_the_model_expects():
     the encoder something it never trained on, which is exactly how 32-slice inference cost 0.018.
     """
     root = _root()
-    corpus, _ = StudyCache(root.processed(), slices=12).load()
+    corpus, _ = _cache(root).load()
 
     assert corpus.images.shape[1] == len(SLOTS)
     assert corpus.images.shape[2] >= GROUP

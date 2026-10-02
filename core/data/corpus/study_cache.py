@@ -24,7 +24,7 @@ from typing import Protocol
 
 import numpy as np
 import pandas as pd
-from jaxtyping import Float
+from jaxtyping import Float, UInt8
 from numpy.typing import NDArray
 
 from core.data.corpus.slot_reader import IMAGE_SIZE, Reading, SlotReader
@@ -479,13 +479,44 @@ class StudyCache:
         decode that died or produced nothing. Asking for the three together is what `arm_check` means by
         UNCACHED and what the smoke means by "decode this first", and the two spelled it separately.
         """
-        return self.images_path.is_file() and self.mask_path.is_file() and self.index_path.is_file()
+        pixels = self.images_path.is_file() or self.wider() is not None
+        return pixels and self.mask_path.is_file() and self.index_path.is_file()
+
+    def wider(self) -> "StudyCache | None":
+        """A decoded cache over the same studies whose slot axis BEGINS with this one's, if one is on disk.
+
+        Schemes append slots and never insert them (`EXTENDED_SLOTS`), so a narrower cache's pixels are
+        the leading slots of a wider one decoded at the same geometry — measured 2026-10-02 on the 336 px
+        band pair, 4,407 of 4,407 studies byte-identical in pixels and mask. That made the 56 GB six-slot
+        array a copy, deleted; its mask and index stay, and say which studies and slots it holds.
+        """
+        narrow = self.scheme_slots
+        candidates = (self.under(scheme) for scheme in SCHEMES)
+        return next(
+            (
+                cache
+                for cache in candidates
+                if cache.slots > self.slots
+                and cache.scheme_slots[: self.slots] == narrow
+                and cache.images_path.is_file()
+                and cache.index_path.is_file()
+                and cache.recorded() == self.recorded()
+            ),
+            None,
+        )
+
+    def pixels(self) -> UInt8[np.ndarray, "n s d h w"]:
+        """The pixel cache memory-mapped read-only — its own file, else the leading slots of a wider one."""
+        if self.images_path.is_file():
+            return np.load(self.images_path, mmap_mode="r")
+        wider = self.wider()
+        if wider is None:
+            raise FileNotFoundError(self.images_path)
+        return np.load(wider.images_path, mmap_mode="r")[:, : self.slots]
 
     def load(self) -> tuple[CachedCorpus, list[str]]:
         """The cache, memory-mapped read-only, with its study order."""
-        images = np.load(self.images_path, mmap_mode="r")
-        mask = np.load(self.mask_path)
-        return CachedCorpus(images, mask), self.recorded()
+        return CachedCorpus(self.pixels(), np.load(self.mask_path)), self.recorded()
 
     @staticmethod
     def planes_of(series_table: Path) -> dict[str, str]:
