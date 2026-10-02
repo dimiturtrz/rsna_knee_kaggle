@@ -26,6 +26,12 @@ dependencies = [
     # DICOM ingest (the corpus is 819,640 .dcm files). Already present in Kaggle's image at 3.0.2, so it
     # needs no wheel in the kit — it is declared here because the LOCAL data layer imports it.
     "pydicom>=3",
+    # The local raw corpus is stored HTJ2K-lossless (transfer syntax 1.2.840.10008.1.2.4.201, ~3.8x
+    # smaller, bit-exact), and pydicom decodes that only through these plugins. Never imported by us:
+    # absent, `.pixel_array` raises on the first study. Kaggle serves its test DICOMs uncompressed, so the
+    # kit needs neither.
+    "pylibjpeg",
+    "pylibjpeg-openjpeg",
     # Tables (train.csv, train_series.csv, the submission). pandas rather than polars, which the sibling
     # repos use: this code runs unchanged inside a Kaggle kernel, pandas is what that image ships, and a
     # second dataframe library in the kit buys nothing the submission path needs.
@@ -168,6 +174,9 @@ DEP002 = [
     # Never imported by us either: transformers loads it when `report_reader` asks for `device_map="auto"`,
     # and its absence surfaces only after the shards have been read off disk.
     "accelerate",
+    # pydicom's pixel-data plugins for the HTJ2K raw corpus; loaded by pydicom, never by us.
+    "pylibjpeg",
+    "pylibjpeg-openjpeg",
 ]
 # `diffusion_model` is the OrthoFoundation checkout under `external/`, gitignored and put on `sys.path` at
 # call time by `ortho_weights.factory` — never a package we depend on, and never installable, since the
