@@ -938,6 +938,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.slot_reader",
+      "target": "core.data.corpus.depth_match",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.slot_ties",
       "target": "core.cli",
       "weight": 1
@@ -9589,6 +9595,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.depth_match.DepthMatch",
+      "target": "core.data.corpus.depth_match.Plane",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.depth_match.Plane",
+      "target": "core.data.corpus.depth_match.Plane",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.diagnose_laterality.LateralityAudit.resolve_one",
       "target": "core.data.corpus.acquisition.Acquisition.probe",
@@ -11053,6 +11071,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "core.data.corpus.slot_reader.FileMemo",
+      "target": "core.data.corpus.depth_match.Plane",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.slot_reader.FileMemo.ordered",
       "target": "core.data.corpus.acquisition.Acquisition.ordered_files",
@@ -11133,6 +11157,12 @@
     {
       "kind": "references",
       "source": "core.data.corpus.slot_reader.SlotReader",
+      "target": "core.data.corpus.depth_match.Plane",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.slot_reader.SlotReader",
       "target": "core.data.corpus.slot_reader.Band",
       "weight": 1
     },
@@ -11169,6 +11199,12 @@
     {
       "kind": "calls",
       "source": "core.data.corpus.slot_reader.SlotReader._decoded",
+      "target": "core.data.corpus.depth_match.Plane.read",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.slot_reader.SlotReader._decoded",
       "target": "core.data.corpus.slot_reader.FileMemo.opened",
       "weight": 1
     },
@@ -11180,14 +11216,14 @@
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.slot_reader.SlotReader._decoded",
-      "target": "core.data.corpus.slot_reader.SlotReader._decode",
+      "source": "core.data.corpus.slot_reader.SlotReader.cropped",
+      "target": "core.data.corpus.acquisition.Acquisition.ordered_files",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.slot_reader.SlotReader.cropped",
-      "target": "core.data.corpus.acquisition.Acquisition.ordered_files",
+      "target": "core.data.corpus.depth_match.DepthMatch.matched",
       "weight": 1
     },
     {
@@ -38121,7 +38157,7 @@
   ],
   "nodes": [
     {
-      "descendants": 79,
+      "descendants": 80,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -38145,7 +38181,7 @@
       "role": null
     },
     {
-      "descendants": 69,
+      "descendants": 70,
       "id": "core.data",
       "label": "data",
       "level": "module",
@@ -38153,7 +38189,7 @@
       "role": null
     },
     {
-      "descendants": 49,
+      "descendants": 50,
       "id": "core.data.corpus",
       "label": "corpus",
       "level": "module",
@@ -38300,6 +38336,14 @@
       "descendants": 0,
       "id": "core.data.corpus.decode_bench",
       "label": "decode_bench",
+      "level": "module",
+      "parent": "core.data.corpus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.depth_match",
+      "label": "depth_match",
       "level": "module",
       "parent": "core.data.corpus",
       "role": null
@@ -41431,6 +41475,22 @@
       "level": "class",
       "parent": "core.data.corpus.decode_bench",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.depth_match.DepthMatch",
+      "label": "DepthMatch",
+      "level": "class",
+      "parent": "core.data.corpus.depth_match",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.depth_match.Plane",
+      "label": "Plane",
+      "level": "class",
+      "parent": "core.data.corpus.depth_match",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -47634,6 +47694,46 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.depth_match.DepthMatch._onto",
+      "label": "_onto",
+      "level": "method",
+      "parent": "core.data.corpus.depth_match.DepthMatch",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.depth_match.DepthMatch.matched",
+      "label": "matched",
+      "level": "method",
+      "parent": "core.data.corpus.depth_match.DepthMatch",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.depth_match.DepthMatch.rescaled",
+      "label": "rescaled",
+      "level": "method",
+      "parent": "core.data.corpus.depth_match.DepthMatch",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.depth_match.Plane._stored",
+      "label": "_stored",
+      "level": "method",
+      "parent": "core.data.corpus.depth_match.Plane",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.depth_match.Plane.read",
+      "label": "read",
+      "level": "method",
+      "parent": "core.data.corpus.depth_match.Plane",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.diagnose_laterality.LateralityAudit.resolve_one",
       "label": "resolve_one",
       "level": "method",
@@ -49164,14 +49264,6 @@
       "descendants": 0,
       "id": "core.data.corpus.slot_reader.SlotReader._crop",
       "label": "_crop",
-      "level": "method",
-      "parent": "core.data.corpus.slot_reader.SlotReader",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.slot_reader.SlotReader._decode",
-      "label": "_decode",
       "level": "method",
       "parent": "core.data.corpus.slot_reader.SlotReader",
       "role": null

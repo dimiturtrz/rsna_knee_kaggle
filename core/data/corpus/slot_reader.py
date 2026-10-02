@@ -20,7 +20,6 @@ from dataclasses import dataclass, field
 from typing import override
 
 import numpy as np
-import pydicom
 import torch
 from jaxtyping import UInt8
 from numpy.typing import NDArray
@@ -28,6 +27,7 @@ from torch import Tensor, nn
 
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.crop_centre import CROP_MM, Crop, CropCentre, ImageCentre
+from core.data.corpus.depth_match import DepthMatch, Plane
 
 IMAGE_SIZE = 336
 """130 mm / 336 px = 0.387 mm per pixel, which clears the 0.5 mm a 1 mm tear needs."""
@@ -278,7 +278,7 @@ class FileMemo:
     so every member is handed byte-identical bags. That equality is the change's admission ticket.
     """
 
-    planes: dict[tuple[str, str], NDArray[np.float32] | None] = field(default_factory=dict)
+    planes: dict[tuple[str, str], Plane | None] = field(default_factory=dict)
     orders: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     slice_opens: int = 0
@@ -298,7 +298,7 @@ class FileMemo:
             self.header_opens += 1
         return self.orders[acquisition.series]
 
-    def plane(self, acquisition: Acquisition, name: str, decoded: NDArray[np.float32] | None) -> None:
+    def plane(self, acquisition: Acquisition, name: str, decoded: Plane | None) -> None:
         """Keep a decode, including a FAILED one — a file that will not open must not be retried."""
         self.planes[(acquisition.series, name)] = decoded
         self.slice_opens += 1
@@ -363,7 +363,7 @@ class SlotReader:
         if not ordered:
             return None
         planes = [self._decoded(acquisition, ordered[index]) for index in self.band_indices(len(ordered), slices)]
-        stack = self._stacked(planes)
+        stack = self._stacked(DepthMatch.matched(planes))
         return None if stack is None else self._crop(stack, acquisition.pixel_spacing)
 
     @classmethod
@@ -421,25 +421,13 @@ class SlotReader:
             indices.append(indices[-1])
         return indices[:slices]
 
-    def _decoded(self, acquisition: Acquisition, name: str) -> NDArray[np.float32] | None:
-        """One slice, through this reader's memo when it has one — the same array either way."""
+    def _decoded(self, acquisition: Acquisition, name: str) -> Plane | None:
+        """One slice, through this reader's memo when it has one — the same plane either way."""
         if self.memo is None:
-            return self._decode(acquisition, name)
+            return Plane.read(acquisition.directory / name)
         if not self.memo.opened(acquisition, name):
-            self.memo.plane(acquisition, name, self._decode(acquisition, name))
+            self.memo.plane(acquisition, name, Plane.read(acquisition.directory / name))
         return self.memo.planes[(acquisition.series, name)]
-
-    @staticmethod
-    def _decode(acquisition: Acquisition, name: str) -> NDArray[np.float32] | None:
-        """One slice in modality units, or None when it will not decode."""
-        try:
-            data = pydicom.dcmread(str(acquisition.directory / name), force=True)
-            pixels = data.pixel_array.astype(np.float32)
-        except (OSError, ValueError, AttributeError, KeyError):
-            return None
-        slope = float(getattr(data, "RescaleSlope", 1) or 1)
-        intercept = float(getattr(data, "RescaleIntercept", 0) or 0)
-        return pixels * slope + intercept
 
     def window(
         self, stack: NDArray[np.float32], spacing: float | None, crop_mm: float | None = None

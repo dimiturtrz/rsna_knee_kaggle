@@ -6,6 +6,7 @@ import torch
 
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.crop_centre import Crop, ImageCentre, TissueCentre
+from core.data.corpus.depth_match import Plane
 from core.data.corpus.slot_reader import (
     ADJACENT,
     SPREAD,
@@ -62,7 +63,7 @@ def test_opened(tmp_path: Path):
     memo = FileMemo()
 
     assert not memo.opened(acquisition, "one.dcm")
-    memo.plane(acquisition, "one.dcm", np.zeros((4, 4), dtype=np.float32))
+    memo.plane(acquisition, "one.dcm", Plane(np.zeros((4, 4), dtype=np.float32), 16))
     assert memo.opened(acquisition, "one.dcm")
 
 
@@ -137,6 +138,29 @@ def test_cropped_fills_a_failed_slice_from_its_neighbour(tmp_path: Path):
     assert stack[1].any(), "the failed middle slice carries pixels, not a black plane"
     assert np.array_equal(stack[1], stack[0]), "and they are its nearest decoded neighbour's"
     assert not np.array_equal(stack[2], stack[0]), "the slices that did decode are still their own"
+
+
+def test_cropped_rescales_an_eight_bit_slice_onto_its_series(tmp_path: Path):
+    """A slice stored one byte per pixel under a 16-bit header is served on its neighbours' scale.
+
+    The raw corpus holds two such files. Before, one failed to decode and was replaced by its
+    neighbour; read at its true depth, it was 25-30% darker than the stack it sat in.
+    """
+    directory = write_series(tmp_path / "eight", slices=10, size=64)
+    acquisition = Acquisition.probe("study", "series", directory)
+    ordered = acquisition.ordered_files()
+    reader = SlotReader(image_size=16)
+    neighbour = pydicom.dcmread(str(directory / ordered[reader.band_indices(10, 3)[0]])).pixel_array
+    eight = directory / ordered[reader.band_indices(10, 3)[1]]
+    data = pydicom.dcmread(str(eight))
+    data.PixelData = (neighbour // 16).astype(np.uint8).tobytes()
+    data.save_as(str(eight))
+
+    stack = reader.cropped(acquisition, slices=3)
+
+    assert stack is not None
+    assert not np.array_equal(stack[1], stack[0]), "its own pixels, not a neighbour fill"
+    assert np.allclose(stack[1], stack[0], atol=16), "on the neighbour's scale, to within one byte step"
 
 
 def test_cropped_returns_none_when_no_sampled_slice_decodes(tmp_path: Path):

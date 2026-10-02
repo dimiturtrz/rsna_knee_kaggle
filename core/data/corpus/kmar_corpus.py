@@ -41,7 +41,7 @@ from numpy.typing import NDArray
 
 logger = logging.getLogger(__name__)
 
-VOLUME_SUFFIX = ".nii"
+NIFTI = ".nii"
 ARTIFACT_DIRECTORY = "ArtifactData"
 CLEAN_DIRECTORY = "GroundTruthData"
 
@@ -154,9 +154,14 @@ class KmarCorpus:
         for directory in sorted(self.root.rglob(f"{kind}*")):
             if not directory.is_dir():
                 continue
-            for path in sorted(directory.glob(f"*{VOLUME_SUFFIX}")):
-                found[path.stem] = path
+            for path in sorted(directory.glob(f"*{NIFTI}*")):
+                found[self._stem(path.name)] = path
         return found
+
+    @staticmethod
+    def _stem(name: str) -> str:
+        """A volume's name without `.nii` or `.nii.gz`; the raw tree is stored gzipped, the cohort names both."""
+        return name.split(NIFTI)[0]
 
     def _plane(self, stem: str) -> str:
         """The acquisition plane out of the filename, or an empty string if it is not one of the three."""
@@ -198,7 +203,7 @@ class KmarCorpus:
             for path in sorted(self.root.rglob(name)):
                 table = pd.read_csv(path, skipinitialspace=True)
                 for _, row in table.iterrows():
-                    stem = str(row.iloc[0]).strip().strip("'").split(".nii")[0]
+                    stem = self._stem(str(row.iloc[0]).strip().strip("'"))
                     rows[self._key(stem)] = KmarCohortRow(
                         spacing=float(ast.literal_eval(str(row[SPACING_COLUMN]).strip())[0]),
                         description=str(row.get(DESCRIPTION_COLUMN, "")).strip().strip("'").lower(),

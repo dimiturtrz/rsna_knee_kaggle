@@ -12,11 +12,11 @@ SPACING = 0.703125
 STEMS = ("2020_1_transection_0.0", "2020_2_sagittal_0.0", "2020_2_sagittal_1.0")
 
 
-def _write(directory: Path, stem: str, level: float) -> None:
+def _write(directory: Path, stem: str, level: float, suffix: str = ".nii") -> None:
     """One NIfTI written x, y, slice — the order the corpus ships and the reader has to transpose."""
     directory.mkdir(parents=True, exist_ok=True)
     pixels = np.full((MATRIX, MATRIX, DEPTH), level, dtype=np.float32)
-    nib.save(nib.Nifti1Image(pixels, np.eye(4)), directory / f"{stem}.nii")
+    nib.save(nib.Nifti1Image(pixels, np.eye(4)), directory / f"{stem}{suffix}")
 
 
 def _root(tmp_path: Path, missing: str = "") -> Path:
@@ -24,13 +24,13 @@ def _root(tmp_path: Path, missing: str = "") -> Path:
 
     `missing` drops one stem from the clean side, which is the real state of this corpus — 1,339 artifact
     volumes against 1,341 clean ones — and the case a join that trusted the two sides to match would get
-    silently wrong.
+    silently wrong. The clean side is gzipped, as the raw tree is stored, so every join spans both spellings.
     """
     root = tmp_path / "kmar50k"
     for stem in STEMS:
         _write(root / "KMAR-50K" / f"{ARTIFACT_DIRECTORY}_part1", stem, level=0.4)
         if stem != missing:
-            _write(root / "KMAR-50K" / f"{CLEAN_DIRECTORY}_part1", stem, level=0.5)
+            _write(root / "KMAR-50K" / f"{CLEAN_DIRECTORY}_part1", stem, level=0.5, suffix=".nii.gz")
     cohort = pd.DataFrame(
         [
             # The cohort writes the index as an int and a `.nii.gz` suffix; disk writes it as a float and
@@ -59,6 +59,7 @@ def test_pairs(tmp_path: Path):
     assert [pair.plane for pair in pairs] == ["transection", "sagittal"]
     assert pairs[0].artifact.parent.name.startswith(ARTIFACT_DIRECTORY)
     assert pairs[0].clean.parent.name.startswith(CLEAN_DIRECTORY)
+    assert pairs[0].clean.name.endswith(".nii.gz"), "a gzipped volume pairs with its plain twin"
     assert pairs[0].spacing == SPACING
 
 
