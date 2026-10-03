@@ -348,6 +348,13 @@ def test_pixels(tmp_path: Path):
     assert not canonical.decoded()
 
 
+def test_decoded_without_own_index(tmp_path: Path):
+    """A narrow cache with no index of its own is undecoded, never a crash, even beside a wider one."""
+    canonical, _ = _wider_on_disk(tmp_path)
+    canonical.index_path.unlink()
+    assert not canonical.decoded()
+
+
 def test_load_serves_leading_slots(tmp_path: Path):
     """A trainer windowing the served cache reads the canonical slots through the explicit file reader."""
     canonical, written = _wider_on_disk(tmp_path)

@@ -479,8 +479,8 @@ class StudyCache:
         decode that died or produced nothing. Asking for the three together is what `arm_check` means by
         UNCACHED and what the smoke means by "decode this first", and the two spelled it separately.
         """
-        pixels = self.images_path.is_file() or self.wider() is not None
-        return pixels and self.mask_path.is_file() and self.index_path.is_file()
+        recorded = self.mask_path.is_file() and self.index_path.is_file()
+        return recorded and (self.images_path.is_file() or self.wider() is not None)
 
     def wider(self) -> "StudyCache | None":
         """A decoded cache over the same studies whose slot axis BEGINS with this one's, if one is on disk.
