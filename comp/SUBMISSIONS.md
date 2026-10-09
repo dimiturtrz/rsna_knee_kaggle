@@ -4880,3 +4880,12 @@ complementarity and more of it. One tick is directional (top-band residual sd ~0
 No offline number: nartaa trained on every labelled study. `run_check` read 7 of 7. Re-pinned as champion.
 Next: tiltseat/tritwo were built on the triseat wave; the open question is now the share against nartaa
 alone (1/2 is the only point read).
+
+## mirrorpair_v1 — 0.952, ref 57017195, 2026-10-09 — nartaa's second checkpoint adds nothing
+
+`kneemri-mirrorpair` keeps mirrorseat's half for our seven and splits nartaa's half evenly between his 384
+CoAtNet and his unseated 224-crop checkpoint (ours 0.50, 384 0.25, 224-crop 0.25, rank blend). It read
+0.952, one tick under mirrorseat. Pre-registered `<= 0.952` = close; it fired. Two checkpoints of one recipe
+on one corpus are one family, so splitting the seat dilutes the stronger checkpoint without adding an axis.
+`run_check` read 7 of 7. No offline number. Champion unchanged (mirrorseat 0.953). The foreign-seat axis is
+now flat on share, on reader, and on a second checkpoint of the same family.

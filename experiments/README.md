@@ -18326,7 +18326,7 @@ knee-dbj03's notes.
 | `triseat_v1` | 57001137 | ours 1/3 + nartaa CoAtNet 384 + goodpjw2008 ConvNeXt reader, rank blend | 0.952 |
 | `trihalf_v1` | 57005577 | ours 1/2 + same wave | 0.952 |
 | `mirrorseat_v1` | 57008651 | ours 1/2 + nartaa 384 alone | **0.953** (pinned) |
-| `mirrorpair_v1` | 57017195 | ours 1/2 + nartaa 384 1/4 + nartaa 224-crop 1/4 | pending at writing |
+| `mirrorpair_v1` | 57017195 | ours 1/2 + nartaa 384 1/4 + nartaa 224-crop 1/4 | 0.952 (pre-reg <= 0.952 fired: closed) |
 
 Readings:
 - The foreign seat is worth ~+0.007, far over the bar. Mechanism: nartaa's trunk carries OAI supervision and a

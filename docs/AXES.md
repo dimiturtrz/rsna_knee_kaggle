@@ -199,7 +199,7 @@ with a foreign seat (`comp/champion.json`). The rows below were closed over OUR 
 | pool exhaustion (held-out per-label oracle) | **CLOSED** — the +0.0124 in-sample oracle is **+0.0020 ± 0.0036** held out; member ranking is honest (split-half corr 0.989) | `2026-09-20_pool_exhaustion.md` |
 | foreign-seat SHARE (ours vs nartaa 384, rank blend) | **FLAT at board resolution.** Ours at 1/3 (`triseat_v1`) and 1/2 (`trihalf_v1`) both read 0.952 with goodpjw2008's reader in the wave. Without the reader, 1/2 (`mirrorseat_v1`) reads 0.953, so the reader is redundant once ours is seated. The 2/3, 1/3 and per-finding brackets were built (`mirrortwo`, `mirrorthird`, `mirrortilt`) and deliberately NOT spent: they are knobs worth ±0.001 | knee-dbj03 |
 | reliability-gated share (per scanner, field, series, disagreement stratum) | **CLOSED** — ours leads the raptor replicas in every readable stratum. The only structure is per finding (Fracture to the raptor family) | `2026-10-09_no-stratum-flips-the-blend-share.md` |
-| more public families in the wave | heliosli compact **DEAD** (weights retired 2026-10-09 13:50Z). lixin73 MaxViT fold0 is weaker than our trio and flat in a blend. nartaa's 224-crop seat `mirrorpair_v1` was submitted 18:20Z — read `comp/board.jsonl` | knee-dbj03 |
+| more public families in the wave | heliosli compact **DEAD** (weights retired 2026-10-09 13:50Z). lixin73 MaxViT fold0 is weaker than our trio and flat in a blend. nartaa's 224-crop seat `mirrorpair_v1` read 0.952 against mirrorseat's 0.953: a second checkpoint of the same family adds nothing (closed) | knee-dbj03 |
 
 ## H. Serving
 
