@@ -1,12 +1,12 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "triseat_v1",
-  "kernel": "kneemri-triseat",
+  "entry": "mirrorseat_v1",
+  "kernel": "kneemri-mirrorseat",
   "kernel_owner": "dimiturnt",
   "kernel_owner_why": "The `kernel` field is a LOCAL directory name — `comp/kernels/<kernel>/<kernel>.py` — and the Kaggle API wants `<owner>/<kernel>`, which is not derivable from it. The owner slug here is NOT the git/Kaggle account name the repo is under (`dimiturtrz`); it is `dimiturnt`, and asking for the wrong one returns `Permission 'kernels.get' was denied`, which reads as an auth failure rather than a typo. Cost a round on 2026-09-08. Read it from `kaggle kernels list --mine -s kneemri` if it ever changes.",
-  "submission": "57001137",
+  "submission": "57008651",
   "date": "2026-10-09",
-  "board": 0.952,
+  "board": 0.953,
   "kit": "5fea6702",
   "members": [
     "final_ws_cf",
@@ -19,13 +19,14 @@
   ],
   "serving": {
     "overlap": false,
-    "vote": "LogitAverage for our seven, then RaptorSeat rank blend at 2/3 for the foreign wave",
+    "vote": "LogitAverage for our seven, then RaptorSeat rank blend at 1/2 against nartaa's CoAtNet alone",
     "views": null,
     "precision": "each member's own",
-    "foreign_weight": 0.6666666666666666,
-    "foreign_seat": "The public 0.950 wave, NOT packaged by comp/members.roster: nartaa's CoAtNet (nartaa/rsna-knee-publication-swa-weights-20261007, served by nartaa's own scoring cell mounted from dimiturnt/nartaa-mirror-src) rank-blended per finding with goodpjw2008's ConvNeXt reader (goodpjw2008/rsna-knee-2-5d-convnext-reader, Apache-2.0, its own infer.py) at rabari9999's V1 shares. Rebuilt by Kaggle mounts on the pinned pre-2026-10-09 image (docker_image in kernel-metadata)."
+    "foreign_weight": 0.5,
+    "foreign_seat": "nartaa's CoAtNet alone (nartaa/rsna-knee-publication-swa-weights-20261007, raptor_ft_alldata_t16_blendjev_oai_d96_r384_swa.pt sha 7e5315da, public solo 0.949), served by nartaa's own scoring cells joined verbatim and mounted from dimiturnt/nartaa-mirror-src. NOT packaged by comp/members.roster. No ConvNeXt reader. Rebuilt by Kaggle mounts on the pinned pre-2026-10-09 image (docker_image in kernel-metadata)."
   },
   "principles": [
+    "THE CONVNEXT READER IS REDUNDANT ONCE OURS IS IN THE BLEND, and dropping it is worth a tick. mirrorseat_v1 is ours7 rank-blended 1/2 against nartaa's CoAtNet alone. It read 0.953 against triseat's 0.952 (wave = nartaa + goodpjw reader at rabari V1 shares, ours at 1/3) and trihalf's 0.952 (same wave, ours at 1/2). Pre-registered '>= 0.952 = the reader is redundant' fired. The reader added +0.001 to nartaa alone on the public board (0.949 -> 0.950), and our seven cover the same complementarity with more of it. One tick is directional, inside the top band's ~0.002 residual sd; what it licenses is a simpler entry (two families, not three) at no loss. No offline number: nartaa trained on every labelled study. run_check read 7 of 7.",
     "A THIRD FAMILY OVER THE PUBLIC WAVE IS WORTH TWO TICKS, and this is the first pin to sit above the public frontier rather than below it. triseat_v1 is the public 0.950 blend (nartaa CoAtNet + goodpjw ConvNeXt reader, per-finding shares found on the public board) with tripleseat's seven seated at 1/3 of a final rank blend. It read 0.952 against the wave's 0.950 (444 teams tied there) and ours7's 0.945, the top of its pre-registered '>= 0.952 adds' band, rank 129 of 5567 at 10:07Z. Both public arms trained on every labelled study, so this entry has NO offline number and the 1/3 share was named before the read, not fitted. Two ticks is directional against the 1.5% bar; what it establishes is that our DINO/ResNet family carries error structure the CoAtNet/ConvNeXt lineage every public notebook shares does not.",
     "THE PIN MOVED FOR ONE RESOLVABLE STEP, AND ONLY ONE. tripleseat_v2 is stackseat_v1 with its two weakest seats (grade_ladder_cf, lr4e-5_ws_cf) out and three labelwise drop40_long fold-0 bases in, raptor at 1/3 and LogitAverage held, seven of ours. It read 0.946 against 0.944 - +0.002, one step past BOARD_RESOLVABLE = 0.0015 and inside its pre-registered 0.9455-0.9469 'real gain' band, the first read to leave the flat 0.944 band three designed entries sat in. The fold-0-twin proxy projected ~+0.0084; about a quarter landed, so the proxy's SIGN transferred and its SIZE did not. Directional under the 1.5% bar. run_check read 7 of 7 before the pin moved.",
     "THE PIN MOVED SIDEWAYS FOR A LICENCE, NOT FOR A SCORE, and that is the only reason it moved. raptorweight_v1 and this entry BOTH read 0.944 - an exact tie, not a tick - and they differ in one seat: merged_blend_cf, whose training table is the Rijeka external expert read whose terms are unresolved against competition rule 2.5, is replaced by stack_increments_ff, fitted on blend_three_v1.csv (our own table averaged with two public LLM readers by core.data.labels.table_blend - no Rijeka). champion_check's LICENCE EXPOSURE warning names the remedy in as many words: a clean entry that ties it replaces it. `licence_refusals` over this entry's seven seats returns NONE. Everything else is byte-identical to the previous pin - same count, same order, same overlap=False, same LogitAverage, same raptor checkpoint at 1/3, same rank-space join - so nothing in the list below is repriced by this move, and NO board delta may be argued from it. It cost zero submission slots, which is the whole point: rule 2.5 binds the WINNING submission, so the exposure had to be cleared before a result was won under it, not after.",

@@ -4869,3 +4869,14 @@ range, so the second tick does not depend on the exact share; it bounds the two 
 and does not license a finer share search. Triseat stays pinned (earlier submission, same score). Next on
 the curve is mirrorseat (ours against nartaa alone at 1/2), which asks whether the ConvNeXt reader still
 earns its seat once ours is in the blend.
+
+## mirrorseat_v1 — 0.953, ref 57008651, 2026-10-09 — the ConvNeXt reader is redundant once ours is in
+
+`kneemri-mirrorseat` is our seven rank-blended at 1/2 against nartaa's public 0.949 CoAtNet alone, with no
+ConvNeXt reader. It read 0.953, one tick over triseat and trihalf (both 0.952, both carrying the reader).
+Pre-registered `>= 0.952` = the reader is redundant; it fired, and the entry has one fewer family to mount.
+The reader lifted nartaa alone by one tick on the public board (0.949 → 0.950); our seven supply the same
+complementarity and more of it. One tick is directional (top-band residual sd ~0.002), not a finding.
+No offline number: nartaa trained on every labelled study. `run_check` read 7 of 7. Re-pinned as champion.
+Next: tiltseat/tritwo were built on the triseat wave; the open question is now the share against nartaa
+alone (1/2 is the only point read).
