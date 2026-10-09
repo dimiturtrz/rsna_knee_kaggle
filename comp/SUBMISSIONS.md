@@ -4860,3 +4860,12 @@ Kernels pinned to the pre-2026-10-09 Kaggle image (the new py3.13 image breaks t
 tokenizers 0.23.1). No offline number: both public arms trained on every labelled study. Ours7 alone
 read 0.945 and the wave 0.950, so the gain is complementarity, not strength. Next: `kneemri-trihalf`
 (ours at 1/2) asks whether the third family is under-weighted.
+
+## trihalf_v1 — 0.952, ref 57005577, 2026-10-09 — the share is flat from 1/3 to 1/2
+
+`kneemri-trihalf` is `kneemri-triseat` with our seven at 1/2 of the final rank blend instead of 1/3, every
+other byte equal. It ties triseat at 0.952. At the board's 0.001 resolution the curve is flat across that
+range, so the second tick does not depend on the exact share; it bounds the two entries' gap below 0.001
+and does not license a finer share search. Triseat stays pinned (earlier submission, same score). Next on
+the curve is mirrorseat (ours against nartaa alone at 1/2), which asks whether the ConvNeXt reader still
+earns its seat once ours is in the blend.
