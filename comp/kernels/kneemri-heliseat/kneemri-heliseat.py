@@ -1,6 +1,9 @@
 """heliseat — mirrorseat with a THIRD family: heliosli's compact convnext_small inside nartaa's half.
 
-DRAFT, NOT RUN. heliosli's weights (`heliosli/rsna-knee-compact-v1`, code `heliosli/rsna-orthofoundation-
+DEAD 2026-10-09: heliosli retired `rsna-knee-compact-v1` at 13:50Z (README only, "earlier versions ...
+are not accessible"); the private run died on `Cannot resolve rsna-knee-compact-v1`. Kept as the record.
+
+Was DRAFT. heliosli's weights (`heliosli/rsna-knee-compact-v1`, code `heliosli/rsna-orthofoundation-
 fold0-epoch7-20261004`) are public Kaggle datasets and so admissible under
 rules 2.6.a, but they carry no licence grant, and using them waits on the owner's word (knee-dbj03).
 Their stage runs verbatim from the private `dimiturnt/heli-compact-src`: stage 2 of
