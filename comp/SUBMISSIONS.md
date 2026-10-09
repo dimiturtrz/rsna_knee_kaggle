@@ -4850,3 +4850,13 @@ is still scoring; by this result its expected read is lower still.
 INSTRUMENT. Same two members as `soupraptor_v1`, raptor weight 2/3. Curve over raptor weight:
 0 → 0.946 (soup alone), 1/2 → 0.944, 2/3 → 0.939. Monotone decreasing: at our top the foreign reader
 only dilutes, so no raptor weight rescues the ensemble lane (knee-ir6d3, parked).
+
+## triseat_v1 — 0.952, ref 57001137, 2026-10-09 — a third family over the public 0.950 wave is worth two ticks
+
+The public 0.950 recipe (nartaa's CoAtNet + goodpjw2008's ConvNeXt reader, rabari9999's V1 per-finding
+shares, 444 teams tied there) with tripleseat's seven seated at 1/3 of a final rank blend. Pre-registered
+`>= 0.952` = a third family adds; it read 0.952, rank 129 of 5567 (silver range), from 850 at 0.946.
+Kernels pinned to the pre-2026-10-09 Kaggle image (the new py3.13 image breaks transformers on
+tokenizers 0.23.1). No offline number: both public arms trained on every labelled study. Ours7 alone
+read 0.945 and the wave 0.950, so the gain is complementarity, not strength. Next: `kneemri-trihalf`
+(ours at 1/2) asks whether the third family is under-weighted.
