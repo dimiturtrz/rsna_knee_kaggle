@@ -1,5 +1,7 @@
 # The efficiency lane, priced — and closed by its own exchange rate
 
+> **Dated snapshot (banner added 2026-10-09).** Its champion and rank numbers predate the public-checkpoint seat. Read today's pin from `comp/champion.json` and the open levers from `2026-10-09_levers_before_final_picks.md`. Its conclusions about OUR pool still bind.
+
 2026-09-21. Zero slots. Two `serve_bench` runs, one `holdout_backfill`, one `ledger75`.
 
 ## Why it was opened

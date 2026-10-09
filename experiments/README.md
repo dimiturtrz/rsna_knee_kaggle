@@ -18313,3 +18313,31 @@ circularity (it does not lose), but it adds nothing at zero shift. Suspect (2), 
 on our own holdout and is NOT ruled out; only a kernel-time run on the real test set can read it, and
 this result gives no licence to price one above the bar. Each treated member is a TWIN of the pool
 (rank 0.951-0.955), so no seat either.
+
+## Public checkpoints as a foreign seat: +0.007 on the board, then flat — 2026-10-09T19:07Z
+
+Context: on ~10-06 the field passed us; public licence-permitted checkpoints became admissible to BLEND (owner,
+2026-10-09). Every number below is BOARD (public, 0.001 resolution, top-band residual sd ~0.002). Full trail in
+knee-dbj03's notes.
+
+| entry | ref | structure | board |
+|---|---|---|---|
+| prior champion | — | our seven, logit mean | 0.946 |
+| `triseat_v1` | 57001137 | ours 1/3 + nartaa CoAtNet 384 + goodpjw2008 ConvNeXt reader, rank blend | 0.952 |
+| `trihalf_v1` | 57005577 | ours 1/2 + same wave | 0.952 |
+| `mirrorseat_v1` | 57008651 | ours 1/2 + nartaa 384 alone | **0.953** (pinned) |
+| `mirrorpair_v1` | 57017195 | ours 1/2 + nartaa 384 1/4 + nartaa 224-crop 1/4 | pending at writing |
+
+Readings:
+- The foreign seat is worth ~+0.007, far over the bar. Mechanism: nartaa's trunk carries OAI supervision and a
+  four-source label blend, so it is off-axis to ours, not a weaker copy (AXES §E foreign weights).
+- The share is flat between 1/3 and 1/2, and the ConvNeXt reader adds nothing once ours is seated. The 2/3, 1/3
+  and per-finding brackets (`mirrortwo`, `mirrorthird`, `mirrortilt`) were built and left unspent as ±0.001 knobs.
+- No stratum (scanner, field, series, disagreement) flips the share: `interpretations/kneemri/2026-10-09_no-stratum-flips-the-blend-share.md`.
+- Dead or flat: heliosli compact (weights retired 13:50Z), lixin73 MaxViT fold0 (flat), JEV label table
+  (gold58 in-sample, AXES §E).
+- Distilling OUR ensemble into one model has a ceiling of +0.0049 ledger75 (trio 0.9102 vs depth24 0.9053, 909
+  rows): under the bar before any student loss.
+
+What this does NOT rule out: training on a model-derived soft target read on the BOARD (knee-p0s4f). The holdout
+ruler is the report table, so it cannot see that lever: `interpretations/kneemri/2026-10-09_levers_before_final_picks.md`.

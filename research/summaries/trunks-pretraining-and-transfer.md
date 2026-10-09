@@ -178,3 +178,7 @@ Ruler: a number is on the repo-default midpoint cut unless it says `ledger75`. T
 - **Verdict:** do not queue it. Re-open only if weights ship under a licence the owner clears AND a reported knee number is within ~0.02 of our trunk.
 
 Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).
+
+- [2026-09-24_all-lanes-web-sweep.md](../deep_dives/2026-09-24_all-lanes-web-sweep.md) — trunk lane; weight-space editing toward pretrained (Model Stock, LiNeS, L2-SP) untried
+
+- [2026-09-28_forum-and-noisy-loss-sweep.md](../deep_dives/2026-09-28_forum-and-noisy-loss-sweep.md) — section 3: DINOv2 registers

@@ -180,3 +180,7 @@ Tags: **[M]** measured by us · **[L]** literature or host text · **[U]** unver
 - [2026-09-18_kaggle-playbook-vs-our-ledger.md](../deep_dives/2026-09-18_kaggle-playbook-vs-our-ledger.md)
 - [2026-09-24_all-lanes-web-sweep.md](../deep_dives/2026-09-24_all-lanes-web-sweep.md)
 - Cross-check: [docs/AXES.md](../../docs/AXES.md)
+
+- [2026-09-30_single-model-thread-reread-and-biohub-transfer.md](../deep_dives/2026-09-30_single-model-thread-reread-and-biohub-transfer.md) — selection rule, public vs private, the report-label ruler cannot see pseudo-label training (knee-p0s4f)
+
+- [2026-09-28_scored-target-and-loss-side-noise.md](../deep_dives/2026-09-28_scored-target-and-loss-side-noise.md) — gold-58 as a ruler

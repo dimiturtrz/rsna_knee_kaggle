@@ -1,5 +1,7 @@
 # State of the levers — what could still carry 1.5%, priced — 2026-09-18T01:50Z
 
+> **Dated snapshot (banner added 2026-10-09).** Its champion and rank numbers predate the public-checkpoint seat. Read today's pin from `comp/champion.json` and the open levers from `2026-10-09_levers_before_final_picks.md`. Its conclusions about OUR pool still bind.
+
 ## Why this file exists
 
 Tonight's close (`2026-09-18_the_pool_holds_no_per_finding_specialist.md`) says the next member has to be

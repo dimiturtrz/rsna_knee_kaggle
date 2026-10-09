@@ -14,7 +14,7 @@ with itself — this repo has already spent a board constant, a transfer slope a
 that. Where a row quotes a figure it is the *key* you grep for, not the citation.
 
 Two companion files, neither of which this one replaces:
-- `interpretations/kneemri/2026-09-18_state_of_the_levers.md` — the levers still OPEN, priced against the board gap.
+- `interpretations/kneemri/2026-10-09_levers_before_final_picks.md` — the levers still OPEN before the final picks (supersedes `2026-09-18_state_of_the_levers.md`).
 - `docs/PLAN.md` — the goal, the metric, and what the metric removes from the design space.
 
 ## Status vocabulary
@@ -140,7 +140,7 @@ now a solo — so a loss that buys diversity and costs solo quality buys nothing
 | curriculum | **a schedule, not a reweight** | `2026-09-01_curriculum-is-a-schedule-not-a-reweight.md` |
 | mutual supervision / DML (live peer) | **CLOSED** −0.0015 on the strongest trunk; the per-epoch deficit is FLAT, not converging | README:16754; knee-z81wd |
 | masked adaptation / in-domain SSL continuation | **CLOSED** — every masked adaptation this project ran switched attention OFF; the gate that catches it is a RATIO. Five "collapses" were partly a harness defect (knee-c3qfe) | README:11389, :11441, :11683, :11726 |
-| **SAM / sharpness-aware minimization** | **OPEN.** rho=0.05 refuted at −0.0421 — *"what this refutes is rho=0.05 at this budget, not sharpness-aware minimization"*. The radius is sized for from-scratch normalised weights, not a pretrained trunk at 4e-5. Deficit uniform from epoch 0; ascent witness fired live, so the harness is cleared. The honest revisit is **rho=0.01 or 0.005, once** | README:16584; knee-zqouw |
+| **SAM / sharpness-aware minimization** | **DIRECTIONAL — read in §Open below** (`sam_r01` +0.0032 ledger75; composition P ~0.05, unarmed). The original argument: rho=0.05 refuted at −0.0421 — *"what this refutes is rho=0.05 at this budget, not sharpness-aware minimization"*. The radius is sized for from-scratch normalised weights, not a pretrained trunk at 4e-5. Deficit uniform from epoch 0; ascent witness fired live, so the harness is cleared. The honest revisit is **rho=0.01 or 0.005, once** | README:16584; knee-zqouw |
 | recipe fragments (leave-one-out over the champion family) | **CLOSED entirely** — sign unanimous across seven | README:16503, :16541; knee-rn9py |
 
 ## E. Data
@@ -158,7 +158,9 @@ now a solo — so a loss that buys diversity and costs solo quality buys nothing
 | **GENERATED images (sampling a generative model for training data)** | **NEVER RUN, and there is no code path to run it.** `diffusion_schedule.py` (retired, last at 398eea9b) was forward-only — `noised()` and nothing else; no reverse sampler exists anywhere in the tree, so we cannot produce an image at any budget. Mechanism is also circular: pathology MORPHOLOGY is not a forward model, so any generator must be fitted on our own 4,407 studies and can only resample what the classifier already sees. Compositional lesion-insertion (the audio copy-paste route) dies at the entrance on `core/data/corpus/anatomy.py:6` — "no localisation at all", no boxes or masks — and the corpora that DO carry boxes (Rijeka ACL, fastMRI+) are BARRED for training. MRI does not superpose the way audio does, so there is no free label either | `kneemri/models/diffusion_schedule.py` (retired, last at 398eea9b); `core/data/corpus/anatomy.py:6` |
 | external data for SSL pretraining | **published wash at our labelled scale** (+0.073 at 80 subjects, −0.005 at 800; we hold ~4,400) | README:7436; Zhang et al. MedIA 2024 |
 | foreign TEACHER / distillation | **bounded below the gap.** Teacher headroom 0.002; the honest term is +0.0056, under the 0.0062 floor; no teacher on disk is above its student. Distillation from a foreign teacher DESTROYS distance instead of importing it. Own-OOF distillation on the labelwise shipping line: −0.0010 ledger75 (knee-bgvmd) | README:8424, :14113, :16623, :18232 |
-| foreign WEIGHTS as members | **CLOSED** — released foreign weights are not a member lever; a cross-program equal-weight join is negative | README:9094, :8940 |
+| foreign WEIGHTS as members | **CLOSED for the CC0 replicas; RE-OPENED and SHIPPED for nartaa's OAI-supervised CoAtNet.** A cross-program equal-weight join of the 2026-09 public weights is negative. The mechanism that answers it: nartaa's trunk carries 2,399 OAI knees of external supervision and a four-source label blend, so it is off-axis to ours rather than a weaker copy. A rank blend at 1/2 is the champion `mirrorseat_v1` (board 0.953) | README:9094, :8940; knee-dbj03; `comp/champion.json` |
+| better-label tables from the field (JEV, `riadmohamed42`, CC0) | **CLOSED, 2026-10-09, gold58 only.** JEV_HYBRID macro 0.9020 vs our `blend_hybrid_fx_v4b` 0.8995 vs v2 0.8659. JEV was selected on the same 58 studies, and a gold58 gain has already failed to transfer (`v4solo_v1` 0.922 vs `holdsolo_v1` 0.928) | knee-dbj03 notes 19:00Z; README:17448 |
+| **PSEUDO-LABEL / teacher-relabelled training for a single model** | **OPEN, and the offline ruler is blind to it by construction.** The holdout truth IS the v2 report table, so any lever that replaces report labels is scored against the thing it replaces. Field evidence, forum 735304, 2026-10-09: a single 2.5D ConvNeXt-T reads 0.953 and DINOv2 ViT-S 0.951 with pseudo labels and no external data. A 5-fold ConvNeXt-T reads 0.959. "model is not the key. it is your labels". Our best solo is 0.946. Our only board reading is `oofsolo_v1` 0.926 vs `holdsolo_v1` 0.928, which used a leaky teacher no stronger than its student on the 0.85-era recipe. That is not this lever. Must be read on the BOARD. The arm `lw24_targetblend` (0.3·calibrated report + 0.7·`teacher_clean`) is written and blocked only on the 24sl cache, the card and the owner's go | knee-p0s4f; `research/deep_dives/2026-09-30_single-model-thread-reread-and-biohub-transfer.md`; `interpretations/kneemri/2026-10-09_levers_before_final_picks.md` |
 | **training on Rijeka / MRNet / fastMRI / SKM-TEA** | **BARRED, not refuted.** A competition winner must publish weights as a public Kaggle dataset (COMPETITION_RULES.txt:187-196); a foreign-fitted member's weights are a distribution all four licences forbid. **Measurement-only use is clean** and named in the rules (:144) | `docs/EXTERNAL_CORPORA.md`; README:15671 |
 | KneeCoT | **BARRED** — never shipped, in any form | owner ruling 2026-09-14 |
 | transduction (pseudo-labelled holdout in training) | **CLOSED at zero shift** — ridge head: 40 cells, none clears +0.0005 (knee-tta1). Member head: six seeds, mean 0.9075 vs parent 0.9078 = TIE; the +0.0012 over control is the control's own −0.0015 drift. Shift is unsimulatable, so the real-test-set version is untested, not refuted (knee-nchjt) | README §Member-head transduction (2026-09-27) |
@@ -180,9 +182,11 @@ forfeits the averaged point in full.
 | `--fold -1` refit | **CLOSED** — the +0.008 was an EMA misattribution; it is ~+0.004 with spread as wide as the mean, capped below the champion. All five best bases refit and shipped | README:17492, :14296 |
 | SWA | **not implemented, and priced UNDER THE BAR (2026-09-28) — do not build it as a score lever.** No `--swa` exists in our tree. The only reading we have is from a foreign recipe: variants `_swa` / `_epens` score 0.8880 against the best epoch's 0.8875, i.e. +0.0005 (README:8901). The ledger75 sweep has `raptor_v4_swa` 0.9425 against `raptor_v4` 0.9399, i.e. +0.0026 (README:9142), but that family's solo read was voided as in-sample. On our own stack the same averaging is already paid for twice: EMA is CLOSED where a holdout picks the epoch (above), and the basin-soup premium is +0.0014. Both are temporal or weight averaging over the same basin. The ceiling is therefore ~+0.001 to +0.003 on a parent, and less once it goes through a soup, since the rule above says averaging must be the LAST operation. P(solo clears 0.947) ~0.03. Re-open only as SWA *replacing* the soup's final step, measured against the soup | README:8868-8901, :9142 |
 
-## G. Ensemble / seats / combiners — OUT OF SCOPE
+## G. Ensemble / seats / combiners
 
-The deliverable is a **single solo checkpoint**. This class is kept for the mechanisms, which still bind.
+This section was headed "OUT OF SCOPE — the deliverable is a single solo checkpoint" until 2026-10-09. That is no
+longer true: every champion since `tripleseat_v2` has been an ensemble, and the current one blends our seven
+with a foreign seat (`comp/champion.json`). The rows below were closed over OUR pool and still bind there.
 
 | axis | verdict | where |
 |---|---|---|
@@ -192,6 +196,10 @@ The deliverable is a **single solo checkpoint**. This class is kept for the mech
 | averaging as an operation | **a CONTRACTION — the pool cannot produce a new board point at any seating** | README:15590 |
 | the ensemble axis as a whole | **worth +0.011 and spent** | `2026-09-11_the_ensemble_axis_is_worth_0p011_and_it_is_spent.md` |
 | per-finding specialists in the pool | **0 of 12 columns clear** their own 95% paired interval over the shipping solo | `2026-09-18_the_pool_holds_no_per_finding_specialist.md` |
+| pool exhaustion (held-out per-label oracle) | **CLOSED** — the +0.0124 in-sample oracle is **+0.0020 ± 0.0036** held out; member ranking is honest (split-half corr 0.989) | `2026-09-20_pool_exhaustion.md` |
+| foreign-seat SHARE (ours vs nartaa 384, rank blend) | **FLAT at board resolution.** Ours at 1/3 (`triseat_v1`) and 1/2 (`trihalf_v1`) both read 0.952 with goodpjw2008's reader in the wave. Without the reader, 1/2 (`mirrorseat_v1`) reads 0.953, so the reader is redundant once ours is seated. The 2/3, 1/3 and per-finding brackets were built (`mirrortwo`, `mirrorthird`, `mirrortilt`) and deliberately NOT spent: they are knobs worth ±0.001 | knee-dbj03 |
+| reliability-gated share (per scanner, field, series, disagreement stratum) | **CLOSED** — ours leads the raptor replicas in every readable stratum. The only structure is per finding (Fracture to the raptor family) | `2026-10-09_no-stratum-flips-the-blend-share.md` |
+| more public families in the wave | heliosli compact **DEAD** (weights retired 2026-10-09 13:50Z). lixin73 MaxViT fold0 is weaker than our trio and flat in a blend. nartaa's 224-crop seat `mirrorpair_v1` was submitted 18:20Z — read `comp/board.jsonl` | knee-dbj03 |
 
 ## H. Serving
 

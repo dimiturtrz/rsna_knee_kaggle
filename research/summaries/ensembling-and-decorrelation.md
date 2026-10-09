@@ -221,3 +221,5 @@ extrapolated. Rulers are quoted where the source names one; an unlabelled repo n
 - [2026-09-04_qeo-corpus-diversity-ensemble](../deep_dives/2026-09-04_qeo-corpus-diversity-ensemble.md)
 - [2026-09-04_qdu-foreign-architecture-census](../deep_dives/2026-09-04_qdu-foreign-architecture-census.md)
 - Index: [docs/AXES.md](../../docs/AXES.md) §A, §D, §E, §F, §G, §H, §I, "Open, and unread"
+
+- [2026-09-30_single-model-thread-reread-and-biohub-transfer.md](../deep_dives/2026-09-30_single-model-thread-reread-and-biohub-transfer.md) — covariate head; Deotte: pseudo-labels pull a member onto the pool

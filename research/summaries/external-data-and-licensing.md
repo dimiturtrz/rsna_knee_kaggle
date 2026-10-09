@@ -203,3 +203,7 @@ Notes on the table:
 - [2026-09-11_shippable-corpus-licence-survey](../deep_dives/2026-09-11_shippable-corpus-licence-survey.md)
 - [2026-09-13_host_rulings_forum_sweep](../deep_dives/2026-09-13_host_rulings_forum_sweep.md)
 - [docs/AXES.md](../../docs/AXES.md) rows A:41, A:49, A:55, D:126, E:150–163
+
+- [2026-09-28_forum-and-noisy-loss-sweep.md](../deep_dives/2026-09-28_forum-and-noisy-loss-sweep.md) — forum threads 743416/743420 on external-data rules
+
+- [2026-09-25_frontier-sweep-for-a-0p95-mechanism.md](../deep_dives/2026-09-25_frontier-sweep-for-a-0p95-mechanism.md) — licence-gated segmentation masks

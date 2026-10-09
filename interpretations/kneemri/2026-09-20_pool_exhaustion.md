@@ -1,5 +1,7 @@
 # The member pool is exhausted, and the holdout says so honestly
 
+> **Dated snapshot (banner added 2026-10-09).** Its champion and rank numbers predate the public-checkpoint seat. Read today's pin from `comp/champion.json` and the open levers from `2026-10-09_levers_before_final_picks.md`. Its conclusions about OUR pool still bind.
+
 2026-09-20, card-free, 389 members of population `eb3ba199` (909 studies, one truth vector verified
 element-wise). Reproduce with `kneemri.evaluation.ledger75 --holdouts D:/data/volumetric/mri/models/rsna_knee_abnormality`
 and the split-half script recorded in `knee-f8nwd`.

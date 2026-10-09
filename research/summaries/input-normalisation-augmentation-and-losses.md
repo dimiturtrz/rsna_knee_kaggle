@@ -245,3 +245,7 @@ Rulers are quoted where named. An unmarked number of ours is midpoint (knee-f9aa
 - DINOv2-reg: P ~0.02, because DINOv3 (four registers) is already CLOSED. It is an instrument first: read the attention maps of the shipped solo for background artifact tokens.
 
 See [forum and noisy-loss sweep](../deep_dives/2026-09-28_forum-and-noisy-loss-sweep.md).
+
+- [2026-09-24_all-lanes-web-sweep.md](../deep_dives/2026-09-24_all-lanes-web-sweep.md) — data and loss lanes: series-choice aug, slot CutMix, manifold mixup, PU-DPO/MIDAM/PS-KD (untried)
+
+- [2026-09-28_scored-target-and-loss-side-noise.md](../deep_dives/2026-09-28_scored-target-and-loss-side-noise.md) — loss-side label noise; scored target

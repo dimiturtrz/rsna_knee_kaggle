@@ -263,3 +263,5 @@ mechanism neither of those tested, such as long-range attention across the whole
 encoding. Note that MST's own ablation found no positional encoding worked best.
 
 Deep dive: [2026-09-28 gap audit and frontier sweep](../deep_dives/2026-09-28_gap-audit-and-frontier-sweep.md).
+
+- [2026-09-24_all-lanes-web-sweep.md](../deep_dives/2026-09-24_all-lanes-web-sweep.md) — architecture lane: AOLM zoom, cross-slot attention, series embeddings (untried)
