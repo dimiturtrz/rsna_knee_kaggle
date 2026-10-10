@@ -81,6 +81,13 @@ Re-priced at each candidate's ACTUAL public lead over the pile (¼ +0.002, ⅓ +
 ⅓ **0.09**, ½ 0.18/0.19, tilt@⅓ 0.14. The quarter's lower variance does not buy back its lost tick;
 `mirrorthird` stays pick 1.
 
+Re-read 10:07Z (5658 teams): gold moved to **0.961**; silver still 0.951, bronze 0.950. The 0.950 pile grew
+522 → **538** in two hours (ranks 343-880), 0.951 ×129, and the 0.953 band holds 30. So the pile is still
+filling from below while the band we sit in barely moves. Against the two tiers that remain in reach: silver
+holds as long as private does not drop us under the 0.951 pile (ranks 214-342), and 0.954 alone would move us
+from rank ~130 to ~98, which is no change of tier. **0.954 buys private margin, not a medal.** The medal is
+protected by the pick's lead over the pile, which is what the private-risk column already prices.
+
 ## A mirror-family second pick hedges nothing
 
 Correlation of the private-minus-pile delta with `mirrorthird`'s, same 400×910 bootstraps, both replicas
