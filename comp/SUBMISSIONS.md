@@ -4922,3 +4922,13 @@ replica's number and does not show at the board's 0.001 resolution. It carries m
 1/3 (0.14 against 0.09), so pick 1 stays `mirrorthird_v1`. `run_check` read 7 of 7. Slot 3 goes to `trisota`,
 not `mirrortilt`, because the tilt did not clear 0.954.
 
+
+## trisota_v1 — 0.952, ref 57046536, 2026-10-10 — public share tables do not transfer under a third family
+
+`kneemri-trisota` put `triseat`'s ours7 at 1/3 over rabari9999's `sota-0-954` wave: nartaa 384 with the 224 crop
+at 0.3 inside the CoAtNet side, and goodpjw2008's reader with its per-finding share table re-tuned on the public
+board. It read 0.952, the same as `triseat_v1` and `trihalf_v1`, and one tick under `mirrorthird`. The pre-registered
+`0.952-0.953` branch fired: a share table fitted on the public board without us does not carry once a third family
+is seated, so the public-retune axis closes and pick 2 stays `mirrorseat`. Every reader-in-the-wave entry reads
+0.952, and every nartaa-alone one 0.953. The reader is redundant once ours is seated (the 562-study readeroof
+pricing says the same offline: half-half minus ours −0.0026). No offline number; nartaa trained on every study.
