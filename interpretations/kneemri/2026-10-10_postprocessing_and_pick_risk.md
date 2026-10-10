@@ -96,3 +96,21 @@ the same draws are one pick. The levels here favour ours (the replicas understat
 max of a pair is not readable — only the correlation is. Pick 2 is therefore worth a different seat
 COMPOSITION if one reaches 0.953 on the board; failing that it is `mirrorseat` (½) as the upside pick, and
 the hedge it buys is small.
+
+## The hedge that IS uncorrelated: OAI eligibility (16:00Z)
+
+nartaa's CoAtNet weights were trained on OAI, and the forum has asked three times (747455, 744056, 743416)
+whether public OAI-trained weights are eligible, with no host answer. Both current picks and the whole 0.950
+pile sit on that checkpoint. If the host rules against it, every one of those entries is voided on the same
+draw, so the pile vanishes and the medal lines fall to whatever is left — and the correlation table above
+cannot see that event, because it is not a sampling draw. The best OAI-free entry on the board is
+`basinsoupff_v1` at 0.946. `kneemri-oaifree` is the first entry built for that event: our seven at ½ plus
+goodpjw2008's ConvNeXt reader alone (ImageNet `convnext_tiny`, trained on LLM report labels read from the
+competition's own reports, verified from its mount), no nartaa. Pre-registered: ≥ 0.950 makes it pick 2,
+0.948-0.949 says the reader is a real second family but pick 2 stays `mirrorseat` unless the host rules,
+≤ 0.947 says the hedge sits at basinsoupff level. Its ours share is priced on the honest half of our holdout
+by `kneemri-readeroof` (the reader's own fold map reproduced: 562 studies it never trained on, 40 leak-control
+rows).
+
+Public notebooks re-read 15:30Z: `romantamrazov/…dinosaur-v5` and `kozykappa/…gold-gated-triple-reader` are
+nartaa + the same reader at the 0.950 pile. Nothing new.
