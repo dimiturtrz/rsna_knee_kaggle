@@ -134,6 +134,29 @@ Three-way, the reader inside the foreign ⅔ beside a replica lifts **+0.0085** 
 (0.8976 → 0.9061, both replicas agree). The real checkpoint already saw this as `triseat`/`trihalf` at 0.952,
 flat on the board, so it is recorded as a mechanism, not a slot.
 
+### Pick 2 buys no sampling protection, so it should buy the ruling (18:38Z, before `oaifree` scored)
+
+Same 562 honest rows, 400 paired draws of a 390 public and a 910 private sample, the pile = replica a alone.
+Private lead is read as `board lead − e_pub + e_priv`, with one draw shared by every candidate (`joint_risk.py`).
+Correlation of the private-minus-pile delta with `mirrorthird`'s: `mirrorseat` 0.98, `oaifreeshare` 0.90,
+`oaifree` **0.83**, the reader alone 0.52. `mirrorthird` alone falls below the pile in **0.072** of draws, and
+`P(both picks below the pile)` is **0.072 for every second pick tried**: `mirrorseat`, and `oaifree` or
+`oaifreeshare` at any board score from 0.947 to 0.950. Whenever `mirrorthird` falls, our shared seven take the
+second pick down with it. So **no second pick lowers the medal-loss probability on a sampling draw**. What they
+differ in is expected upside, `E[max(pick1, pick2) − pick1]`:
+
+| Pick 2 | 0.950 | 0.949 | 0.948 | 0.947 |
+|---|---|---|---|---|
+| `mirrorseat` (board 0.953) | 0.00044 | | | |
+| `oaifree` | 0.00054 | 0.00033 | 0.00021 | 0.00012 |
+| `oaifreeshare` | 0.00045 | 0.00027 | 0.00015 | 0.00007 |
+
+Every gap here is ≤ 0.0004, which is a tenth of the board's resolution. The only event a second pick can
+actually hedge is the one no bootstrap sees: a ruling that voids OAI-trained weights. Amended BEFORE either
+score was seen: **pick 2 = the best OAI-free entry if it reads ≥ 0.948** (it gives up ≤ 0.0002 of expected
+upside). Below that, the choice between `basinsoupff_v1` and `mirrorseat` is the owner's: insurance against
+upside. Caveat: the replicas understate nartaa, so these are orderings, not levels.
+
 ### The "0.954" probit wave (read 18:17Z)
 
 `rabari9999/rsna-knee-lb-0-954-rank-127-silver` is byte-identical to `jcgweb/rsna-knee-probit954`. Mounts:
