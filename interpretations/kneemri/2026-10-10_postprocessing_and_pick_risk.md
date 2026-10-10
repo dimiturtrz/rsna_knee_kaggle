@@ -216,3 +216,10 @@ against a=1 (ours only), identical on both replicas. A PLATEAU from a=0 to a=1/2
 top-band residual sd: directional only. Two kernels built to read its ends on the board: `kneemri-soupmirror`
 (a=0, slot 5 of 10-10) and `kneemri-soupsevenmirror` (a=1/2, for 10-11). No interior share points are worth
 a slot: the board's 0.001 resolution cannot split a plateau that is 0.0001 wide.
+
+**Two soups as the partner, 21:17Z (same rows, same replicas).** `basinsoup_k4 + basinsoup_dmlb_k7` at 1/6 each:
++0.0015 / +0.0016 [+0.0005, +0.0026] over ours6, P>0 1.00 on both replicas; ours6 + both soups at 1/9 each
++0.0012 / +0.0014. Best of seven compositions read on these 896 rows, so mildly selected, and its margin over the
+soup alone (+0.0004) is noise. Kernel `kneemri-twosoupmirror`. A caveat on the board side of the argument:
+`soup16_v1` serves the SAME soup checkpoint and boarded 0.944, so the soup's 0.946 against the seven's 0.944 is
+inside serving noise; the offline analog, not the board solo, is the evidence for this line.
