@@ -4913,3 +4913,12 @@ the branch says stop lowering. The board's share curve is 1/4 0.952, 1/3 0.953, 
 worth a slot. `run_check` read 7 of 7. No offline number (nartaa trained on all studies). Shipped as a
 known repeat of the member set (`submit_check --anyway`), since only the share moved.
 
+## mirrortiltthird_v1 — 0.953, ref 57037388, 2026-10-10 — the per-finding profile sits below board resolution
+
+`kneemri-mirrortiltthird` is mirrorthird with a per-finding share fitted on the holdout: ours 1/2 on ACL, MCL,
+Lateral Meniscus, PF OA and Synovitis, 1/4 on Fracture, and 1/3 elsewhere. It read 0.953, the same as
+mirrorthird. The pre-registered `0.952-0.953` branch, "flat", fired. The holdout's +0.006 per-finding gain is a
+replica's number and does not show at the board's 0.001 resolution. It carries more private risk than flat
+1/3 (0.14 against 0.09), so pick 1 stays `mirrorthird_v1`. `run_check` read 7 of 7. Slot 3 goes to `trisota`,
+not `mirrortilt`, because the tilt did not clear 0.954.
+
