@@ -88,6 +88,12 @@ holds as long as private does not drop us under the 0.951 pile (ranks 214-342), 
 from rank ~130 to ~98, which is no change of tier. **0.954 buys private margin, not a medal.** The medal is
 protected by the pick's lead over the pile, which is what the private-risk column already prices.
 
+Re-read 18:06Z (5690 teams): gold 0.961 (rank 21), silver 0.951 (rank 284), bronze 0.950 (rank 569). The pile
+grew 538 → **608** in eight hours (ranks 362-969), 0.951 ×134, 0.954 ×39; 139 teams sit above 0.953 and we
+slipped to rank 153 without a score change. The bronze line now sits a hundred ranks deep inside the pile, so
+the pile's private number decides bronze for ~600 teams at once, and the silver line moves with the 0.951 band.
+Nothing in this changes the picks; it lengthens the fall below the pile (past rank ~970).
+
 ## A mirror-family second pick hedges nothing
 
 Correlation of the private-minus-pile delta with `mirrorthird`'s, same 400×910 bootstraps, both replicas
