@@ -191,5 +191,12 @@ from a different version; the notebook alone is not shown above the pile. Nothin
 reader-wave already read 0.952 three times (`triseat`, `trihalf`, `trisota`), so a probit wave plus ours is
 priced flat and gets no slot.
 
+The combiner priced on its own (20:27Z, `probit_fusion.py`, 562 honest rows, 300 paired draws). Swapping our
+rank-average for probit z-space blending (ndtri of the mid-rank percentile) moves the macro by **+0.0002 to
++0.0008**. That holds for `mirrorthird` (1/3), `mirrorseat` (1/2), `oaifree` (1/2) and `oaifreeshare` (2/3),
+on both nartaa replicas. The best case is `mirrorthird` on replica c at +0.0008 [+0.0002, +0.0014]. Every
+delta is under the board's 0.001 resolution, so it is knob-sized and gets no slot. The fusion is not where
+the wave's 0.954 comes from.
+
 Public notebooks re-read 15:30Z: `romantamrazov/…dinosaur-v5` and `kozykappa/…gold-gated-triple-reader` are
 nartaa + the same reader at the 0.950 pile. Nothing new.
