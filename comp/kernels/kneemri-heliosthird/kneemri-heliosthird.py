@@ -108,7 +108,8 @@ def main() -> None:
 
     import pandas as pd  # noqa: PLC0415
 
-    from core.mounts import Mounts  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from core.mounts import SERIES as MOUNTED_SERIES  # noqa: PLC0415 - the kit is on sys.path only after boot
+    from core.mounts import Mounts  # noqa: PLC0415
     from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415
     from kneemri.inference.ensemble import Serving  # noqa: PLC0415
     from kneemri.inference.vote import LogitAverage  # noqa: PLC0415
@@ -125,6 +126,7 @@ def main() -> None:
         "labelwise_dense_drop40_long_s2026",
     )
     s6_deadline_offset = 0.3 * 3600.0
+    heliosli_mounts = frozenset({"rsna-knee-compact-v1", "rsna-orthofoundation-fold0-epoch7-20261004"})
     working = Path("/kaggle/working")
     started = time.time()
     mounts = Mounts()
@@ -139,7 +141,7 @@ def main() -> None:
         names=chosen,
         overlap=False,
         serving=Serving(vote=LogitAverage(), budget=Budget(seconds=max(KERNEL_SECONDS - spent, 0.0) / 2.0)),
-        mounts=mounts,
+        mounts=Mounts(skip=MOUNTED_SERIES | heliosli_mounts),
     ).run()
     seven = working / "seven.csv"
     shutil.move(working / "submission.csv", seven)
