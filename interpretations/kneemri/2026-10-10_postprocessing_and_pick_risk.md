@@ -208,3 +208,11 @@ the wave's 0.954 comes from.
 
 Public notebooks re-read 15:30Z: `romantamrazov/…dinosaur-v5` and `kozykappa/…gold-gated-triple-reader` are
 nartaa + the same reader at the 0.950 pile. Nothing new.
+
+**Soup as nartaa's partner, priced 20:50-21:06Z (fold-0 analog, nartaa replicas a/c, n=896).** The ours third of
+the mirrorthird blend split as `a*ours6 + (1-a)*basinsoup_k4` in rank space, nartaa replica at 2/3:
+a=0 (soup only) +0.0011 [-0.0002, +0.0025]; a=1/4 +0.0011; a=1/2 +0.0010 [+0.0003, +0.0017]; a=3/4 +0.0006, all
+against a=1 (ours only), identical on both replicas. A PLATEAU from a=0 to a=1/2, knob-sized, below the 0.002
+top-band residual sd: directional only. Two kernels built to read its ends on the board: `kneemri-soupmirror`
+(a=0, slot 5 of 10-10) and `kneemri-soupsevenmirror` (a=1/2, for 10-11). No interior share points are worth
+a slot: the board's 0.001 resolution cannot split a plateau that is 0.0001 wide.
