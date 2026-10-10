@@ -162,6 +162,15 @@ score was seen: **pick 2 = the best OAI-free entry if it reads ≥ 0.948** (it g
 upside). Below that, the choice between `basinsoupff_v1` and `mirrorseat` is the owner's: insurance against
 upside. Caveat: the replicas understate nartaa, so these are orderings, not levels.
 
+Threads re-read 20:06Z (747455, 744056, 743416), still no host ruling. The precedent participants quote is
+the host's Aug 27 guidance in 743416: "straightforward registration or click-through data-use agreements are
+generally acceptable; institution-specific approvals are not" (KneeCoT was barred under it). OAI through the
+NIMH Data Archive is a login.gov account plus click-through terms, so the precedent points toward allowed. One
+commenter also attached a reply from the NDA itself about OAI's intended accessibility, though its text is not
+in the thread dump. A void of OAI-trained weights therefore looks less likely than an even bet. That shrinks
+the value of the insurance but does not remove it, so the rule above stands. The commenters' read that only
+prize (top-10) solutions get audited cuts the same way.
+
 ### The "0.954" probit wave (read 18:17Z)
 
 `rabari9999/rsna-knee-lb-0-954-rank-127-silver` is byte-identical to `jcgweb/rsna-knee-probit954`. Mounts:
