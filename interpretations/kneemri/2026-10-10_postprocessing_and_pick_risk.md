@@ -247,3 +247,14 @@ SKM-TEA checkpoint. Under the 09-15 ruling, nothing SKM-TEA-derived goes into a 
 only. It could price what the ruling costs on the board, but it could never be a pick. Their stronger R3 bundle
 and nartaa's original384 pair are private (403), so they cannot be mounted. Filed as knee-7nfa8. Whether a third
 party's public SKM-TEA-anchored model falls under the ruling is a question only the owner can answer.
+
+**Rank drift at a fixed 0.953, priced (21:47Z).** `comp/leaderboard.jsonl` holds our rank at the same 0.953 across
+reads: 127 of 5616 (10-09 20:43Z), 142 (10-10 06:11Z), 144 (10:06Z), 157 (20:10Z), 159 of 5706 (21:46Z). That is
+about 30 ranks a day while our score stays flat. The silver line sits near rank 285 (top 5% of 5706). At this rate a
+flat 0.953 leaves the silver band in about four days, around 10-14/15, and ends near rank 520 on 10-22, inside bronze
+but no longer silver. The rate is a public-board one, and the public 0.955 notebooks being forked are most of it, so it
+may run faster in the final week. A private reshuffle may also move it in either direction. Two consequences. First,
+a +0.001 entry buys about one day, not a medal tier; to hold silver the public number has to reach about 0.955-0.956.
+Second, the only lever on record that is measured at that size is a second nartaa partner. heliosli's 0.954 is that
+lever, and its public partner S6 is blocked by the SKM-TEA ruling (knee-7nfa8). That turns the owner question from a
+curiosity into the deciding one.
