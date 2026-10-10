@@ -33,6 +33,17 @@ logit at ½ reads **0.9076 / 0.9075**. Scale-free z-logit at ½ gains only +0.00
 nartaa, and which the board does not share (¼, ⅓, ½ read 0.952 / 0.953 / 0.953). Not submitted; voided
 as a candidate. Its private risk (0.24) is also the ⅔ row's (0.25), as the identity predicts.
 
+## The public wave holds no new seat (read 06:35Z)
+
+`rabari9999/rsna-knee-sota-0-954`: 0.954 is the notebook's stated TARGET, no score shown; members are
+nartaa-384, nartaa-224 (0.30 inside the CoAtNet side) and goodpjw2008's reader — `triseat`'s, which read
+0.952 — and the only change from its own `lb-0-95` is the reader share on 8 findings (Lateral OA 0.28→0.50)
+and dropping the probit half of the fusion. A per-finding share retune found on the public board.
+`heliosli/*` (and `evgendvorkin/rsna-versia-7`, verbatim heliosli): 0.7 nartaa + 0.3 an OrthoFoundation-L /
+DINOv3 compact model; its weights sit in `heliosli/rsna-knee-ofl-ssl-weights` (403 to us) and a
+`rsna-knee-compact-v1` whose public copy is one README, licence `other`, titled "Private Weights". Not
+mountable, not licence-clean.
+
 ## Errors
 
 - **Fracture** is our weakest label (0.842; 39 positives) and the only one where even the weaker replica
