@@ -61,3 +61,12 @@ ours ¼ 0.04 · ⅓ 0.09 · tilt@⅓ 0.14 · ½ 0.18 · tilt@½ 0.21 · logit ½
 Spread of the lead across 1.5T/3T/Siemens/Philips/GE is ≤ 0.0045 for every blend — no stratum flips one.
 So lower ours share buys private safety monotonically; a per-finding tilt costs ~+0.05 risk over its
 centre share.
+
+## A mirror-family second pick hedges nothing
+
+Correlation of the private-minus-pile delta with `mirrorthird`'s, same 400×910 bootstraps, both replicas
+agreeing to ±0.01: ours ¼ **0.99**, ½ **0.99**, tilt@⅓ **0.95**, ours alone **0.94**. Two picks that fail on
+the same draws are one pick. The levels here favour ours (the replicas understate nartaa), so the expected
+max of a pair is not readable — only the correlation is. Pick 2 is therefore worth a different seat
+COMPOSITION if one reaches 0.953 on the board; failing that it is `mirrorseat` (½) as the upside pick, and
+the hedge it buys is small.
