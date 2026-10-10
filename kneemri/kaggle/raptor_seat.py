@@ -53,6 +53,18 @@ class RaptorSeat:
         return self.combined(ours, [theirs], [self.weight])
 
     @staticmethod
+    def tilted(ours: pd.DataFrame, theirs: pd.DataFrame, weights: Mapping[str, float]) -> pd.DataFrame:
+        """Each finding blended at its OWN foreign weight: column `f` is `RaptorSeat(weights[f]).blended(...)[f]`."""
+        if set(weights) != set(TARGETS):
+            message = f"weights name {sorted(weights)}, the board scores {sorted(TARGETS)}"
+            raise ValueError(message)
+        blends = {weight: RaptorSeat(weight=weight).blended(ours, theirs) for weight in set(weights.values())}
+        frame = ours[[STUDY]].reset_index(drop=True)
+        for finding in TARGETS:
+            frame[finding] = blends[weights[finding]][finding]
+        return frame
+
+    @staticmethod
     def fleet(ours: pd.DataFrame, theirs: Mapping[str, pd.DataFrame]) -> pd.DataFrame:
         """Several foreign members seated at once, each taking ONE seat of the widened roster.
 

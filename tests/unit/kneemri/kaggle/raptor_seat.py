@@ -95,6 +95,32 @@ def test_combined() -> None:
         RaptorSeat.combined(mine, [mine, mine], [0.7, 0.7])
 
 
+def test_tilted() -> None:
+    """Uniform weights equal `blended`; mixed weights equal each column's own `blended`; bad weights refused."""
+    studies = ["a", "b", "c", "d"]
+    mine = _table(studies, _rising(len(studies)) * np.arange(1, len(TARGETS) + 1))
+    yours = _table(studies, _rising(len(studies), offset=0.05)[::-1] * np.arange(len(TARGETS), 0, -1))
+    columns = list(TARGETS)
+
+    uniform = RaptorSeat.tilted(mine, yours, dict.fromkeys(TARGETS, 0.25))
+    reference = RaptorSeat(weight=0.25).blended(mine, yours)
+    assert list(uniform.columns) == [STUDY, *TARGETS]
+    pd.testing.assert_frame_equal(uniform, reference)
+
+    mixed = {finding: (0.5 if index % 2 else 1.0 / 3.0) for index, finding in enumerate(TARGETS)}
+    tilted = RaptorSeat.tilted(mine, yours, mixed)
+    for finding, weight in mixed.items():
+        expected = RaptorSeat(weight=weight).blended(mine, yours)[finding]
+        np.testing.assert_allclose(tilted[finding].to_numpy(), expected.to_numpy())
+    assert list(tilted[STUDY]) == studies
+    assert list(tilted.columns) == [STUDY, *columns]
+
+    with pytest.raises(ValueError, match="the board scores"):
+        RaptorSeat.tilted(mine, yours, dict.fromkeys(columns[1:], 0.25))
+    with pytest.raises(ValueError, match="is not one"):
+        RaptorSeat.tilted(mine, yours, {**dict.fromkeys(TARGETS, 0.25), columns[0]: 1.5})
+
+
 def test_a_zero_weight_returns_our_own_ranks() -> None:
     """The identity end of the axis, so the blend cannot be silently shifting our table on its own."""
     studies = ["a", "b", "c"]
