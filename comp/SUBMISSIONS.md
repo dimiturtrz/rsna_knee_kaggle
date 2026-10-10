@@ -4901,3 +4901,15 @@ public lead a lower ours share has lower private variance against the 0.950 pile
 mirrorthird replaces mirrorseat as the pick-1 candidate. The pin stays on mirrorseat (a tie is not a better
 entry). `run_check` read 7 of 7. No offline number. Next point: `kneemri-mirrorquarter` (ours 1/4), whose
 flat branch keeps the lower share.
+
+## mirrorquarter_v1 — 0.952, ref 57030644, 2026-10-10 — ours at 1/4 drops one tick; the share floor is 1/3
+
+`kneemri-mirrorquarter` is mirrorseat with our seven at 1/4 and nartaa's 384 CoAtNet at 3/4, rank blend. It
+read 0.952, one tick under mirrorthird (1/3) and mirrorseat (1/2), both 0.953. Pre-registered `<= 0.952` =
+the optimum sits at 1/3 or above; it fired. One tick is inside the top band's ~0.002 residual scatter, so the
+drop is directional, not a measured slope; but the pre-registration chose the branch before the number and
+the branch says stop lowering. The board's share curve is 1/4 0.952, 1/3 0.953, 1/2 0.953. Pick 1 stays
+`mirrorthird_v1`: the lowest share that holds the best score. The share axis is spent; no further point is
+worth a slot. `run_check` read 7 of 7. No offline number (nartaa trained on all studies). Shipped as a
+known repeat of the member set (`submit_check --anyway`), since only the share moved.
+
