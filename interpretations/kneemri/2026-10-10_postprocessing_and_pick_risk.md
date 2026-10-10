@@ -69,6 +69,18 @@ Spread of the lead across 1.5T/3T/Siemens/Philips/GE is ≤ 0.0045 for every ble
 So lower ours share buys private safety monotonically; a per-finding tilt costs ~+0.05 risk over its
 centre share.
 
+## Medal geometry (full public board, 5651 teams, read 07:56Z)
+
+Gold (rank 21) 0.960 · silver (rank 282) **0.951** · bronze (rank 565) **0.950**, and the bronze line sits
+INSIDE a pile of **522 teams at exactly 0.950** (ranks 338-859) — the public nartaa/reader notebooks. Above
+it: 0.951 ×127, 0.952 ×54, 0.953 ×28 (us), 128 teams above 0.953. So the pile's private score is one
+number shared by ~500 teams, and a pick that lands below it on private falls past rank ~860 — out of the
+medals, not one tier down. `P(private below pile)` IS the medal-loss probability, to first order.
+
+Re-priced at each candidate's ACTUAL public lead over the pile (¼ +0.002, ⅓ +0.003, ½ +0.003): ¼ **0.12**,
+⅓ **0.09**, ½ 0.18/0.19, tilt@⅓ 0.14. The quarter's lower variance does not buy back its lost tick;
+`mirrorthird` stays pick 1.
+
 ## A mirror-family second pick hedges nothing
 
 Correlation of the private-minus-pile delta with `mirrorthird`'s, same 400×910 bootstraps, both replicas
