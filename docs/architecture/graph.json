@@ -31459,6 +31459,12 @@
       "weight": 1
     },
     {
+      "kind": "calls",
+      "source": "kneemri.kaggle.raptor_seat.RaptorSeat.tilted",
+      "target": "kneemri.kaggle.raptor_seat.RaptorSeat.blended",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.raptor_teacher.TeacherPass",
       "target": "kneemri.evaluation.raptor_model.RaptorMember",
@@ -64598,6 +64604,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.raptor_seat.RaptorSeat.fleet",
       "label": "fleet",
+      "level": "method",
+      "parent": "kneemri.kaggle.raptor_seat.RaptorSeat",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.raptor_seat.RaptorSeat.tilted",
+      "label": "tilted",
       "level": "method",
       "parent": "kneemri.kaggle.raptor_seat.RaptorSeat",
       "role": null
