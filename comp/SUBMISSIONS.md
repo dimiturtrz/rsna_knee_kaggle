@@ -4932,3 +4932,14 @@ board. It read 0.952, the same as `triseat_v1` and `trihalf_v1`, and one tick un
 is seated, so the public-retune axis closes and pick 2 stays `mirrorseat`. Every reader-in-the-wave entry reads
 0.952, and every nartaa-alone one 0.953. The reader is redundant once ours is seated (the 562-study readeroof
 pricing says the same offline: half-half minus ours −0.0026). No offline number; nartaa trained on every study.
+
+## oaifree_v1 — 0.944, ref 57051234, 2026-10-10 — the reader adds nothing on the board; OAI-free hedge below the 0.948 bar
+
+`kneemri-oaifree` blended ours7 at 1/2 with goodpjw2008's ConvNeXt reader (ImageNet init, competition-report labels),
+with no nartaa: the first entry carrying no OAI-trained weights. It read 0.944. That is the score of every ours-only
+seven-seat entry (`foldseven`, `eightseat`, `swapseat`, all 0.944), so the reader's half is worth zero on the board.
+It sits below `basinsoupff_v1` (0.946), which is OAI-free too. The amended pick-2 rule's `<= 0.947` branch fired.
+No OAI-free blend clears 0.948, so pick 2 is the owner's call between `basinsoupff_v1` (0.946, OAI-free insurance)
+and `mirrorseat` (0.953, upside). The 562-row readeroof pricing had the half-half at −0.0026 under ours alone, and
+the board reads it flat, inside its 0.001 resolution. The reader's +0.0104 lead over the replica pile does not survive once ours is seated.
+Members ship from kit 5fea6702.

@@ -170,6 +170,14 @@ score was seen: **pick 2 = the best OAI-free entry if it reads ≥ 0.948** (it g
 upside). Below that, the choice between `basinsoupff_v1` and `mirrorseat` is the owner's: insurance against
 upside. Caveat: the replicas understate nartaa, so these are orderings, not levels.
 
+**Scored 20:37Z: `oaifree_v1` = 0.944**, the `<= 0.947` branch. That equals every ours-only seven-seat entry
+(`foldseven`, `eightseat`, `swapseat`), so the reader's half is worth zero on the board, and it sits under
+`basinsoupff_v1` (0.946), our best OAI-free entry. The table above priced `oaifree` as a pick only from 0.947
+upward, which the board has now ruled out. Pick 2 is the owner's call: `basinsoupff_v1` insures against an OAI
+void at 0.007 of public score, and `mirrorseat` keeps the upside. The readeroof +0.0104 reader lead was a lead
+over a replica pile, not over ours: the half-half was already −0.0026 under ours offline. The board reads that
+flat, not negative.
+
 Threads re-read 20:06Z (747455, 744056, 743416), still no host ruling. The precedent participants quote is
 the host's Aug 27 guidance in 743416: "straightforward registration or click-through data-use agreements are
 generally acceptable; institution-specific approvals are not" (KneeCoT was barred under it). OAI through the
