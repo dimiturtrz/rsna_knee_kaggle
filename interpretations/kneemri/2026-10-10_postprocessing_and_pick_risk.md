@@ -134,5 +134,17 @@ Three-way, the reader inside the foreign ⅔ beside a replica lifts **+0.0085** 
 (0.8976 → 0.9061, both replicas agree). The real checkpoint already saw this as `triseat`/`trihalf` at 0.952,
 flat on the board, so it is recorded as a mechanism, not a slot.
 
+### The "0.954" probit wave (read 18:17Z)
+
+`rabari9999/rsna-knee-lb-0-954-rank-127-silver` is byte-identical to `jcgweb/rsna-knee-probit954`. Mounts:
+nartaa's SWA weights and goodpjw2008's reader only — `trisota`'s members. Fusion is per-leg rank → `ndtri`,
+then z-blends nartaa-384 with nartaa-224 crop (`C224_WEIGHTS`, 0.02-0.22 per finding) and the reader
+(`CNXT_WEIGHTS`, Lateral OA 0.52, Baker's 0.40, Contusion 0.26, the rest ≤ 0.10), then `ndtr`. The board
+partly backs the title: rabari9999's team (Netram Faran) reads 0.954 at rank 136, but jcgweb's own team reads
+0.950 with the same notebook, and so does sameerk's (d5l-probit). So 0.954 is one team's best, which may come
+from a different version; the notebook alone is not shown above the pile. Nothing new to seat: ours over the
+reader-wave already read 0.952 three times (`triseat`, `trihalf`, `trisota`), so a probit wave plus ours is
+priced flat and gets no slot.
+
 Public notebooks re-read 15:30Z: `romantamrazov/…dinosaur-v5` and `kozykappa/…gold-gated-triple-reader` are
 nartaa + the same reader at the 0.950 pile. Nothing new.
