@@ -23,6 +23,16 @@ OA trio, Medial Meniscus–Medial OA) — re-imposing them only adds the fold's 
 per-finding SHARE, which the board is already being asked about (`mirrortilt`, `mirrortiltthird`), and
 its size here is a replica's, not the real checkpoint's.
 
+## `mirrorlogit` is a share knob, not a confidence lever
+
+Its docstring reads logit-at-½ over rank-at-½ as +0.004 "cross-head confidence". On the same 896 studies
+our averaged logits are 1.3-2.2× wider than a replica's per label (1.87 vs 1.21 overall), so a logit mean
+hands ours roughly ⅔ of each study's vote. Rank at ours ⅔ reads **0.9078 / 0.9076** (replicas a / c);
+logit at ½ reads **0.9076 / 0.9075**. Scale-free z-logit at ½ gains only +0.0009 over rank. The whole
+"gain" is the ruler's monotone preference for ours share, which this ruler has because it understates
+nartaa, and which the board does not share (¼, ⅓, ½ read 0.952 / 0.953 / 0.953). Not submitted; voided
+as a candidate. Its private risk (0.24) is also the ⅔ row's (0.25), as the identity predicts.
+
 ## Errors
 
 - **Fracture** is our weakest label (0.842; 39 positives) and the only one where even the weaker replica
