@@ -1,9 +1,10 @@
-"""oaifreeshare — `oaifree` with our seven at 1/3 and goodpjw2008's reader at 2/3: the hedge's second share point.
+"""oaifreeshare — `oaifree` with our seven at 2/3 and goodpjw2008's reader at 1/3: the hedge's second share point.
 
 Same members, same reader, same code as `kneemri-oaifree` (ours 1/2); only `OURS` moves. The two read together
-are the hedge's share curve, which the board has never seen without nartaa. 1/3 is the pre-registered default
-(knee-kl48k, 16:57Z): the reader is the real checkpoint, and `kneemri-readeroof` reprices the share on the 562
-studies it never trained on; this moves to 2/3 only if that argmax lands above 1/2.
+are the hedge's share curve, which the board has never seen without nartaa. The pre-registered rule (knee-kl48k,
+17:07Z) was 2/3 if `kneemri-readeroof`'s argmax lands above 1/2, else 1/3. On the 562 studies the reader never
+trained on (leak control +0.033, fold map holds), ours 1/2 reads 0.9080, 2/3 0.9108, 3/4 0.9114 (argmax): 2/3.
+A tie-break, not a finding: the board has not reproduced offline share preferences before.
 
 The rest of this docstring is `oaifree`'s, unchanged.
 
@@ -109,7 +110,7 @@ def boot() -> Path:
 # <<< KERNEL-BOOTSTRAP
 
 
-OURS = 1 / 3
+OURS = 2 / 3
 """Our seven's share against the reader. See the module docstring."""
 
 

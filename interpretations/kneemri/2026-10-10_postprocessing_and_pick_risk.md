@@ -112,5 +112,21 @@ competition's own reports, verified from its mount), no nartaa. Pre-registered: 
 by `kneemri-readeroof` (the reader's own fold map reproduced: 562 studies it never trained on, 40 leak-control
 rows).
 
+### The reader priced honestly (`kneemri-readeroof`, read 17:46Z)
+
+On the 562 studies outside the reader's training folds (ledger75 cut), the reader alone reads **0.8886**, our
+six **0.9106**, the two nartaa replicas 0.8780 / 0.8785. The 40 leak-control rows read the reader at 0.9215,
++0.033 over its honest number, so the reproduced fold map is right. Ours share against the reader:
+0 0.8886 · ⅓ 0.9031 · ½ **0.9080** · ⅔ **0.9108** · ¾ **0.9114** · 1 0.9106. Half-half minus ours alone is
+−0.0026 [−0.0069, +0.0018]: the reader adds nothing at ½ that this ruler can see, and only a small share of it
+helps. Per label the reader trails ours everywhere but Fracture (+0.021) and Synovitis/Baker's (±0.001), the
+same Fracture pattern as nartaa's. Pre-registered rule (knee-kl48k 17:07Z): `oaifreeshare` moves to ⅔ when the
+argmax lands above ½ — it did, so v2 holds ⅔ (+0.0028 over ½). A tie-break, not a finding: the board has
+not reproduced offline share preferences in the mirror family.
+
+Three-way, the reader inside the foreign ⅔ beside a replica lifts **+0.0085** at reader 0.45 of it
+(0.8976 → 0.9061, both replicas agree). The real checkpoint already saw this as `triseat`/`trihalf` at 0.952,
+flat on the board, so it is recorded as a mechanism, not a slot.
+
 Public notebooks re-read 15:30Z: `romantamrazov/…dinosaur-v5` and `kozykappa/…gold-gated-triple-reader` are
 nartaa + the same reader at the 0.950 pile. Nothing new.
