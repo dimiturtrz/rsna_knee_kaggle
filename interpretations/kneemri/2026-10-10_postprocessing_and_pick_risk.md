@@ -44,6 +44,13 @@ DINOv3 compact model; its weights sit in `heliosli/rsna-knee-ofl-ssl-weights` (4
 `rsna-knee-compact-v1` whose public copy is one README, licence `other`, titled "Private Weights". Not
 mountable, not licence-clean.
 
+Re-read 07:28Z, four newer notebooks, still nothing: `jenillangaliya/…dual-stage…lb-0-951` and
+`rainycloudss/…apex-grandmaster-stack-v9` are nartaa-384 0.70 + goodpjw2008's ConvNeXt reader 0.30, i.e.
+the wave `triseat` already seats; `omn1v3r53/omniverse-sota…` mounts nartaa + `tonylica/…bend-dinov3-0917-repro-assets`
+(mattiaangeli's DINOv3 family, closed by `bend_v1`) but its code runs a single-slice ResNet stub with a
+hash-of-UID fallback, and its 0.9572 ablation table has no run behind it; `innshrestha/…0-943` is the
+older raptor/DINOv2 pile at 0.943.
+
 ## Errors
 
 - **Fracture** is our weakest label (0.842; 39 positives) and the only one where even the weaker replica
