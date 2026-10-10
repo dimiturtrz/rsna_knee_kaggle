@@ -94,6 +94,14 @@ slipped to rank 153 without a score change. The bronze line now sits a hundred r
 the pile's private number decides bronze for ~600 teams at once, and the silver line moves with the 0.951 band.
 Nothing in this changes the picks; it lengthens the fall below the pile (past rank ~970).
 
+Re-read 20:16Z (5700 teams). The lines have not moved: gold 0.961 (rank 21), silver 0.951 (rank 285, inside
+the 0.951 band at ranks 232-371), bronze 0.950 (rank 570, inside the pile). The pile is 608 → **619** in two
+hours (ranks 372-990), 0.951 ×140, 0.954 ×42. 142 teams sit above 0.953, and we are rank 157 with no score
+change. The fill is mostly at or below our score (pile +11, 0.951 +6, against +3 above us), which is the probit
+wave settling. The silver line is 114 ranks
+under our band's floor (171), so private shake must drop us past the whole 0.952 band to cost silver. Same
+reading as at 18:06Z; nothing in it changes the picks.
+
 ## A mirror-family second pick hedges nothing
 
 Correlation of the private-minus-pile delta with `mirrorthird`'s, same 400×910 bootstraps, both replicas
