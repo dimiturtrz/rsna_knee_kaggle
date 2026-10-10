@@ -223,3 +223,15 @@ a slot: the board's 0.001 resolution cannot split a plateau that is 0.0001 wide.
 soup alone (+0.0004) is noise. Kernel `kneemri-twosoupmirror`. A caveat on the board side of the argument:
 `soup16_v1` serves the SAME soup checkpoint and boarded 0.944, so the soup's 0.946 against the seven's 0.944 is
 inside serving noise; the offline analog, not the board solo, is the evidence for this line.
+
+**Pick 2 priced on sampling alone (21:27Z).** The final score is the better of the two picks, so pick 2's worth
+over pick 1 alone is `E[max(0, d)]`, with `d ~ N(board gap, sd(cand - mirrorthird))` and sd taken from the
+`hedge_corr` paired draws. `mirrorseat` (tie, sd 0.0007) is worth +0.0003, and a soup-side mirror that ties
+(sd about 0.0010) is worth +0.0004. `basinsoupff_v1` (-0.007, sd 0.0024-0.0034) is worth 0.0000 and wins the
+private draw 0.2-2% of the time. All three are under the board's 0.001 resolution, so **sampling does not
+decide pick 2. Eligibility does.** `basinsoupff_v1` matters in only one world: OAI-trained weights are ruled
+out. That ruling also removes every nartaa-based team in the 0.950 pile, so the bronze line falls well below
+0.950 and a 0.946 OAI-free entry can medal. In every other world `basinsoupff_v1` is worth zero. The owner's
+question is therefore one number, P(OAI ruling), and not a score comparison. A side effect for tonight's
+instrument: if `soupmirror` reads 0.953 it replaces `mirrorseat` as the OAI-exposed pick-2 option. The edge is
+free but noise-sized.
