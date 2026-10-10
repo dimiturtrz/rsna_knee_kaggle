@@ -4889,3 +4889,15 @@ CoAtNet and his unseated 224-crop checkpoint (ours 0.50, 384 0.25, 224-crop 0.25
 on one corpus are one family, so splitting the seat dilutes the stronger checkpoint without adding an axis.
 `run_check` read 7 of 7. No offline number. Champion unchanged (mirrorseat 0.953). The foreign-seat axis is
 now flat on share, on reader, and on a second checkpoint of the same family.
+
+## mirrorthird_v1 — 0.953, ref 57023373, 2026-10-09 — ours at 1/3 holds the champion's score
+
+`kneemri-mirrorthird` is mirrorseat with the share moved: our seven at 1/3, nartaa's 384 CoAtNet at 2/3, rank
+blend. It read 0.953, level with mirrorseat at 1/2. Pre-registered `0.952-0.953` = flat; it fired, so the
+share is flat from 1/2 down to 1/3 at board resolution (1/2 0.953, 1/3 0.953; the triseat-wave 1/3 and 1/2
+both read 0.952). That flat is the useful reading for the FINAL PICKS, not for the public score: at an equal
+public lead a lower ours share has lower private variance against the 0.950 pile (medal-risk table,
+`interpretations/kneemri/2026-10-09_medal_risk_vs_foreign_share.md`: ~0.08 at 1/3 against ~0.18 at 1/2), so
+mirrorthird replaces mirrorseat as the pick-1 candidate. The pin stays on mirrorseat (a tie is not a better
+entry). `run_check` read 7 of 7. No offline number. Next point: `kneemri-mirrorquarter` (ours 1/4), whose
+flat branch keeps the lower share.
