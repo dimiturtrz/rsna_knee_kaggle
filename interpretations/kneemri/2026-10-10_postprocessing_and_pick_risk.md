@@ -235,3 +235,15 @@ out. That ruling also removes every nartaa-based team in the 0.950 pile, so the 
 question is therefore one number, P(OAI ruling), and not a score comparison. A side effect for tonight's
 instrument: if `soupmirror` reads 0.953 it replaces `mirrorseat` as the OAI-exposed pick-2 option. The edge is
 free but noise-sized.
+
+**Public notebooks re-read (21:36Z): the 0.954 team is nartaa plus one public partner, and that partner cannot ship.**
+heliosli's best board entry, 0.954 (rank 119), is a rank blend: nartaa 384 at 0.7 and their own ConvNeXt at 0.3.
+That is the same structure as `mirrorthird` (nartaa 2/3 + ours 1/3, 0.953), so their partner is worth about what
+ours is. The partner is public as `heliosli/rsna-knee-compact-v1` (S6: convnext_small 384, crop 352, 4 folds), and
+its README invites blending. A three-way blend (nartaa 2/3, ours 1/6, S6 1/6) is the obvious lever, plausibly worth
++0.001 to +0.002 through a decorrelated partner side. But its `manifest.json` declares `views: v4`, which loads
+`anatomy.pt` from `heliosli/rsna-orthofoundation-fold0-epoch7-20261004`, which their own code describes as the
+SKM-TEA checkpoint. Under the 09-15 ruling, nothing SKM-TEA-derived goes into a final pick, so S6 is an instrument
+only. It could price what the ruling costs on the board, but it could never be a pick. Their stronger R3 bundle
+and nartaa's original384 pair are private (403), so they cannot be mounted. Filed as knee-7nfa8. Whether a third
+party's public SKM-TEA-anchored model falls under the ruling is a question only the owner can answer.
