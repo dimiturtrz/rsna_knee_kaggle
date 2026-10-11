@@ -65,6 +65,8 @@ def test_resolved(tmp_path: Path):
     kernel = _kernel(tmp_path, "kneemri-named", "KernelRun().run()\n")
     assert SubmitCheck.resolved("kneemri-named", tmp_path) == kernel
     assert SubmitCheck.resolved(str(kernel), tmp_path / "unused") == kernel
+    assert SubmitCheck.resolved("dimiturnt/kneemri-named", tmp_path) == kernel, "the Kaggle id names the same kernel"
+    assert not SubmitCheck.resolved("kneemri-absent", tmp_path).is_dir(), "a missing kernel stays missing"
 
 
 def test_rows_without_names(tmp_path: Path):
