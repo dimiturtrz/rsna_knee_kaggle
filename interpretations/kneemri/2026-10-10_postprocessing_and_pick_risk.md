@@ -296,3 +296,21 @@ to twosoupmirror: it has the higher read, and it has two checkpoints on the ours
 risk. Pick 2 stays the owner's call. The candidates are mirrorthird (same nartaa share, ours7) as the diversity hedge,
 or the best all-ours entry as the licence hedge. The next combiner instrument should run on this ours side
 (twosoupprobit), not on mirrorthird's.
+
+## 2026-10-11 02:10Z — the 0.954 pile is ordered by hidden decimals; slots read RANK, not score
+
+Between leaderboard downloads at 01:08Z and 01:36Z our rank went 164 → 168 while the count at ≥0.955 rose by
+one (103 → 104): three new 0.954 entries landed above ours. The tie is not broken by submit time, so the board
+ranks on the unrounded score. Two consequences:
+
+- **Medal horizon.** ≥0.954 arrivals run ~95-200/day; if about half beat our hidden decimals, public silver
+  (rank ~285) holds 2-3 days, not the ~12 recorded at 370aef49 (corrected on knee-bpklf).
+- **Instrument resolution.** An entry reading 0.954 is no longer a null. Our team rank moves only if the new
+  entry's unrounded score beats twosoupmirror's, so a rank read immediately before and after each 0.954 result
+  orders the two at sub-0.001 resolution. That makes the probit combiner (+0.0002..+0.0008 offline at every
+  share, `docs/AXES.md` blend-space row) worth its slot even though its whole offline price sits under the
+  board's rounding.
+
+Slot order for 2026-10-11 (pace (23:30Z − now)/slots_left): twosoupprobit (~06:50Z), then soupsevenmirror
+(pick-2 diversity candidate: ours7 in the second soup's seat), then soupmirror (one-soup ablation) only if
+nothing with a mechanism appears first. Each is read as `board` AND `rank delta at equal board`.
