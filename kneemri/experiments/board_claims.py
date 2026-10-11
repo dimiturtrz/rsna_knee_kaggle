@@ -97,6 +97,10 @@ RANK = re.compile(r"rank (\d+) of ([\d,]+)", re.IGNORECASE)
 """The standing as this project writes it, both halves, so a rank is never checked without its field."""
 
 DATED = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+VERSION = re.compile(r"_v\d+$")
+"""An entry's version suffix. Prose names the comparator by its bare stem (`s6third` beside `s6half_v1`), and
+a stem nobody recognises turns a two-entry comparison into a one-entry misquote."""
 """A line that carries its own read date is a DATED READ, and a dated read is never stale.
 
 This is the discriminator, not a refinement of one. The first sweep raised 18 rank findings and 13 of
@@ -178,7 +182,13 @@ class BoardClaims:
         self.entries = entries
         self.standing = standing
         self.corpus = corpus
-        self.stems = {name: re.compile(rf"(?<![A-Za-z0-9_])({re.escape(name)})(?![A-Za-z0-9_])") for name in entries}
+        self.stems = {name: BoardClaims.token(name) for name in entries}
+        self.bare = {name: BoardClaims.token(VERSION.sub("", name)) for name in entries}
+
+    @staticmethod
+    def token(text: str) -> re.Pattern[str]:
+        """`text` as a whole word: no letter, digit or underscore on either side."""
+        return re.compile(rf"(?<![A-Za-z0-9_])({re.escape(text)})(?![A-Za-z0-9_])")
 
     @staticmethod
     def scored(path: Path) -> dict[str, float]:
@@ -215,9 +225,16 @@ class BoardClaims:
         return [span for span in found if BOARD_FLOOR <= float(span[2]) <= BOARD_CEILING]
 
     def named(self, line: str) -> str | None:
-        """The single board entry a line names, or None when it names none or several."""
+        """The single board entry a line names, or None when it names none or several.
+
+        A bare stem never names an entry (too many are words: `band`, `rate`, `vote`), but it does make a
+        line a comparison, because prose writes the comparator that way (`s6half_v1 0.955 (s6third 0.956)`).
+        """
         found = [name for name, token in self.stems.items() if token.search(line)]
-        return found[0] if len(found) == 1 else None
+        if len(found) != 1:
+            return None
+        compared = [name for name, token in self.bare.items() if name != found[0] and token.search(line)]
+        return None if compared else found[0]
 
     def about(self, line: str, name: str) -> set[str]:
         """The board scores written near enough to `name` on this line to be claims about that entry."""

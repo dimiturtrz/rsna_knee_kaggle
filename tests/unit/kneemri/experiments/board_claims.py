@@ -80,10 +80,20 @@ def test_quoted() -> None:
     assert BoardClaims.quoted("a blend weight of 0.330") == []
 
 
+def test_token() -> None:
+    assert BoardClaims.token("s6third").search("kneemri-s6third read 0.956")
+    assert not BoardClaims.token("s6third").search("s6third_v1 read 0.956")
+    assert not BoardClaims.token("band").search("bandwidth")
+
+
 def test_named() -> None:
     assert check().named("`votefit_v1` scored 0.938") == "votefit_v1"
     # Two entries named is a comparison, and both its numbers are somebody's by design.
     assert check().named("`votefit_v1` 0.938 against `basedense_v1` 0.931") is None
+    # The comparator written by its bare stem is still a second entry.
+    assert check().named("`votefit_v1` 0.938 vs basedense 0.931") is None
+    # A bare stem alone names nothing: too many stems are ordinary words.
+    assert check().named("votefit scored 0.938") is None
     assert check().named("no entry here at all") is None
 
 
@@ -100,6 +110,7 @@ def test_misquoted() -> None:
     assert check([document(4, "`votefit_v1` scored 0.938")]).misquoted() == []
     # 0.93 and 0.930 are the same claim written two ways, so neither is a finding.
     assert check([document(4, "`sixstrong_v1` scored 0.930")]).misquoted() == []
+    assert check([document(4, "votefit_v1 = 0.938 (basedense 0.931)")]).misquoted() == []
     findings = check([document(4, "`votefit_v1` scored 0.931")]).misquoted()
     assert findings == [("note.md", 4, "votefit_v1", {"0.931"}, 0.938)]
 
