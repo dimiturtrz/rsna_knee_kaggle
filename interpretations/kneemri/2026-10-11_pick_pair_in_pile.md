@@ -89,3 +89,21 @@ and `comp/champion.json` now pins `s6third_v1`. KneeCoT stays banned.
 Pick plan: the best S6 entry plus `twosoupmirror_v1` (0.954) as the non-S6 hedge — the two differ only in
 whether S6 serves, so the pair covers S6 failing on the private split. Slot 3 goes to `kneemri-s6half`
 (S6 1/2), the third point of the share curve, which can only raise the S6 pick or confirm `s6third_v1`.
+
+## 19:32Z — the pile now holds both medal lines
+
+Full public board, 5771 teams. **447 teams are tied at exactly 0.954, ranks 141-587.** At 07:27Z the same
+tie held 187. The silver line (top 5%, r288) and the bronze line (top 10%, r577) both fall inside it.
+The gold line (10 + 0.2%N, about r21) is 0.961. Ours is 0.956, rank 95; 78 teams are above 0.956.
+
+What this does to the picks:
+
+- **Being at the pile on private means no medal at all.** A pick that finishes level with the pile ranks
+  with it, at 141-587 on public. Below it is outside bronze. There is no partial safety in being "near".
+- **`twosoupmirror_v1` as the non-S6 hedge is the coin of the table above, and the stakes are now a medal.**
+  It covers one case only: S6 failing on the private rerun. In that case `s6third_v1` falls back to the
+  soup blend and lands in the pile anyway. So the hedge buys nothing that the S6 pick's own fallback
+  does not already give.
+- **Pick 2 should therefore be a second entry ABOVE the pile, decorrelated from pick 1.** Not a
+  non-S6 entry inside it. `s6seven` (the seven-member ours side at the 1/3 S6 share) is that candidate,
+  if it reads at least 0.955 when the 10-12 slot spends.
