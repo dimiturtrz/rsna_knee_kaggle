@@ -150,7 +150,11 @@ def main() -> None:
         if table.isna().any().any() or (table.nunique() <= 1).any():
             message = "a foreign table is missing studies or constant in a finding"
             raise ValueError(message)
-    wave = (sum(table.rank(pct=True) for table in seats) / len(seats)).rank(pct=True).reset_index()
+    wave = (
+        (sum((table.rank(pct=True) for table in seats[1:]), seats[0].rank(pct=True)) / len(seats))
+        .rank(pct=True)
+        .reset_index()
+    )
 
     spent = time.time() - started
     KernelRun(

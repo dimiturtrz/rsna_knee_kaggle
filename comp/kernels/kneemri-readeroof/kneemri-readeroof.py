@@ -645,11 +645,15 @@ def main() -> None:
         check=False,
     )
     sys.path[:0] = [str(target), str(reader)]
+    import importlib  # noqa: PLC0415
+
     import pandas as pd  # noqa: PLC0415 - importable only after the mount is on sys.path
     import torch  # noqa: PLC0415 - importable only after the mount is on sys.path
-    from infer import DicomStudyDataset, load_models  # noqa: PLC0415 - importable only after the mount is on sys.path
-    from knee import LABELS, build_study_table  # noqa: PLC0415 - importable only after the mount is on sys.path
-    from preprocess import MAX_SLICES  # noqa: PLC0415 - importable only after the mount is on sys.path
+
+    infer, knee = importlib.import_module("infer"), importlib.import_module("knee")
+    DicomStudyDataset, load_models = infer.DicomStudyDataset, infer.load_models  # noqa: N806 - goodpjw's names
+    LABELS, build_study_table = knee.LABELS, knee.build_study_table  # noqa: N806 - goodpjw's names
+    MAX_SLICES = importlib.import_module("preprocess").MAX_SLICES  # noqa: N806 - goodpjw's name
 
     torch.set_num_threads(os.cpu_count() or 4)
     plan = pd.DataFrame([line.split() for line in PLAN.splitlines()], columns=["study", "fold", "kind"])
@@ -662,7 +666,7 @@ def main() -> None:
         n_files[sr] = min(len(os.listdir(d)), MAX_SLICES) if d.is_dir() else 0
     table = build_study_table(se, n_files)
     out = Path("/kaggle/working/reader_oof.csv")
-    started, done = time.time(), []
+    started, done = time.time(), list[pd.DataFrame]()
     for fold, part in plan.groupby("fold"):
         ((model, res),) = load_models([str(reader / f"cnxt_v0_fold{fold}.pt")], device="cpu")
         loader = torch.utils.data.DataLoader(
@@ -673,9 +677,9 @@ def main() -> None:
             for x, mask, pos in loader:
                 probs.append(model(x, mask, pos, res=res).float().sigmoid())
         frame = pd.DataFrame(torch.cat(probs).numpy(), columns=LABELS)
-        frame.insert(0, "kind", part.kind.values)
+        frame.insert(0, "kind", part.kind.to_numpy())
         frame.insert(0, "fold", fold)
-        frame.insert(0, "StudyInstanceUID", part.study.values)
+        frame.insert(0, "StudyInstanceUID", part.study.to_numpy())
         done.append(frame)
         pd.concat(done).to_csv(out, index=False)
         logging.getLogger(__name__).info("fold %s: %d studies, %.0fs", fold, len(part), time.time() - started)
