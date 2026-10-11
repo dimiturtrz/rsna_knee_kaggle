@@ -11,10 +11,12 @@ this is the S6-side pick with a different ours half.
 
 S6 is SKM-TEA-derived; pick-eligible since the owner revoked the 09-15 ruling on 2026-10-11 (knee-7nfa8).
 
-RUNTIME RISK. The ours budget stays s6third's quarter of what nartaa leaves, shared by soup_ff and the seven,
-so S6 keeps the time it had on the run that scored. Eight members in that quarter can overrun; `Serving` then
-drops the weakest member rather than dying, so an overrun reads as a slightly different seven, not an error.
-The hidden rerun's log is not served back, so an overrun is invisible: price a score with that caveat.
+RUNTIME. Each KernelRun gets its OWN Budget (s6third's quarter of what nartaa leaves), the soupsevenmirror
+pattern. A SHARED Budget is wrong here: `Budget.started` is set once while `chunk()` restarts its fraction per
+run, so the seven's projection would carry soup_ff's elapsed time and, on the ~910-study hidden set, give up
+members chunk after chunk down to one (v1 had this; its 3-study visible run is a single chunk and never showed
+it). Priced from v1's visible log: seven forward ~1.8 s/study with decode pipelined, ~+12 min over s6third,
+which leaves S6 its margin. The hidden log is not served, so price a score with that caveat.
 
 PRE-REGISTRATION (s6third 0.956):
 - **>= 0.956** — pairs with s6third or replaces it as the S6 pick.
@@ -139,9 +141,14 @@ def main() -> None:
     spent = time.time() - started
     logging.getLogger(__name__).info("nartaa's pass cost %.0fs", spent)
 
-    serving = Serving(vote=LogitAverage(), budget=Budget(seconds=max(KERNEL_SECONDS - spent, 0.0) / 4.0))
+    ours_seconds = max(KERNEL_SECONDS - spent, 0.0) / 4.0
     ours_mounts = Mounts(skip=MOUNTED_SERIES | heliosli_mounts)
-    KernelRun(names=("basinsoup_ff_k4_s2026",), overlap=False, serving=serving, mounts=ours_mounts).run()
+    KernelRun(
+        names=("basinsoup_ff_k4_s2026",),
+        overlap=False,
+        serving=Serving(vote=LogitAverage(), budget=Budget(seconds=ours_seconds)),
+        mounts=ours_mounts,
+    ).run()
     shutil.move(working / "submission.csv", working / "soup_ff.csv")
     KernelRun(
         names=(
@@ -154,7 +161,7 @@ def main() -> None:
             "labelwise_dense_drop40_long_s2026",
         ),
         overlap=False,
-        serving=serving,
+        serving=Serving(vote=LogitAverage(), budget=Budget(seconds=ours_seconds)),
         mounts=ours_mounts,
     ).run()
     shutil.move(working / "submission.csv", working / "seven.csv")
