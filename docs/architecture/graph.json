@@ -30320,6 +30320,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._calls",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript._filenames",
       "target": "kneemri.kaggle.kernel_script.KernelScript._assigned",
       "weight": 1
@@ -30350,6 +30356,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._selection",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._keyword",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._selection",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._strings",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript._strings",
       "target": "kneemri.kaggle.kernel_script.KernelScript._assigned",
       "weight": 1
@@ -30375,13 +30393,13 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript.member_names",
-      "target": "kneemri.kaggle.kernel_script.KernelScript._strings",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._calls",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript.member_names",
-      "target": "kneemri.kaggle.kernel_script.KernelScript.call",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._selection",
       "weight": 1
     },
     {
@@ -63770,6 +63788,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._calls",
+      "label": "_calls",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.kernel_script.KernelScript._filenames",
       "label": "_filenames",
       "level": "method",
@@ -63804,6 +63830,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.kernel_script.KernelScript._seats",
       "label": "_seats",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._selection",
+      "label": "_selection",
       "level": "method",
       "parent": "kneemri.kaggle.kernel_script.KernelScript",
       "role": null
