@@ -7,10 +7,20 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from core.data.corpus.folds import ReportFolds
 from core.findings import TARGETS
-from kneemri.evaluation.feature_probe import SELECTION, FeatureProbe, ProbeCorpus, ProbeResult, ProbeSplit
+from core.paths import TRAIN_TABLE
+from kneemri.evaluation.feature_probe import (
+    HOLDOUT_FOLD,
+    SELECTION,
+    TRUNKS,
+    FeatureProbe,
+    ProbeCorpus,
+    ProbeResult,
+    ProbeSplit,
+)
 from kneemri.evaluation.scores import LabelScores
-from kneemri.evaluation.slice_readout import SliceMax, SliceMean
+from kneemri.evaluation.slice_readout import READOUTS, SliceMax, SliceMean
 
 
 def _result() -> ProbeResult:
@@ -152,6 +162,39 @@ def test_identifiers(tmp_path: Path) -> None:
 def test_features(tmp_path: Path) -> None:
     corpus = _corpus(tmp_path, ["b", "a"], "features_demo")
     assert corpus.features("features_demo").shape == (2, 2, 2, 3)
+
+
+SPLIT_STUDIES = 40
+
+
+def _split_corpus(tmp_path: Path, stem: str) -> tuple[ProbeCorpus, list[str]]:
+    identifiers = [f"s{index}" for index in range(SPLIT_STUDIES)]
+    corpus = _corpus(tmp_path, identifiers, stem)
+    corpus.raw.mkdir()
+    reports = [f"report {index}" for index in range(SPLIT_STUDIES)]
+    pd.DataFrame({"StudyInstanceUID": identifiers, "Report": reports}).to_csv(corpus.raw / TRAIN_TABLE, index=False)
+    features = np.random.default_rng(7).normal(size=(SPLIT_STUDIES, 2, 2, 3)).astype(np.float16)
+    np.save(corpus.processed / f"{stem}.npy", features)
+    return corpus, identifiers
+
+
+def _manual_split(corpus: ProbeCorpus, stem: str, identifiers: list[str], readout: str) -> ProbeSplit:
+    folds = ReportFolds()
+    training, holdout = folds.holdout(folds.assign(str(corpus.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
+    features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])
+    return ProbeSplit(features, corpus.truth(identifiers), training, holdout)
+
+
+def test_split(tmp_path: Path) -> None:
+    """The split equals the fold-0 block the probe mains built by hand, array for array."""
+    name = sorted(TRUNKS)[0]
+    corpus, identifiers = _split_corpus(tmp_path, TRUNKS[name])
+    expected = _manual_split(corpus, TRUNKS[name], identifiers, SliceMax.name)
+    split = corpus.split(name, SliceMax.name)
+    assert len(expected.training) > 0
+    assert len(expected.holdout) > 0
+    for field in ("features", "truth", "training", "holdout"):
+        assert np.array_equal(getattr(split, field), getattr(expected, field))
 
 
 def _probe_pool(studies: int, dim: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:

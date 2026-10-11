@@ -82,13 +82,11 @@ from jaxtyping import Float, Int
 from numpy.typing import NDArray
 
 from core import cli
-from core.data.corpus.folds import ReportFolds
 from core.denominator import Denominator
-from core.paths import TRAIN_TABLE
-from kneemri.evaluation.feature_probe import HOLDOUT_FOLD, TRUNKS, FeatureProbe, ProbeCorpus, ProbeSplit
+from kneemri.evaluation.feature_probe import TRUNKS, FeatureProbe, ProbeCorpus, ProbeSplit
 from kneemri.evaluation.labelling import FIXED_TAIL, LABELLINGS, Labelling
 from kneemri.evaluation.scores import LabelScores
-from kneemri.evaluation.slice_readout import READOUTS, SliceMean
+from kneemri.evaluation.slice_readout import SliceMean
 
 LOGGER = logging.getLogger(__name__)
 
@@ -200,15 +198,9 @@ def main() -> None:
     arguments = command.parsed()
     root = command.rooted(arguments)
     corpus = ProbeCorpus(processed=root.processed(), raw=root.raw())
-    folds = ReportFolds()
     results: list[AdaptationResult] = []
     for name in arguments.trunks:
-        stem = TRUNKS[name]
-        identifiers = corpus.identifiers(stem)
-        training, holdout = folds.holdout(folds.assign(str(corpus.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
-        truth = corpus.truth(identifiers)
-        features = FeatureProbe.pooled(corpus.features(stem), READOUTS[SliceMean.name])
-        split = ProbeSplit(features, truth, training, holdout)
+        split = corpus.split(name, SliceMean.name)
         penalty = arguments.penalty or FeatureProbe.chosen(split)
         for scheme in arguments.labellings:
             for share in arguments.shares:
