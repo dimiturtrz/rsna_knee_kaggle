@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
+from core.findings import STUDY
+
 TRAIN_ONLY = -2
 """The fold of a study that may never be scored on — a corpus that is not the one we are measured on.
 
@@ -58,7 +60,7 @@ class ReportFolds:
         rather than into the rotation — see that constant for why a holdout it appeared in would report a
         number nothing could be compared against.
         """
-        reports = pd.read_csv(train_table).set_index("StudyInstanceUID")["Report"].fillna("").to_dict()
+        reports = pd.read_csv(train_table).set_index(STUDY)["Report"].fillna("").to_dict()
         assignments = np.empty(len(identifiers), dtype=np.int64)
         for index, identifier in enumerate(identifiers):
             if identifier not in reports:

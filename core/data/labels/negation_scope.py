@@ -31,18 +31,20 @@ import logging
 import re
 
 from core.data.labels.finding_mentions import FindingMentions
+from core.data.labels.report_language import Language
+from core.findings import Finding
 
 logger = logging.getLogger(__name__)
 
 DENIAL: dict[str, tuple[str, ...]] = {
-    "en": (r"\bno\b", r"\bnot\b", r"without", r"negative\s+for", r"ruled\s+out", r"denie", r"\bnor\b"),
-    "es": (r"\bno\b", r"\bsin\b", r"descarta", r"ausencia", r"\bnegativ"),
-    "tr": (r"\byok\b", r"yoktur", r"mevcut\s+değil", r"\bdeğil\b", r"etmiyor"),
-    "hr": (r"\bbez\b", r"\bnema\b", r"\bne\s", r"nije\b"),
-    "de": (r"\bkein", r"\bohne\b", r"\bnicht\b"),
-    "bg": (r"\bняма\b", r"\bбез\b", r"\bне\s"),
-    "el": (r"\bδεν\b", r"χωρίς", r"ουδέν", r"\bόχι\b"),
-    "nl": (r"\bgeen\b", r"zonder", r"\bniet\b"),
+    Language.EN: (r"\bno\b", r"\bnot\b", r"without", r"negative\s+for", r"ruled\s+out", r"denie", r"\bnor\b"),
+    Language.ES: (r"\bno\b", r"\bsin\b", r"descarta", r"ausencia", r"\bnegativ"),
+    Language.TR: (r"\byok\b", r"yoktur", r"mevcut\s+değil", r"\bdeğil\b", r"etmiyor"),
+    Language.HR: (r"\bbez\b", r"\bnema\b", r"\bne\s", r"nije\b"),
+    Language.DE: (r"\bkein", r"\bohne\b", r"\bnicht\b"),
+    Language.BG: (r"\bняма\b", r"\bбез\b", r"\bне\s"),
+    Language.EL: (r"\bδεν\b", r"χωρίς", r"ουδέν", r"\bόχι\b"),
+    Language.NL: (r"\bgeen\b", r"zonder", r"\bniet\b"),
 }
 """Words that deny WHAT FOLLOWS THEM — prepositions and negative particles. Scoped FORWARD ONLY.
 
@@ -55,14 +57,14 @@ error — sixteen of them on cells where the radiologist AGREED with the reader,
 caught it."""
 
 NORMALITY: dict[str, tuple[str, ...]] = {
-    "en": (r"\bnormal", r"\bintact", r"unremarkable", r"preserved", r"\babsent", r"well[- ]maintained"),
-    "es": (r"\bnormal", r"conservad", r"íntegr", r"\bintegr"),
-    "tr": (r"\bnormal", r"korunmuş", r"izlenmemiş", r"görülmemiş", r"saptanmamış", r"izlenmedi", r"doğal"),
-    "hr": (r"uredn", r"\buredan\b", r"održan", r"očuvan", r"primjeren", r"intaktn"),
-    "de": (r"unauffällig", r"\bintakt", r"regelrecht", r"\bnormal", r"erhalten"),
-    "bg": (r"нормалн", r"нормално", r"запазен", r"съхранен", r"интактн"),
-    "el": (r"φυσιολογικ", r"ακέραι"),
-    "nl": (r"\bnormaal", r"\bintact", r"onopvallend"),
+    Language.EN: (r"\bnormal", r"\bintact", r"unremarkable", r"preserved", r"\babsent", r"well[- ]maintained"),
+    Language.ES: (r"\bnormal", r"conservad", r"íntegr", r"\bintegr"),
+    Language.TR: (r"\bnormal", r"korunmuş", r"izlenmemiş", r"görülmemiş", r"saptanmamış", r"izlenmedi", r"doğal"),
+    Language.HR: (r"uredn", r"\buredan\b", r"održan", r"očuvan", r"primjeren", r"intaktn"),
+    Language.DE: (r"unauffällig", r"\bintakt", r"regelrecht", r"\bnormal", r"erhalten"),
+    Language.BG: (r"нормалн", r"нормално", r"запазен", r"съхранен", r"интактн"),
+    Language.EL: (r"φυσιολογικ", r"ακέραι"),
+    Language.NL: (r"\bnormaal", r"\bintact", r"onopvallend"),
 }
 """Words asserting the structure is NORMAL — predicates, not prepositions, so they scope over their whole
 clause in EITHER direction.
@@ -76,14 +78,14 @@ found "articular cartilage of the patellofemoral joint is well-maintained" readi
 bare search for the finding vocabulary saw `cartilage` and nothing else."""
 
 CLAUSE: dict[str, str] = {
-    "en": r",|\band\b|\bbut\b|\bwith\b|\bhowever\b",
-    "es": r",|\by\b|\bpero\b|\bcon\b|\baunque\b",
-    "tr": r",|\bve\b|\bancak\b|\bile\b|\bfakat\b",
-    "hr": r",|\bi\b|\bali\b|\bte\b|\buz\b",
-    "de": r",|\bund\b|\baber\b|\bmit\b|\bjedoch\b",
-    "bg": r",|\bи\b|\bно\b|\bсъс?\b|\bобаче\b",
-    "el": r",|\bκαι\b|\bαλλά\b|\bµε\b|\bμε\b",
-    "nl": r",|\ben\b|\bmaar\b|\bmet\b|\bechter\b",
+    Language.EN: r",|\band\b|\bbut\b|\bwith\b|\bhowever\b",
+    Language.ES: r",|\by\b|\bpero\b|\bcon\b|\baunque\b",
+    Language.TR: r",|\bve\b|\bancak\b|\bile\b|\bfakat\b",
+    Language.HR: r",|\bi\b|\bali\b|\bte\b|\buz\b",
+    Language.DE: r",|\bund\b|\baber\b|\bmit\b|\bjedoch\b",
+    Language.BG: r",|\bи\b|\bно\b|\bсъс?\b|\bобаче\b",
+    Language.EL: r",|\bκαι\b|\bαλλά\b|\bµε\b|\bμε\b",
+    Language.NL: r",|\ben\b|\bmaar\b|\bmet\b|\bechter\b",
 }
 """Where a forward-scoping denial STOPS — the next comma or coordinating conjunction.
 
@@ -95,18 +97,18 @@ tear. Bounding is the second half of the scope rule and it is as load-bearing as
 TEAR, BREAK, EDEMA, FLUID, CYST, WEAR, SYNOVIUM = "tear", "break", "edema", "fluid", "cyst", "wear", "synovium"
 
 FAMILY: dict[str, str] = {
-    "ACL": TEAR,
-    "MCL": TEAR,
-    "Medial Meniscus": TEAR,
-    "Lateral Meniscus": TEAR,
-    "Medial OA": WEAR,
-    "Lateral OA": WEAR,
-    "PF OA": WEAR,
-    "Effusion": FLUID,
-    "Synovitis": SYNOVIUM,
-    "Baker's": CYST,
-    "Contusion": EDEMA,
-    "Fracture": BREAK,
+    Finding.ACL: TEAR,
+    Finding.MCL: TEAR,
+    Finding.MEDIAL_MENISCUS: TEAR,
+    Finding.LATERAL_MENISCUS: TEAR,
+    Finding.MEDIAL_OA: WEAR,
+    Finding.LATERAL_OA: WEAR,
+    Finding.PF_OA: WEAR,
+    Finding.EFFUSION: FLUID,
+    Finding.SYNOVITIS: SYNOVIUM,
+    Finding.BAKERS: CYST,
+    Finding.CONTUSION: EDEMA,
+    Finding.FRACTURE: BREAK,
 }
 """Which LESION each finding is, because a denial scopes over the lesion word and not the anatomy word.
 
@@ -116,57 +118,57 @@ for the anatomy vocabulary of `finding_mentions` would miss both."""
 
 DENIABLE: dict[str, dict[str, tuple[str, ...]]] = {
     TEAR: {
-        "en": (r"\btear", r"\btorn\b", r"ruptur", r"disrupt", r"sprain", r"\bavuls"),
-        "es": (r"rotura", r"ruptur", r"desgarro", r"\blesión", r"avuls"),
-        "tr": (r"yırtık", r"rüptür", r"yaralan", r"avuls"),
-        "hr": (r"ruptur", r"puknuć", r"\brasap", r"avuls"),
-        "de": (r"\bruptur", r"\briss", r"zerreiss", r"ausriss"),
-        "bg": (r"разкъсв", r"руптур", r"скъсв"),
-        "el": (r"ρήξ", r"ρήγµα", r"ρήγμα"),
-        "nl": (r"ruptuur", r"scheur", r"laesie"),
+        Language.EN: (r"\btear", r"\btorn\b", r"ruptur", r"disrupt", r"sprain", r"\bavuls"),
+        Language.ES: (r"rotura", r"ruptur", r"desgarro", r"\blesión", r"avuls"),
+        Language.TR: (r"yırtık", r"rüptür", r"yaralan", r"avuls"),
+        Language.HR: (r"ruptur", r"puknuć", r"\brasap", r"avuls"),
+        Language.DE: (r"\bruptur", r"\briss", r"zerreiss", r"ausriss"),
+        Language.BG: (r"разкъсв", r"руптур", r"скъсв"),
+        Language.EL: (r"ρήξ", r"ρήγµα", r"ρήγμα"),
+        Language.NL: (r"ruptuur", r"scheur", r"laesie"),
     },
     BREAK: {
-        "en": (r"fracture", r"\bbreak"),
-        "es": (r"fractura",),
-        "tr": (r"fraktür", r"kırık"),
-        "hr": (r"prijelom", r"fraktur"),
-        "de": (r"fraktur", r"\bbruch"),
-        "bg": (r"фрактур", r"счупв"),
-        "el": (r"κάταγµ", r"καταγμ", r"κατάγµ"),
-        "nl": (r"fractuur", r"\bbreuk"),
+        Language.EN: (r"fracture", r"\bbreak"),
+        Language.ES: (r"fractura",),
+        Language.TR: (r"fraktür", r"kırık"),
+        Language.HR: (r"prijelom", r"fraktur"),
+        Language.DE: (r"fraktur", r"\bbruch"),
+        Language.BG: (r"фрактур", r"счупв"),
+        Language.EL: (r"κάταγµ", r"καταγμ", r"κατάγµ"),
+        Language.NL: (r"fractuur", r"\bbreuk"),
     },
     EDEMA: {
-        "en": (r"edema", r"oedema", r"contusion", r"bruise", r"marrow\s+signal"),
-        "es": (r"edema", r"contusi"),
-        "tr": (r"ödem", r"kontüzyon", r"kontuzyon"),
-        "hr": (r"edem", r"kontuzij", r"nagnječ"),
-        "de": (r"ödem", r"kontusion", r"bone\s+bruise"),
-        "bg": (r"оток", r"едем", r"контуз"),
-        "el": (r"οίδηµ", r"οίδημ", r"θλάσ"),
-        "nl": (r"oedeem", r"contusie", r"kneuzing"),
+        Language.EN: (r"edema", r"oedema", r"contusion", r"bruise", r"marrow\s+signal"),
+        Language.ES: (r"edema", r"contusi"),
+        Language.TR: (r"ödem", r"kontüzyon", r"kontuzyon"),
+        Language.HR: (r"edem", r"kontuzij", r"nagnječ"),
+        Language.DE: (r"ödem", r"kontusion", r"bone\s+bruise"),
+        Language.BG: (r"оток", r"едем", r"контуз"),
+        Language.EL: (r"οίδηµ", r"οίδημ", r"θλάσ"),
+        Language.NL: (r"oedeem", r"contusie", r"kneuzing"),
     },
     FLUID: {
-        "en": (r"effusion", r"\bfluid"),
-        "es": (r"derrame", r"líquido", r"liquido"),
-        "tr": (r"efüzyon", r"sıvı"),
-        "hr": (r"izljev", r"tekućin"),
-        "de": (r"erguss", r"flüssigkeit"),
-        "bg": (r"излив", r"течност"),
-        "el": (r"συλλογ", r"υγρ"),
-        "nl": (r"vocht", r"hydrops", r"effusie"),
+        Language.EN: (r"effusion", r"\bfluid"),
+        Language.ES: (r"derrame", r"líquido", r"liquido"),
+        Language.TR: (r"efüzyon", r"sıvı"),
+        Language.HR: (r"izljev", r"tekućin"),
+        Language.DE: (r"erguss", r"flüssigkeit"),
+        Language.BG: (r"излив", r"течност"),
+        Language.EL: (r"συλλογ", r"υγρ"),
+        Language.NL: (r"vocht", r"hydrops", r"effusie"),
     },
     CYST: {
-        "en": (r"\bcyst",),
-        "es": (r"quiste",),
-        "tr": (r"\bkist",),
-        "hr": (r"\bcist",),
-        "de": (r"zyste",),
-        "bg": (r"\bкист",),
-        "el": (r"κύστ",),
-        "nl": (r"\bcyste",),
+        Language.EN: (r"\bcyst",),
+        Language.ES: (r"quiste",),
+        Language.TR: (r"\bkist",),
+        Language.HR: (r"\bcist",),
+        Language.DE: (r"zyste",),
+        Language.BG: (r"\bкист",),
+        Language.EL: (r"κύστ",),
+        Language.NL: (r"\bcyste",),
     },
     WEAR: {
-        "en": (
+        Language.EN: (
             r"cartilage",
             r"\bchondral",
             r"osteophyt",
@@ -178,23 +180,23 @@ DENIABLE: dict[str, dict[str, tuple[str, ...]]] = {
             r"\bwear\b",
             r"joint\s+space",
         ),
-        "es": (r"cartílag", r"cartilag", r"\bcondral", r"osteofit", r"artros", r"adelgaza"),
-        "tr": (r"kıkırdak", r"kondral", r"osteofit", r"artroz", r"incelme"),
-        "hr": (r"hrskavic", r"\bhondral", r"osteofit", r"artroz", r"stanjen"),
-        "de": (r"knorpel", r"\bchondral", r"osteophyt", r"arthros", r"gonarthros"),
-        "bg": (r"хрущял", r"\bхондрал", r"остеофит", r"артроз", r"изтънява"),
-        "el": (r"χόνδρ", r"οστεόφυτ", r"αρθρίτ", r"αρθρωσ", r"αρθρώσ"),
-        "nl": (r"kraakbeen", r"\bchondraal", r"osteofyt", r"artros", r"gonartros"),
+        Language.ES: (r"cartílag", r"cartilag", r"\bcondral", r"osteofit", r"artros", r"adelgaza"),
+        Language.TR: (r"kıkırdak", r"kondral", r"osteofit", r"artroz", r"incelme"),
+        Language.HR: (r"hrskavic", r"\bhondral", r"osteofit", r"artroz", r"stanjen"),
+        Language.DE: (r"knorpel", r"\bchondral", r"osteophyt", r"arthros", r"gonarthros"),
+        Language.BG: (r"хрущял", r"\bхондрал", r"остеофит", r"артроз", r"изтънява"),
+        Language.EL: (r"χόνδρ", r"οστεόφυτ", r"αρθρίτ", r"αρθρωσ", r"αρθρώσ"),
+        Language.NL: (r"kraakbeen", r"\bchondraal", r"osteofyt", r"artros", r"gonartros"),
     },
     SYNOVIUM: {
-        "en": (r"synovit", r"synovial"),
-        "es": (r"sinovit", r"sinovial"),
-        "tr": (r"sinovit", r"sinovyal"),
-        "hr": (r"sinovit", r"sinovijaln"),
-        "de": (r"synovit", r"synovial"),
-        "bg": (r"синовит", r"синовиал"),
-        "el": (r"υµενίτ", r"υμενίτ", r"αρθρικ\w*\s+υµέν"),
-        "nl": (r"synovit", r"synoviaal"),
+        Language.EN: (r"synovit", r"synovial"),
+        Language.ES: (r"sinovit", r"sinovial"),
+        Language.TR: (r"sinovit", r"sinovyal"),
+        Language.HR: (r"sinovit", r"sinovijaln"),
+        Language.DE: (r"synovit", r"synovial"),
+        Language.BG: (r"синовит", r"синовиал"),
+        Language.EL: (r"υµενίτ", r"υμενίτ", r"αρθρικ\w*\s+υµέν"),
+        Language.NL: (r"synovit", r"synoviaal"),
     },
 }
 """The lesion words whose denial actually removes each family's finding.

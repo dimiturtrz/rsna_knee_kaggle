@@ -19,12 +19,14 @@ import numpy as np
 import pandas as pd
 from jaxtyping import Float
 
+from core.findings import STUDY
+
 logger = logging.getLogger(__name__)
 
 PARQUET_TWIN = ".parquet"
 """The suffix his trainer's existence check looks for beside the blend it is actually served."""
 
-UID = "StudyInstanceUID"
+UID = STUDY
 HIS_POSITIVE = 0.5
 OUR_POSITIVE = 0.75
 FINDINGS = 12

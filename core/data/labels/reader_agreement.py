@@ -25,7 +25,7 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from core import cli
-from core.data.labels.report_language import ReportLanguages
+from core.data.labels.report_language import Language, ReportLanguages
 from core.findings import STUDY, TARGETS
 from core.paths import LABEL_TABLE, DataRoot
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 RESAMPLES = 5000
 SEED = 2026
 INTERVAL = (2.5, 97.5)
-ENGLISH = "en"
+ENGLISH = Language.EN
 POSITIVE = "YES"
 SILENT = "UNK"
 """The verdict that is an abstention rather than a read — the whole subject of `silence`."""
@@ -104,7 +104,7 @@ class ReaderAgreement:
         the reader — a second copy is a second definition of which studies count.
         """
         truth = pd.read_csv(root.train_table())
-        return truth.dropna(subset=TARGETS, how="all")[["StudyInstanceUID", "Report", *TARGETS]]
+        return truth.dropna(subset=TARGETS, how="all")[[STUDY, "Report", *TARGETS]]
 
     def cells(self, annotated: pd.DataFrame, read: pd.DataFrame) -> pd.DataFrame:
         """One row per (study, finding) the radiologist annotated AND the reader gave a verdict on.
@@ -113,7 +113,7 @@ class ReaderAgreement:
         counting it as one would measure coverage while claiming to measure accuracy.
         """
         verdicts = [column for column in read.columns if column.endswith("__verdict")]
-        merged = annotated.merge(read[["StudyInstanceUID", *verdicts]], on="StudyInstanceUID")
+        merged = annotated.merge(read[[STUDY, *verdicts]], on=STUDY)
         rows = []
         for _, study in merged.iterrows():
             report = str(study["Report"])
@@ -125,7 +125,7 @@ class ReaderAgreement:
                 verdict, truth = study.get(f"{target}__verdict"), study.get(target)
                 if pd.isna(verdict) or pd.isna(truth):
                     continue
-                rows.append((study["StudyInstanceUID"], language, *flags, target, str(verdict).upper(), float(truth)))
+                rows.append((study[STUDY], language, *flags, target, str(verdict).upper(), float(truth)))
         return pd.DataFrame(rows, columns=["study", "language", GRADED, HEDGED, "target", "verdict", "truth"])
 
     def errors(self, cells: pd.DataFrame) -> pd.DataFrame:

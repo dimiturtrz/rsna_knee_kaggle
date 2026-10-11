@@ -20,7 +20,7 @@ import pandas as pd
 from jaxtyping import Float
 
 from core import cli
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class GoldRows:
         partial row would be a study whose columns mean different things, and there are none to
         scavenge. Returned in table order so a caller can align predictions to it.
         """
-        table = pd.read_csv(train_table).set_index("StudyInstanceUID")
+        table = pd.read_csv(train_table).set_index(STUDY)
         columns = [target for target in TARGETS if target in table.columns]
         complete = table[columns].dropna(how="any")
         return list(complete.index), complete.to_numpy(dtype=np.float32)
@@ -58,7 +58,7 @@ class GoldRows:
         columns and every finding after the gap would be scored under its neighbour's name. Ours carries
         all twelve and the bug never fired; a foreign reader is not owed that assumption.
         """
-        table = pd.read_csv(labels).set_index("StudyInstanceUID").reindex(identifiers)
+        table = pd.read_csv(labels).set_index(STUDY).reindex(identifiers)
         values = table.reindex(columns=list(TARGETS)).to_numpy(dtype=np.float32)
         return np.asarray(np.nan_to_num(values, nan=PRESENT), dtype=np.float32)
 

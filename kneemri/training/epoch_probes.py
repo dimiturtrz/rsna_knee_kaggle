@@ -84,11 +84,15 @@ class HoldoutProbe:
 
     def read(self, reading: EpochReading) -> Mapping[str, object]:
         """`auc`, `per_label`, `ece` and `holdout_loss`; the last two NaN when nothing was held out."""
-        held = {"auc": reading.ranked, "per_label": reading.per_label}
+        ece, loss = self._calibration(reading)
+        return {"auc": reading.ranked, "per_label": reading.per_label, "ece": ece, "holdout_loss": loss}
+
+    @staticmethod
+    def _calibration(reading: EpochReading) -> tuple[float, float]:
         if reading.predicted is None:
-            return held | {"ece": UNREAD, "holdout_loss": UNREAD}
+            return UNREAD, UNREAD
         cells = HoldoutCells(reading.predicted, reading.truth)
-        return held | {"ece": cells.calibration_error(), "holdout_loss": cells.loss()}
+        return cells.calibration_error(), cells.loss()
 
 
 @dataclass(frozen=True)

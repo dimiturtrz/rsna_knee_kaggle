@@ -55,7 +55,7 @@ from core import cli
 from core.data.labels.overcall_audit import CATEGORIES, GENUINE, LATERALITY, UNLOCATED, OvercallAudit, OvercallCensus
 from core.data.labels.report_language import ReportLanguages
 from core.data.labels.report_reader import UNSURE
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 from core.paths import LABEL_TABLE, TRAIN_TABLE
 from kneemri.evaluation.scores import MIDPOINT
 from kneemri.evaluation.study_errors import StudyDamage, StudyErrors
@@ -339,7 +339,7 @@ class StudyAttribution:
             fluid=series["Fluid_Sensitive"].astype(float),
             fat=series["Fat_Suppression"].astype(float),
         )
-        grouped = counted.groupby("StudyInstanceUID").agg(
+        grouped = counted.groupby(STUDY).agg(
             series_count=("SeriesInstanceUID", "count"),
             planes=("Anatomical_Plane", "nunique"),
             fluid=("fluid", "mean"),
@@ -404,7 +404,7 @@ class AttributionCorpus:
     def reports(self) -> dict[str, str]:
         """Study id to report text, which is the evidence every label category is read out of."""
         frame = pd.read_csv(self.raw / TRAIN_TABLE)
-        return dict(zip(frame["StudyInstanceUID"].astype(str), frame["Report"].astype(str), strict=True))
+        return dict(zip(frame[STUDY].astype(str), frame["Report"].astype(str), strict=True))
 
     def verdicts(self) -> pd.DataFrame:
         """The reader's per-cell verdicts, indexed by study — the only place `UNK` survives.
@@ -413,7 +413,7 @@ class AttributionCorpus:
         distinction between a read zero and a defaulted one is destroyed by the threshold.
         """
         frame = pd.read_csv(self.processed / "labels" / LABEL_TABLE)
-        return frame.assign(StudyInstanceUID=frame["StudyInstanceUID"].astype(str)).set_index("StudyInstanceUID")
+        return frame.assign(**{STUDY: frame[STUDY].astype(str)}).set_index(STUDY)
 
     def series(self) -> pd.DataFrame:
         """The per-series acquisition table, unaggregated — the strata decide how it is grouped."""

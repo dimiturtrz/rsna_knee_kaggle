@@ -47,6 +47,8 @@ from pydicom.pixel_data_handlers.util import apply_modality_lut
 from torch import Tensor
 
 from core import cli
+from core.data.corpus.acquisition import DicomTag
+from core.findings import STUDY
 from kneemri.evaluation import foreign_member
 
 logger = logging.getLogger(__name__)
@@ -187,11 +189,11 @@ class Series:
     @staticmethod
     def _position(header: pydicom.Dataset) -> float:
         """Where this slice sits along the normal to its own plane."""
-        orientation = getattr(header, "ImageOrientationPatient", None)
-        origin = getattr(header, "ImagePositionPatient", None)
+        orientation = getattr(header, DicomTag.IMAGE_ORIENTATION, None)
+        origin = getattr(header, DicomTag.IMAGE_POSITION, None)
         oriented = orientation is not None and origin is not None and len(orientation) == TRIPLET * 2
         if not oriented:
-            return float(getattr(header, "InstanceNumber", 0) or 0)
+            return float(getattr(header, DicomTag.INSTANCE_NUMBER, 0) or 0)
         row = np.array(orientation[:TRIPLET], float)
         column = np.array(orientation[TRIPLET:], float)
         return float(np.dot(np.array(origin, float), np.cross(row, column)))
@@ -199,7 +201,7 @@ class Series:
     @staticmethod
     def _spacing(header: pydicom.Dataset) -> float:
         """Millimetres per pixel, defaulted when the header does not say."""
-        spacing = getattr(header, "PixelSpacing", None)
+        spacing = getattr(header, DicomTag.PIXEL_SPACING, None)
         return float(spacing[0]) if spacing is not None else DEFAULT_SPACING_MM
 
     def sampled(self, count: int) -> tuple[Slice, ...]:
@@ -225,7 +227,7 @@ class RaptorFeed:
         rows: dict[str, list[Mapping[str, object]]] = {}
         with series_csv.open(newline="", encoding="utf-8") as handle:
             for row in csv.DictReader(handle):
-                rows.setdefault(row["StudyInstanceUID"], []).append(row)
+                rows.setdefault(row[STUDY], []).append(row)
         return rows
 
     def study(

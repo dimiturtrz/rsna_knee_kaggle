@@ -32,6 +32,7 @@ from core.data.corpus.slots import SCHEMES, Routing
 from core.data.corpus.study import SlotPipeline, Study
 from core.data.corpus.window_reader import FileReader, MappedReader, SliceSpan, WindowReader
 from core.denominator import Denominator
+from core.findings import STUDY
 from core.paths import TRAIN_TABLE
 
 logger = logging.getLogger(__name__)
@@ -591,7 +592,7 @@ class CorpusSplit:
 
     def identifiers(self) -> list[str]:
         """Every study in the split, in the order the cache will index them by."""
-        return pd.read_csv(self.studies_table)["StudyInstanceUID"].tolist()
+        return pd.read_csv(self.studies_table)[STUDY].tolist()
 
     def planes(self) -> dict[str, str]:
         """Series UID to anatomical plane, which is what the slot predicate routes on."""

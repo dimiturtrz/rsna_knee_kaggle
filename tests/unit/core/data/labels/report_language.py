@@ -24,6 +24,7 @@ def test_language():
     assert languages.language("МР находка: МР данни за ставен излив. Костите се променени.") == "bg"
     assert languages.language(CROATIAN) == "hr", "the residue that the first census reported as 9.3% unclassified"
     assert languages.language("Rapporto breve.") == UNKNOWN, "one word is not a language"
+    assert type(languages.language(ENGLISH)) is str, "a column of codes must hold plain strings, not enum members"
 
 
 def test_graded():

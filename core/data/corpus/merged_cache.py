@@ -31,6 +31,7 @@ import pandas as pd
 from jaxtyping import Float, UInt8
 
 from core.data.corpus.study_cache import StudyCache
+from core.findings import STUDY
 
 logger = logging.getLogger(__name__)
 
@@ -149,7 +150,7 @@ class MergedCache:
         merged.to_csv(destination, index=False)
         logger.info(f"{len(merged)} rows, {len(merged.columns)} columns -> {destination}")
 
-    def drop_unslotted(self, destination: Path, *, identifier: str = "StudyInstanceUID") -> int:
+    def drop_unslotted(self, destination: Path, *, identifier: str = STUDY) -> int:
         """Remove label rows for merged studies whose mask is entirely empty. Returns how many went.
 
         A slot the merged axis does not name is dropped by `positions`, and a foreign study that filled

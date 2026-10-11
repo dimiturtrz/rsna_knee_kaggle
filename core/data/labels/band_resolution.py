@@ -64,7 +64,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.labels.targets import MEASURED_AGREEMENT
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +215,7 @@ def main() -> None:  # devtools-ignore: test-mirror
 
     table = pd.read_csv(arguments.table)
     placed = {name: row for row, name in enumerate(names)}
-    rows = table["StudyInstanceUID"].map(placed)
+    rows = table[STUDY].map(placed)
     if rows.isna().any():
         message = f"{int(rows.isna().sum())} of {len(table)} table rows have no out-of-fold prediction"
         raise ValueError(message)

@@ -38,6 +38,7 @@ import pandas as pd
 from core import cli
 from core.data.corpus.slots import SLOTS, SlotScheme
 from core.data.corpus.study import Study
+from core.findings import STUDY
 
 PERCENT = 100.0
 
@@ -64,7 +65,7 @@ class SlotTies:
         taken. It is the denominator the rest of this module does not have.
         """
         frame = pd.read_csv(series_table)
-        grouped = frame.groupby("StudyInstanceUID", sort=False)["SeriesInstanceUID"].apply(list)
+        grouped = frame.groupby(STUDY, sort=False)["SeriesInstanceUID"].apply(list)
         return sum(1 for series in grouped if list(series) != sorted(series)), len(grouped)
 
     def of_study(self, directory: Path, planes: dict[str, str]) -> dict[str, int]:

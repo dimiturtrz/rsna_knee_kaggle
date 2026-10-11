@@ -37,7 +37,7 @@ import pydicom
 from numpy.typing import NDArray
 
 from core import cli
-from core.data.corpus.acquisition import Acquisition
+from core.data.corpus.acquisition import Acquisition, DicomTag
 from core.data.corpus.audit import UNCROPPED, AuditRequest, CorpusAudit, Reading
 from core.data.corpus.study_cache import CorpusSample
 
@@ -51,7 +51,13 @@ The draw is the harness's every-k-th 400, which is what makes this the same stud
 here, under a comment claiming exactly that — which is the drift `CorpusSample` was written to end.
 """
 
-GEOMETRY_TAGS = ["ImagePositionPatient", "ImageOrientationPatient", "PixelSpacing", "Rows", "Columns"]
+GEOMETRY_TAGS: list[str] = [
+    DicomTag.IMAGE_POSITION,
+    DicomTag.IMAGE_ORIENTATION,
+    DicomTag.PIXEL_SPACING,
+    DicomTag.ROWS,
+    DicomTag.COLUMNS,
+]
 """The five tags that place a slice in the patient frame. Read with `specific_tags` because this is the
 one measurement in the corpus tools that is header-bound rather than decode-bound."""
 
@@ -154,10 +160,10 @@ class SlotGeometry:
         row_cosine + (columns/2) * spacing * column_cosine` — because a matrix centre expressed in the
         patient frame is what makes two differently-oriented series comparable at all.
         """
-        orientation = getattr(header, "ImageOrientationPatient", None)
-        position = getattr(header, "ImagePositionPatient", None)
-        spacing = getattr(header, "PixelSpacing", None)
-        rows, columns = getattr(header, "Rows", None), getattr(header, "Columns", None)
+        orientation = getattr(header, DicomTag.IMAGE_ORIENTATION, None)
+        position = getattr(header, DicomTag.IMAGE_POSITION, None)
+        spacing = getattr(header, DicomTag.PIXEL_SPACING, None)
+        rows, columns = getattr(header, DicomTag.ROWS, None), getattr(header, DicomTag.COLUMNS, None)
         if orientation is None or position is None or spacing is None or rows is None or columns is None:
             return None
         if len(orientation) < ORIENTATION_VALUES or len(position) < POSITION_VALUES:

@@ -26,6 +26,8 @@ import pandas as pd
 from jaxtyping import Int
 from numpy.typing import NDArray
 
+from core.findings import STUDY
+
 
 class StudySeries:
     """The competition's per-series acquisition table, reduced to one number per study."""
@@ -35,12 +37,12 @@ class StudySeries:
 
     def counts(self, studies: list[str]) -> Int[NDArray[np.int64], " studies"]:
         """How many series each study has, in the given order."""
-        sizes = self.table.groupby("StudyInstanceUID").size()
+        sizes = self.table.groupby(STUDY).size()
         return np.asarray(sizes.reindex(studies).to_numpy(), dtype=np.int64)
 
     def fluid(self, studies: list[str]) -> Int[NDArray[np.int64], " studies"]:
         """How many of each study's series are fluid-sensitive, in the given order."""
-        sums = self.table.groupby("StudyInstanceUID")["Fluid_Sensitive"].sum()
+        sums = self.table.groupby(STUDY)["Fluid_Sensitive"].sum()
         return np.asarray(sums.reindex(studies).to_numpy(), dtype=np.int64)
 
     def redundant(self) -> bool:

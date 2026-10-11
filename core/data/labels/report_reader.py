@@ -245,10 +245,8 @@ class ReadingPrompt:
 
     def messages(self, report: str) -> list[dict[str, str]]:
         """The chat turns a causal reader is templated with."""
-        return [
-            {"role": "system", "content": self.system()},
-            {"role": "user", "content": self.user(report)},
-        ]
+        turns = (("system", self.system()), ("user", self.user(report)))
+        return [{"role": role, "content": content} for role, content in turns]
 
 
 @dataclass(frozen=True)

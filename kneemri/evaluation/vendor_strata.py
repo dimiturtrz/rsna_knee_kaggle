@@ -14,7 +14,9 @@ import pandas as pd
 from jaxtyping import Int
 from numpy.typing import NDArray
 
-IDENTIFIER = "StudyInstanceUID"
+from core.findings import STUDY
+
+IDENTIFIER = STUDY
 SCANNER = "scanner"
 FIELD_STRENGTH = "field_strength_t"
 
