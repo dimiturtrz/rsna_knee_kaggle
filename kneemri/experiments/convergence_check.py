@@ -269,6 +269,29 @@ class ConvergenceCheck:
         ]
         return sorted(found, key=lambda seen: (seen.settled(), seen.name))
 
+    def single(self, path: Path) -> list[RunConvergence]:
+        """The one run at `path`, refusing a path that holds no file.
+
+        A PATH, and a name is not one. `--run swin_supervised_s2026` resolves against the working
+        directory, finds nothing, and reports UNSCORED — a verdict that describes a real state and
+        hides a typo, which is how a converged run was read as having no score at all. The whole point
+        of this check is that a number is not quoted from a run that cannot support it, so a reading
+        taken of no file is the one thing it may never return quietly.
+        """
+        record = RunRecord(path)
+        if not record.exists():
+            message = f"{record.path} is not on disk - --run takes a PATH to a metrics file, not a run name"
+            raise SystemExit(message)
+        return [self.verdict(record)]
+
+    @staticmethod
+    def summary(seen: list[RunConvergence]) -> str:
+        """How many runs were read, and how many landed on each verdict that occurred."""
+        counted = {verdict: sum(run.verdict is verdict for run in seen) for verdict in Convergence}
+        return f"{len(seen)} runs: " + ", ".join(
+            f"{count} {verdict.lower()}" for verdict, count in counted.items() if count
+        )
+
 
 def main() -> None:
     """Report every run whose number is not finished, and exit non-zero if any is truncated."""
@@ -278,16 +301,7 @@ def main() -> None:
 
     check = ConvergenceCheck()
     if arguments.run is not None:
-        # A PATH, and a name is not one. `--run swin_supervised_s2026` resolves against the working
-        # directory, finds nothing, and reports UNSCORED — a verdict that describes a real state and
-        # hides a typo, which is how a converged run was read as having no score at all. The whole point
-        # of this check is that a number is not quoted from a run that cannot support it, so a reading
-        # taken of no file is the one thing it may never return quietly.
-        record = RunRecord(arguments.run)
-        if not record.exists():
-            message = f"{record.path} is not on disk - --run takes a PATH to a metrics file, not a run name"
-            raise SystemExit(message)
-        seen = [check.verdict(record)]
+        seen = check.single(arguments.run)
     else:
         models = command.rooted(arguments).models()
         seen = check.audit(models)
@@ -298,13 +312,8 @@ def main() -> None:
     for run in seen:
         if not run.settled():
             logger.info("%s", run.line())
-    counted = {verdict: sum(run.verdict is verdict for run in seen) for verdict in Convergence}
     truncated = [run for run in seen if run.verdict is Convergence.TRUNCATED]
-    logger.info(
-        "%d runs: %s",
-        len(seen),
-        ", ".join(f"{count} {verdict.lower()}" for verdict, count in counted.items() if count),
-    )
+    logger.info("%s", check.summary(seen))
     if truncated:
         # Only TRUNCATED blocks. An undertrained run is an honest measurement of a budget and its score
         # is real; a truncated one is a crash whose score is a floor, and quoting it is the defect.

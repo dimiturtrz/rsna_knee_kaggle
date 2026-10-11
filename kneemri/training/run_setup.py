@@ -477,6 +477,42 @@ class RunSetup:
         targets = self.options.targets
         return EarlyTargets(len(identifiers), targets.early_beta) if targets.early_weight else None
 
+    def switch(self, trainer: Trainer) -> None:
+        """The run-shape switches: precision, how much of the stack is read, and how many studies an epoch draws."""
+        options = self.options
+        if options.run.bf16:
+            trainer.bfloat16()
+        if options.encoder.whole_stack:
+            trainer.whole_stack(options.data.slices)
+        if options.data.train_size:
+            trainer.resample_to(options.data.train_size)
+
+    def supervise(
+        self,
+        trainer: Trainer,
+        identifiers: list[str],
+        training: NDArray[np.int64],
+        features: TeacherFeatures | None,
+    ) -> None:
+        """Every extra target the loop learns from beyond the labels, in the order the trainer attaches them."""
+        reports = self.reports(identifiers)
+        if reports is not None:
+            trainer.report_supervision(reports)
+        teacher = self.teacher(identifiers, training)
+        if teacher is not None:
+            trainer.teach_from(teacher)
+        if features is not None:
+            trainer.teach_features_from(features)
+
+    def regularise(self, trainer: Trainer, identifiers: list[str]) -> None:
+        """What restrains the fit rather than feeding it: the early-learning memory, the weight average, erasing."""
+        trainer.remember_early(self.early(identifiers))
+        if self.options.optim.ema:
+            trainer.exponential_average()
+        erasing = self.erasing(identifiers)
+        if erasing is not None:
+            trainer.erase_with(erasing)
+
     def trainer(
         self,
         model: StudyModel,
@@ -514,26 +550,9 @@ class RunSetup:
             adaptation=self.adaptation(),
             objective=self.objective(None if features is None else Widths(model.context_width(), features.width())),
         )
-        if options.run.bf16:
-            trainer.bfloat16()
-        if options.encoder.whole_stack:
-            trainer.whole_stack(options.data.slices)
-        if options.data.train_size:
-            trainer.resample_to(options.data.train_size)
-        reports = self.reports(identifiers)
-        if reports is not None:
-            trainer.report_supervision(reports)
-        teacher = self.teacher(identifiers, training)
-        if teacher is not None:
-            trainer.teach_from(teacher)
-        if features is not None:
-            trainer.teach_features_from(features)
-        trainer.remember_early(self.early(identifiers))
-        if options.optim.ema:
-            trainer.exponential_average()
-        erasing = self.erasing(identifiers)
-        if erasing is not None:
-            trainer.erase_with(erasing)
+        self.switch(trainer)
+        self.supervise(trainer, identifiers, training, features)
+        self.regularise(trainer, identifiers)
         # BEFORE the schedule, which is not cosmetic: the schedule's total is counted in OPTIMISER steps
         # and the trainer's own accumulation is what converts micro-batches into them.
         trainer.accumulate(options.optim.accumulate)

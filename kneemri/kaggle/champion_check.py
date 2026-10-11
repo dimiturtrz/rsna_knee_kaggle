@@ -23,6 +23,7 @@ reproduction path is asserted.
 
 import json
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -91,6 +92,23 @@ class Champion:
             kit=str(held["kit"]),
         )
 
+    @staticmethod
+    def unbuildable(row: Mapping[str, object]) -> list[str]:
+        """The fields a board row needs to be priced against that it leaves absent or null.
+
+        A row can be present and still be unusable: 31 of 48 were written without the two fields that
+        make an entry rebuildable, and reading them straight raised a bare KeyError naming neither the
+        entry nor the field. Say which, because the repair is to go and read the kernel's `chosen` tuple
+        and its log's `kit` line for that entry.
+
+        A NULL counts as absent, not just a missing key: a row saying `"kit": null` is DECLINING to invent
+        a sha, and a presence-only test would pass it and hand the caller `str(None)`.
+
+        `kit` is not in this list — see the field's own note. What is required is what makes the entry a
+        comparison target at all: which kernel, what it scored, and which members it loaded.
+        """
+        return [field for field in ("kernel", "board", "members_named") if row.get(field) is None]
+
     @classmethod
     def from_board(cls, entry: str, path: Path = BOARD) -> "Champion":
         """Any scored entry, read from the board record by its id — not necessarily the best one.
@@ -106,17 +124,7 @@ class Champion:
             message = f"no board entry named {entry}; the record holds {', '.join(sorted(held))}"
             raise ValueError(message)
         row = held[entry]
-        # A row can be present and still be unusable: 31 of 48 were written without the two fields that
-        # make an entry rebuildable, and reading them straight raised a bare KeyError naming neither the
-        # entry nor the field. Say which, because the repair is to go and read the kernel's `chosen`
-        # tuple and its log's `kit` line for that entry.
-        #
-        # A NULL counts as absent, not just a missing key: a row saying `"kit": null` is DECLINING to
-        # invent a sha, and a presence-only test would pass it and hand the caller `str(None)`.
-        #
-        # `kit` is not in this list — see the field's own note. What is required is what makes the entry
-        # a comparison target at all: which kernel, what it scored, and which members it loaded.
-        absent = [field for field in ("kernel", "board", "members_named") if row.get(field) is None]
+        absent = Champion.unbuildable(row)
         if absent:
             message = f"board entry {entry} records no {', '.join(absent)}, so nothing can be rebuilt from it"
             raise ValueError(message)

@@ -64,6 +64,14 @@ MIXED = "both, e.g. small to moderate"
 BUCKETS: tuple[str, ...] = (SMALL, MIXED, LARGE, UNQUALIFIED, DENIAL, SILENT)
 """Ordered as the rule reads them, so the two rows that must not both hold positives are adjacent."""
 
+SIZED: dict[tuple[bool, bool], str] = {
+    (True, True): MIXED,
+    (True, False): SMALL,
+    (False, True): LARGE,
+    (False, False): UNQUALIFIED,
+}
+"""The bucket an undenied effusion sentence lands in, keyed by (carries a small word, carries a large word)."""
+
 
 class SeverityBoundary:
     """Each annotated report's effusion size word, read against the radiologist's own annotation."""
@@ -93,11 +101,7 @@ class SeverityBoundary:
             return DENIAL
         small = any(word.search(found) for word in self.small)
         large = any(word.search(found) for word in self.large)
-        if small and large:
-            return MIXED
-        if small:
-            return SMALL
-        return LARGE if large else UNQUALIFIED
+        return SIZED[small, large]
 
     def table(self, annotated: pd.DataFrame) -> pd.DataFrame:
         """One row per annotated English study: its bucket and the radiologist's Effusion annotation."""

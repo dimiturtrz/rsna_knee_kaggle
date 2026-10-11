@@ -105,6 +105,15 @@ def _board(tmp_path: Path) -> Path:
     return path
 
 
+def test_unbuildable():
+    """A missing key and a null both count as absent; an absent kit does not, it is optional."""
+    full = {"kernel": "k", "board": 0.9, "members_named": ["a"]}
+
+    assert Champion.unbuildable(full) == []
+    assert Champion.unbuildable({**full, "board": None}) == ["board"]
+    assert Champion.unbuildable({"board": 0.9}) == ["kernel", "members_named"]
+
+
 def test_from_board(tmp_path: Path):
     """Any scored entry can be priced against, not only the best one — the champion may be unscoreable."""
     entry = Champion.from_board("greedy7_v1", _board(tmp_path))

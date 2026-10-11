@@ -261,25 +261,35 @@ class ArmSmoke:
         """
         broken: dict[str, str] = {}
         for name, flags in invocations.items():
-            checkpoint = out / f"{name}.pt"
-            crowded = self.room(self.reserves(flags))
-            if crowded:
-                broken[name] = crowded
-                logger.info("NO ROOM %s: %s", name, crowded)
-                continue
-            untouched = {path: path.stat().st_mtime_ns for path in out.glob(f"{name}.*")}
-            code, complaint = self.runner(self.command(flags, checkpoint))
-            trouble = (complaint or f"exit {code} with nothing on stderr") if code else self.learned(checkpoint)
+            trouble = self.smoked(name, flags, out)
             if trouble:
                 broken[name] = trouble
-            # SAID AS IT IS LEARNED, not collected and reported at the end: thirty-four arms is the
-            # better part of an hour, and a sweep that prints nothing until it finishes is one nobody
-            # can tell from a hang.
-            logger.info("%s %s%s", "BROKEN" if trouble else "ok", name, f": {trouble}" if trouble else "")
-            for artifact in out.glob(f"{name}.*"):
-                if untouched.get(artifact) != artifact.stat().st_mtime_ns:
-                    artifact.unlink(missing_ok=True)
         return broken
+
+    def smoked(self, name: str, flags: str, out: Path) -> str:
+        """One arm smoked and swept: what went wrong with it, or empty when it learned.
+
+        SAID AS IT IS LEARNED, not collected and reported at the end: thirty-four arms is the better part
+        of an hour, and a sweep that prints nothing until it finishes is one nobody can tell from a hang.
+        """
+        crowded = self.room(self.reserves(flags))
+        if crowded:
+            logger.info("NO ROOM %s: %s", name, crowded)
+            return crowded
+        checkpoint = out / f"{name}.pt"
+        untouched = {path: path.stat().st_mtime_ns for path in out.glob(f"{name}.*")}
+        code, complaint = self.runner(self.command(flags, checkpoint))
+        trouble = (complaint or f"exit {code} with nothing on stderr") if code else self.learned(checkpoint)
+        logger.info("%s %s%s", "BROKEN" if trouble else "ok", name, f": {trouble}" if trouble else "")
+        ArmSmoke.sweep(out, name, untouched)
+        return trouble
+
+    @staticmethod
+    def sweep(out: Path, name: str, untouched: dict[Path, int]) -> None:
+        """Delete every `<name>.*` in `out` whose modification time is not the one recorded before the run."""
+        for artifact in out.glob(f"{name}.*"):
+            if untouched.get(artifact) != artifact.stat().st_mtime_ns:
+                artifact.unlink(missing_ok=True)
 
     def reported(self, invocations: dict[str, str], refused: dict[str, str], out: Path) -> dict[str, str]:
         """Smoke the arms the parser accepted, logging each failure as it is found.

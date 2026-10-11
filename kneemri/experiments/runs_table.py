@@ -25,6 +25,7 @@ TABLE = Path("experiments/runs.tsv")
 COLUMNS = ("name", "run_id", "git", "epochs", "best_epoch", "best_auc", "checkpoint", "holdout", "ledgered")
 UNKNOWN = ""
 YES, NO = "yes", "no"
+ANSWER = {True: YES, False: NO}
 
 
 class RunsTable:
@@ -53,9 +54,9 @@ class RunsTable:
             "epochs": str(len(rows)) if rows else UNKNOWN,
             "best_epoch": str(best["epoch"]) if best else UNKNOWN,
             "best_auc": f"{best['auc']:.4f}" if best else UNKNOWN,
-            "checkpoint": YES if checkpoint.exists() else NO,
-            "holdout": YES if Artefact.HOLDOUT.beside(checkpoint).exists() else NO,
-            "ledgered": YES if self.record.named(name) else NO,
+            "checkpoint": ANSWER[checkpoint.exists()],
+            "holdout": ANSWER[Artefact.HOLDOUT.beside(checkpoint).exists()],
+            "ledgered": ANSWER[bool(self.record.named(name))],
         }
 
     def write(self, destination: Path) -> int:

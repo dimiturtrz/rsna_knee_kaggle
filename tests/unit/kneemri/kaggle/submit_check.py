@@ -102,3 +102,24 @@ def test_prose():
     """Only strings are prose: a score or a member list never matches a word."""
     row = {"what": "Greedy", "why": "Ruler", "board": 0.9, "members_named": ["ruler"]}
     assert TriedIdea.prose(row) == "greedy ruler"
+
+
+def test_licence_refusals(tmp_path: Path):
+    """Every shelf is read, so a tag on a LATER shelf refuses as surely as one on the first."""
+    first, second = tmp_path / "shelf1", tmp_path / "shelf2"
+    first.write_text("clean_s2026.pt  # nothing external\n", encoding="utf-8")
+    second.write_text("tainted_s2026.pt  # licence: rijeka\n", encoding="utf-8")
+    assert SubmitCheck.licence_refusals([first, second], {"clean_s2026"}) == []
+    (refused,) = SubmitCheck.licence_refusals([first, second], {"clean_s2026", "tainted_s2026"})
+    assert refused.startswith("tainted_s2026 trains on the rijeka table")
+
+
+def test_warnings(tmp_path: Path):
+    """No idea word reads as UNCHECKED, never as clean; with words, each matching try is one line."""
+    record = _record(tmp_path)
+    (unchecked,) = TriedIdea.warnings(record, [], "kneemri-new")
+    assert unchecked.startswith("IDEA NOT CHECKED kneemri-new")
+    tried = TriedIdea.warnings(record, ["ruler", "greedy"], "kneemri-new")
+    assert [line.split(" ")[1] for line in tried] == ["cleanseat_v1", "l75seat_v1"]
+    assert all(line.startswith("TRIED ") for line in tried)
+    assert TriedIdea.warnings(record, ["unheard"], "kneemri-new") == []

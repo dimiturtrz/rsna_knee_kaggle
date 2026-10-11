@@ -133,10 +133,7 @@ class CropAlignment:
             f"{len(slots)} routed slots, {len(spreads)} studies with at least {MIN_SLOTS_FOR_SPREAD} slots",
             f"{'plane':14s} {'|offset| p50':>13s} {'p90':>8s} {'down p50':>10s} {'across p50':>12s} {'slots':>7s}",
         ]
-        lines.extend(
-            self.plane_line(plane, [offset for offset in slots if offset.plane == plane])
-            for plane in sorted({offset.plane for offset in slots})
-        )
+        lines.extend(self.plane_lines(slots))
         if spreads:
             low, high = np.percentile(spreads, PERCENTILES)
             lines.append(
@@ -144,6 +141,13 @@ class CropAlignment:
                 f"max {max(spreads):.1f} mm"
             )
         return lines
+
+    def plane_lines(self, slots: list[SlotOffset]) -> list[str]:
+        """One row per plane the slots cover, planes in name order."""
+        return [
+            self.plane_line(plane, [offset for offset in slots if offset.plane == plane])
+            for plane in sorted({offset.plane for offset in slots})
+        ]
 
     def plane_line(self, plane: str, offsets: list[SlotOffset]) -> str:
         """One plane's row: magnitude median and tail, plus the SIGNED components its axes make readable."""
