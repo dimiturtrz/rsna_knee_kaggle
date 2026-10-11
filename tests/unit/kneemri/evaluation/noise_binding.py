@@ -112,11 +112,9 @@ def test_verdict() -> None:
     assert "RADIOLOGIST" in binding.verdict(MISSED)
 
 
-def test_report() -> None:
+def test_lines() -> None:
     """The report carries the census, both ratios with intervals, and the sentence that reads them."""
-    binding = NoiseBinding(resamples=RESAMPLES)
-
-    lines = binding.report(binding.tracking(_scored(over_called=CONFIDENT)))
+    lines = NoiseBinding(resamples=RESAMPLES).tracking(_scored(over_called=CONFIDENT)).lines()
 
     text = "\n".join(lines)
     assert OVER_CALLED in text and MISSED in text, "both disputed groups are reported"

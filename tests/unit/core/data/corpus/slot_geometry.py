@@ -7,7 +7,7 @@ import pydicom
 
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.audit import AuditRequest
-from core.data.corpus.slot_geometry import SlotFrame, SlotGeometry
+from core.data.corpus.slot_geometry import SlotFrame, SlotGeometry, SlotPairing
 from core.data.corpus.study_cache import CorpusSample
 
 SAGITTAL = (0.0, 1.0, 0.0, 0.0, 0.0, -1.0)
@@ -92,14 +92,14 @@ def test_pairs():
         SlotFrame("ax", (0.0, 0.0, 0.0), (0.0, 0.0, 1.0), 40.0),
     ]
 
-    pairs = SlotGeometry().pairs(frames)
+    pairs = SlotPairing().pairs(frames)
 
     assert len(pairs) == 3, "three slots make three pairs"
     angle, total, through, within = pairs[0]
     assert (angle, total) == (90.0, 5.0)
     assert through == 0.0, "the sagittal normal is +x and the gap has no x component"
     assert within == 5.0, "so the whole displacement lies inside the sagittal plane"
-    assert SlotGeometry().pairs(frames[:1]) == [], "one slot makes no pair"
+    assert SlotPairing().pairs(frames[:1]) == [], "one slot makes no pair"
 
 
 def test_frame():
@@ -126,7 +126,7 @@ def test_report():
         SlotFrame("cor", (0.0, 3.0, 4.0), (0.0, 1.0, 0.0), 120.0),
     ]
 
-    lines = SlotGeometry().report([study], CorpusSample(["a", "b"], 4407))
+    lines = SlotPairing().report([study], CorpusSample(["a", "b"], 4407))
 
     assert lines[0].startswith("1 studies with geometry measured, from 2 studies sampled of 4407 in the corpus")
     assert "2 slots with geometry, 1 within-study slot pairs" in lines[0]
@@ -148,11 +148,11 @@ def test_report():
     ], "pinned verbatim: the layout is what a reader compares across runs"
 
     unspanned = [SlotFrame(frame.plane, frame.centre, frame.normal, None) for frame in study]
-    assert SlotGeometry().report([unspanned], CorpusSample(["a", "b"], 4407)) == lines[:-1], (
+    assert SlotPairing().report([unspanned], CorpusSample(["a", "b"], 4407)) == lines[:-1], (
         "no span, no coverage claim — the distributions stay and only the coverage line goes"
     )
 
-    assert len(SlotGeometry().report([], CorpusSample(["a"], 2))) == 1, "no pairs, no distributions"
+    assert len(SlotPairing().report([], CorpusSample(["a"], 2))) == 1, "no pairs, no distributions"
 
 
 def test_covers():
@@ -170,9 +170,9 @@ def test_coverage():
     thick = SlotFrame("sag", (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), 140.0)
     thin = SlotFrame("ax", (50.0, 0.0, 0.0), (1.0, 0.0, 0.0), 20.0)
 
-    assert SlotGeometry().coverage([thick, thin]) == [True, False], "both directions, and they disagree"
-    assert SlotGeometry().coverage([thick]) == [], "one slot makes no ordered pair"
-    assert SlotGeometry().coverage([thick, SlotFrame("cor", (0.0, 0.0, 0.0), (0.0, 1.0, 0.0), None)]) == [True]
+    assert SlotPairing().coverage([thick, thin]) == [True, False], "both directions, and they disagree"
+    assert SlotPairing().coverage([thick]) == [], "one slot makes no ordered pair"
+    assert SlotPairing().coverage([thick, SlotFrame("cor", (0.0, 0.0, 0.0), (0.0, 1.0, 0.0), None)]) == [True]
 
 
 def test_measure_study(tmp_path: Path):

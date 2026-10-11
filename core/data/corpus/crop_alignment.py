@@ -107,6 +107,32 @@ class CropAlignment:
         middle_down, middle_across = ImageCentre().of(stack)
         return SlotOffset(plane, (down - middle_down) * spacing, (across - middle_across) * spacing)
 
+    @staticmethod
+    def measure_study(request: AuditRequest) -> list["StudyOffsets"]:
+        """Every routed slot of one study, offset — STILL NAMED where none of them placed.
+
+        A LIST of exactly one study, because the pool flattens and a bare object cannot be extended into
+        the result. A study that placed nothing stays in it rather than vanishing: `dump` writes an
+        abstention as nan precisely so a join can tell a study that did not measure from one that was
+        never drawn, and a worker that dropped it would take that distinction with it.
+        """
+        alignment = CropAlignment()
+        found = [
+            alignment.offset(stack, acquisition.pixel_spacing, slot)
+            for slot, acquisition, stack in request.routed().decoded(request.slices)
+            if stack is not None
+        ]
+        return [StudyOffsets(request.identifier, [offset for offset in found if offset is not None])]
+
+
+@dataclass(frozen=True)
+class AlignmentSpread:
+    """How far apart a study's slot offsets are, aggregated into the corpus report and the per-study dump.
+
+    Split from `CropAlignment`, which measures ONE slot's offset inside a worker: this side never touches
+    a pixel, it only reads the offsets the workers returned.
+    """
+
     def spread(self, offsets: list[SlotOffset]) -> float | None:
         """The mean pairwise gap in offset MAGNITUDE across a study's slots, in millimetres.
 
@@ -168,23 +194,6 @@ class CropAlignment:
             slots=np.array([len(study.offsets) for study in decoded], dtype=np.int32),
         )
 
-    @staticmethod
-    def measure_study(request: AuditRequest) -> list["StudyOffsets"]:
-        """Every routed slot of one study, offset — STILL NAMED where none of them placed.
-
-        A LIST of exactly one study, because the pool flattens and a bare object cannot be extended into
-        the result. A study that placed nothing stays in it rather than vanishing: `dump` writes an
-        abstention as nan precisely so a join can tell a study that did not measure from one that was
-        never drawn, and a worker that dropped it would take that distinction with it.
-        """
-        alignment = CropAlignment()
-        found = [
-            alignment.offset(stack, acquisition.pixel_spacing, slot)
-            for slot, acquisition, stack in request.routed().decoded(request.slices)
-            if stack is not None
-        ]
-        return [StudyOffsets(request.identifier, [offset for offset in found if offset is not None])]
-
 
 def main() -> None:
     """Decode a spread sample of studies uncropped and report how far each slot's knee sits off centre."""
@@ -209,7 +218,7 @@ def main() -> None:
     arguments = command.parsed()
 
     audit = AUDIT.with_slices(arguments.slices)
-    alignment = CropAlignment()
+    alignment = AlignmentSpread()
     sample, requests = audit.drawn(command, arguments, studies=arguments.studies)
     decoded = audit.mapped(CropAlignment.measure_study, requests, arguments.workers)
     # The report is over the studies that PLACED; the dump keeps the abstentions, which is what a join

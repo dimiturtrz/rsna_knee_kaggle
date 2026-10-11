@@ -111,9 +111,19 @@ class Diagnostics:
     slots: dict[str, float]
     regions: dict[str, float]
     rings: dict[str, float]
-    depth: dict[str, float]
     depth_by_label: dict[str, dict[str, float]]
     slices: dict[str, dict[str, float]]
+
+    @property
+    def depth(self) -> dict[str, float]:
+        """Mean over labels at each depth — the profile, derived rather than measured a second time.
+
+        This used to be its own method that re-ran every window through the model, which doubled the
+        cost of the depth diagnostic to compute a number already contained in `depth_by_label`. Ten
+        GPU passes for an arithmetic mean. Derived here rather than stored beside it, so the profile
+        and the per-label table it summarises cannot be assembled out of step.
+        """
+        return {start: float(np.nanmean(list(labels.values()))) for start, labels in self.depth_by_label.items()}
 
 
 class Attribution:
@@ -270,15 +280,6 @@ class Attribution:
                 finally:
                     images[..., rows, columns] = kept
         return maps
-
-    def averaged(self, by_label: dict[str, dict[str, float]]) -> dict[str, float]:
-        """Mean over labels at each depth — the profile, derived rather than measured a second time.
-
-        This used to be its own method that re-ran every window through the model, which doubled the
-        cost of the depth diagnostic to compute a number already contained in `depth_by_label`. Ten
-        GPU passes for an arithmetic mean.
-        """
-        return {start: float(np.nanmean(list(labels.values()))) for start, labels in by_label.items()}
 
     def depth_by_label(
         self,
@@ -526,13 +527,11 @@ def main() -> None:
     # Six occlusion sweeps over the holdout, each a full inference pass per occluded part: the run is
     # hours long and unattended, which is exactly what the idle timer suspends (knee-wyzj).
     with Wakelock():
-        by_label = attribution.depth_by_label(model, holdout_data)
         diagnostics = Diagnostics(
             slots=attribution.slot_importance(model, holdout_data),
             regions=attribution.region_importance(model, holdout_data),
             rings=attribution.ring_importance(model, holdout_data),
-            depth=attribution.averaged(by_label),
-            depth_by_label=by_label,
+            depth_by_label=attribution.depth_by_label(model, holdout_data),
             slices=attribution.slice_importance(model, holdout_data),
         )
     for line in AttributionReport(diagnostics).lines():

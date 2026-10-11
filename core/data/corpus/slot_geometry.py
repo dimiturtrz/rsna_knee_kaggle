@@ -65,7 +65,7 @@ ORTHOGONAL_TOLERANCE_DEG = 20.0
 knee is not scanned to the scanner axes — sagittal series are routinely angled to the femoral condyles."""
 
 DISTANCE_LEGS = ("centre distance", "  through-plane leg", "  in-plane leg")
-"""The three millimetre columns of a `SlotGeometry.pairs` row after the angle, in that order."""
+"""The three millimetre columns of a `SlotPairing.pairs` row after the angle, in that order."""
 
 
 @dataclass(frozen=True)
@@ -173,6 +173,28 @@ class SlotGeometry:
         """A 3-vector as a plain tuple, so a frame stays hashable and picklable across the pool."""
         return float(vector[0]), float(vector[1]), float(vector[2])
 
+    @staticmethod
+    def measure_study(request: AuditRequest) -> list[list[SlotFrame]]:
+        """Every routed slot of one study, placed — as ONE group, because the pairs are within-study.
+
+        A list of at most one study rather than a flat list of frames: the pool flattens what a worker
+        returns, and a frame that has lost which study it came from cannot be paired with anything.
+        """
+        geometry = SlotGeometry()
+        routed = request.routed()
+        placed = [geometry.frame(acquisition, name) for name, acquisition in routed.slots.items()]
+        frames = [frame for frame in placed if frame is not None]
+        return [frames] if frames else []
+
+
+@dataclass(frozen=True)
+class SlotPairing:
+    """How a study's placed slots relate pairwise, aggregated into the corpus report.
+
+    Split from `SlotGeometry`, which reads a DICOM header into one `SlotFrame` inside a worker: this side
+    never opens a file, it compares the frames the workers returned.
+    """
+
     def pairs(self, frames: list[SlotFrame]) -> list[tuple[float, float, float, float]]:
         """Every within-study slot pair as `(angle, centre distance, through-plane leg, in-plane leg)`, in
         degrees and millimetres.
@@ -248,19 +270,6 @@ class SlotGeometry:
             f"({100 * inside / len(covered):.1f}%)"
         ]
 
-    @staticmethod
-    def measure_study(request: AuditRequest) -> list[list[SlotFrame]]:
-        """Every routed slot of one study, placed — as ONE group, because the pairs are within-study.
-
-        A list of at most one study rather than a flat list of frames: the pool flattens what a worker
-        returns, and a frame that has lost which study it came from cannot be paired with anything.
-        """
-        geometry = SlotGeometry()
-        routed = request.routed()
-        placed = [geometry.frame(acquisition, name) for name, acquisition in routed.slots.items()]
-        frames = [frame for frame in placed if frame is not None]
-        return [frames] if frames else []
-
 
 def main() -> None:
     """Place every routed slot of a sample of studies in patient space and report the pairwise geometry."""
@@ -270,7 +279,7 @@ def main() -> None:
 
     sample, requests = AUDIT.drawn(command, arguments)
     measured = AUDIT.mapped(SlotGeometry.measure_study, requests, arguments.workers)
-    AUDIT.reported(command, SlotGeometry().report(measured, sample), sample, len(measured))
+    AUDIT.reported(command, SlotPairing().report(measured, sample), sample, len(measured))
 
 
 if __name__ == "__main__":

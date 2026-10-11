@@ -205,14 +205,21 @@ class AxisReading:
         ]
 
 
-class CompetenceAxis:
-    """The members' per-finding competence, read for its shape rather than for its best subset."""
+@dataclass(frozen=True)
+class CompetenceTable:
+    """One AUC per member per finding over a shared split — the matrix every reading of the pool starts from.
 
-    def __init__(self, scores: LabelScores, seed: int = SHUFFLE_SEED) -> None:
-        self.scores = scores
-        self.seed = seed
+    Split from `CompetenceAxis` because the table is a MEASUREMENT of the pool, while the axis read and the
+    residual ranking are two different questions asked of it. Names, findings and matrix travel as one
+    object so a caller cannot pair a matrix with the finding list of a different pool.
+    """
 
-    def table(self, pool: Pool) -> tuple[list[str], Float[np.ndarray, "members findings"]]:
+    names: list[str]
+    findings: list[str]
+    matrix: Float[np.ndarray, "members findings"]
+
+    @classmethod
+    def scored(cls, pool: Pool, scores: LabelScores) -> "CompetenceTable":
         """One AUC per member per finding, with any finding undefined for ANY member dropped and named.
 
         Dropped whole rather than imputed: a NaN comes from a finding with one class present on the
@@ -221,50 +228,19 @@ class CompetenceAxis:
         than it is. The findings that survive ARE the denominator, which is why they travel in the
         reading rather than being counted off the twelve.
         """
-        rows = [self.scores.per_label(member, pool.truth) for member in pool.predictions]
+        rows = [scores.per_label(member, pool.truth) for member in pool.predictions]
         findings = [finding for finding in rows[0] if all(np.isfinite(row[finding]) for row in rows)]
         if dropped := [finding for finding in rows[0] if finding not in findings]:
             logger.warning("undefined for at least one member on the shared studies, dropped: %s", ", ".join(dropped))
-        return findings, np.array([[row[finding] for finding in findings] for row in rows], dtype=np.float64)
+        matrix = np.array([[row[finding] for finding in findings] for row in rows], dtype=np.float64)
+        return cls(names=list(pool.names), findings=findings, matrix=matrix)
 
-    def read(
-        self,
-        names: list[str],
-        matrix: Float[np.ndarray, "members findings"],
-        findings: list[str],
-        resamples: int = NULL_RESAMPLES,
-    ) -> AxisReading:
-        """Double-centre, take the first component, and price it against a column-shuffled null."""
-        if len(names) < MINIMUM_MEMBERS:
-            message = (
-                f"{len(names)} members cannot carry an axis — a double-centred pair has one direction by construction"
-            )
-            raise ValueError(message)
-        centred = matrix - matrix.mean(axis=0, keepdims=True)
-        residual = self._residual(matrix)
-        quality = 1.0 - float((residual**2).sum() / (centred**2).sum())
-        left, values, right = np.linalg.svd(residual, full_matrices=False)
-        loadings = right[0] * np.sign(right[0][np.argmax(np.abs(right[0]))])
-        projections = left[:, 0] * values[0] * np.sign(right[0][np.argmax(np.abs(right[0]))])
-        order = np.argsort(projections)
-        return AxisReading(
-            findings=findings,
-            share=self._share(values),
-            null=self._null(residual, resamples),
-            quality=quality,
-            loadings=dict(zip(findings, loadings.tolist(), strict=True)),
-            spread=dict(zip(findings, residual.std(axis=0).tolist(), strict=True)),
-            maturity=float(np.corrcoef(projections, matrix.mean(axis=1))[0, 1]),
-            extremes=[(names[index], float(projections[index])) for index in order],
-        )
+    def residual(self) -> Float[np.ndarray, "members findings"]:
+        """The matrix with finding difficulty and member quality both removed — every reading's input."""
+        centred = self.matrix - self.matrix.mean(axis=0, keepdims=True)
+        return centred - centred.mean(axis=1, keepdims=True)
 
-    def strongest(
-        self,
-        names: list[str],
-        matrix: Float[np.ndarray, "members findings"],
-        findings: list[str],
-        wanted: tuple[str, ...],
-    ) -> list[tuple[str, float]]:
+    def strongest(self, wanted: tuple[str, ...]) -> list[tuple[str, float]]:
         """Members ranked by their competence on a NAMED subset of findings, quality already removed.
 
         The selection rule every seat search on this board has used is the holdout MEAN, and the mean is
@@ -280,19 +256,46 @@ class CompetenceAxis:
         It ranks; it does not price. What a residual-strong member is worth in a roster is `seat_value`'s
         question, against the champion, and nothing here substitutes for it.
         """
-        if missing := [finding for finding in wanted if finding not in findings]:
+        if missing := [finding for finding in wanted if finding not in self.findings]:
             message = f"not in this pool's scored findings: {', '.join(missing)}"
             raise ValueError(message)
-        columns = [findings.index(finding) for finding in wanted]
-        strength = self._residual(matrix)[:, columns].mean(axis=1)
+        columns = [self.findings.index(finding) for finding in wanted]
+        strength = self.residual()[:, columns].mean(axis=1)
         order = np.argsort(-strength)
-        return [(names[index], float(strength[index])) for index in order]
+        return [(self.names[index], float(strength[index])) for index in order]
 
-    @staticmethod
-    def _residual(matrix: Float[np.ndarray, "members findings"]) -> Float[np.ndarray, "members findings"]:
-        """The matrix with finding difficulty and member quality both removed — every reading's input."""
+
+class CompetenceAxis:
+    """Whether a competence table's spread is one shared direction, priced against a column-shuffled null."""
+
+    def __init__(self, seed: int = SHUFFLE_SEED) -> None:
+        self.seed = seed
+
+    def read(self, table: CompetenceTable, resamples: int = NULL_RESAMPLES) -> AxisReading:
+        """Double-centre, take the first component, and price it against a column-shuffled null."""
+        names, findings, matrix = table.names, table.findings, table.matrix
+        if len(names) < MINIMUM_MEMBERS:
+            message = (
+                f"{len(names)} members cannot carry an axis — a double-centred pair has one direction by construction"
+            )
+            raise ValueError(message)
         centred = matrix - matrix.mean(axis=0, keepdims=True)
-        return centred - centred.mean(axis=1, keepdims=True)
+        residual = table.residual()
+        quality = 1.0 - float((residual**2).sum() / (centred**2).sum())
+        left, values, right = np.linalg.svd(residual, full_matrices=False)
+        loadings = right[0] * np.sign(right[0][np.argmax(np.abs(right[0]))])
+        projections = left[:, 0] * values[0] * np.sign(right[0][np.argmax(np.abs(right[0]))])
+        order = np.argsort(projections)
+        return AxisReading(
+            findings=findings,
+            share=self._share(values),
+            null=self._null(residual, resamples),
+            quality=quality,
+            loadings=dict(zip(findings, loadings.tolist(), strict=True)),
+            spread=dict(zip(findings, residual.std(axis=0).tolist(), strict=True)),
+            maturity=float(np.corrcoef(projections, matrix.mean(axis=1))[0, 1]),
+            extremes=[(names[index], float(projections[index])) for index in order],
+        )
 
     @staticmethod
     def _share(values: NDArray[np.float64]) -> float:
@@ -354,11 +357,10 @@ def main() -> None:
         len(arguments.records),
         len(pool.truth),
     )
-    axis = CompetenceAxis(LabelScores())
-    findings, matrix = axis.table(pool)
-    command.report(axis.read(pool.names, matrix, findings, arguments.resamples).lines(arguments.ends))
+    table = CompetenceTable.scored(pool, LabelScores())
+    command.report(CompetenceAxis().read(table, arguments.resamples).lines(arguments.ends))
     if wanted := tuple(arguments.on):
-        ranked = axis.strongest(pool.names, matrix, findings, wanted)
+        ranked = table.strongest(wanted)
         command.report(
             [
                 f"residual competence on {', '.join(wanted)} — a RANKING, not a price:",

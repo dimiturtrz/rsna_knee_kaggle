@@ -353,11 +353,9 @@ class OvercallAudit:
         self,
         mentions: FindingMentions | None = None,
         languages: ReportLanguages | None = None,
-        resamples: int = RESAMPLES,
     ) -> None:
         self.mentions = mentions or FindingMentions()
         self.languages = languages or ReportLanguages()
-        self.resamples = resamples
         self.cues = {
             category: {
                 language: [re.compile(pattern, re.IGNORECASE) for pattern in patterns]
@@ -422,6 +420,28 @@ class OvercallAudit:
                 }
             )
         return pd.DataFrame(rows, columns=["study", "target", "language", "category", "cues", "span"])
+
+    @staticmethod
+    def _cells(root: DataRoot, table: Path) -> tuple[pd.DataFrame, dict[str, str]]:
+        """The scored cells and the report text they were read from, joined on the study."""
+        agreement = ReaderAgreement()
+        annotated = agreement.annotated(root)
+        read = pd.read_csv(table)
+        cells = agreement.cells(annotated, read)
+        text = zip(annotated["StudyInstanceUID"], annotated["Report"], strict=True)
+        reports = {str(key): str(value) for key, value in text}
+        return cells, reports
+
+
+@dataclass(frozen=True)
+class OvercallCensus:
+    """The classified cells tallied against their control, with study-clustered intervals and coverage.
+
+    Split from `OvercallAudit`, which reads a REPORT to classify one cell: this side never sees text, it
+    counts the frames `audit` returned and prices the false-positive group against the agreed one.
+    """
+
+    resamples: int = RESAMPLES
 
     def census(self, audited: pd.DataFrame) -> dict[str, int]:
         """How many cells fell in each category, every category present even at zero.
@@ -552,17 +572,6 @@ class OvercallAudit:
             "    `rubric_gap` refused the subthreshold reading for MCL and the size family.",
         ]
 
-    @staticmethod
-    def _cells(root: DataRoot, table: Path) -> tuple[pd.DataFrame, dict[str, str]]:
-        """The scored cells and the report text they were read from, joined on the study."""
-        agreement = ReaderAgreement()
-        annotated = agreement.annotated(root)
-        read = pd.read_csv(table)
-        cells = agreement.cells(annotated, read)
-        text = zip(annotated["StudyInstanceUID"], annotated["Report"], strict=True)
-        reports = {str(key): str(value) for key, value in text}
-        return cells, reports
-
 
 def main() -> None:
     """Classify the reader's confident false positives, with its confident true positives as control."""
@@ -581,6 +590,7 @@ def main() -> None:
     agreed = called[called["truth"] > MIDPOINT]
 
     audited_over, audited_agreed = audit.audit(over, reports), audit.audit(agreed, reports)
+    tally = OvercallCensus()
 
     command.report(
         [
@@ -589,13 +599,13 @@ def main() -> None:
             f"the {len(over)} refused cells span {over['study'].nunique()} studies and "
             f"{over['language'].nunique()} languages ({(over['language'] == 'en').sum()} of them English)",
             "",
-            *audit.coverage(audited_over),
+            *tally.coverage(audited_over),
             "",
-            *audit.compare(audited_over, audited_agreed),
+            *tally.compare(audited_over, audited_agreed),
             "",
-            *audit.incidence(audited_over, audited_agreed),
+            *tally.incidence(audited_over, audited_agreed),
             "",
-            *audit.limits(),
+            *tally.limits(),
         ]
     )
 

@@ -60,7 +60,6 @@ def _report(
     slots: dict[str, float] | None = None,
     regions: dict[str, float] | None = None,
     rings: dict[str, float] | None = None,
-    depth: dict[str, float] | None = None,
     depth_by_label: dict[str, dict[str, float]] | None = None,
     slices: dict[str, dict[str, float]] | None = None,
 ) -> AttributionReport:
@@ -74,7 +73,6 @@ def _report(
             slots=slots or {"0": 0.01, "2": 0.30},
             regions=regions or {"whole": 0.83, "centre_only": 0.82, "border_only": 0.51},
             rings=rings or {"0.05": 0.52, "0.25": 0.74},
-            depth=depth or {"0": 0.80, "3": 0.83},
             depth_by_label=depth_by_label or {"0": dict.fromkeys(TARGETS, 0.80), "3": dict.fromkeys(TARGETS, 0.83)},
             slices=slices or {"0": dict.fromkeys(TARGETS, 0.02), "1": dict.fromkeys(TARGETS, 0.01)},
         )
@@ -113,9 +111,10 @@ def test_patch_importance():
     assert centre / total > 0.9, "a diffuse read would leave a quarter of the mass in the centre cells"
 
 
-def test_averaged():
+def test_depth():
     """The profile is the per-label table meaned over labels, not a second pass over the model."""
-    averaged = _attribution().averaged({"0": {"ACL": 0.80, "MCL": 0.90}, "3": {"ACL": 0.70, "MCL": 0.70}})
+    by_label = {"0": {"ACL": 0.80, "MCL": 0.90}, "3": {"ACL": 0.70, "MCL": 0.70}}
+    averaged = Diagnostics(slots={}, regions={}, rings={}, depth_by_label=by_label, slices={}).depth
 
     assert sorted(averaged) == ["0", "3"]
     assert averaged["0"] == pytest.approx(0.85)
@@ -181,7 +180,6 @@ def test_lines():
         slots={"0": 0.01, "2": 0.30},
         regions={"whole": 0.83, "centre_only": 0.82, "border_only": 0.51},
         rings={"0.05": 0.52, "0.25": 0.74},
-        depth={"0": 0.80, "3": 0.83},
         depth_by_label={"0": dict.fromkeys(TARGETS, 0.80), "3": dict.fromkeys(TARGETS, 0.83)},
         slices={"0": dict.fromkeys(TARGETS, 0.02), "1": dict.fromkeys(TARGETS, 0.01)},
     ).lines()
@@ -202,7 +200,6 @@ def test_depth_refuses_a_single_window():
     """
     lines = "\n".join(
         _report(
-            depth={"0": 0.8558},
             depth_by_label={"0": dict.fromkeys(TARGETS, 0.8558)},
         )._depth()
     )
