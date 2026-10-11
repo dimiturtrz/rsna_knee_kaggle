@@ -139,9 +139,13 @@ class SubmitCheck:
 
     @staticmethod
     def resolved(given: str, kernels: Path) -> Path:
-        """A kernel named either by its directory or by its bare name, as a directory."""
+        """A kernel named by its directory, its bare name or its Kaggle id `owner/name`, as a directory.
+
+        The Kaggle id is what `kernel-metadata.json` spells, and it once resolved to `comp/kernels/<owner>/<name>`,
+        a directory that never exists, which then read as a kernel naming no members (knee-z1h31).
+        """
         direct = Path(given)
-        return direct if direct.is_dir() else kernels / given
+        return direct if direct.is_dir() else kernels / direct.name
 
 
 def main() -> None:
@@ -160,6 +164,8 @@ def main() -> None:
     arguments = command.parsed()
 
     kernel = SubmitCheck.resolved(arguments.kernel, arguments.kernels)
+    if not kernel.is_dir():
+        command.parser.error(f"no kernel directory {kernel}")
     named = SubmitCheck.seats(kernel)
     if named is None:
         command.unknown(f"{kernel.name} names no members in its source, so this check did not look")

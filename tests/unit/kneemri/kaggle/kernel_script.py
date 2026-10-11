@@ -40,6 +40,15 @@ def test_member_names(tmp_path: Path):
 
     twice = "chosen = ('a', 'b')\nKernelRun(names=chosen).run()\nKernelRun(names=('c', 'a')).run()\n"
     assert _script(tmp_path, twice).member_names() == ["a", "b", "c"], "every run's members, once each"
+    bound = {
+        "module": "chosen = ('a', 'b')\nSeatedEntry(names=chosen).run()\n",
+        "function": "def main():\n    chosen = ('a', 'b')\n    SeatedEntry(names=chosen).run()\n",
+    }
+    for scope, body in bound.items():
+        assert _script(tmp_path, body).member_names() == ["a", "b"], f"chosen bound at {scope} scope"
+    unbound = "def main():\n    SeatedEntry(names=chosen).run()\n"
+    assert _script(tmp_path, unbound).member_names() is None, "an unbound name is not a literal"
+
     ranked_second = "KernelRun(names=('a',)).run()\nKernelRun(members=2).run()\n"
     assert _script(tmp_path, ranked_second).member_names() is None, "one ranked run makes the whole set unknown"
 
