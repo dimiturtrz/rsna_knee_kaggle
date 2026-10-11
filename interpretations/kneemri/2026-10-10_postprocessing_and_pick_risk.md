@@ -258,3 +258,31 @@ a +0.001 entry buys about one day, not a medal tier; to hold silver the public n
 Second, the only lever on record that is measured at that size is a second nartaa partner. heliosli's 0.954 is that
 lever, and its public partner S6 is blocked by the SKM-TEA ruling (knee-7nfa8). That turns the owner question from a
 curiosity into the deciding one.
+
+## The offline nartaa replica is the WEAK leg, so the share axis cannot be priced offline (2026-10-11 00:07Z)
+
+A per-label nartaa share, chosen on half the rows and scored on the other half (100 repeats of 2-fold,
+`s2/labelwise_share_cv.py`), read **+0.011 [+0.009, +0.014]** over the fixed 2/3. It picked a 1/3 share for
+86% of labels, which means "give nartaa less". That result is about the harness, not about the blend. The
+stand-in for nartaa in every fold-0 analog is our own replica, `raptor_ft_repl2x2_a_swa`, at
+**0.8787@ledger75 (pop c08b56a7, n=896)**. The ours-side soup it is paired with reads **0.9089@ledger75**. So
+offline, nartaa is the leg that is 0.03 weaker. On the board it is the other way round: nartaa scores 0.949
+alone and ours7 scores 0.945.
+
+The board has already measured the share axis directly:
+
+| Entry | Our share | Board |
+|---|---|---|
+| mirrorquarter | 1/4 | 0.952 |
+| mirrorthird | 1/3 | 0.953 |
+| mirrortiltthird (per-finding tilt) | about 1/3 | 0.953 |
+| mirrorseat | 1/2 | 0.953 |
+
+The axis is flat there. No share or labelwise-share entry gets a slot.
+
+The same defect qualifies every "partner at 2/3 against a replica" price written today, which covers
+twosoup +0.0015, probit +0.0008 and twosoup×probit +0.0020. Each of them is measured where nartaa is the weak
+leg. In that regime, a stronger ours side and a combiner that shrinks extreme ranks both matter more than they
+do on the board. Read those prices for SIGN only, and expect the 10-11 readings to land at 0.954 or below.
+What this does NOT rule out is the ours-side ranking itself: soup beats ours6 by about 0.004 solo on
+ledger75 regardless of the partner.
