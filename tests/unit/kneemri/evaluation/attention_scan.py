@@ -7,6 +7,7 @@ from torch import nn
 from core.data.corpus.slots import SLOTS
 from core.findings import TARGETS
 from kneemri.evaluation.attention_scan import AttentionScan
+from kneemri.inference.holdout_predictions import ServedModel
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Window
 from kneemri.models.model import StudyModel
@@ -51,7 +52,9 @@ def test_weights() -> None:
     model = cast(StudyModel, _SlotAttender())
     window = Window(starts=[0, 1], width=2, size=SIZE)
 
-    weights = AttentionScan(torch.device("cpu"), batch=4).weights(model, HoldoutSlab.of(images, mask), window)
+    weights = AttentionScan(torch.device("cpu"), batch=4).weights(
+        ServedModel(model, window), HoldoutSlab.of(images, mask)
+    )
 
     assert weights.shape == (STUDIES, len(TARGETS), len(SLOTS))
     assert np.allclose(weights.sum(axis=2), 1.0), "a mean of softmaxes is still a distribution"

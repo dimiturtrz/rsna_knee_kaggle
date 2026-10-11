@@ -6,6 +6,7 @@ its pixels are file-backed at all — see `CachedCorpus.reader`.
 """
 
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
@@ -31,22 +32,32 @@ least this much (knee-lky3).
 """
 
 
-class WindowReader(Protocol):
-    """The one thing a reader does: hand back `width` slices of every slot for a batch of positions.
+@dataclass(frozen=True, kw_only=True)
+class SliceSpan:
+    """Which slices of every slot a read takes: `width` of them, from `start`, along the slice axis.
 
-    `(batch, start, width)` travels as three parameters rather than one request object DELIBERATELY. It
-    is a slicing expression, not a noun the rest of the codebase says anything about: nothing stores
-    one, nothing returns one, and nothing decides anything from one — `Prefetch` already holds the
-    schedule that produces them, and `Window` in `inference.members` is a different thing (a member's
-    read plan). A value object here would add a type to name an argument list, on the inner loop, and
-    would still be unpacked in the same two places.
-
-    What the clump DID cost is that `start` and `width` are both non-negative ints indexing the same
-    axis, so a swapped pair is a valid call that reads the wrong slices and returns the right shape.
-    They are keyword-only for that reason, which is the whole of the risk and none of the type.
+    `start` and `width` are both non-negative ints indexing the same axis, so a swapped pair is a valid
+    read of the wrong slices that returns the right shape. Keyword-only construction is the guard; the
+    type is what lets the pair travel as one argument instead of two that can be crossed at every hop.
     """
 
-    def read(self, batch: NDArray[np.int64], *, start: int, width: int) -> NDArray[np.uint8]: ...
+    start: int
+    width: int
+
+    @property
+    def stop(self) -> int:
+        """One past the last slice read — the end of the slice expression."""
+        return self.start + self.width
+
+    def covers(self, depth: int) -> bool:
+        """Whether this span is the whole stack, so a study is one contiguous read rather than one per slot."""
+        return self.width == depth
+
+
+class WindowReader(Protocol):
+    """The one thing a reader does: hand back a span of slices of every slot for a batch of positions."""
+
+    def read(self, batch: NDArray[np.int64], span: SliceSpan) -> NDArray[np.uint8]: ...
 
 
 class MappedReader:
@@ -55,9 +66,9 @@ class MappedReader:
     def __init__(self, images: NDArray[np.uint8]) -> None:
         self.images = images
 
-    def read(self, batch: NDArray[np.int64], *, start: int, width: int) -> NDArray[np.uint8]:
+    def read(self, batch: NDArray[np.int64], span: SliceSpan) -> NDArray[np.uint8]:
         """The window, contiguous, in ONE indexing op — never index the batch and slice afterwards."""
-        return np.ascontiguousarray(self.images[batch, :, start : start + width])
+        return np.ascontiguousarray(self.images[batch, :, span.start : span.stop])
 
 
 class FileReader:
@@ -96,11 +107,11 @@ class FileReader:
         """
         return int(self.strides[0])
 
-    def read(self, batch: NDArray[np.int64], *, start: int, width: int) -> NDArray[np.uint8]:
+    def read(self, batch: NDArray[np.int64], span: SliceSpan) -> NDArray[np.uint8]:
         """The window for every position in the batch, the rows shared out over the handles."""
-        window = np.empty((len(batch), self.shape[1], width, *self.shape[3:]), dtype=self.dtype)
+        window = np.empty((len(batch), self.shape[1], span.width, *self.shape[3:]), dtype=self.dtype)
         shares = [range(offset, len(batch), self.threads) for offset in range(self.threads)]
-        list(self.pool.map(lambda rows: self._fill(window, batch, rows, start=start, width=width), shares))
+        list(self.pool.map(lambda rows: self._fill(window, batch, rows, span), shares))
         return window
 
     def _fill(
@@ -108,9 +119,7 @@ class FileReader:
         window: NDArray[np.uint8],
         batch: NDArray[np.int64],
         rows: range,
-        *,
-        start: int,
-        width: int,
+        span: SliceSpan,
     ) -> None:
         """Fill this share of the rows through one handle of its own — handles are not thread-safe.
 
@@ -120,10 +129,10 @@ class FileReader:
         with self.path.open("rb", buffering=0) as handle:
             for row in rows:
                 base = self.offset + int(batch[row]) * self.per_study
-                if width == self.shape[2]:
+                if span.covers(self.shape[2]):
                     handle.seek(base)
                     handle.readinto(window[row].reshape(-1).data)
                     continue
                 for slot in range(self.shape[1]):
-                    handle.seek(base + slot * self.strides[1] + start * self.per_slot)
+                    handle.seek(base + slot * self.strides[1] + span.start * self.per_slot)
                     handle.readinto(window[row, slot].reshape(-1).data)

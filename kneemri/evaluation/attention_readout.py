@@ -240,7 +240,7 @@ def main() -> None:
     from core.data.corpus.slots import SCHEMES  # noqa: PLC0415 - as above
     from kneemri.device import VisibleCards  # noqa: PLC0415 - as above
     from kneemri.evaluation.attention_scan import AttentionScan  # noqa: PLC0415 - as above
-    from kneemri.inference.holdout_predictions import HoldoutPredictions  # noqa: PLC0415 - as above
+    from kneemri.inference.holdout_predictions import HoldoutPredictions, ServedModel  # noqa: PLC0415 - as above
     from kneemri.inference.holdout_slab import HoldoutSlab  # noqa: PLC0415 - as above
     from kneemri.inference.members import Member  # noqa: PLC0415 - as above
     from kneemri.models.backbone import ENCODERS  # noqa: PLC0415 - as above
@@ -271,7 +271,7 @@ def main() -> None:
     window = member.window(corpus.slices, overlap=True)
 
     readout = AttentionReadout(SCHEMES[member.scheme])
-    weights = AttentionScan(device).weights(model, HoldoutSlab.of(images, mask), window, member.precision)
+    weights = AttentionScan(device).weights(ServedModel(model, window, member.precision), HoldoutSlab.of(images, mask))
     record = readout.record(weights, mask)
     # Out of the repo, beside the caches and the checkpoints: this is a run output, not source.
     destination = root.processed() / f"attention_readout_{arguments.checkpoint.stem}.json"

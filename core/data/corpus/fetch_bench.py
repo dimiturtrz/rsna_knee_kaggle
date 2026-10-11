@@ -26,7 +26,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from core import cli
-from core.data.corpus.window_reader import FileReader, MappedReader, WindowReader
+from core.data.corpus.window_reader import FileReader, MappedReader, SliceSpan, WindowReader
 
 logger = logging.getLogger(__name__)
 
@@ -54,28 +54,27 @@ class Sweep:
     """
 
     rows: list[NDArray[np.int64]]
-    start: int
-    width: int
+    span: SliceSpan
 
     def bytes_read(self, images: NDArray[np.uint8]) -> int:
         """Bytes this sweep asks for, from the cache's own shape — never from a size passed alongside."""
         per_slice = int(np.prod(images.shape[3:]))
-        return sum(len(batch) * images.shape[1] * self.width * per_slice for batch in self.rows)
+        return sum(len(batch) * images.shape[1] * self.span.width * per_slice for batch in self.rows)
 
     @classmethod
-    def over(cls, arm: int, studies: int, start: int, width: int) -> "Sweep":
+    def over(cls, arm: int, studies: int, span: SliceSpan) -> "Sweep":
         """The `arm`-th disjoint block of rows, so arm N never reads what arm N-1 warmed.
 
         Contiguous rather than strided: the cache is laid out by study, and a strided block would
         measure a seek pattern no reader of this cache performs.
         """
-        span = BATCH * BATCHES
-        first = arm * span
-        if first + span > studies:
-            message = f"arm {arm} needs rows {first}..{first + span} of a cache holding {studies}"
+        block = BATCH * BATCHES
+        first = arm * block
+        if first + block > studies:
+            message = f"arm {arm} needs rows {first}..{first + block} of a cache holding {studies}"
             raise ValueError(message)
         rows = [np.arange(first + n * BATCH, first + (n + 1) * BATCH, dtype=np.int64) for n in range(BATCHES)]
-        return cls(rows=rows, start=start, width=width)
+        return cls(rows=rows, span=span)
 
 
 class FetchBench:
@@ -85,7 +84,7 @@ class FetchBench:
         """Wall-clock for the whole sweep, which is what a step pays — not a per-call best case."""
         started = time.time()
         for batch in sweep.rows:
-            reader.read(batch, start=sweep.start, width=sweep.width)
+            reader.read(batch, sweep.span)
         return time.time() - started
 
     def rate(self, reader: WindowReader, sweep: Sweep, images: NDArray[np.uint8]) -> float:
@@ -133,7 +132,7 @@ def main() -> None:
     readers: list[tuple[str, WindowReader]] = [("mapped", MappedReader(images))]
     readers += [(f"file({handles})", FileReader(images, Path(images.filename), handles)) for handles in HANDLES]
     for arm, (label, reader) in enumerate(reversed(readers) if arguments.reverse else readers):
-        rows = Sweep.over(arm + arguments.offset, len(identifiers), start=0, width=width)
+        rows = Sweep.over(arm + arguments.offset, len(identifiers), SliceSpan(start=0, width=width))
         measured[label] = bench.rate(reader, rows, images)
 
     command.report(bench.report(measured, width, corpus.slices))

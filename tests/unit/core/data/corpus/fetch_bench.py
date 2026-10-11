@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from core.data.corpus.fetch_bench import BATCH, BATCHES, FetchBench, Sweep
-from core.data.corpus.window_reader import MappedReader
+from core.data.corpus.window_reader import MappedReader, SliceSpan
 
 STUDIES = BATCH * BATCHES * 3
 SLOTS, SLICES, PIXELS = 2, 4, 5
@@ -17,15 +17,15 @@ def _images() -> np.ndarray:
 def test_bytes_read():
     """Counted off the ARRAY's own shape, so a bench pointed at a bigger cache cannot keep quoting the
     byte count of the one it was written against."""
-    sweep = Sweep.over(0, STUDIES, start=0, width=SLICES)
+    sweep = Sweep.over(0, STUDIES, SliceSpan(start=0, width=SLICES))
     assert sweep.bytes_read(_images()) == BATCH * BATCHES * SLOTS * SLICES * PIXELS * PIXELS
 
 
 def test_over():
     """Successive arms get disjoint rows — the control the whole measurement rests on, since an arm
     reading what the previous arm warmed is timing the page cache."""
-    first = Sweep.over(0, STUDIES, start=0, width=SLICES)
-    second = Sweep.over(1, STUDIES, start=0, width=SLICES)
+    first = Sweep.over(0, STUDIES, SliceSpan(start=0, width=SLICES))
+    second = Sweep.over(1, STUDIES, SliceSpan(start=0, width=SLICES))
     assert set(np.concatenate(first.rows).tolist()).isdisjoint(np.concatenate(second.rows).tolist())
     assert len(np.concatenate(first.rows)) == BATCH * BATCHES
 
@@ -33,19 +33,19 @@ def test_over():
 def test_over_refuses_a_cache_too_small_to_keep_the_arms_apart():
     """Refused rather than wrapped: silently reusing rows would report the last arm as the fastest."""
     with pytest.raises(ValueError, match="arm 2 needs rows"):
-        Sweep.over(2, BATCH * BATCHES, start=0, width=SLICES)
+        Sweep.over(2, BATCH * BATCHES, SliceSpan(start=0, width=SLICES))
 
 
 def test_seconds():
     """The whole sweep, not one call — a step pays for every batch it reads."""
     reads: list[int] = []
-    sweep = Sweep.over(0, STUDIES, start=0, width=SLICES)
+    sweep = Sweep.over(0, STUDIES, SliceSpan(start=0, width=SLICES))
     images = _images()
 
     class Counts(MappedReader):
-        def read(self, batch, *, start, width):  # type: ignore[no-untyped-def]
+        def read(self, batch, span):  # type: ignore[no-untyped-def]
             reads.append(len(batch))
-            return super().read(batch, start=start, width=width)
+            return super().read(batch, span)
 
     assert FetchBench().seconds(Counts(images), sweep) >= 0.0
     assert reads == [BATCH] * BATCHES
@@ -55,7 +55,7 @@ def test_rate():
     """GB/s over the bytes the sweep asked for. Positive and finite on a real read, which is what
     separates a working bench from one dividing by a zero it never noticed."""
     images = _images()
-    rate = FetchBench().rate(MappedReader(images), Sweep.over(0, STUDIES, start=0, width=SLICES), images)
+    rate = FetchBench().rate(MappedReader(images), Sweep.over(0, STUDIES, SliceSpan(start=0, width=SLICES)), images)
     assert rate > 0.0
     assert np.isfinite(rate)
 

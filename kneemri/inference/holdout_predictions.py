@@ -6,6 +6,7 @@ and reads them over test-time windows is a recurring shape here, not a one-off.
 """
 
 import logging
+from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
@@ -28,6 +29,34 @@ from kneemri.models.model import StudyModel
 logger = logging.getLogger(__name__)
 
 BATCH = 8
+
+
+@dataclass(frozen=True)
+class ServedModel:
+    """A loaded member with the window it reads and the arithmetic it was fitted in.
+
+    The three travel together everywhere a member is READ rather than trained, and none of them is
+    optional to the reading: the window decides which slices the encoder sees, and the precision is the
+    member's OWN - a bf16 member read in fp16 is a different function of the same pixels.
+    """
+
+    model: StudyModel
+    window: Window
+    precision: torch.dtype = torch.float16
+
+    def autocast(self, device: torch.device) -> torch.autocast:
+        """The member's own arithmetic on the card; a no-op anywhere else."""
+        return torch.autocast("cuda", dtype=self.precision, enabled=device.type == "cuda")
+
+    def crop(self, view: UInt8[Tensor, "b n s h w"], start: int) -> UInt8[Tensor, "b n k h w"]:
+        """The window's slices from `start` - the stack this member reads at one window start."""
+        return view[:, :, start : start + self.window.width]
+
+    def logits(
+        self, view: UInt8[Tensor, "b n s h w"], flags: Float[Tensor, "b n"], start: int
+    ) -> Float[Tensor, "b labels"]:
+        """One forward at one window start, at the member's own image size."""
+        return self.model(self.crop(view, start), flags, self.window.size)
 
 
 class HoldoutPredictions:
@@ -115,46 +144,41 @@ class HoldoutPredictions:
         function. The same defect shipped to the leaderboard through `Ensemble` (knee-y8y); this is the
         analysis path, where it decides which members we choose to submit.
         """
+        served = ServedModel(model, window, precision)
         chunks = []
         for images, mask in slab.batches(self.adaptation.episode or BATCH):
             pixels: UInt8[Tensor, "b n s h w"] = torch.from_numpy(np.ascontiguousarray(images)).to(self.device)
             flags: Float[Tensor, "b n"] = torch.from_numpy(mask).to(self.device)
-            graded = partial(self._logits, model, pixels, flags, window, precision)
+            graded = partial(self._logits, served, pixels, flags)
             with self.adaptation.on(model, graded):
-                chunks.append(self._average(model, pixels, flags, window, precision))
+                chunks.append(self._average(served, pixels, flags))
         return np.concatenate(chunks).astype(np.float64)
 
     def _average(
         self,
-        model: StudyModel,
+        served: ServedModel,
         pixels: UInt8[Tensor, "b n s h w"],
         flags: Float[Tensor, "b n"],
-        window: "Window",
-        precision: torch.dtype,
     ) -> NDArray[np.float32]:
         """The test-time average that produced every published figure, unchanged and still ungraded."""
         # The member's OWN arithmetic, not autocast's cuda default of float16: this is the tool that
         # decides which members to submit, so scoring a bf16 member in fp16 ranks it under a function
         # it was never fitted as. Same defect as Ensemble.predict_member carried until today.
-        with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=self.device.type == "cuda"):
+        with torch.no_grad(), served.autocast(self.device):
             total = torch.zeros(pixels.shape[0], len(TARGETS), device=self.device)
             passes = 0
             for view in self.views.apply(pixels):
-                self.fits(window, view.shape[2])
-                for start in window.starts:
-                    total = total + torch.sigmoid(
-                        model(view[:, :, start : start + window.width], flags, window.size).float()
-                    )
+                self.fits(served.window, view.shape[2])
+                for start in served.window.starts:
+                    total = total + torch.sigmoid(served.logits(view, flags, start).float())
                     passes += 1
             return (total / passes).cpu().numpy()
 
     def _logits(
         self,
-        model: StudyModel,
+        served: ServedModel,
         pixels: UInt8[Tensor, "b n s h w"],
         flags: Float[Tensor, "b n"],
-        window: "Window",
-        precision: torch.dtype,
     ) -> Float[Tensor, "studies labels"]:
         """One GRADED read for the adapt pass — the first view at the first start, not the average.
 
@@ -165,10 +189,9 @@ class HoldoutPredictions:
         average, not a different reading.
         """
         view = next(iter(self.views.apply(pixels)))
-        self.fits(window, view.shape[2])
-        start = window.starts[0]
-        with torch.autocast("cuda", dtype=precision, enabled=self.device.type == "cuda"):
-            return model(view[:, :, start : start + window.width], flags, window.size)
+        self.fits(served.window, view.shape[2])
+        with served.autocast(self.device):
+            return served.logits(view, flags, served.window.starts[0])
 
     def cached(
         self, reading: Member, slab: HoldoutSlab, cache: PredictionCache, window: Window

@@ -211,6 +211,19 @@ in this tuple is not a claim that its cells are mislabelled; `main` prints the t
 """
 
 
+@dataclass(frozen=True, eq=False)
+class RuleEvidence:
+    """One rule's bucketed table read beside the radiologists' annotations — what `backed` is judged on.
+
+    Produced by pairing `RubricGap.table` with the train table: the rule says what each bucket SHOULD be,
+    the table says where each report fell, and `truth` is the only witness that can disagree with both.
+    """
+
+    rule: RubricRule
+    table: pd.DataFrame
+    truth: pd.DataFrame
+
+
 class RubricGap:
     """Each report's sentences about a finding, bucketed by the host's rule and read beside our target."""
 
@@ -299,7 +312,7 @@ class RubricGap:
         """
         return table[(table["bucket"] == SUBTHRESHOLD) & table["positive"]]
 
-    def backed(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> bool:
+    def backed(self, evidence: RuleEvidence) -> bool:
         """Do the radiologists' own annotations agree that this rule's subthreshold class is negative?
 
         THE COUNT IS ONLY WORTH WHAT THIS SAYS. A rule earns its cells by predicting the annotation where
@@ -322,33 +335,34 @@ class RubricGap:
         n is 1 to 12 per rule, so a pass here is weak evidence and a fail is strong evidence. `annotated`
         prints the cell counts beside the verdict for that reason — read them, do not read the word alone.
         """
-        sub = self.subthreshold(rule, table, truth)
+        sub = self.subthreshold(evidence)
         return bool(len(sub)) and not int(sub["truth"].sum())
 
-    def subthreshold(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> pd.DataFrame:
+    def subthreshold(self, evidence: RuleEvidence) -> pd.DataFrame:
         """The annotated cells this rule calls subthreshold — the only class its claim is falsifiable on."""
-        rows = self._annotated_rows(rule, table, truth)
+        rows = self._annotated_rows(evidence)
         return rows[rows["bucket"] == SUBTHRESHOLD]
 
-    def _annotated_rows(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> pd.DataFrame:
+    def _annotated_rows(self, evidence: RuleEvidence) -> pd.DataFrame:
         """This rule's buckets over the annotated studies, with the radiologist's verdict beside ours."""
-        graded = truth.dropna(subset=TARGETS, how="all")
-        cells = self._cells(graded, rule.columns)
-        rows = table[table["study"].isin(cells[rule.columns[0]])].copy()
+        graded = evidence.truth.dropna(subset=TARGETS, how="all")
+        columns = evidence.rule.columns
+        cells = self._cells(graded, columns)
+        rows = evidence.table[evidence.table["study"].isin(cells[columns[0]])].copy()
         rows["truth"] = [cells[str(row.column)][str(row.study)] > MIDPOINT for row in rows.itertuples()]
         return rows
 
-    def annotated(self, rule: RubricRule, table: pd.DataFrame, truth: pd.DataFrame) -> list[str]:
+    def annotated(self, evidence: RuleEvidence) -> list[str]:
         """The same buckets read against the 58 radiologist annotations — a check on the RULE, not on us.
 
         Small n by construction, so it settles nothing on its own. But if the annotation agrees with the
         stated rule where both exist, the rule is worth re-reading the whole corpus under; if it does not,
         the defect is in the ruler and no better reader recovers it.
         """
-        rows = self._annotated_rows(rule, table, truth)
-        graded = len(truth.dropna(subset=TARGETS, how="all"))
-        sub = self.subthreshold(rule, table, truth)
-        verdict = "BACKED" if self.backed(rule, table, truth) else "NOT BACKED — do not bank this rule's cells"
+        rows = self._annotated_rows(evidence)
+        graded = len(evidence.truth.dropna(subset=TARGETS, how="all"))
+        sub = self.subthreshold(evidence)
+        verdict = "BACKED" if self.backed(evidence) else "NOT BACKED — do not bank this rule's cells"
         lines = [
             f"  {rows['study'].nunique()} of the {graded} annotated studies are English: {verdict}"
             f" ({int(sub['truth'].sum())} of {len(sub)} subthreshold cells annotated positive)"
@@ -380,9 +394,10 @@ def main() -> None:
     for rule in RUBRIC:
         table = gap.table(rule, reports, labels)
         command.report(gap.report(rule, table, len(truth)))
-        command.report(gap.annotated(rule, table, truth))
+        evidence = RuleEvidence(rule, table, truth)
+        command.report(gap.annotated(evidence))
         wrong = gap.contradicted(table)
-        totals[gap.backed(rule, table, truth)] += len(wrong)
+        totals[gap.backed(evidence)] += len(wrong)
         # The identifiers, because a count of contradicted cells is a claim and the studies are evidence.
         command.report([f"    {row.study}  {row.column}" for row in wrong.head(MENTIONED).itertuples()])
     # Two totals, never one: summing a rule the annotations refuse into the headline is how 448 became 1600.

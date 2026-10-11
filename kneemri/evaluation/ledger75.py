@@ -31,6 +31,7 @@ midpoint's wanders 1.05-1.41.
 import hashlib
 import logging
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -65,11 +66,23 @@ class Ruler(StrEnum):
     @property
     def column(self) -> str:
         """The `comp/board.jsonl` field a number read under this ruler is recorded in."""
-        return RECORD_COLUMNS[self]
+        return RULINGS[self].column
+
+    def scorer(self) -> LabelScores:
+        """A fresh scorer applying this ruler's cut, for a caller holding arrays rather than a record."""
+        return RULINGS[self].scorer()
 
 
-RECORD_COLUMNS: dict[Ruler, str] = {Ruler.MIDPOINT: "offline", Ruler.LEDGER75: "offline75"}
-"""One field per ruler, so a row can never hold a number whose cut its column name does not state."""
+@dataclass(frozen=True)
+class Ruling:
+    """What one ruler IS: the field its numbers are recorded in and the scorer that produces them.
+
+    One row per ruler rather than one table per attribute, so a ruler can never gain a column without
+    a cut or a cut without a column - the two parallel maps this replaced could drift apart silently.
+    """
+
+    column: str
+    scorer: Callable[[], LabelScores]
 
 
 @dataclass(frozen=True)
@@ -305,6 +318,13 @@ class LedgerSeventyFive:
             f"--only spans {len(asked)} populations - a population is the studies AND the table that graded "
             f"them, so equal counts still answer different questions: {spans}"
         )
+
+
+RULINGS: dict[Ruler, Ruling] = {
+    Ruler.MIDPOINT: Ruling("offline", LabelScores),
+    Ruler.LEDGER75: Ruling("offline75", lambda: LedgerSeventyFive().scorer()),
+}
+"""One field per ruler, so a row can never hold a number whose cut its column name does not state."""
 
 
 def main() -> None:
