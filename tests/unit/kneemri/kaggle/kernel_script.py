@@ -38,6 +38,11 @@ def test_member_names(tmp_path: Path):
     assert _script(tmp_path, "KernelRun().run()\n").member_names() is None
     assert _script(tmp_path, "KernelRun(names=picked()).run()\n").member_names() is None, "not a literal"
 
+    twice = "chosen = ('a', 'b')\nKernelRun(names=chosen).run()\nKernelRun(names=('c', 'a')).run()\n"
+    assert _script(tmp_path, twice).member_names() == ["a", "b", "c"], "every run's members, once each"
+    ranked_second = "KernelRun(names=('a',)).run()\nKernelRun(members=2).run()\n"
+    assert _script(tmp_path, ranked_second).member_names() is None, "one ranked run makes the whole set unknown"
+
 
 def test_foreign_seats(tmp_path: Path):
     """Every way a kernel names its raptor checkpoint resolves to the board's name for it; no call is no seat."""

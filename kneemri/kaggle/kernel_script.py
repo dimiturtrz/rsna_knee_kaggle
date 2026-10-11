@@ -68,10 +68,19 @@ class KernelScript:
         entry needs are the package's whole set. Over-declaring costs mount seconds; under-declaring
         costs the slot.
         """
-        call = self.call()
-        if call is None:
+        selections = [self._selection(call) for call in self._calls()]
+        if not selections or None in selections:
             return None
-        selected = next((keyword.value for keyword in call.keywords if keyword.arg == SELECTION), None)
+        return list(dict.fromkeys(name for names in selections if names is not None for name in names))
+
+    def _calls(self) -> list[ast.Call]:
+        """Every entry call, in source order: `kneemri-twosoupmirror` runs one `KernelRun` per soup, and a
+        check that read only the first saw one member of two (knee-5qv7k)."""
+        calls = [node for node in ast.walk(self.tree) if self._named(node, ENTRY_CALLS)]
+        return sorted(calls, key=lambda call: (call.lineno, call.col_offset))
+
+    def _selection(self, call: ast.Call) -> list[str] | None:
+        selected = self._keyword(call, SELECTION)
         return None if selected is None else self._strings(selected)
 
     def foreign_seats(self) -> set[str]:
