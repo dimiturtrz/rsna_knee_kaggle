@@ -73,43 +73,14 @@ class ForeignPrice:
         return self.predictions[self.split.fold, np.arange(len(self.split.studies))]
 
     @staticmethod
-    def corpus_rows(table: pd.DataFrame, studies: list[str]) -> list[int]:
-        """The served positions whose study the truth table actually carries, in the served order.
+    def holdout_truth(holdout: Path, studies: list[str]) -> Float[NDArray[np.float32], "studies labels"]:
+        """The truth our holdout record carries, when the subject is the 909.
 
-        The corpus scan serves every study the SERIES tables name; the label table is a different file
-        with its own coverage, and joining them by assumption is how a reading acquires a denominator
-        nobody stated. The positions this returns are the denominator, and the caller prints it.
+        It is the exact truth our members were scored against, and its study ORDER is the contract this
+        module holds the serving to — so a served list in any other order refuses rather than realigns.
+        A CORPUS reading has no such file by construction (their five folds hold out all 4407 between them
+        by THEIR split, and nothing on our side ever wrote that list); there `LabelTable.truth` is the truth.
         """
-        known = {str(one) for one in table[STUDY]}
-        return [index for index, study in enumerate(studies) if study in known]
-
-    @staticmethod
-    def truth_of(
-        holdout: Path | None, studies: list[str], table: pd.DataFrame
-    ) -> Float[NDArray[np.float32], "studies labels"]:
-        """The truth for the served studies: our holdout record's, or a per-study label table's.
-
-        A holdout npz is the reading when the subject is the 909 — it carries the exact truth our members
-        were scored against, and its study ORDER is the contract this module holds the serving to. The
-        CORPUS reading has no such file by construction: their five folds hold out all 4407 between them
-        by THEIR split, and nothing on our side ever wrote that list. There a label table is the truth,
-        which is the point rather than a fallback — the census this feeds asks which of the table's own
-        cells two independent instruments both contradict.
-
-        THE TABLE IS NOT `train.csv`, AND THIS REFUSES IT. The competition's own file carries a label for
-        58 of our 4407 studies: 52188 of its 52884 target cells are nan, every target column nan on 4349
-        rows. Passed here it produced a fold-matched 0.8211 that read like a family being worth 0.06 less
-        than it is, on a truth that was almost entirely absent. What our members are actually scored
-        against is the reader's table (`labels/report_labels_v2.csv`), which is complete and soft-valued.
-        """
-        if holdout is None:
-            rows = table.drop_duplicates(subset=STUDY).astype({STUDY: str}).set_index(STUDY)
-            truth = rows.loc[studies, list(TARGETS)].to_numpy(np.float32)
-            absent = float(np.isnan(truth).mean())
-            if absent > NAN_CEILING:
-                message = f"{absent:.3%} of the truth cells are nan: this table does not label these studies"
-                raise ValueError(message)
-            return truth
         ours = HoldoutRecord(holdout).required()
         if studies != ours.studies:
             message = "the served studies are not our holdout's studies, in order"
@@ -127,6 +98,47 @@ class ForeignPrice:
             f"fold-matched pooled: {self.pooled():.4f} over all {len(self.split.studies)} studies, none contaminated",
             "their own rank-mean over these studies is NOT reported: four of five folds trained on each one",
         ]
+
+
+@dataclass(frozen=True)
+class LabelTable:
+    """A per-study label table, read as the truth of a CORPUS reading.
+
+    Both of its readings take the same table against the same served study list — which rows it covers,
+    and what it says on them — so the table is the instance rather than an argument threaded through both.
+
+    THE TABLE IS NOT `train.csv`, AND `truth` REFUSES IT. The competition's own file carries a label for
+    58 of our 4407 studies: 52188 of its 52884 target cells are nan, every target column nan on 4349
+    rows. Passed here it produced a fold-matched 0.8211 that read like a family being worth 0.06 less
+    than it is, on a truth that was almost entirely absent. What our members are actually scored
+    against is the reader's table (`labels/report_labels_v2.csv`), which is complete and soft-valued.
+    """
+
+    table: pd.DataFrame
+
+    def rows_of(self, studies: list[str]) -> list[int]:
+        """The served positions whose study this table actually carries, in the served order.
+
+        The corpus scan serves every study the SERIES tables name; the label table is a different file
+        with its own coverage, and joining them by assumption is how a reading acquires a denominator
+        nobody stated. The positions this returns are the denominator, and the caller prints it.
+        """
+        known = {str(one) for one in self.table[STUDY]}
+        return [index for index, study in enumerate(studies) if study in known]
+
+    def truth(self, studies: list[str]) -> Float[NDArray[np.float32], "studies labels"]:
+        """The table's labels for the served studies, in the served order, deduplicated.
+
+        A label table is the truth of a corpus reading by design rather than as a fallback — the census
+        this feeds asks which of the table's own cells two independent instruments both contradict.
+        """
+        rows = self.table.drop_duplicates(subset=STUDY).astype({STUDY: str}).set_index(STUDY)
+        truth = rows.loc[studies, list(TARGETS)].to_numpy(np.float32)
+        absent = float(np.isnan(truth).mean())
+        if absent > NAN_CEILING:
+            message = f"{absent:.3%} of the truth cells are nan: this table does not label these studies"
+            raise ValueError(message)
+        return truth
 
 
 def main() -> None:
@@ -177,20 +189,20 @@ def main() -> None:
         # about the reader's table and has nothing to do with what the foreign folds served.
         served_split = ForeignSplit.of(studies, table)
         matched = predictions[served_split.fold, np.arange(len(studies))]
-        TeacherFile.write(arguments.teacher, studies, matched.astype(np.float32))
+        TeacherFile(arguments.teacher).write(studies, matched.astype(np.float32))
         logger.info("wrote %s teacher readings to %s", len(studies), arguments.teacher)
     if arguments.holdout is None:
         if arguments.truth is None:
             message = "a corpus scan needs --truth: --labels is their split's Report source, not a label table"
             raise SystemExit(message)
-        labelled = pd.read_csv(arguments.truth)
-        rows = ForeignPrice.corpus_rows(labelled, studies)
+        labelled = LabelTable(pd.read_csv(arguments.truth))
+        rows = labelled.rows_of(studies)
         logger.info("corpus reading over %d of %d served studies the truth table labels", len(rows), len(studies))
         studies = [studies[index] for index in rows]
         predictions = predictions[:, rows]
-        truth = ForeignPrice.truth_of(None, studies, labelled)
+        truth = labelled.truth(studies)
     else:
-        truth = ForeignPrice.truth_of(arguments.holdout, studies, table)
+        truth = ForeignPrice.holdout_truth(arguments.holdout, studies)
     price = ForeignPrice(predictions, truth, ForeignSplit.of(studies, table))
     if arguments.emit:
         np.savez(

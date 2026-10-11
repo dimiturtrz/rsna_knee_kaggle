@@ -186,7 +186,7 @@ def main() -> None:
     folds = ReportFolds(arguments.folds, arguments.split_seed)
 
     taught, scores = readings.teach(members, identifiers, folds, -1 if arguments.teach_all else arguments.fold)
-    TeacherFile.write(arguments.out, taught, scores)
+    TeacherFile(arguments.out).write(taught, scores)
     logger.info("%s: %d studies taught by %d members", arguments.out, len(scores), len(members))
 
 

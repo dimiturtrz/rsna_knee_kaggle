@@ -163,7 +163,7 @@ class OutOfFoldTeacher:
     def write(self, out: Path) -> list[str]:
         """Write the teacher file and report what went into it, per part."""
         names, scores = self.readings()
-        TeacherFile.write(out, names, scores)
+        TeacherFile(out).write(names, scores)
         read = [len(HoldoutRecord(part).required().studies) for part in self.parts]
         return [
             *[f"  {part.stem:28s} {count} studies" for part, count in zip(self.parts, read, strict=True)],

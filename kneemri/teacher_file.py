@@ -9,22 +9,32 @@ rename would then surface as a `KeyError` against a file that cost thirty-six mi
 
 import os
 from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import ClassVar
 
 import numpy as np
 from jaxtyping import Float
 from numpy.typing import NDArray
 
 
+@dataclass(frozen=True)
 class TeacherFile:
-    """The file format: the two array names, and the single call that writes them under those names."""
+    """One teacher file on disk: the array names, and the single call that writes them under those names.
 
-    IDENTIFIERS = "identifiers"
+    The PATH is the instance because every call that touches the file is about one file — the writers
+    and the merge each threaded it as their first argument. `aligned` stays a staticmethod: it reorders
+    arrays already read, and knows nothing about where they came from.
+    """
+
+    path: os.PathLike[str]
+
+    IDENTIFIERS: ClassVar[str] = "identifiers"
     """The study each row belongs to, stored beside the scores so a reader can REORDER rather than trust."""
 
-    SCORES = "scores"
+    SCORES: ClassVar[str] = "scores"
     """One row per study, one column per target, in the corpus's twelve-target order."""
 
-    EMBEDDINGS = "embeddings"
+    EMBEDDINGS: ClassVar[str] = "embeddings"
     """One row per study, one column per feature of the TEACHER'S width — a representation, not a verdict.
 
     A DISTINCT NAME rather than a second file format, and that is the whole of its value: the two files
@@ -34,25 +44,23 @@ class TeacherFile:
     the same mistake is a `KeyError` before the card is touched.
     """
 
-    @staticmethod
-    def write(path: os.PathLike[str], identifiers: list[str], scores: Float[np.ndarray, "n t"]) -> None:
+    def write(self, identifiers: list[str], scores: Float[np.ndarray, "n t"]) -> None:
         """Write the two arrays under the names the reader looks them up by.
 
         A call rather than two constants the producer spells into its own `np.savez`: that call names its
         arrays as KEYWORDS, so a constant it never mentions could not keep it honest, and a shared call
         is the only form in which one half cannot drift from the other.
         """
-        np.savez(path, identifiers=np.array(identifiers), scores=scores)
+        np.savez(self.path, identifiers=np.array(identifiers), scores=scores)
 
-    @staticmethod
-    def write_embeddings(path: os.PathLike[str], identifiers: list[str], embeddings: Float[np.ndarray, "n d"]) -> None:
+    def write_embeddings(self, identifiers: list[str], embeddings: Float[np.ndarray, "n d"]) -> None:
         """Write a teacher's REPRESENTATIONS under the name the feature side looks them up by.
 
         Beside `write` and not a flag on it, for the reason the class docstring gives: the array name is
         a KEYWORD at the one call that produces it, so the two formats cannot be confused by a caller
         that passed the wrong argument — they are different calls.
         """
-        np.savez(path, identifiers=np.array(identifiers), embeddings=embeddings)
+        np.savez(self.path, identifiers=np.array(identifiers), embeddings=embeddings)
 
     @staticmethod
     def aligned(
@@ -85,9 +93,8 @@ class TeacherFile:
         rows[training] = values[[position[name] for name in taught]].astype(np.float32)
         return rows
 
-    @staticmethod
-    def merged(parts: Sequence[os.PathLike[str]], path: os.PathLike[str], array: str = SCORES) -> int:
-        """Join shard files into one, and return how many studies the joined file holds.
+    def merged(self, parts: Sequence[os.PathLike[str]], array: str = SCORES) -> int:
+        """Join shard files into this one, and return how many studies the joined file holds.
 
         A teacher pass is DECODE-bound — the card sat at 0% while pydicom worked — so the pass is run as
         several processes over disjoint slices of the same split. The join lives here, beside `write`, for
@@ -101,6 +108,6 @@ class TeacherFile:
         loaded = [np.load(part) for part in parts]
         identifiers = np.concatenate([part[TeacherFile.IDENTIFIERS] for part in loaded])
         values = np.concatenate([part[array] for part in loaded])
-        writers = {TeacherFile.SCORES: TeacherFile.write, TeacherFile.EMBEDDINGS: TeacherFile.write_embeddings}
-        writers[array](path, [str(name) for name in identifiers], values)
+        writers = {TeacherFile.SCORES: self.write, TeacherFile.EMBEDDINGS: self.write_embeddings}
+        writers[array]([str(name) for name in identifiers], values)
         return len(identifiers)

@@ -107,7 +107,7 @@ class TeacherPass:
         re-read the split's tables thirteen times to name thirteen files.
         """
         path.parent.mkdir(parents=True, exist_ok=True)
-        TeacherFile.write(path, identifiers, scores)
+        TeacherFile(path).write(identifiers, scores)
         logger.info("wrote %d studies x %d findings to %s", *scores.shape, path)
         return path
 
@@ -139,7 +139,7 @@ def main() -> None:
 
     destination = arguments.out or root.processed() / TEACHER
     if arguments.merge:
-        logger.info("merged %d studies into %s", TeacherFile.merged(arguments.merge, destination), destination)
+        logger.info("merged %d studies into %s", TeacherFile(destination).merged(arguments.merge), destination)
         return
 
     teaching = TeacherPass(root.raw(), destination, Split(name=str(arguments.split)))

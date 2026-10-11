@@ -94,9 +94,9 @@ class DataRoot:
         """
         override = os.environ.get(ENV_OVERRIDE)
         if override:
-            return cls(Path(NativePath.resolve(override, ENV_OVERRIDE)))
+            return cls(Path(NativePath(override).resolve(ENV_OVERRIDE)))
         entries: dict[str, str] = yaml.safe_load(config.read_text(encoding="utf-8")) or {}
-        return cls(Path(NativePath.resolve(str(entries["data"]), ENV_OVERRIDE)), entries)
+        return cls(Path(NativePath(str(entries["data"])).resolve(ENV_OVERRIDE)), entries)
 
     def kind(self, name: str) -> Path:
         """The root for one kind of data — `<data>/<name>`, or the path paths.yaml gave that name.
@@ -105,7 +105,7 @@ class DataRoot:
         same silently-relative failure available to it, and no reason to be trusted more.
         """
         stated = self._kinds.get(name)
-        return Path(NativePath.resolve(stated, ENV_OVERRIDE)) if stated else self._root / name
+        return Path(NativePath(stated).resolve(ENV_OVERRIDE)) if stated else self._root / name
 
     def raw(self, dataset: str = COMPETITION) -> Path:
         """Where an as-downloaded dataset lives. Never written to."""

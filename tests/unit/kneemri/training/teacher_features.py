@@ -16,7 +16,7 @@ def _written(tmp_path: Path, names: list[str], first_column: list[float]) -> Pat
     embeddings = np.zeros((len(names), WIDTH), dtype=np.float32)
     embeddings[:, 0] = first_column
     path = tmp_path / "features.npz"
-    TeacherFile.write_embeddings(path, names, embeddings)
+    TeacherFile(path).write_embeddings(names, embeddings)
     return path
 
 
@@ -36,7 +36,7 @@ def test_from_file_refuses_a_targets_file(tmp_path: Path) -> None:
     and report a representation arm that had distilled logits.
     """
     path = tmp_path / "targets.npz"
-    TeacherFile.write(path, ["a"], np.zeros((1, 12), dtype=np.float32))
+    TeacherFile(path).write(["a"], np.zeros((1, 12), dtype=np.float32))
 
     with pytest.raises(KeyError):
         TeacherFeatures.from_file(path, ["a"], np.array([0]))

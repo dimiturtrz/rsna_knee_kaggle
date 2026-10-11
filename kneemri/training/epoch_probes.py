@@ -87,28 +87,37 @@ class HoldoutProbe:
         held = {"auc": reading.ranked, "per_label": reading.per_label}
         if reading.predicted is None:
             return held | {"ece": UNREAD, "holdout_loss": UNREAD}
-        return held | {
-            "ece": self.calibration_error(reading.predicted, reading.truth),
-            "holdout_loss": self.loss(reading.predicted, reading.truth),
-        }
+        cells = HoldoutCells(reading.predicted, reading.truth)
+        return held | {"ece": cells.calibration_error(), "holdout_loss": cells.loss()}
 
-    @staticmethod
-    def calibration_error(
-        predicted: Float[NDArray[np.float64], "h o"], truth: Float[NDArray[np.float32], "h o"]
-    ) -> float:
+
+@dataclass(frozen=True)
+class HoldoutCells:
+    """The holdout's predictions beside the truth they are read against — every reading here takes both.
+
+    `predicted` is already probabilities: `Trainer.predict` applies the sigmoid. Only the cells where
+    both sides are present are read, since a finding whose truth was never read is not a negative.
+    """
+
+    predicted: Float[NDArray[np.float64], "h o"]
+    truth: Float[NDArray[np.float32], "h o"]
+
+    def _read(self) -> NDArray[np.bool_]:
+        return ~(np.isnan(self.predicted) | np.isnan(self.truth))
+
+    def calibration_error(self) -> float:
         """Expected calibration error over every (study, label) cell of the holdout pooled.
 
         The truth is BINARISED AT 0.5 — `MIDPOINT`, the cut `LabelScores.per_label` scores the twelve AUCs
         against — so the calibration reading is taken against the same partition as the ranking reading.
         Pooled rather than per label, because a per-label ECE is twelve noisy instruments where one will
-        do; NaN cells are excluded, since a finding whose truth was never read is not a negative.
-        `predicted` is already probabilities: `Trainer.predict` applies the sigmoid.
+        do.
         """
-        cells = ~(np.isnan(predicted) | np.isnan(truth))
+        cells = self._read()
         if not cells.any():
             return UNREAD
-        probability = predicted[cells]
-        positive = (truth[cells] > MIDPOINT).astype(np.float64)
+        probability = self.predicted[cells]
+        positive = (self.truth[cells] > MIDPOINT).astype(np.float64)
         which = np.minimum((probability * ECE_BINS).astype(np.int64), ECE_BINS - 1)
         count = np.bincount(which, minlength=ECE_BINS).astype(np.float64)
         live = count > 0
@@ -116,14 +125,13 @@ class HoldoutProbe:
         accuracy = np.bincount(which, weights=positive, minlength=ECE_BINS)[live] / count[live]
         return float((np.abs(confidence - accuracy) * count[live]).sum() / count.sum())
 
-    @staticmethod
-    def loss(predicted: Float[NDArray[np.float64], "h o"], truth: Float[NDArray[np.float32], "h o"]) -> float:
+    def loss(self) -> float:
         """Mean binary cross-entropy against the GRADED truth, the target the objective itself descends on."""
-        cells = ~(np.isnan(predicted) | np.isnan(truth))
+        cells = self._read()
         if not cells.any():
             return UNREAD
-        probability = np.clip(predicted[cells], PROBABILITY_FLOOR, 1 - PROBABILITY_FLOOR)
-        target = truth[cells].astype(np.float64)
+        probability = np.clip(self.predicted[cells], PROBABILITY_FLOOR, 1 - PROBABILITY_FLOOR)
+        target = self.truth[cells].astype(np.float64)
         return float(-(target * np.log(probability) + (1 - target) * np.log1p(-probability)).mean())
 
 

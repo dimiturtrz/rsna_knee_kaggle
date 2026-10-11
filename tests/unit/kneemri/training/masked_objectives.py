@@ -23,4 +23,4 @@ def test_named():
     is exactly what a unit test must not reach for.
     """
     with pytest.raises(KeyError):
-        Objectives.named("nonesuch", Namespace(), ENCODERS[SMALL])
+        Objectives(Namespace(), ENCODERS[SMALL]).named("nonesuch")
