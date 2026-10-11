@@ -1,4 +1,4 @@
-"""s6half — INSTRUMENT. s6third with S6 and nartaa swapped: S6 1/2, nartaa 1/3, soups 1/12 each.
+"""s6half — PICK CANDIDATE. s6third with S6 and nartaa swapped: S6 1/2, nartaa 1/3, soups 1/12 each.
 
 Same three producers as `kneemri-s6third` (ref 57063964, 0.956) and `kneemri-heliossoup` (ref 57063827,
 0.955): nartaa 384, heliosli's public ConvNeXt-small S6 (`heliosli/rsna-knee-compact-v1`, bundle
@@ -7,8 +7,8 @@ Same three producers as `kneemri-s6third` (ref 57063964, 0.956) and `kneemri-hel
 WHY. The S6 share curve reads 0 -> 0.954, 1/6 -> 0.955, 1/3 -> 0.956, one board step per point. This is the
 third point: whether the curve still climbs past S6 = nartaa or has peaked between 1/3 and 1/2.
 
-NOT SHIPPABLE under the 09-15 ruling (S6's `views: v4` crops come from `anatomy.pt`, an SKM-TEA checkpoint).
-Built so it is ready if the owner relaxes the ruling (knee-7nfa8).
+S6's `views: v4` crops come from `anatomy.pt`, an SKM-TEA checkpoint; the owner revoked the 09-15
+instrument-only ruling on 2026-10-11, so this is pick-eligible (knee-7nfa8).
 
 PRE-REGISTRATION (s6third 0.956, resolution 0.001, top-band sd ~0.002):
 - **>= 0.957** — still climbing; S6 should lead the blend.

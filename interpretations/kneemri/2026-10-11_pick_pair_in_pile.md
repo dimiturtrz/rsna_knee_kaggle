@@ -79,3 +79,13 @@ public rank 87 of 5735. The curve is now 0.954 at no S6 (`twosoupmirror_v1`), 0.
   instrument and never a pick. If the owner relaxes the ruling, `s6third_v1` becomes the strongest pick
   candidate. The next point on the curve (S6 at 1/2) would be the instrument that says whether the
   curve is still climbing or has peaked.
+
+## 10:56Z — the 09-15 ruling is revoked; the picks change
+
+The owner lifted "foreign-corpus-derived = instrument only" (entry is inference code + model; the fight is
+for a medal, not first). `heliossoup_v1` (0.955) and `s6third_v1` (0.956) move from `excluded` to `ensemble`,
+and `comp/champion.json` now pins `s6third_v1`. KneeCoT stays banned.
+
+Pick plan: the best S6 entry plus `twosoupmirror_v1` (0.954) as the non-S6 hedge — the two differ only in
+whether S6 serves, so the pair covers S6 failing on the private split. Slot 3 goes to `kneemri-s6half`
+(S6 1/2), the third point of the share curve, which can only raise the S6 pick or confirm `s6third_v1`.

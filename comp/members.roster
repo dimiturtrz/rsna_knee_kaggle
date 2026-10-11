@@ -25,6 +25,12 @@
 # shipping on it until 2026-09-10; it was wrong on both halves of the claim. So a merged member of
 # ANY scheme — merged, merged3, mergedf — is an OFFLINE result about what more data does, and gets
 # `# licence: <corpus>` the moment it is written down here. See knee (P0, 2026-09-10).
+#
+# 2026-10-11 the owner REVOKED the 2026-09-15 "foreign-corpus-derived = instrument only" ruling: an
+# entry is inference code plus a model, it is not competing for first place, and the exposure is the
+# owner's call. Foreign-derived seats (heliosli S6, SKM-TEA crops) are pick-eligible. KneeCoT stays
+# banned by the host. The `# licence:` tag stays as provenance; the submit_check refusal on it is now
+# stricter than policy (knee-35q47 tracks demoting it).
 
 res392_ws_s2026.pt          # 0.8523 solo — our best single member
 calibrated_targets_s2026.pt # 0.8493
