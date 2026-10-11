@@ -1,8 +1,15 @@
 """The shared resampling protocol: does an interval bracket the mean, and does one stream stay one stream?"""
 
 import numpy as np
+import pandas as pd
 
-from core.bootstrap import INTERVAL, RESAMPLE_SEED, Bootstrap, StudyBootstrap
+from core.bootstrap import (
+    INTERVAL,
+    RESAMPLE_SEED,
+    Bootstrap,
+    StudyBootstrap,
+    StudyFrameBootstrap,
+)
 
 DRAWS = 40
 """Enough draws that a percentile exists, few enough that the suite stays a unit test."""
@@ -64,7 +71,7 @@ def test_draws():
     assert [index.tolist() for index in bootstrap.draws(STUDIES)] == [index.tolist() for index in drawn]
 
 
-def test_interval():
+def test_study_bootstrap_interval():
     """Brackets the quantity measured on the full sample, and is reproducible."""
     values = np.linspace(0.0, 1.0, STUDIES)
     bootstrap = StudyBootstrap(resamples=DRAWS)
@@ -94,10 +101,32 @@ def test_per_label():
     assert all(np.isnan(bound) for bound in bounds["undefined"])
 
 
-def test_percentiles():
+def test_percentile_interval():
     """The two-sided pair off a finished list, and NaN rather than a raise when nothing was defined."""
-    assert all(np.isnan(bound) for bound in StudyBootstrap.percentiles([]))
+    assert all(np.isnan(bound) for bound in Bootstrap.percentile_interval([]))
 
-    low, high = StudyBootstrap.percentiles([float(value) for value in np.linspace(0.0, 100.0, 101)])
+    spread = [float(value) for value in np.linspace(0.0, 100.0, 101)]
+    low, high = Bootstrap.percentile_interval(spread)
 
     assert (round(low, 6), round(high, 6)) == (2.5, 97.5), "the pair is INTERVAL, read off the values"
+    assert Bootstrap.percentile_interval(spread, (5.0, 95.0)) == (5.0, 95.0), "a caller's own band is honoured"
+
+
+def _frame() -> pd.DataFrame:
+    generator = np.random.default_rng(7)
+    studies = np.repeat([f"s{index}" for index in range(STUDIES)], 3)
+    return pd.DataFrame({"study": studies, "value": generator.random(len(studies))})
+
+
+def test_study_frame_bootstrap_interval():
+    """Whole studies drawn by name, a None draw skipped, and no defined draw reads (nan, nan)."""
+    cells = _frame()
+    bootstrap = StudyFrameBootstrap(resamples=DRAWS)
+
+    low, high = bootstrap.interval(cells, lambda sample: float(sample["value"].mean()))
+
+    assert low < float(cells["value"].mean()) < high
+    assert bootstrap.interval(cells, lambda sample: float(sample["value"].mean())) == (low, high)
+    skipping = bootstrap.interval(cells, lambda sample: None if sample["value"].mean() > high else 0.0)
+    assert skipping == (0.0, 0.0)
+    assert all(np.isnan(bound) for bound in bootstrap.interval(cells, lambda _sample: None))

@@ -29,6 +29,21 @@ def _studies(reports: list[str], truths: list[list[float | None]]) -> tuple[pd.D
     return pd.DataFrame(columns), pd.DataFrame(verdicts)
 
 
+def test_gap_and_split_intervals_are_pinned():
+    """Bit-equal to the percentiles the hand-written tail read, on mixed studies with a real spread."""
+    annotated, read = _studies(
+        [ENGLISH, ENGLISH, SPANISH, SPANISH, ENGLISH], [[1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0], [1.0, 0.0]]
+    )
+    gap = ReaderAgreement().gap(ReaderAgreement().cells(annotated, read))
+    annotated, read = _studies(
+        [ENGLISH, ENGLISH, PLAIN, PLAIN, PLAIN], [[0.0, 1.0], [0.0, 0.0], [1.0, 1.0], [1.0, 0.0], [0.0, 1.0]]
+    )
+    split = ReaderAgreement().split(ReaderAgreement().cells(annotated, read), GRADED)
+
+    assert (gap["low"], gap["high"]) == (0.0, 0.8333333333333334)
+    assert (split["low"], split["high"]) == (-0.8333333333333334, 0.0)
+
+
 def test_annotated(tmp_path: Path):
     """A study with no radiologist column at all is not annotated; a partly graded one is.
 

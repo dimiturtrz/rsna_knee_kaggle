@@ -54,7 +54,7 @@ from numpy.typing import NDArray
 from scipy import stats
 
 from core import cli
-from core.bootstrap import STUDY_RESAMPLES, StudyBootstrap
+from core.bootstrap import STUDY_RESAMPLES, Bootstrap, StudyBootstrap
 from core.findings import STUDY
 from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, RECUT
 from kneemri.evaluation.pool import Pool
@@ -70,12 +70,6 @@ TARGET_COLUMNS = 12
 CONTROL_SPLITS = 20
 """How many random halves price a statistic's spread. Twenty because each is two full passes over the
 pool and the reading is a min/median/max, not an interval that would want hundreds."""
-
-PERCENTILE_LOW = 2.5
-"""The lower end of a 95% percentile interval — the same two ends every other interval here reports."""
-
-PERCENTILE_HIGH = 97.5
-"""The upper end. Named because a bare 2.5/97.5 at a call site says nothing about which interval it is."""
 
 CONTROL_SEED = 2026
 """The project seed, so the random-split floor a reading is compared against is the same one twice."""
@@ -315,8 +309,7 @@ class RankStability:
             mixed = scores.mean(together[drawn], self.pool.truth[drawn])
             drawn_margins.append(mixed - float(np.nanmax(singles)))
         full = scores.mean(together, self.pool.truth) - float(np.nanmax(self.scored(scores)))
-        low, high = np.percentile(drawn_margins, [PERCENTILE_LOW, PERCENTILE_HIGH])
-        return full, float(low), float(high)
+        return full, *Bootstrap.percentile_interval(drawn_margins)
 
     def control_spread(self, scores: LabelScores, count: int = CONTROL_SPLITS) -> list[str]:
         """The same two statistics over MANY random halves — which of them 909 studies can actually carry.

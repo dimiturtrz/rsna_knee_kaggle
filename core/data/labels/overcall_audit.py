@@ -50,10 +50,10 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from core import cli
+from core.bootstrap import StudyFrameBootstrap
 from core.data.labels.finding_mentions import FindingMentions
 from core.data.labels.negation_scope import NegationScope
 from core.data.labels.reader_agreement import MIDPOINT, POSITIVE, ReaderAgreement
@@ -89,7 +89,6 @@ CATEGORIES = (MISSED_NEGATION, LATERALITY, HEDGE_DROPPED, HISTORICAL, SUBTHRESHO
 
 RESAMPLES = 2000
 SEED = 2026
-INTERVAL = (2.5, 97.5)
 """Bootstrap settings, matching `noise_binding` so two readings of these same 108 cells are comparable."""
 
 
@@ -505,22 +504,15 @@ class OvercallCensus:
         BOTH rates recomputed from the same draw, because the two groups overlap in studies and
         resampling them separately would break that pairing.
         """
-        generator = np.random.default_rng(SEED)
-        pooled = pd.concat([over.assign(side=0), agreed.assign(side=1)])
-        studies = pooled["study"].unique()
-        by_study = {study: frame for study, frame in pooled.groupby("study")}
-        drawn = []
-        for _ in range(self.resamples):
-            picked = generator.choice(studies, size=len(studies), replace=True)
-            sample = pd.concat([by_study[study] for study in picked])
+
+        def difference(sample: pd.DataFrame) -> float | None:
             first, second = sample[sample["side"] == 0], sample[sample["side"] == 1]
             if first.empty or second.empty:
-                continue
-            drawn.append(first["category"].eq(category).mean() - second["category"].eq(category).mean())
-        if not drawn:
-            return (float("nan"), float("nan"))
-        low, high = np.percentile(np.array(drawn), INTERVAL)
-        return (float(low), float(high))
+                return None
+            return first["category"].eq(category).mean() - second["category"].eq(category).mean()
+
+        pooled = pd.concat([over.assign(side=0), agreed.assign(side=1)])
+        return StudyFrameBootstrap(self.resamples, SEED).interval(pooled, difference)
 
     def incidence(self, over: pd.DataFrame, agreed: pd.DataFrame) -> list[str]:
         """How often each cue fired at all, IGNORING `PRECEDENCE`, on both groups.

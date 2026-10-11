@@ -65,6 +65,19 @@ def test_contrast():
     assert groups.contrast(pair[1], seeing, columns, scores) == 1.0
 
 
+def test_interval_is_pinned():
+    """Bit-equal to the hand-written 2.5/97.5 tail, on noise that leaves the contrast a real spread."""
+    columns = _columns()
+    truth = _truth(columns)
+    predictions = np.random.default_rng(3).random((STUDIES, len(columns)))
+    pair = COMPARTMENT_PAIRS[0]
+    groups = Discordant.of(pair, truth, columns)
+
+    interval = SideBlindness(LabelScores(), resamples=RESAMPLES)._interval(groups, pair[1], predictions, columns)
+
+    assert interval == (0.5033298611111111, 0.6393246527777778)
+
+
 def test_oriented():
     """The medial column runs backwards, so its raw contrast is flipped and the lateral one is not."""
     groups = Discordant.of(COMPARTMENT_PAIRS[0], _truth(_columns()), _columns())

@@ -25,6 +25,7 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from core import cli
+from core.bootstrap import Bootstrap
 from core.data.labels.report_language import Language, ReportLanguages
 from core.findings import STUDY, TARGETS
 from core.paths import LABEL_TABLE, DataRoot
@@ -33,7 +34,6 @@ logger = logging.getLogger(__name__)
 
 RESAMPLES = 5000
 SEED = 2026
-INTERVAL = (2.5, 97.5)
 ENGLISH = Language.EN
 POSITIVE = "YES"
 SILENT = "UNK"
@@ -180,14 +180,15 @@ class ReaderAgreement:
         positives = cells[cells["verdict"] == POSITIVE]
         english = positives[positives["language"] == ENGLISH]
         other = positives[positives["language"] != ENGLISH]
-        deltas = self._resample(positives, english["study"].unique(), other["study"].unique())
-        low, high = np.percentile(deltas, INTERVAL)
+        low, high = Bootstrap.percentile_interval(
+            self._resample(positives, english["study"].unique(), other["study"].unique())
+        )
         return {
             "english": float(english["truth"].mean()),
             "other": float(other["truth"].mean()),
             "delta": float(english["truth"].mean() - other["truth"].mean()),
-            "low": float(low),
-            "high": float(high),
+            "low": low,
+            "high": high,
         }
 
     def split(self, cells: pd.DataFrame, signal: str) -> dict[str, float]:
@@ -204,15 +205,16 @@ class ReaderAgreement:
         fired, plain = positives[positives[signal]], positives[~positives[signal]]
         if fired.empty or plain.empty:
             return dict.fromkeys(("fired", "plain", "cells", "delta", "low", "high"), float("nan"))
-        deltas = self._resample(positives, fired["study"].unique(), plain["study"].unique())
-        low, high = np.percentile(deltas, INTERVAL)
+        low, high = Bootstrap.percentile_interval(
+            self._resample(positives, fired["study"].unique(), plain["study"].unique())
+        )
         return {
             "fired": float(fired["truth"].mean()),
             "plain": float(plain["truth"].mean()),
             "cells": float(len(fired)),
             "delta": float(fired["truth"].mean() - plain["truth"].mean()),
-            "low": float(low),
-            "high": float(high),
+            "low": low,
+            "high": high,
         }
 
     def signal_report(self, cells: pd.DataFrame) -> list[str]:
