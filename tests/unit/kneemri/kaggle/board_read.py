@@ -1,10 +1,13 @@
 import json
+import math
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 
-from kneemri.kaggle.board_read import BoardRow, BoardTrend, LeaderboardRead, Standing
+from kneemri.kaggle import board_read
+from kneemri.kaggle.board_read import BoardRow, BoardTrend, LeaderboardRead, PublicBoard, Standing
 
 TAKEN = "2026-08-25T11:00:00+00:00"
 
@@ -208,6 +211,45 @@ def test_slope():
     assert short.slope([read.ours for read in short.reads]) != short.slope([read.ours for read in short.reads]), (
         "two points fit a line exactly and must report NaN rather than a slope"
     )
+
+
+def test_days_of_an_empty_history_is_empty():
+    assert BoardTrend([]).days() == []
+
+
+def test_slope_of_reads_all_taken_at_one_instant_is_nan():
+    """Three reads at one instant span no time, so they measure no rate — NaN, not a division by zero."""
+    one = _read()
+    trend = BoardTrend([one, one, one])
+    assert math.isnan(trend.slope([0.93, 0.94, 0.95]))
+
+
+BOARD = "Rank,TeamName,Score,TeamMemberUserNames\n1,lead,0.953,brandon\n3,us,0.938,dimiturnt\n"
+
+
+class _Api:
+    """Writes the zip Kaggle's download writes, so the read path runs exactly as it does live."""
+
+    def competition_leaderboard_download(self, slug: str, into: str) -> None:
+        with zipfile.ZipFile(Path(into) / f"{slug}.zip", "w") as archive:
+            archive.writestr("board.csv", BOARD.encode("utf-8-sig"))
+
+
+def test_text_strips_the_bom_and_leaves_no_archive_behind(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(board_read.Kaggle, "authenticated", staticmethod(_Api))
+    into = tmp_path / "comp"
+    text = PublicBoard.text(into)
+    assert text.startswith("Rank,"), "a BOM would rename the first column"
+    assert list(into.iterdir()) == []
+
+
+def test_kaggle_parses_every_line_of_the_download(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(PublicBoard, "text", staticmethod(lambda into: BOARD))
+    rows = LeaderboardRead._kaggle()
+    assert rows == [
+        BoardRow(rank=1, score=0.953, members="brandon"),
+        BoardRow(rank=3, score=0.938, members="dimiturnt"),
+    ]
 
 
 def test_closing():

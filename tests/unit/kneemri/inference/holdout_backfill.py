@@ -10,6 +10,7 @@ import torch
 from core.data.corpus.study_cache import CachedCorpus
 from core.findings import TARGETS
 from core.paths import DataRoot
+from kneemri.inference import holdout_backfill
 from kneemri.inference.holdout_backfill import Backfill, HoldoutBackfill, Reading, ReadSize, UnbackfillableError
 from kneemri.inference.members import RESIZED_FROM, Member
 from kneemri.inference.prediction_cache import PredictionCache
@@ -227,6 +228,73 @@ def test_stamp(tmp_path: Path):
     witnessed = tmp_path / "witnessed.pt"
     torch.save({"model": {}, "fingerprint": [0.1, 0.2], "holdout": 0.87}, witnessed)
     assert not backfill.stamp(_member(tmp_path / "ignored.pt"), witnessed), "a witness is never recomputed silently"
+
+
+class _Encoder:
+    dim = 8
+
+    def load(self) -> str:
+        return "trunk"
+
+
+class _Model:
+    n_slot = 2
+
+    def fingerprint(self, size: int, group: int, device: torch.device) -> torch.Tensor:
+        return torch.full((2, 3), float(size))
+
+
+def test_stamp_witnesses_a_checkpoint_that_arrived_without_one(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """A soup carries no fingerprint; stamping writes one from the weights and says how it was taken."""
+    backfill = HoldoutBackfill(DataRoot(tmp_path), torch.device("cpu"))
+    member = _member(tmp_path / "soup.pt")
+    monkeypatch.setattr(holdout_backfill, "ENCODERS", {member.variant: _Encoder()})
+    loaded: list[tuple[object, ...]] = []
+    monkeypatch.setattr(backfill.predictions, "load", lambda *args: loaded.append(args) or _Model())
+
+    assert backfill.stamp(member, member.file)
+
+    saved = torch.load(member.file, map_location="cpu", weights_only=True)
+    assert np.asarray(saved["fingerprint"]).shape == (2, 3)
+    assert saved["fingerprint_config"]["img"] == member.read_size
+    assert saved["fingerprint_config"]["n_slot"] == _Model.n_slot
+    assert "model" in saved, "the weights travel with the stamp"
+    assert not member.file.with_suffix(".stamping").exists(), "staged, then renamed into place"
+    assert loaded[0][1:] == ("trunk", _Encoder.dim, member.slot_count)
+    assert not backfill.stamp(member, member.file), "and the second pass leaves the new witness alone"
+
+
+def _recorded(checkpoint: Path, epoch: int) -> Path:
+    scores = np.full((2, len(TARGETS)), 0.5)
+    HoldoutRecord(checkpoint).write(["s0", "s1"], scores, scores.astype(np.float32), epoch)
+    return checkpoint
+
+
+def test_visit_restamps_an_existing_record_without_re_deriving_it(tmp_path: Path):
+    """A wrong epoch stamp is corrected in place; a right one is left alone, and neither is a re-derivation."""
+    checkpoint = _metrics(_fitted(tmp_path / "arm.pt"), RECIPE, [_epoch(0, 0.80), _epoch(1, 0.86)])
+    _recorded(checkpoint, UNKNOWN_EPOCH)
+    backfill = HoldoutBackfill(DataRoot(tmp_path), torch.device("cpu"))
+
+    assert not backfill.visit(checkpoint, Reading(), restamp=True)
+    stored = HoldoutRecord(checkpoint).read()
+    assert stored is not None
+    assert stored.epoch == 1
+    assert not backfill.visit(checkpoint, Reading(), restamp=True)
+
+
+def test_visit_keeps_an_existing_record_unless_asked_to_refresh(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """A plain walk steps over a finished record; a refresh re-derives it, into the reading's destination."""
+    checkpoint = _recorded(_metrics(_fitted(tmp_path / "arm.pt"), RECIPE, [_epoch(0, 0.80)]), 0)
+    backfill = HoldoutBackfill(DataRoot(tmp_path), torch.device("cpu"))
+    derived: list[Backfill] = []
+    monkeypatch.setattr(Reading, "load", lambda self, path, processed: (_member(tmp_path / "m.pt"), None, STUDIES))
+    monkeypatch.setattr(HoldoutBackfill, "derive", lambda self, member, plan, corpus, ids: derived.append(plan) or 3)
+
+    assert not backfill.visit(checkpoint, Reading()), "already keeps its predictions"
+    assert derived == []
+    assert backfill.visit(checkpoint, Reading(), refresh=True)
+    assert [plan.checkpoint for plan in derived] == [checkpoint]
 
 
 def _fitted(checkpoint: Path) -> Path:

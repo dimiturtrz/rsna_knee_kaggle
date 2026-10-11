@@ -1,10 +1,14 @@
 """The teacher table is a concatenation, so the tests state what may and may not be concatenated."""
 
+import logging
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from core import cli
+from core.paths import DataRoot
+from kneemri.evaluation import oof_teacher
 from kneemri.evaluation.oof_teacher import BlockStats, OutOfFoldTeacher
 from kneemri.teacher_file import TeacherFile
 
@@ -79,6 +83,50 @@ def test_line(tmp_path: Path) -> None:
     line = BlockStats.of(_block(tmp_path, "oof_fold1_s2026", 0.8)).line()
     assert "oof_fold1_s2026" in line
     assert "mean 0.8000" in line
+
+
+def _main(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path, *flags: str) -> Path:
+    out = tmp_path / "teacher.npz"
+    monkeypatch.setattr(cli.Command, "rooted", lambda self, arguments: DataRoot(tmp_path))
+    monkeypatch.setattr("sys.argv", ["oof_teacher", "--models", str(tmp_path), "--out", str(out), *flags])
+    caplog.set_level(logging.INFO, logger=oof_teacher.__name__)
+    oof_teacher.main()
+    return out
+
+
+def _identifiers(out: Path) -> list[str]:
+    return [str(name) for name in np.load(out, allow_pickle=True)[TeacherFile.IDENTIFIERS]]
+
+
+def test_main_assembles_the_fold_twins_and_never_fold_zero(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path
+) -> None:
+    _fold(tmp_path, "oof_fold1_s2026", ["a", "b"])
+    _fold(tmp_path, "oof_fold2_s2026", ["c"])
+    _fold(tmp_path, "oof_fold0_s2026", ["z"])
+    out = _main(monkeypatch, caplog, tmp_path)
+    assert _identifiers(out) == ["a", "b", "c"], "fold 0 is not matched by the default glob"
+    assert not any("outside the fold-to-fold scatter" in record.getMessage() for record in caplog.records)
+
+
+def test_main_appends_and_witnesses_a_fill_block(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path
+) -> None:
+    """A fill is appended LAST and is priced against the folds' scatter before the file is written."""
+    _fold(tmp_path, "oof_fold1_s2026", ["a", "b"])
+    _fold(tmp_path, "oof_fold2_s2026", ["c"])
+    _fold(tmp_path, "band_dense_s2026", ["z"])
+    out = _main(monkeypatch, caplog, tmp_path, "--fill")
+    assert _identifiers(out) == ["a", "b", "c", "z"]
+    witness = [record.getMessage() for record in caplog.records if "outside the fold-to-fold" in record.getMessage()]
+    assert len(witness) == len(BlockStats.of(tmp_path / "band_dense_s2026.holdout.npz").axes())
+
+
+def test_main_refuses_when_no_twin_matches(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path
+) -> None:
+    with pytest.raises(FileNotFoundError, match="no out-of-fold twins"):
+        _main(monkeypatch, caplog, tmp_path)
 
 
 def test_axes(tmp_path: Path) -> None:

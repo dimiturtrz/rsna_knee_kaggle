@@ -1,12 +1,17 @@
 """The middle-rung re-spread: which cells it may touch, how far it moves them, and what it may not cross."""
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 
+from core import cli
+from core.data.labels import band_resolution
 from core.data.labels.band_resolution import CALIBRATED, MIDDLE, RAW, BandResolution
 from core.data.labels.targets import MEASURED_AGREEMENT
 from core.findings import TARGETS
+from core.paths import DataRoot
 
 STUDIES = 8
 """Rows in the fixture table — enough that a within-column percentile has something to spread."""
@@ -113,3 +118,58 @@ def test_census() -> None:
     body = "\n".join(BandResolution(_table(), SHARE).census(_scores()))
     assert "of the table" in body
     assert TARGETS[0] in body
+
+
+def test_resolved_leaves_a_column_with_no_band_cells_untouched() -> None:
+    """A finding the reader never put on the rung has nothing to order, so its column is copied as it is."""
+    table = _table()
+    table[TARGETS[0]] = UPPER
+    written = BandResolution(table, SHARE).resolved(_scores())
+    assert written[TARGETS[0]].to_numpy() == pytest.approx(np.full(STUDIES, UPPER))
+    assert not np.allclose(written[TARGETS[1]].to_numpy()[:4], BAND), "the other columns still move"
+
+
+def _resolve(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, folds: dict[str, list[str]]) -> Path:
+    """Write the table and the given out-of-fold records, run the CLI, and return where it wrote."""
+    table = tmp_path / "labels.csv"
+    _table().to_csv(table, index=False)
+    names = list(_table()["StudyInstanceUID"])
+    scores = _scores()
+    for fold, studies in folds.items():
+        rows = [names.index(study) for study in studies]
+        np.savez(tmp_path / f"{fold}.holdout.npz", studies=np.array(studies), predictions=scores[rows])
+    out = tmp_path / "out" / "resolved.csv"
+    monkeypatch.setattr(cli.Command, "rooted", lambda self, arguments: DataRoot(tmp_path))
+    stitch = ["--stitch", "oof_fold*.holdout.npz", "--share", str(SHARE), "--out", str(out)]
+    monkeypatch.setattr("sys.argv", ["band_resolution", "--table", str(table), "--models", str(tmp_path), *stitch])
+    band_resolution.main()
+    return out
+
+
+def test_main_writes_the_table_re_spread_by_the_stitched_folds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """Two folds partitioning the table stitch into one ordering, and the written table carries it."""
+    names = list(_table()["StudyInstanceUID"])
+    out = _resolve(monkeypatch, tmp_path, {"oof_fold0": names[::2], "oof_fold1": names[1::2]})
+    written = pd.read_csv(out)
+    expected = BandResolution(_table(), SHARE).resolved(_scores())
+    for target in TARGETS:
+        assert written[target].to_numpy() == pytest.approx(expected[target].to_numpy(), abs=1e-9)
+
+
+def test_main_refuses_when_no_record_matches(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    with pytest.raises(FileNotFoundError, match="no fold records"):
+        _resolve(monkeypatch, tmp_path, {})
+
+
+def test_main_refuses_folds_that_overlap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """A study read by two folds would carry two orderings; the stitch must be a partition."""
+    names = list(_table()["StudyInstanceUID"])
+    with pytest.raises(ValueError, match="not a partition"):
+        _resolve(monkeypatch, tmp_path, {"oof_fold0": names, "oof_fold1": names[:1]})
+
+
+def test_main_refuses_a_table_row_no_fold_read(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """A row without an out-of-fold score would be ordered by nothing, so the whole write refuses."""
+    names = list(_table()["StudyInstanceUID"])
+    with pytest.raises(ValueError, match="1 of 8 table rows"):
+        _resolve(monkeypatch, tmp_path, {"oof_fold0": names[:-1]})

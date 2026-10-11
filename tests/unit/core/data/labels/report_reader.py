@@ -6,7 +6,9 @@ that decide what the table says — are testable without twenty gigabytes of wei
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import pytest
 
 from core.data.labels.report_reader import (
     ABSENT,
@@ -113,6 +115,75 @@ def test_parse_falls_back_rather_than_raising():
     """An unreadable answer leaves every cell exactly where the lexicon already had it, not in an exception."""
     reading = ReportReading.parse("a", "the report is in Greek and I cannot read it")
     assert reading.unread() == len(TARGETS)
+
+
+def test_parse_falls_back_when_the_braces_hold_no_json():
+    """An object-shaped answer that is not JSON costs its own cells, never the run."""
+    reading = ReportReading.parse("a", "{MCL: present, ACL: absent}")
+    assert reading.unread() == len(TARGETS)
+
+
+class _Encoded(dict[str, object]):
+    """What a tokenizer returns: a mapping that can be moved to the model's device."""
+
+    def to(self, device: str) -> "_Encoded":
+        self["device"] = device
+        return self
+
+
+class _Tokenizer:
+    """Tokens are characters, so a decoded slice is readable text and the prompt's length is countable."""
+
+    def __init__(self) -> None:
+        self.template_flags: dict[str, object] = {}
+
+    def apply_chat_template(self, messages: list[dict[str, str]], **flags: object) -> str:
+        self.template_flags = flags
+        return "".join(message["content"] for message in messages)
+
+    def __call__(self, text: str, return_tensors: str) -> _Encoded:
+        return _Encoded(input_ids=np.array([[ord(char) for char in text]]), tensors=return_tensors)
+
+    def decode(self, tokens: np.ndarray, *, skip_special_tokens: bool) -> str:
+        assert skip_special_tokens
+        return "".join(chr(int(token)) for token in tokens)
+
+
+class _Model:
+    """Echoes the prompt and appends a fixed answer, as a causal model's `generate` does."""
+
+    device = "cpu"
+
+    def generate(self, input_ids: np.ndarray, **kwargs: object) -> np.ndarray:
+        assert kwargs["do_sample"] is False, "a grading must be reproducible"
+        answer = np.array([[ord(char) for char in _answer("severe")]])
+        return np.concatenate([input_ids, answer], axis=1)
+
+
+def test_answer():
+    """Only the GENERATED tokens come back, and the template is asked not to think first."""
+    reader = LocalReader(prompt=ReadingPrompt())
+    tokenizer = _Tokenizer()
+    reader._loaded = (tokenizer, _Model())
+    assert reader.answer("medial meniscus tear") == _answer("severe")
+    assert tokenizer.template_flags["enable_thinking"] is False
+    assert reader.read("a", "report").grades[TARGETS[0]] is ReportGrade.SEVERE
+
+
+def test_table(monkeypatch: pytest.MonkeyPatch):
+    """Every report becomes one row, in the order given, keyed by its own study."""
+    answers = {"torn": _answer("severe"), "clean": _answer("absent"), "garbled": "no idea"}
+    monkeypatch.setattr(LocalReader, "answer", lambda self, report: answers[report])
+    reports = pd.DataFrame({"StudyInstanceUID": ["s1", "s2", "s3"], "Report": ["torn", "clean", "garbled"]})
+    table = LocalReader().table(reports)
+    assert list(table["StudyInstanceUID"]) == ["s1", "s2", "s3"]
+    assert list(table[f"{TARGETS[0]}__verdict"]) == [PRESENT, ABSENT, UNSURE]
+
+
+def test_table_of_nothing_is_empty(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(LocalReader, "answer", lambda self, report: report)
+    empty = pd.DataFrame({"StudyInstanceUID": [], "Report": []})
+    assert LocalReader().table(empty).empty
 
 
 def test_row():
