@@ -37,7 +37,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.denominator import Denominator
-from core.paths import DataRoot
+from core.roster_flags import RosterFlags
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import LabelScores
@@ -171,17 +171,10 @@ class VoteCeiling:
 def main() -> None:
     """Report what each vote rule scores once its weights are fitted on studies it is not scored on."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--roster", type=Path, default=None, help="a roster file, one member per line")
-    command.parser.add_argument(
-        "--candidates", nargs="*", default=[], help="member names or checkpoint paths, instead of a roster"
-    )
+    RosterFlags.add(command.parser)
     arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
-    named = arguments.roster.read_text(encoding="utf-8").splitlines() if arguments.roster else arguments.candidates
-    paths = root.checkpoints(list(named))
-    Denominator(len(paths), "no checkpoint named by --roster or --candidates").refuse_empty()
-
+    paths = RosterFlags.required(arguments, command.rooted(arguments))
     for line in VoteCeiling.over(paths).lines(LabelScores()):
         logger.info(line)
 

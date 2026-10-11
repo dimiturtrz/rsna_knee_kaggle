@@ -20,13 +20,12 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+from core.paths import CHECKPOINT_SUFFIX, COMMENT
 from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
 
 logger = logging.getLogger(__name__)
 
 DECLINES = Path("comp/members.declines")
-CHECKPOINT_SUFFIX = ".pt"
-COMMENT = "#"
 VOID = "void"
 
 

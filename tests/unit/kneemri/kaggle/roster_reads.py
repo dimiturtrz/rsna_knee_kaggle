@@ -1,5 +1,6 @@
 """A roster's cost is its decode count, and resolution is the axis that must never raise it."""
 
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -7,7 +8,9 @@ import pytest
 
 from core.data.corpus.slot_reader import Band
 from core.data.corpus.slots import SCHEMES
+from core.paths import ENV_OVERRIDE, DataRoot
 from kneemri.inference.members import Member, MemberConfig
+from kneemri.kaggle import roster_reads
 from kneemri.kaggle.roster_reads import ReadGroup, RosterReads
 
 CANONICAL = "canonical"
@@ -128,3 +131,41 @@ def test_read_group_lines():
 def test_read_members(tmp_path: Path):
     """A named checkpoint that is not on disk is reported, not raised on — a candidate list is edited."""
     assert RosterReads.read_members([tmp_path / "absent.pt"]) == [], "an absent checkpoint contributes no member"
+
+
+class _ResolvedError(Exception):
+    """Raised with the checkpoints the command resolved, before any of them is read."""
+
+
+def _resolved(monkeypatch: pytest.MonkeyPatch, argv: list[str]) -> list[Path]:
+    """The checkpoint list `main` hands to the member reader for `argv`."""
+
+    def _stop(paths: list[Path]) -> list[Member]:
+        raise _ResolvedError(paths)
+
+    monkeypatch.setattr(sys, "argv", ["roster_reads", *argv])
+    monkeypatch.setattr(RosterReads, "read_members", staticmethod(_stop))
+    with pytest.raises(_ResolvedError) as caught:
+        roster_reads.main()
+    return caught.value.args[0]
+
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A roster and a candidate list name the same checkpoints the same way, and none on disk is refused."""
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    models = DataRoot(tmp_path).models()
+    roster = tmp_path / "members.roster"
+    roster.write_text("# header\n\nalpha.pt   # why\n  beta  \nelsewhere/gamma.pt\n", encoding="utf-8")
+
+    assert _resolved(monkeypatch, ["--roster", str(roster)]) == [
+        models / "alpha.pt",
+        models / "beta.pt",
+        Path("elsewhere/gamma.pt"),
+    ]
+    assert _resolved(monkeypatch, ["--candidates", "alpha", "beta.pt"]) == [models / "alpha.pt", models / "beta.pt"]
+
+    monkeypatch.undo()
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    monkeypatch.setattr(sys, "argv", ["roster_reads", "--candidates", "absent"])
+    with pytest.raises(SystemExit):
+        roster_reads.main()

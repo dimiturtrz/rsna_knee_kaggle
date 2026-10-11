@@ -37,9 +37,11 @@ from jaxtyping import Bool, Float
 from core import cli
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
+from core.paths import CHECKPOINT_SUFFIX
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import LabelScores
+from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +49,6 @@ SEATS = 8
 """How deep the greedy runs. The champion seats seven and the honest curve flattens past that, so a
 disagreement below eight seats is a disagreement about what ships; past it, about nothing."""
 
-COMMENT = "#"
-CHECKPOINT = ".pt"
 MOVED = "MOVED"
 HELD = "held"
 
@@ -146,8 +146,7 @@ class RulerSwap:
         the `.pt` suffix — `res392_ws_s2026.pt  # 0.8523 solo`. Both cost a run: the comment and the
         doubled suffix each fail as a checkpoint that is not on disk rather than as a parse.
         """
-        lines = [line.split(COMMENT)[0].strip() for line in roster.read_text(encoding="utf-8").splitlines()]
-        return [line.removesuffix(CHECKPOINT) for line in lines if line]
+        return [name.removesuffix(CHECKPOINT_SUFFIX) for name in MemberRoster.read(roster).patterns()]
 
     def report(self, table: Path) -> list[str]:  # devtools-ignore: test-mirror
         """Both orders, the diff, and what the churn licenses.

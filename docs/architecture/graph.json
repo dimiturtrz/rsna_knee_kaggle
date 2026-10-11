@@ -1442,6 +1442,18 @@
     },
     {
       "kind": "import",
+      "source": "core.roster_flags",
+      "target": "core.denominator",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.roster_flags",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.wakelock",
       "target": "core.sleep_policy",
       "weight": 1
@@ -2967,6 +2979,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.member_pool",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.member_pool",
       "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
@@ -4365,7 +4383,7 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.vote_ceiling",
-      "target": "core.paths",
+      "target": "core.roster_flags",
       "weight": 1
     },
     {
@@ -5775,7 +5793,7 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.decode_entry",
-      "target": "core.paths",
+      "target": "core.roster_flags",
       "weight": 1
     },
     {
@@ -6105,6 +6123,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.package_members",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.package_members",
       "target": "kneemri.models.backbone",
       "weight": 1
     },
@@ -6363,7 +6387,7 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.roster_reads",
-      "target": "core.paths",
+      "target": "core.roster_flags",
       "weight": 1
     },
     {
@@ -6393,6 +6417,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.ruler_swap",
+      "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
       "target": "kneemri.evaluation.pool",
       "weight": 1
     },
@@ -6406,6 +6436,12 @@
       "kind": "import",
       "source": "kneemri.kaggle.ruler_swap",
       "target": "kneemri.evaluation.scores",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.ruler_swap",
+      "target": "kneemri.kaggle.package_members",
       "weight": 1
     },
     {
@@ -13660,6 +13696,30 @@
       "kind": "calls",
       "source": "core.paths.DataRoot.train_table",
       "target": "core.paths.DataRoot.raw",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.roster_flags.RosterFlags",
+      "target": "core.paths.DataRoot",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.roster_flags.RosterFlags.checkpoints",
+      "target": "core.paths.DataRoot.checkpoints",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.roster_flags.RosterFlags.required",
+      "target": "core.denominator.Denominator",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.roster_flags.RosterFlags.required",
+      "target": "core.denominator.Denominator.refuse_empty",
       "weight": 1
     },
     {
@@ -24331,21 +24391,15 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.evaluation.vote_ceiling.main",
-      "target": "core.denominator.Denominator",
+      "target": "core.roster_flags.RosterFlags.add",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.vote_ceiling.main",
-      "target": "core.denominator.Denominator.refuse_empty",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.vote_ceiling.main",
-      "target": "core.paths.DataRoot.from_config",
+      "target": "core.roster_flags.RosterFlags.required",
       "weight": 1
     },
     {
@@ -30433,21 +30487,15 @@
       "weight": 1
     },
     {
-      "kind": "construct",
+      "kind": "calls",
       "source": "kneemri.kaggle.decode_entry.main",
-      "target": "core.denominator.Denominator",
+      "target": "core.roster_flags.RosterFlags.add",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.kaggle.decode_entry.main",
-      "target": "core.denominator.Denominator.refuse_empty",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.kaggle.decode_entry.main",
-      "target": "core.paths.DataRoot.from_config",
+      "target": "core.roster_flags.RosterFlags.required",
       "weight": 1
     },
     {
@@ -32613,7 +32661,13 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.roster_reads.main",
-      "target": "core.paths.DataRoot.from_config",
+      "target": "core.roster_flags.RosterFlags.add",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.roster_reads.main",
+      "target": "core.roster_flags.RosterFlags.checkpoints",
       "weight": 1
     },
     {
@@ -32728,6 +32782,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.ruler_swap.RulerSwap.report",
       "target": "kneemri.kaggle.ruler_swap.RulerSwap.truth",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.ruler_swap.RulerSwap.roster_members",
+      "target": "kneemri.kaggle.package_members.MemberRoster.read",
       "weight": 1
     },
     {
@@ -39069,7 +39129,7 @@
   ],
   "nodes": [
     {
-      "descendants": 80,
+      "descendants": 81,
       "id": "core",
       "label": "core",
       "level": "module",
@@ -39696,6 +39756,14 @@
       "descendants": 0,
       "id": "core.paths",
       "label": "paths",
+      "level": "module",
+      "parent": "core",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.roster_flags",
+      "label": "roster_flags",
       "level": "module",
       "parent": "core",
       "role": null
@@ -43386,6 +43454,14 @@
       "label": "DataRoot",
       "level": "class",
       "parent": "core.paths",
+      "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "core.roster_flags.RosterFlags",
+      "label": "RosterFlags",
+      "level": "class",
+      "parent": "core.roster_flags",
       "role": "primary"
     },
     {
@@ -52994,6 +53070,30 @@
       "label": "train_table",
       "level": "method",
       "parent": "core.paths.DataRoot",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.roster_flags.RosterFlags.add",
+      "label": "add",
+      "level": "method",
+      "parent": "core.roster_flags.RosterFlags",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.roster_flags.RosterFlags.checkpoints",
+      "label": "checkpoints",
+      "level": "method",
+      "parent": "core.roster_flags.RosterFlags",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.roster_flags.RosterFlags.required",
+      "label": "required",
+      "level": "method",
+      "parent": "core.roster_flags.RosterFlags",
       "role": null
     },
     {

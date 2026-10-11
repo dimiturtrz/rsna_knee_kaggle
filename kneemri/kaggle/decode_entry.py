@@ -31,7 +31,7 @@ from pathlib import Path
 
 from core import cli
 from core.denominator import Denominator
-from core.paths import DataRoot
+from core.roster_flags import RosterFlags
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import LabelScores
@@ -150,20 +150,13 @@ class DecodeEntry:
 def main() -> None:
     """Report the best-scoring roster available within a ceiling on decodes."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--roster", type=Path, default=None, help="a roster file, one member per line")
-    command.parser.add_argument(
-        "--candidates", nargs="*", default=[], help="member names or checkpoint paths, instead of a roster"
-    )
+    RosterFlags.add(command.parser)
     command.parser.add_argument(
         "--max-decodes", type=int, default=1, help="the decode budget the entry must fit inside"
     )
     arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
-    named = arguments.roster.read_text(encoding="utf-8").splitlines() if arguments.roster else arguments.candidates
-    paths = root.checkpoints(list(named))
-    Denominator(len(paths), "no checkpoint named by --roster or --candidates").refuse_empty()
-
+    paths = RosterFlags.required(arguments, command.rooted(arguments))
     scores = LabelScores()
     for line in DecodeEntry.over(paths).lines(scores, arguments.max_decodes):
         logger.info(line)

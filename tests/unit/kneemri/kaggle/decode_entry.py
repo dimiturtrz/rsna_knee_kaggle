@@ -1,13 +1,16 @@
 """A roster's score is bought with decodes, and the search must refuse to overspend them."""
 
+import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from core.paths import ENV_OVERRIDE, DataRoot
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.vote import RankAverage
+from kneemri.kaggle import decode_entry
 from kneemri.kaggle.decode_entry import BudgetedRoster, DecodeEntry
 
 STUDIES = 40
@@ -106,3 +109,39 @@ def test_line():
 
     assert row.endswith("+newest"), "the newest seat is the decision the row records"
     assert "0.9312" in row and "2 seats / 1 decodes" in row
+
+
+class _ResolvedError(Exception):
+    """Raised with the checkpoints the command resolved, before any of them is read."""
+
+
+def _resolved(monkeypatch: pytest.MonkeyPatch, argv: list[str]) -> list[Path]:
+    """The checkpoint list `main` hands to the search for `argv`."""
+
+    def _stop(cls: type[DecodeEntry], paths: list[Path]) -> DecodeEntry:
+        raise _ResolvedError(paths)
+
+    monkeypatch.setattr(sys, "argv", ["decode_entry", *argv])
+    monkeypatch.setattr(DecodeEntry, "over", classmethod(_stop))
+    with pytest.raises(_ResolvedError) as caught:
+        decode_entry.main()
+    return caught.value.args[0]
+
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A roster and a candidate list name the same checkpoints the same way, and naming none is refused."""
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    models = DataRoot(tmp_path).models()
+    roster = tmp_path / "members.roster"
+    roster.write_text("# header\n\nalpha.pt   # why\n  beta  \nelsewhere/gamma.pt\n", encoding="utf-8")
+
+    assert _resolved(monkeypatch, ["--roster", str(roster), "--max-decodes", "2"]) == [
+        models / "alpha.pt",
+        models / "beta.pt",
+        Path("elsewhere/gamma.pt"),
+    ]
+    assert _resolved(monkeypatch, ["--candidates", "alpha", "beta.pt"]) == [models / "alpha.pt", models / "beta.pt"]
+
+    monkeypatch.setattr(sys, "argv", ["decode_entry"])
+    with pytest.raises(SystemExit):
+        decode_entry.main()
