@@ -30,7 +30,6 @@ import numpy as np
 import pandas as pd
 from jaxtyping import Float
 from numpy.typing import NDArray
-from scipy.special import ndtr, ndtri
 
 from core.findings import STUDY, TARGETS
 from kneemri.inference.vote import Vote
@@ -51,9 +50,9 @@ Table = Float[NDArray[np.float64], "studies labels"]
 class Fusion(ABC):
     """How aligned producer tables become one table, given each table's share of the blend.
 
-    Every combiner here is a share-weighted sum of a per-table SCORE; what varies is the score (and,
-    for probit, the map back out). The sum is accumulated in table order with the first term seeding it,
-    which is the arithmetic every inline kernel block used, so a fused table matches theirs bit for bit.
+    Every combiner here is a share-weighted sum of a per-table SCORE; what varies is the score. The sum is
+    accumulated in table order with the first term seeding it, which is the arithmetic every inline kernel
+    block used, so a fused table matches theirs bit for bit.
     """
 
     def fuse(self, tables: Sequence[Table], weights: Sequence[float]) -> Table:
@@ -80,28 +79,6 @@ class WeightedRankAverage(Fusion):
     def scored(self, table: Table) -> Table:
         """Per-label mid-ranks scaled to [0, 1], exactly as every ensemble vote ranks."""
         return Vote.ranks(table)
-
-
-@dataclass(frozen=True)
-class ProbitRanks(Fusion):
-    """Per-label mid-rank percentiles through the inverse normal CDF, share-weighted, then back through the CDF.
-
-    The percentile is `(rank - 0.5) / n` on 1-based mid-ranks, which keeps both ends finite under `ndtri`.
-    A producer's extreme ranks land in the tails, so a confident producer moves the blend more than it
-    would in a plain rank average — the shape of the pile's probit blends, inlined in four S6 kernels.
-    """
-
-    @override
-    def fuse(self, tables: Sequence[Table], weights: Sequence[float]) -> Table:
-        """`ndtr` of the share-weighted sum of each table's per-label probit scores."""
-        return ndtr(super().fuse(tables, weights))
-
-    @override
-    def scored(self, table: Table) -> Table:
-        """Each label's 1-based mid-rank percentile `(rank - 0.5) / n`, as a standard-normal quantile."""
-        studies = table.shape[0]
-        midranks = np.column_stack([Vote.midranks(table[:, label]) for label in range(table.shape[1])])
-        return ndtri((midranks + 1.0 - 0.5) / studies)
 
 
 @dataclass(frozen=True)

@@ -12,7 +12,8 @@ from typing import cast
 import numpy as np
 import torch
 
-from kneemri.training.resume import SUFFIX, ResumeState
+from kneemri.runs.artefact import Artefact
+from kneemri.training.resume import ResumeState
 from kneemri.training.trainer import Trainer
 
 SEED = 2026
@@ -51,7 +52,7 @@ def test_captured() -> None:
 
 def test_beside(tmp_path: Path) -> None:
     """The trajectory is named from the checkpoint, so the two cannot be given different stems."""
-    assert ResumeState.beside(tmp_path / "member.pt") == tmp_path / ("member" + SUFFIX)
+    assert ResumeState.beside(tmp_path / "member.pt") == tmp_path / ("member" + Artefact.RESUME)
 
 
 def test_write(tmp_path: Path) -> None:

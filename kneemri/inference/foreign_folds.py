@@ -111,7 +111,6 @@ SYMBOLS = (
 """Every symbol their serving program needs, in no particular order — the lift emits them in file order."""
 
 WORKERS = 8
-WORKERS_REASON = "their ProcessPoolExecutor, as threads; a lifted module cannot be imported in a child"
 
 
 @dataclass(frozen=True)

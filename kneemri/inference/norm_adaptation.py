@@ -124,7 +124,7 @@ class Adaptation(Protocol):
         """
         ...
 
-    def on(self, member: object, logits: "Forward") -> AbstractContextManager[None]: ...
+    def on(self, member: object, logits: Forward) -> AbstractContextManager[None]: ...
 
 
 class NotAdaptableError(TypeError):
@@ -145,7 +145,7 @@ class NoAdaptation:
     episode: int = UNBOUNDED_EPISODE
 
     @contextmanager
-    def on(self, member: object, logits: "Forward") -> Iterator[None]:
+    def on(self, member: object, logits: Forward) -> Iterator[None]:
         """Serve the member exactly as it was trained."""
         del member, logits
         yield
@@ -261,7 +261,7 @@ class CardinalityAwareLN:
         return (term * chosen).sum(dim=1) / counted.clamp(min=1)
 
     @contextmanager
-    def on(self, member: object, logits: "Forward") -> Iterator[None]:
+    def on(self, member: object, logits: Forward) -> Iterator[None]:
         """Adapt to this study, hand the member over to be read, then put it back as it was."""
         affines = self.affines(member)
         snapshot = [parameter.detach().clone() for parameter in affines]
@@ -273,7 +273,7 @@ class CardinalityAwareLN:
                 for parameter, original in zip(affines, snapshot, strict=True):
                     parameter.copy_(original)
 
-    def _descend(self, logits: "Forward", affines: list[nn.Parameter]) -> None:
+    def _descend(self, logits: Forward, affines: list[nn.Parameter]) -> None:
         """Take the study's gradient steps, leaving every other parameter exactly where it was."""
         optimiser = torch.optim.Adam(affines, lr=self.lr)
         was_grading = [(parameter, parameter.requires_grad) for parameter in affines]

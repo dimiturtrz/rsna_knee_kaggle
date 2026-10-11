@@ -52,7 +52,6 @@ from kneemri.runs.holdout_record import SUFFIX as HOLDOUT_SUFFIX
 
 logger = logging.getLogger(__name__)
 
-ROSTER = Path("comp/members.roster")
 ROSTERS = MemberRoster.shelves()
 """Every shelf a member may be named on, in shelf order.
 

@@ -99,7 +99,3 @@ def test_merge_written_writes_nothing_when_no_source_did(tmp_path: Path) -> None
 
 def test_corpus_column_matches_the_merge_that_writes_it() -> None:
     assert CORPUS == MERGED_CORPUS
-
-
-def test_keys() -> None:
-    assert StudyMetadata.KEYS == (IDENTIFIER, CORPUS)

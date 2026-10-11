@@ -93,7 +93,7 @@ a `Tensor | Module` to a checker and only `get_submodule` is a module by contrac
 LAST_STAGE = "layer4"
 """Where a classification ResNet is read, and where the first MedicalNet probe read (0.7348)."""
 
-STAGE_WIDTHS = {"layer3": 1024, "layer4": 2048}
+STAGE_WIDTHS = {"layer3": 1024, LAST_STAGE: WIDTH}
 """The readable stages and the width each one outputs. `layer3` is here because THEIR `layer3` runs at
 dilation 2 and `layer4` at dilation 4 — dilations a SEGMENTATION network wants and a whole-volume
 readout may not. That makes the depth of the read a named harness suspect against the 0.7348 band

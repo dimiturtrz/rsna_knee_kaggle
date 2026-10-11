@@ -42,9 +42,6 @@ MINIMUM_SENTENCE = 3
 BOUNDARY = re.compile(r"(?<=[.;:!?\n])")
 """Split AFTER terminal punctuation, keeping it. Deliberately not `\\s`-anchored: see `WINDOW`."""
 
-SHARED: tuple[str, ...] = ()
-"""Reserved for terms identical in every language; empty because none of the twelve are."""
-
 FINDING_TERMS: dict[str, dict[str, tuple[str, ...]]] = {
     "ACL": {
         "en": (r"\bACL\b", r"anterior\s+cruciate"),
