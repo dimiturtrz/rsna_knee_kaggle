@@ -32,7 +32,6 @@ failure the `Fluid_Sensitive` measurement is already a monument to.
 import logging
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
-from typing import ClassVar
 
 import pandas as pd
 
@@ -79,10 +78,6 @@ class StudyMetadata:
     age_years: float | None = None
     sex: str | None = None
     scanner: str | None = None
-
-    KEYS: ClassVar[tuple[str, str]] = (IDENTIFIER, CORPUS)
-    """The two columns every row carries. Named so a consumer can split the join keys from the axes
-    without re-listing the dataclass."""
 
     @classmethod
     def axes(cls) -> tuple[str, ...]:

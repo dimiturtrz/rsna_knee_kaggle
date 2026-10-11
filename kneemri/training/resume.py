@@ -29,13 +29,11 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from kneemri.runs.artefact import Artefact
 from kneemri.training.durable import Durable
 from kneemri.training.trainer import Trainer
 
 logger = logging.getLogger(__name__)
-
-SUFFIX = ".resume"
-"""What the trajectory file is called, beside `<checkpoint>.partial` and under the same stem."""
 
 
 @dataclass(frozen=True)
@@ -79,7 +77,7 @@ class ResumeState:
     @staticmethod
     def beside(destination: Path) -> Path:
         """Where a checkpoint's trajectory file sits — named from the checkpoint, never from the arm."""
-        return destination.with_suffix(SUFFIX)
+        return Artefact.RESUME.beside(destination)
 
     def write(self, destination: Path) -> None:
         """Put this trajectory on the platter beside the weights it belongs to."""
