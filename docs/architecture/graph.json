@@ -1425,12 +1425,6 @@
     {
       "kind": "import",
       "source": "kneemri.embeddings.build_embeddings",
-      "target": "kneemri.models.study_design",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_embeddings",
       "target": "kneemri.models.token_pooling",
       "weight": 1
     },
@@ -1593,12 +1587,6 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.alignment_damage",
-      "target": "kneemri.inference.vote",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.alignment_damage",
       "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
@@ -1642,7 +1630,7 @@
       "kind": "import",
       "source": "kneemri.evaluation.annotated_readings",
       "target": "kneemri.evaluation.scores",
-      "weight": 3
+      "weight": 4
     },
     {
       "kind": "import",
@@ -1755,19 +1743,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.attention_scan",
+      "target": "kneemri.inference.holdout_predictions",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.attention_scan",
       "target": "kneemri.inference.holdout_slab",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.attention_scan",
-      "target": "kneemri.inference.members",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.attention_scan",
-      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -1857,13 +1839,13 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.board_transfer",
-      "target": "kneemri.evaluation.score_scale",
+      "target": "kneemri.evaluation.ledger75",
       "weight": 1
     },
     {
       "kind": "import",
-      "source": "kneemri.evaluation.column_headroom",
-      "target": "core.cli",
+      "source": "kneemri.evaluation.board_transfer",
+      "target": "kneemri.evaluation.score_scale",
       "weight": 1
     },
     {
@@ -1888,18 +1870,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.column_headroom",
       "target": "kneemri.evaluation.stack_fit",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.column_headroom",
-      "target": "kneemri.inference.vote",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.column_mixing",
-      "target": "core.cli",
       "weight": 1
     },
     {
@@ -1930,12 +1900,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.column_mixing",
       "target": "kneemri.evaluation.stack_fit",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.column_mixing",
-      "target": "kneemri.inference.vote",
       "weight": 1
     },
     {
@@ -2432,12 +2396,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.evaluation.gold_estimators",
-      "target": "kneemri.inference.vote",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.evaluation.gold_rows",
       "target": "core.cli",
       "weight": 1
@@ -2894,12 +2852,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.evaluation.member_space",
-      "target": "kneemri.inference.vote",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.evaluation.noise_binding",
       "target": "core.cli",
       "weight": 1
@@ -3214,18 +3166,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.protocol_prior",
       "target": "core.cli",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.protocol_prior",
-      "target": "kneemri.inference.vote",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.protocol_prior",
-      "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
     {
@@ -3718,12 +3658,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.slotdrop_tta",
       "target": "kneemri.runs.holdout_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.stack_fit",
-      "target": "core.cli",
       "weight": 1
     },
     {
@@ -5235,7 +5169,7 @@
     {
       "kind": "import",
       "source": "kneemri.inference.members",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -5776,12 +5710,6 @@
       "kind": "import",
       "source": "kneemri.kaggle.entry_offline",
       "target": "kneemri.evaluation.record_mix",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.kaggle.entry_offline",
-      "target": "kneemri.evaluation.scores",
       "weight": 1
     },
     {
@@ -6608,12 +6536,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.models.encoder_surgery",
-      "target": "kneemri.models.slice_shift",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.models.foreign_encoders",
       "target": "kneemri.models.encoder",
       "weight": 1
@@ -6741,6 +6663,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
       "target": "kneemri.models.encoder",
       "weight": 1
     },
@@ -6771,19 +6699,25 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
+      "target": "kneemri.models.slice_shift",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
       "target": "kneemri.models.slot_head",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.models.model",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.token_pooling",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.models.model",
-      "target": "kneemri.models.token_pooling",
+      "target": "kneemri.models.variants",
       "weight": 1
     },
     {
@@ -7089,7 +7023,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.adaptation",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -7191,6 +7125,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.config_tree",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
       "target": "kneemri.models.slice_pooling",
       "weight": 1
     },
@@ -7198,12 +7138,6 @@
       "kind": "import",
       "source": "kneemri.training.config_tree",
       "target": "kneemri.models.slot_head",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.config_tree",
-      "target": "kneemri.models.study_design",
       "weight": 1
     },
     {
@@ -7839,12 +7773,6 @@
     {
       "kind": "import",
       "source": "kneemri.training.run_setup",
-      "target": "kneemri.models.study_design",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.run_setup",
       "target": "kneemri.training.adaptation",
       "weight": 1
     },
@@ -8115,7 +8043,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.train",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -8343,7 +8271,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.witness",
-      "target": "kneemri.models.encoder_surgery",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -8690,12 +8618,6 @@
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.band_coverage.BandCoverage.interval",
-      "target": "core.bootstrap.Bootstrap.seeded",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "core.data.corpus.band_coverage.BandCoverage.measure_study",
       "target": "core.data.corpus.audit.AuditRequest.routed",
       "weight": 1
@@ -8733,19 +8655,25 @@
     {
       "kind": "references",
       "source": "core.data.corpus.band_coverage.SlotShares",
-      "target": "core.data.corpus.band_coverage.BandCoverage",
+      "target": "core.data.corpus.band_coverage.SlotShares",
       "weight": 1
     },
     {
       "kind": "references",
       "source": "core.data.corpus.band_coverage.SlotShares",
-      "target": "core.data.corpus.band_coverage.SlotShares",
+      "target": "core.data.corpus.slot_reader.Band",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.band_coverage.SlotShares.interval",
+      "target": "core.bootstrap.Bootstrap.seeded",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.band_coverage.SlotShares.row",
-      "target": "core.data.corpus.band_coverage.BandCoverage.interval",
+      "target": "core.data.corpus.band_coverage.SlotShares.interval",
       "weight": 1
     },
     {
@@ -9266,6 +9194,48 @@
     },
     {
       "kind": "references",
+      "source": "core.data.corpus.crop_alignment.AlignmentSpread",
+      "target": "core.data.corpus.crop_alignment.SlotOffset",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.crop_alignment.AlignmentSpread",
+      "target": "core.data.corpus.crop_alignment.StudyOffsets",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.crop_alignment.AlignmentSpread",
+      "target": "core.data.corpus.study_cache.CorpusSample",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.AlignmentSpread.dump",
+      "target": "core.data.corpus.crop_alignment.AlignmentSpread.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.AlignmentSpread.report",
+      "target": "core.data.corpus.crop_alignment.AlignmentSpread.plane_line",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.AlignmentSpread.report",
+      "target": "core.data.corpus.crop_alignment.AlignmentSpread.spread",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.crop_alignment.AlignmentSpread.report",
+      "target": "core.data.corpus.study_cache.CorpusSample.line",
+      "weight": 1
+    },
+    {
+      "kind": "references",
       "source": "core.data.corpus.crop_alignment.CropAlignment",
       "target": "core.data.corpus.audit.AuditRequest",
       "weight": 1
@@ -9280,18 +9250,6 @@
       "kind": "references",
       "source": "core.data.corpus.crop_alignment.CropAlignment",
       "target": "core.data.corpus.crop_alignment.StudyOffsets",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "core.data.corpus.crop_alignment.CropAlignment",
-      "target": "core.data.corpus.study_cache.CorpusSample",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.dump",
-      "target": "core.data.corpus.crop_alignment.CropAlignment.spread",
       "weight": 1
     },
     {
@@ -9343,24 +9301,6 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.report",
-      "target": "core.data.corpus.crop_alignment.CropAlignment.plane_line",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.report",
-      "target": "core.data.corpus.crop_alignment.CropAlignment.spread",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.corpus.crop_alignment.CropAlignment.report",
-      "target": "core.data.corpus.study_cache.CorpusSample.line",
-      "weight": 1
-    },
-    {
       "kind": "holds",
       "source": "core.data.corpus.crop_alignment.StudyOffsets",
       "target": "core.data.corpus.crop_alignment.SlotOffset",
@@ -9369,19 +9309,19 @@
     {
       "kind": "construct",
       "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.crop_alignment.CropAlignment",
+      "target": "core.data.corpus.crop_alignment.AlignmentSpread",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.crop_alignment.CropAlignment.dump",
+      "target": "core.data.corpus.crop_alignment.AlignmentSpread.dump",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.crop_alignment.main",
-      "target": "core.data.corpus.crop_alignment.CropAlignment.report",
+      "target": "core.data.corpus.crop_alignment.AlignmentSpread.report",
       "weight": 1
     },
     {
@@ -10135,6 +10075,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "core.data.corpus.fetch_bench.Sweep",
+      "target": "core.data.corpus.window_reader.SliceSpan",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.fetch_bench.main",
       "target": "core.data.corpus.cache_flags.CacheFlags.add_to",
@@ -10180,6 +10126,12 @@
       "kind": "construct",
       "source": "core.data.corpus.fetch_bench.main",
       "target": "core.data.corpus.window_reader.MappedReader",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.corpus.fetch_bench.main",
+      "target": "core.data.corpus.window_reader.SliceSpan",
       "weight": 1
     },
     {
@@ -11233,12 +11185,6 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry",
-      "target": "core.data.corpus.study_cache.CorpusSample",
-      "weight": 1
-    },
-    {
       "kind": "calls",
       "source": "core.data.corpus.slot_geometry.SlotGeometry.frame",
       "target": "core.data.corpus.slot_geometry.SlotGeometry.placed",
@@ -11269,45 +11215,57 @@
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.report",
-      "target": "core.data.corpus.slot_geometry.SlotGeometry._covered",
+      "kind": "references",
+      "source": "core.data.corpus.slot_geometry.SlotPairing",
+      "target": "core.data.corpus.slot_geometry.SlotFrame",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.slot_geometry.SlotPairing",
+      "target": "core.data.corpus.study_cache.CorpusSample",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.report",
-      "target": "core.data.corpus.slot_geometry.SlotGeometry._distributions",
+      "source": "core.data.corpus.slot_geometry.SlotPairing.report",
+      "target": "core.data.corpus.slot_geometry.SlotPairing._covered",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.report",
-      "target": "core.data.corpus.slot_geometry.SlotGeometry.coverage",
+      "source": "core.data.corpus.slot_geometry.SlotPairing.report",
+      "target": "core.data.corpus.slot_geometry.SlotPairing._distributions",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.report",
-      "target": "core.data.corpus.slot_geometry.SlotGeometry.pairs",
+      "source": "core.data.corpus.slot_geometry.SlotPairing.report",
+      "target": "core.data.corpus.slot_geometry.SlotPairing.coverage",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "core.data.corpus.slot_geometry.SlotGeometry.report",
+      "source": "core.data.corpus.slot_geometry.SlotPairing.report",
+      "target": "core.data.corpus.slot_geometry.SlotPairing.pairs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.slot_geometry.SlotPairing.report",
       "target": "core.data.corpus.study_cache.CorpusSample.line",
       "weight": 1
     },
     {
       "kind": "construct",
       "source": "core.data.corpus.slot_geometry.main",
-      "target": "core.data.corpus.slot_geometry.SlotGeometry",
+      "target": "core.data.corpus.slot_geometry.SlotPairing",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.corpus.slot_geometry.main",
-      "target": "core.data.corpus.slot_geometry.SlotGeometry.report",
+      "target": "core.data.corpus.slot_geometry.SlotPairing.report",
       "weight": 1
     },
     {
@@ -11833,6 +11791,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "core.data.corpus.study_cache.CachedCorpus.window",
+      "target": "core.data.corpus.window_reader.SliceSpan",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "core.data.corpus.study_cache.CorpusSample",
       "target": "core.denominator.Denominator",
@@ -12079,9 +12043,33 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.corpus.window_reader.FileReader",
+      "target": "core.data.corpus.window_reader.SliceSpan",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.corpus.window_reader.FileReader._fill",
+      "target": "core.data.corpus.window_reader.SliceSpan.covers",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "core.data.corpus.window_reader.FileReader.read",
       "target": "core.data.corpus.window_reader.FileReader._fill",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.window_reader.MappedReader",
+      "target": "core.data.corpus.window_reader.SliceSpan",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "core.data.corpus.window_reader.WindowReader",
+      "target": "core.data.corpus.window_reader.SliceSpan",
       "weight": 1
     },
     {
@@ -12494,20 +12482,20 @@
     },
     {
       "kind": "calls",
-      "source": "core.data.labels.overcall_audit.OvercallAudit.compare",
-      "target": "core.data.labels.overcall_audit.OvercallAudit.census",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "core.data.labels.overcall_audit.OvercallAudit.compare",
-      "target": "core.data.labels.overcall_audit.OvercallAudit.interval",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
       "source": "core.data.labels.overcall_audit.OvercallAudit.fired",
       "target": "core.data.labels.negation_scope.NegationScope.denied",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallCensus.compare",
+      "target": "core.data.labels.overcall_audit.OvercallCensus.census",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.OvercallCensus.compare",
+      "target": "core.data.labels.overcall_audit.OvercallCensus.interval",
       "weight": 1
     },
     {
@@ -12529,27 +12517,33 @@
       "weight": 1
     },
     {
-      "kind": "calls",
+      "kind": "construct",
       "source": "core.data.labels.overcall_audit.main",
-      "target": "core.data.labels.overcall_audit.OvercallAudit.compare",
+      "target": "core.data.labels.overcall_audit.OvercallCensus",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.labels.overcall_audit.main",
-      "target": "core.data.labels.overcall_audit.OvercallAudit.coverage",
+      "target": "core.data.labels.overcall_audit.OvercallCensus.compare",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.labels.overcall_audit.main",
-      "target": "core.data.labels.overcall_audit.OvercallAudit.incidence",
+      "target": "core.data.labels.overcall_audit.OvercallCensus.coverage",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "core.data.labels.overcall_audit.main",
-      "target": "core.data.labels.overcall_audit.OvercallAudit.limits",
+      "target": "core.data.labels.overcall_audit.OvercallCensus.incidence",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "core.data.labels.overcall_audit.main",
+      "target": "core.data.labels.overcall_audit.OvercallCensus.limits",
       "weight": 1
     },
     {
@@ -12895,6 +12889,12 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "core.data.labels.rubric_gap.RubricGap",
+      "target": "core.data.labels.rubric_gap.RuleEvidence",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.labels.rubric_gap.RubricGap.__init__",
       "target": "core.data.labels.report_language.ReportLanguages",
@@ -12973,6 +12973,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "core.data.labels.rubric_gap.RuleEvidence",
+      "target": "core.data.labels.rubric_gap.RubricRule",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "core.data.labels.rubric_gap.main",
       "target": "core.data.labels.rubric_gap.RubricGap",
@@ -13006,6 +13012,12 @@
       "kind": "calls",
       "source": "core.data.labels.rubric_gap.main",
       "target": "core.data.labels.rubric_gap.RubricGap.table",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.rubric_gap.main",
+      "target": "core.data.labels.rubric_gap.RuleEvidence",
       "weight": 1
     },
     {
@@ -13246,6 +13258,12 @@
       "kind": "calls",
       "source": "core.data.labels.table_correction.RubricPull.flagged",
       "target": "core.data.labels.rubric_gap.RubricGap.table",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "core.data.labels.table_correction.RubricPull.flagged",
+      "target": "core.data.labels.rubric_gap.RuleEvidence",
       "weight": 1
     },
     {
@@ -14515,6 +14533,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.attention_readout.main",
+      "target": "kneemri.inference.holdout_predictions.ServedModel",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.attention_readout.main",
       "target": "kneemri.inference.holdout_slab.HoldoutSlab.of",
@@ -14529,31 +14553,31 @@
     {
       "kind": "references",
       "source": "kneemri.evaluation.attention_scan.AttentionScan",
+      "target": "kneemri.inference.holdout_predictions.ServedModel",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan",
       "target": "kneemri.inference.holdout_slab.HoldoutSlab",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.attention_scan.AttentionScan",
-      "target": "kneemri.inference.members.Window",
-      "weight": 1
-    },
-    {
-      "kind": "references",
-      "source": "kneemri.evaluation.attention_scan.AttentionScan",
-      "target": "kneemri.models.model.StudyModel",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.attention_scan.AttentionScan._batch",
-      "target": "kneemri.models.model.StudyModel.slot_features",
+      "target": "kneemri.inference.holdout_predictions.ServedModel.crop",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.evaluation.attention_scan.AttentionScan.weights",
       "target": "kneemri.evaluation.attention_scan.AttentionScan._batch",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.attention_scan.AttentionScan.weights",
+      "target": "kneemri.inference.holdout_predictions.ServedModel.autocast",
       "weight": 1
     },
     {
@@ -14727,12 +14751,6 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.attribution.main",
-      "target": "kneemri.evaluation.attribution.Attribution.averaged",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.attribution.main",
       "target": "kneemri.evaluation.attribution.Attribution.depth_by_label",
       "weight": 1
     },
@@ -14830,6 +14848,12 @@
       "kind": "references",
       "source": "kneemri.evaluation.board_transfer.BoardTransfer",
       "target": "kneemri.evaluation.board_transfer.BoardPair",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.board_transfer.BoardTransfer",
+      "target": "kneemri.evaluation.ledger75.Ruler",
       "weight": 1
     },
     {
@@ -15097,6 +15121,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.evaluation.board_transfer.main",
+      "target": "kneemri.evaluation.ledger75.Ruler",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.column_headroom.ColumnHeadroom",
       "target": "kneemri.evaluation.column_headroom.HeadroomRow",
@@ -15309,13 +15339,7 @@
     {
       "kind": "references",
       "source": "kneemri.evaluation.competence_axis.CompetenceAxis",
-      "target": "kneemri.evaluation.pool.Pool",
-      "weight": 1
-    },
-    {
-      "kind": "holds",
-      "source": "kneemri.evaluation.competence_axis.CompetenceAxis",
-      "target": "kneemri.evaluation.scores.LabelScores",
+      "target": "kneemri.evaluation.competence_axis.CompetenceTable",
       "weight": 1
     },
     {
@@ -15339,25 +15363,43 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
-      "target": "kneemri.evaluation.competence_axis.CompetenceAxis._residual",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
       "target": "kneemri.evaluation.competence_axis.CompetenceAxis._share",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.strongest",
-      "target": "kneemri.evaluation.competence_axis.CompetenceAxis._residual",
+      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.read",
+      "target": "kneemri.evaluation.competence_axis.CompetenceTable.residual",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.competence_axis.CompetenceTable",
+      "target": "kneemri.evaluation.competence_axis.CompetenceTable",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.competence_axis.CompetenceTable",
+      "target": "kneemri.evaluation.pool.Pool",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.competence_axis.CompetenceTable",
+      "target": "kneemri.evaluation.scores.LabelScores",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.evaluation.competence_axis.CompetenceAxis.table",
+      "source": "kneemri.evaluation.competence_axis.CompetenceTable.scored",
       "target": "kneemri.evaluation.scores.LabelScores.per_label",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.competence_axis.CompetenceTable.strongest",
+      "target": "kneemri.evaluation.competence_axis.CompetenceTable.residual",
       "weight": 1
     },
     {
@@ -15375,13 +15417,7 @@
     {
       "kind": "calls",
       "source": "kneemri.evaluation.competence_axis.main",
-      "target": "kneemri.evaluation.competence_axis.CompetenceAxis.strongest",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.competence_axis.main",
-      "target": "kneemri.evaluation.competence_axis.CompetenceAxis.table",
+      "target": "kneemri.evaluation.competence_axis.CompetenceTable.scored",
       "weight": 1
     },
     {
@@ -17737,6 +17773,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.ledger75.Ruler",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.ledger75.Ruling",
+      "target": "kneemri.evaluation.scores.LabelScores",
+      "weight": 1
+    },
+    {
       "kind": "construct",
       "source": "kneemri.evaluation.ledger75.main",
       "target": "kneemri.evaluation.ledger75.LedgerSeventyFive",
@@ -18865,15 +18913,15 @@
       "weight": 1
     },
     {
-      "kind": "references",
-      "source": "kneemri.evaluation.noise_binding.NoiseBinding",
-      "target": "kneemri.evaluation.noise_binding.Binding",
+      "kind": "calls",
+      "source": "kneemri.evaluation.noise_binding.Binding.lines",
+      "target": "kneemri.evaluation.noise_binding.Binding.verdict",
       "weight": 1
     },
     {
-      "kind": "calls",
-      "source": "kneemri.evaluation.noise_binding.NoiseBinding.report",
-      "target": "kneemri.evaluation.noise_binding.Binding.verdict",
+      "kind": "references",
+      "source": "kneemri.evaluation.noise_binding.NoiseBinding",
+      "target": "kneemri.evaluation.noise_binding.Binding",
       "weight": 1
     },
     {
@@ -18934,12 +18982,6 @@
       "kind": "calls",
       "source": "kneemri.evaluation.noise_binding.main",
       "target": "kneemri.evaluation.noise_binding.NoiseBinding.probabilities",
-      "weight": 1
-    },
-    {
-      "kind": "calls",
-      "source": "kneemri.evaluation.noise_binding.main",
-      "target": "kneemri.evaluation.noise_binding.NoiseBinding.report",
       "weight": 1
     },
     {
@@ -22606,6 +22648,18 @@
       "kind": "construct",
       "source": "kneemri.evaluation.study_attribution.StudyAttribution.acquired",
       "target": "kneemri.evaluation.study_attribution.AcquisitionCause",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.evaluation.study_attribution.StudyAttribution.caused",
+      "target": "core.data.labels.overcall_audit.OvercallCensus",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.study_attribution.StudyAttribution.caused",
+      "target": "core.data.labels.overcall_audit.OvercallCensus.census",
       "weight": 1
     },
     {
@@ -28239,6 +28293,12 @@
     {
       "kind": "references",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "target": "kneemri.inference.holdout_predictions.ServedModel",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions",
       "target": "kneemri.inference.holdout_slab.HoldoutSlab",
       "weight": 1
     },
@@ -28310,8 +28370,32 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._average",
+      "target": "kneemri.inference.holdout_predictions.ServedModel.autocast",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._average",
+      "target": "kneemri.inference.holdout_predictions.ServedModel.logits",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._logits",
       "target": "kneemri.inference.holdout_predictions.HoldoutPredictions.fits",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._logits",
+      "target": "kneemri.inference.holdout_predictions.ServedModel.autocast",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions._logits",
+      "target": "kneemri.inference.holdout_predictions.ServedModel.logits",
       "weight": 1
     },
     {
@@ -28357,6 +28441,12 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
+      "target": "kneemri.inference.holdout_predictions.ServedModel",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
       "target": "kneemri.inference.holdout_slab.HoldoutSlab.batches",
@@ -28366,6 +28456,24 @@
       "kind": "calls",
       "source": "kneemri.inference.holdout_predictions.HoldoutPredictions.predict",
       "target": "kneemri.inference.norm_adaptation.Adaptation.on",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.holdout_predictions.ServedModel",
+      "target": "kneemri.inference.members.Window",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.inference.holdout_predictions.ServedModel",
+      "target": "kneemri.models.model.StudyModel",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.inference.holdout_predictions.ServedModel.logits",
+      "target": "kneemri.inference.holdout_predictions.ServedModel.crop",
       "weight": 1
     },
     {
@@ -30442,6 +30550,12 @@
       "kind": "references",
       "source": "kneemri.kaggle.entry_offline.EntryOffline",
       "target": "kneemri.kaggle.board_check.BoardRow",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.entry_offline.EntryOffline.__init__",
+      "target": "kneemri.evaluation.ledger75.Ruler.scorer",
       "weight": 1
     },
     {
@@ -42142,6 +42256,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.AlignmentSpread",
+      "label": "AlignmentSpread",
+      "level": "class",
+      "parent": "core.data.corpus.crop_alignment",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.crop_alignment.CropAlignment",
       "label": "CropAlignment",
       "level": "class",
@@ -42646,6 +42768,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.slot_geometry.SlotPairing",
+      "label": "SlotPairing",
+      "level": "class",
+      "parent": "core.data.corpus.slot_geometry",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.slot_reader.Adjacent",
       "label": "Adjacent",
       "level": "class",
@@ -42854,6 +42984,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.window_reader.SliceSpan",
+      "label": "SliceSpan",
+      "level": "class",
+      "parent": "core.data.corpus.window_reader",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.window_reader.WindowReader",
       "label": "WindowReader",
       "level": "class",
@@ -42934,6 +43072,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallCensus",
+      "label": "OvercallCensus",
+      "level": "class",
+      "parent": "core.data.labels.overcall_audit",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.reader_agreement.ReaderAgreement",
       "label": "ReaderAgreement",
       "level": "class",
@@ -43000,6 +43146,14 @@
       "descendants": 0,
       "id": "core.data.labels.rubric_gap.RubricRule",
       "label": "RubricRule",
+      "level": "class",
+      "parent": "core.data.labels.rubric_gap",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.rubric_gap.RuleEvidence",
+      "label": "RuleEvidence",
       "level": "class",
       "parent": "core.data.labels.rubric_gap",
       "role": "satellite"
@@ -43446,6 +43600,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceTable",
+      "label": "CompetenceTable",
+      "level": "class",
+      "parent": "kneemri.evaluation.competence_axis",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.diversity_slope.DiversitySlope",
       "label": "DiversitySlope",
       "level": "class",
@@ -43880,6 +44042,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.ledger75.Ruler",
       "label": "Ruler",
+      "level": "class",
+      "parent": "kneemri.evaluation.ledger75",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.Ruling",
+      "label": "Ruling",
       "level": "class",
       "parent": "kneemri.evaluation.ledger75",
       "role": "satellite"
@@ -45387,6 +45557,14 @@
       "level": "class",
       "parent": "kneemri.inference.holdout_predictions",
       "role": "primary"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.ServedModel",
+      "label": "ServedModel",
+      "level": "class",
+      "parent": "kneemri.inference.holdout_predictions",
+      "role": "satellite"
     },
     {
       "descendants": 0,
@@ -48158,14 +48336,6 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.band_coverage.BandCoverage.interval",
-      "label": "interval",
-      "level": "method",
-      "parent": "core.data.corpus.band_coverage.BandCoverage",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.band_coverage.BandCoverage.measure_study",
       "label": "measure_study",
       "level": "method",
@@ -48186,6 +48356,14 @@
       "label": "report",
       "level": "method",
       "parent": "core.data.corpus.band_coverage.BandCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.band_coverage.SlotShares.interval",
+      "label": "interval",
+      "level": "method",
+      "parent": "core.data.corpus.band_coverage.SlotShares",
       "role": null
     },
     {
@@ -48358,10 +48536,34 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.crop_alignment.CropAlignment.dump",
+      "id": "core.data.corpus.crop_alignment.AlignmentSpread.dump",
       "label": "dump",
       "level": "method",
-      "parent": "core.data.corpus.crop_alignment.CropAlignment",
+      "parent": "core.data.corpus.crop_alignment.AlignmentSpread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.AlignmentSpread.plane_line",
+      "label": "plane_line",
+      "level": "method",
+      "parent": "core.data.corpus.crop_alignment.AlignmentSpread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.AlignmentSpread.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.corpus.crop_alignment.AlignmentSpread",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.crop_alignment.AlignmentSpread.spread",
+      "label": "spread",
+      "level": "method",
+      "parent": "core.data.corpus.crop_alignment.AlignmentSpread",
       "role": null
     },
     {
@@ -48376,30 +48578,6 @@
       "descendants": 0,
       "id": "core.data.corpus.crop_alignment.CropAlignment.offset",
       "label": "offset",
-      "level": "method",
-      "parent": "core.data.corpus.crop_alignment.CropAlignment",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.crop_alignment.CropAlignment.plane_line",
-      "label": "plane_line",
-      "level": "method",
-      "parent": "core.data.corpus.crop_alignment.CropAlignment",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.crop_alignment.CropAlignment.report",
-      "label": "report",
-      "level": "method",
-      "parent": "core.data.corpus.crop_alignment.CropAlignment",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.crop_alignment.CropAlignment.spread",
-      "label": "spread",
       "level": "method",
       "parent": "core.data.corpus.crop_alignment.CropAlignment",
       "role": null
@@ -50118,30 +50296,6 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.slot_geometry.SlotGeometry._covered",
-      "label": "_covered",
-      "level": "method",
-      "parent": "core.data.corpus.slot_geometry.SlotGeometry",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.slot_geometry.SlotGeometry._distributions",
-      "label": "_distributions",
-      "level": "method",
-      "parent": "core.data.corpus.slot_geometry.SlotGeometry",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.slot_geometry.SlotGeometry.coverage",
-      "label": "coverage",
-      "level": "method",
-      "parent": "core.data.corpus.slot_geometry.SlotGeometry",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.slot_geometry.SlotGeometry.frame",
       "label": "frame",
       "level": "method",
@@ -50158,24 +50312,8 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.corpus.slot_geometry.SlotGeometry.pairs",
-      "label": "pairs",
-      "level": "method",
-      "parent": "core.data.corpus.slot_geometry.SlotGeometry",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.data.corpus.slot_geometry.SlotGeometry.placed",
       "label": "placed",
-      "level": "method",
-      "parent": "core.data.corpus.slot_geometry.SlotGeometry",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.corpus.slot_geometry.SlotGeometry.report",
-      "label": "report",
       "level": "method",
       "parent": "core.data.corpus.slot_geometry.SlotGeometry",
       "role": null
@@ -50186,6 +50324,46 @@
       "label": "triple",
       "level": "method",
       "parent": "core.data.corpus.slot_geometry.SlotGeometry",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_geometry.SlotPairing._covered",
+      "label": "_covered",
+      "level": "method",
+      "parent": "core.data.corpus.slot_geometry.SlotPairing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_geometry.SlotPairing._distributions",
+      "label": "_distributions",
+      "level": "method",
+      "parent": "core.data.corpus.slot_geometry.SlotPairing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_geometry.SlotPairing.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "core.data.corpus.slot_geometry.SlotPairing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_geometry.SlotPairing.pairs",
+      "label": "pairs",
+      "level": "method",
+      "parent": "core.data.corpus.slot_geometry.SlotPairing",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.slot_geometry.SlotPairing.report",
+      "label": "report",
+      "level": "method",
+      "parent": "core.data.corpus.slot_geometry.SlotPairing",
       "role": null
     },
     {
@@ -51166,6 +51344,22 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.window_reader.SliceSpan.covers",
+      "label": "covers",
+      "level": "method",
+      "parent": "core.data.corpus.window_reader.SliceSpan",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.corpus.window_reader.SliceSpan.stop",
+      "label": "stop",
+      "level": "method",
+      "parent": "core.data.corpus.window_reader.SliceSpan",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.window_reader.WindowReader.read",
       "label": "read",
       "level": "method",
@@ -51630,32 +51824,8 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.overcall_audit.OvercallAudit.census",
-      "label": "census",
-      "level": "method",
-      "parent": "core.data.labels.overcall_audit.OvercallAudit",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "core.data.labels.overcall_audit.OvercallAudit.classify",
       "label": "classify",
-      "level": "method",
-      "parent": "core.data.labels.overcall_audit.OvercallAudit",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.overcall_audit.OvercallAudit.compare",
-      "label": "compare",
-      "level": "method",
-      "parent": "core.data.labels.overcall_audit.OvercallAudit",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "core.data.labels.overcall_audit.OvercallAudit.coverage",
-      "label": "coverage",
       "level": "method",
       "parent": "core.data.labels.overcall_audit.OvercallAudit",
       "role": null
@@ -51670,26 +51840,50 @@
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.overcall_audit.OvercallAudit.incidence",
+      "id": "core.data.labels.overcall_audit.OvercallCensus.census",
+      "label": "census",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallCensus.compare",
+      "label": "compare",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallCensus.coverage",
+      "label": "coverage",
+      "level": "method",
+      "parent": "core.data.labels.overcall_audit.OvercallCensus",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "core.data.labels.overcall_audit.OvercallCensus.incidence",
       "label": "incidence",
       "level": "method",
-      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "parent": "core.data.labels.overcall_audit.OvercallCensus",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.overcall_audit.OvercallAudit.interval",
+      "id": "core.data.labels.overcall_audit.OvercallCensus.interval",
       "label": "interval",
       "level": "method",
-      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "parent": "core.data.labels.overcall_audit.OvercallCensus",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "core.data.labels.overcall_audit.OvercallAudit.limits",
+      "id": "core.data.labels.overcall_audit.OvercallCensus.limits",
       "label": "limits",
       "level": "method",
-      "parent": "core.data.labels.overcall_audit.OvercallAudit",
+      "parent": "core.data.labels.overcall_audit.OvercallCensus",
       "role": null
     },
     {
@@ -53486,14 +53680,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.attribution.Attribution.averaged",
-      "label": "averaged",
-      "level": "method",
-      "parent": "kneemri.evaluation.attribution.Attribution",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.attribution.Attribution.depth_by_label",
       "label": "depth_by_label",
       "level": "method",
@@ -53570,6 +53756,14 @@
       "label": "lines",
       "level": "method",
       "parent": "kneemri.evaluation.attribution.AttributionReport",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.attribution.Diagnostics.depth",
+      "label": "depth",
+      "level": "method",
+      "parent": "kneemri.evaluation.attribution.Diagnostics",
       "role": null
     },
     {
@@ -54014,14 +54208,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.competence_axis.CompetenceAxis._residual",
-      "label": "_residual",
-      "level": "method",
-      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.evaluation.competence_axis.CompetenceAxis._share",
       "label": "_share",
       "level": "method",
@@ -54038,18 +54224,26 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.competence_axis.CompetenceAxis.strongest",
-      "label": "strongest",
+      "id": "kneemri.evaluation.competence_axis.CompetenceTable.residual",
+      "label": "residual",
       "level": "method",
-      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceTable",
       "role": null
     },
     {
       "descendants": 0,
-      "id": "kneemri.evaluation.competence_axis.CompetenceAxis.table",
-      "label": "table",
+      "id": "kneemri.evaluation.competence_axis.CompetenceTable.scored",
+      "label": "scored",
       "level": "method",
-      "parent": "kneemri.evaluation.competence_axis.CompetenceAxis",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceTable",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.competence_axis.CompetenceTable.strongest",
+      "label": "strongest",
+      "level": "method",
+      "parent": "kneemri.evaluation.competence_axis.CompetenceTable",
       "role": null
     },
     {
@@ -55678,6 +55872,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.ledger75.Ruler.scorer",
+      "label": "scorer",
+      "level": "method",
+      "parent": "kneemri.evaluation.ledger75.Ruler",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.ledger75.main",
       "label": "main",
       "level": "method",
@@ -56374,6 +56576,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.noise_binding.Binding.lines",
+      "label": "lines",
+      "level": "method",
+      "parent": "kneemri.evaluation.noise_binding.Binding",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.noise_binding.Binding.verdict",
       "label": "verdict",
       "level": "method",
@@ -56408,14 +56618,6 @@
       "descendants": 0,
       "id": "kneemri.evaluation.noise_binding.NoiseBinding.probabilities",
       "label": "probabilities",
-      "level": "method",
-      "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
-      "role": null
-    },
-    {
-      "descendants": 0,
-      "id": "kneemri.evaluation.noise_binding.NoiseBinding.report",
-      "label": "report",
       "level": "method",
       "parent": "kneemri.evaluation.noise_binding.NoiseBinding",
       "role": null
@@ -62826,6 +63028,30 @@
       "label": "predict",
       "level": "method",
       "parent": "kneemri.inference.holdout_predictions.HoldoutPredictions",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.ServedModel.autocast",
+      "label": "autocast",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_predictions.ServedModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.ServedModel.crop",
+      "label": "crop",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_predictions.ServedModel",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.inference.holdout_predictions.ServedModel.logits",
+      "label": "logits",
+      "level": "method",
+      "parent": "kneemri.inference.holdout_predictions.ServedModel",
       "role": null
     },
     {

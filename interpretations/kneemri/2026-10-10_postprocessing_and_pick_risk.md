@@ -160,7 +160,8 @@ differ in is expected upside, `E[max(pick1, pick2) − pick1]`:
 | `oaifreeshare` | 0.00045 | 0.00027 | 0.00015 | 0.00007 |
 
 Levers on the OAI-free entry itself (19:06Z, same 562 rows, `oaifree_levers.py`). Adding a soup as a seventh
-seat moves ours+reader at ⅔ by +0.0007 (`basinsoup2_k4`, 0.9108 → 0.9115) or +0.0008 (`basinsoup_dmlb_k7`).
+seat moves the ours+reader blend at ⅔ from 0.9108 to 0.9115 (+0.0007) with the first soup, or +0.0008 with
+the second (the soups are `basinsoup2_k4` and `basinsoup_dmlb_k7`).
 Giving the reader ⅔ of Fracture moves it +0.0006 [−0.0009, +0.0023]. All three are knob-sized, so none gets a
 slot. The OAI-free side is saturated at what the reader adds.
 
