@@ -83,11 +83,11 @@ def test_plane_line():
 def test_plane_lines():
     """One row per plane, in name order, each counting only its own plane's slots."""
     slots = [SlotOffset("sag", 3.0, -4.0), SlotOffset("cor", 0.0, 1.0), SlotOffset("sag", 3.0, -4.0)]
-    lines = CropAlignment().plane_lines(slots)
+    lines = AlignmentSpread().plane_lines(slots)
     assert [line.split()[0] for line in lines] == ["cor", "sag"]
     assert lines[0].endswith("      1")
     assert lines[1].endswith("      2")
-    assert CropAlignment().plane_lines([]) == []
+    assert AlignmentSpread().plane_lines([]) == []
 
 
 def test_measure_study(tmp_path: Path):
