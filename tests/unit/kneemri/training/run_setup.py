@@ -7,7 +7,8 @@ import torch
 
 from core.findings import TARGETS
 from kneemri.models.backbone import ENCODERS
-from kneemri.models.model import NO_LAYER_DECAY, StudyDesign
+from kneemri.models.encoder_surgery import NO_LAYER_DECAY
+from kneemri.models.study_design import StudyDesign
 from kneemri.models.variants import SMALL
 from kneemri.training.adaptation import Adaptation
 from kneemri.training.config_tree import TrainConfig
@@ -164,7 +165,8 @@ def test_trainer(tmp_path: Path):
 
     from core.data.corpus.slot_reader import GROUP  # noqa: PLC0415
     from kneemri.models.ema import LiveWeights, WeightAverage  # noqa: PLC0415
-    from kneemri.models.model import StudyDesign, StudyModel  # noqa: PLC0415
+    from kneemri.models.model import StudyModel  # noqa: PLC0415
+    from kneemri.models.study_design import StudyDesign  # noqa: PLC0415
     from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision  # noqa: PLC0415
 
     from ..models.model import DIM, SLOTS, _FakeBackbone  # noqa: PLC0415

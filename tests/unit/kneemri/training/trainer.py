@@ -12,8 +12,10 @@ from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.models.drop_path import NO_DROP
-from kneemri.models.model import NO_LAYER_DECAY, StudyDesign, StudyModel
+from kneemri.models.encoder_surgery import NO_LAYER_DECAY
+from kneemri.models.model import StudyModel
 from kneemri.models.slot_head import REPORT_DIMS
+from kneemri.models.study_design import StudyDesign
 from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
 from kneemri.training.augmentation import (
     INTENSITY_AUGMENT,

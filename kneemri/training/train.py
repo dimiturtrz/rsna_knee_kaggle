@@ -17,7 +17,7 @@ from core.data.corpus.slots import SCHEMES
 from core.data.labels.targets import Targets
 from core.paths import DataRoot
 from kneemri.models.backbone import ENCODERS
-from kneemri.models.model import StudyDesign
+from kneemri.models.study_design import StudyDesign
 from kneemri.runs.member_record import MemberRecord
 from kneemri.runs.run_identity import RunIdentity
 from kneemri.training.config_tree import TrainConfig

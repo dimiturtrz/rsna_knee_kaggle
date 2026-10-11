@@ -16,16 +16,10 @@ from core.data.labels.targets import (
     Supervision,
     Targets,
 )
-from kneemri.models.encoder_surgery import ADAPTERS, OPENED_BLOCKS
-from kneemri.models.model import (
-    COMPILED_ENCODER,
-    DEPTH_REGIONS,
-    NO_LAYER_DECAY,
-    RECOMPUTING,
-    StudyDesign,
-    StudyModel,
-)
+from kneemri.models.encoder_surgery import ADAPTERS, NO_LAYER_DECAY, OPENED_BLOCKS
+from kneemri.models.model import COMPILED_ENCODER, DEPTH_REGIONS, RECOMPUTING, StudyModel
 from kneemri.models.slice_pooling import ATTEND, CHANNELS, MAXIMUM
+from kneemri.models.study_design import StudyDesign
 from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.gradient_clip import UNCLIPPED

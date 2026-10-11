@@ -21,7 +21,8 @@ from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
 from kneemri.inference.test_time import SpatialViews
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
+from kneemri.models.study_design import StudyDesign
 from kneemri.models.token_pooling import CLS_MEAN_FOCAL
 
 DIM = 12

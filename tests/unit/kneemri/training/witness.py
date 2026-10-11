@@ -9,7 +9,7 @@ arithmetic over the equivalence classes of group layout, which a trainer cannot 
 import pytest
 import torch
 
-from kneemri.models.model import NO_LAYER_DECAY
+from kneemri.models.encoder_surgery import NO_LAYER_DECAY
 from kneemri.training.witness import OptimiserWitness
 
 ANCHOR = 9.8e-5

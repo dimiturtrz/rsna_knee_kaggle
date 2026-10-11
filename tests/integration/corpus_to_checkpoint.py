@@ -29,7 +29,8 @@ from kneemri.inference.member_package import MemberPackage
 from kneemri.inference.members import MemberConfig
 from kneemri.kaggle.package_members import MemberManifest, PackagedMember
 from kneemri.models.encoder import Encoder
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
+from kneemri.models.study_design import StudyDesign
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.fitting import Fitting, Fold, RunPlan

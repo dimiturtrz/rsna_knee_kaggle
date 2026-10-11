@@ -20,6 +20,7 @@ import torch
 from torch import nn
 
 from kneemri.models.lora import LoRALinear
+from kneemri.models.slice_shift import SliceShift
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +172,14 @@ class EncoderSurgery:
             children = list(holder)
             return children if len({type(child) for child in children}) == 1 else []
         return []
+
+    def slice_shift(self, count: int, dim: int) -> SliceShift:
+        """Neighbour mixing hooked in front of the last `count` blocks — see `SliceShift`.
+
+        Built here because the blocks are found here; the model registers what this returns as `shift`,
+        so the state-dict key every slice-shift member was saved under does not move.
+        """
+        return SliceShift(self.blocks()[-count:], dim)
 
     def pin_frozen_norms(self) -> int:
         """Put every FROZEN normalization layer that keeps running statistics back into eval mode.
