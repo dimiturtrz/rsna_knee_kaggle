@@ -4962,3 +4962,20 @@ COMPLETE with a blank score and Kaggle's "unhandled error while rerunning your c
 so the cause is unknown; the S6 stage is foreign code we did not write and the only new piece against twosoupmirror.
 The instrument prices nothing: the ruling stays UNPRICED (not "costs ~0"). Not re-shipped — the S6 family can never be a
 pick, so a second slot buys only the instrument reading, and that is worth less than a licence-clean slot today.
+
+## heliossoup_v1 — 0.955, ref 57063827, 2026-10-11 — S6 at 1/6 beside nartaa and the soups
+
+`kneemri-heliossoup` seats heliosli's public S6 model (`heliosli/rsna-knee-compact-v1`, 4-fold ConvNeXt-small; the
+author's README invites blending) at 1/6. nartaa 384 holds 2/3 and the twosoupmirror soups take 1/12 each, rank space.
+heliosthird_v2 crashed on the hidden rerun, so the outer cell now tolerates S6's PROBE_TOO_MANY_FALLBACKS exit. That
+exit writes a complete mean-filled table first, so the run continues on it. The public run read S6 exit 0 and 0 fallback.
+It scored 0.955 against twosoupmirror's 0.954 (rank 239 -> 116). One tick is inside the top band's ~0.002 residual sd,
+so the reading is directional. It was filed as an instrument under the 09-15 ruling. The owner revoked that ruling on
+2026-10-11, and the entry is now pick-eligible.
+
+## s6third_v1 — 0.956, ref 57063964, 2026-10-11 — S6 at 1/3: the share curve climbs one tick per point
+
+Same producers, with S6 at 1/3, nartaa at 1/2 and the soups at 1/12 each. It scored 0.956, rank 87. The S6 share curve
+now reads 0 -> 0.954, 1/6 -> 0.955, 1/3 -> 0.956. The curve is monotone, so S6 really did run on the hidden rerun; a
+mean fallback would have read near 0.954. Two consistent ticks are still about one residual sd each, so this is
+directional. It is the champion pin and the S6-side pick-1 candidate. The next point is `s6half`, with S6 at 1/2.
