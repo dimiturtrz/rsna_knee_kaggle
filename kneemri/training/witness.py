@@ -15,7 +15,7 @@ import logging
 
 import torch
 
-from kneemri.models.model import NO_LAYER_DECAY
+from kneemri.models.encoder_surgery import NO_LAYER_DECAY
 
 logger = logging.getLogger(__name__)
 

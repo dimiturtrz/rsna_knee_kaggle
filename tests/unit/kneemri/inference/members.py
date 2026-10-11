@@ -14,7 +14,8 @@ from core.data.corpus.slot_reader import Band, Reading
 from core.data.corpus.slots import SCHEMES, Routing
 from kneemri.inference.member_package import MemberPackage
 from kneemri.inference.members import LEGACY_SLICES, RESIZED_FROM, Member, MemberConfig
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
+from kneemri.models.study_design import StudyDesign
 from kneemri.models.variants import SMALL
 
 from ..runs.member_record import OPTIONS

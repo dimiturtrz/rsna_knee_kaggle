@@ -80,6 +80,16 @@ class _StagedBackbone(nn.Module):
         self.layers = nn.ModuleList([_Stage(depth) for depth in depths])
 
 
+def test_slice_shift():
+    """One gate pair per shifted block, hooked on the LAST `count` blocks and on no other."""
+    surgery = _surgery()
+    shift = surgery.slice_shift(2, DIM)
+    assert tuple(shift.gates.shape) == (2, 2, DIM)
+    assert not shift.gates.any(), "zero gates, so a shifted run starts at the control's function"
+    hooked = [bool(block._forward_pre_hooks) for block in surgery.blocks()]
+    assert hooked == [False] * (BLOCKS - 2) + [True, True]
+
+
 def test_blocks():
     """The most repeated element type, wherever it hangs — not `encoder.layer`, which is one path."""
     surgery = _surgery()

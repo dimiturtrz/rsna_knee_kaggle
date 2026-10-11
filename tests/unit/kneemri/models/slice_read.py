@@ -8,8 +8,9 @@ from torch import Tensor, nn
 
 from kneemri.models.depth_window import DepthWindow
 from kneemri.models.grid_fit import INTERPOLATE
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
 from kneemri.models.slice_read import BYTE_SCALE, SliceRead
+from kneemri.models.study_design import StudyDesign
 from kneemri.models.token_pooling import MEAN
 from kneemri.models.volume_read import VolumeRead
 

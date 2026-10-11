@@ -21,9 +21,9 @@ from core.data.corpus.folds import FitPositions
 from core.data.corpus.slot_reader import IMAGE_SIZE, SLICE_BAND, SPREAD, Band, Reading
 from core.data.corpus.slots import CANONICAL_SCHEME, FIRST_MAXIMAL, Routing
 from core.data.corpus.study_cache import StudyCache
-from kneemri.models.model import StudyDesign
 from kneemri.models.slice_pooling import CHANNELS, SLICE_POOLINGS
 from kneemri.models.slot_head import ATTENDED, SLOT_POOLINGS
+from kneemri.models.study_design import StudyDesign
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 from kneemri.runs.member_record import RunStamp
 from kneemri.training.adaptation import EncoderConfig

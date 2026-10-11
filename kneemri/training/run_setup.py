@@ -15,7 +15,8 @@ from numpy.typing import NDArray
 
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.encoder import Encoder
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
+from kneemri.models.study_design import StudyDesign
 from kneemri.training.adaptation import Adaptation
 from kneemri.training.augmentation import AugmentConfig
 from kneemri.training.config_tree import TrainConfig

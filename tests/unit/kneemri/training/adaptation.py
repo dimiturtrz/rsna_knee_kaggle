@@ -2,8 +2,7 @@
 
 import pytest
 
-from kneemri.models.encoder_surgery import NO_OFFSET
-from kneemri.models.model import NO_LAYER_DECAY
+from kneemri.models.encoder_surgery import NO_LAYER_DECAY, NO_OFFSET
 from kneemri.training.adaptation import WEIGHT_DECAY, Adaptation
 
 RATIO = 125

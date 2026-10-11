@@ -18,7 +18,8 @@ from kneemri.inference.read_groups import SharedRead
 from kneemri.inference.test_time import SpatialViews, WindowPooling
 from kneemri.inference.vote import LogitAverage
 from kneemri.models.backbone import ENCODERS
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
+from kneemri.models.study_design import StudyDesign
 
 SEED = 2026
 DIM = 8

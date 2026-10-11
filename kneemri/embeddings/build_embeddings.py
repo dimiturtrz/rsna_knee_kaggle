@@ -19,8 +19,9 @@ from core.wakelock import Wakelock
 from kneemri.device import VisibleCards
 from kneemri.embeddings.embedding_cache import EmbeddingCache, EmbeddingSpec
 from kneemri.models.backbone import ENCODERS
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
 from kneemri.models.slice_pooling import MAXIMUM, SLICE_POOLINGS
+from kneemri.models.study_design import StudyDesign
 from kneemri.models.token_pooling import CLS_MEAN, POOL_PARTS
 from kneemri.models.variants import SMALL
 

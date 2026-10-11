@@ -21,9 +21,10 @@ import pytest
 import torch
 
 from kneemri.models.encoder import Encoder
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
 from kneemri.models.slice_pooling import SLICE_POOLINGS
 from kneemri.models.slot_head import SLOT_POOLINGS
+from kneemri.models.study_design import StudyDesign
 from kneemri.training import run_setup as build_module
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.run_setup import RunSetup

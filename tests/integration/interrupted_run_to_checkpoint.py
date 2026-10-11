@@ -21,7 +21,8 @@ from core.data.corpus.study_cache import CachedCorpus
 from core.data.labels.targets import Targets
 from core.findings import TARGETS
 from kneemri.models.encoder import Encoder
-from kneemri.models.model import StudyDesign, StudyModel
+from kneemri.models.model import StudyModel
+from kneemri.models.study_design import StudyDesign
 from kneemri.runs.member_record import MemberRecord
 from kneemri.training.config_tree import TrainConfig
 from kneemri.training.fitting import Fitted, Fitting, Fold, RunPlan

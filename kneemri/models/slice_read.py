@@ -60,8 +60,8 @@ class SliceRead:
         registers, which must be excluded from the patch pooling. A tubelet trunk has no class token at
         all — the first token is a patch.
 
-        Primitives rather than the `StudyDesign` value that holds them, because the design lives with
-        the model and this module is one of the model's imports: taking the type would be a cycle.
+        Primitives rather than the `StudyDesign` value that holds them, so this module stays a leaf the
+        model reads through rather than one more importer of the design.
         """
         config = getattr(backbone, "config", None)
         volume = VolumeRead.of(config, pool, slice_pooling)
