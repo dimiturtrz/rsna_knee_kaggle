@@ -37,7 +37,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from core import cli
-from kneemri.evaluation.ledger75 import LedgerSeventyFive
+from kneemri.evaluation.ledger75 import LedgerSeventyFive, Ruler
 from kneemri.evaluation.record_mix import VOTE_RULES, RecordMix
 from kneemri.evaluation.scores import LabelScores
 from kneemri.kaggle.board_check import RECORD, BoardCensus, BoardRow
@@ -45,9 +45,9 @@ from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
-RULERS: dict[str, Callable[[], LabelScores]] = {
-    "midpoint": LabelScores,
-    "ledger75": lambda: LedgerSeventyFive().scorer(),
+RULERS: dict[Ruler, Callable[[], LabelScores]] = {
+    Ruler.MIDPOINT: LabelScores,
+    Ruler.LEDGER75: lambda: LedgerSeventyFive().scorer(),
 }
 """The cut an entry's offline number is read under, and the column that number goes in.
 
@@ -56,8 +56,6 @@ CARRIED THAT FIELD — `git log -S offline75` finds the reader and no data commi
 arm of the transfer fit has always dropped every row and reported on an empty set, while `ledger75.py:26-28`
 cites board evidence out of that arm. This is the producer that column never had.
 """
-
-COLUMNS: dict[str, str] = {"midpoint": "offline", "ledger75": "offline75"}
 
 FRAME_GAP = 0.0062
 """How far a recomputed midpoint may sit from a recorded `offline` before the two are different questions.
@@ -99,14 +97,14 @@ class EntryOffline:
     """Each board entry's offline number, or the reason it does not get one."""
 
     def __init__(
-        self, processed: Path, record: Path = RECORD, vote: str = DEFAULT_VOTE, ruler: str = "midpoint"
+        self, processed: Path, record: Path = RECORD, vote: str = DEFAULT_VOTE, ruler: Ruler = Ruler.MIDPOINT
     ) -> None:
         self.processed = processed
         self.record = record
         self.vote = vote
         self.ruler = ruler
         self.scores = RULERS[ruler]()
-        self.column = COLUMNS[ruler]
+        self.column = ruler.column
 
     def stored(self) -> dict[str, dict[str, object]]:
         """Every recorded line by entry id, because a column this file writes is one `BoardRow` cannot see."""
@@ -242,7 +240,12 @@ def main() -> None:
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--record", type=Path, default=RECORD, help="the submission record")
     command.parser.add_argument("--vote", choices=tuple(VOTE_RULES), default=DEFAULT_VOTE)
-    command.parser.add_argument("--ruler", choices=tuple(RULERS), default="midpoint", help="the cut, and the column")
+    command.parser.add_argument(
+        "--ruler",
+        choices=[ruler.value for ruler in Ruler],
+        default=Ruler.MIDPOINT.value,
+        help="the cut, and the column",
+    )
     command.parser.add_argument(
         "--check", action="store_true", help="recompute THIS RULER's column and name every cell it cannot reproduce"
     )
@@ -250,7 +253,7 @@ def main() -> None:
     arguments = command.parsed()
     root = command.rooted(arguments)
 
-    entries = EntryOffline(root.models(), arguments.record, arguments.vote, arguments.ruler)
+    entries = EntryOffline(root.models(), arguments.record, arguments.vote, Ruler(arguments.ruler))
     if arguments.check:
         gaps = entries.mismatched()
         command.report([f"{name} recorded {was:.4f}, recomputed {now:.4f}" for name, (was, now) in gaps.items()])

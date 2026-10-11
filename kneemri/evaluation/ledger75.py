@@ -32,6 +32,7 @@ import hashlib
 import logging
 from collections import Counter
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
 from typing import cast
 
@@ -53,6 +54,22 @@ tuned one: it is the only cut that separates 0.68 from 0.82 given the five level
 
 MIDPOINT_COLUMNS: tuple[str, ...] = ("Medial Meniscus", "Baker's")
 """The two findings whose 0.68 rung carries real positives, so the recut costs them their ruler."""
+
+
+class Ruler(StrEnum):
+    """The two cuts an offline number is read under, by the name every CLI and record field uses."""
+
+    MIDPOINT = "midpoint"
+    LEDGER75 = "ledger75"
+
+    @property
+    def column(self) -> str:
+        """The `comp/board.jsonl` field a number read under this ruler is recorded in."""
+        return RECORD_COLUMNS[self]
+
+
+RECORD_COLUMNS: dict[Ruler, str] = {Ruler.MIDPOINT: "offline", Ruler.LEDGER75: "offline75"}
+"""One field per ruler, so a row can never hold a number whose cut its column name does not state."""
 
 
 @dataclass(frozen=True)

@@ -8,7 +8,7 @@ import torch
 from numpy.typing import NDArray
 
 from core.findings import TARGETS
-from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, Ledger75Row, LedgerSeventyFive
+from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, Ledger75Row, LedgerSeventyFive, Ruler
 from kneemri.evaluation.member_pool import MemberDeclines
 from kneemri.evaluation.scores import LabelScores
 from kneemri.runs.holdout_record import HoldoutRecord
@@ -245,3 +245,10 @@ def test_refusal() -> None:
     assert LedgerSeventyFive.refusal(spanning, Path("declines"), compared=True).startswith("--only spans 2")
     assert "VOID" in LedgerSeventyFive.refusal([_plain("x", void=True)], Path("declines"), compared=False)
     assert not LedgerSeventyFive.refusal([_plain("a")], Path("declines"), compared=True)
+
+
+def test_column():
+    """Each ruler records into its own field, and the midpoint keeps the field every older row carries."""
+    assert Ruler.MIDPOINT.column == "offline"
+    assert Ruler.LEDGER75.column == "offline75"
+    assert len({ruler.column for ruler in Ruler}) == len(Ruler)

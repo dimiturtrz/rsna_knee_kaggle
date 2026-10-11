@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
+from kneemri.evaluation.ledger75 import Ruler
 from kneemri.kaggle.entry_offline import FRAME_GAP, SCOPE_KEY, EntryOffline
 from kneemri.runs.holdout_record import HoldoutRecord
 
@@ -81,7 +82,7 @@ def test_mismatched_reads_its_own_rulers_column(tmp_path: Path):
     midpoint and compares it against the midpoint column reports the same gap whatever `--ruler` says,
     which is a clean report over a column it never read.
     """
-    entries = EntryOffline(tmp_path, _board(tmp_path), ruler="ledger75")
+    entries = EntryOffline(tmp_path, _board(tmp_path), ruler=Ruler.LEDGER75)
 
     assert entries.mismatched() == {}, "no row carries an offline75 cell, so there is nothing to reproduce"
 
