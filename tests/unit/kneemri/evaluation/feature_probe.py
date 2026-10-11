@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 from core.findings import TARGETS
-from kneemri.evaluation.feature_probe import SELECTION, FeatureProbe, ProbeCorpus, ProbeResult
+from kneemri.evaluation.feature_probe import SELECTION, FeatureProbe, ProbeCorpus, ProbeResult, ProbeSplit
 from kneemri.evaluation.slice_readout import SliceMax, SliceMean
 
 
@@ -72,9 +72,23 @@ def test_holdout_record() -> None:
     truth = (features[:, :1] > 0).astype(np.int64).repeat(len(TARGETS), axis=1)
     holdout = np.arange(10, dtype=np.int64)
     training = np.arange(10, 40, dtype=np.int64)
-    record = FeatureProbe(penalty=1.0).holdout_record(features, truth, holdout, training)
+    record = FeatureProbe(penalty=1.0).holdout_record(ProbeSplit(features, truth, training, holdout))
     assert record.shape == (len(holdout), len(TARGETS))
     assert np.isfinite(record).all()
+
+
+def test_fitted() -> None:
+    """Weights come from the training rows alone: corrupting the holdout rows leaves them unchanged."""
+    generator = np.random.default_rng(5)
+    features = generator.normal(size=(40, 3))
+    truth = (features[:, :1] > 0).astype(np.int64).repeat(len(TARGETS), axis=1)
+    holdout, training = np.arange(10, dtype=np.int64), np.arange(10, 40, dtype=np.int64)
+    probe = FeatureProbe(penalty=1.0)
+    clean = probe.fitted(ProbeSplit(features, truth, training, holdout))
+    corrupted = features.copy()
+    corrupted[holdout] = 1e6
+    assert clean.shape == (features.shape[1] + 1, len(TARGETS))
+    assert np.allclose(clean, probe.fitted(ProbeSplit(corrupted, truth, training, holdout)))
 
 
 def test_scored() -> None:
@@ -82,7 +96,9 @@ def test_scored() -> None:
     signal = generator.normal(size=(80, 1))
     features = np.hstack([signal, generator.normal(size=(80, 3))])
     truth = (signal > 0).astype(np.int64).repeat(len(TARGETS), axis=1)
-    result = FeatureProbe(penalty=1.0).scored("t", features, truth, holdout=np.arange(60, 80), training=np.arange(60))
+    result = FeatureProbe(penalty=1.0).scored(
+        "t", ProbeSplit(features, truth, training=np.arange(60), holdout=np.arange(60, 80))
+    )
     assert result.studies == 20
     assert result.dimensions == 4
     assert result.mean > 0.9
@@ -147,10 +163,10 @@ def _probe_pool(studies: int, dim: int) -> tuple[np.ndarray, np.ndarray, np.ndar
 def test_chosen() -> None:
     """The penalty comes from the grid, and the caller's holdout never enters the choice."""
     features, truth, training = _probe_pool(studies=240, dim=6)
-    assert FeatureProbe.chosen(features, truth, training) in set(SELECTION)
+    assert FeatureProbe.chosen(ProbeSplit(features, truth, training, np.arange(0))) in set(SELECTION)
 
 
 def test_inner_area() -> None:
     """A separable pool reads above chance on the inner scoring positions."""
     features, truth, training = _probe_pool(studies=240, dim=6)
-    assert FeatureProbe(1.0).inner_area(features, truth, training[:120], training[120:]) > 0.5
+    assert FeatureProbe(1.0).inner_area(ProbeSplit(features, truth, training[:120], training[120:])) > 0.5

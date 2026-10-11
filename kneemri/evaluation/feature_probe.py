@@ -142,6 +142,21 @@ class ProbeResult:
         return f"{self.trunk:<14} dim={self.dimensions:<5} n={self.studies:<5} mean={self.mean:.4f}"
 
 
+@dataclass(frozen=True)
+class ProbeSplit:
+    """One trunk's pooled features and graded truth, with the positions a probe fits on and scores on.
+
+    The four always travel together — every read fits on `training` and scores on `holdout` of the same
+    two arrays — so they are one value. The nested penalty search is the same shape one level down: its
+    inner fit and inner score positions are a split of the training rows.
+    """
+
+    features: Float[NDArray[np.float64], "studies dim"]
+    truth: Int[NDArray[np.int64], "studies findings"]
+    training: Int[NDArray[np.int64], " trained"]
+    holdout: Int[NDArray[np.int64], " held"]
+
+
 class FeatureProbe:
     """A ridge read of pooled frozen features against the twelve findings, on the fold-0 split."""
 
@@ -149,12 +164,7 @@ class FeatureProbe:
         self.penalty = penalty
 
     @classmethod
-    def chosen(
-        cls,
-        features: Float[NDArray[np.float64], "studies dim"],
-        truth: Int[NDArray[np.int64], "studies findings"],
-        training: Int[NDArray[np.int64], " trained"],
-    ) -> float:
+    def chosen(cls, split: ProbeSplit) -> float:
         """The penalty this trunk is entitled to, chosen inside the TRAINING positions only.
 
         A shared penalty is not a fair comparison between trunks. Trunk feature magnitudes differ by
@@ -165,22 +175,16 @@ class FeatureProbe:
 
         The choice never touches the caller's holdout, so the reported number stays a held-out number.
         """
-        order = np.random.default_rng(SELECTION_SEED).permutation(len(training))
-        cut = int(len(training) * INNER_SHARE)
-        inner_fit, inner_score = training[order[:cut]], training[order[cut:]]
-        areas = {penalty: cls(penalty).inner_area(features, truth, inner_fit, inner_score) for penalty in SELECTION}
+        order = np.random.default_rng(SELECTION_SEED).permutation(len(split.training))
+        cut = int(len(split.training) * INNER_SHARE)
+        inner = ProbeSplit(split.features, split.truth, split.training[order[:cut]], split.training[order[cut:]])
+        areas = {penalty: cls(penalty).inner_area(inner) for penalty in SELECTION}
         return max(areas, key=lambda penalty: areas[penalty])
 
-    def inner_area(
-        self,
-        features: Float[NDArray[np.float64], "studies dim"],
-        truth: Int[NDArray[np.int64], "studies findings"],
-        inner_fit: Int[NDArray[np.int64], " fit"],
-        inner_score: Int[NDArray[np.int64], " score"],
-    ) -> float:
+    def inner_area(self, inner: ProbeSplit) -> float:
         """Mean area over the inner scoring positions, skipping labels they left with one class."""
-        predictions = self.predicted(features[inner_score], self.weights(features[inner_fit], truth[inner_fit]))
-        held = truth[inner_score]
+        predictions = self.holdout_record(inner)
+        held = inner.truth[inner.holdout]
         areas = [
             LabelScores.area_under_curve(predictions[:, column], held[:, column])
             for column in range(held.shape[1])
@@ -227,13 +231,11 @@ class FeatureProbe:
         """Apply probe weights to held-out features."""
         return np.hstack([features, np.ones((len(features), 1))]) @ weights
 
-    def holdout_record(
-        self,
-        features: Float[NDArray[np.float64], "studies dim"],
-        truth: Int[NDArray[np.int64], "studies findings"],
-        holdout: Int[NDArray[np.int64], " held"],
-        training: Int[NDArray[np.int64], " trained"],
-    ) -> Float[NDArray[np.float64], "held findings"]:
+    def fitted(self, split: ProbeSplit) -> Float[NDArray[np.float64], "dim1 findings"]:
+        """Ridge weights fitted on the split's training positions alone."""
+        return self.weights(split.features[split.training], split.truth[split.training])
+
+    def holdout_record(self, split: ProbeSplit) -> Float[NDArray[np.float64], "held findings"]:
         """The held-out predictions themselves, in the shape a member's `.holdout.npz` carries.
 
         A probe number says whether a trunk CAN be read; it says nothing about whether the trunk adds
@@ -241,24 +243,16 @@ class FeatureProbe:
         that judges members judge a probe alongside them, on the studies both were held out on — which
         is the only way to ask the diversity question without first spending a training run.
         """
-        return self.predicted(features[holdout], self.weights(features[training], truth[training]))
+        return self.predicted(split.features[split.holdout], self.fitted(split))
 
-    def scored(
-        self,
-        trunk: str,
-        features: Float[NDArray[np.float64], "studies dim"],
-        truth: Int[NDArray[np.int64], "studies findings"],
-        holdout: Int[NDArray[np.int64], " held"],
-        training: Int[NDArray[np.int64], " trained"],
-    ) -> ProbeResult:
+    def scored(self, trunk: str, split: ProbeSplit) -> ProbeResult:
         """Fit on the training positions and score the holdout, one area per finding."""
-        weights = self.weights(features[training], truth[training])
-        predictions = self.predicted(features[holdout], weights)
+        predictions = self.holdout_record(split)
         areas = {
-            target: LabelScores.area_under_curve(predictions[:, column], truth[holdout, column])
+            target: LabelScores.area_under_curve(predictions[:, column], split.truth[split.holdout, column])
             for column, target in enumerate(TARGETS)
         }
-        return ProbeResult(trunk=trunk, dimensions=features.shape[1], studies=len(holdout), per_label=areas)
+        return ProbeResult(trunk=trunk, dimensions=split.features.shape[1], studies=len(split.holdout), per_label=areas)
 
 
 @dataclass(frozen=True)
@@ -340,14 +334,13 @@ def main() -> None:
         truth = corpus.truth(identifiers)
         for readout in arguments.slice_readout:
             features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])
+            split = ProbeSplit(features, truth, training, holdout)
             # Per-trunk by DEFAULT since 2026-09-04. The shared reading is still reachable, because it is
             # what every number quoted before that date was taken at, but it is no longer what a bare
             # invocation prints — the wrong reading should not be the one nobody had to ask for.
-            penalties = (
-                arguments.penalty if arguments.shared_penalty else [FeatureProbe.chosen(features, truth, training)]
-            )
+            penalties = arguments.penalty if arguments.shared_penalty else [FeatureProbe.chosen(split)]
             for penalty in penalties:
-                result = FeatureProbe(penalty).scored(f"{name}@{readout}", features, truth, holdout, training)
+                result = FeatureProbe(penalty).scored(f"{name}@{readout}", split)
                 results.append(result)
                 command.report([f"penalty={penalty:<8} {result.line()}"])
                 command.report([f"    {target} {area:.4f}" for target, area in result.per_label.items()])
@@ -360,7 +353,7 @@ def main() -> None:
                     # One writer means the format cannot drift again.
                     HoldoutRecord(arguments.emit_holdout / f"{name}_{readout}_probe.npz").write(
                         HoldoutRecord.named(identifiers, holdout),
-                        FeatureProbe(penalty).holdout_record(features, truth, holdout, training),
+                        FeatureProbe(penalty).holdout_record(split),
                         corpus.graded(identifiers)[holdout],
                         UNKNOWN_EPOCH,
                         source=PROBE,

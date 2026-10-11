@@ -86,7 +86,7 @@ from core.data.corpus.folds import ReportFolds
 from core.denominator import Denominator
 from core.findings import TARGETS
 from core.paths import TRAIN_TABLE
-from kneemri.evaluation.feature_probe import HOLDOUT_FOLD, TRUNKS, FeatureProbe, ProbeCorpus
+from kneemri.evaluation.feature_probe import HOLDOUT_FOLD, TRUNKS, FeatureProbe, ProbeCorpus, ProbeSplit
 from kneemri.evaluation.labelling import FIXED_TAIL, LABELLINGS, Labelling
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.slice_readout import READOUTS, SliceMean
@@ -152,22 +152,15 @@ class TestAdaptation:
         """
         return self.labelling.assigned(predictions, self.share, prevalence)
 
-    def adapted(
-        self,
-        trunk: str,
-        features: Float[NDArray[np.float64], "studies dim"],
-        truth: Int[NDArray[np.int64], "studies findings"],
-        holdout: Int[NDArray[np.int64], " held"],
-        training: Int[NDArray[np.int64], " trained"],
-    ) -> AdaptationResult:
+    def adapted(self, trunk: str, split: ProbeSplit) -> AdaptationResult:
         """Fit on training, pseudo-label the holdout, refit on both, and score both reads on the truth.
 
         The refit uses the pseudo-labelled holdout studies ALONGSIDE the real training rows rather than
         instead of them. Replacing the real labels would not be adaptation, it would be discarding the
         supervision we have for supervision we invented.
         """
-        first = self.probe.weights(features[training], truth[training])
-        predictions = self.probe.predicted(features[holdout], first)
+        features, truth, training, holdout = split.features, split.truth, split.training, split.holdout
+        predictions = self.probe.holdout_record(split)
         labels, weights = self.pseudo_labels(predictions, truth[training].mean(axis=0))
         confident = weights.max(axis=1) > 0
         design = np.vstack([features[training], features[holdout][confident]])
@@ -219,11 +212,12 @@ def main() -> None:
         training, holdout = folds.holdout(folds.assign(str(corpus.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
         truth = corpus.truth(identifiers)
         features = FeatureProbe.pooled(corpus.features(stem), READOUTS[SliceMean.name])
-        penalty = arguments.penalty or FeatureProbe.chosen(features, truth, training)
+        split = ProbeSplit(features, truth, training, holdout)
+        penalty = arguments.penalty or FeatureProbe.chosen(split)
         for scheme in arguments.labellings:
             for share in arguments.shares:
                 adaptation = TestAdaptation(penalty, share, LABELLINGS[scheme])
-                result = adaptation.adapted(name, features, truth, holdout, training)
+                result = adaptation.adapted(name, split)
                 results.append(result)
                 command.report([result.line()])
     Denominator(len(results), "no trunk had a cached feature array to adapt on").refuse_empty()

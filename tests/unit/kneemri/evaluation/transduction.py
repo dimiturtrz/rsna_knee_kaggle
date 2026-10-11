@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from core.findings import TARGETS
+from kneemri.evaluation.feature_probe import ProbeSplit
 from kneemri.evaluation.transduction import AdaptationResult, TestAdaptation
 
 PENALTY = 10.0
@@ -52,7 +53,7 @@ def test_pseudo_labels_tiny_test_set() -> None:
 def test_adapted(corpus: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]) -> None:
     """The refit reports both reads over the holdout it was given, and names the trunk it was asked for."""
     features, truth, holdout, training = corpus
-    result = TestAdaptation(PENALTY, share=0.25).adapted("synthetic", features, truth, holdout, training)
+    result = TestAdaptation(PENALTY, share=0.25).adapted("synthetic", ProbeSplit(features, truth, training, holdout))
     assert result.trunk == "synthetic"
     assert result.studies == len(holdout)
     assert set(result.fitted) == set(TARGETS)
