@@ -4979,3 +4979,11 @@ Same producers, with S6 at 1/3, nartaa at 1/2 and the soups at 1/12 each. It sco
 now reads 0 -> 0.954, 1/6 -> 0.955, 1/3 -> 0.956. The curve is monotone, so S6 really did run on the hidden rerun; a
 mean fallback would have read near 0.954. Two consistent ticks are still about one residual sd each, so this is
 directional. It is the champion pin and the S6-side pick-1 candidate. The next point is `s6half`, with S6 at 1/2.
+
+## s6half_v1 — 0.955, ref 57077161, 2026-10-11 — S6 at 1/2: the share curve turns over at 1/3
+
+Same producers, with S6 at 1/2, nartaa at 1/3 and the soups at 1/12 each. It took about four hours on the hidden rerun
+and scored 0.955, one tick under s6third. The curve now reads 0 -> 0.954, 1/6 -> 0.955, 1/3 -> 0.956, 1/2 -> 0.955,
+which is the pre-registered "peaked at 1/3" branch. Each step is still about one residual sd, so the peak's position is
+directional. What it settles is that S6 does not want to lead the blend. The 2/3 point (`s6twothirds`) is dropped.
+Slot 4 goes to `s6probit`: the probit combiner at the s6third shares, the peak.
