@@ -62,3 +62,20 @@ It does not change the pick pair above. Three reasons:
 What it does say: something in our model set clears the pile on public, and the move was a fourth producer
 at 1/6. If the owner relaxes the ruling for S6, the pick table above needs an S6 leg, and there is no offline
 replica of S6 to price that leg with. Any pricing would come from the board alone.
+
+## 10:06Z — s6third_v1 scored 0.956: the S6 share curve has two points
+
+`s6third_v1` (ref 57063964; nartaa384 1/2, heliosli S6 1/3, the two soups at 1/12 each) read **0.956**,
+public rank 87 of 5735. The curve is now 0.954 at no S6 (`twosoupmirror_v1`), 0.955 at 1/6
+(`heliossoup_v1`) and 0.956 at 1/3.
+
+- **S6 ran on the hidden rerun.** If the fallback cell had fired, both S6 entries would have collapsed
+  to the soup blend and read about 0.954. Getting one point more for each step up in share is not
+  what a fallback produces.
+- **The size is still directional.** +0.002 over the pick base is about one top-band residual sd, and
+  each step is +0.001, which is the board's own resolution. Two consistent points beat one, but they
+  do not make a finding.
+- **The pick pair is unchanged under the 2026-09-15 ruling.** S6 is SKM-TEA-derived, so it is an
+  instrument and never a pick. If the owner relaxes the ruling, `s6third_v1` becomes the strongest pick
+  candidate. The next point on the curve (S6 at 1/2) would be the instrument that says whether the
+  curve is still climbing or has peaked.
