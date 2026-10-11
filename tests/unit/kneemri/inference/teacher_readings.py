@@ -110,3 +110,22 @@ def test_teach_over_every_study_is_reachable_only_through_the_negative_fold(tmp_
     readings = TeacherReadings(DataRoot(tmp_path), torch.device("cpu"))
     every = readings._split(["s0", "s1", "s2"], ReportFolds(5, 2026), -1)
     assert every.tolist() == [0, 1, 2], "no train.csv is read, and nothing is held out"
+
+
+def test_teach_pairs_each_ordering_with_the_studies_it_was_read_on(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The identifiers come out of the SAME positions the members were read at, and the members are ranked."""
+    readings = TeacherReadings(DataRoot(tmp_path), torch.device("cpu"))
+    monkeypatch.setattr(TeacherReadings, "_split", lambda self, identifiers, folds, fold: np.array([2, 0]))
+    read_at: list[list[int]] = []
+
+    def read(_self: TeacherReadings, member: str, positions: np.ndarray) -> np.ndarray:
+        read_at.append(positions.tolist())
+        return np.array([[0.2], [0.9]]) if member == "up" else np.array([[0.1], [0.3]])
+
+    monkeypatch.setattr(TeacherReadings, "_read", read)
+    names, ordering = readings.teach(cast(list[Member], ["up", "up"]), ["s0", "s1", "s2"], ReportFolds(5, 2026), 0)
+    assert names == ["s2", "s0"]
+    assert read_at == [[2, 0], [2, 0]]
+    assert ordering[:, 0].tolist() == [0.0, 1.0]
