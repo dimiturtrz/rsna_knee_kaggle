@@ -67,7 +67,7 @@ replica of S6 to price that leg with. Any pricing would come from the board alon
 
 `s6third_v1` (ref 57063964; nartaa384 1/2, heliosli S6 1/3, the two soups at 1/12 each) read **0.956**,
 public rank 87 of 5735. The curve is now 0.954 at no S6 (`twosoupmirror_v1`), 0.955 at 1/6
-(`heliossoup_v1`) and 0.956 at 1/3.
+(`heliossoup_v1`); this entry is the 1/3 point.
 
 - **S6 ran on the hidden rerun.** If the fallback cell had fired, both S6 entries would have collapsed
   to the soup blend and read about 0.954. Getting one point more for each step up in share is not

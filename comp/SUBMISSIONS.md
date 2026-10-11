@@ -4855,7 +4855,7 @@ only dilutes, so no raptor weight rescues the ensemble lane (knee-ir6d3, parked)
 
 The public 0.950 recipe (nartaa's CoAtNet + goodpjw2008's ConvNeXt reader, rabari9999's V1 per-finding
 shares, 444 teams tied there) with tripleseat's seven seated at 1/3 of a final rank blend. Pre-registered
-`>= 0.952` = a third family adds; it read 0.952, rank 129 of 5567 (silver range), from 850 at 0.946.
+`>= 0.952` = a third family adds; it read 0.952, rank 129 of 5567 read 2026-10-09 (silver range), from 850 at 0.946.
 Kernels pinned to the pre-2026-10-09 Kaggle image (the new py3.13 image breaks transformers on
 tokenizers 0.23.1). No offline number: both public arms trained on every labelled study. Ours7 alone
 read 0.945 and the wave 0.950, so the gain is complementarity, not strength. Next: `kneemri-trihalf`
