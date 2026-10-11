@@ -89,12 +89,15 @@ class KernelLog:
         return cls.of(path.read_text(encoding="utf-8", errors="replace"))
 
     def seats(self) -> tuple[int, int] | None:
-        """Members loaded and members named, or None when the run never got as far as saying."""
-        for line in self.lines:
-            found = LOADED.search(line)
-            if found:
-                return int(found.group(1)), int(found.group(2))
-        return None
+        """Members loaded and members named, summed over every run's census, or None when none printed one.
+
+        A kernel with one `KernelRun` per soup prints one census per run, and reading only the first passed a
+        second run that loaded nothing — the defect knee-5qv7k found in `champion_check`'s parse.
+        """
+        censuses = [(int(found.group(1)), int(found.group(2))) for found in map(LOADED.search, self.lines) if found]
+        if not censuses:
+            return None
+        return sum(loaded for loaded, _ in censuses), sum(named for _, named in censuses)
 
     def dropped(self) -> list[str]:
         """Every seat the run could not assemble, as `<member> wanted <encoder>`."""

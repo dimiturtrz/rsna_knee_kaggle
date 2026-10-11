@@ -35,6 +35,10 @@ def test_seats():
     assert KernelLog.of(DROPPED).seats() == (6, 7)
     assert KernelLog.of("kit 53f81d3\n").seats() is None
 
+    short_second = WHOLE + "loaded and fingerprint-checked 0 of 1 members from /kaggle/input\n"
+    assert KernelLog.of(short_second).seats() == (7, 8), "every run's census, not the first"
+    assert KernelLog.of(short_second).faults() == ["the run loaded 7 of 8 members"]
+
 
 def test_dropped():
     """A dropped seat names the member and the encoder it wanted, so the mount can be found."""
