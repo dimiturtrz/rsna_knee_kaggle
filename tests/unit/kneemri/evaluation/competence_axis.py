@@ -3,7 +3,7 @@
 import numpy as np
 
 from core.findings import TARGETS
-from kneemri.evaluation.competence_axis import AxisReading, CompetenceAxis
+from kneemri.evaluation.competence_axis import AxisReading, CompetenceAxis, CompetenceTable
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.scores import LabelScores
 
@@ -37,18 +37,30 @@ def _pool(inverted: int) -> Pool:
     return Pool([f"m{index}" for index in range(MEMBERS)], predictions, truth)
 
 
-def test_table():
+def test_scored():
     """One AUC per member per finding, and a finding no member can be scored on is dropped, not imputed."""
     pool = _pool(inverted=0)
     truth = pool.truth.copy()
     truth[:, 0] = 1.0
     blind = Pool(pool.names, pool.predictions, truth)
 
-    findings, matrix = CompetenceAxis(LabelScores()).table(blind)
+    table = CompetenceTable.scored(blind, LabelScores())
 
-    assert matrix.shape == (MEMBERS, len(TARGETS) - 1), "the single-class finding leaves the denominator"
-    assert TARGETS[0] not in findings
-    assert np.isfinite(matrix).all(), "and nothing undefined survives into the arithmetic"
+    assert table.matrix.shape == (MEMBERS, len(TARGETS) - 1), "the single-class finding leaves the denominator"
+    assert TARGETS[0] not in table.findings
+    assert np.isfinite(table.matrix).all(), "and nothing undefined survives into the arithmetic"
+    assert table.names == pool.names, "the rows stay named in the pool's order"
+
+
+def test_residual():
+    """A uniform row lift is member quality and a uniform column lift is difficulty; both leave nothing."""
+    matrix = np.full((3, len(TARGETS)), 0.80)
+    matrix[0, :] += 0.06
+    matrix[:, 0] += 0.04
+
+    residual = CompetenceTable(["a", "b", "c"], list(TARGETS), matrix).residual()
+
+    assert np.allclose(residual, 0.0), "level and difficulty are exactly what the residual removes"
 
 
 def test_read():
@@ -58,11 +70,11 @@ def test_read():
     largest share, so a reading that cannot fail to resolve says nothing — the null bar is what makes
     the verdict a measurement, and the noise pool is where it is checked.
     """
-    axis = CompetenceAxis(LabelScores(), seed=SEED)
+    axis = CompetenceAxis(seed=SEED)
     names = [f"m{index}" for index in range(MEMBERS)]
     traded = _traded([float(index) - MEMBERS / 2 for index in range(MEMBERS)])
 
-    reading = axis.read(names, traded, list(TARGETS), resamples=RESAMPLES)
+    reading = axis.read(CompetenceTable(names, list(TARGETS), traded), resamples=RESAMPLES)
 
     assert reading.resolved, "a rank-one trade is the case this instrument exists to detect"
     assert reading.share > reading.null
@@ -71,7 +83,7 @@ def test_read():
 
     noise = 0.8 + np.random.default_rng(SEED).normal(0.0, 0.05, (MEMBERS, len(TARGETS)))
 
-    assert not axis.read(names, noise, list(TARGETS), resamples=RESAMPLES).resolved, (
+    assert not axis.read(CompetenceTable(names, list(TARGETS), noise), resamples=RESAMPLES).resolved, (
         "unlinked per-finding differences may never be reported as a shared axis"
     )
 
@@ -83,20 +95,20 @@ def test_strongest():
     matrix below gives one member a uniformly high row and another a high row ONLY on the wanted finding,
     and the second must win.
     """
-    axis = CompetenceAxis(LabelScores(), seed=SEED)
     names = ["broadly_good", "specialist", "flat"]
     matrix = np.full((len(names), len(TARGETS)), 0.80)
     matrix[0, :] = 0.86
     matrix[1, 0] = 0.86
+    table = CompetenceTable(names, list(TARGETS), matrix)
 
-    ranked = axis.strongest(names, matrix, list(TARGETS), (TARGETS[0],))
+    ranked = table.strongest((TARGETS[0],))
 
     assert ranked[0][0] == "specialist", "a uniform lift is member quality and is removed before ranking"
     assert ranked[0][1] > 0.0 > ranked[-1][1], "and the ranking is signed, so a member can be BELOW its own level"
     assert len(ranked) == len(names), "every member is placed, not only the shortlist the CLI prints"
 
     try:
-        axis.strongest(names, matrix, list(TARGETS), ("Not A Finding",))
+        table.strongest(("Not A Finding",))
     except ValueError as refused:
         assert "Not A Finding" in str(refused), "a subset this pool cannot score is named, never silently dropped"
     else:

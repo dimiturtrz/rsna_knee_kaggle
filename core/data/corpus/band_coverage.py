@@ -109,16 +109,20 @@ class SlotShares:
             spans=np.array(spans),
         )
 
-    def row(self, coverage: "BandCoverage") -> str:
+    def row(self, band: Band) -> str:
         """The formatted line, with the cut restated as the distance it removes from each end."""
-        low, high = coverage.interval(self.discarded)
+        low, high = self.interval()
         return (
             f"{self.slot:16s} {self.discarded.mean():10.4f} [{low:+.4f}, {high:+.4f}] "
             f"{np.percentile(self.discarded, PERCENTILE_HIGH):7.4f} "
             f"{self.low_end.mean():8.4f} {self.high_end.mean():9.4f} "
-            f"{self.span_mm:8.1f} {self.span_mm * coverage.band.low:8.1f} {self.spread()} "
+            f"{self.span_mm:8.1f} {self.span_mm * band.low:8.1f} {self.spread()} "
             f"{self.discarded.size:6d}"
         )
+
+    def interval(self, seed: int = RESAMPLE_SEED) -> tuple[float, float]:
+        """A bootstrap interval on the mean discarded share, so it is never reported as a bare point estimate."""
+        return Bootstrap.seeded(seed).mean_interval(self.discarded)
 
     def spread(self) -> str:
         """The span's p10, p90 and their ratio — how differently the SAME fraction reads across studies."""
@@ -166,10 +170,6 @@ class BandCoverage:
         high = float(mass[position > self.band.high].sum()) / total
         return {"low_end": low, "high_end": high, "discarded": low + high}
 
-    def interval(self, values: NDArray[np.float64], seed: int = RESAMPLE_SEED) -> tuple[float, float]:
-        """A bootstrap interval on the mean, so a share is never reported as a bare point estimate."""
-        return Bootstrap.seeded(seed).mean_interval(values)
-
     def report(self, measured: list[tuple[str, dict[str, float]]], sample: CorpusSample) -> list[str]:
         """Discarded tissue per slot, with the DENOMINATORS on the first line rather than in a footnote.
 
@@ -184,7 +184,7 @@ class BandCoverage:
             f"{'span mm':>8s} {'cut/end':>8s} {'span p10':>7s} {'span p90':>7s} {'ratio':>6s} {'n':>6s}",
         ]
         slots = sorted({name for name, _ in measured})
-        return header + [SlotShares.of(slot, measured).row(self) for slot in slots]
+        return header + [SlotShares.of(slot, measured).row(self.band) for slot in slots]
 
     def measure_study(self, request: AuditRequest) -> list[tuple[str, dict[str, float]]]:
         """Every routed slot of one study, read over the FULL series and scored against THIS band.

@@ -52,7 +52,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
-from core.data.labels.overcall_audit import CATEGORIES, GENUINE, LATERALITY, UNLOCATED, OvercallAudit
+from core.data.labels.overcall_audit import CATEGORIES, GENUINE, LATERALITY, UNLOCATED, OvercallAudit, OvercallCensus
 from core.data.labels.report_language import ReportLanguages
 from core.data.labels.report_reader import UNSURE
 from core.findings import TARGETS
@@ -307,8 +307,8 @@ class StudyAttribution:
     def caused(self, tail: pd.DataFrame, body: pd.DataFrame, reports: dict[str, str]) -> LabelCause:
         """Classify both strata through the SAME auditor and census them side by side."""
         return LabelCause(
-            tail=self.audit.census(self.audit.audit(self.labelled(tail, reports), reports)),
-            body=self.audit.census(self.audit.audit(self.labelled(body, reports), reports)),
+            tail=OvercallCensus().census(self.audit.audit(self.labelled(tail, reports), reports)),
+            body=OvercallCensus().census(self.audit.audit(self.labelled(body, reports), reports)),
         )
 
     @staticmethod

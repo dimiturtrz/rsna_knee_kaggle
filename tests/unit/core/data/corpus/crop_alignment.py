@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from core.data.corpus.audit import AuditRequest
-from core.data.corpus.crop_alignment import CropAlignment, SlotOffset, StudyOffsets
+from core.data.corpus.crop_alignment import AlignmentSpread, CropAlignment, SlotOffset, StudyOffsets
 from core.data.corpus.study_cache import CorpusSample
 
 SPACING = 2.0
@@ -46,7 +46,7 @@ def test_offset():
 
 def test_spread():
     """Slots that agree spread to zero; a slot that disagrees spreads by its own distance."""
-    alignment = CropAlignment()
+    alignment = AlignmentSpread()
     agreeing = [SlotOffset("sag", 3.0, 4.0), SlotOffset("cor", 0.0, 5.0)]
 
     assert alignment.spread(agreeing) == 0.0, "equal magnitudes disagree by nothing, whatever their direction"
@@ -58,7 +58,7 @@ def test_spread():
 def test_report():
     """The denominators lead, because a spread over what decoded is not a spread over the corpus."""
     study = [SlotOffset("sag", 3.0, 4.0), SlotOffset("cor", 0.0, 20.0)]
-    lines = CropAlignment().report([study], CorpusSample(["a", "b"], 4407))
+    lines = AlignmentSpread().report([study], CorpusSample(["a", "b"], 4407))
 
     assert lines[0].startswith("1 studies measured, from 2 studies sampled of 4407 in the corpus")
     assert "2 routed slots, 1 studies" in lines[0]
@@ -66,13 +66,13 @@ def test_report():
     assert any(line.startswith("cor") for line in lines)
     assert any("within-study spread" in line and "p50 15.0 mm" in line for line in lines)
 
-    empty = CropAlignment().report([], CorpusSample(["a"], 2))
+    empty = AlignmentSpread().report([], CorpusSample(["a"], 2))
     assert not any("within-study spread" in line for line in empty)
 
 
 def test_plane_line():
     """One plane's row carries its magnitude tail and the signed components its axes make readable."""
-    line = CropAlignment().plane_line("sag", [SlotOffset("sag", 3.0, -4.0), SlotOffset("sag", 3.0, -4.0)])
+    line = AlignmentSpread().plane_line("sag", [SlotOffset("sag", 3.0, -4.0), SlotOffset("sag", 3.0, -4.0)])
 
     assert line.startswith("sag")
     assert "5.0" in line, "the magnitude"
@@ -92,7 +92,7 @@ def test_measure_study(tmp_path: Path):
 def test_dump(tmp_path: Path):
     """Each study's spread is written beside its identifier, a one-slot study as nan rather than dropped."""
     destination = tmp_path / "spread.npz"
-    CropAlignment().dump(
+    AlignmentSpread().dump(
         destination,
         [
             StudyOffsets("pair", [SlotOffset("sag", 3.0, 4.0), SlotOffset("cor", 0.0, 20.0)]),

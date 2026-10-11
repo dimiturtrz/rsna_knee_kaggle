@@ -53,13 +53,18 @@ def test_discarded():
     assert BandCoverage().discarded(np.zeros((4, 20, 20), np.float32)) == {}, "no tissue, no evidence"
 
 
+def _shares(discarded: np.ndarray) -> SlotShares:
+    ends = np.zeros_like(discarded)
+    return SlotShares("SAG_T1", discarded, ends, ends, 100.0, np.full(discarded.size, 100.0))
+
+
 def test_interval():
     """A bootstrap interval on the mean, which brackets a constant sample at the constant."""
-    low, high = BandCoverage().interval(np.full(50, 0.25))
+    low, high = _shares(np.full(50, 0.25)).interval()
 
     assert low == high == 0.25, "a constant sample cannot resample to anything else"
 
-    spread_low, spread_high = BandCoverage().interval(np.linspace(0.0, 1.0, 200))
+    spread_low, spread_high = _shares(np.linspace(0.0, 1.0, 200)).interval()
     assert spread_low < 0.5 < spread_high
 
 
@@ -82,7 +87,7 @@ def test_row():
     """The share restated as the distance: a 100 mm span cut at 0.20 loses 20 mm from each end."""
     shares = SlotShares("SAG_T1", np.full(4, 0.3), np.full(4, 0.1), np.full(4, 0.2), 100.0, np.full(4, 100.0))
 
-    row = shares.row(BandCoverage())
+    row = shares.row(BandCoverage().band)
 
     assert row.startswith("SAG_T1")
     assert "0.3000" in row

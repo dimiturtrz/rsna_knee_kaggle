@@ -18,6 +18,7 @@ from core.data.labels.overcall_audit import (
     UNLOCATED,
     Judgement,
     OvercallAudit,
+    OvercallCensus,
 )
 
 TORN = "There is a full-thickness tear of the medial meniscus."
@@ -76,7 +77,7 @@ def test_audit():
 
 def test_census():
     """Every category prints even at zero, so two runs of the table can be compared line for line."""
-    counts = OvercallAudit().census(pd.DataFrame({"category": [GENUINE, GENUINE, MISSED_NEGATION]}))
+    counts = OvercallCensus().census(pd.DataFrame({"category": [GENUINE, GENUINE, MISSED_NEGATION]}))
 
     assert counts[GENUINE] == 2
     assert counts[LATERALITY] == 0, "a category absent from the data still appears in the census"
@@ -85,7 +86,7 @@ def test_census():
 
 def test_compare():
     """The control table: each rate beside its own denominator, and the difference with an interval."""
-    audit = OvercallAudit()
+    audit = OvercallCensus()
     over = pd.DataFrame({"study": ["s1", "s2"], "category": [MISSED_NEGATION, GENUINE]})
     agreed = pd.DataFrame({"study": ["s1", "s2"], "category": [GENUINE, GENUINE]})
 
@@ -98,7 +99,7 @@ def test_compare():
 
 def test_interval():
     """The bootstrap draws STUDIES, so a difference driven by one study is not read as a difference."""
-    audit = OvercallAudit(resamples=200)
+    audit = OvercallCensus(resamples=200)
     over = pd.DataFrame({"study": ["s1", "s1", "s2"], "category": [MISSED_NEGATION, MISSED_NEGATION, GENUINE]})
     agreed = pd.DataFrame({"study": ["s1", "s2"], "category": [GENUINE, GENUINE]})
 
@@ -111,7 +112,7 @@ def test_interval():
 
 def test_incidence():
     """Cue firing counted without precedence, so a category buried by the order is still visible."""
-    audit = OvercallAudit()
+    audit = OvercallCensus()
     over = pd.DataFrame({"cues": ["missed_negation subthreshold", ""]})
     agreed = pd.DataFrame({"cues": ["subthreshold"]})
 
@@ -124,7 +125,7 @@ def test_incidence():
 
 def test_coverage():
     """Located and total, always both, because every rate below is computed inside the located subset."""
-    lines = OvercallAudit().coverage(
+    lines = OvercallCensus().coverage(
         pd.DataFrame({"category": [GENUINE, UNLOCATED], "language": ["en", "tr"], "target": ["ACL", "ACL"]})
     )
 
@@ -134,7 +135,7 @@ def test_coverage():
 
 def test_limits():
     """The caveats print WITH the number, so a copy-paste cannot separate them."""
-    lines = OvercallAudit.limits()
+    lines = OvercallCensus.limits()
 
     assert any("SCOPE" in line for line in lines)
     assert any("VOCABULARY" in line for line in lines)

@@ -110,6 +110,26 @@ class Binding:
             return f"tracks the LEXICON ({ratio:.2f} of the way to a true positive)"
         return f"tracks the RADIOLOGIST ({ratio:.2f} of the way to a true positive)"
 
+    def lines(self) -> list[str]:
+        """The census, the two ratios, and the lane each one licenses — never a bare number."""
+        lines = ["cells by how reader and radiologist related:"]
+        for group, count in sorted(self.counts.items(), key=lambda item: -item[1]):
+            mean = self.means.get(group, float("nan"))
+            lines.append(f"  {group:<18} {count:>4} cells, member mean {mean:.4f}")
+        lines.append("")
+        low_pole, high_pole = self.means[AGREED_NEGATIVE], self.means[AGREED_POSITIVE]
+        lines.append(f"poles: agreed negative {low_pole:.4f} -> agreed positive {high_pole:.4f}")
+        for group, ratio in self.ratios.items():
+            low, high = self.intervals[group]
+            lines.append(f"  {group}: tracking {ratio:+.3f} [{low:+.3f}, {high:+.3f}] — {self.verdict(group)}")
+        lines.append("")
+        lines.append(
+            "a tracking near 1 on over-called cells means the member inherited the reader's confident "
+            "errors and the label lane is LIVE; near 0 means it averaged them away and the lane is CLOSED "
+            "for this defect"
+        )
+        return lines
+
 
 class NoiseBinding:
     """Whether the label reader's confident errors reached the model that trained on them."""
@@ -206,26 +226,6 @@ class NoiseBinding:
         low, high = np.percentile(np.array(drawn), INTERVAL)
         return (float(low), float(high))
 
-    def report(self, binding: Binding) -> list[str]:
-        """The census, the two ratios, and the lane each one licenses — never a bare number."""
-        lines = ["cells by how reader and radiologist related:"]
-        for group, count in sorted(binding.counts.items(), key=lambda item: -item[1]):
-            mean = binding.means.get(group, float("nan"))
-            lines.append(f"  {group:<18} {count:>4} cells, member mean {mean:.4f}")
-        lines.append("")
-        low_pole, high_pole = binding.means[AGREED_NEGATIVE], binding.means[AGREED_POSITIVE]
-        lines.append(f"poles: agreed negative {low_pole:.4f} -> agreed positive {high_pole:.4f}")
-        for group, ratio in binding.ratios.items():
-            low, high = binding.intervals[group]
-            lines.append(f"  {group}: tracking {ratio:+.3f} [{low:+.3f}, {high:+.3f}] — {binding.verdict(group)}")
-        lines.append("")
-        lines.append(
-            "a tracking near 1 on over-called cells means the member inherited the reader's confident "
-            "errors and the label lane is LIVE; near 0 means it averaged them away and the lane is CLOSED "
-            "for this defect"
-        )
-        return lines
-
 
 def main() -> None:
     """Read the given members over the annotated cells and report whether they inherited the reader's errors."""
@@ -252,7 +252,7 @@ def main() -> None:
     grouped = binding.groups(cells)
     for checkpoint, values in per_member:
         scored = binding.probabilities(grouped, names, values)
-        command.report([f"=== {checkpoint.name} ===", *binding.report(binding.tracking(scored))])
+        command.report([f"=== {checkpoint.name} ===", *binding.tracking(scored).lines()])
 
 
 if __name__ == "__main__":
