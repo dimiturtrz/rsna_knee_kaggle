@@ -45,3 +45,20 @@ What survives this is narrow. Two pick-2 candidates sharing the ⅓ share differ
 The comparison between them is less exposed to the weak-leg bias than any comparison across shares. So
 `soupseven1/3` against `twosoup1/3` is the one row here worth carrying, and it is still only directional. The
 share rows (`1/4`, `1/2`) are for sign only, and the board has already said their sign is flat.
+
+**09:34Z: `heliossoup_v1` scored 0.955 (ref 57063827).** This is the first entry above the pile. Public rank
+went from 328 to 116 of 5732; public rank counts our best submission, so that holds with no further action.
+
+It does not change the pick pair above. Three reasons:
+
+1. **The ruling.** heliosli's S6 is derived from SKM-TEA. Under the 2026-09-15 ruling (foreign-corpus-derived =
+   instrument only) it cannot be a final pick. That holds until the owner says otherwise.
+2. **What the score proves.** The kernel has an S6 fallback-tolerant cell, and Kaggle serves no hidden log. So
+   0.955 does not prove S6 was in the hidden run. `s6third_v1` (S6 at 1/3) is the second point. If S6 is
+   live, moving its share should move the score.
+3. **Size of the gain.** +0.001 over `twosoupmirror_v1` is half the top-band residual sd (0.002). It is a
+   direction, not a measured gain.
+
+What it does say: something in our model set clears the pile on public, and the move was a fourth producer
+at 1/6. If the owner relaxes the ruling for S6, the pick table above needs an S6 leg, and there is no offline
+replica of S6 to price that leg with. Any pricing would come from the board alone.
