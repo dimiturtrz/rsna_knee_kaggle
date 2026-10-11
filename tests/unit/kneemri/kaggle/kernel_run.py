@@ -86,7 +86,15 @@ def test_served():
     shortened = Budget(seconds=hour)
     after = KernelRun(serving=Serving(budget=shortened)).served()
     assert after.budget is shortened, "a second-producer kernel's shortened deadline must survive"
-    assert shortened.seconds == pytest.approx(hour * DEADLINE_MARGIN)
+    assert shortened.seconds == pytest.approx(hour * DEADLINE_MARGIN, abs=1.0)
+
+    # And each run starts its own projection window: a budget shared with an earlier run must not
+    # carry that run's progress or its start into this one (knee-s6n3v).
+    shortened.chunk(3, 4)
+    shortened.started -= hour
+    KernelRun(serving=Serving(budget=shortened)).served()
+    assert not shortened.measured(), "the earlier run's progress is not this run's"
+    assert shortened.seconds == pytest.approx(0.0, abs=1.0), "the hour the earlier run spent is off the ceiling"
 
 
 def test_served_states_the_serving_in_the_log(caplog: pytest.LogCaptureFixture):

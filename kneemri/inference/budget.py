@@ -38,6 +38,20 @@ class Budget:
         self.started = time.time()
         self.fraction = 0.0
 
+    def begin(self) -> None:
+        """A run starts on this budget: the session's spend so far leaves the ceiling, the projection restarts.
+
+        A budget is the SESSION's, and a session can hold several runs in sequence. Progress is per run —
+        the decode counts chunks of ITS split — so elapsed has to be per run too, or a second run divides
+        the first run's hours by its own first chunks and gives up its members over time it never spent
+        (knee-s6n3v). What the earlier runs spent is not forgotten: it comes off the ceiling, so the
+        second run aims at what is LEFT of nine hours rather than at a fresh nine.
+        """
+        now = time.time()
+        self.seconds = max(self.seconds - (now - self.started), 0.0)
+        self.started = now
+        self.fraction = 0.0
+
     def chunk(self, done: int, total: int) -> None:
         """`done` of the split's `total` chunks have been decoded AND forwarded."""
         self.fraction = done / max(total, 1)

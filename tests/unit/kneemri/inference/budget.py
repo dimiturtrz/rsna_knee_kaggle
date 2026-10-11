@@ -1,6 +1,40 @@
+from types import SimpleNamespace
+
 import pytest
 
+from kneemri.inference import budget as budget_module
 from kneemri.inference.budget import KERNEL_SECONDS, Budget
+
+CHUNKS = 18
+"""The ~910-study hidden split at 48 studies a chunk, the shape knee-s6n3v was simulated on."""
+
+
+class _Clock:
+    """Wall-clock the test advances by hand, so a nine-hour session runs in no time."""
+
+    def __init__(self) -> None:
+        self.now = 0.0
+
+    def time(self) -> float:
+        return self.now
+
+
+@pytest.fixture
+def clock(monkeypatch: pytest.MonkeyPatch) -> _Clock:
+    fake = _Clock()
+    monkeypatch.setattr(budget_module, "time", SimpleNamespace(time=fake.time))
+    return fake
+
+
+def _run(budget: Budget, clock: _Clock, seconds_per_chunk: float) -> list[bool]:
+    """One KernelRun's chunk sequence on `budget`: whether it was overrunning at each chunk report."""
+    budget.begin()
+    overrunning = []
+    for index in range(CHUNKS):
+        budget.chunk(index, CHUNKS)
+        overrunning.append(budget.overrunning())
+        clock.now += seconds_per_chunk
+    return overrunning
 
 
 def _spent(seconds: float, *, ceiling: float = KERNEL_SECONDS) -> Budget:
@@ -78,3 +112,30 @@ def test_margin():
     """The ceiling a run aims at is under the real one, because the tail is not in the projection."""
     assert Budget(seconds=1000, margin=0.85).seconds == pytest.approx(850)
     assert Budget().seconds < KERNEL_SECONDS, "the last chunk, the rank-combine and the CSV are unmeasured"
+
+
+def test_begin(clock: _Clock):
+    """A second run on a shared budget projects from ITS start, against what the first left of the ceiling.
+
+    knee-s6n3v: `started` was set once, so the second run divided the first run's 2457 s by its own
+    first chunks and gave up six of seven members on the hidden split. The ceiling and the two runs'
+    costs are the bead's simulation: a soup at 2.7 s a study, then seven members at 3.5 s a study.
+    """
+    shared = Budget(seconds=5738, margin=1.0)
+    soup = 2457 / CHUNKS
+    seven = 3185 / CHUNKS
+
+    assert not any(_run(shared, clock, soup)), "the first run fits its ceiling"
+    second = _run(shared, clock, seven)
+    assert not any(second), "the second run must not be charged the first run's hours"
+    assert shared.seconds == pytest.approx(5738 - 2457), "what the first run spent is off the ceiling"
+
+    # The timeout net still holds: a run that genuinely cannot fit is caught on its first measured chunk,
+    # and so is a second run that would fit nine hours but not what the first run left of them.
+    slow = _run(Budget(seconds=3000, margin=1.0), clock, 200)
+    assert not slow[0], "nothing is measured before the first chunk is done"
+    assert slow[1], "3600 s of work against 3000 s gives up at the first projection"
+
+    squeezed = Budget(seconds=3000, margin=1.0)
+    assert not any(_run(squeezed, clock, soup))
+    assert all(_run(squeezed, clock, seven)[1:]), "3185 s of work against the 543 s the first run left"

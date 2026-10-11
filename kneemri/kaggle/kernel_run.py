@@ -181,8 +181,12 @@ class KernelRun:
         visible after the fact. The first `kneemri-vote` run logged the kit, the members and the
         studies and said nothing about the vote — so the one thing that entry was bought to vary was
         the one thing its log could not confirm had landed, which is a slot spent on an unasserted flag.
+
+        AND THIS IS WHERE A RUN STARTS, the one place that knows it: a budget shared by two sequential
+        runs projects each from its own start, with what the first spent off the ceiling (knee-s6n3v).
         """
         budget = self.serving.budget or Budget()
+        budget.begin()
         served = replace(self.serving, budget=budget)
         logger.info(
             "serving: vote=%s views=%s precision=%s deadline=%.0fs",
