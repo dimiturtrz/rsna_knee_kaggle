@@ -33,3 +33,15 @@ replica alone. 400 shared draws, 390 public and 910 private. `pick_pair_now.py`,
 
 Every delta in the table is directional. The pair ranking is the only usable output: **twosoupmirror_v1 +
 soupsevenmirror_v1**, if the latter scores 0.954.
+
+**Caveat added 07:58Z: the analog has nartaa as the weak leg.** The section of `2026-10-10_postprocessing_and_pick_risk.md`
+dated 00:07Z already found this. The replica standing in for nartaa reads **0.8787@ledger75** (n=896); the soup reads
+**0.9089**. On the board it is the other way round: nartaa 0.949, ours 0.945/0.946. So the decorrelation figures above
+are measured where the pile is 0.03 weaker than our side. That inflates every "ours-heavy" offset. It is why
+`twosoup1/2` shows the largest E[max − p1], while the board read share as flat (mirrorquarter 0.952, mirrorthird 0.953,
+mirrorseat 0.953).
+
+What survives this is narrow. Two pick-2 candidates sharing the ⅓ share differ only in which ours members they seat.
+The comparison between them is less exposed to the weak-leg bias than any comparison across shares. So
+`soupseven1/3` against `twosoup1/3` is the one row here worth carrying, and it is still only directional. The
+share rows (`1/4`, `1/2`) are for sign only, and the board has already said their sign is flat.
