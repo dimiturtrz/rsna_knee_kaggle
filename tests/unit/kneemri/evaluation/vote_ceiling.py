@@ -1,10 +1,13 @@
 """A weighted vote rule must be scored on studies its weights never saw, or it grades its own homework."""
 
+import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from core.paths import ENV_OVERRIDE, DataRoot
+from kneemri.evaluation import vote_ceiling
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.vote_ceiling import RuleReading, VoteCeiling
@@ -108,3 +111,39 @@ def test_line():
     assert "honest 0.8739" in row
     assert "+0.0001" in row and "fit-on-self 0.8745" in row
     assert "overfit gap +0.0006" in row, "the gap is derived, not passed, so it cannot disagree with its parts"
+
+
+class _ResolvedError(Exception):
+    """Raised with the checkpoints the command resolved, before any of them is read."""
+
+
+def _resolved(monkeypatch: pytest.MonkeyPatch, argv: list[str]) -> list[Path]:
+    """The checkpoint list `main` hands to the ceiling for `argv`."""
+
+    def _stop(cls: type[VoteCeiling], paths: list[Path]) -> VoteCeiling:
+        raise _ResolvedError(paths)
+
+    monkeypatch.setattr(sys, "argv", ["vote_ceiling", *argv])
+    monkeypatch.setattr(VoteCeiling, "over", classmethod(_stop))
+    with pytest.raises(_ResolvedError) as caught:
+        vote_ceiling.main()
+    return caught.value.args[0]
+
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A roster and a candidate list name the same checkpoints the same way, and naming none is refused."""
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    models = DataRoot(tmp_path).models()
+    roster = tmp_path / "members.roster"
+    roster.write_text("# header\n\nalpha.pt   # why\n  beta  \nelsewhere/gamma.pt\n", encoding="utf-8")
+
+    assert _resolved(monkeypatch, ["--roster", str(roster)]) == [
+        models / "alpha.pt",
+        models / "beta.pt",
+        Path("elsewhere/gamma.pt"),
+    ]
+    assert _resolved(monkeypatch, ["--candidates", "alpha", "beta.pt"]) == [models / "alpha.pt", models / "beta.pt"]
+
+    monkeypatch.setattr(sys, "argv", ["vote_ceiling"])
+    with pytest.raises(SystemExit):
+        vote_ceiling.main()

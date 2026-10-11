@@ -31,9 +31,10 @@ teacher file with a hole in it would be a silent training bug rather than a loud
 """
 
 import logging
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import ClassVar
 
 import numpy as np
 import pandas as pd
@@ -61,6 +62,11 @@ student withholds is the student's business. `teacher_fold0.npz` beside it is th
 @dataclass(frozen=True)
 class TeacherPass:
     """One pass of a foreign member over our corpus: where the studies are, and where the readings go."""
+
+    FILE: ClassVar[str] = TEACHER
+    ARRAY: ClassVar[str] = TeacherFile.SCORES
+    VERB: ClassVar[str] = "score"
+    GERUND: ClassVar[str] = "teaching"
 
     competition: Path
     destination: Path
@@ -122,43 +128,73 @@ class TeacherPass:
         """
         return {path.stem: RaptorMember.loaded(path, device) for path in weights}
 
+    @staticmethod
+    def honest(checkpoint: Path) -> None:
+        """Admit any teacher: this pass copies an ORDERING, which a memorised reading still carries.
+
+        See the module docstring — the readings are unsound for validating a teacher and sound for copying
+        one, so there is nothing about a checkpoint this pass could refuse.
+        """
+        del checkpoint
+
+    def taught(
+        self, identifiers: list[str], records: Records, members: Mapping[str, RaptorMember], device: str
+    ) -> Mapping[str, Float[np.ndarray, "n w"]]:
+        """What this pass takes out of every member: the head's verdicts, through the submission's scorer."""
+        return self.entry().readings(identifiers, records, members, device)
+
+    def kept(self, path: Path, identifiers: list[str], values: Float[np.ndarray, "n w"]) -> Path:
+        """Write one member's take under the array name this pass's readers look it up by."""
+        return self.written(path, identifiers, values)
+
+    @classmethod
+    def main(cls, doc: str | None, log: logging.Logger) -> None:
+        """The command both passes are: read the flags, then merge shards, or read a shard and write it.
+
+        One body because the two commands differ in nothing but the facts the class already holds — its
+        default file, its array name, its refusal, and what it takes out of a member and writes.
+        """
+        command = cli.Command(doc, log)
+        command.parser.add_argument("--weights", type=Path, nargs="+", required=True, help="raptor checkpoints")
+        command.parser.add_argument("--fleet", type=Path, default=None, help="write one file per checkpoint here")
+        command.parser.add_argument("--split", default=TRAIN, help="which split to teach over")
+        command.parser.add_argument("--out", type=Path, default=None, help="destination npz")
+        command.parser.add_argument("--studies", type=int, default=0, help="cap the pass, for a smoke")
+        command.parser.add_argument("--shard", type=int, default=0, help=f"which stride of the split to {cls.VERB}")
+        command.parser.add_argument("--shards", type=int, default=1, help="how many processes share the pass")
+        command.parser.add_argument("--merge", type=Path, nargs="*", help="join these shard files and exit")
+        arguments = command.parsed()
+        root = command.rooted(arguments)
+
+        destination = arguments.out or root.processed() / cls.FILE
+        if arguments.merge:
+            joined = TeacherFile(destination).merged(arguments.merge, cls.ARRAY)
+            log.info("merged %d studies into %s", joined, destination)
+            return
+
+        for checkpoint in arguments.weights:
+            cls.honest(checkpoint)
+        passing = cls(root.raw(), destination, Split(name=str(arguments.split)))
+        identifiers = cls.sharded(passing.identifiers(), arguments.shard, arguments.shards)
+        if arguments.studies:
+            identifiers = identifiers[: arguments.studies]
+        log.info("%s over %d %s studies", cls.GERUND, len(identifiers), arguments.split)
+
+        device = str(VisibleCards().device())
+        members = cls.fleet(arguments.weights, device)
+        log.info("loaded %d members onto %s", len(members), device)
+
+        for name, values in passing.taught(identifiers, passing.records(), members, device).items():
+            passing.kept(
+                arguments.fleet / f"{name}.npz" if arguments.fleet else destination,
+                identifiers,
+                values.astype(np.float32),
+            )
+
 
 def main() -> None:
     """Score the train split through the foreign member and write its readings as a teacher file."""
-    command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--weights", type=Path, nargs="+", required=True, help="raptor checkpoints")
-    command.parser.add_argument("--fleet", type=Path, default=None, help="write one file per checkpoint here")
-    command.parser.add_argument("--split", default=TRAIN, help="which split to teach over")
-    command.parser.add_argument("--out", type=Path, default=None, help="destination npz")
-    command.parser.add_argument("--studies", type=int, default=0, help="cap the pass, for a smoke")
-    command.parser.add_argument("--shard", type=int, default=0, help="which stride of the split to score")
-    command.parser.add_argument("--shards", type=int, default=1, help="how many processes share the pass")
-    command.parser.add_argument("--merge", type=Path, nargs="*", help="join these shard files and exit")
-    arguments = command.parsed()
-    root = command.rooted(arguments)
-
-    destination = arguments.out or root.processed() / TEACHER
-    if arguments.merge:
-        logger.info("merged %d studies into %s", TeacherFile(destination).merged(arguments.merge), destination)
-        return
-
-    teaching = TeacherPass(root.raw(), destination, Split(name=str(arguments.split)))
-    identifiers = TeacherPass.sharded(teaching.identifiers(), arguments.shard, arguments.shards)
-    if arguments.studies:
-        identifiers = identifiers[: arguments.studies]
-    logger.info("teaching over %d %s studies", len(identifiers), arguments.split)
-
-    device = str(VisibleCards().device())
-    members = TeacherPass.fleet(arguments.weights, device)
-    logger.info("loaded %d members onto %s", len(members), device)
-    readings = teaching.entry().readings(identifiers, teaching.records(), members, device)
-
-    for name, scores in readings.items():
-        teaching.written(
-            arguments.fleet / f"{name}.npz" if arguments.fleet else destination,
-            identifiers,
-            scores.astype(np.float32),
-        )
+    TeacherPass.main(__doc__, logger)
 
 
 if __name__ == "__main__":

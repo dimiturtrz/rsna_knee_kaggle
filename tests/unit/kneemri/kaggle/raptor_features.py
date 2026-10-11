@@ -1,5 +1,6 @@
 """The feature pass over our split: what it writes, what it leaves NaN, and the teacher it refuses."""
 
+import sys
 from pathlib import Path
 from typing import cast
 
@@ -10,8 +11,11 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core.findings import STUDY
+from core.paths import ENV_OVERRIDE, DataRoot
+from kneemri.device import VisibleCards
 from kneemri.evaluation.raptor_feed import RaptorFeed
 from kneemri.evaluation.raptor_model import RaptorMember
+from kneemri.kaggle import raptor_features
 from kneemri.kaggle.raptor_features import FeaturePass
 from kneemri.kaggle.raptor_teacher import TRAIN
 from kneemri.kaggle.submission import Split
@@ -151,3 +155,74 @@ def test_honest(tmp_path: Path) -> None:
 
     assert FeaturePass.honest(honest) is None
     assert FeaturePass.honest(foreign) is None
+
+
+def test_taught(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The feature pass takes the representations, sized by the member's width."""
+    monkeypatch.setattr(
+        RaptorFeed,
+        "study",
+        lambda self, study, records: (np.zeros((DEPTH, SIDE, SIDE), np.uint8), np.ones(DEPTH, np.uint8)),
+    )
+    reading = FeaturePass(_corpus(tmp_path, ["a"]), tmp_path / "out.npz", Split(name=TRAIN))
+
+    taught = reading.taught(["a"], reading.records(), _members(one=_Reader(0.5)), "cpu")
+
+    assert taught["one"].shape == (1, WIDTH)
+
+
+def test_kept(tmp_path: Path) -> None:
+    """The feature pass keeps its representations under `embeddings`, never under `scores`."""
+    reading = FeaturePass(tmp_path, tmp_path / "out.npz", Split(name=TRAIN))
+    stored = np.load(reading.kept(tmp_path / "out.npz", ["a"], np.full((1, WIDTH), 0.5, np.float32)))
+
+    assert TeacherFile.EMBEDDINGS in stored
+    assert TeacherFile.SCORES not in stored
+
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The command writes every member's reading of its studies, and merges embeddings byte for byte."""
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    raw = DataRoot(tmp_path).raw()
+    raw.mkdir(parents=True)
+    _corpus(raw, ["s0", "s1", "s2"])
+    weights = tmp_path / "foreign.pt"
+    torch.save({"model": {}}, weights)
+    monkeypatch.setattr(VisibleCards, "device", lambda self: torch.device("cpu"))
+    monkeypatch.setattr(FeaturePass, "fleet", staticmethod(lambda paths, device: _members(foreign=_Reader(0.5))))
+    monkeypatch.setattr(
+        RaptorFeed,
+        "study",
+        lambda self, study, records: (np.zeros((DEPTH, SIDE, SIDE), np.uint8), np.ones(DEPTH, np.uint8)),
+    )
+    destination = tmp_path / "features.npz"
+    argv = ["raptor_features", "--weights", str(weights), "--out", str(destination), "--studies", "2"]
+    monkeypatch.setattr(sys, "argv", argv)
+    raptor_features.main()
+
+    stored = np.load(destination)
+    assert list(stored[TeacherFile.IDENTIFIERS]) == ["s0", "s1"]
+    assert stored[TeacherFile.EMBEDDINGS].dtype == np.float32
+    assert np.allclose(stored[TeacherFile.EMBEDDINGS], 0.5)
+
+    merged = tmp_path / "merged.npz"
+    shards = [str(destination), str(destination)]
+    monkeypatch.setattr(
+        sys, "argv", ["raptor_features", "--weights", str(weights), "--out", str(merged), "--merge", *shards]
+    )
+    raptor_features.main()
+
+    expected = tmp_path / "expected.npz"
+    TeacherFile(expected).write_embeddings(["s0", "s1", "s0", "s1"], np.full((4, WIDTH), 0.5, np.float32))
+    assert merged.read_bytes() == expected.read_bytes()
+
+
+def test_main_refuses_a_full_fold_teacher(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A checkpoint of ours fitted on every study is refused before any member is loaded."""
+    weights = tmp_path / "full.pt"
+    torch.save({"recipe": {"fold": -1}}, weights)
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    monkeypatch.setattr(sys, "argv", ["raptor_features", "--weights", str(weights)])
+
+    with pytest.raises(ValueError, match="fold -1"):
+        raptor_features.main()

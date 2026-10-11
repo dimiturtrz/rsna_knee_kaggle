@@ -66,6 +66,10 @@ CHECKPOINT_SUFFIX = ".pt"
 """What a member is stored as. Named here because the resolver below writes it and the submission layer
 reads it, and a literal spelled in two layers is a literal that will one day disagree with itself."""
 
+COMMENT = "#"
+"""Where a roster or declines line stops naming a member and starts saying why. One spelling for every
+reader of those files, because a reader that split on anything else would resolve the prose as a name."""
+
 
 TRAIN_TABLE = "train.csv"
 """The competition's study table, under `raw/`."""
@@ -145,7 +149,7 @@ class DataRoot:
         """
         paths = []
         for line in names:
-            name = line.split("#")[0].strip()
+            name = line.split(COMMENT)[0].strip()
             if not name:
                 continue
             path = Path(name)

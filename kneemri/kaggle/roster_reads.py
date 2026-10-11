@@ -32,7 +32,7 @@ from pathlib import Path
 from core import cli
 from core.data.corpus.slot_reader import Reading
 from core.denominator import Denominator
-from core.paths import DataRoot
+from core.roster_flags import RosterFlags
 from kneemri.inference.members import Member
 
 logger = logging.getLogger(__name__)
@@ -160,10 +160,7 @@ class RosterReads:
 def main() -> None:
     """Report the decodes a set of checkpoints would cost, and which members share each one."""
     command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--roster", type=Path, default=None, help="a roster file, one member per line")
-    command.parser.add_argument(
-        "--candidates", nargs="*", default=[], help="member names or checkpoint paths, instead of a roster"
-    )
+    RosterFlags.add(command.parser)
     command.parser.add_argument(
         "--max-decodes",
         type=int,
@@ -172,13 +169,11 @@ def main() -> None:
     )
     arguments = command.parsed()
 
-    root = DataRoot.from_config(arguments.paths)
-    named = arguments.roster.read_text(encoding="utf-8").splitlines() if arguments.roster else arguments.candidates
-    members = RosterReads.read_members(root.checkpoints(list(named)))
+    members = RosterReads.read_members(RosterFlags.checkpoints(arguments, command.rooted(arguments)))
     # THE DENOMINATOR, refused rather than divided by: a roster whose every line resolved to nothing
     # would otherwise print "0 seats on 0 decodes" through a ZeroDivisionError, or worse, "0 decodes"
     # as if the entry were free.
-    Denominator(len(members), "no checkpoint named by --roster or --candidates is on disk").refuse_empty()
+    Denominator(len(members), f"{RosterFlags.EMPTY} is on disk").refuse_empty()
 
     reads = RosterReads.over(members)
     for line in reads.lines():

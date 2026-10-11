@@ -13,6 +13,7 @@ import pandas as pd
 
 from core.findings import TARGETS
 from kneemri.evaluation.pool import Pool
+from kneemri.kaggle.package_members import MemberRoster
 from kneemri.kaggle.ruler_swap import RulerSwap, Seat
 
 STUDIES = 40
@@ -116,3 +117,13 @@ def test_roster_members(tmp_path: Path) -> None:
     roster.write_text("# a comment\n\nalpha\n  beta.pt  \ngamma.pt   # 0.8523 solo\n", encoding="utf-8")
 
     assert RulerSwap.roster_members(roster) == ["alpha", "beta", "gamma"], "a trailing comment and a .pt are both prose"
+
+
+def test_roster_members_reads_every_shelf_as_the_packager_does() -> None:
+    """The members a reseat is asked about are exactly the ones the package holds, spelled without `.pt`."""
+    shelves = MemberRoster.shelves(Path(__file__).parents[4] / "comp")
+
+    assert shelves, "the committed shelves are the fixture"
+    for shelf in shelves:
+        packaged = [name.removesuffix(".pt") for name in MemberRoster.read(shelf).patterns()]
+        assert RulerSwap.roster_members(shelf) == packaged, shelf.name

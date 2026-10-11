@@ -23,6 +23,7 @@ from typing import cast
 import torch
 
 from core import cli
+from core.paths import COMMENT
 from kneemri.models.backbone import ENCODERS
 from kneemri.models.variants import SMALL
 
@@ -102,8 +103,6 @@ class MemberRoster:
 
     text: str
 
-    COMMENT = "#"
-
     LICENCE = "licence:"
     """The trailing-comment tag naming the external table a member trained on, when that table's terms
     are not settled against competition rule 2.5's obligation to license the winning submission.
@@ -146,7 +145,7 @@ class MemberRoster:
 
     def patterns(self) -> list[str]:
         """The named members, without the prose that says why each is in the package."""
-        lines = [line.split(self.COMMENT)[0].strip() for line in self.text.splitlines()]
+        lines = [line.split(COMMENT)[0].strip() for line in self.text.splitlines()]
         return [line for line in lines if line]
 
     def licence_refusals(self, names: set[str]) -> list[str]:
@@ -156,7 +155,7 @@ class MemberRoster:
         """
         tagged = {}
         for line in self.text.splitlines():
-            member, _, comment = line.partition(self.COMMENT)
+            member, _, comment = line.partition(COMMENT)
             if member.strip() and self.LICENCE in comment:
                 tagged[member.strip().removesuffix(".pt")] = comment.split(self.LICENCE)[1].split()[0]
         return [
