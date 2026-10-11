@@ -9,23 +9,21 @@ import logging
 from pathlib import Path
 
 from core import cli
-from core.data.corpus.cache_flags import CacheFlags
+from core.data.corpus.corpus_build import CorpusBuild
 from core.data.corpus.rijeka_corpus import RIJEKA_SPACING, RijekaCorpus
 from core.data.corpus.slots import RIJEKA_SCHEME
-from core.data.corpus.study_metadata import StudyMetadata
-from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
 LABELS = "rijeka_acl.csv"
-METADATA = "rijeka_metadata.csv"
+BUILD = CorpusBuild(RIJEKA_SCHEME, "RIJEKA", metadata="rijeka_metadata.csv")
 
 
 def main() -> None:
     command = cli.Command(__doc__, logger)
-    CacheFlags.add_to(command.parser)
-    command.parser.add_argument("--archive", type=Path, required=True, help="the kneeMRI dataset zip")
-    command.parser.add_argument(
+    parser = BUILD.opening(command)
+    parser.add_argument("--archive", type=Path, required=True, help="the kneeMRI dataset zip")
+    parser.add_argument(
         "--pixel-spacing",
         type=float,
         default=RIJEKA_SPACING,
@@ -34,27 +32,10 @@ def main() -> None:
         "from CacheFlags' `--spacing`, which selects how slices sit inside the band: two subjects, "
         "one word, and argparse refused the collision rather than letting either flag win.",
     )
-    command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
-    arguments = command.parsed()
-
-    if arguments.scheme != RIJEKA_SCHEME:
-        # THE ONE ERROR THAT COSTS 71.6 GB. `Routing.suffix()` is empty for the canonical scheme, so a
-        # 336px/12sl build under it writes to `images_336px_12sl.npy` — the arrays every member on disk
-        # was fitted on — and destroys them with a corpus differing only in its first axis. The flag
-        # defaults to canonical for every other CLI, so this refuses rather than assumes.
-        command.parser.error(f"--scheme {RIJEKA_SCHEME} is required: any other scheme writes onto our own corpus")
-
-    root = command.rooted(arguments)
-    cache = CacheFlags.cache(arguments, arguments.out or root.processed())
-    corpus = RijekaCorpus(arguments.archive, cache, spacing=arguments.pixel_spacing)
-
-    corpus.labels(root.processed() / "labels" / LABELS)
-    StudyMetadata.write(corpus.metadata(), root.processed() / "metadata" / METADATA)
-    logger.info(f"building {cache.shape(len(corpus.volumes()))} uint8 -> {cache.images_path}")
-    # The decode runs unattended for minutes and the idle timer counts INPUT rather than load (knee-wyzj).
-    with Wakelock():
-        corpus.build()
-    logger.info("RIJEKA BUILD COMPLETE")
+    site = BUILD.opened(command)
+    corpus = RijekaCorpus(site.arguments.archive, site.cache, spacing=site.arguments.pixel_spacing)
+    corpus.labels(site.root.processed() / "labels" / LABELS)
+    BUILD.run(site, corpus, corpus.volumes)
 
 
 if __name__ == "__main__":
