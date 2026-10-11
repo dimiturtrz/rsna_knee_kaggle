@@ -29,6 +29,7 @@ from kneemri.training.terms import (
     Margin,
     Ranking,
 )
+from kneemri.training.trainer import Trainer
 
 
 def _setup(**asked: object) -> RunSetup:
@@ -562,6 +563,64 @@ def test_drawing_mixed_corpus_requires_corpus_column() -> None:
 def test_drawing_mixed_corpus_conflicts_with_disagreed() -> None:
     with pytest.raises(ValueError, match="sample-spread"):
         _setup(corpus_oversample=3.0, sample_spread=Path("x.npz")).drawing(["a", "b"])
+
+
+def _plain_trainer() -> Trainer:
+    from kneemri.models.model import StudyModel  # noqa: PLC0415
+
+    from ..models.model import DIM, SLOTS, _FakeBackbone  # noqa: PLC0415
+
+    return _setup().trainer(StudyModel(_FakeBackbone(), DIM, SLOTS), torch.device("cpu"), [], np.arange(120))
+
+
+def test_switch(monkeypatch: pytest.MonkeyPatch):
+    """The run-shape switches land on a trainer built without them, and a default run attaches none.
+
+    The fake backbone pools over channels, which `whole_stack` rightly refuses, so that one call is
+    recorded rather than run: what is under test is that the switch reaches it with the run's slices.
+    """
+    from core.data.corpus.slot_reader import GROUP  # noqa: PLC0415
+
+    untouched = _plain_trainer()
+    _setup(bf16=False).switch(untouched)
+    assert untouched.window == GROUP
+    assert untouched.read_size is None
+
+    switched = _plain_trainer()
+    stacked: list[int] = []
+    monkeypatch.setattr(switched, "whole_stack", stacked.append)
+    _setup(whole_stack=True, slices=16, train_size=392).switch(switched)
+    assert stacked == [16]
+    assert switched.read_size == 392
+    assert switched.autocast_dtype is torch.bfloat16
+
+
+def test_supervise(tmp_path: Path):
+    """Each extra target is attached only where the run asked for it."""
+    from kneemri.training.report_supervision import NoReportSupervision, ReportSupervision  # noqa: PLC0415
+
+    plain = _plain_trainer()
+    _setup().supervise(plain, [], np.arange(120), None)
+    assert type(plain.reports) is NoReportSupervision
+
+    vectors = tmp_path / "reports.npz"
+    np.savez(vectors, identifiers=np.array(["s0"]), vectors=np.zeros((1, 4), dtype=np.float32))
+    asked = _plain_trainer()
+    _setup(report_weight=0.3, report_vectors=vectors).supervise(asked, ["s0"], np.arange(120), None)
+    assert isinstance(asked.reports, ReportSupervision)
+
+
+def test_regularise():
+    """The weight average is attached only where the run asked for it."""
+    from kneemri.models.ema import LiveWeights, WeightAverage  # noqa: PLC0415
+
+    plain = _plain_trainer()
+    _setup().regularise(plain, [])
+    assert type(plain.average) is LiveWeights
+
+    asked = _plain_trainer()
+    _setup(ema=True).regularise(asked, ["s0"])
+    assert type(asked.average) is WeightAverage
 
 
 def test_early():

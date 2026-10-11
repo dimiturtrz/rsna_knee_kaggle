@@ -120,6 +120,41 @@ def test_failed_cleans_a_leftover_it_rewrote(tmp_path: Path):
     assert (tmp_path / "again.sh").exists(), "and the arm file, which nothing touched, stays"
 
 
+def test_smoked(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """One arm: its complaint, or empty when it learned — and a crowded card is answered without running it."""
+    ran: list[str] = []
+
+    def runner(argv: list[str]) -> tuple[int, str]:
+        name = Path(argv[-1]).stem
+        ran.append(name)
+        _record(tmp_path, name, loss=0.62, auc=0.55)
+        return (1, "boom") if name == "loud" else (0, "")
+
+    smoke = ArmSmoke(runner=runner)
+    monkeypatch.setattr(ArmSmoke, "room", staticmethod(lambda _need: ""))
+
+    assert smoke.smoked("fine", "--fold 0", tmp_path) == ""
+    assert smoke.smoked("loud", "--fold 0", tmp_path) == "boom"
+    assert not list(tmp_path.glob("*.metrics.jsonl")), "both arms' output is swept"
+
+    monkeypatch.setattr(ArmSmoke, "room", staticmethod(lambda _need: "card full"))
+    assert smoke.smoked("crowded", "--fold 0", tmp_path) == "card full"
+    assert ran == ["fine", "loud"], "a crowded arm never reaches the trainer"
+
+
+def test_sweep(tmp_path: Path):
+    """What the run touched goes; an untouched file with the same stem, and other stems, stay."""
+    kept = tmp_path / "arm.sh"
+    kept.write_text("run_train arm\n", encoding="utf-8")
+    untouched = {kept: kept.stat().st_mtime_ns}
+    (tmp_path / "arm.partial").write_bytes(b"weights")
+    (tmp_path / "other.partial").write_bytes(b"weights")
+
+    ArmSmoke.sweep(tmp_path, "arm", untouched)
+
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["arm.sh", "other.partial"]
+
+
 def test_learned(tmp_path: Path):
     """The epoch's own aggregates decide, and a per-label NaN at sixty studies is not a fault."""
     smoke = ArmSmoke()

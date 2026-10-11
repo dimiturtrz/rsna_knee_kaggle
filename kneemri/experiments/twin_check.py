@@ -84,14 +84,20 @@ class TwinDrift:
         for theirs, ours in ((shipped.options, validated.options), (shipped.config, validated.config)):
             for axis in sorted(set(theirs) | set(ours)):
                 here, there = theirs.get(axis), ours.get(axis)
-                if axis in self.allowed or here == there:
-                    continue
-                # ONE SIDE PREDATES THE FLAG. A key absent from one stamp while the other holds that
-                # flag's declared default is one era, not two models.
-                if (here is None or there is None) and (here or there) == defaults.get(axis):
-                    continue
-                found[axis] = f"{axis}={there!r}->{here!r}"
+                if self.drifted(axis, here, there, defaults):
+                    found[axis] = f"{axis}={there!r}->{here!r}"
         return list(found.values())
+
+    def drifted(self, axis: str, here: str | None, there: str | None, defaults: dict[str, str]) -> bool:
+        """Whether one axis differs beyond the allowance.
+
+        ONE SIDE PREDATES THE FLAG. A key absent from one stamp while the other holds that flag's declared
+        default is one era, not two models.
+        """
+        if axis in self.allowed or here == there:
+            return False
+        predates = (here is None or there is None) and (here or there) == defaults.get(axis)
+        return not predates
 
     def faults(self) -> list[str]:
         """Each pair carrying an unread second variable, named with the axes that carry it."""

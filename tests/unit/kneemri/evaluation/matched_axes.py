@@ -97,6 +97,23 @@ def test_groups():
     ]
 
 
+def test_context():
+    """The held-out key and the noise keys drop out; what is left is sorted, so dict order cannot split a group."""
+    signature = MatchedAxes.context({"variant": "small", "epochs": "12", "out": "x", "aug": "on"}, "epochs")
+
+    assert signature == (("aug", "on"), ("variant", "small"))
+
+
+def test_varies():
+    """A group is a contrast only with two values of the key, all read on one population."""
+    axes = _axes()
+    recut = MatchedAxes(recipes=axes.recipes, rows={**axes.rows, "long_a": _row("long_a", 0.885, population="other")})
+
+    assert axes.varies(["short_a", "long_a"], "epochs")
+    assert not axes.varies(["short_a", "unmatched"], "epochs"), "one value of the key is no contrast"
+    assert not recut.varies(["short_a", "long_a"], "epochs"), "two populations are two questions"
+
+
 def test_groups_splits_populations():
     """Two rows read on different study sets are two questions, so they are not one another's control."""
     axes = _axes()

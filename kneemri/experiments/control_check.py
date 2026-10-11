@@ -297,6 +297,21 @@ class ControlCheck:
         seen = [(comparison, *self.findings(comparison)) for comparison in declared]
         return sorted((row for row in seen if row[1]), key=lambda row: (-len(row[1]), row[0].arm))
 
+    def summary(self, seen: list[tuple[Comparison, tuple[str, ...], float | None]]) -> str:
+        """One line counting the flagged comparisons by finding; BUILD is counted by prefix, it carries a count."""
+        kinds = self.comparability
+        flags = [found for _comparison, found, _measured in seen]
+        exact = {
+            tag: sum(tag in found for found in flags)
+            for tag in (kinds.unsourced, kinds.unruled, kinds.budget, kinds.unresolved, kinds.unrun)
+        }
+        build = sum(any(item.startswith(kinds.build) for item in found) for found in flags)
+        return (
+            f"{len(seen)} declared comparisons flagged: {exact[kinds.unsourced]} unsourced, "
+            f"{exact[kinds.unruled]} unruled, {exact[kinds.budget]} budget, {build} build, "
+            f"{exact[kinds.unresolved]} unresolved, {exact[kinds.unrun]} unrun"
+        )
+
     def _unmatched(self, comparison: Comparison) -> str:
         """What to call a declared score that matches no ruler this side can compute.
 
@@ -321,18 +336,8 @@ def main() -> None:
 
     for comparison, found, measured in seen:
         logger.info("%s", comparison.line(found, measured))
-    unsourced = [row for row in seen if Comparability().unsourced in row[1]]
-    logger.info(
-        "%d declared comparisons flagged: %d unsourced, %d unruled, %d budget, %d build, %d unresolved, %d unrun",
-        len(seen),
-        len(unsourced),
-        sum(Comparability().unruled in found for _, found, _measured in seen),
-        sum(Comparability().budget in found for _, found, _measured in seen),
-        sum(any(item.startswith(Comparability().build) for item in found) for _, found, _measured in seen),
-        sum(Comparability().unresolved in found for _, found, _measured in seen),
-        sum(Comparability().unrun in found for _, found, _measured in seen),
-    )
-    if unsourced:
+    logger.info("%s", check.summary(seen))
+    if any(Comparability().unsourced in found for _comparison, found, _measured in seen):
         # Only UNSOURCED blocks. A budget or build mismatch is a real comparison that needs a caveat;
         # an unsourced score is a number no run produced, and there is no caveat that repairs one.
         logger.info("an unsourced score is on NO epoch of the control's curve - it has no producer")

@@ -195,10 +195,10 @@ class TailProfile:
             body=len(body),
             tail_positives=float(np.mean([row.positives for row in tail])),
             body_positives=float(np.mean([row.positives for row in body])),
-            tail_gold=sum(1 for row in tail if row.study in gold),
-            body_gold=sum(1 for row in body if row.study in gold),
-            tail_over=sum(1 for row in tail if row.direction == "over"),
-            body_over=sum(1 for row in body if row.direction == "over"),
+            tail_gold=sum(row.study in gold for row in tail),
+            body_gold=sum(row.study in gold for row in body),
+            tail_over=sum(row.direction == "over" for row in tail),
+            body_over=sum(row.direction == "over" for row in body),
         )
 
     def report(self) -> list[str]:

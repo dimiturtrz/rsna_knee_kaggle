@@ -49,6 +49,18 @@ def test_mismatched(tmp_path: Path):
     )
 
 
+def test_undeclared(tmp_path: Path):
+    """Omitted, added, declared, incidental and equal-but-respelled flags, read without any control lookup."""
+    diff = ArmDiff(ArmHeader(tmp_path))
+    mine = {"--epochs": "8", "--lr": "4e-05", "--distill-weight": "0.3", "--depth": "2", "--out": "a.pt"}
+    theirs = {"--epochs": "8", "--lr": "4e-5", "--backbone-lr": "4e-5", "--out": "b.pt"}
+
+    found = diff.undeclared(mine, theirs, {"--depth"})
+
+    assert found == ["--backbone-lr: 4e-5 -> absent", "--distill-weight: absent -> 0.3"]
+    assert diff.undeclared(mine, mine, set()) == []
+
+
 def test_twinned(tmp_path: Path):
     """One recipe under two names is a duplicate; the same identity DECLARED, or from one shell, is not.
 

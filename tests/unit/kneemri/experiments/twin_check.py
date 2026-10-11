@@ -45,6 +45,18 @@ def test_drift(tmp_path: Path) -> None:
     assert era.drift(tmp_path / "arm_ff.pt", tmp_path / "arm_s2026.pt") == []
 
 
+def test_drifted(tmp_path: Path) -> None:
+    """One axis: allowed or equal never drifts, a predating side at the default never drifts, a stated change does."""
+    check = TwinDrift(tmp_path)
+    defaults = {"layer_decay": "1.0"}
+
+    assert not check.drifted("fold", "-1", "0", defaults), "the fold is the swap itself"
+    assert not check.drifted("epochs", "24", "24", defaults)
+    assert not check.drifted("layer_decay", None, "1.0", defaults), "one side predates the flag"
+    assert check.drifted("layer_decay", None, "0.75", defaults), "absent against a non-default is a second variable"
+    assert check.drifted("epochs", "12", "24", defaults)
+
+
 def test_faults(tmp_path: Path) -> None:
     """A pair differing on the allowance alone is silent; one carrying another axis names it."""
     assert pair(tmp_path, DEPLOYED).faults() == []

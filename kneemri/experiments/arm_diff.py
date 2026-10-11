@@ -11,7 +11,7 @@ arm, which is also why they are the only checks taking `against`.
 """
 
 import shlex
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 
 from kneemri.experiments.arm_header import ArmHeader
 from kneemri.training.recipe_layers import CONFIG, SET
@@ -79,19 +79,22 @@ class ArmDiff:
         for name, control in self.headers.controls(invocations).items():
             if control not in against or control == name:
                 continue
-            declared = self.headers.deliberate(name)
-            mine = self.values(invocations[name])
-            theirs = self.values(against[control])
-            found = [
-                f"{flag}: {theirs.get(flag, 'absent')} -> {mine.get(flag, 'absent')}"
-                for flag in sorted(set(mine) | set(theirs))
-                if flag not in INCIDENTAL_FLAGS
-                and flag not in declared
-                and not (flag in mine and flag in theirs and self._same(mine[flag], theirs[flag]))
-            ]
+            found = self.undeclared(
+                self.values(invocations[name]), self.values(against[control]), self.headers.deliberate(name)
+            )
             if found:
                 differences[name] = found
         return differences
+
+    def undeclared(self, mine: Mapping[str, str], theirs: Mapping[str, str], declared: Collection[str]) -> list[str]:
+        """The flags two parsed lines disagree on, minus the incidental and the declared, as `flag: control -> arm`."""
+        return [
+            f"{flag}: {theirs.get(flag, 'absent')} -> {mine.get(flag, 'absent')}"
+            for flag in sorted(set(mine) | set(theirs))
+            if flag not in INCIDENTAL_FLAGS
+            and flag not in declared
+            and not (flag in mine and flag in theirs and self._same(mine[flag], theirs[flag]))
+        ]
 
     def twinned(self, invocations: Mapping[str, str], against: Mapping[str, str]) -> dict[str, str]:
         """Each arm whose flag line is ALREADY another arm's, up to the file it writes.

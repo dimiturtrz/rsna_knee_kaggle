@@ -86,6 +86,13 @@ class TriedIdea:
         board = "unscored" if self.board is None else f"{self.board:.3f}"
         return f"{self.identifier} (board {board}): {self.what[:PROSE_SHOWN]}"
 
+    @classmethod
+    def warnings(cls, record: Path, words: list[str], kernel: str) -> list[str]:
+        """What the board already tried under these mechanism words — or that nobody asked it."""
+        if not words:
+            return [f"IDEA NOT CHECKED {kernel}: pass --idea <mechanism word> to read what the board already tried"]
+        return [f"TRIED {tried.described()}" for tried in cls.matched(record, words)]
+
 
 class SubmitCheck:
     """The board's recorded entries, asked whether a candidate kernel's seats are already one of them."""
@@ -126,6 +133,11 @@ class SubmitCheck:
         return set(names) | script.foreign_seats() if names else None
 
     @staticmethod
+    def licence_refusals(shelves: list[Path], named: set[str]) -> list[str]:
+        """Every seat any shelf tags as trained on a table whose licence forbids shipping it."""
+        return [refusal for shelf in shelves for refusal in MemberRoster.read(shelf).licence_refusals(named)]
+
+    @staticmethod
     def resolved(given: str, kernels: Path) -> Path:
         """A kernel named either by its directory or by its bare name, as a directory."""
         direct = Path(given)
@@ -155,7 +167,7 @@ def main() -> None:
     # Before the repeat question, because a repeat is a wasted slot and this is a wasted WIN: rule 2.5
     # obliges the winner to license the submission and its source, and a member trained on a
     # no-derivatives table cannot be relicensed by us. `--anyway` does not open this one.
-    refusals = [refusal for shelf in arguments.roster for refusal in MemberRoster.read(shelf).licence_refusals(named)]
+    refusals = SubmitCheck.licence_refusals(arguments.roster, named)
     for refusal in refusals:
         logger.error("LICENCE %s: %s", kernel.name, refusal)
     command.conclude(refusals, "licence refusal(s)")
@@ -165,12 +177,8 @@ def main() -> None:
 
     for row, part in shipped.overlaps(named):
         logger.info("overlaps %.0f%% of %s", 100 * part, shipped.described(row))
-    if not arguments.idea:
-        logger.warning(
-            "IDEA NOT CHECKED %s: pass --idea <mechanism word> to read what the board already tried", kernel.name
-        )
-    for tried in TriedIdea.matched(arguments.record, arguments.idea) if arguments.idea else []:
-        logger.warning("TRIED %s", tried.described())
+    for warning in TriedIdea.warnings(arguments.record, arguments.idea, kernel.name):
+        logger.warning("%s", warning)
     repeats = shipped.repeats(named)
     for row in repeats:
         logger.info("SAME %d members as %s", len(named), shipped.described(row))

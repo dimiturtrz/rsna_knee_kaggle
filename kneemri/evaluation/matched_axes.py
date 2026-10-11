@@ -158,16 +158,20 @@ class MatchedAxes:
         """Members sharing every other key, split into the sets that differ only on `key`."""
         buckets: dict[tuple[tuple[str, str], ...], list[str]] = defaultdict(list)
         for name, recipe in self.recipes.items():
-            if key not in recipe:
-                continue
-            rest = tuple(sorted((k, v) for k, v in recipe.items() if k != key and k not in RECIPE_NOISE))
-            buckets[rest].append(name)
-        return [
-            members
-            for members in buckets.values()
-            if len({MatchedAxes.recipe_value(self.recipes[m], key) for m in members}) > 1
-            and len({self.rows[m].population for m in members}) == 1
-        ]
+            if key in recipe:
+                buckets[MatchedAxes.context(recipe, key)].append(name)
+        return [members for members in buckets.values() if self.varies(members, key)]
+
+    @staticmethod
+    def context(recipe: dict[str, str], key: str) -> tuple[tuple[str, str], ...]:
+        """Every recorded key but `key` and the noise, as a hashable signature two matched members share."""
+        return tuple(sorted((k, v) for k, v in recipe.items() if k != key and k not in RECIPE_NOISE))
+
+    def varies(self, members: list[str], key: str) -> bool:
+        """Whether the members hold more than one value of `key` while scored on one population."""
+        values = {MatchedAxes.recipe_value(self.recipes[m], key) for m in members}
+        populations = {self.rows[m].population for m in members}
+        return len(values) > 1 and len(populations) == 1
 
     def readings(self, members: list[str], key: str) -> dict[str, float]:
         """One LEDGER75 per VALUE of `key`, averaging the members a group happens to hold at that value.

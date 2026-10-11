@@ -237,3 +237,28 @@ def test_resumed_run_is_not_truncated(tmp_path: Path) -> None:
     killed = check.verdict(write_run(tmp_path, "died", peak=18, epochs=4, asked=24, first=16))
     assert killed.verdict is Convergence.TRUNCATED
     assert killed.epochs_done == 20
+
+
+def test_single(tmp_path: Path) -> None:
+    """A path on disk reads to its one verdict; a path holding no file refuses rather than reading UNSCORED."""
+    converged = write_run(tmp_path, "v3base_dense", peak=SETTLED_PEAK, epochs=12, asked=12)
+    (seen,) = ConvergenceCheck().single(converged.path)
+    assert seen.verdict is Convergence.CONVERGED
+
+    with pytest.raises(SystemExit, match="not on disk"):
+        ConvergenceCheck().single(tmp_path / "v3base_dense_s2026")
+
+
+def test_summary() -> None:
+    """The total, then only the verdicts that occurred, each counted."""
+    seen = [
+        RunConvergence("a", Convergence.CONVERGED, 6, 12, 12),
+        RunConvergence("b", Convergence.CONVERGED, 6, 12, 12),
+        RunConvergence("c", Convergence.TRUNCATED, 6, 7, 12),
+    ]
+    summary = ConvergenceCheck.summary(seen)
+    assert summary.startswith("3 runs: ")
+    assert f"2 {Convergence.CONVERGED.lower()}" in summary
+    assert f"1 {Convergence.TRUNCATED.lower()}" in summary
+    assert Convergence.STOPPED.lower() not in summary
+    assert ConvergenceCheck.summary([]) == "0 runs: "

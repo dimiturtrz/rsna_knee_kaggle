@@ -212,6 +212,22 @@ def test_audit(tmp_path: Path) -> None:
     assert seen[0][1] == ("BUDGET",)
 
 
+def test_summary(tmp_path: Path) -> None:
+    """Each finding counted once per comparison, and BUILD by its prefix since it carries a count."""
+    check = ControlCheck(tmp_path, tmp_path)
+    arm = Comparison("a", "b", BAND_DENSE_PEAK, tmp_path / "a.sh")
+    seen: list[tuple[Comparison, tuple[str, ...], float | None]] = [
+        (arm, ("UNSOURCED", "BUILD(2)"), None),
+        (arm, ("BUDGET", "BUILD(1)"), 0.85),
+        (arm, ("UNRUN",), None),
+    ]
+
+    assert check.summary(seen) == (
+        "3 declared comparisons flagged: 1 unsourced, 0 unruled, 1 budget, 2 build, 0 unresolved, 1 unrun"
+    )
+    assert check.summary([]).startswith("0 declared comparisons flagged: 0 unsourced")
+
+
 def test_line(tmp_path: Path) -> None:
     """The offset is printed, because it is what tells a transcription slip from a different ruler."""
     comparison = Comparison("rank966_hold", "band_dense_hold_s2026", 0.8956, tmp_path / "rank966_hold.sh")
