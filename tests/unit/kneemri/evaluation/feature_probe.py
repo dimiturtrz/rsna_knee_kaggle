@@ -7,9 +7,20 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from core.data.corpus.folds import ReportFolds
 from core.findings import TARGETS
-from kneemri.evaluation.feature_probe import SELECTION, FeatureProbe, ProbeCorpus, ProbeResult, ProbeSplit
-from kneemri.evaluation.slice_readout import SliceMax, SliceMean
+from core.paths import TRAIN_TABLE
+from kneemri.evaluation.feature_probe import (
+    HOLDOUT_FOLD,
+    SELECTION,
+    TRUNKS,
+    FeatureProbe,
+    ProbeCorpus,
+    ProbeResult,
+    ProbeSplit,
+)
+from kneemri.evaluation.scores import LabelScores
+from kneemri.evaluation.slice_readout import READOUTS, SliceMax, SliceMean
 
 
 def _result() -> ProbeResult:
@@ -153,6 +164,39 @@ def test_features(tmp_path: Path) -> None:
     assert corpus.features("features_demo").shape == (2, 2, 2, 3)
 
 
+SPLIT_STUDIES = 40
+
+
+def _split_corpus(tmp_path: Path, stem: str) -> tuple[ProbeCorpus, list[str]]:
+    identifiers = [f"s{index}" for index in range(SPLIT_STUDIES)]
+    corpus = _corpus(tmp_path, identifiers, stem)
+    corpus.raw.mkdir()
+    reports = [f"report {index}" for index in range(SPLIT_STUDIES)]
+    pd.DataFrame({"StudyInstanceUID": identifiers, "Report": reports}).to_csv(corpus.raw / TRAIN_TABLE, index=False)
+    features = np.random.default_rng(7).normal(size=(SPLIT_STUDIES, 2, 2, 3)).astype(np.float16)
+    np.save(corpus.processed / f"{stem}.npy", features)
+    return corpus, identifiers
+
+
+def _manual_split(corpus: ProbeCorpus, stem: str, identifiers: list[str], readout: str) -> ProbeSplit:
+    folds = ReportFolds()
+    training, holdout = folds.holdout(folds.assign(str(corpus.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
+    features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])
+    return ProbeSplit(features, corpus.truth(identifiers), training, holdout)
+
+
+def test_split(tmp_path: Path) -> None:
+    """The split equals the fold-0 block the probe mains built by hand, array for array."""
+    name = sorted(TRUNKS)[0]
+    corpus, identifiers = _split_corpus(tmp_path, TRUNKS[name])
+    expected = _manual_split(corpus, TRUNKS[name], identifiers, SliceMax.name)
+    split = corpus.split(name, SliceMax.name)
+    assert len(expected.training) > 0
+    assert len(expected.holdout) > 0
+    for field in ("features", "truth", "training", "holdout"):
+        assert np.array_equal(getattr(split, field), getattr(expected, field))
+
+
 def _probe_pool(studies: int, dim: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     rng = np.random.default_rng(0)
     truth = (rng.random((studies, len(TARGETS))) > 0.6).astype(np.int64)
@@ -170,3 +214,48 @@ def test_inner_area() -> None:
     """A separable pool reads above chance on the inner scoring positions."""
     features, truth, training = _probe_pool(studies=240, dim=6)
     assert FeatureProbe(1.0).inner_area(ProbeSplit(features, truth, training[:120], training[120:])) > 0.5
+
+
+ORACLE_STUDIES = 120
+ONE_CLASS_COLUMN = 3
+
+
+def _oracle_split() -> ProbeSplit:
+    """Random binary truth with one finding that holds a single class on the scored positions."""
+    generator = np.random.default_rng(5)
+    truth = generator.integers(0, 2, size=(ORACLE_STUDIES, len(TARGETS)))
+    truth[:, ONE_CLASS_COLUMN] = 0
+    features = truth[:, :4] * 0.5 + generator.normal(size=(ORACLE_STUDIES, 4))
+    positions = np.arange(ORACLE_STUDIES)
+    return ProbeSplit(features, truth, positions[: ORACLE_STUDIES // 2], positions[ORACLE_STUDIES // 2 :])
+
+
+def _rank_areas(predictions: np.ndarray, held: np.ndarray) -> dict[str, float]:
+    return {
+        target: LabelScores.area_under_curve(predictions[:, column], held[:, column])
+        for column, target in enumerate(TARGETS)
+    }
+
+
+def test_scored_matches_rank_areas_with_a_one_class_column() -> None:
+    split = _oracle_split()
+    probe = FeatureProbe(penalty=1.0)
+    expected = _rank_areas(probe.holdout_record(split), split.truth[split.holdout])
+    per_label = probe.scored("t", split).per_label
+    np.testing.assert_equal(per_label, expected)
+    assert np.isnan(per_label[TARGETS[ONE_CLASS_COLUMN]])
+
+
+def test_inner_area_is_the_mean_over_defined_labels() -> None:
+    split = _oracle_split()
+    probe = FeatureProbe(penalty=1.0)
+    areas = _rank_areas(probe.holdout_record(split), split.truth[split.holdout])
+    defined = [area for area in areas.values() if not np.isnan(area)]
+    assert len(defined) == len(TARGETS) - 1
+    assert probe.inner_area(split) == float(np.mean(defined))
+
+
+def test_inner_area_reads_zero_when_no_label_is_defined() -> None:
+    split = _oracle_split()
+    flat = ProbeSplit(split.features, np.zeros_like(split.truth), split.training, split.holdout)
+    assert FeatureProbe(penalty=1.0).inner_area(flat) == 0.0

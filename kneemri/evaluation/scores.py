@@ -130,7 +130,7 @@ class LabelScores:
     def per_label(
         self,
         predictions: NDArray[np.float64],
-        targets: NDArray[np.float32],
+        targets: NDArray[np.float32] | NDArray[np.int64],
         where: NDArray[np.bool_] | None = None,
     ) -> dict[str, float]:
         """One AUC per finding, against graded targets binarised at this instrument's `cut`.

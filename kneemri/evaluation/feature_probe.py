@@ -183,14 +183,8 @@ class FeatureProbe:
 
     def inner_area(self, inner: ProbeSplit) -> float:
         """Mean area over the inner scoring positions, skipping labels they left with one class."""
-        predictions = self.holdout_record(inner)
-        held = inner.truth[inner.holdout]
-        areas = [
-            LabelScores.area_under_curve(predictions[:, column], held[:, column])
-            for column in range(held.shape[1])
-            if 0 < held[:, column].sum() < len(held)
-        ]
-        return float(np.mean(areas)) if areas else 0.0
+        areas = LabelScores().per_label(self.holdout_record(inner), inner.truth[inner.holdout])
+        return 0.0 if np.isnan(list(areas.values())).all() else LabelScores.mean_of(areas)
 
     @staticmethod
     def pooled(
@@ -247,11 +241,7 @@ class FeatureProbe:
 
     def scored(self, trunk: str, split: ProbeSplit) -> ProbeResult:
         """Fit on the training positions and score the holdout, one area per finding."""
-        predictions = self.holdout_record(split)
-        areas = {
-            target: LabelScores.area_under_curve(predictions[:, column], split.truth[split.holdout, column])
-            for column, target in enumerate(TARGETS)
-        }
+        areas = LabelScores().per_label(self.holdout_record(split), split.truth[split.holdout])
         return ProbeResult(trunk=trunk, dimensions=split.features.shape[1], studies=len(split.holdout), per_label=areas)
 
 
@@ -290,6 +280,15 @@ class ProbeCorpus:
         """Memory-map a feature cache rather than reading 500 MB per trunk."""
         return np.load(self.processed / f"{stem}.npy", mmap_mode="r")
 
+    def split(self, name: str, readout: str) -> ProbeSplit:
+        """A trunk's pooled features and truth with the fold-0 positions every probe is ranked on."""
+        stem = TRUNKS[name]
+        identifiers = self.identifiers(stem)
+        folds = ReportFolds()
+        training, holdout = folds.holdout(folds.assign(str(self.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
+        features = FeatureProbe.pooled(self.features(stem), READOUTS[readout])
+        return ProbeSplit(features, self.truth(identifiers), training, holdout)
+
 
 def main() -> None:
     """Probe every cached trunk against the twelve findings on the fold-0 holdout."""
@@ -325,16 +324,11 @@ def main() -> None:
     arguments = command.parsed()
     root = command.rooted(arguments)
     corpus = ProbeCorpus(processed=root.processed(), raw=root.raw())
-    folds = ReportFolds()
     results: list[ProbeResult] = []
     for name in arguments.trunks:
-        stem = TRUNKS[name]
-        identifiers = corpus.identifiers(stem)
-        training, holdout = folds.holdout(folds.assign(str(corpus.raw / TRAIN_TABLE), identifiers), HOLDOUT_FOLD)
-        truth = corpus.truth(identifiers)
+        identifiers = corpus.identifiers(TRUNKS[name])
         for readout in arguments.slice_readout:
-            features = FeatureProbe.pooled(corpus.features(stem), READOUTS[readout])
-            split = ProbeSplit(features, truth, training, holdout)
+            split = corpus.split(name, readout)
             # Per-trunk by DEFAULT since 2026-09-04. The shared reading is still reachable, because it is
             # what every number quoted before that date was taken at, but it is no longer what a bare
             # invocation prints — the wrong reading should not be the one nobody had to ask for.
@@ -352,26 +346,26 @@ def main() -> None:
                     # inside `seat_value`, four calls deep, with nothing naming the probe as the cause.
                     # One writer means the format cannot drift again.
                     HoldoutRecord(arguments.emit_holdout / f"{name}_{readout}_probe.npz").write(
-                        HoldoutRecord.named(identifiers, holdout),
+                        HoldoutRecord.named(identifiers, split.holdout),
                         FeatureProbe(penalty).holdout_record(split),
-                        corpus.graded(identifiers)[holdout],
+                        corpus.graded(identifiers)[split.holdout],
                         UNKNOWN_EPOCH,
                         source=PROBE,
                     )
                 if arguments.emit_weights is not None:
                     arguments.emit_weights.mkdir(parents=True, exist_ok=True)
                     everything = np.arange(len(identifiers))
-                    shipped = FeatureProbe(penalty).weights(features, truth)
+                    shipped = FeatureProbe(penalty).weights(split.features, split.truth)
                     np.savez(
                         arguments.emit_weights / f"{name}_{readout}_probe.weights.npz",
                         weights=shipped,
                         penalty=np.float64(penalty),
                         readout=readout,
                         trunk=name,
-                        stem=stem,
+                        stem=TRUNKS[name],
                         witness_studies=np.asarray(identifiers)[everything[:WITNESS_STUDIES]],
-                        witness_features=features[everything[:WITNESS_STUDIES]],
-                        witness_logits=FeatureProbe.predicted(features[everything[:WITNESS_STUDIES]], shipped),
+                        witness_features=split.features[everything[:WITNESS_STUDIES]],
+                        witness_logits=FeatureProbe.predicted(split.features[everything[:WITNESS_STUDIES]], shipped),
                     )
     Denominator(len(results), "no trunk had a cached feature array to probe").refuse_empty()
 
