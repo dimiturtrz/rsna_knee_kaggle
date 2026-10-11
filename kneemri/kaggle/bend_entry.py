@@ -36,6 +36,7 @@ from pathlib import Path
 import pandas as pd
 
 from core.findings import STUDY, TARGETS
+from kneemri.kaggle.script_seat import Anchor
 
 logger = logging.getLogger(__name__)
 
@@ -138,11 +139,7 @@ class BendEntry:
         the single-site `TIME_BUDGET` case would have been: his rad stage would have gone on aiming at a
         nine-hour ceiling that is not there.
         """
-        found = text.count(spelling)
-        if found != sites:
-            message = f"{self.source} spells {spelling!r} {found} times, not {sites}"
-            raise ValueError(message)
-        return text.replace(spelling, replacement)
+        return Anchor(spelling, replacement, sites).applied(text, str(self.source))
 
     def flattened(self, text: str) -> str:
         """His three concatenated notebook CELLS made into one legal script.

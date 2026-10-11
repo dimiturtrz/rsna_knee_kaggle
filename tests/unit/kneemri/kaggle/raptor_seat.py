@@ -1,12 +1,24 @@
 """The seat blend: it must rank, it must weight, and it must join by study rather than by row."""
 
+from collections.abc import Sequence
+
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.special import ndtr, ndtri
 
 from core.findings import STUDY, TARGETS
 from kneemri.inference.vote import Vote
-from kneemri.kaggle.raptor_seat import OUR_SEATS, SEATS, RaptorSeat
+from kneemri.kaggle.raptor_seat import OUR_SEATS, SEATS, ProbitRanks, RaptorSeat, WeightedRankAverage
+
+STUDIES = 23
+"""Odd and prime, so no tie group lines up with a round fraction of the table."""
+
+LEVELS = 5
+"""Distinct values per label in a tied fixture: few enough that most studies share a score."""
+
+KERNEL_SHARES = (1.0 / 12.0, 1.0 / 12.0, 1.0 / 3.0, 1.0 / 2.0)
+"""The shares `kneemri-s6probit` fuses its four producers at."""
 
 
 def _table(studies: list[str], values: np.ndarray) -> pd.DataFrame:
@@ -127,3 +139,105 @@ def test_a_zero_weight_returns_our_own_ranks() -> None:
     mine, yours = _rising(3), _rising(3)[::-1]
     blended = RaptorSeat(weight=0.0).blended(_table(studies, mine), _table(studies, yours))
     np.testing.assert_allclose(blended[list(TARGETS)].to_numpy(), Vote.ranks(mine))
+
+
+def _tied(seed: int) -> pd.DataFrame:
+    """A table of few distinct scores per label, so ties are the rule rather than the exception."""
+    rng = np.random.default_rng(seed)
+    values = rng.integers(0, LEVELS, size=(STUDIES, len(TARGETS))) / LEVELS
+    return _table([f"s{index:02d}" for index in range(STUDIES)], values)
+
+
+def _shuffled(table: pd.DataFrame, seed: int) -> pd.DataFrame:
+    return table.iloc[np.random.default_rng(seed).permutation(len(table))].reset_index(drop=True)
+
+
+def _combined_before_fusion(
+    ours: pd.DataFrame, theirs: Sequence[pd.DataFrame], weights: Sequence[float]
+) -> pd.DataFrame:
+    """`RaptorSeat.combined` as it stood before it took a `fusion`, verbatim, as the identity oracle."""
+    share = sum(weights)
+    combined = (1.0 - share) * Vote.ranks(ours[list(TARGETS)].to_numpy(dtype=np.float64))
+    for table, weight in zip(theirs, weights, strict=True):
+        aligned = table.set_index(STUDY).reindex(ours[STUDY])
+        combined += weight * Vote.ranks(aligned[list(TARGETS)].to_numpy(dtype=np.float64))
+    frame = pd.DataFrame(combined, columns=list(TARGETS))
+    frame.insert(0, STUDY, ours[STUDY].to_numpy())
+    return frame
+
+
+def _kernel_probit(frames: Sequence[pd.DataFrame], shares: Sequence[float]) -> pd.DataFrame:
+    """The probit block of `comp/kernels/kneemri-s6probit/kneemri-s6probit.py`, copied as the oracle."""
+    ids = frames[0]["StudyInstanceUID"]
+    labels = [column for column in frames[0].columns if column != "StudyInstanceUID"]
+    fused = sum(
+        share * ndtri((table.set_index("StudyInstanceUID").loc[ids, labels].rank().to_numpy() - 0.5) / len(ids))
+        for table, share in zip(frames, shares, strict=True)
+    )
+    return pd.DataFrame(ndtr(fused), columns=labels).assign(StudyInstanceUID=ids.to_numpy())[
+        ["StudyInstanceUID", *labels]
+    ]
+
+
+def test_default_fusion_is_the_rank_average_it_replaced() -> None:
+    """Default `combined` is bit-identical to the pre-fusion body on tied, shuffled tables."""
+    ours = _tied(0)
+    theirs = [_shuffled(_tied(seed), seed) for seed in (1, 2, 3)]
+    weights = KERNEL_SHARES[1:]
+
+    pd.testing.assert_frame_equal(
+        RaptorSeat.combined(ours, theirs, weights), _combined_before_fusion(ours, theirs, weights), check_exact=True
+    )
+
+
+def test_probit_combined_reproduces_the_kernel_block() -> None:
+    """`combined(..., fusion=ProbitRanks())` writes the s6probit kernel's table, joined by study."""
+    assert STUDY == "StudyInstanceUID"
+    ours = _tied(0)
+    theirs = [_shuffled(_tied(seed), seed) for seed in (1, 2, 3)]
+    weights = KERNEL_SHARES[1:]
+
+    fused = RaptorSeat.combined(ours, theirs, weights, fusion=ProbitRanks())
+
+    oracle = _kernel_probit([ours, *theirs], (1.0 - sum(weights), *weights))
+    pd.testing.assert_frame_equal(fused, oracle, check_exact=True)
+
+
+def test_probit_ranks_fuse() -> None:
+    """At the kernel's literal shares on aligned arrays, `fuse` is the s6probit block bit for bit."""
+    frames = [_tied(seed) for seed in range(len(KERNEL_SHARES))]
+    arrays = [frame[list(TARGETS)].to_numpy(dtype=np.float64) for frame in frames]
+
+    probit = ProbitRanks().fuse(arrays, KERNEL_SHARES)
+
+    np.testing.assert_array_equal(probit, _kernel_probit(frames, KERNEL_SHARES)[list(TARGETS)].to_numpy())
+    with pytest.raises(ValueError, match="zip"):
+        ProbitRanks().fuse(arrays, KERNEL_SHARES[:-1])
+
+
+def test_fusion_fuse() -> None:
+    """The shared accumulation is `sum(weight * scored(table))` in table order, refusing a length mismatch."""
+    arrays = [_tied(seed)[list(TARGETS)].to_numpy(dtype=np.float64) for seed in range(len(KERNEL_SHARES))]
+
+    ranked = WeightedRankAverage().fuse(arrays, KERNEL_SHARES)
+
+    expected = sum(share * Vote.ranks(array) for array, share in zip(arrays, KERNEL_SHARES, strict=True))
+    np.testing.assert_allclose(ranked, expected, rtol=0.0, atol=1e-15)
+    with pytest.raises(ValueError, match="zip"):
+        WeightedRankAverage().fuse(arrays[:-1], KERNEL_SHARES)
+
+
+def test_weighted_rank_average_scored() -> None:
+    """The rank score is `Vote.ranks` itself, so a seat and a vote can never rank differently."""
+    table = _tied(4)[list(TARGETS)].to_numpy(dtype=np.float64)
+    np.testing.assert_array_equal(WeightedRankAverage().scored(table), Vote.ranks(table))
+
+
+def test_probit_ranks_scored() -> None:
+    """Tied studies share one quantile, the order is kept, and the percentiles are symmetric about the median."""
+    column = np.array([[0.2], [0.9], [0.2], [0.5], [0.7]])
+    probits = ProbitRanks().scored(column)[:, 0]
+    np.testing.assert_allclose(probits, ndtri((np.array([1.5, 5.0, 1.5, 3.0, 4.0]) - 0.5) / 5))
+    assert probits[0] == probits[2]
+    assert probits[3] == 0.0
+    assert np.all(np.isfinite(ProbitRanks().scored(np.linspace(0.0, 1.0, 7)[:, None])))
