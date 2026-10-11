@@ -23,9 +23,9 @@ from kneemri.training.terms import (
     EarlyLearning,
     Margin,
     PairMass,
-    Pooled,
     Ranking,
     Term,
+    Widening,
 )
 
 SEED = 2026
@@ -473,12 +473,12 @@ def test_attached():
         assert term.attached(cpu) == []
 
 
-def test_widened():
+def test_readout():
     """The live batch comes first and the pool follows, and no teacher is carried across."""
     live = _batch([1.0, 2.0, 3.0, -1.0, -2.0, -3.0])
     pooled = _batch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     taught = Predicted(live.logits, live.scores, live.weights, teacher=live.scores)
-    widened = Pooled.widened(taught, pooled)
+    widened = Widening(taught, pooled).readout()
 
     assert widened.logits.shape[0] == live.logits.shape[0] + pooled.logits.shape[0]
     assert torch.equal(widened.logits[: live.logits.shape[0]], live.logits)
@@ -486,15 +486,15 @@ def test_widened():
     assert widened.teacher is None, "no pooled term reads a teacher, so carrying half of one would be a lie"
 
 
-def test_joined():
+def test_embedding():
     """Both contexts as one, and None the moment either side lacks one — never the live half alone."""
     batch = _embedded([[1.0, 0.0], [0.0, 1.0]], [1.0, 0.0])
     remembered = _embedded([[0.5, 0.5]], [1.0])
     bare = Predicted(batch.logits, batch.scores, batch.weights)
 
-    joined = Pooled.joined(batch, remembered)
+    joined = Widening(batch, remembered).embedding()
     assert joined is not None
     assert joined.shape[0] == 3
     assert torch.equal(joined[:2], batch.embedding)
-    assert Pooled.joined(batch, bare) is None, "a pool with no context must raise downstream, not narrow"
-    assert Pooled.joined(bare, remembered) is None
+    assert Widening(batch, bare).embedding() is None, "a pool with no context must raise downstream, not narrow"
+    assert Widening(bare, remembered).embedding() is None

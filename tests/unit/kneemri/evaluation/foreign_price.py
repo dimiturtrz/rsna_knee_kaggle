@@ -1,9 +1,11 @@
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from core.findings import STUDY, TARGETS
-from kneemri.evaluation.foreign_price import ForeignPrice
+from kneemri.evaluation.foreign_price import ForeignPrice, LabelTable
 from kneemri.evaluation.foreign_split import ForeignSplit
 
 TRUTH = np.array([[1.0, 0.0], [0.0, 0.0], [1.0, 1.0], [0.0, 1.0]], np.float32)
@@ -55,8 +57,8 @@ def test_lines() -> None:
     assert "rank-mean" in lines[6]
 
 
-def test_truth_of() -> None:
-    """No holdout npz means the training table IS the truth, taken in the served order and deduplicated."""
+def test_truth() -> None:
+    """A label table IS the truth of a corpus reading, taken in the served order and deduplicated."""
     table = pd.DataFrame(
         [
             {STUDY: study, "Report": "r", **{target: float(index) for target in TARGETS}}
@@ -64,16 +66,25 @@ def test_truth_of() -> None:
         ]
     )
     doubled = pd.concat([table, table.iloc[[0]]], ignore_index=True)
-    truth = ForeignPrice.truth_of(None, ["b", "a"], doubled)
+    truth = LabelTable(doubled).truth(["b", "a"])
     assert truth.shape == (2, len(TARGETS))
     assert truth[0, 0] == 1.0, "the served order decides the rows, not the table's"
     assert truth[1, 0] == 0.0
     empty = doubled.assign(**dict.fromkeys(TARGETS, np.nan))
     with pytest.raises(ValueError, match="does not label these studies"):
-        ForeignPrice.truth_of(None, ["b", "a"], empty)
+        LabelTable(empty).truth(["b", "a"])
 
 
-def test_corpus_rows() -> None:
+def test_rows_of() -> None:
     """Only the served studies the truth table carries are read, and their served ORDER is kept."""
     table = pd.DataFrame([{STUDY: study, **dict.fromkeys(TARGETS, 0.0)} for study in "ac"])
-    assert ForeignPrice.corpus_rows(table, ["a", "b", "c"]) == [0, 2]
+    assert LabelTable(table).rows_of(["a", "b", "c"]) == [0, 2]
+
+
+def test_holdout_truth(tmp_path: Path) -> None:
+    """Our holdout record's truth, but only for the served studies in ITS order — any other order refuses."""
+    holdout = tmp_path / "member.holdout.npz"
+    np.savez(holdout, studies=np.array(["a", "b"]), predictions=np.zeros((2, 2)), truth=TRUTH[:2])
+    assert np.array_equal(ForeignPrice.holdout_truth(holdout, ["a", "b"]), TRUTH[:2])
+    with pytest.raises(ValueError, match="in order"):
+        ForeignPrice.holdout_truth(holdout, ["b", "a"])

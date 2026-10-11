@@ -18,7 +18,7 @@ def test_write(tmp_path: Path) -> None:
     assert (TeacherFile.IDENTIFIERS, TeacherFile.SCORES) == ("identifiers", "scores")
 
     path = tmp_path / "teacher.npz"
-    TeacherFile.write(path, ["s0"], np.zeros((1, 12), dtype=np.float32))
+    TeacherFile(path).write(["s0"], np.zeros((1, 12), dtype=np.float32))
     stored = np.load(path, allow_pickle=True)
 
     assert stored[TeacherFile.IDENTIFIERS].tolist() == ["s0"]
@@ -36,7 +36,7 @@ def test_write_embeddings(tmp_path: Path) -> None:
     assert TeacherFile.EMBEDDINGS == "embeddings"
 
     path = tmp_path / "features.npz"
-    TeacherFile.write_embeddings(path, ["s0"], np.zeros((1, 7), dtype=np.float32))
+    TeacherFile(path).write_embeddings(["s0"], np.zeros((1, 7), dtype=np.float32))
     stored = np.load(path, allow_pickle=True)
 
     assert stored[TeacherFile.EMBEDDINGS].shape == (1, 7)
@@ -70,11 +70,11 @@ def test_merged(tmp_path: Path) -> None:
     parts = []
     for shard, studies in enumerate([["s0", "s2"], ["s1"]]):
         part = tmp_path / f"shard{shard}.npz"
-        TeacherFile.write(part, studies, np.full((len(studies), 12), float(shard), dtype=np.float32))
+        TeacherFile(part).write(studies, np.full((len(studies), 12), float(shard), dtype=np.float32))
         parts.append(part)
 
     joined = tmp_path / "teacher.npz"
-    count = TeacherFile.merged(parts, joined)
+    count = TeacherFile(joined).merged(parts)
     stored = np.load(joined, allow_pickle=True)
 
     assert count == 3
@@ -84,9 +84,9 @@ def test_merged(tmp_path: Path) -> None:
     # The SAME join over the other format, named at the call: a features merge that wrote a `scores`
     # key would produce a file the feature loader refuses, after the whole decode had been paid for.
     features = [tmp_path / "featshard0.npz", tmp_path / "featshard1.npz"]
-    TeacherFile.write_embeddings(features[0], ["s0"], np.zeros((1, 4), dtype=np.float32))
-    TeacherFile.write_embeddings(features[1], ["s1"], np.ones((1, 4), dtype=np.float32))
+    TeacherFile(features[0]).write_embeddings(["s0"], np.zeros((1, 4), dtype=np.float32))
+    TeacherFile(features[1]).write_embeddings(["s1"], np.ones((1, 4), dtype=np.float32))
     joined_features = tmp_path / "features.npz"
 
-    assert TeacherFile.merged(features, joined_features, TeacherFile.EMBEDDINGS) == 2
+    assert TeacherFile(joined_features).merged(features, TeacherFile.EMBEDDINGS) == 2
     assert np.load(joined_features)[TeacherFile.EMBEDDINGS].shape == (2, 4)

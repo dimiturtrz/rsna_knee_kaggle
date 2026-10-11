@@ -9,7 +9,7 @@ from torch import Tensor, nn
 
 from kneemri.training.grades import Predicted
 from kneemri.training.pair_memory import PairMemory
-from kneemri.training.terms import PAIR_MEMORY, PAIR_POOL, Pooled, Term
+from kneemri.training.terms import PAIR_MEMORY, PAIR_POOL, Pooled, Term, Widening
 
 
 class Remembered(Term):
@@ -56,7 +56,7 @@ class Remembered(Term):
         readings rather than one policy's threshold crossings, so a pool outlives nothing but the step.
         """
         remembered = self.memory.pooled()
-        population = batch if remembered is None else self.term.widened(batch, remembered)
+        population = batch if remembered is None else Widening(batch, remembered).readout()
         loss = self.term.graded(population, spread)
         self.memory.remember(batch)
         return loss

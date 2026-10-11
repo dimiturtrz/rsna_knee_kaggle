@@ -9,6 +9,7 @@ never silently relative.
 """
 
 import os
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
 DRIVE_ANCHOR = 2
@@ -18,8 +19,9 @@ MOUNT_PARTS = 3
 """Parts a WSL mount path has before its content: the root, `mnt`, and the drive letter."""
 
 
+@dataclass(frozen=True)
 class NativePath:
-    """Cross-platform data-root resolution: pure functions over path strings, no filesystem access.
+    """Cross-platform data-root resolution of ONE configured path string, with no filesystem access.
 
     OS detection is injected (`os_name` / `wsl`) rather than read, so the whole matrix — a Windows path
     on Windows, on WSL and on bare Linux, and a mount path on each — is unit-testable from any host.
@@ -28,6 +30,9 @@ class NativePath:
     The mapping is the DEFAULT WSL one (`D:/x` <-> `/mnt/d/x`). A machine with a custom `automount.root`
     needs its own path in the environment override, which is the escape hatch the raising branch names.
     """
+
+    raw: str
+    """The path exactly as it was configured, before any translation."""
 
     @staticmethod
     def detect_wsl() -> bool:
@@ -41,45 +46,40 @@ class NativePath:
         except OSError:
             return False
 
-    @staticmethod
-    def win_drive(raw: str) -> str | None:
-        """The lowercase drive letter if `raw` is a Windows drive path, else None.
+    def win_drive(self) -> str | None:
+        """The lowercase drive letter if this is a Windows drive path, else None.
 
         `PureWindowsPath` is used rather than a string test so the drive is still detected when this
         runs on POSIX, which is the case the whole module exists for.
         """
-        drive = PureWindowsPath(raw).drive
+        drive = PureWindowsPath(self.raw).drive
         return drive[0].lower() if len(drive) == DRIVE_ANCHOR and drive[1] == ":" else None
 
-    @staticmethod
-    def mount_drive(raw: str) -> str | None:
-        """The lowercase drive letter if `raw` is a WSL mount path (`/mnt/d/x` -> `d`), else None."""
-        parts = PurePosixPath(raw).parts
+    def mount_drive(self) -> str | None:
+        """The lowercase drive letter if this is a WSL mount path (`/mnt/d/x` -> `d`), else None."""
+        parts = PurePosixPath(self.raw).parts
         if len(parts) >= MOUNT_PARTS and parts[1] == "mnt" and len(parts[2]) == 1 and parts[2].isalpha():
             return parts[2].lower()
         return None
 
-    @staticmethod
-    def to_mount(raw: str) -> str:
+    def to_mount(self) -> str:
         """A Windows drive path as its WSL mount (`D:/data/x` -> `/mnt/d/data/x`)."""
-        drive = NativePath.win_drive(raw)
+        drive = self.win_drive()
         if drive is None:
-            message = f"to_mount expects a Windows drive path, got {raw!r}"
+            message = f"to_mount expects a Windows drive path, got {self.raw!r}"
             raise ValueError(message)
-        return str(PurePosixPath("/mnt", drive, *PureWindowsPath(raw).parts[1:]))
+        return str(PurePosixPath("/mnt", drive, *PureWindowsPath(self.raw).parts[1:]))
 
-    @staticmethod
-    def to_windows(raw: str) -> str:
+    def to_windows(self) -> str:
         """A WSL mount path as its Windows drive path (`/mnt/d/data/x` -> `D:/data/x`)."""
-        drive = NativePath.mount_drive(raw)
+        drive = self.mount_drive()
         if drive is None:
-            message = f"to_windows expects a WSL mount path, got {raw!r}"
+            message = f"to_windows expects a WSL mount path, got {self.raw!r}"
             raise ValueError(message)
-        parts = PurePosixPath(raw).parts
+        parts = PurePosixPath(self.raw).parts
         return PureWindowsPath(f"{drive.upper()}:/", *parts[MOUNT_PARTS:]).as_posix()
 
-    @staticmethod
-    def resolve(raw: str, escape: str, *, os_name: str | None = None, wsl: bool | None = None) -> str:
+    def resolve(self, escape: str, *, os_name: str | None = None, wsl: bool | None = None) -> str:
         """The configured root as a path that means something on THIS machine.
 
         Same family (a Windows path on Windows, a POSIX path on POSIX) passes through untouched. A
@@ -92,15 +92,15 @@ class NativePath:
         """
         os_name = os.name if os_name is None else os_name
         wsl = NativePath.detect_wsl() if wsl is None else wsl
-        drive = NativePath.win_drive(raw)
+        drive = self.win_drive()
         if os_name == "nt":
-            return NativePath.to_windows(raw) if drive is None and NativePath.mount_drive(raw) else raw
+            return self.to_windows() if drive is None and self.mount_drive() else self.raw
         if drive is None:
-            return raw
+            return self.raw
         if wsl:
-            return NativePath.to_mount(raw)
+            return self.to_mount()
         message = (
-            f"data root {raw!r} is a Windows drive path and this is non-WSL POSIX, so it cannot be "
+            f"data root {self.raw!r} is a Windows drive path and this is non-WSL POSIX, so it cannot be "
             f"translated to a real path here. Set {escape} to a path on this machine. Refusing to "
             f"treat it as relative, which would silently create a repo-local {drive.upper()}:/ directory."
         )

@@ -176,6 +176,42 @@ class Term(ABC):
         return value
 
 
+@dataclass(frozen=True)
+class Widening:
+    """The live batch beside the pooled memory it is widened by — the pair every `Pooled` term reads.
+
+    A value rather than two staticmethods on `Pooled` that both threaded `(batch, remembered)`: the pair
+    is one thing, and its order is part of what it means.
+    """
+
+    batch: Predicted
+    remembered: Predicted
+
+    def readout(self) -> Predicted:
+        """The live batch followed by the pooled memory, as one readout — `[live, remembered]`, never reversed.
+
+        Every anchor has to be its own first key, so the diagonal of the leading block is the only entry a
+        self-exclusion masks out. `teacher` is dropped because no pooled term reads one and a half-carried
+        teacher is worse than none.
+        """
+        return Predicted(
+            logits=torch.cat([self.batch.logits, self.remembered.logits]),
+            scores=torch.cat([self.batch.scores, self.remembered.scores]),
+            weights=torch.cat([self.batch.weights, self.remembered.weights]),
+            embedding=self.embedding(),
+        )
+
+    def embedding(self) -> Float[Tensor, "b o h"] | None:
+        """Both sides' contexts as one, or None when either side has none — which a reader then REFUSES.
+
+        None rather than the live half alone: silently narrowing back to the batch would return a
+        plausible number about the term the memory was built to widen.
+        """
+        if self.batch.embedding is None or self.remembered.embedding is None:
+            return None
+        return torch.cat([self.batch.embedding, self.remembered.embedding])
+
+
 class Pooled(Term):
     """A term that can be read over a WIDER population than one batch — what `Remembered` widens.
 
@@ -186,32 +222,6 @@ class Pooled(Term):
     @abstractmethod
     def across(self, batch: Predicted, remembered: Predicted) -> Float[Tensor, ""]:
         """This term with the live batch compared against itself AND the remembered steps."""
-
-    @staticmethod
-    def widened(batch: Predicted, remembered: Predicted) -> Predicted:
-        """The live batch followed by the pooled memory, as one readout — `[live, remembered]`, never reversed.
-
-        Every anchor has to be its own first key, so the diagonal of the leading block is the only entry a
-        self-exclusion masks out. `teacher` is dropped because no pooled term reads one and a half-carried
-        teacher is worse than none.
-        """
-        return Predicted(
-            logits=torch.cat([batch.logits, remembered.logits]),
-            scores=torch.cat([batch.scores, remembered.scores]),
-            weights=torch.cat([batch.weights, remembered.weights]),
-            embedding=Pooled.joined(batch, remembered),
-        )
-
-    @staticmethod
-    def joined(batch: Predicted, remembered: Predicted) -> Float[Tensor, "b o h"] | None:
-        """Both sides' contexts as one, or None when either side has none — which a reader then REFUSES.
-
-        None rather than the live half alone: silently narrowing back to the batch would return a
-        plausible number about the term the memory was built to widen.
-        """
-        if batch.embedding is None or remembered.embedding is None:
-            return None
-        return torch.cat([batch.embedding, remembered.embedding])
 
 
 class CrossEntropy(Term):
@@ -539,7 +549,7 @@ class Margin(Pooled):
     @override
     def across(self, batch: Predicted, remembered: Predicted) -> Float[Tensor, ""]:
         """The same surrogate with the class means and spreads taken over the remembered steps too."""
-        return self(self.widened(batch, remembered))
+        return self(Widening(batch, remembered).readout())
 
 
 class Contrast(Pooled):
@@ -578,7 +588,7 @@ class Contrast(Pooled):
     @override
     def across(self, batch: Predicted, remembered: Predicted) -> Float[Tensor, ""]:
         """SupCon with the live batch as anchors and the live batch plus the remembered steps as keys."""
-        return self.supcon(batch, self.widened(batch, remembered))
+        return self.supcon(batch, Widening(batch, remembered).readout())
 
     def supcon(self, anchors: Predicted, keys: Predicted) -> Float[Tensor, ""]:
         """SupCon with the anchors and the compared population named separately.

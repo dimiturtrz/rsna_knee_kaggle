@@ -11,6 +11,7 @@ from kneemri.training.epoch_probes import (
     DrawProbe,
     EpochReading,
     FitProbe,
+    HoldoutCells,
     HoldoutProbe,
     LossProbe,
     OptimProbe,
@@ -84,16 +85,16 @@ def test_draw_probe_read():
 def test_calibration_error():
     """Confident and right is calibrated; confident and wrong is off by the whole confidence."""
     truth = np.array([[1.0], [0.0]], dtype=np.float32)
-    assert HoldoutProbe.calibration_error(np.array([[1.0], [0.0]]), truth) == pytest.approx(0.0)
-    assert HoldoutProbe.calibration_error(np.array([[0.0], [1.0]]), truth) == pytest.approx(1.0)
-    assert np.isnan(HoldoutProbe.calibration_error(np.array([[np.nan]]), truth[:1]))
+    assert HoldoutCells(np.array([[1.0], [0.0]]), truth).calibration_error() == pytest.approx(0.0)
+    assert HoldoutCells(np.array([[0.0], [1.0]]), truth).calibration_error() == pytest.approx(1.0)
+    assert np.isnan(HoldoutCells(np.array([[np.nan]]), truth[:1]).calibration_error())
 
 
 def test_loss():
     """BCE against GRADED truth, NaN cells excluded."""
     truth = np.array([[0.5, np.nan]], dtype=np.float32)
-    assert HoldoutProbe.loss(np.array([[0.5, 0.9]]), truth) == pytest.approx(np.log(2))
-    assert np.isnan(HoldoutProbe.loss(np.array([[np.nan]]), truth[:, :1]))
+    assert HoldoutCells(np.array([[0.5, 0.9]]), truth).loss() == pytest.approx(np.log(2))
+    assert np.isnan(HoldoutCells(np.array([[np.nan]]), truth[:, :1]).loss())
 
 
 def test_row():

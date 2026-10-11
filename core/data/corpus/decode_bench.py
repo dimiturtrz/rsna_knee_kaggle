@@ -29,9 +29,14 @@ import os
 import time
 from collections.abc import Callable, Sequence
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from core import cli
+
+if TYPE_CHECKING:
+    from core.data.corpus.study import Study
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +53,10 @@ DEFAULT_SLICES = 12
 """The depth every shipped member reads at except the 20-slice group. The bench's own default, so a
 run with no flag prices what the champion actually serves."""
 
-CHAMPION_GROUPS = ((20, (0.1, 0.9)), (12, (0.1, 0.9)), (12, (0.2, 0.8)))
+type ReadGroup = tuple[int, tuple[float, float]]
+"""One decode of every study: how many slices, read inside which (low, high) band of the series."""
+
+CHAMPION_GROUPS: tuple[ReadGroup, ...] = ((20, (0.1, 0.9)), (12, (0.1, 0.9)), (12, (0.2, 0.8)))
 """The three read groups `raptorweight_v1` serves — three seats, one seat, two seats. Read off the
 members' own recipes on 2026-09-06, and the reason its Kaggle log decodes the same three visible
 studies three times over (`decode 4s`, `2s`, `2s`) and projects 7.6 h of a 9 h cap."""
@@ -61,7 +69,7 @@ and the alternative — sending the table with every study — would measure pic
 class DecodeBench:
     """One decode workload, timed under each way of running it."""
 
-    def timings(self, work: Callable[[str], object], items: Sequence[str]) -> dict[str, float]:
+    def timings[T](self, work: Callable[[T], object], items: Sequence[T]) -> dict[str, float]:
         """Seconds for each strategy, warmed first so the earliest one is not charged for cold cache.
 
         `work` is injected rather than reached for, so the arithmetic here can be exercised without a
@@ -89,26 +97,47 @@ class DecodeBench:
         return measured
 
     @staticmethod
-    def _decode_one(directory: str) -> object:
-        """One study through the real reader.
+    def _union_all(studies: Sequence[str], groups: Sequence[ReadGroup]) -> tuple[int, int]:
+        """Distinct and summed opens over a corpus slice for ANY set of read groups.
 
-        A staticmethod rather than a module-level function because the house rule wants behaviour on
-        the class that owns it — and a staticmethod still pickles by qualified name, which is what the
-        child process needs. Same shape as `SlotTies._contested_of`, for the same two reasons.
+        Taking the groups rather than reading the constant is what prices a CANDIDATE group: the memo
+        makes an entry's decode bill the size of the UNION, so what a new reading costs is
+        `union(champion + candidate) - union(champion)`, and that marginal is nothing like the group's
+        own size — a band nested inside one already served costs almost nothing, a shifted band costs
+        nearly all of itself.
         """
-        global PLANES
-        from core.data.corpus.study import SlotPipeline, Study  # noqa: PLC0415 - CLI-only
-        from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
-        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+        counted = [BenchStudy(study).opens(groups) for study in studies]
+        return sum(pair[0] for pair in counted), sum(pair[1] for pair in counted)
 
-        if not PLANES:
-            PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
-        return Study.from_directory(Path(directory), PLANES, SlotPipeline()).bag(
-            int(os.environ.get(SLICES, DEFAULT_SLICES))
-        )
+    def report(self, measured: dict[str, float], studies: int) -> list[str]:
+        """Each strategy against SERIAL, because the question is whether a pool earns its complexity."""
+        baseline = measured.get("serial") or 1.0
+        return [
+            f"{label:14s} {seconds:6.1f}s   {seconds / max(studies, 1):.2f}s/study   {baseline / seconds:.2f}x"
+            for label, seconds in measured.items()
+        ]
 
-    @staticmethod
-    def _headers_one(directory: str) -> object:
+
+@dataclass(frozen=True)
+class BenchStudy:
+    """One study directory, read the three ways the bench prices: decoded, headers only, file opens.
+
+    The directory is the instance because all three readings are of one study, and each used to thread
+    it as its only argument while re-spelling the same planes lookup and `Study` construction. Frozen and
+    holding one string, so a process pool pickles it as cheaply as the bare path it replaces; the
+    readings are reached by qualified name (`BenchStudy.decoded`), which is what the child process needs.
+
+    None is unit-tested: every reading opens the configured corpus, which `hygiene.small` forbids a unit
+    test to reach. The harness that times them, `DecodeBench`, is.
+    """
+
+    directory: str
+
+    def decoded(self) -> object:  # devtools-ignore: test-mirror
+        """One study through the real reader."""
+        return self._study().bag(int(os.environ.get(SLICES, DEFAULT_SLICES)))
+
+    def headers(self) -> object:  # devtools-ignore: test-mirror
         """The same study with the PIXELS left unread — every header parsed, nothing decoded.
 
         This is the term no depth can cut. `Acquisition.ordered_files` header-parses EVERY file in
@@ -118,34 +147,10 @@ class DecodeBench:
         the two is a lever priced wrong — and if headers dominate, ordering by filename or parsing one
         header per series is worth more than any slice count.
         """
-        global PLANES
-        from core.data.corpus.study import SlotPipeline, Study  # noqa: PLC0415 - CLI-only
-        from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
-        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+        return [acquisition.ordered_files() for acquisition in self._study().acquisitions]
 
-        if not PLANES:
-            PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
-        study = Study.from_directory(Path(directory), PLANES, SlotPipeline())
-        return [acquisition.ordered_files() for acquisition in study.acquisitions]
-
-    @staticmethod
-    def _union_all(studies: Sequence[str], groups: Sequence[tuple[int, tuple[float, float]]]) -> tuple[int, int]:
-        """Distinct and summed opens over a corpus slice for ANY set of read groups.
-
-        Taking the groups rather than reading the constant is what prices a CANDIDATE group: the memo
-        makes an entry's decode bill the size of the UNION, so what a new reading costs is
-        `union(champion + candidate) - union(champion)`, and that marginal is nothing like the group's
-        own size — a band nested inside one already served costs almost nothing, a shifted band costs
-        nearly all of itself.
-        """
-        counted = [DecodeBench._union_one(study, groups) for study in studies]
-        return sum(pair[0] for pair in counted), sum(pair[1] for pair in counted)
-
-    @staticmethod
-    def _union_one(
-        directory: str, groups: Sequence[tuple[int, tuple[float, float]]] = CHAMPION_GROUPS
-    ) -> tuple[int, int]:
-        """How many DISTINCT files the champion's three read groups open in this study, against their sum.
+    def opens(self, groups: Sequence[ReadGroup]) -> tuple[int, int]:  # devtools-ignore: test-mirror
+        """How many DISTINCT files the read groups open in this study, against their sum.
 
         A group is a decode of every study, but two groups at the same band and different depths open
         overlapping files, and the historic band 0.2-0.8 sits INSIDE 0.1-0.9. So the floor a file-level
@@ -155,15 +160,9 @@ class DecodeBench:
         Returns `(distinct, total)` per study; the caller sums both. Reads headers only — the count is a
         property of `band_indices` and the file list, so no pixel is decoded to answer it.
         """
-        global PLANES
         from core.data.corpus.slot_reader import Band, SlotReader  # noqa: PLC0415 - CLI-only
-        from core.data.corpus.study import SlotPipeline, Study  # noqa: PLC0415 - CLI-only
-        from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
-        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
 
-        if not PLANES:
-            PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
-        study = Study.from_directory(Path(directory), PLANES, SlotPipeline())
+        study = self._study()
         distinct: set[tuple[str, int]] = set()
         total = 0
         # ROUTED acquisitions only. A study holds many series and the pipeline decodes one per slot;
@@ -176,13 +175,15 @@ class DecodeBench:
                 total += len(opened)
         return len(distinct), total
 
-    def report(self, measured: dict[str, float], studies: int) -> list[str]:
-        """Each strategy against SERIAL, because the question is whether a pool earns its complexity."""
-        baseline = measured.get("serial") or 1.0
-        return [
-            f"{label:14s} {seconds:6.1f}s   {seconds / max(studies, 1):.2f}s/study   {baseline / seconds:.2f}x"
-            for label, seconds in measured.items()
-        ]
+    def _study(self) -> "Study":
+        global PLANES
+        from core.data.corpus.study import SlotPipeline, Study  # noqa: PLC0415 - CLI-only
+        from core.data.corpus.study_cache import CorpusSplit  # noqa: PLC0415 - CLI-only
+        from core.paths import DataRoot  # noqa: PLC0415 - CLI-only
+
+        if not PLANES:
+            PLANES = CorpusSplit(DataRoot.from_config(Path("paths.yaml")).raw()).planes()
+        return Study.from_directory(Path(self.directory), PLANES, SlotPipeline())
 
 
 def main() -> None:
@@ -234,8 +235,8 @@ def main() -> None:
 
     os.environ[SLICES] = str(arguments.slices)
     bench = DecodeBench()
-    work = DecodeBench._headers_one if arguments.headers_only else DecodeBench._decode_one  # noqa: SLF001 - its own CLI
-    measured = bench.timings(work, chosen)
+    work = BenchStudy.headers if arguments.headers_only else BenchStudy.decoded
+    measured = bench.timings(work, [BenchStudy(directory) for directory in chosen])
     command.report(["headers only, no pixels" if arguments.headers_only else f"{arguments.slices} slices"])
     command.report(bench.report(measured, len(chosen)))
 

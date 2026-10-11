@@ -15,7 +15,7 @@ def _written(tmp_path: Path, names: list[str], first_column: list[float]) -> Pat
     scores = np.zeros((len(names), len(TARGETS)), dtype=np.float32)
     scores[:, 0] = first_column
     path = tmp_path / "teacher.npz"
-    TeacherFile.write(path, names, scores)
+    TeacherFile(path).write(names, scores)
     return path
 
 
@@ -40,7 +40,7 @@ def test_from_file_raises_when_a_training_study_has_no_reading(tmp_path: Path) -
 
 def test_from_file_raises_on_the_wrong_number_of_columns(tmp_path: Path) -> None:
     path = tmp_path / "narrow.npz"
-    TeacherFile.write(path, ["a"], np.zeros((1, 3), dtype=np.float32))
+    TeacherFile(path).write(["a"], np.zeros((1, 3), dtype=np.float32))
     with pytest.raises(ValueError, match="columns"):
         TeacherTargets.from_file(path, ["a"], np.array([0]))
 

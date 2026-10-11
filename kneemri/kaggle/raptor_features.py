@@ -98,7 +98,7 @@ class FeaturePass(TeacherPass):
         features file, and a shared writer parameterised by it is one argument away from writing either.
         """
         path.parent.mkdir(parents=True, exist_ok=True)
-        TeacherFile.write_embeddings(path, identifiers, embeddings)
+        TeacherFile(path).write_embeddings(identifiers, embeddings)
         logger.info("wrote %d studies x %d features to %s", *embeddings.shape, path)
         return path
 
@@ -138,7 +138,7 @@ def main() -> None:
 
     destination = arguments.out or root.processed() / FEATURES
     if arguments.merge:
-        joined = TeacherFile.merged(arguments.merge, destination, TeacherFile.EMBEDDINGS)
+        joined = TeacherFile(destination).merged(arguments.merge, TeacherFile.EMBEDDINGS)
         logger.info("merged %d studies into %s", joined, destination)
         return
 

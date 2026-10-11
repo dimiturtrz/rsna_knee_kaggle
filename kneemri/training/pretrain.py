@@ -315,7 +315,7 @@ def main() -> None:
     encoder.require_tiling(corpus.image_size)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    objective = Objectives.named(arguments.objective, arguments, encoder).to(device)
+    objective = Objectives(arguments, encoder).named(arguments.objective).to(device)
     if device.type == "cuda":
         objective.backbone.compile()
 

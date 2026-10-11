@@ -6,7 +6,7 @@ import torch
 from kneemri.training.grades import OrdinalGrades, Predicted
 from kneemri.training.objective import LabelStructure
 from kneemri.training.remembered import Remembered
-from kneemri.training.terms import PAIR_POOL, Contrast, Margin, Pooled, Ranking
+from kneemri.training.terms import PAIR_POOL, Contrast, Margin, Pooled, Ranking, Widening
 
 SEED = 2026
 STUDIES = 6
@@ -59,7 +59,7 @@ def test_graded(make: Callable[[], Pooled]) -> None:
     term = make()
 
     assert torch.equal(remembered.graded(first, ladder.spread), term(ladder.spread(first)))
-    widened = term.widened(second, first)
+    widened = Widening(second, first).readout()
     assert torch.equal(remembered.graded(second, ladder.spread), term(ladder.spread(widened)))
     assert torch.equal(Remembered(make()).graded(first, LabelStructure().spread), term(first))
 
