@@ -74,7 +74,8 @@ def test_split(tmp_path: Path):
 
     held, candidates = pool.split([tmp_path / "shipped.pt", tmp_path / "other.pt"])
 
-    assert len(held) == 2, "both named members are held out of the candidate list"
+    assert held.names == ["shipped.pt", "other.pt"], "both named members are held, in pool order"
+    assert held.predictions[1] is members[1], "a held name keeps its own predictions"
     assert candidates.names == ["candidate.pt"], "everything not named is priced against the roster"
     assert candidates.truth.shape == pool.truth.shape, "candidates keep the join's truth, not their own"
 

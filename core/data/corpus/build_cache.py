@@ -5,9 +5,12 @@ spawns fresh interpreters that re-import the parent module, and a `__main__` rea
 to import, so every child dies with BrokenProcessPool.
 """
 
+import argparse
 import logging
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from typing import override
 
 from core import cli
 from core.data.corpus.cache_flags import CacheFlags
@@ -55,46 +58,17 @@ def main() -> None:
         "images change, and every other corpus already writes its metadata beside its labels.",
     )
     arguments = command.parsed()
-
-    if arguments.scheme in FOREIGN_SCHEMES:
-        # This builder always decodes OUR study list; the scheme only names the output file. So a
-        # foreign scheme here writes our corpus under a name that promises another one, and for
-        # `merged` the shape matches too — see FOREIGN_SCHEMES for the 59.7 GB that cost.
-        command.parser.error(
-            f"--scheme {arguments.scheme} names a corpus this builder cannot decode: it would write OUR "
-            f"studies under that name. Use core.data.corpus.build_{arguments.scheme}"
-        )
+    request = BuildRequest(command, arguments)
+    request.refuse()
 
     root = command.rooted(arguments)
-    raw = root.raw()
-    split = CorpusSplit(raw, arguments.split)
+    split = CorpusSplit(root.raw(), arguments.split)
     identifiers = split.identifiers()
-
-    if (arguments.holdout_fold is not None or arguments.only_studies is not None) and arguments.out is None:
-        # A FOLD RESTRICTION IS NOT IN THE KEY, unlike `--cache-studies`, so a fold cache written into
-        # the processed root lands on the full corpus's own filename and destroys it — 71.6 GB that
-        # cost two hours, differing only in one axis length. It cannot be named for itself either:
-        # `train.py` has no fold-restriction flag, so a suffix here would make the arrays it already
-        # reads unaddressable. So the directory is what separates them, and it is now required.
-        command.parser.error("a study restriction writes a partial corpus under the FULL cache's name: pass --out")
-
-    if arguments.only_studies is not None:
-        identifiers = split.named(arguments.only_studies).chosen
-        logger.info(f"restricted to {arguments.only_studies}: {len(identifiers)} studies")
-
-    if arguments.holdout_fold is not None:
-        # A whole-corpus cache at 32 slices would be 95 GB to answer a question about one fold's
-        # holdout. Restricting to the studies actually being scored keeps it at 20 GB.
-        folds = ReportFolds()
-        _, holdout = folds.holdout(folds.assign(str(raw / TRAIN_TABLE), identifiers), arguments.holdout_fold)
-        identifiers = [identifiers[index] for index in holdout]
-        logger.info(f"restricted to fold {arguments.holdout_fold}'s holdout: {len(identifiers)} studies")
+    for restriction in RESTRICTIONS:
+        identifiers = restriction.applied(arguments, split, identifiers)
 
     if arguments.metadata_only:
-        planes = split.planes()
-        entries = [Study.from_directory(split.source / identifier, planes).metadata() for identifier in identifiers]
-        StudyMetadata.write(entries, root.processed() / "metadata" / METADATA)
-        logger.info("CANONICAL METADATA COMPLETE (no decode requested)")
+        request.write_metadata(split, identifiers, root.processed() / "metadata" / METADATA)
         return
 
     cache = CacheFlags.cache(arguments, arguments.out or root.processed())
@@ -114,6 +88,81 @@ def main() -> None:
     with Wakelock():
         cache.build(split.source, identifiers, split.planes(), workers=arguments.workers)
     logger.info("CACHE BUILD COMPLETE")
+
+
+class _OnlyStudies:
+    """`--only-studies`: the named subset, in split order."""
+
+    def asked(self, arguments: argparse.Namespace) -> bool:
+        return arguments.only_studies is not None
+
+    def applied(self, arguments: argparse.Namespace, split: CorpusSplit, identifiers: list[str]) -> list[str]:
+        if not self.asked(arguments):
+            return identifiers
+        chosen = split.named(arguments.only_studies).chosen
+        logger.info(f"restricted to {arguments.only_studies}: {len(chosen)} studies")
+        return chosen
+
+
+class _HoldoutFold(_OnlyStudies):
+    """`--holdout-fold`: one fold's holdout of whatever is left.
+
+    A whole-corpus cache at 32 slices would be 95 GB to answer a question about one fold's holdout.
+    Restricting to the studies actually being scored keeps it at 20 GB.
+    """
+
+    @override
+    def asked(self, arguments: argparse.Namespace) -> bool:
+        return arguments.holdout_fold is not None
+
+    @override
+    def applied(self, arguments: argparse.Namespace, split: CorpusSplit, identifiers: list[str]) -> list[str]:
+        if not self.asked(arguments):
+            return identifiers
+        folds = ReportFolds()
+        assigned = folds.assign(str(split.raw / TRAIN_TABLE), identifiers)
+        _, holdout = folds.holdout(assigned, arguments.holdout_fold)
+        kept = [identifiers[index] for index in holdout]
+        logger.info(f"restricted to fold {arguments.holdout_fold}'s holdout: {len(kept)} studies")
+        return kept
+
+
+RESTRICTIONS = (_OnlyStudies(), _HoldoutFold())
+"""The study restrictions, applied in this order, each narrowing what the one before left."""
+
+
+@dataclass(frozen=True)
+class BuildRequest:
+    """One parsed invocation: what it refuses, and the decode-free metadata path it can take instead."""
+
+    command: cli.Command
+    arguments: argparse.Namespace
+
+    def refuse(self) -> None:
+        """Exit on a flag combination that would write a corpus under a name that promises another one."""
+        command, arguments = self.command, self.arguments
+        if arguments.scheme in FOREIGN_SCHEMES:
+            # This builder always decodes OUR study list; the scheme only names the output file. So a
+            # foreign scheme here writes our corpus under a name that promises another one, and for
+            # `merged` the shape matches too — see FOREIGN_SCHEMES for the 59.7 GB that cost.
+            command.parser.error(
+                f"--scheme {arguments.scheme} names a corpus this builder cannot decode: it would write OUR "
+                f"studies under that name. Use core.data.corpus.build_{arguments.scheme}"
+            )
+        if arguments.out is None and any(restriction.asked(arguments) for restriction in RESTRICTIONS):
+            # A FOLD RESTRICTION IS NOT IN THE KEY, unlike `--cache-studies`, so a fold cache written into
+            # the processed root lands on the full corpus's own filename and destroys it — 71.6 GB that
+            # cost two hours, differing only in one axis length. It cannot be named for itself either:
+            # `train.py` has no fold-restriction flag, so a suffix here would make the arrays it already
+            # reads unaddressable. So the directory is what separates them, and it is now required.
+            command.parser.error("a study restriction writes a partial corpus under the FULL cache's name: pass --out")
+
+    def write_metadata(self, split: CorpusSplit, identifiers: list[str], path: Path) -> None:
+        """One header per study into the canonical metadata table, with no pixel decoded."""
+        planes = split.planes()
+        entries = [Study.from_directory(split.source / identifier, planes).metadata() for identifier in identifiers]
+        StudyMetadata.write(entries, path)
+        logger.info("CANONICAL METADATA COMPLETE (no decode requested)")
 
 
 if __name__ == "__main__":

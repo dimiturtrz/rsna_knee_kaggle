@@ -93,3 +93,24 @@ def test_report(ruler: FaultRuler) -> None:
     assert "oracle" in lines[1]
     assert any("VERDICT" in line for line in lines)
     assert any("INCUMBENT" in line for line in lines)
+    assert lines == [
+        "ruler check over 5 members, 10 sampled pairs, 48000 discordance trials each, voting RankAverage",
+        "  oracle: sampled error rate against 1 - AUC over 5 members, "
+        "worst gap 0.0023 (sampling error alone is ~0.0023)",
+        "  each statistic signed so that HIGHER predicts MORE gain. PARTIAL is the reading — it holds the",
+        "  pair's quality fixed; RAW is the same number confounded by the weak-and-distant shape of the pool:",
+        "    disagreement rate: partial +0.1515   raw +0.8061",
+        "    agreement (INCUMBENT, MemberDistance): partial +0.1152   raw +0.6485",
+        "    disagreement-error ratio (DER): partial -0.0061   raw -0.8545",
+        "    double-fault rate (negated): partial -0.0788   raw -0.8788",
+        "  measured gain over the pairs: median +0.0244, best +0.0564, worst -0.0333",
+        "  DER above 1 in 10 of 10 pairs",
+        "  VERDICT: NO statistic reaches 0.2 here — the best is disagreement rate at +0.1515, so pair diversity "
+        "does not predict offline gain in this pool and selecting on any of these four is selecting on noise",
+    ], "pinned verbatim, read off the module before its report was split into sections"
+
+
+def test_report_names_a_predictive_winner(ruler: FaultRuler, monkeypatch: pytest.MonkeyPatch) -> None:
+    """At or above the cut the verdict names the statistic; ties on partial fall back to the raw reading."""
+    monkeypatch.setattr(FaultRuler, "partial", lambda self, values, gains, controls: 0.5)
+    assert ruler.report()[-1] == "  VERDICT: disagreement rate ranks gain best at +0.5000"

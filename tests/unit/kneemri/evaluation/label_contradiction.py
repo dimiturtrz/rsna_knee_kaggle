@@ -113,3 +113,20 @@ def test_align_unions_complementary_records(tmp_path: Path) -> None:
     )
     assert census.predicted.shape == (2, len(TARGETS)), "both folds' studies are present, not their overlap"
     assert census.candidates().all(), "reader and model both call positive where the label says negative"
+
+
+def test_align_averages_overlap_and_drops_unlabelled_studies(tmp_path: Path) -> None:
+    """A study two records hold out is their MEAN; one the reader never read is not a row at all."""
+    verdicts = {f"{target}{VERDICT_SUFFIX}": [SILENT, POSITIVE] for target in TARGETS}
+    table = pd.DataFrame({STUDY: ["b", "a"], **verdicts}).set_index(STUDY)
+    census = LabelContradiction.align(
+        table,
+        [
+            _record(tmp_path / "one.holdout.npz", ["a", "b"], 0.2),
+            _record(tmp_path / "two.holdout.npz", ["z", "a"], 0.6),
+        ],
+    )
+    assert census.predicted[:, 0].tolist() == pytest.approx([0.4, 0.2]), "sorted by study, a averaged over two"
+    assert census.spoke[:, 0].tolist() == [True, False], "verdicts follow the sorted study order, not the table's"
+    assert census.read_positive[:, 0].tolist() == [True, False]
+    assert census.truth.shape == (2, len(TARGETS)), "z is held out but unread, so it never enters"

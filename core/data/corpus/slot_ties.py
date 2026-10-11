@@ -28,8 +28,10 @@ It reads one DICOM header per series and no pixels, so it is cheap and runs happ
 """
 
 from collections import Counter
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from typing import override
 
 import pandas as pd
 
@@ -184,27 +186,62 @@ def main() -> None:
         disagreeing,
         total,
         disagreeing / max(total, 1) * PERCENT,
-        "" if disagreeing else " — SAME ORDER, so both tie rules pick the same series everywhere",
+        SAME_ORDER[disagreeing == 0],
     )
 
     planes = StudyCache.planes_of(table)
     directories = sorted(path for path in (raw / arguments.split).iterdir() if path.is_dir())
-    if arguments.studies:
-        directories = directories[: arguments.studies]
+    directories = directories[: arguments.studies or None]
 
+    census = CENSUSES[arguments.lost]
     totals: Counter[str] = Counter()
-    worker = SlotTies._lost_of if arguments.lost else SlotTies._contested_of  # noqa: SLF001
     with ProcessPoolExecutor(max_workers=arguments.workers) as pool:
         work = ((directory, planes) for directory in directories)
-        for counted in pool.map(worker, work, chunksize=8):
-            totals.update({name: count for name, count in counted.items() if count})
-            if not arguments.lost:
-                totals["studies_with_any"] += int(any(counted.values()))
+        for counted in pool.map(census.worker(), work, chunksize=8):
+            census.tally(totals, counted)
 
-    report = SlotTiesReport(totals, len(directories))
-    lines = report.unrouted() if arguments.lost else report.contested()
-    for line in lines:
+    for line in census.lines(SlotTiesReport(totals, len(directories))):
         logger.info("%s", line)
+
+
+SAME_ORDER = {True: " — SAME ORDER, so both tie rules pick the same series everywhere", False: ""}
+"""What the order verdict adds when no study disagrees, keyed on that."""
+
+
+@dataclass(frozen=True)
+class UnroutedCensus:
+    """The series no slot accepts, summed across studies."""
+
+    def worker(self) -> Callable[[tuple[Path, dict[str, str]]], Mapping[str, int]]:
+        return SlotTies._lost_of  # noqa: SLF001 - the pool worker the class keeps for pickling
+
+    def tally(self, totals: Counter[str], counted: Mapping[str, int]) -> None:
+        totals.update({name: count for name, count in counted.items() if count})
+
+    def lines(self, report: SlotTiesReport) -> list[str]:
+        return report.unrouted()
+
+
+@dataclass(frozen=True)
+class ContestedCensus(UnroutedCensus):
+    """The slots won by a tie, plus how many studies hold any."""
+
+    @override
+    def worker(self) -> Callable[[tuple[Path, dict[str, str]]], Mapping[str, int]]:
+        return SlotTies._contested_of  # noqa: SLF001 - the pool worker the class keeps for pickling
+
+    @override
+    def tally(self, totals: Counter[str], counted: Mapping[str, int]) -> None:
+        super().tally(totals, counted)
+        totals["studies_with_any"] += int(any(counted.values()))
+
+    @override
+    def lines(self, report: SlotTiesReport) -> list[str]:
+        return report.contested()
+
+
+CENSUSES: dict[bool, UnroutedCensus] = {False: ContestedCensus(), True: UnroutedCensus()}
+"""The census `--lost` selects."""
 
 
 if __name__ == "__main__":

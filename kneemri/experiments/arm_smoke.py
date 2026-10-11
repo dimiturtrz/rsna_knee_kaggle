@@ -69,6 +69,12 @@ Anchored at the start so an INFO log that merely mentions an error name does not
 must END the match (at a colon, or at the line's end for a bare `AssertionError`) so `HTTP Request:` and
 its kin cannot claim it."""
 
+WITH_HOLDOUT = ("loss", "auc")
+"""What a fold that keeps studies back must record finite."""
+
+SCORED_BY_FOLD = {"-1": ("loss",)}
+"""Folds that hold nothing out, whose AUC is NaN by design — see `ArmSmoke.learned`."""
+
 TIMED_OUT = 124
 """The exit code a timeout is reported under — `timeout(1)`'s, so the number in the log means the thing
 it means everywhere else. The process was killed, so it has no code of its own to report."""
@@ -216,8 +222,12 @@ class ArmSmoke:
         epochs = [line for line in lines if "epoch" in line]
         if not epochs:
             return "exited 0 without finishing an epoch"
-        last = epochs[-1]
-        scored = ("loss", "auc") if str(recipe.get("fold", "0")) != "-1" else ("loss",)
+        scored = SCORED_BY_FOLD.get(str(recipe.get("fold", "0")), WITH_HOLDOUT)
+        return self._non_finite(epochs[-1], scored)
+
+    @staticmethod
+    def _non_finite(last: dict[str, float], scored: tuple[str, ...]) -> str:
+        """The scored aggregates this epoch recorded as NaN or infinite, named — empty when all are finite."""
         wrong = [key for key in scored if not math.isfinite(float(last[key]))]
         return f"epoch {last['epoch']} recorded a non-finite {' and '.join(wrong)}" if wrong else ""
 

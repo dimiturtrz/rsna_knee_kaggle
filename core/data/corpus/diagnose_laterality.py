@@ -11,7 +11,7 @@ read per series — so it costs seconds and no cache rebuild.
 
 import logging
 from concurrent.futures import ProcessPoolExecutor
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import pandas as pd
@@ -24,6 +24,54 @@ from core.data.corpus.study_cache import CorpusSplit
 logger = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
+class SideEvidence:
+    """What one study's series say about its side: the tags, the centres, and what each rule resolves."""
+
+    acquisitions: list[Acquisition]
+
+    def tagged(self) -> list[str]:
+        """Every series' own laterality tag, in probe order, untagged series skipped."""
+        return [a.laterality_tag for a in self.acquisitions if a.laterality_tag]
+
+    def centres(self) -> list[float]:
+        """Every series' image-centre x, where its header carried one."""
+        return [a.centre_x for a in self.acquisitions if a.centre_x is not None]
+
+    def geometric(self) -> str | None:
+        """The side geometry alone gives, read from EVERY series with its tag stripped.
+
+        Not only the untagged ones: computing it from the untagged remainder makes the "both available"
+        set mean "studies whose series disagree about having a tag", which is a biased subsample and not
+        the accuracy question being asked.
+        """
+        if not self.centres():
+            return None
+        return Laterality().of_study([replace(a, laterality_tag=None) for a in self.acquisitions])
+
+    def side(self) -> str | None:
+        """The side the production rule resolves, tag first."""
+        return Laterality().of_study(self.acquisitions)
+
+    def source(self) -> str:
+        """Which rule decided the side: the tag, the geometry, or neither."""
+        if self.tagged():
+            return "tag"
+        return "unresolved" if self.side() is None else "geometry"
+
+    def row(self) -> dict[str, object]:
+        """The audit columns this evidence fills, empty strings where a rule gave nothing."""
+        tagged, centres = self.tagged(), self.centres()
+        return {
+            "side": self.side() or "",
+            "source": self.source(),
+            "tag_side": next(iter(tagged), ""),
+            "geometry_side": self.geometric() or "",
+            "series": len(self.acquisitions),
+            "median_centre_x": float(pd.Series(centres, dtype=float).median()),
+        }
+
+
 class LateralityAudit:
     """Resolves every study's side and records which rule decided it."""
 
@@ -31,30 +79,9 @@ class LateralityAudit:
     def resolve_one(argument: tuple[str, str]) -> dict[str, object]:
         """One study: the side the tag gives, the side geometry gives, and which one was used."""
         identifier, directory = argument
-        acquisitions = [
-            Acquisition.probe(identifier, series.name, series)
-            for series in sorted(Path(directory).iterdir())
-            if series.is_dir()
-        ]
-        laterality = Laterality()
-        tagged = [a.laterality_tag for a in acquisitions if a.laterality_tag]
-        centres = [a.centre_x for a in acquisitions if a.centre_x is not None]
-        # Geometry is computed from EVERY series, not only the untagged ones. Computing it from the
-        # untagged remainder makes the "both available" set mean "studies whose series disagree about
-        # having a tag", which is a biased subsample and not the accuracy question being asked.
-        stripped = [replace(a, laterality_tag=None) for a in acquisitions]
-        geometric = laterality.of_study(stripped) if centres else None
-        side = laterality.of_study(acquisitions)
-        source = "tag" if tagged else ("geometry" if side is not None else "unresolved")
-        return {
-            "StudyInstanceUID": identifier,
-            "side": side or "",
-            "source": source,
-            "tag_side": tagged[0] if tagged else "",
-            "geometry_side": geometric or "",
-            "series": len(acquisitions),
-            "median_centre_x": float(pd.Series(centres).median()) if centres else float("nan"),
-        }
+        series = [path for path in sorted(Path(directory).iterdir()) if path.is_dir()]
+        evidence = SideEvidence([Acquisition.probe(identifier, path.name, path) for path in series])
+        return {"StudyInstanceUID": identifier, **evidence.row()}
 
     def run(self, source: Path, identifiers: list[str], workers: int) -> pd.DataFrame:
         """Resolve every study in parallel; only headers are read, so this is seconds not hours."""

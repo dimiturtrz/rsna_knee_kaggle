@@ -21,7 +21,9 @@ ensemble entries carrying both, midpoint inverts 12 of 414 resolved pairs and le
 """
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
+from typing import override
 
 from core import cli
 from core.findings import TARGETS
@@ -129,6 +131,22 @@ class SeatProfile:
             for target in TARGETS
         }
 
+    def paths(self, members: list[Path] | None, holdouts: Path | None, declines: Path) -> list[Path]:
+        """The records named on the line, or every non-void record in the `holdouts` directory."""
+        if holdouts is None:
+            return list(members or [])
+        return [holdouts / f"{name}{SUFFIX}" for name in MemberPool.at(holdouts, declines).names()]
+
+    def columns(
+        self, readings: dict[str, HoldoutReading], table: dict[str, dict[str, float]], against: str | None
+    ) -> "RankedColumns":
+        """The plain per-finding ranking, or the priced one when a baseline is named."""
+        spread = self.spread(table)
+        if against is None:
+            return RankedColumns(table, spread, {target: name for target, (name, _) in self.leaders(table).items()})
+        margins = self.margins(readings, table, against)
+        return PricedColumns(table, spread, {target: margin[0] for target, margin in margins.items()}, margins)
+
 
 def main() -> None:
     """Print the member-by-finding matrix, the per-finding leader, and where the pool spreads widest."""
@@ -142,36 +160,61 @@ def main() -> None:
     arguments = command.parsed()
 
     profile = SeatProfile(LabelScores(MIDPOINT) if arguments.midpoint else None)
-    if arguments.holdouts:
-        pool = MemberPool.at(arguments.holdouts, arguments.declines)
-        paths = [arguments.holdouts / f"{name}{SUFFIX}" for name in pool.names()]
-    else:
-        paths = list(arguments.members)
+    paths = profile.paths(arguments.members, arguments.holdouts, arguments.declines)
     if arguments.against:
         paths = profile.population(paths, arguments.against)
     readings = profile.readings(paths)
     table = profile.profile(readings)
-    leaders, spread = profile.leaders(table), profile.spread(table)
-    margins: dict[str, tuple[str, float, tuple[float, float]]] = (
-        profile.margins(readings, table, arguments.against) if arguments.against else {}
+    columns = profile.columns(readings, table, arguments.against)
+    spread = columns.spread
+    command.report(
+        [f"--- per finding @{profile.scores.name()}", columns.header()]
+        + [columns.row(target) for target in sorted(TARGETS, key=lambda name: spread[name], reverse=True)]
+        + [""]
+        + [columns.summary(name) for name in sorted(table, key=lambda name: -sum(table[name].values()))]
     )
 
-    lines = [f"--- per finding @{profile.scores.name()}"]
-    header = f"{'finding':22s} {'leader':28s} {'best':>7s} {'spread':>7s}"
-    lines += [header + (f"  {'margin':>8s} {'95% interval':>18s}  clears" if margins else "")]
-    for target in sorted(TARGETS, key=lambda name: spread[name], reverse=True):
-        leader = margins[target][0] if margins else leaders[target][0]
-        row = f"{target:22s} {leader[:28]:28s} {table[leader][target]:7.4f} {spread[target]:7.4f}"
-        if margins:
-            _, margin, (low, high) = margins[target]
-            row += f"  {margin:8.4f} [{low:8.4f},{high:8.4f}]  {'YES' if low > 0 else 'no'}"
-        lines.append(row)
-    lines.append("")
-    for name, row in sorted(table.items(), key=lambda item: -sum(item[1].values())):
-        mean = sum(row.values()) / len(row)
+
+CLEARS = {True: "YES", False: "no"}
+"""The verdict column, keyed on whether a margin's interval sits wholly above zero."""
+
+
+@dataclass(frozen=True)
+class RankedColumns:
+    """The per-finding rows with no baseline: each finding's leader, its score, and the pool's spread."""
+
+    table: dict[str, dict[str, float]]
+    spread: dict[str, float]
+    leader: dict[str, str]
+
+    def header(self) -> str:
+        return f"{'finding':22s} {'leader':28s} {'best':>7s} {'spread':>7s}"
+
+    def row(self, target: str) -> str:
+        leader = self.leader[target]
+        return f"{target:22s} {leader[:28]:28s} {self.table[leader][target]:7.4f} {self.spread[target]:7.4f}"
+
+    def summary(self, name: str) -> str:
+        """One member's mean and its weakest finding."""
+        row = self.table[name]
         worst = min(TARGETS, key=lambda target: row[target])
-        lines.append(f"{name[:34]:34s} mean {mean:.4f}  weakest {worst} {row[worst]:.4f}")
-    command.report(lines)
+        return f"{name[:34]:34s} mean {sum(row.values()) / len(row):.4f}  weakest {worst} {row[worst]:.4f}"
+
+
+@dataclass(frozen=True)
+class PricedColumns(RankedColumns):
+    """The same rows, each leader also priced against a named baseline with the margin's interval."""
+
+    margins: dict[str, tuple[str, float, tuple[float, float]]]
+
+    @override
+    def header(self) -> str:
+        return super().header() + f"  {'margin':>8s} {'95% interval':>18s}  clears"
+
+    @override
+    def row(self, target: str) -> str:
+        _, margin, (low, high) = self.margins[target]
+        return super().row(target) + f"  {margin:8.4f} [{low:8.4f},{high:8.4f}]  {CLEARS[low > 0]}"
 
 
 if __name__ == "__main__":

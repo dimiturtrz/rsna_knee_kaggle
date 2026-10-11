@@ -53,6 +53,40 @@ def test_gold_fitted(tmp_path: Path):
     assert "report_labels_v3.csv" in derived
 
 
+def test_origin(tmp_path: Path):
+    """Only the members with a gold-fitted route are listed, under a caveat counting them; none, no caveat."""
+    reader = _reader(tmp_path)
+    clean = _checkpoint(tmp_path / "clean.pt", held="True")
+    fitted = tmp_path / "fitted.pt"
+    torch.save({"options": {"hold_annotations": "True", "calibrated_targets": "True"}}, fitted)
+
+    assert reader.origin([clean]) == []
+    lines = reader.origin([clean, fitted])
+    assert lines[:2] == ["", "1 of them carry a constant FITTED on these cells, so their score here is agreement"]
+    assert lines[-1].split()[0] == "fitted", "only the gold-fitted member is named"
+    assert len(lines) == 4
+
+
+def test_asked(tmp_path: Path):
+    """No flag adds nothing; --per-label adds a blank line and the per-label table, nothing else."""
+    from core.findings import TARGETS  # noqa: PLC0415 - test-local, so the module under test owns its imports
+    from kneemri.evaluation.annotated_readings import AskedSections  # noqa: PLC0415 - test-local
+    from kneemri.evaluation.scores import LabelScores  # noqa: PLC0415 - test-local
+
+    reader = _reader(tmp_path)
+    annotations = np.zeros((20, len(TARGETS)), dtype=np.float32)
+    annotations[1::2, 0] = 1.0
+    per_member = [(tmp_path / "best.pt", annotations.astype(np.float64))]
+    sections = AskedSections(reader, LabelScores(), per_member, annotations)
+
+    assert sections.asked(per_label=False, cross=False) == []
+    table = reader.per_label_table(LabelScores(), per_member, annotations)
+    assert sections.asked(per_label=True, cross=False) == ["", *table]
+    crossed = sections.asked(per_label=True, cross=True)
+    assert crossed[: len(table) + 1] == ["", *table], "the per-label section prints before the matrices"
+    assert crossed[len(table) + 2].startswith("cross-column AUC, best")
+
+
 def test_rows(tmp_path: Path):
     """The annotated studies located in CORPUS order, with a set that misses entirely refused."""
     reader = _reader(tmp_path)
@@ -153,3 +187,91 @@ def test_joined_missing(tmp_path: Path):
 
     with pytest.raises(ValueError, match="holds no reading"):
         _reader(tmp_path).joined([path], ["a", "b"])
+
+
+STUDY_NAMES = [f"s{index}" for index in range(12)]
+PIN_HEAD = [
+    "12 annotated studies, 3 member(s), none of them TRAINED on these cells",
+    "m0                           0.1785",
+    "m1                           0.2087",
+    "m2                           0.2302",
+    "combined                     0.0790",
+    "",
+]
+PIN_ORIGIN = [
+    "",
+    "1 of them carry a constant FITTED on these cells, so their score here is agreement",
+    "between two rulers that share an origin, never a confirmation (knee-vrioa):",
+    "  m1                           --labels derived.csv",
+]
+PIN_PLAIN = [
+    *PIN_HEAD,
+    "paired against m0 (95% interval over studies, resampled):",
+    "  m1                           +0.0302 [-0.0597, +0.1382] INSIDE the interval — no pairwise claim",
+    "  m2                           +0.0517 [-0.0524, +0.1389] INSIDE the interval — no pairwise claim",
+    *PIN_ORIGIN,
+]
+PIN_FLAGGED_LINES = 72
+PIN_FLAGGED_DIGEST = "014dc11f0823794b26917d25d989634099115f507f53c75888643d454df371f9"
+"""The 72-line flagged report, too long to inline, pinned by its sha256 off the module before the split."""
+
+
+def _main_lines(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path, *flags: str):
+    """Drive main with the device-bound read and the gold join stubbed, and return what it reported."""
+    import logging  # noqa: PLC0415 - test-local
+
+    from core import cli  # noqa: PLC0415 - test-local
+    from core.findings import TARGETS  # noqa: PLC0415 - test-local
+    from core.paths import DataRoot  # noqa: PLC0415 - test-local
+    from kneemri.evaluation import annotated_readings  # noqa: PLC0415 - test-local
+    from kneemri.evaluation.gold_rows import GoldRows  # noqa: PLC0415 - test-local
+
+    truth = np.zeros((len(STUDY_NAMES), len(TARGETS)), dtype=np.float32)
+    truth[1::2] = 1.0
+    truth[0, 1] = 1.0
+    rng = np.random.default_rng(3)
+    members = [tmp_path / f"m{index}.pt" for index in range(3)]
+    per_member = [
+        (path, truth.astype(np.float64) + rng.normal(0, 0.6 + index / 4, truth.shape))
+        for index, path in enumerate(members)
+    ]
+    monkeypatch.setattr(cli.Command, "rooted", lambda self, arguments: DataRoot(tmp_path))
+    monkeypatch.setattr(GoldRows, "annotated", lambda self, table: (STUDY_NAMES, truth))
+    monkeypatch.setattr(
+        annotated_readings.AnnotatedReadings,
+        "readings",
+        lambda self, checkpoints, identifiers, *, overlap: (STUDY_NAMES[::-1], per_member),
+    )
+    monkeypatch.setattr(
+        annotated_readings.AnnotatedReadings,
+        "gold_fitted",
+        lambda self, path: "--labels derived.csv" if path.stem == "m1" else None,
+    )
+    monkeypatch.setattr(
+        "sys.argv", ["annotated_readings", "--device", "cpu", "--checkpoints", *map(str, members), *flags]
+    )
+    caplog.set_level(logging.INFO, logger=annotated_readings.__name__)
+    annotated_readings.main()
+    return [record.getMessage() for record in caplog.records if record.name == annotated_readings.__name__]
+
+
+def test_main_reports_the_members_and_their_pairing(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path
+):
+    """Pinned verbatim off the module before main was split into report sections."""
+    assert _main_lines(monkeypatch, caplog, tmp_path) == PIN_PLAIN
+
+
+def test_main_adds_each_asked_section(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, tmp_path: Path
+):
+    """--per-label and --cross each add their section, and a named baseline replaces the first checkpoint."""
+    lines = _main_lines(monkeypatch, caplog, tmp_path, "--per-label", "--cross", "--against", str(tmp_path / "m2.pt"))
+    import hashlib  # noqa: PLC0415 - test-local
+
+    assert lines[: len(PIN_HEAD)] == PIN_HEAD
+    assert lines[len(PIN_HEAD)] == "paired against m2 (95% interval over studies, resampled):"
+    assert lines[-len(PIN_ORIGIN) :] == PIN_ORIGIN
+    assert sum(line.startswith("cross-column AUC") for line in lines) == len(PIN_HEAD) - 3, "one matrix per member"
+    assert len(lines) == PIN_FLAGGED_LINES
+    assert hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest() == PIN_FLAGGED_DIGEST

@@ -136,6 +136,21 @@ def test_report():
     assert any("in-plane leg" in line and "p50 5.0 mm" in line for line in lines)
     assert any("orthogonal" in line and "1/1 (100.0%)" in line for line in lines)
     assert any("IMAGED the second's centre: 2/2 (100.0%)" in line for line in lines), "ordered, so both ways"
+    assert lines == [
+        "1 studies with geometry measured, from 2 studies sampled of 4407 in the corpus; "
+        "2 slots with geometry, 1 within-study slot pairs",
+        "normal angle between slots:   p50 90.0 deg, p90 90.0 deg",
+        "centre distance        between slots: p50 5.0 mm, p90 5.0 mm",
+        "  through-plane leg    between slots: p50 0.0 mm, p90 0.0 mm",
+        "  in-plane leg         between slots: p50 5.0 mm, p90 5.0 mm",
+        "pairs within 20 deg of orthogonal: 1/1 (100.0%)",
+        "ordered pairs where the first slot IMAGED the second's centre: 2/2 (100.0%)",
+    ], "pinned verbatim: the layout is what a reader compares across runs"
+
+    unspanned = [SlotFrame(frame.plane, frame.centre, frame.normal, None) for frame in study]
+    assert SlotGeometry().report([unspanned], CorpusSample(["a", "b"], 4407)) == lines[:-1], (
+        "no span, no coverage claim — the distributions stay and only the coverage line goes"
+    )
 
     assert len(SlotGeometry().report([], CorpusSample(["a"], 2))) == 1, "no pairs, no distributions"
 

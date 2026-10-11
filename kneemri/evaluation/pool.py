@@ -110,16 +110,17 @@ class Pool:
         four-member roster as three and every delta below it is against the wrong base.
         """
         wanted = {path.name for path in roster}
-        found = {name for name in self.names if name in wanted}
-        if found != wanted:
-            message = f"roster members with no holdout record: {', '.join(sorted(wanted - found))}"
+        missing = wanted - set(self.names)
+        if missing:
+            message = f"roster members with no holdout record: {', '.join(sorted(missing))}"
             raise ValueError(message)
-        paired = list(zip(self.names, self.predictions, strict=True))
-        held = [(name, member) for name, member in paired if name in wanted]
-        rest = [(name, member) for name, member in paired if name not in wanted]
-        return (
-            Pool([name for name, _ in held], [member for _, member in held], self.truth, self.vote),
-            Pool([name for name, _ in rest], [member for _, member in rest], self.truth, self.vote),
+        return self._side(wanted, inside=True), self._side(wanted, inside=False)
+
+    def _side(self, wanted: set[str], *, inside: bool) -> "Pool":
+        """The members on one side of a roster, in pool order, over this pool's truth and vote."""
+        kept = [index for index, name in enumerate(self.names) if (name in wanted) == inside]
+        return Pool(
+            [self.names[index] for index in kept], [self.predictions[index] for index in kept], self.truth, self.vote
         )
 
     def rows(self, studies: NDArray[np.int64]) -> "Pool":

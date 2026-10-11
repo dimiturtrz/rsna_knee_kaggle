@@ -29,7 +29,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.findings import STUDY, TARGETS
-from kneemri.runs.holdout_record import HoldoutRecord
+from kneemri.runs.holdout_record import HoldoutReading, HoldoutRecord
 
 logger = logging.getLogger(__name__)
 
@@ -75,13 +75,7 @@ class LabelContradiction:
             message = f"none of the {len(records)} named records carries a holdout array"
             raise ValueError(message)
         covered = sorted(set().union(*[set(reading.studies) for reading in readings]) & set(table.index))
-        opinions: dict[str, list[NDArray[np.float64]]] = {study: [] for study in covered}
-        truths: dict[str, NDArray[np.float32]] = {}
-        for reading in readings:
-            for position, study in enumerate(reading.studies):
-                if study in opinions:
-                    opinions[study].append(reading.predictions[position].astype(np.float64))
-                    truths[study] = reading.truth[position]
+        opinions, truths = cls._opinions(readings, covered)
         stacked = [np.mean(opinions[study], axis=0) for study in covered]
         truth = np.stack([truths[study] for study in covered])
         rows = table.loc[covered]
@@ -92,6 +86,24 @@ class LabelContradiction:
             predicted=np.stack(stacked),
             truth=truth,
         )
+
+    @staticmethod
+    def _opinions(
+        readings: list[HoldoutReading], covered: list[str]
+    ) -> tuple[dict[str, list[NDArray[np.float64]]], dict[str, NDArray[np.float32]]]:
+        """Every record's prediction for each covered study, and the truth the last record to hold it carried."""
+        opinions: dict[str, list[NDArray[np.float64]]] = {study: [] for study in covered}
+        truths: dict[str, NDArray[np.float32]] = {}
+        held = (
+            (study, reading, position)
+            for reading in readings
+            for position, study in enumerate(reading.studies)
+            if study in opinions
+        )
+        for study, reading, position in held:
+            opinions[study].append(reading.predictions[position].astype(np.float64))
+            truths[study] = reading.truth[position]
+        return opinions, truths
 
     def labelled_positive(self) -> Bool[NDArray[np.bool_], "studies labels"]:
         """The cells the TRAINING label calls positive — the denominator a correction is priced against."""

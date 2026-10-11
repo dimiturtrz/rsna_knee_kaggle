@@ -64,6 +64,9 @@ ORTHOGONAL_TOLERANCE_DEG = 20.0
 """How far from 90 degrees two normals may sit and still be called an orthogonal pair. Wide, because the
 knee is not scanned to the scanner axes — sagittal series are routinely angled to the femoral condyles."""
 
+DISTANCE_LEGS = ("centre distance", "  through-plane leg", "  in-plane leg")
+"""The three millimetre columns of a `SlotGeometry.pairs` row after the angle, in that order."""
+
 
 @dataclass(frozen=True)
 class SlotFrame:
@@ -212,26 +215,38 @@ class SlotGeometry:
         ]
         if not pairs:
             return lines
-        angles = np.array([angle for angle, _, _, _ in pairs])
-        angle_low, angle_high = np.percentile(angles, PERCENTILES)
-        orthogonal = int((np.abs(angles - RIGHT_ANGLE) <= ORTHOGONAL_TOLERANCE_DEG).sum())
-        lines.append(f"normal angle between slots:   p50 {angle_low:.1f} deg, p90 {angle_high:.1f} deg")
-        for index, name in ((1, "centre distance"), (2, "  through-plane leg"), (3, "  in-plane leg")):
-            values = np.array([pair[index] for pair in pairs])
-            low, high = np.percentile(values, PERCENTILES)
-            lines.append(f"{name:22s} between slots: p50 {low:.1f} mm, p90 {high:.1f} mm")
-        lines.append(
-            f"pairs within {ORTHOGONAL_TOLERANCE_DEG:.0f} deg of orthogonal: {orthogonal}/{len(pairs)} "
-            f"({100 * orthogonal / len(pairs):.1f}%)"
-        )
         covered = [seen for study in measured for seen in self.coverage(study)]
-        if covered:
-            inside = sum(covered)
-            lines.append(
-                f"ordered pairs where the first slot IMAGED the second's centre: {inside}/{len(covered)} "
-                f"({100 * inside / len(covered):.1f}%)"
+        return lines + self._distributions(pairs) + self._covered(covered)
+
+    @staticmethod
+    def _distributions(pairs: list[tuple[float, float, float, float]]) -> list[str]:
+        """The angle and the three distance legs as percentiles, then the share of pairs that are orthogonal."""
+        columns = np.array(pairs).T
+        angle_low, angle_high = np.percentile(columns[0], PERCENTILES)
+        orthogonal = int((np.abs(columns[0] - RIGHT_ANGLE) <= ORTHOGONAL_TOLERANCE_DEG).sum())
+        legs = [
+            f"{name:22s} between slots: p50 {low:.1f} mm, p90 {high:.1f} mm"
+            for name, (low, high) in zip(
+                DISTANCE_LEGS, (np.percentile(column, PERCENTILES) for column in columns[1:]), strict=True
             )
-        return lines
+        ]
+        return [
+            f"normal angle between slots:   p50 {angle_low:.1f} deg, p90 {angle_high:.1f} deg",
+            *legs,
+            f"pairs within {ORTHOGONAL_TOLERANCE_DEG:.0f} deg of orthogonal: {orthogonal}/{len(pairs)} "
+            f"({100 * orthogonal / len(pairs):.1f}%)",
+        ]
+
+    @staticmethod
+    def _covered(covered: list[bool]) -> list[str]:
+        """The coverage share over ordered pairs, or nothing when no slot's span was known."""
+        if not covered:
+            return []
+        inside = sum(covered)
+        return [
+            f"ordered pairs where the first slot IMAGED the second's centre: {inside}/{len(covered)} "
+            f"({100 * inside / len(covered):.1f}%)"
+        ]
 
     @staticmethod
     def measure_study(request: AuditRequest) -> list[list[SlotFrame]]:

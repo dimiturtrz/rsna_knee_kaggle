@@ -283,21 +283,7 @@ class FaultRuler:
         errors = self.errors()
         rows = self.statistics()
         gains = np.array([row.gain for row in rows])
-        candidates = {
-            "agreement (INCUMBENT, MemberDistance)": np.array([-row.agreement for row in rows]),
-            "disagreement rate": np.array([row.disagreement for row in rows]),
-            "double-fault rate (negated)": np.array([-row.double_fault for row in rows]),
-            "disagreement-error ratio (DER)": np.array([row.der for row in rows]),
-        }
-        controls = np.column_stack([[row.better for row in rows], [row.spread for row in rows]])
-        ranked = sorted(
-            (
-                (self.partial(values, gains, controls), self.rank_correlation(values, gains), name)
-                for name, values in candidates.items()
-            ),
-            reverse=True,
-        )
-        best, winner = ranked[0][0], ranked[0][2]
+        ranked = self._ranked(rows, gains)
         return [
             f"ruler check over {len(self.pool)} members, {len(rows)} sampled pairs, "
             f"{errors.shape[1]} discordance trials each, voting {self.pool.rule()}",
@@ -308,14 +294,42 @@ class FaultRuler:
             f"  measured gain over the pairs: median {float(np.median(gains)):+.4f}, "
             f"best {float(gains.max()):+.4f}, worst {float(gains.min()):+.4f}",
             f"  DER above 1 in {int((np.array([row.der for row in rows]) > 1).sum())} of {len(rows)} pairs",
-            (
-                f"  VERDICT: {winner} ranks gain best at {best:+.4f}"
-                if best >= PREDICTIVE
-                else f"  VERDICT: NO statistic reaches {PREDICTIVE} here — the best is {winner} at {best:+.4f}, "
-                f"so pair diversity does not predict offline gain in this pool and selecting on any of "
-                f"these four is selecting on noise"
-            ),
+            self._verdict(ranked[0][0], ranked[0][2]),
         ]
+
+    def _ranked(
+        self, rows: list[PairStatistics], gains: Float[NDArray[np.float64], " pairs"]
+    ) -> list[tuple[float, float, str]]:
+        """Every candidate ruler as `(partial, raw, name)`, best partial first, ties broken by raw then name.
+
+        Each is signed so that HIGHER predicts MORE gain — agreement and double-fault are negated —
+        and the controls are the pair's quality, which is what `partial` holds fixed.
+        """
+        candidates = {
+            "agreement (INCUMBENT, MemberDistance)": np.array([-row.agreement for row in rows]),
+            "disagreement rate": np.array([row.disagreement for row in rows]),
+            "double-fault rate (negated)": np.array([-row.double_fault for row in rows]),
+            "disagreement-error ratio (DER)": np.array([row.der for row in rows]),
+        }
+        controls = np.column_stack([[row.better for row in rows], [row.spread for row in rows]])
+        return sorted(
+            (
+                (self.partial(values, gains, controls), self.rank_correlation(values, gains), name)
+                for name, values in candidates.items()
+            ),
+            reverse=True,
+        )
+
+    @staticmethod
+    def _verdict(best: float, winner: str) -> str:
+        """The line that names the winning ruler, or says none clears `PREDICTIVE` in this pool."""
+        if best >= PREDICTIVE:
+            return f"  VERDICT: {winner} ranks gain best at {best:+.4f}"
+        return (
+            f"  VERDICT: NO statistic reaches {PREDICTIVE} here — the best is {winner} at {best:+.4f}, "
+            f"so pair diversity does not predict offline gain in this pool and selecting on any of "
+            f"these four is selecting on noise"
+        )
 
 
 def main() -> None:

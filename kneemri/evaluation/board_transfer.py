@@ -152,6 +152,10 @@ the whole of the disagreement in every board-scatter reading taken so far. So th
 twice — over everything, and over this population — rather than fitted once on a mixture of two.
 """
 
+PLURAL = {False: "", True: "s"}
+UNRESOLVED_MARK = {True: "", False: " (UNRESOLVED, under the floor)"}
+"""What an inverted pair's line carries when the holdout could not separate it, keyed on `resolved`."""
+
 THIN = " — DIRECTION ONLY, too few pairs to price an arm with"
 """What a cell under `PRICEABLE` says about itself, carried beside its own number and never elsewhere."""
 
@@ -450,44 +454,55 @@ class BoardTransfer:
         pairs = self.pairs()
         if not pairs:
             return f"{self.record} records no entry carrying both numbers"
-        inverted = self.inversions()
+        sections = (self._header(pairs), self._blur_lines(), self._asked(near), self._inversion_lines(pairs))
+        return "\n".join(line for section in sections for line in section)
+
+    def _header(self, pairs: list[BoardPair]) -> list[str]:
+        """The denominator, the whole-record compression, and the per-floor regimes beneath it."""
         excluded = ", ".join(f"{count} {scope}" for scope, count in self.dropped().items())
-        lines = [
+        return [
             f"{len(self.entries())} entries on the {self.scope} scope read against `{self.ruler}`, "
             f"{len(pairs)} orderable pairs "
             f"(excluded: {excluded or 'none'}; "
             f"one-sided: {', '.join(self.unmeasured()) or 'none'})",
             f"compression: median {self.compression():+.2f} board points per holdout point "
             f"over the WHOLE record — the wrong number to price an arm with, see below",
-        ]
-        lines += [
+        ] + [
             f"  among entries at or above {floor:.4f}: {self.priced(count, value, spread)}"
             for floor, count, value, spread in self.regimes()
         ]
-        for least in (1, BLUR_MEMBERS):
-            count, gap = self.blur(least)
-            lines.append(
-                f"board blur over the {count} pairs the holdout could not separate "
-                f"(>= {least} member{'s' if least > 1 else ''}): median |board| {gap:.4f} — a delta "
-                f"smaller than this is a move the board cannot certify"
-            )
-        if near is not None:
-            count, value = self.compression_above(near)
-            cell = self.priced(count, value, self.spread(self.ratios_above(near)))
-            lines.append(f"  PRICE AN ARM AT THIS ONE: at or above {near:.4f} (asked for), {cell}")
-        lines += [
-            f"inversions: {len(inverted)}/{len(pairs)} pairs the board ordered the other way, "
-            f"{sum(pair.inverted for pair in pairs if pair.resolved)}/"
-            f"{sum(pair.resolved for pair in pairs)} of the pairs the holdout resolved at all "
-            f"(a gap >= {RESOLVED})",
+
+    def _blur_lines(self) -> list[str]:
+        """The board delta the holdout could not separate, over any entry and over full-sized ones."""
+        return [
+            f"board blur over the {count} pairs the holdout could not separate "
+            f"(>= {least} member{PLURAL[least > 1]}): median |board| {gap:.4f} — a delta "
+            f"smaller than this is a move the board cannot certify"
+            for least in (1, BLUR_MEMBERS)
+            for count, gap in (self.blur(least),)
         ]
-        lines += [
+
+    def _asked(self, near: float | None) -> list[str]:
+        """The PRICE line for the floor the caller asked about, or nothing when it asked about none."""
+        if near is None:
+            return []
+        count, value = self.compression_above(near)
+        cell = self.priced(count, value, self.spread(self.ratios_above(near)))
+        return [f"  PRICE AN ARM AT THIS ONE: at or above {near:.4f} (asked for), {cell}"]
+
+    def _inversion_lines(self, pairs: list[BoardPair]) -> list[str]:
+        """How often the board disagreed with the holdout, then each disagreement, board-worst first."""
+        resolved = [pair for pair in pairs if pair.resolved]
+        inverted = self.inversions()
+        return [
+            f"inversions: {len(inverted)}/{len(pairs)} pairs the board ordered the other way, "
+            f"{sum(pair.inverted for pair in resolved)}/{len(resolved)} of the pairs the holdout resolved "
+            f"at all (a gap >= {RESOLVED})",
+        ] + [
             f"  {pair.better.id} over {pair.worse.id}: holdout {pair.offline_delta:+.4f}"
-            f"{'' if pair.resolved else ' (UNRESOLVED, under the floor)'}, "
-            f"board {pair.board_delta:+.3f}"
+            f"{UNRESOLVED_MARK[pair.resolved]}, board {pair.board_delta:+.3f}"
             for pair in sorted(inverted, key=lambda pair: pair.board_delta)
         ]
-        return "\n".join(lines)
 
 
 def main() -> None:

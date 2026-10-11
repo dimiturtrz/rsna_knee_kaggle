@@ -33,49 +33,57 @@ class ObjectiveChecks:
         SEPARATE from `objective` because the two answer different questions — which objective, and
         whether the flags asking for it can be honoured together — and because holding both put the
         dispatch over the complexity ceiling, which is the gate saying the same thing.
+
+        The ORDER is the content. `--auc-margin` goes first because it replaces the term every other
+        objective is built on, so its conflict is named against IT. Dissent precedes the pair-memory rule
+        so a dissenting arm is not told about a `--rank-weight` it never meant to give; feature precedes it
+        so `--feature-weight --pair-memory` names the dropped flag rather than an unfed pool. The batch
+        guard is LAST: every message above names a flag the reader can drop, and it names one to ADD.
         """
         options = self.options
-        # FIRST of the guards, ahead of the dissent one for its own reason: this flag replaces the term
-        # every other objective here is built on, so a composition it cannot honour has to be named
-        # against THIS flag rather than against whichever term was stacked on top of it.
-        if options.targets.auc_margin:
-            self._check_margin_alone()
-        # A dissenting arm that also passed `--pair-memory` would otherwise be told about a missing
-        # `--rank-weight` it never intended to give, which sends the reader to the wrong flag entirely.
-        if options.teacher.dissent_weight:
-            self._check_dissent_alone()
-        if options.targets.contrast_weight:
-            self._check_contrast_alone()
-        # BEFORE the pair-memory rule below, so `--feature-weight --pair-memory` is answered by the flag
-        # that would have been silently dropped rather than by one about an unfed pool.
-        if options.teacher.feature_weight:
-            self._check_feature_alone()
-        if options.targets.pair_memory and not (
-            options.targets.rank_weight or options.targets.contrast_weight or options.targets.auc_margin
-        ):
-            # LOUD, for the reason `reports` gives below: a memory with no term to feed is a silent
-            # no-op that trains the plain recipe under the arm's name, and would be read as a
-            # refutation of the mechanism rather than of the invocation.
-            message = (
-                f"--pair-memory {options.targets.pair_memory} widens the pool of a ranking, contrastive, or "
-                "margin term and none of --rank-weight, --contrast-weight, or --auc-margin was given, "
-                "so there is nothing for it to widen"
-            )
-            raise ValueError(message)
-        if options.teacher.distill_weight and options.targets.pair_memory:
-            # LOUD for the same reason as above. `Remembered` widens a pooled term
-            # and knows nothing about a teacher, so the two together would train a distilling arm whose
-            # remembered pairs silently carry no teacher at all — half the mechanism, under its name.
-            message = (
-                f"--distill-weight {options.teacher.distill_weight} and --pair-memory {options.targets.pair_memory} "
-                "are not composed: the remembered pool widens the label term only, so the teacher would be "
-                "dropped for every remembered step"
-            )
-            raise ValueError(message)
-        # LAST, because it is about the BATCH rather than about the flags, and every message above names
-        # a flag the reader can drop. This one names a flag they must ADD.
-        if options.optim.batch <= LONE_BATCH and not options.targets.pair_memory:
-            self._check_pairs_can_form()
+        guards = (
+            (options.targets.auc_margin, self._check_margin_alone),
+            (options.teacher.dissent_weight, self._check_dissent_alone),
+            (options.targets.contrast_weight, self._check_contrast_alone),
+            (options.teacher.feature_weight, self._check_feature_alone),
+            (options.targets.pair_memory, self._check_memory_fed),
+            (options.teacher.distill_weight and options.targets.pair_memory, self._check_distill_unpooled),
+            (options.optim.batch <= LONE_BATCH and not options.targets.pair_memory, self._check_pairs_can_form),
+        )
+        for armed, check in guards:
+            if armed:
+                check()
+
+    def _check_memory_fed(self) -> None:
+        """`--pair-memory` with no pooled term to widen, LOUD for `objective`'s reason.
+
+        A memory with no term to feed is a silent no-op that trains the plain recipe under the arm's
+        name, and would be read as a refutation of the mechanism rather than of the invocation.
+        """
+        targets = self.options.targets
+        if targets.rank_weight or targets.contrast_weight or targets.auc_margin:
+            return
+        message = (
+            f"--pair-memory {targets.pair_memory} widens the pool of a ranking, contrastive, or "
+            "margin term and none of --rank-weight, --contrast-weight, or --auc-margin was given, "
+            "so there is nothing for it to widen"
+        )
+        raise ValueError(message)
+
+    def _check_distill_unpooled(self) -> None:
+        """`--distill-weight` beside `--pair-memory`, which would drop the teacher on every remembered pair.
+
+        `Remembered` widens a pooled term and knows nothing about a teacher, so the two together would
+        train a distilling arm whose remembered pairs silently carry no teacher at all — half the
+        mechanism, under its name.
+        """
+        options = self.options
+        message = (
+            f"--distill-weight {options.teacher.distill_weight} and --pair-memory {options.targets.pair_memory} "
+            "are not composed: the remembered pool widens the label term only, so the teacher would be "
+            "dropped for every remembered step"
+        )
+        raise ValueError(message)
 
     def _check_pairs_can_form(self) -> None:
         """The comparison terms that are silently OFF at a batch of one, raised before the card is touched.

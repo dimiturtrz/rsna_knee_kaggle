@@ -112,17 +112,27 @@ class ArmRead:
         direct = RunComparison.resolved(Path(self.produced(named)), models)
         if direct.exists() or RunRecord(direct).exists():
             return direct
-        records = models.glob(f"{named}_*{METRICS_SUFFIX}.jsonl")
-        runs = [models / f"{Artefact.stem(record)}.pt" for record in records]
-        best = ((run, RunRecord(run).best()) for run in runs)
-        scored = {run: row["auc"] for run, row in best if row is not None}
-        if declared is not None:
-            matched = [path for path, auc in scored.items() if abs(auc - declared) <= DECLARED_TOLERANCE]
-            if len(matched) == 1:
-                return matched[0]
+        scored = self._scored_siblings(named, models)
+        matched = self._matching(scored, declared)
+        if len(matched) == 1:
+            return matched[0]
         candidates = " ".join(f"{path.stem}={auc:.4f}" for path, auc in sorted(scored.items())) or "none"
         message = f"control {named} = {declared} matches no single run under {models}; siblings: {candidates}"
         raise SystemExit(message)
+
+    @staticmethod
+    def _scored_siblings(named: str, models: Path) -> dict[Path, float]:
+        """Every split-suffixed run of this name that recorded an epoch, at its own best score."""
+        runs = [models / f"{Artefact.stem(record)}.pt" for record in models.glob(f"{named}_*{METRICS_SUFFIX}.jsonl")]
+        best = ((run, RunRecord(run).best()) for run in runs)
+        return {run: row["auc"] for run, row in best if row is not None}
+
+    @staticmethod
+    def _matching(scored: dict[Path, float], declared: float | None) -> list[Path]:
+        """The runs whose score is the one the header declared; none when it declared no number."""
+        if declared is None:
+            return []
+        return [path for path, auc in scored.items() if abs(auc - declared) <= DECLARED_TOLERANCE]
 
     def uncontrolled(self, arms: Iterable[str]) -> list[str]:
         """The arms declaring no control — the ones whose every reading is against a remembered number.

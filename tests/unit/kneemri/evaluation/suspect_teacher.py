@@ -79,6 +79,28 @@ def test_table(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     assert corrected == pytest.approx(ALPHA * 0.08 + (1.0 - ALPHA) * 0.94, abs=1e-6)
 
 
+def test_table_reports_each_finding_it_corrects(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+):
+    """The per-finding mean shift is the reading, so its lines are pinned verbatim, untouched findings silent."""
+    teacher = _teacher(tmp_path, [0.94, 0.94, 0.08, 0.08], [("s0", TARGETS[0]), ("s2", TARGETS[1])])
+    pool = np.tile(np.array([[0.1], [0.9], [0.5], [0.7]]), (1, len(TARGETS)))
+    monkeypatch.setattr(
+        "kneemri.evaluation.suspect_teacher.PublishedRuler.per_seed",
+        lambda self: (["s0", "s1", "s2", "s3"], [pool]),
+    )
+
+    with caplog.at_level("INFO", logger="kneemri.evaluation.suspect_teacher"):
+        table = teacher.table()
+
+    assert [record.getMessage() for record in caplog.records] == [
+        "4 studies in the published pool, 2 flagged cells",
+        f"{TARGETS[0]:<18s}     1 corrected, mean 0.9400 -> 0.4240 (-0.5160), corpus mean 0.5100",
+        f"{TARGETS[1]:<18s}     1 corrected, mean 0.0800 -> 0.0800 (+0.0000), corpus mean 0.5100",
+    ]
+    assert table[UNREAD_VALUE].round(6).tolist() == [0.424, 0.08]
+
+
 def test_table_at_full_posterior(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """alpha = 1 is the ablation arm, and it has to be reachable rather than argued about."""
     teacher = _teacher(tmp_path, [0.94, 0.94, 0.08, 0.08], [("s0", TARGETS[0])], alpha=1.0)

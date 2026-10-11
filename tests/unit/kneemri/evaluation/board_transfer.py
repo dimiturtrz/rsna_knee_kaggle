@@ -211,6 +211,35 @@ def test_report(tmp_path: Path):
     assert "1 member_mean, 1 unknown" in report, "what was excluded is part of the result"
     assert "0/2 of the pairs the holdout resolved" in report
     assert "UNRESOLVED" in report, "an inversion under the floor is not a refutation"
+    assert report == "\n".join(PINNED_HEAD + PINNED_TAIL), "pinned verbatim, read before report was split"
+
+
+PINNED_THIN = "0 resolved pairs, median +0.00 [+0.00, +0.00] — DIRECTION ONLY, too few pairs to price an arm with"
+PINNED_BLUR = "median |board| 0.0000 — a delta smaller than this is a move the board cannot certify"
+PINNED_HEAD = [
+    "3 entries on the ensemble scope read against `offline`, 3 orderable pairs "
+    "(excluded: 1 member_mean, 1 unknown; one-sided: unasked, blanked)",
+    "compression: median +3.15 board points per holdout point over the WHOLE record "
+    "— the wrong number to price an arm with, see below",
+    f"  among entries at or above 0.8600: {PINNED_THIN}",
+    f"  among entries at or above 0.8630: {PINNED_THIN}",
+    f"board blur over the 0 pairs the holdout could not separate (>= 1 member): {PINNED_BLUR}",
+    f"board blur over the 0 pairs the holdout could not separate (>= 4 members): {PINNED_BLUR}",
+]
+PINNED_TAIL = [
+    "inversions: 1/3 pairs the board ordered the other way, "
+    "0/2 of the pairs the holdout resolved at all (a gap >= 0.0053)",
+    "  close over strong: holdout +0.0030 (UNRESOLVED, under the floor), board -0.010",
+]
+
+
+def test_report_prices_the_asked_floor(tmp_path: Path):
+    """Asking for a floor adds exactly one PRICE line between the blur and the inversions."""
+    asked = (
+        "  PRICE AN ARM AT THIS ONE: at or above 0.8500 (asked for), 2 resolved pairs, "
+        "median +3.15 [+2.31, +4.00] — DIRECTION ONLY, too few pairs to price an arm with"
+    )
+    assert BoardTransfer(_record(tmp_path)).report(near=0.85) == "\n".join([*PINNED_HEAD, asked, *PINNED_TAIL])
 
 
 def test_report_says_so_when_nothing_is_recorded(tmp_path: Path):

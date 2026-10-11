@@ -46,6 +46,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
@@ -103,40 +104,53 @@ class SuspectTeacher:
         derived = pd.read_csv(self.labels).set_index(STUDY)
         flagged = pd.read_csv(self.flags)
         names, per_seed = PublishedRuler(self.published).per_seed()
-        pooled = RankAverage().combine(per_seed)
-        position = {name: index for index, name in enumerate(names)}
         logger.info("%d studies in the published pool, %d flagged cells", len(names), len(flagged))
-
-        rows: list[pd.DataFrame] = []
-        for column, target in enumerate(TARGETS):
-            asked = flagged.loc[flagged[SUSPECT_TARGET] == target, SUSPECT_STUDY]
-            carried = [name for name in asked if name in position and name in derived.index]
-            if not carried:
-                continue
-            corpus = [name for name in names if name in derived.index]
-            expressed = self.expressed(
-                pooled[[position[name] for name in corpus], column].astype(np.float64),
-                derived.loc[corpus, target].to_numpy(dtype=np.float64),
-            )
-            at = {name: index for index, name in enumerate(corpus)}
-            posterior = expressed[[at[name] for name in carried]]
-            original = derived.loc[carried, target].to_numpy(dtype=np.float64)
-            corrected = self.alpha * posterior + (1.0 - self.alpha) * original
-            rows.append(pd.DataFrame({SUSPECT_STUDY: carried, SUSPECT_TARGET: target, UNREAD_VALUE: corrected}))
-            logger.info(
-                "%-18s %5d corrected, mean %.4f -> %.4f (%+.4f), corpus mean %.4f",
-                target,
-                len(carried),
-                float(original.mean()),
-                float(corrected.mean()),
-                float(corrected.mean() - original.mean()),
-                float(derived.loc[corpus, target].mean()),
-            )
+        position = {name: index for index, name in enumerate(names)}
+        corpus = [name for name in names if name in derived.index]
+        pooled = RankAverage().combine(per_seed)[[position[name] for name in corpus]].astype(np.float64)
+        labels = derived.loc[corpus]
+        rows = [
+            frame
+            for column, target in enumerate(TARGETS)
+            if (frame := self._corrected(labels, pooled[:, column], target, flagged)) is not None
+        ]
         return (
             pd.concat(rows, ignore_index=True)
             if rows
             else pd.DataFrame({SUSPECT_STUDY: [], SUSPECT_TARGET: [], UNREAD_VALUE: []})
         )
+
+    def _corrected(
+        self,
+        labels: pd.DataFrame,
+        pool: Float[NDArray[np.float64], " corpus"],
+        target: str,
+        flagged: pd.DataFrame,
+    ) -> pd.DataFrame | None:
+        """One finding's flagged cells mixed toward the pool's expressed posterior, or None if none is carried.
+
+        `labels` and `pool` are the corpus the pool and the table share, in the pool's order, so a
+        flagged study is carried exactly when it is one of their rows.
+        """
+        asked = flagged.loc[flagged[SUSPECT_TARGET] == target, SUSPECT_STUDY]
+        at = {name: index for index, name in enumerate(labels.index)}
+        carried = [name for name in asked if name in at]
+        if not carried:
+            return None
+        levels = labels[target].to_numpy(dtype=np.float64)
+        posterior = self.expressed(pool, levels)[[at[name] for name in carried]]
+        original = labels.loc[carried, target].to_numpy(dtype=np.float64)
+        corrected = self.alpha * posterior + (1.0 - self.alpha) * original
+        logger.info(
+            "%-18s %5d corrected, mean %.4f -> %.4f (%+.4f), corpus mean %.4f",
+            target,
+            len(carried),
+            float(original.mean()),
+            float(corrected.mean()),
+            float(corrected.mean() - original.mean()),
+            float(labels[target].mean()),
+        )
+        return pd.DataFrame({SUSPECT_STUDY: carried, SUSPECT_TARGET: target, UNREAD_VALUE: corrected})
 
 
 def main() -> None:

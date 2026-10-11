@@ -57,6 +57,7 @@ refuse, because the reason above has not changed. See knee-vrioa.
 """
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -140,6 +141,20 @@ class AnnotatedReadings:
         if table and table != LABEL_TABLE:
             return f"--labels {table} (derived, not the corpus {LABEL_TABLE})"
         return None
+
+    def origin(self, checkpoints: list[Path]) -> list[str]:
+        """The members whose supervision carries a constant fitted on these cells, or nothing if none does."""
+        flagged = [
+            f"  {path.stem:28s} {route}" for path in checkpoints if (route := self.gold_fitted(path)) is not None
+        ]
+        if not flagged:
+            return []
+        return [
+            "",
+            f"{len(flagged)} of them carry a constant FITTED on these cells, so their score here is agreement",
+            "between two rulers that share an origin, never a confirmation (knee-vrioa):",
+            *flagged,
+        ]
 
     def rows(self, reference: list[str], annotated: list[str]) -> NDArray[np.int64]:
         """Where the annotated studies sit in the corpus order, as the index array a slab takes.
@@ -349,29 +364,44 @@ def main() -> None:
     annotations = truth[np.array([position[name] for name in names], dtype=np.int64)]
     scores = LabelScores()
     combined = RankAverage().combine([values for _, values in per_member])
-    routes = [(path, reader.gold_fitted(path)) for path in arguments.checkpoints]
-    flagged = [f"  {path.stem:28s} {route}" for path, route in routes if route is not None]
-    caveat = [
-        "",
-        f"{len(flagged)} of them carry a constant FITTED on these cells, so their score here is agreement",
-        "between two rulers that share an origin, never a confirmation (knee-vrioa):",
-        *flagged,
-    ]
-    origin = caveat if flagged else []
-    breakdown = ["", *reader.per_label_table(scores, per_member, annotations)] if arguments.per_label else []
-    matrices: list[str] = []
-    for member, values in per_member if arguments.cross else []:
-        matrices += ["", f"cross-column AUC, {member.stem} (rows: our posterior; columns: gold truth)"]
-        matrices += reader.cross(scores, values, annotations)
+    sections = AskedSections(reader, scores, per_member, annotations)
     command.report(
         [f"{len(names)} annotated studies, {len(per_member)} member(s), none of them TRAINED on these cells"]
         + [f"{member.stem:28s} {scores.mean(values, annotations):.4f}" for member, values in per_member]
         + [f"{'combined':28s} {scores.mean(combined, annotations):.4f}"]
         + ([""] + reader.paired(scores, per_member, arguments.against or arguments.checkpoints[0], annotations))
-        + breakdown
-        + matrices
-        + origin
+        + sections.asked(per_label=arguments.per_label, cross=arguments.cross)
+        + reader.origin(arguments.checkpoints)
     )
+
+
+@dataclass(frozen=True)
+class AskedSections:
+    """The report sections a flag switches on, in the order they print, each built only when asked."""
+
+    reader: AnnotatedReadings
+    scores: LabelScores
+    per_member: list[tuple[Path, NDArray[np.float64]]]
+    annotations: NDArray[np.float32]
+
+    def asked(self, *, per_label: bool, cross: bool) -> list[str]:
+        """Every section whose flag is set, concatenated in table order."""
+        chosen = ((per_label, self._per_label), (cross, self._matrices))
+        return [line for wanted, section in chosen if wanted for line in section()]
+
+    def _per_label(self) -> list[str]:
+        return ["", *self.reader.per_label_table(self.scores, self.per_member, self.annotations)]
+
+    def _matrices(self) -> list[str]:
+        return [
+            line
+            for member, values in self.per_member
+            for line in (
+                "",
+                f"cross-column AUC, {member.stem} (rows: our posterior; columns: gold truth)",
+                *self.reader.cross(self.scores, values, self.annotations),
+            )
+        ]
 
 
 if __name__ == "__main__":

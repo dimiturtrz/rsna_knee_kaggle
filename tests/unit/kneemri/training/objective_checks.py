@@ -23,6 +23,7 @@ def test_composed():
         ({"contrast_weight": 1.0, "distill_weight": 0.3}, "--contrast-weight"),
         ({"feature_weight": 0.3, "dissent_weight": 0.3}, "--feature-weight"),
         ({"pair_memory": 64}, "--pair-memory"),
+        ({"distill_weight": 0.3, "rank_weight": 1.0, "pair_memory": 64}, "--distill-weight"),
         ({"rank_weight": 1.0, "batch": 1}, "--batch 1"),
     ):
         with pytest.raises(ValueError, match=named) as refusal:
