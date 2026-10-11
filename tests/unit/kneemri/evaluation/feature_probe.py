@@ -9,6 +9,7 @@ import pytest
 
 from core.findings import TARGETS
 from kneemri.evaluation.feature_probe import SELECTION, FeatureProbe, ProbeCorpus, ProbeResult, ProbeSplit
+from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.slice_readout import SliceMax, SliceMean
 
 
@@ -170,3 +171,48 @@ def test_inner_area() -> None:
     """A separable pool reads above chance on the inner scoring positions."""
     features, truth, training = _probe_pool(studies=240, dim=6)
     assert FeatureProbe(1.0).inner_area(ProbeSplit(features, truth, training[:120], training[120:])) > 0.5
+
+
+ORACLE_STUDIES = 120
+ONE_CLASS_COLUMN = 3
+
+
+def _oracle_split() -> ProbeSplit:
+    """Random binary truth with one finding that holds a single class on the scored positions."""
+    generator = np.random.default_rng(5)
+    truth = generator.integers(0, 2, size=(ORACLE_STUDIES, len(TARGETS)))
+    truth[:, ONE_CLASS_COLUMN] = 0
+    features = truth[:, :4] * 0.5 + generator.normal(size=(ORACLE_STUDIES, 4))
+    positions = np.arange(ORACLE_STUDIES)
+    return ProbeSplit(features, truth, positions[: ORACLE_STUDIES // 2], positions[ORACLE_STUDIES // 2 :])
+
+
+def _rank_areas(predictions: np.ndarray, held: np.ndarray) -> dict[str, float]:
+    return {
+        target: LabelScores.area_under_curve(predictions[:, column], held[:, column])
+        for column, target in enumerate(TARGETS)
+    }
+
+
+def test_scored_matches_rank_areas_with_a_one_class_column() -> None:
+    split = _oracle_split()
+    probe = FeatureProbe(penalty=1.0)
+    expected = _rank_areas(probe.holdout_record(split), split.truth[split.holdout])
+    per_label = probe.scored("t", split).per_label
+    np.testing.assert_equal(per_label, expected)
+    assert np.isnan(per_label[TARGETS[ONE_CLASS_COLUMN]])
+
+
+def test_inner_area_is_the_mean_over_defined_labels() -> None:
+    split = _oracle_split()
+    probe = FeatureProbe(penalty=1.0)
+    areas = _rank_areas(probe.holdout_record(split), split.truth[split.holdout])
+    defined = [area for area in areas.values() if not np.isnan(area)]
+    assert len(defined) == len(TARGETS) - 1
+    assert probe.inner_area(split) == float(np.mean(defined))
+
+
+def test_inner_area_reads_zero_when_no_label_is_defined() -> None:
+    split = _oracle_split()
+    flat = ProbeSplit(split.features, np.zeros_like(split.truth), split.training, split.holdout)
+    assert FeatureProbe(penalty=1.0).inner_area(flat) == 0.0

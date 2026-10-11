@@ -183,14 +183,8 @@ class FeatureProbe:
 
     def inner_area(self, inner: ProbeSplit) -> float:
         """Mean area over the inner scoring positions, skipping labels they left with one class."""
-        predictions = self.holdout_record(inner)
-        held = inner.truth[inner.holdout]
-        areas = [
-            LabelScores.area_under_curve(predictions[:, column], held[:, column])
-            for column in range(held.shape[1])
-            if 0 < held[:, column].sum() < len(held)
-        ]
-        return float(np.mean(areas)) if areas else 0.0
+        areas = LabelScores().per_label(self.holdout_record(inner), inner.truth[inner.holdout])
+        return 0.0 if np.isnan(list(areas.values())).all() else LabelScores.mean_of(areas)
 
     @staticmethod
     def pooled(
@@ -247,11 +241,7 @@ class FeatureProbe:
 
     def scored(self, trunk: str, split: ProbeSplit) -> ProbeResult:
         """Fit on the training positions and score the holdout, one area per finding."""
-        predictions = self.holdout_record(split)
-        areas = {
-            target: LabelScores.area_under_curve(predictions[:, column], split.truth[split.holdout, column])
-            for column, target in enumerate(TARGETS)
-        }
+        areas = LabelScores().per_label(self.holdout_record(split), split.truth[split.holdout])
         return ProbeResult(trunk=trunk, dimensions=split.features.shape[1], studies=len(split.holdout), per_label=areas)
 
 

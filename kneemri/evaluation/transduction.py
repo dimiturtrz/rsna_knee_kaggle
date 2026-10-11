@@ -84,7 +84,6 @@ from numpy.typing import NDArray
 from core import cli
 from core.data.corpus.folds import ReportFolds
 from core.denominator import Denominator
-from core.findings import TARGETS
 from core.paths import TRAIN_TABLE
 from kneemri.evaluation.feature_probe import HOLDOUT_FOLD, TRUNKS, FeatureProbe, ProbeCorpus, ProbeSplit
 from kneemri.evaluation.labelling import FIXED_TAIL, LABELLINGS, Labelling
@@ -181,10 +180,7 @@ class TestAdaptation:
         held: Int[NDArray[np.int64], "held findings"],
     ) -> dict[str, float]:
         """One area per finding, in the fixed target order."""
-        return {
-            target: LabelScores.area_under_curve(predictions[:, column], held[:, column])
-            for column, target in enumerate(TARGETS)
-        }
+        return LabelScores().per_label(predictions, held)
 
 
 def main() -> None:

@@ -10,6 +10,7 @@ import pytest
 
 from core.findings import TARGETS
 from kneemri.evaluation.feature_probe import ProbeSplit
+from kneemri.evaluation.scores import LabelScores
 from kneemri.evaluation.transduction import AdaptationResult, TestAdaptation
 
 PENALTY = 10.0
@@ -96,3 +97,18 @@ def test_line() -> None:
     assert "ortholarge" in line
     assert "n=909" in line
     assert "+0.0100" in line
+
+
+def test_areas_match_label_scores_with_a_one_class_column() -> None:
+    """Every area equals the rank AUC per column, and a one-class column is NaN in the same place."""
+    generator = np.random.default_rng(11)
+    held = generator.integers(0, 2, size=(40, len(TARGETS)))
+    held[:, 2] = 1
+    predictions = generator.normal(size=held.shape)
+    expected = {
+        target: LabelScores.area_under_curve(predictions[:, column], held[:, column])
+        for column, target in enumerate(TARGETS)
+    }
+    areas = TestAdaptation.areas(predictions, held)
+    np.testing.assert_equal(areas, expected)
+    assert np.isnan(areas[TARGETS[2]])
