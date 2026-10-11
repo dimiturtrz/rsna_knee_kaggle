@@ -4953,3 +4953,12 @@ pre-registered `>= 0.954` branch fired: it is the pick-1 candidate. One tick sit
 so the reading is directional: the soups are at least as good an ours side as the seven, on two checkpoints instead of
 seven, which also halves the kernel's runtime risk. The offline analog (+0.0015) was priced against a weak nartaa replica
 and is sign-only. Both KernelRuns loaded 1 of 1, kit 5fea6702.
+
+## heliosthird_v2 — ERROR (blank), ref 57054372, 2026-10-10 — the SKM-TEA instrument crashed on the hidden rerun
+
+`kneemri-heliosthird` v2 seated heliosli's public S6 model at 1/6 beside nartaa 384 (2/3) and ours7 (1/6) to price what
+the 09-15 SKM-TEA ruling costs us. It passed the public test (run_check 7/7, S6 3/3), sat PENDING ~4.6 h and came back
+COMPLETE with a blank score and Kaggle's "unhandled error while rerunning your code". The hidden-rerun log is not served,
+so the cause is unknown; the S6 stage is foreign code we did not write and the only new piece against twosoupmirror.
+The instrument prices nothing: the ruling stays UNPRICED (not "costs ~0"). Not re-shipped — the S6 family can never be a
+pick, so a second slot buys only the instrument reading, and that is worth less than a licence-clean slot today.
