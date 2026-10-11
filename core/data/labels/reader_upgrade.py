@@ -31,8 +31,8 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
+from core.bootstrap import Bootstrap
 from core.data.labels.reader_agreement import (
-    INTERVAL,
     MIDPOINT,
     POSITIVE,
     SEED,
@@ -160,7 +160,7 @@ class ReaderUpgrade:
         if not spoken:
             lines.append("SILENT TOO: the candidate abstains where the lexicon did. No sweep — it is the same table.")
             return lines
-        low, high = np.percentile(self.resampled(blank), INTERVAL)
+        low, high = Bootstrap.percentile_interval(self.resampled(blank))
         lines.append(f"blank-pair accuracy interval [{low:.3f}, {high:.3f}] over studies")
         if low > majority:
             lines.append(
@@ -187,7 +187,7 @@ class ReaderUpgrade:
         shared, lexicon, candidate = self.correction(matched)
         if not shared:
             return ["no cell is asserted by both readers; the correction lane is unreadable here"]
-        low, high = np.percentile(self.resampled_correction(matched), INTERVAL)
+        low, high = Bootstrap.percentile_interval(self.resampled_correction(matched))
         lines = [
             f"the {shared} cells BOTH readers assert: lexicon {lexicon:.3f}, candidate {candidate:.3f}",
             f"candidate minus lexicon {candidate - lexicon:+.3f}, paired interval [{low:+.3f}, {high:+.3f}]",

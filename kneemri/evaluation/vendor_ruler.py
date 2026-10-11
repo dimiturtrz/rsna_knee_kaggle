@@ -34,6 +34,7 @@ from jaxtyping import Int
 from numpy.typing import NDArray
 
 from core import cli
+from core.bootstrap import Bootstrap
 from core.data.corpus.build_cache import METADATA
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
@@ -113,15 +114,7 @@ class VendorRuler:
             self.agreement(self.scored(self.generator.choice(population, size=size, replace=False)), whole)
             for _ in range(DRAWS)
         ]
-        kept = [value for value in drawn if not np.isnan(value)]
-        return (
-            (float(np.percentile(kept, BAND)), float(np.percentile(kept, 100 - BAND)))
-            if kept
-            else (
-                float("nan"),
-                float("nan"),
-            )
-        )
+        return Bootstrap.percentile_interval([value for value in drawn if not np.isnan(value)], (BAND, 100 - BAND))
 
     def seats(self, scored: list[float]) -> set[str]:
         """The names of the `SEATS` best members under one ordering — what a seat search would take."""

@@ -57,6 +57,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
+from core.bootstrap import StudyFrameBootstrap
 from core.data.labels.reader_agreement import MIDPOINT, POSITIVE, SILENT, ReaderAgreement
 from core.findings import TARGETS
 
@@ -64,7 +65,6 @@ logger = logging.getLogger(__name__)
 
 RESAMPLES = 5000
 SEED = 2026
-INTERVAL = (2.5, 97.5)
 
 AGREED_POSITIVE = "agreed positive"
 OVER_CALLED = "over-called"
@@ -207,24 +207,15 @@ class NoiseBinding:
 
     def _resample(self, scored: pd.DataFrame, group: str) -> tuple[float, float]:
         """The ratio's interval, drawing STUDIES with replacement because cells within one are not independent."""
-        studies = scored["study"].unique()
-        by_study = {study: frame for study, frame in scored.groupby("study")}
-        generator = np.random.default_rng(self.seed)
-        drawn = []
-        for _ in range(self.resamples):
-            picked = generator.choice(studies, size=len(studies), replace=True)
-            sample = pd.concat([by_study[study] for study in picked])
+
+        def ratio(sample: pd.DataFrame) -> float | None:
             pooled = sample.groupby("group")["probability"].mean()
             if not all(pole in pooled for pole in POLES) or group not in pooled:
-                continue
+                return None
             spread = pooled[AGREED_POSITIVE] - pooled[AGREED_NEGATIVE]
-            if spread < SEPARATION_FLOOR:
-                continue
-            drawn.append((pooled[group] - pooled[AGREED_NEGATIVE]) / spread)
-        if not drawn:
-            return (float("nan"), float("nan"))
-        low, high = np.percentile(np.array(drawn), INTERVAL)
-        return (float(low), float(high))
+            return None if spread < SEPARATION_FLOOR else (pooled[group] - pooled[AGREED_NEGATIVE]) / spread
+
+        return StudyFrameBootstrap(self.resamples, self.seed).interval(scored, ratio)
 
 
 def main() -> None:

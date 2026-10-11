@@ -68,7 +68,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
-from core.bootstrap import RESAMPLE_SEED, RESAMPLES
+from core.bootstrap import RESAMPLE_SEED, RESAMPLES, Bootstrap
 from core.findings import COMPARTMENT_PAIRS, TARGETS
 from kneemri.evaluation.record_mix import RecordMix
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
@@ -213,8 +213,7 @@ class SideBlindness:
         for _ in range(self.resamples):
             rows = np.concatenate([generator.choice(wanted, len(wanted)), generator.choice(other, len(other))])
             draws.append(self.scores.area_under_curve(predictions[rows, column].astype(np.float64), labels))
-        finite = np.array([value for value in draws if np.isfinite(value)])
-        return float(np.percentile(finite, 2.5)), float(np.percentile(finite, 97.5))
+        return Bootstrap.percentile_interval([value for value in draws if np.isfinite(value)])
 
 
 def main() -> None:

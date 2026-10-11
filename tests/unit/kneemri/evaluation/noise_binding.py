@@ -119,3 +119,17 @@ def test_lines() -> None:
     text = "\n".join(lines)
     assert OVER_CALLED in text and MISSED in text, "both disputed groups are reported"
     assert "LIVE" in text and "CLOSED" in text, "and the two lanes the number decides between are named"
+
+
+def test_tracking_intervals_are_pinned() -> None:
+    """Bit-equal to the intervals the hand-written study loop drew, so moving it moved no published number."""
+    scored = pd.concat(
+        [
+            _scored(over_called=0.5, missed=0.3),
+            _scored(over_called=0.7, missed=0.2).assign(study=lambda frame: frame["study"] + "b"),
+        ]
+    )
+
+    intervals = NoiseBinding(resamples=RESAMPLES).tracking(scored).intervals
+
+    assert intervals == {OVER_CALLED: (0.5, 0.7499999999999999), MISSED: (0.125, 0.24999999999999997)}

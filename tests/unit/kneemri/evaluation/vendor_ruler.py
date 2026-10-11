@@ -27,6 +27,16 @@ def _ruler(strata: list[Stratum] | None = None) -> VendorRuler:
     return VendorRuler(pool, strata or [Stratum("all", everything)], LabelScores(), np.random.default_rng(1))
 
 
+def test_null_band_is_pinned():
+    """Bit-equal to the hand-written 5th/95th tail, so the band a vendor is read against did not move."""
+    ruler = _ruler()
+
+    assert ruler.null_band(MIN_STRATUM, ruler.scored(np.arange(STUDIES, dtype=np.int64))) == (
+        0.9515151515151514,
+        0.9999999999999999,
+    )
+
+
 def test_scored():
     """Members and truth are restricted TOGETHER, and the built-in quality order comes back."""
     scored = _ruler().scored(np.arange(0, 200, dtype=np.int64))

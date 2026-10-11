@@ -59,6 +59,18 @@ def test_interval() -> None:
     assert low <= seat.scored(2) - seat.scored(0) <= high
 
 
+def test_interval_is_pinned() -> None:
+    """Bit-equal to the hand-written nan-tolerant tail, on a noisy pool where the delta has a real spread."""
+    generator = np.random.default_rng(5)
+    truth = (generator.random((40, len(TARGETS))) > 0.5).astype(np.float32)
+    members = [(truth + generator.normal(0.0, scale, truth.shape)).astype(np.float32) for scale in (1.0, 1.2, 0.8)]
+    pool = Pool(names=["a", "b", "c"], predictions=members, truth=truth, vote=RankAverage())
+
+    interval = SeatWeight(pool, seat=2, scores=LabelScores()).interval(2, draws=200, seed=3)
+
+    assert interval == (0.023942249062458846, 0.08379659116618934)
+
+
 def test_on() -> None:
     """Reading the seat on a subset keeps the members and narrows the studies."""
     subset = seat_of().on(np.array([0, 2], dtype=np.int64))

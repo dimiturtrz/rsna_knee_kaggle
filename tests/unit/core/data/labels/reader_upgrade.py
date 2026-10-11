@@ -16,6 +16,17 @@ def _cells(rows: list[tuple[str, str, str, float]]) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["study", "target", "verdict", "truth"])
 
 
+def test_interval_lines_are_pinned():
+    """The two printed intervals, unchanged by moving their percentile tail into `core.bootstrap`."""
+    truth = {(study, cell): float((cell * study) % 3 == 0) for study in range(30) for cell in range(6)}
+    lexicon = _cells([(f"s{s}", f"t{c}", ABSENT if (c * s) % 4 else POSITIVE, v) for (s, c), v in truth.items()])
+    candidate = _cells([(f"s{s}", f"t{c}", POSITIVE if (c + s) % 3 else ABSENT, v) for (s, c), v in truth.items()])
+    mute = _cells([(f"s{s}", f"t{c}", SILENT, 0.0) for s, c in truth])
+
+    assert "paired interval [+0.044, +0.183]" in ReaderUpgrade(lexicon, candidate).correction_lines()[1]
+    assert "blank-pair accuracy interval [0.667, 0.667] over studies" in ReaderUpgrade(mute, candidate).report()
+
+
 def test_blank():
     """Only the pairs the LEXICON abstained on come through, joined on identity and not on position."""
     lexicon = _cells([("a", "acl", SILENT, 1.0), ("a", "pcl", POSITIVE, 1.0)])

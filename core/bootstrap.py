@@ -15,6 +15,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
 import numpy as np
+import pandas as pd
 from jaxtyping import Float
 from numpy.typing import NDArray
 
@@ -37,6 +38,9 @@ RESAMPLE_SEED = 11
 INTERVAL = (2.5, 97.5)
 """The percentile pair a 95% interval is read at — spelled once so no report quietly widens its own."""
 
+STUDY_COLUMN = "study"
+"""The cluster a frame bootstrap draws whole: cells inside one study share a report and a reader."""
+
 
 @dataclass(frozen=True)
 class Bootstrap:
@@ -55,11 +59,25 @@ class Bootstrap:
         """The protocol's own stream, so a caller states a seed only when it wants a different one."""
         return cls(np.random.default_rng(seed))
 
+    @staticmethod
+    def percentile_interval(
+        values: list[float] | Float[NDArray[np.float64], " draws"], pair: tuple[float, float] = INTERVAL
+    ) -> tuple[float, float]:
+        """The two-sided bound of a finished list of draws, NaN when every draw was undefined.
+
+        NaN rather than a raise: a label undefined on this split is a fact worth printing beside the ones
+        that are defined, and an exception would take the whole report down with it.
+        """
+        if len(values) == 0:
+            return (float("nan"), float("nan"))
+        low, high = np.percentile(values, pair)
+        return (float(low), float(high))
+
     def mean_interval(self, values: Float[np.ndarray, " n"]) -> tuple[float, float]:
         """A bootstrap interval on the mean of `values`, so a share is never a bare point estimate."""
-        resampled = [float(self.generator.choice(values, values.size).mean()) for _ in range(RESAMPLES)]
-        low, high = np.percentile(resampled, INTERVAL)
-        return float(low), float(high)
+        return self.percentile_interval(
+            [float(self.generator.choice(values, values.size).mean()) for _ in range(RESAMPLES)]
+        )
 
 
 STUDY_RESAMPLES = 1000
@@ -106,7 +124,9 @@ class StudyBootstrap:
 
     def interval(self, studies: int, measure: Callable[[NDArray[np.int64]], float]) -> tuple[float, float]:
         """The interval of a single number — one arm's mean, or one differential."""
-        return self.percentiles([value for value in map(measure, self.draws(studies)) if not np.isnan(value)])
+        return Bootstrap.percentile_interval(
+            [value for value in map(measure, self.draws(studies)) if not np.isnan(value)]
+        )
 
     def per_label(
         self, studies: int, measure: Callable[[NDArray[np.int64]], dict[str, float]]
@@ -126,16 +146,32 @@ class StudyBootstrap:
                 drawn_values = collected.setdefault(label, [])
                 if not np.isnan(value):
                     drawn_values.append(value)
-        return {label: self.percentiles(values) for label, values in collected.items()}
+        return {label: Bootstrap.percentile_interval(values) for label, values in collected.items()}
 
-    @staticmethod
-    def percentiles(values: list[float]) -> tuple[float, float]:
-        """The two-sided bound of a finished list of draws, NaN when every draw was undefined.
 
-        NaN rather than a raise: a label undefined on this split is a fact worth printing beside the ones
-        that are defined, and an exception would take the whole report down with it.
-        """
-        if not values:
-            return (float("nan"), float("nan"))
-        low, high = np.percentile(values, INTERVAL)
-        return (float(low), float(high))
+@dataclass(frozen=True)
+class StudyFrameBootstrap:
+    """The interval of a statistic re-measured on a cell FRAME rebuilt from whole resampled studies.
+
+    The frame-shaped sibling of `StudyBootstrap`: the callers hold cells in pandas and re-pool them per
+    draw, so the draw is over study NAMES with `choice` rather than over row indices with `integers`. The
+    two forms consume the generator differently, which is why they are not one class — merging them would
+    move every interval either has published. A `measure` returning None marks a draw on which the
+    statistic is undefined; it is skipped, and a run with no defined draw reads (nan, nan).
+    """
+
+    resamples: int
+    seed: int = STUDY_SEED
+
+    def interval(self, cells: pd.DataFrame, measure: Callable[[pd.DataFrame], float | None]) -> tuple[float, float]:
+        """Draw the studies with replacement, rebuild their cells, measure, and read the two-sided bound."""
+        studies = cells[STUDY_COLUMN].unique()
+        by_study = dict(iter(cells.groupby(STUDY_COLUMN)))
+        generator = np.random.default_rng(self.seed)
+        drawn = []
+        for _ in range(self.resamples):
+            picked = generator.choice(studies, size=len(studies), replace=True)
+            value = measure(pd.concat([by_study[study] for study in picked]))
+            if value is not None:
+                drawn.append(value)
+        return Bootstrap.percentile_interval(drawn)

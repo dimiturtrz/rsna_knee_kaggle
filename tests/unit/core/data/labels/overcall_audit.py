@@ -6,6 +6,8 @@ added because a cue scored anywhere in the span fired on sixteen cells where the
 the reader, and each of those shapes is kept here so the defect cannot come back silently.
 """
 
+import math
+
 import pandas as pd
 
 from core.data.labels.overcall_audit import (
@@ -108,6 +110,18 @@ def test_interval():
     assert low <= high
     assert low >= -1.0 and high <= 1.0, "a difference of two rates cannot leave [-1, 1]"
     assert low < high, "three cells over two studies cannot produce a point estimate"
+
+
+def test_interval_is_pinned():
+    """Bit-equal to the hand-written study loop, and (nan, nan) when no draw had both groups."""
+    audit = OvercallCensus(resamples=200)
+    over = pd.DataFrame(
+        {"study": ["s1", "s1", "s2", "s3"], "category": [MISSED_NEGATION, MISSED_NEGATION, GENUINE, MISSED_NEGATION]}
+    )
+    agreed = pd.DataFrame({"study": ["s1", "s2", "s3"], "category": [GENUINE, GENUINE, MISSED_NEGATION]})
+
+    assert audit.interval(over, agreed, MISSED_NEGATION) == (0.0, 1.0)
+    assert all(math.isnan(bound) for bound in audit.interval(over.iloc[:0], agreed, MISSED_NEGATION))
 
 
 def test_incidence():

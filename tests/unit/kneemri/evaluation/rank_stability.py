@@ -42,6 +42,13 @@ def _pool() -> Pool:
     return Pool(["perfect", "noisy", "flat"], [perfect, noisy, flat], truth)
 
 
+def test_margin_interval_is_pinned() -> None:
+    """Bit-equal to the hand-written percentile pair, so the published margins did not move."""
+    stability = RankStability(_pool(), RESAMPLES)
+
+    assert stability.margin_interval(stability.ruler()) == (-0.1922625, -0.21752842403805583, -0.1717673575580847)
+
+
 def test_ruler() -> None:
     """The two truths the cut question compares are distinguishable by name."""
     stability = RankStability(_pool(), RESAMPLES)

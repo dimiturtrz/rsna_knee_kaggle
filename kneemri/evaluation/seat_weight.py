@@ -38,6 +38,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
+from core.bootstrap import Bootstrap
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
@@ -51,9 +52,6 @@ DRAWS = 2000
 
 INTERVAL_SEED = 2026
 """The resampling seed, fixed so two readings of the same pool are the same number rather than nearly."""
-
-PERCENTILES = (2.5, 97.5)
-"""The interval reported: a two-sided 95%, the same band every seat number in the ledger carries."""
 
 
 class SeatWeight:
@@ -108,8 +106,7 @@ class SeatWeight:
             drawn = generator.choice(rows, size=len(rows), replace=True)
             truth = self.pool.truth[drawn]
             deltas.append(self.scores.mean(weighted[drawn], truth) - self.scores.mean(control[drawn], truth))
-        low, high = np.nanpercentile(deltas, PERCENTILES)
-        return float(low), float(high)
+        return Bootstrap.percentile_interval([delta for delta in deltas if not np.isnan(delta)])
 
     def on(self, rows: Float[NDArray[np.int64], " studies"]) -> "SeatWeight":
         """The same seat read on a subset of the studies — the half a weight was NOT chosen on."""
