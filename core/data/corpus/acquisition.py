@@ -17,11 +17,24 @@ verified on our own corpus before being relied on (see `knee-25n`):
 
 import re
 from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
 
 import numpy as np
 import pydicom
 from numpy.typing import NDArray
+
+
+class DicomTag(StrEnum):
+    """The header keywords this corpus reads geometry and slice order from, spelled as pydicom spells them."""
+
+    IMAGE_POSITION = "ImagePositionPatient"
+    IMAGE_ORIENTATION = "ImageOrientationPatient"
+    PIXEL_SPACING = "PixelSpacing"
+    ROWS = "Rows"
+    COLUMNS = "Columns"
+    INSTANCE_NUMBER = "InstanceNumber"
+
 
 _SEPARATORS = re.compile(r"[_\-.]")
 _FATSAT = re.compile(
@@ -61,7 +74,7 @@ Systems in 2016 and the same scanners answer to both names, so they are one coho
 _LONG_TE_MS = 60.0
 """Above this echo time a long-TR sequence is T2-weighted rather than proton density."""
 
-_ORDER_TAGS = ["ImagePositionPatient", "ImageOrientationPatient", "InstanceNumber"]
+_ORDER_TAGS: list[str] = [DicomTag.IMAGE_POSITION, DicomTag.IMAGE_ORIENTATION, DicomTag.INSTANCE_NUMBER]
 
 _ORIENTATION_VALUES = 6
 """ImageOrientationPatient is two 3-vectors: the row and column direction cosines."""
@@ -156,7 +169,7 @@ class SeriesHeader:
     @property
     def pixel_spacing(self) -> float | None:
         """In-plane mm per pixel, which with the crop extent fixes the effective resolution."""
-        spacing = getattr(self.header, "PixelSpacing", None)
+        spacing = getattr(self.header, DicomTag.PIXEL_SPACING, None)
         return None if spacing is None or len(spacing) < 1 else float(spacing[0])
 
     @property
@@ -185,8 +198,8 @@ class SeriesHeader:
 
         Both spacings are read rather than reusing `pixel_spacing`, which reports the row pitch alone.
         """
-        spacing = getattr(self.header, "PixelSpacing", None)
-        rows, columns = getattr(self.header, "Rows", None), getattr(self.header, "Columns", None)
+        spacing = getattr(self.header, DicomTag.PIXEL_SPACING, None)
+        rows, columns = getattr(self.header, DicomTag.ROWS, None), getattr(self.header, DicomTag.COLUMNS, None)
         if spacing is None or len(spacing) < _SPACING_VALUES or not rows or not columns:
             return None
         return min(float(spacing[0]) * float(rows), float(spacing[1]) * float(columns))
@@ -230,10 +243,10 @@ class SeriesHeader:
         The corner (`ImagePositionPatient` itself) sits half a field of view away, which is enough to
         reverse the sign on a knee scanned near the midline.
         """
-        position = getattr(self.header, "ImagePositionPatient", None)
-        orientation = getattr(self.header, "ImageOrientationPatient", None)
-        spacing = getattr(self.header, "PixelSpacing", None)
-        rows, columns = getattr(self.header, "Rows", None), getattr(self.header, "Columns", None)
+        position = getattr(self.header, DicomTag.IMAGE_POSITION, None)
+        orientation = getattr(self.header, DicomTag.IMAGE_ORIENTATION, None)
+        spacing = getattr(self.header, DicomTag.PIXEL_SPACING, None)
+        rows, columns = getattr(self.header, DicomTag.ROWS, None), getattr(self.header, DicomTag.COLUMNS, None)
         if position is None or orientation is None or spacing is None or not rows or not columns:
             return None
         axes = np.asarray(orientation, dtype=float)
@@ -253,7 +266,7 @@ class SeriesHeader:
         axis is through-plane — and a consumer must read a near-zero as 'this plane cannot answer'
         rather than as a direction.
         """
-        orientation = getattr(self.header, "ImageOrientationPatient", None)
+        orientation = getattr(self.header, DicomTag.IMAGE_ORIENTATION, None)
         if orientation is None or len(orientation) < _ORIENTATION_VALUES:
             return None
         return float(np.asarray(orientation, dtype=float)[0])
@@ -359,8 +372,8 @@ class Acquisition:
             header = pydicom.dcmread(str(path), force=True, stop_before_pixels=True, specific_tags=_ORDER_TAGS)
         except (OSError, ValueError):
             return None
-        orientation = getattr(header, "ImageOrientationPatient", None)
-        position = getattr(header, "ImagePositionPatient", None)
+        orientation = getattr(header, DicomTag.IMAGE_ORIENTATION, None)
+        position = getattr(header, DicomTag.IMAGE_POSITION, None)
         if (
             orientation is not None
             and position is not None
@@ -369,5 +382,5 @@ class Acquisition:
         ):
             axes = np.asarray(orientation, dtype=float)
             return float(np.dot(np.asarray(position, dtype=float), np.cross(axes[:3], axes[3:6])))
-        number = getattr(header, "InstanceNumber", None)
+        number = getattr(header, DicomTag.INSTANCE_NUMBER, None)
         return None if number is None else float(number)

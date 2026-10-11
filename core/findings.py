@@ -10,21 +10,28 @@ member's head, and of the score matrices in between — a member fitted under on
 another is silently wrong on every finding rather than loudly wrong on one.
 """
 
-TARGETS: tuple[str, ...] = (
-    "ACL",
-    "MCL",
-    "Medial Meniscus",
-    "Lateral Meniscus",
-    "Medial OA",
-    "Lateral OA",
-    "PF OA",
-    "Effusion",
-    "Synovitis",
-    "Baker's",
-    "Contusion",
-    "Fracture",
-)
-"""The twelve findings, in the column order the submission and the trained members both use."""
+from enum import StrEnum
+
+
+class Finding(StrEnum):
+    """The twelve finding names. DECLARATION ORDER IS THE CONTRACT — `TARGETS` is read off it."""
+
+    ACL = "ACL"
+    MCL = "MCL"
+    MEDIAL_MENISCUS = "Medial Meniscus"
+    LATERAL_MENISCUS = "Lateral Meniscus"
+    MEDIAL_OA = "Medial OA"
+    LATERAL_OA = "Lateral OA"
+    PF_OA = "PF OA"
+    EFFUSION = "Effusion"
+    SYNOVITIS = "Synovitis"
+    BAKERS = "Baker's"
+    CONTUSION = "Contusion"
+    FRACTURE = "Fracture"
+
+
+TARGETS: tuple[str, ...] = tuple(finding.value for finding in Finding)
+"""The twelve findings, in the column order the submission and the trained members both use — plain strings."""
 
 STUDY = "StudyInstanceUID"
 """The column every labels table is keyed by, beside the findings those tables carry.
@@ -35,8 +42,8 @@ learn the name of its own index column.
 """
 
 COMPARTMENT_PAIRS: tuple[tuple[str, str], ...] = (
-    ("Medial Meniscus", "Lateral Meniscus"),
-    ("Medial OA", "Lateral OA"),
+    (Finding.MEDIAL_MENISCUS.value, Finding.LATERAL_MENISCUS.value),
+    (Finding.MEDIAL_OA.value, Finding.LATERAL_OA.value),
 )
 """The findings this corpus annotates ONCE PER COMPARTMENT: the same lesion, located to one side.
 
@@ -61,28 +68,28 @@ when the report does not clearly say.
 """
 
 CRITERIA: dict[str, str] = {
-    "ACL": "A high-grade partial or full-thickness tear of the anterior cruciate ligament, meaning complete "
+    Finding.ACL: "A high-grade partial or full-thickness tear of the anterior cruciate ligament, meaning complete "
     "discontinuity of the ligament, or more than 50 percent of fibers disrupted, with or without secondary "
     "signs such as characteristic pivot-shift bone contusions. Mild signal change, degeneration, or "
     "thickening without discontinuity is graded negative.",
-    "MCL": "A high-grade partial or complete acute tear of the medial collateral ligament, with disrupted "
+    Finding.MCL: "A high-grade partial or complete acute tear of the medial collateral ligament, with disrupted "
     "fibers and edema within and adjacent to the ligament. Low-grade sprains and chronic or remote stress "
     "changes are graded negative.",
-    "Medial Meniscus": "Abnormal signal that definitely contacts the meniscal surface on at least two images, "
+    Finding.MEDIAL_MENISCUS: "Abnormal signal that definitely contacts the meniscal surface on at least two images, "
     "or a morphologic abnormality such as a truncated, diminutive, or displaced fragment, involving the "
     "medial meniscus. Intrasubstance degeneration that does not reach the surface is negative.",
-    "Lateral Meniscus": "The same criteria as the medial meniscus, applied to the lateral meniscus.",
-    "Medial OA": "A moderate or large area (roughly 1 cm or greater) of high-grade cartilage loss, defined as "
+    Finding.LATERAL_MENISCUS: "The same criteria as the medial meniscus, applied to the lateral meniscus.",
+    Finding.MEDIAL_OA: "A moderate or large area (roughly 1 cm or greater) of high-grade cartilage loss, defined as "
     "greater than 50 percent of cartilage thickness, in the medial compartment, with or without underlying "
     "subchondral marrow changes.",
-    "Lateral OA": "The same criteria as the medial compartment, applied to the lateral compartment.",
-    "PF OA": "The same criteria as the medial compartment, applied to the patellofemoral compartment.",
-    "Effusion": "A moderate or large amount of fluid distending the joint.",
-    "Synovitis": "Inflammation and thickening of the synovial lining of the joint.",
-    "Baker's": "A moderate or large fluid collection in the characteristic location behind the knee.",
-    "Contusion": "A bone contusion, seen as bone marrow edema-like signal from impact, without a discrete "
+    Finding.LATERAL_OA: "The same criteria as the medial compartment, applied to the lateral compartment.",
+    Finding.PF_OA: "The same criteria as the medial compartment, applied to the patellofemoral compartment.",
+    Finding.EFFUSION: "A moderate or large amount of fluid distending the joint.",
+    Finding.SYNOVITIS: "Inflammation and thickening of the synovial lining of the joint.",
+    Finding.BAKERS: "A moderate or large fluid collection in the characteristic location behind the knee.",
+    Finding.CONTUSION: "A bone contusion, seen as bone marrow edema-like signal from impact, without a discrete "
     "fracture line.",
-    "Fracture": "An acute cortical break or fracture line.",
+    Finding.FRACTURE: "An acute cortical break or fracture line.",
 }
 """What the two annotating radiologists were told each label MEANS, quoted from the host's Overview thread.
 

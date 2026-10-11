@@ -32,6 +32,7 @@ import numpy as np
 from jaxtyping import Float, Integer
 
 from core import cli
+from core.findings import TARGETS
 from kneemri.inference.vote import Vote
 from kneemri.runs.holdout_record import HoldoutRecord
 
@@ -56,21 +57,6 @@ two disagreeing denominators in one formula."""
 BLENDS = (0.0, 0.05, 0.1, 0.2, 0.3, 0.5)
 """Weight on the prior's rank. 0.0 is the unblended ensemble, printed so the table carries its own
 control rather than a number quoted from elsewhere."""
-
-TARGETS = (
-    "ACL",
-    "MCL",
-    "Medial Meniscus",
-    "Lateral Meniscus",
-    "Medial OA",
-    "Lateral OA",
-    "PF OA",
-    "Effusion",
-    "Synovitis",
-    "Baker's",
-    "Contusion",
-    "Fracture",
-)
 
 
 class Ordering:

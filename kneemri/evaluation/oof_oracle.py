@@ -51,6 +51,7 @@ from core.data.corpus.slot_reader import Band
 from core.data.corpus.slot_ties import SlotTies
 from core.data.corpus.slots import SCHEMES
 from core.data.corpus.study_cache import CorpusSplit
+from core.findings import STUDY
 from kneemri.inference.holdout_predictions import HoldoutPredictions
 from kneemri.inference.members import Member, MemberConfig
 
@@ -160,7 +161,7 @@ class OutOfFoldOracle:
         routing to get wrong. `contested` is the same question sharpened — those are the studies where
         two series compete for one slot. Neither needs a label, a GPU or a pixel.
         """
-        counts = series.groupby("StudyInstanceUID")["SeriesInstanceUID"].count()
+        counts = series.groupby(STUDY)["SeriesInstanceUID"].count()
         return {"series_count": np.array([float(counts.get(name, 0)) for name in identifiers])}
 
     def routing(

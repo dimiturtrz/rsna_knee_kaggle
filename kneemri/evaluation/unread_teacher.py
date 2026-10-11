@@ -54,7 +54,7 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.labels.targets import MEASURED_AGREEMENT, SUSPECT_STUDY, SUSPECT_TARGET, UNREAD_VALUE
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.inference.vote import RankAverage
 
@@ -64,8 +64,6 @@ UNREAD_VERDICT = "UNK"
 """The verdict `report_reader` writes when the report does not name the structure at all."""
 
 VERDICT_SUFFIX = "__verdict"
-
-STUDY = "StudyInstanceUID"
 
 RANKABLE = 2
 """The fewest values that carry an order; below it a rank says nothing and the centre is the honest answer."""

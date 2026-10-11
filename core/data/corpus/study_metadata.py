@@ -35,9 +35,11 @@ from pathlib import Path
 
 import pandas as pd
 
+from core.findings import STUDY
+
 logger = logging.getLogger(__name__)
 
-IDENTIFIER = "StudyInstanceUID"
+IDENTIFIER = STUDY
 """The join key, spelled as the labels tables spell it. A metadata frame is only ever useful merged onto
 labels, so a second spelling would be a silent empty join rather than an error."""
 

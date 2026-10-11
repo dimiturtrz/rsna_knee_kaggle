@@ -1,4 +1,4 @@
-from core.findings import TARGETS
+from core.findings import TARGETS, Finding
 
 
 def test_targets():
@@ -23,3 +23,11 @@ def test_targets():
         "Fracture",
     )
     assert len(set(TARGETS)) == len(TARGETS), "a duplicated name would make two columns one"
+    assert all(type(name) is str for name in TARGETS), "serialised columns must be plain strings, not enum members"
+
+
+def test_finding():
+    """The enum IS the order: TARGETS is read off its declaration, and each member equals its name."""
+    assert tuple(Finding) == TARGETS
+    assert Finding.BAKERS == "Baker's"
+    assert {Finding.ACL: 1}["ACL"] == 1, "a member key answers a plain-string lookup"

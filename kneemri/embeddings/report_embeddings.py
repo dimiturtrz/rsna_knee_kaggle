@@ -29,6 +29,7 @@ import torch
 from jaxtyping import Float
 
 from core import cli
+from core.findings import STUDY
 from kneemri.device import VisibleCards
 
 ENCODER = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -104,7 +105,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     table = pd.read_csv(root.train_table())
-    identifiers = table["StudyInstanceUID"].astype(str).tolist()
+    identifiers = table[STUDY].astype(str).tolist()
     reports = table["Report"].astype(str).tolist()
     logger.info("embedding %d reports with %s", len(reports), arguments.encoder)
 

@@ -55,6 +55,7 @@ from scipy import stats
 
 from core import cli
 from core.bootstrap import STUDY_RESAMPLES, StudyBootstrap
+from core.findings import STUDY
 from kneemri.evaluation.ledger75 import MIDPOINT_COLUMNS, RECUT
 from kneemri.evaluation.pool import Pool
 from kneemri.evaluation.record_mix import RecordMix
@@ -110,7 +111,7 @@ class SeriesAxes:
         suppressed: dict[str, float] = {}
         with table.open(newline="") as handle:
             for row in csv.DictReader(handle):
-                study = row["StudyInstanceUID"]
+                study = row[STUDY]
                 counts[study] = counts.get(study, 0) + 1
                 suppressed[study] = suppressed.get(study, 0.0) + float(row["Fat_Suppression"])
         return cls(counts, {study: total / counts[study] for study, total in suppressed.items()})

@@ -34,7 +34,7 @@ from core import cli
 from core.data.corpus.folds import ReportFolds
 from core.data.labels.targets import Targets
 from core.denominator import Denominator
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 from core.paths import LABEL_TABLE, TRAIN_TABLE
 from kneemri.evaluation.scores import MIDPOINT, LabelScores
 from kneemri.evaluation.slice_readout import READOUTS, SliceMean, SliceReadout
@@ -264,7 +264,7 @@ class ProbeCorpus:
 
     def truth(self, identifiers: list[str]) -> Int[NDArray[np.int64], "studies findings"]:
         """Binarised report labels in corpus order, aligned to the feature index by study id."""
-        table = pd.read_csv(self.processed / "labels" / LABEL_TABLE).set_index("StudyInstanceUID")
+        table = pd.read_csv(self.processed / "labels" / LABEL_TABLE).set_index(STUDY)
         aligned = table.reindex(identifiers)
         return (aligned[list(TARGETS)].to_numpy(dtype=np.float64) > MIDPOINT).astype(np.int64)
 

@@ -28,6 +28,7 @@ per-finding regex extraction adds nothing a level does not already carry.
 
 import logging
 import re
+from enum import StrEnum
 
 import pandas as pd
 
@@ -38,33 +39,93 @@ logger = logging.getLogger(__name__)
 MINIMUM_SIGNATURE_WORDS = 2
 """Distinct signature words a language needs before it is claimed, so one shared word cannot decide."""
 
+
+class Language(StrEnum):
+    """The eight languages the corpus's reports are written in, as the ISO 639-1 codes every vocabulary keys by."""
+
+    EN = "en"
+    TR = "tr"
+    ES = "es"
+    DE = "de"
+    BG = "bg"
+    NL = "nl"
+    EL = "el"
+    HR = "hr"
+
+
 SIGNATURES: dict[str, tuple[str, ...]] = {
-    "en": ("the", "and", "with", "there", "is", "joint", "tear", "normal", "signal"),
-    "tr": ("ve", "ile", "izlenmiştir", "izlendi", "görünüm", "kesiminde", "düzeyinde", "mevcut", "bulgular", "diz"),
-    "es": ("de", "la", "el", "con", "sin", "rodilla", "menisco", "articular", "se", "del"),
-    "de": ("der", "die", "das", "und", "mit", "ohne", "gelenk", "kniegelenk", "nachweis", "im", "kein"),
-    "bg": ("на", "мр", "данни", "става", "няма", "се", "костите", "менискус"),
-    "nl": ("van", "het", "een", "geen", "met", "knie", "mediaal", "rechts", "links", "meniscus"),
-    "el": ("ΓΟΝΑΤΟΣ", "εξέταση", "χωρίς", "του", "της", "ευρηματα", "µε", "και"),
-    "hr": ("bez", "znakova", "meniska", "hrskavice", "ligamenta", "zgloba", "promjene", "signala", "intenziteta"),
+    Language.EN: ("the", "and", "with", "there", "is", "joint", "tear", "normal", "signal"),
+    Language.TR: (
+        "ve",
+        "ile",
+        "izlenmiştir",
+        "izlendi",
+        "görünüm",
+        "kesiminde",
+        "düzeyinde",
+        "mevcut",
+        "bulgular",
+        "diz",
+    ),
+    Language.ES: ("de", "la", "el", "con", "sin", "rodilla", "menisco", "articular", "se", "del"),
+    Language.DE: ("der", "die", "das", "und", "mit", "ohne", "gelenk", "kniegelenk", "nachweis", "im", "kein"),
+    Language.BG: ("на", "мр", "данни", "става", "няма", "се", "костите", "менискус"),
+    Language.NL: ("van", "het", "een", "geen", "met", "knie", "mediaal", "rechts", "links", "meniscus"),
+    Language.EL: ("ΓΟΝΑΤΟΣ", "εξέταση", "χωρίς", "του", "της", "ευρηματα", "µε", "και"),
+    Language.HR: (
+        "bez",
+        "znakova",
+        "meniska",
+        "hrskavice",
+        "ligamenta",
+        "zgloba",
+        "promjene",
+        "signala",
+        "intenziteta",
+    ),
 }
 """Function words and anatomy, never diacritics: a character class of accented letters scored ANY accented
 text as Turkish and reported the corpus 94% Turkish, which is the same blind-spot error this file corrects."""
 
 SEVERITY: dict[str, tuple[str, ...]] = {
-    "en": (r"grade\s*[i1-4v]", r"\bmild", r"\bmoderate", r"\bsevere", r"full[- ]thickness", r"partial[- ]thickness"),
-    "tr": (r"grade?\s*[i1-4v]", r"derece", r"hafif", r"\borta\b", r"ileri", r"ciddi", r"tam\s*kat", r"parsiyel"),
-    "es": (r"grado\s*[i1-4v]", r"\bleve", r"moderad", r"\bsever", r"\bgrave", r"espesor\s+completo", r"parcial"),
-    "de": (r"grad\s*[i1-4v]", r"gering", r"mäßig", r"mittelgradig", r"\bschwer", r"ausgeprägt", r"vollschichtig"),
-    "bg": (r"степен", r"\bлек", r"умерен", r"тежк", r"изразен", r"пълно", r"частичн"),
-    "nl": (r"graad\s*[i1-4v]", r"\blicht", r"matig", r"ernstig", r"volledig", r"partieel", r"gering"),
-    "el": (r"βαθμ", r"ήπι", r"μέτρι", r"σοβαρ", r"πλήρ", r"μερικ"),
-    "hr": (r"stupnj", r"stupanj", r"\bblag", r"umjeren", r"\btešk", r"izražen", r"potpun", r"parcijaln", r"djelomičn"),
+    Language.EN: (
+        r"grade\s*[i1-4v]",
+        r"\bmild",
+        r"\bmoderate",
+        r"\bsevere",
+        r"full[- ]thickness",
+        r"partial[- ]thickness",
+    ),
+    Language.TR: (r"grade?\s*[i1-4v]", r"derece", r"hafif", r"\borta\b", r"ileri", r"ciddi", r"tam\s*kat", r"parsiyel"),
+    Language.ES: (r"grado\s*[i1-4v]", r"\bleve", r"moderad", r"\bsever", r"\bgrave", r"espesor\s+completo", r"parcial"),
+    Language.DE: (
+        r"grad\s*[i1-4v]",
+        r"gering",
+        r"mäßig",
+        r"mittelgradig",
+        r"\bschwer",
+        r"ausgeprägt",
+        r"vollschichtig",
+    ),
+    Language.BG: (r"степен", r"\bлек", r"умерен", r"тежк", r"изразен", r"пълно", r"частичн"),
+    Language.NL: (r"graad\s*[i1-4v]", r"\blicht", r"matig", r"ernstig", r"volledig", r"partieel", r"gering"),
+    Language.EL: (r"βαθμ", r"ήπι", r"μέτρι", r"σοβαρ", r"πλήρ", r"μερικ"),
+    Language.HR: (
+        r"stupnj",
+        r"stupanj",
+        r"\bblag",
+        r"umjeren",
+        r"\btešk",
+        r"izražen",
+        r"potpun",
+        r"parcijaln",
+        r"djelomičn",
+    ),
 }
 """Each language's own grading words — the whole point, since the English set finds 1.7% of Spanish."""
 
 HEDGES: dict[str, tuple[str, ...]] = {
-    "en": (
+    Language.EN: (
         r"possib",
         r"suspect",
         r"cannot\s+(be\s+)?exclude",
@@ -117,7 +178,7 @@ class ReportLanguages:
         """The best-matching language, or `unknown` when no language matches enough signature words."""
         matched = {code: sum(1 for word in words if word.search(report)) for code, words in self.words.items()}
         best = max(matched, key=lambda code: matched[code])
-        return best if matched[best] >= MINIMUM_SIGNATURE_WORDS else UNKNOWN
+        return str(best) if matched[best] >= MINIMUM_SIGNATURE_WORDS else UNKNOWN
 
     def graded(self, report: str, language: str) -> bool:
         """Whether the report carries an explicit severity marker IN THE GIVEN LANGUAGE.
@@ -149,7 +210,7 @@ class ReportLanguages:
         for code in sorted(set(languages), key=lambda item: -languages.count(item)):
             texts = [report for report, found in zip(reports, languages, strict=True) if found == code]
             own = sum(1 for text in texts if self.graded(text, code))
-            english = sum(1 for text in texts if self.graded(text, "en"))
+            english = sum(1 for text in texts if self.graded(text, Language.EN))
             share = len(texts) / len(reports)
             lines.append(
                 f"{code:>8} {len(texts):>6} {share:>7.1%}   graded {own / len(texts):>6.1%} in its own words, "

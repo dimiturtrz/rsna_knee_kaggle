@@ -14,6 +14,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.anatomy",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.audit",
       "target": "core.cli",
       "weight": 1
@@ -596,6 +602,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.diagnose_laterality",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.diagnose_matrix",
       "target": "core.cli",
       "weight": 1
@@ -680,6 +692,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.folds",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.foreign_build",
       "target": "core.data.corpus.study_cache",
       "weight": 1
@@ -748,6 +766,12 @@
       "kind": "import",
       "source": "core.data.corpus.merged_cache",
       "target": "core.data.corpus.study_cache",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.merged_cache",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -968,6 +992,12 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.slot_ties",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.slots",
       "target": "core.data.corpus.acquisition",
       "weight": 1
@@ -1035,7 +1065,19 @@
     {
       "kind": "import",
       "source": "core.data.corpus.study_cache",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.study_cache",
       "target": "core.paths",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.study_metadata",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -1095,6 +1137,12 @@
     {
       "kind": "import",
       "source": "core.data.labels.finding_mentions",
+      "target": "core.data.labels.report_language",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.finding_mentions",
       "target": "core.findings",
       "weight": 1
     },
@@ -1136,6 +1184,18 @@
     },
     {
       "kind": "import",
+      "source": "core.data.labels.negation_scope",
+      "target": "core.data.labels.report_language",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.negation_scope",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.labels.overcall_audit",
       "target": "core.cli",
       "weight": 1
@@ -1162,6 +1222,12 @@
       "kind": "import",
       "source": "core.data.labels.overcall_audit",
       "target": "core.data.labels.report_language",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.overcall_audit",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -1264,6 +1330,12 @@
       "kind": "import",
       "source": "core.data.labels.ruler",
       "target": "core.data.labels.targets",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.labels.ruler",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -1492,6 +1564,12 @@
       "kind": "import",
       "source": "kneemri.embeddings.report_embeddings",
       "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.embeddings.report_embeddings",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -2188,6 +2266,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.foreign_overlap",
       "target": "core.data.corpus.folds",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.foreign_overlap",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -2919,6 +3003,12 @@
     {
       "kind": "import",
       "source": "kneemri.evaluation.oof_oracle",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.oof_oracle",
       "target": "kneemri.inference.holdout_predictions",
       "weight": 1
     },
@@ -3170,6 +3260,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.protocol_prior",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.protocol_prior",
+      "target": "kneemri.inference.vote",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.protocol_prior",
+      "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.rank_stability",
       "target": "core.bootstrap",
       "weight": 1
@@ -3178,6 +3286,12 @@
       "kind": "import",
       "source": "kneemri.evaluation.rank_stability",
       "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.rank_stability",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -3214,6 +3328,18 @@
       "kind": "import",
       "source": "kneemri.evaluation.raptor_feed",
       "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.raptor_feed",
+      "target": "core.data.corpus.acquisition",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.evaluation.raptor_feed",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -4166,6 +4292,12 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.evaluation.vendor_strata",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.evaluation.vote_ceiling",
       "target": "core.cli",
       "weight": 1
@@ -4594,6 +4726,12 @@
       "kind": "import",
       "source": "kneemri.experiments.geometry_check",
       "target": "kneemri.runs.run_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.his_labels_blend",
+      "target": "core.findings",
       "weight": 1
     },
     {
@@ -35690,20 +35828,26 @@
     },
     {
       "kind": "construct",
-      "source": "kneemri.training.epoch_probes.HoldoutProbe.read",
+      "source": "kneemri.training.epoch_probes.HoldoutProbe._calibration",
       "target": "kneemri.training.epoch_probes.HoldoutCells",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.epoch_probes.HoldoutProbe.read",
+      "source": "kneemri.training.epoch_probes.HoldoutProbe._calibration",
       "target": "kneemri.training.epoch_probes.HoldoutCells.calibration_error",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.training.epoch_probes.HoldoutProbe.read",
+      "source": "kneemri.training.epoch_probes.HoldoutProbe._calibration",
       "target": "kneemri.training.epoch_probes.HoldoutCells.loss",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.epoch_probes.HoldoutProbe.read",
+      "target": "kneemri.training.epoch_probes.HoldoutProbe._calibration",
       "weight": 1
     },
     {
@@ -42102,6 +42246,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.corpus.acquisition.DicomTag",
+      "label": "DicomTag",
+      "level": "class",
+      "parent": "core.data.corpus.acquisition",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.corpus.acquisition.SeriesHeader",
       "label": "SeriesHeader",
       "level": "class",
@@ -43070,6 +43222,14 @@
     },
     {
       "descendants": 0,
+      "id": "core.data.labels.report_language.Language",
+      "label": "Language",
+      "level": "class",
+      "parent": "core.data.labels.report_language",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "core.data.labels.report_language.ReportLanguages",
       "label": "ReportLanguages",
       "level": "class",
@@ -43242,6 +43402,14 @@
       "label": "Denominator",
       "level": "class",
       "parent": "core.denominator",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "core.findings.Finding",
+      "label": "Finding",
+      "level": "class",
+      "parent": "core.findings",
       "role": "satellite"
     },
     {
@@ -69858,6 +70026,14 @@
       "label": "loss",
       "level": "method",
       "parent": "kneemri.training.epoch_probes.HoldoutCells",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.epoch_probes.HoldoutProbe._calibration",
+      "label": "_calibration",
+      "level": "method",
+      "parent": "kneemri.training.epoch_probes.HoldoutProbe",
       "role": null
     },
     {

@@ -410,7 +410,7 @@ class DetectedCells:
         rows, columns = np.nonzero(self.flagged if selected is None else selected)
         return pd.DataFrame(
             {
-                "StudyInstanceUID": [self.identifiers[row] for row in rows],
+                STUDY: [self.identifiers[row] for row in rows],
                 "target": [TARGETS[column] for column in columns],
             }
         )

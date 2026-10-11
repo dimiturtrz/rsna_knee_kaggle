@@ -51,13 +51,11 @@ from numpy.typing import NDArray
 
 from core import cli
 from core.data.labels.targets import SUSPECT_STUDY, SUSPECT_TARGET, UNREAD_VALUE
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 from kneemri.evaluation.published_ruler import PublishedRuler
 from kneemri.inference.vote import RankAverage
 
 logger = logging.getLogger(__name__)
-
-STUDY = "StudyInstanceUID"
 
 ALPHA = 0.6
 """How much of the corrected target is the posterior. BoMD's ablated middle; 0.2 and 1.0 both lost."""

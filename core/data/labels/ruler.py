@@ -25,8 +25,9 @@ from pathlib import Path
 import pandas as pd
 
 from core.data.labels.targets import ASSERTS_PRESENCE
+from core.findings import STUDY
 
-STUDY_COLUMN = "StudyInstanceUID"
+STUDY_COLUMN = STUDY
 DERIVED_COLUMNS = ("__conf", "__verdict")
 """A label table's graded columns are every column but the study id and these two per-target companions."""
 

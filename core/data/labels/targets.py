@@ -24,7 +24,7 @@ import pandas as pd
 from numpy.typing import NDArray
 
 from core.data.corpus.merged_cache import CORPUS
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 
 CONFIDENCE_FLOOR = 0.25
 """What a finding the report never mentions still pulls with, as a fraction of a fully-confident one.
@@ -110,7 +110,7 @@ WITHHELD = "hold_annotation_studies"
 `annotations` withholds the annotator's VALUE. This withholds the STUDY. They were conflated in prose
 for weeks — see `Supervision.withheld` for the measurement that separates them."""
 
-SUSPECT_STUDY = "StudyInstanceUID"
+SUSPECT_STUDY = STUDY
 SUSPECT_TARGET = "target"
 """The two columns of the flag table `kneemri.evaluation.label_errors --flags` writes."""
 
@@ -468,8 +468,8 @@ class Targets:
                 "whose weight is then zeroed: a no-op wearing a contradiction. Pass --hold-annotations too."
             )
         index = pd.Index(identifiers)
-        derived = pd.read_csv(report_labels).set_index("StudyInstanceUID").reindex(index)
-        annotated = pd.read_csv(train_table).set_index("StudyInstanceUID").reindex(index)
+        derived = pd.read_csv(report_labels).set_index(STUDY).reindex(index)
+        annotated = pd.read_csv(train_table).set_index(STUDY).reindex(index)
 
         scores = np.full((len(identifiers), len(TARGETS)), 0.5, dtype=np.float32)
         weights = np.zeros((len(identifiers), len(TARGETS)), dtype=np.float32)

@@ -20,6 +20,7 @@ from core import cli
 from core.data.corpus.acquisition import Acquisition
 from core.data.corpus.laterality import Laterality
 from core.data.corpus.study_cache import CorpusSplit
+from core.findings import STUDY
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ class LateralityAudit:
         identifier, directory = argument
         series = [path for path in sorted(Path(directory).iterdir()) if path.is_dir()]
         evidence = SideEvidence([Acquisition.probe(identifier, path.name, path) for path in series])
-        return {"StudyInstanceUID": identifier, **evidence.row()}
+        return {STUDY: identifier, **evidence.row()}
 
     def run(self, source: Path, identifiers: list[str], workers: int) -> pd.DataFrame:
         """Resolve every study in parallel; only headers are read, so this is seconds not hours."""

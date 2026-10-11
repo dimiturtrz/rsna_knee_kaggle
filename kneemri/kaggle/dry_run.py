@@ -28,7 +28,7 @@ import torch
 
 from core import cli
 from core.data.labels.targets import Targets
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 from core.paths import TRAIN_TABLE, DataRoot
 from kneemri.evaluation.scores import LabelScores
 from kneemri.inference.ensemble import Ensemble
@@ -58,8 +58,8 @@ class DryRun:
         into.mkdir(parents=True, exist_ok=True)
         studies = pd.read_csv(self.root.train_table())
         series = pd.read_csv(self.root.raw() / "train_series.csv")
-        studies[studies["StudyInstanceUID"].isin(identifiers)].to_csv(into / TRAIN_TABLE, index=False)
-        series[series["StudyInstanceUID"].isin(identifiers)].to_csv(into / "train_series.csv", index=False)
+        studies[studies[STUDY].isin(identifiers)].to_csv(into / TRAIN_TABLE, index=False)
+        series[series[STUDY].isin(identifiers)].to_csv(into / "train_series.csv", index=False)
         return into
 
     def scored(self, frame: pd.DataFrame, labels: Path) -> dict[str, float]:
@@ -73,7 +73,7 @@ class DryRun:
         Scored through the same `LabelScores` the ledger uses, so the number is comparable to a holdout
         number rather than a new kind of measurement.
         """
-        truth = Targets.load(labels, self.root.train_table(), list(frame["StudyInstanceUID"])).scores
+        truth = Targets.load(labels, self.root.train_table(), list(frame[STUDY])).scores
         predictions = frame[list(TARGETS)].to_numpy()
         scores = LabelScores()
         return {"mean": scores.mean(predictions, truth), **scores.per_label(predictions, truth)}
@@ -110,7 +110,7 @@ def main() -> None:
 
     root = command.rooted(arguments)
     package = MemberPackage(arguments.members)
-    identifiers = pd.read_csv(root.train_table())["StudyInstanceUID"].tolist()[: arguments.studies]
+    identifiers = pd.read_csv(root.train_table())[STUDY].tolist()[: arguments.studies]
 
     logger.info("running %d labelled studies through the submission path", len(identifiers))
 

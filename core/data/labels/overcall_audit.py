@@ -57,7 +57,8 @@ from core import cli
 from core.data.labels.finding_mentions import FindingMentions
 from core.data.labels.negation_scope import NegationScope
 from core.data.labels.reader_agreement import MIDPOINT, POSITIVE, ReaderAgreement
-from core.data.labels.report_language import ReportLanguages
+from core.data.labels.report_language import Language, ReportLanguages
+from core.findings import STUDY
 from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ INTERVAL = (2.5, 97.5)
 
 
 HEDGE: dict[str, tuple[str, ...]] = {
-    "en": (
+    Language.EN: (
         r"possib",
         r"suspect",
         r"cannot\s+(be\s+)?exclude",
@@ -111,7 +112,7 @@ HEDGE: dict[str, tuple[str, ...]] = {
         r"appears?\s+to\s+repres",
         r"concerning\s+for",
     ),
-    "es": (
+    Language.ES: (
         r"posib",
         r"probabl",
         r"sugestiv",
@@ -122,7 +123,7 @@ HEDGE: dict[str, tuple[str, ...]] = {
         r"puede\s+corresponder",
         r"indetermin",
     ),
-    "tr": (
+    Language.TR: (
         r"olasılık",
         r"muhtemel",
         r"şüphe",
@@ -133,7 +134,7 @@ HEDGE: dict[str, tuple[str, ...]] = {
         r"uyumlu\s+olabil",
         r"ekarte\s+edilemez",
     ),
-    "hr": (
+    Language.HR: (
         r"moguć",
         r"vjerojatn",
         r"može\s+odgovarati",
@@ -143,7 +144,7 @@ HEDGE: dict[str, tuple[str, ...]] = {
         r"\bDD\b",
         r"vjerojatno",
     ),
-    "de": (
+    Language.DE: (
         r"möglich",
         r"fraglich",
         r"verdächtig",
@@ -155,9 +156,9 @@ HEDGE: dict[str, tuple[str, ...]] = {
         r"\bV\.?a\.?\b",
         r"suspekt",
     ),
-    "bg": (r"възможн", r"вероятн", r"съмнени", r"суспектн", r"диференциал", r"не\s+може\s+да\s+се\s+изключи"),
-    "el": (r"πιθαν", r"ενδεχοµέν", r"ενδεχομέν", r"ύποπτ", r"δεν\s+αποκλείεται", r"µπορούσε", r"μπορούσε"),
-    "nl": (r"mogelijk", r"verdacht", r"waarschijnlijk", r"\bDD\b", r"vermoedelijk", r"suspect"),
+    Language.BG: (r"възможн", r"вероятн", r"съмнени", r"суспектн", r"диференциал", r"не\s+може\s+да\s+се\s+изключи"),
+    Language.EL: (r"πιθαν", r"ενδεχοµέν", r"ενδεχομέν", r"ύποπτ", r"δεν\s+αποκλείεται", r"µπορούσε", r"μπορούσε"),
+    Language.NL: (r"mogelijk", r"verdacht", r"waarschijnlijk", r"\bDD\b", r"vermoedelijk", r"suspect"),
 }
 """Words a report uses when it is NOT sure. English-only vocabulary existed before this module
 (`report_language.HEDGES`) and was deliberately kept English-only there because the flag came back
@@ -165,7 +166,7 @@ BACKWARDS as a supervision weight. It is written out for all eight here because 
 different: not "does hedging predict error" but "did the extractor score a hedged sentence confident"."""
 
 HISTORY: dict[str, tuple[str, ...]] = {
-    "en": (
+    Language.EN: (
         r"status\s+post",
         r"\bs/p\b",
         r"\bprior\b",
@@ -179,7 +180,7 @@ HISTORY: dict[str, tuple[str, ...]] = {
         r"sequela",
         r"known\b",
     ),
-    "es": (
+    Language.ES: (
         r"antecedent",
         r"\bprevi",
         r"postquirúrg",
@@ -189,8 +190,18 @@ HISTORY: dict[str, tuple[str, ...]] = {
         r"intervenid",
         r"historia\s+de",
     ),
-    "tr": (r"öykü", r"geçirilmiş", r"\beski\b", r"kronik", r"opere", r"postoperatif", r"sekel", r"bilinen", r"anamnez"),
-    "hr": (
+    Language.TR: (
+        r"öykü",
+        r"geçirilmiş",
+        r"\beski\b",
+        r"kronik",
+        r"opere",
+        r"postoperatif",
+        r"sekel",
+        r"bilinen",
+        r"anamnez",
+    ),
+    Language.HR: (
         r"stanje\s+nakon",
         r"ranij",
         r"prijašnj",
@@ -200,7 +211,7 @@ HISTORY: dict[str, tuple[str, ...]] = {
         r"\bstatus\s+post",
         r"anamnest",
     ),
-    "de": (
+    Language.DE: (
         r"anamnestisch",
         r"\bbek\.?\b",
         r"bekannt",
@@ -213,14 +224,22 @@ HISTORY: dict[str, tuple[str, ...]] = {
         r"postoperativ",
         r"voroperiert",
     ),
-    "bg": (r"анамнез", r"\bстар", r"хронич", r"състояние\s+след", r"опериран", r"предшеств"),
-    "el": (r"ιστορικό", r"παλαι", r"χρόνι", r"µετεγχειρητικ", r"μετεγχειρητικ", r"προηγούµεν", r"προηγούμεν"),
-    "nl": (r"status\s+na", r"voorgeschiedenis", r"\boud\b", r"chronisch", r"postoperatief", r"\bbekend", r"eerder"),
+    Language.BG: (r"анамнез", r"\bстар", r"хронич", r"състояние\s+след", r"опериран", r"предшеств"),
+    Language.EL: (r"ιστορικό", r"παλαι", r"χρόνι", r"µετεγχειρητικ", r"μετεγχειρητικ", r"προηγούµεν", r"προηγούμεν"),
+    Language.NL: (
+        r"status\s+na",
+        r"voorgeschiedenis",
+        r"\boud\b",
+        r"chronisch",
+        r"postoperatief",
+        r"\bbekend",
+        r"eerder",
+    ),
 }
 """References to a PRIOR study, an operation, or clinical history rather than a current image finding."""
 
 MINIMISER: dict[str, tuple[str, ...]] = {
-    "en": (
+    Language.EN: (
         r"\bmild",
         r"\bminimal",
         r"\bsmall\b",
@@ -238,7 +257,7 @@ MINIMISER: dict[str, tuple[str, ...]] = {
         r"\bfocal\b",
         r"early\b",
     ),
-    "es": (
+    Language.ES: (
         r"\bleve",
         r"mínim",
         r"minim",
@@ -251,7 +270,7 @@ MINIMISER: dict[str, tuple[str, ...]] = {
         r"\bfin[ao]\b",
         r"escas",
     ),
-    "tr": (
+    Language.TR: (
         r"\bhafif",
         r"minimal",
         r"küçük",
@@ -263,7 +282,7 @@ MINIMISER: dict[str, tuple[str, ...]] = {
         r"silik",
         r"başlangıç",
     ),
-    "hr": (
+    Language.HR: (
         r"\bblag",
         r"minimaln",
         r"\bmanj",
@@ -276,7 +295,7 @@ MINIMISER: dict[str, tuple[str, ...]] = {
         r"diskret",
         r"neznatn",
     ),
-    "de": (
+    Language.DE: (
         r"\bgering",
         r"\bklein",
         r"minimal",
@@ -289,8 +308,8 @@ MINIMISER: dict[str, tuple[str, ...]] = {
         r"diskret",
         r"\bmäßig\s+gering",
     ),
-    "bg": (r"минимал", r"\bлек", r"лекостепен", r"\bмалк", r"начал", r"слабо", r"незначител"),
-    "el": (
+    Language.BG: (r"минимал", r"\bлек", r"лекостепен", r"\bмалк", r"начал", r"слабо", r"незначител"),
+    Language.EL: (
         r"ήπι",
         r"\bµικρ",
         r"\bμικρ",
@@ -302,7 +321,7 @@ MINIMISER: dict[str, tuple[str, ...]] = {
         r"grade\s*(ii|2)\b",
         r"απλή\s+εκφύλιση",
     ),
-    "nl": (r"\blicht", r"\bklein", r"minimaal", r"\bgering", r"minstens", r"beginnende", r"subtiel"),
+    Language.NL: (r"\blicht", r"\bklein", r"minimaal", r"\bgering", r"minstens", r"beginnende", r"subtiel"),
 }
 """Severity words BELOW the annotation rubric's bar, which `core.findings.CRITERIA` states explicitly:
 ACL wants "more than 50 percent of fibers disrupted", MCL excludes "low-grade sprains", the meniscus
@@ -428,7 +447,7 @@ class OvercallAudit:
         annotated = agreement.annotated(root)
         read = pd.read_csv(table)
         cells = agreement.cells(annotated, read)
-        text = zip(annotated["StudyInstanceUID"], annotated["Report"], strict=True)
+        text = zip(annotated[STUDY], annotated["Report"], strict=True)
         reports = {str(key): str(value) for key, value in text}
         return cells, reports
 
@@ -597,7 +616,7 @@ def main() -> None:
             f"{len(cells)} annotated cells over {cells['study'].nunique()} studies; the reader called "
             f"{len(called)} positive, the radiologist agreed on {len(agreed)} and refused {len(over)}",
             f"the {len(over)} refused cells span {over['study'].nunique()} studies and "
-            f"{over['language'].nunique()} languages ({(over['language'] == 'en').sum()} of them English)",
+            f"{over['language'].nunique()} languages ({(over['language'] == Language.EN).sum()} of them English)",
             "",
             *tally.coverage(audited_over),
             "",

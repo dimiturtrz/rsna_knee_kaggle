@@ -29,6 +29,7 @@ from jaxtyping import Float
 from torch import Tensor
 
 from core.data.corpus.slots import SLOTS, Plane, Slot
+from core.findings import Finding
 
 
 class Extent(Enum):
@@ -109,36 +110,36 @@ class FindingAnatomy:
 
 
 ANATOMY: dict[str, FindingAnatomy] = {
-    "ACL": FindingAnatomy(primary=(Plane.SAGITTAL,), secondary=(Plane.CORONAL,), extent=Extent.FOCAL),
-    "MCL": FindingAnatomy(primary=(Plane.CORONAL,), extent=Extent.FOCAL),
+    Finding.ACL: FindingAnatomy(primary=(Plane.SAGITTAL,), secondary=(Plane.CORONAL,), extent=Extent.FOCAL),
+    Finding.MCL: FindingAnatomy(primary=(Plane.CORONAL,), extent=Extent.FOCAL),
     # The meniscal body is coronal and its horns are sagittal, so a tear is genuinely read on both.
-    "Medial Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), extent=Extent.FOCAL),
-    "Lateral Meniscus": FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), extent=Extent.FOCAL),
+    Finding.MEDIAL_MENISCUS: FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), extent=Extent.FOCAL),
+    Finding.LATERAL_MENISCUS: FindingAnatomy(primary=(Plane.SAGITTAL, Plane.CORONAL), extent=Extent.FOCAL),
     # Cartilage loss, joint-space narrowing and osteophytes are morphology: T1 shows them well.
-    "Medial OA": FindingAnatomy(
+    Finding.MEDIAL_OA: FindingAnatomy(
         primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False, extent=Extent.FOCAL
     ),
-    "Lateral OA": FindingAnatomy(
+    Finding.LATERAL_OA: FindingAnatomy(
         primary=(Plane.CORONAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False, extent=Extent.FOCAL
     ),
-    "PF OA": FindingAnatomy(
+    Finding.PF_OA: FindingAnatomy(
         primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), needs_fluid=False, extent=Extent.FOCAL
     ),
-    "Effusion": FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL), extent=Extent.REGIONAL),
-    "Synovitis": FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), extent=Extent.REGIONAL),
+    Finding.EFFUSION: FindingAnatomy(primary=(Plane.AXIAL, Plane.SAGITTAL), extent=Extent.REGIONAL),
+    Finding.SYNOVITIS: FindingAnatomy(primary=(Plane.AXIAL,), secondary=(Plane.SAGITTAL,), extent=Extent.REGIONAL),
     # A Baker's cyst sits posteromedially, and its NECK - the part that identifies it as a cyst rather
     # than a fluid collection - runs between the semimembranosus tendon and the medial head of
     # gastrocnemius, which is an axial relationship. Axial was demoted to secondary in the first version
     # of this table and it was the single worst row in it: the prior cost 0.0589 of AUC on this finding
     # alone, against a mean of -0.0009 across the other eleven, six of which improved.
-    "Baker's": FindingAnatomy(
+    Finding.BAKERS: FindingAnatomy(
         primary=(Plane.AXIAL, Plane.SAGITTAL), secondary=(Plane.CORONAL,), extent=Extent.REGIONAL
     ),
     # Marrow oedema is invisible without fat suppression and fluid weighting, whatever the plane.
-    "Contusion": FindingAnatomy(
+    Finding.CONTUSION: FindingAnatomy(
         primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True, extent=Extent.REGIONAL
     ),
-    "Fracture": FindingAnatomy(
+    Finding.FRACTURE: FindingAnatomy(
         primary=(Plane.SAGITTAL, Plane.CORONAL), secondary=(Plane.AXIAL,), needs_fat_sat=True, extent=Extent.REGIONAL
     ),
 }

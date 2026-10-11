@@ -52,7 +52,7 @@ from jaxtyping import Float
 from numpy.typing import NDArray
 
 from core import cli
-from core.findings import TARGETS
+from core.findings import STUDY, TARGETS
 from kneemri.runs.holdout_record import FOREIGN, UNKNOWN_EPOCH, HoldoutRecord
 
 logger = logging.getLogger(__name__)
@@ -207,7 +207,7 @@ def main() -> None:
     grouped: dict[str, list[Mapping[str, object]]] = {}
     with (raw / "train_series.csv").open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
-            grouped.setdefault(row["StudyInstanceUID"], []).append(row)
+            grouped.setdefault(row[STUDY], []).append(row)
 
     member = ForeignMember(
         module=Decode(EXTERNAL / SCRIPT).loaded(),

@@ -35,11 +35,12 @@ import pandas as pd
 
 from core import cli
 from core.data.corpus.folds import ReportFolds
+from core.findings import STUDY
 from core.paths import DataRoot
 
 logger = logging.getLogger(__name__)
 
-IDENTIFIER = "StudyInstanceUID"
+IDENTIFIER = STUDY
 """The join key every table in this project carries, ours and theirs alike."""
 
 CLEAN = 0
