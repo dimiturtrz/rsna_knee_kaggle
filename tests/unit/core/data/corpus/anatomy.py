@@ -17,6 +17,11 @@ COR_T1 = Slot("COR_T1", "Coronal", fluid_sensitive=False, fat_suppressed=False)
 AX_FS = Slot("AX_FLUID_FS", "Axial", fluid_sensitive=True, fat_suppressed=True)
 
 
+def test_anatomy_keys_are_the_competition_targets():
+    """The table is keyed by exactly the twelve findings; a missing one would read a flat prior silently."""
+    assert set(ANATOMY) == set(TARGETS)
+
+
 def test_affinity():
     """A primary matched plane outranks a secondary one, and an unrelated plane scores nothing."""
     acl = FindingAnatomy(primary=("Sagittal",), secondary=("Coronal",))

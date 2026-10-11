@@ -6,11 +6,17 @@ anywhere in a span fired on SIXTEEN cells where the radiologist AGREED with the 
 those shapes is kept here so the defect cannot come back silently.
 """
 
-from core.data.labels.negation_scope import NegationScope
+from core.data.labels.negation_scope import FAMILY, NegationScope
+from core.findings import TARGETS
 
 TORN = "There is a full-thickness tear of the medial meniscus."
 DENIED = "No fracture is seen."
 QUALIFIED = "Radial tear of the lateral meniscus without extrusion."
+
+
+def test_family_keys_are_the_competition_targets():
+    """Every finding names its lesion family; a missing one would raise only when its span is scoped."""
+    assert set(FAMILY) == set(TARGETS)
 
 
 def test_about():
