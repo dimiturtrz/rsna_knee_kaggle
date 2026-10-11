@@ -1,12 +1,21 @@
 """A foreign member's readings over our own split, without a checkpoint or a DICOM."""
 
+import argparse
+import sys
+from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
 import pytest
+import torch
 
+from core import cli
 from core.findings import STUDY
+from core.paths import ENV_OVERRIDE, DataRoot
+from kneemri.device import VisibleCards
 from kneemri.evaluation.raptor_model import RaptorMember
+from kneemri.kaggle import raptor_features, raptor_teacher
+from kneemri.kaggle.raptor_run import RaptorEntry
 from kneemri.kaggle.raptor_teacher import TRAIN, TeacherPass
 from kneemri.kaggle.submission import Split
 from kneemri.teacher_file import TeacherFile
@@ -95,3 +104,101 @@ def test_sharded():
 
     assert shards[0] == ["s0", "s3", "s6"]
     assert sorted(sum(shards, [])) == sorted(studies)
+
+
+def test_honest(tmp_path: Path) -> None:
+    """The logit pass refuses no teacher, not even one that names no file on disk."""
+    assert TeacherPass.honest(tmp_path / "absent.pt") is None
+
+
+def test_taught(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The logit pass takes the scorer's readings, unchanged."""
+    readings = {"a": np.full((1, 2), 0.25)}
+    monkeypatch.setattr(RaptorEntry, "readings", lambda self, identifiers, records, members, device: readings)
+    teaching = TeacherPass(_corpus(tmp_path, ["1.2.3"]), tmp_path / "out.npz")
+
+    assert teaching.taught(["1.2.3"], teaching.records(), {}, "cpu") is readings
+
+
+def test_kept(tmp_path: Path) -> None:
+    """The logit pass keeps its readings under `scores`, the name the targets loader asks for."""
+    teaching = TeacherPass(tmp_path, tmp_path / "out.npz")
+    kept = teaching.kept(tmp_path / "out.npz", ["1.2.3"], np.array([[0.5, 0.5]], np.float32))
+
+    assert TeacherFile.SCORES in np.load(kept)
+
+
+class _ParsedError(Exception):
+    """Raised once the command line is read, so a test can stop a pass before it loads a member."""
+
+
+def _namespace(monkeypatch: pytest.MonkeyPatch, command: Callable[[], None], argv: list[str]) -> argparse.Namespace:
+    """What a pass command reads `argv` as, captured before any of it is acted on."""
+    seen: list[argparse.Namespace] = []
+    original = cli.Command.parsed
+
+    def _capture(self: cli.Command) -> argparse.Namespace:
+        seen.append(original(self))
+        raise _ParsedError
+
+    with monkeypatch.context() as patch:
+        patch.setattr(sys, "argv", ["pass", *argv])
+        patch.setattr(cli.Command, "parsed", _capture)
+        with pytest.raises(_ParsedError):
+            command()
+    return seen[0]
+
+
+def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The command reads its flags, scores its shard through every member, and merges shards byte for byte.
+
+    The feature pass is held to the same reading of the same flags, because it is the same command over
+    the same split and an arm script switches between the two by module name alone.
+    """
+    argv = ["--weights", "a.pt", "--shard", "1", "--shards", "2"]
+    expected_flags = argparse.Namespace(
+        paths=cli.PATHS,
+        weights=[Path("a.pt")],
+        fleet=None,
+        split=TRAIN,
+        out=None,
+        studies=0,
+        shard=1,
+        shards=2,
+        merge=None,
+    )
+    assert _namespace(monkeypatch, raptor_teacher.main, argv) == expected_flags
+    assert _namespace(monkeypatch, raptor_features.main, argv) == expected_flags
+
+    monkeypatch.setenv(ENV_OVERRIDE, str(tmp_path))
+    raw = DataRoot(tmp_path).raw()
+    raw.mkdir(parents=True)
+    _corpus(raw, ["s0", "s1", "s2", "s3"])
+    monkeypatch.setattr(VisibleCards, "device", lambda self: torch.device("cpu"))
+    monkeypatch.setattr(TeacherPass, "fleet", staticmethod(lambda weights, device: {p.stem: device for p in weights}))
+    monkeypatch.setattr(
+        RaptorEntry,
+        "readings",
+        lambda self, identifiers, records, members, device: {
+            name: np.full((len(identifiers), 2), float(index)) for index, name in enumerate(members)
+        },
+    )
+    fleet = tmp_path / "fleet"
+    argv = ["raptor_teacher", "--weights", "a.pt", "b.pt", "--fleet", str(fleet), "--shard", "1", "--shards", "2"]
+    monkeypatch.setattr(sys, "argv", argv)
+    raptor_teacher.main()
+
+    second = np.load(fleet / "b.npz")
+    assert list(second[TeacherFile.IDENTIFIERS]) == ["s1", "s3"]
+    assert second[TeacherFile.SCORES].dtype == np.float32
+    assert np.allclose(second[TeacherFile.SCORES], 1.0)
+
+    merged = tmp_path / "merged.npz"
+    shards = [str(fleet / "a.npz"), str(fleet / "b.npz")]
+    monkeypatch.setattr(sys, "argv", ["raptor_teacher", "--weights", "a.pt", "--out", str(merged), "--merge", *shards])
+    raptor_teacher.main()
+
+    expected = tmp_path / "expected.npz"
+    values = np.array([[0.0, 0.0], [0.0, 0.0], [1.0, 1.0], [1.0, 1.0]], np.float32)
+    TeacherFile(expected).write(["s1", "s3", "s1", "s3"], values)
+    assert merged.read_bytes() == expected.read_bytes()

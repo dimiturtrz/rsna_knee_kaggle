@@ -25,18 +25,17 @@ direction the student is quietly pulled toward.
 """
 
 import logging
+from collections.abc import Mapping
 from pathlib import Path
+from typing import ClassVar, override
 
 import numpy as np
 import torch
 from jaxtyping import Float
 
-from core import cli
-from kneemri.device import VisibleCards
 from kneemri.evaluation.raptor_feed import RaptorFeed, Records
 from kneemri.evaluation.raptor_model import RaptorMember
-from kneemri.kaggle.raptor_teacher import TRAIN, TeacherPass
-from kneemri.kaggle.submission import Split
+from kneemri.kaggle.raptor_teacher import TeacherPass
 from kneemri.teacher_file import TeacherFile
 
 logger = logging.getLogger(__name__)
@@ -59,6 +58,23 @@ class FeaturePass(TeacherPass):
     A subclass because the split tables, the sharding, the records and the fleet load are the same facts
     about the same pass; only what is taken out of each member and the array it is written under differ.
     """
+
+    FILE: ClassVar[str] = FEATURES
+    ARRAY: ClassVar[str] = TeacherFile.EMBEDDINGS
+    VERB: ClassVar[str] = "read"
+    GERUND: ClassVar[str] = "reading"
+
+    @override
+    def taught(
+        self, identifiers: list[str], records: Records, members: Mapping[str, RaptorMember], device: str
+    ) -> Mapping[str, Float[np.ndarray, "n w"]]:
+        """What this pass takes out of every member: the representation its head was applied to."""
+        return self.embeddings(identifiers, records, dict(members), device)
+
+    @override
+    def kept(self, path: Path, identifiers: list[str], values: Float[np.ndarray, "n w"]) -> Path:
+        """Write one member's representations under `embeddings`, never under the targets' name."""
+        return self.wrote(path, identifiers, values)
 
     def embeddings(
         self, identifiers: list[str], records: Records, members: dict[str, RaptorMember], device: str
@@ -103,6 +119,7 @@ class FeaturePass(TeacherPass):
         return path
 
     @staticmethod
+    @override
     def honest(checkpoint: Path) -> None:
         """Refuse a teacher this project fitted on EVERY study — the checkable half of the constraint.
 
@@ -124,42 +141,7 @@ class FeaturePass(TeacherPass):
 
 def main() -> None:
     """Read the train split through the member and write its representations as a feature-teacher file."""
-    command = cli.Command(__doc__, logger)
-    command.parser.add_argument("--weights", type=Path, nargs="+", required=True, help="raptor checkpoints")
-    command.parser.add_argument("--fleet", type=Path, default=None, help="write one file per checkpoint here")
-    command.parser.add_argument("--split", default=TRAIN, help="which split to teach over")
-    command.parser.add_argument("--out", type=Path, default=None, help="destination npz")
-    command.parser.add_argument("--studies", type=int, default=0, help="cap the pass, for a smoke")
-    command.parser.add_argument("--shard", type=int, default=0, help="which stride of the split to read")
-    command.parser.add_argument("--shards", type=int, default=1, help="how many processes share the pass")
-    command.parser.add_argument("--merge", type=Path, nargs="*", help="join these shard files and exit")
-    arguments = command.parsed()
-    root = command.rooted(arguments)
-
-    destination = arguments.out or root.processed() / FEATURES
-    if arguments.merge:
-        joined = TeacherFile(destination).merged(arguments.merge, TeacherFile.EMBEDDINGS)
-        logger.info("merged %d studies into %s", joined, destination)
-        return
-
-    for checkpoint in arguments.weights:
-        FeaturePass.honest(checkpoint)
-    reading = FeaturePass(root.raw(), destination, Split(name=str(arguments.split)))
-    identifiers = FeaturePass.sharded(reading.identifiers(), arguments.shard, arguments.shards)
-    if arguments.studies:
-        identifiers = identifiers[: arguments.studies]
-    logger.info("reading over %d %s studies", len(identifiers), arguments.split)
-
-    device = str(VisibleCards().device())
-    members = FeaturePass.fleet(arguments.weights, device)
-    logger.info("loaded %d members onto %s", len(members), device)
-
-    for name, embeddings in reading.embeddings(identifiers, reading.records(), members, device).items():
-        reading.wrote(
-            arguments.fleet / f"{name}.npz" if arguments.fleet else destination,
-            identifiers,
-            embeddings.astype(np.float32),
-        )
+    FeaturePass.main(__doc__, logger)
 
 
 if __name__ == "__main__":
