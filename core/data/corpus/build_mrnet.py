@@ -9,24 +9,22 @@ import logging
 from pathlib import Path
 
 from core import cli
-from core.data.corpus.cache_flags import CacheFlags
+from core.data.corpus.corpus_build import CorpusBuild
 from core.data.corpus.mrnet_corpus import MRNET_SPACING, MRNetCorpus
 from core.data.corpus.mrnet_labels import TableLabels
 from core.data.corpus.slots import MRNET_SCHEME
-from core.data.corpus.study_metadata import StudyMetadata
-from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
 LABELS = "mrnet_acl.csv"
-METADATA = "mrnet_metadata.csv"
+BUILD = CorpusBuild(MRNET_SCHEME, "MRNET", metadata="mrnet_metadata.csv")
 
 
 def main() -> None:
     command = cli.Command(__doc__, logger)
-    CacheFlags.add_to(command.parser)
-    command.parser.add_argument("--archive", type=Path, required=True, help="the MRNet-v1.0 dataset zip")
-    command.parser.add_argument(
+    parser = BUILD.opening(command)
+    parser.add_argument("--archive", type=Path, required=True, help="the MRNet-v1.0 dataset zip")
+    parser.add_argument(
         "--pixel-spacing",
         type=float,
         default=MRNET_SPACING,
@@ -35,7 +33,7 @@ def main() -> None:
         "`--spacing`, which selects how slices sit inside the band: two subjects, one word, and argparse "
         "refused the collision rather than letting either flag win.",
     )
-    command.parser.add_argument(
+    parser.add_argument(
         "--labels-dir",
         type=Path,
         default=None,
@@ -43,29 +41,12 @@ def main() -> None:
         "of this corpus does exactly that — 3,750 arrays and no CSV — and its tables are a separate "
         "download. Omit for the Stanford archive, which carries them inside.",
     )
-    command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
-    arguments = command.parsed()
-
-    if arguments.scheme != MRNET_SCHEME:
-        # THE ONE ERROR THAT COSTS 71.6 GB, and the third corpus is the third chance at it.
-        # `Routing.suffix()` is empty for the canonical scheme, so a 336px/12sl build under it writes to
-        # `images_336px_12sl.npy` — the arrays every member on disk was fitted on — and destroys them
-        # with a corpus differing only in its first axis. The flag defaults to canonical for every other
-        # CLI, so this refuses rather than assumes.
-        command.parser.error(f"--scheme {MRNET_SCHEME} is required: any other scheme writes onto our own corpus")
-
-    root = command.rooted(arguments)
-    cache = CacheFlags.cache(arguments, arguments.out or root.processed())
+    site = BUILD.opened(command)
+    arguments = site.arguments
     tables = TableLabels(arguments.labels_dir) if arguments.labels_dir else None
-    corpus = MRNetCorpus(arguments.archive, cache, spacing=arguments.pixel_spacing, tables=tables)
-
-    corpus.labels(root.processed() / "labels" / LABELS)
-    StudyMetadata.write(corpus.metadata(), root.processed() / "metadata" / METADATA)
-    logger.info(f"building {cache.shape(len(corpus.volumes()))} uint8 -> {cache.images_path}")
-    # The decode runs unattended for minutes and the idle timer counts INPUT rather than load (knee-wyzj).
-    with Wakelock():
-        corpus.build()
-    logger.info("MRNET BUILD COMPLETE")
+    corpus = MRNetCorpus(arguments.archive, site.cache, spacing=arguments.pixel_spacing, tables=tables)
+    corpus.labels(site.root.processed() / "labels" / LABELS)
+    BUILD.run(site, corpus, corpus.volumes)
 
 
 if __name__ == "__main__":

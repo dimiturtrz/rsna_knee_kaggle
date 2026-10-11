@@ -13,12 +13,10 @@ import logging
 from pathlib import Path
 
 from core import cli
-from core.data.corpus.cache_flags import CacheFlags
+from core.data.corpus.corpus_build import CorpusBuild
 from core.data.corpus.fastmri_boxes import BOX_TABLE, STUDY_TABLE, FastmriBoxes
 from core.data.corpus.fastmri_corpus import READER_CONFIDENCE, FastmriCorpus
 from core.data.corpus.slots import FASTMRI_SCHEME
-from core.data.corpus.study_metadata import StudyMetadata
-from core.wakelock import Wakelock
 
 logger = logging.getLogger(__name__)
 
@@ -30,21 +28,21 @@ keyed by an exam identifier this build no longer emits. Overwriting it would lea
 unreproducible with every gate still green — the rule `--labels-out` states, applied to a change of
 IDENTITY rather than of reading.
 """
-METADATA = "fastmri_metadata.csv"
 ANNOTATIONS = "labels/Annotations"
+BUILD = CorpusBuild(FASTMRI_SCHEME, "FASTMRI", metadata="fastmri_metadata.csv")
 
 
 def main() -> None:
     command = cli.Command(__doc__, logger)
-    CacheFlags.add_to(command.parser)
-    command.parser.add_argument("--root", type=Path, required=True, help="the directory holding singlecoil_* volumes")
-    command.parser.add_argument(
+    parser = BUILD.opening(command)
+    parser.add_argument("--root", type=Path, required=True, help="the directory holding singlecoil_* volumes")
+    parser.add_argument(
         "--annotations",
         type=Path,
         default=None,
         help=f"the fastMRI+ Annotations directory (default: <root>/{ANNOTATIONS})",
     )
-    command.parser.add_argument(
+    parser.add_argument(
         "--reader-confidence",
         type=float,
         default=READER_CONFIDENCE,
@@ -52,7 +50,7 @@ def main() -> None:
         "single-reader, single-view reads the corpus itself calls indicative, against Rijeka's "
         "double-blind 1.0. See fastmri_corpus.READER_CONFIDENCE before quoting it.",
     )
-    command.parser.add_argument(
+    parser.add_argument(
         "--labels-out",
         type=Path,
         default=None,
@@ -63,45 +61,28 @@ def main() -> None:
             "still green."
         ),
     )
-    command.parser.add_argument("--labels-only", action="store_true", help="write the table, skip the decode")
-    command.parser.add_argument(
+    parser.add_argument("--labels-only", action="store_true", help="write the table, skip the decode")
+    parser.add_argument(
         "--boxes",
         action="store_true",
         help=f"write only the fastMRI+ box tables ({BOX_TABLE}, {STUDY_TABLE}) in this cache's frame, and exit",
     )
-    command.parser.add_argument("--out", type=Path, default=None, help="cache directory (default: the processed root)")
-    arguments = command.parsed()
-
-    if arguments.scheme != FASTMRI_SCHEME:
-        # THE ONE ERROR THAT COSTS 71.6 GB, refused here for the reason `build_rijeka` refuses it:
-        # `Routing.suffix()` is empty for the canonical scheme, so a build under it writes to the arrays
-        # every member on disk was fitted on and destroys them with a corpus differing only in axis 0.
-        command.parser.error(f"--scheme {FASTMRI_SCHEME} is required: any other scheme writes onto our own corpus")
-
-    root = command.rooted(arguments)
-    cache = CacheFlags.cache(arguments, arguments.out or root.processed())
+    site = BUILD.opened(command)
+    arguments = site.arguments
     corpus = FastmriCorpus(
         arguments.root,
         arguments.annotations or arguments.root / ANNOTATIONS,
-        cache,
+        site.cache,
         confidence=arguments.reader_confidence,
     )
+    labels = site.root.processed() / "labels"
     if arguments.boxes:
-        FastmriBoxes(corpus.annotations, cache).write(corpus.volumes(), root.processed() / "labels")
+        FastmriBoxes(corpus.annotations, site.cache).write(corpus.volumes(), labels)
         logger.info("FASTMRI BOXES COMPLETE")
         return
 
-    corpus.labels(arguments.labels_out or root.processed() / "labels" / LABELS)
-    StudyMetadata.write(corpus.metadata(), root.processed() / "metadata" / METADATA)
-    if arguments.labels_only:
-        logger.info("FASTMRI LABELS COMPLETE (no decode requested)")
-        return
-
-    logger.info(f"building {cache.shape(len(corpus.studies()))} uint8 -> {cache.images_path}")
-    # The decode runs unattended for minutes and the idle timer counts INPUT rather than load (knee-wyzj).
-    with Wakelock():
-        corpus.build()
-    logger.info("FASTMRI BUILD COMPLETE")
+    corpus.labels(arguments.labels_out or labels / LABELS)
+    BUILD.run(site, corpus, corpus.studies, decode=not arguments.labels_only)
 
 
 if __name__ == "__main__":
