@@ -107,3 +107,45 @@ What this does to the picks:
 - **Pick 2 should therefore be a second entry ABOVE the pile, decorrelated from pick 1.** Not a
   non-S6 entry inside it. `s6seven` (the seven-member ours side at the 1/3 S6 share) is that candidate,
   if it reads at least 0.955 when the 10-12 slot spends.
+
+## 21:18Z — the pile is our own two foreign producers, without our soups
+
+Full public board, 5779 teams: **477 tied at 0.954, ranks 142-618.** The tie held 39 at 10-10 18:07Z and 57
+at 10-11 00:37Z, so about 420 teams joined it in one day. Above it the board also climbed: 83 teams were at
+or above 0.956 at 00:37Z and 104 are now. Silver (r288) and bronze (r577) still sit inside the tie. Gold is
+0.961.
+
+The fork source is `heliosli/blend-mine-in-private-lb-luck-to-all-upvoters`. It ran 10-11 14:16Z and had
+101 votes by 21:17Z. Its `kernel-metadata.json` and code cells (read as text, never run) show:
+
+- a rank (`pct=True`) blend fixed at **nartaa Raptor 0.5, S6 0.5**, the same weights on every finding;
+- the S6 bundle checked by id: `209a32c8b50a6b1c`, the bundle our `s6*` kernels mount;
+- nartaa's checkpoint from `nartaa/rsna-knee-publication-swa-weights-20261007`, the dataset our
+  `s6third` mounts.
+
+So the pile's producers are the two foreign legs of every `s6*` entry, in one 1:1 ratio, with nothing of ours.
+`s6third_v1` is that blend with 1/6 of the S6 share moved to our two soups. The share curve now has a
+no-ours point as well:
+
+| nartaa | S6 | ours | board |
+|---|---|---|---|
+| 1/2 | 1/2 | 0 | 0.954 (pile) |
+| 1/2 | 1/3 | 1/6 | 0.956 (`s6third_v1`) |
+| 1/3 | 1/2 | 1/6 | 0.955 (`s6half_v1`) |
+| 2/3 | 1/6 | 1/6 | 0.955 (`heliossoup_v1`) |
+| 2/3 | 0 | 1/3 | 0.954 (`twosoupmirror_v1`) |
+
+What it changes:
+
+- **Every medal in play comes down to one comparison:** our pick's private score against this blend's
+  private score. The two share five sixths of their weight, so the difference between them is the
+  soup-for-S6 swap and little else. The private delta will be much tighter than the 0.47 coin in the
+  table above. That table modelled the pile as nartaa alone and our side as a different producer.
+- **The swap's sign has public evidence on two independent rows.** Each of `s6third` and `s6half` adds
+  ours at 1/6 to a nartaa+S6 base and reads +0.001 to +0.002 over the pile. Every step is still at the
+  board's resolution, so the size is directional.
+- **The pick-2 question becomes "how much of ours" rather than "which ours".** `s6seven` changes which
+  ours members serve, at the same 1/6. `s6equal` (ours 1/3) moves the share. Both stay above the pile only
+  if the swap carries to the private split. They hedge each other on member choice, not on the swap itself.
+- **There is no S6 offline replica, so none of this can be priced off the board.** The fold-0 harness
+  cannot model this pile.
