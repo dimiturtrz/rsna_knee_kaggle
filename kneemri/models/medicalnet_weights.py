@@ -64,7 +64,7 @@ class MedicalNetWeights:
         """
         source = self.checkout.resolve() / MODULE
         spec = importlib.util.spec_from_file_location("medicalnet_resnet", source)
-        if spec is None or spec.loader is None:
+        if not source.is_file() or spec is None or spec.loader is None:
             raise FileNotFoundError(f"no MedicalNet checkout at {source} — see this module's docstring")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

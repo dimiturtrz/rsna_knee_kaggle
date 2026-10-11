@@ -80,3 +80,8 @@ def test_trunk_refuses_a_checkpoint_missing_more_than_the_head(tmp_path: Path) -
 def test_trunk_refuses_a_key_the_network_does_not_have(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="unexpected=\\['layer9"):
         _weights(tmp_path, {**_trunk_only(), "layer9.weight": torch.zeros(1)}).trunk(torch.device("cpu"))
+
+
+def test_network_refuses_a_missing_checkout_with_the_docstring_pointer(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError, match="see this module's docstring"):
+        MedicalNetWeights(tmp_path, checkout=tmp_path / "absent").network()
