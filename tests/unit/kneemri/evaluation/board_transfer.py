@@ -7,12 +7,12 @@ from kneemri.evaluation.board_transfer import (
     DELTA_FLOOR,
     PRICEABLE,
     REGIME_QUANTILES,
-    RULERS,
     THIN,
     BoardEntry,
     BoardPair,
     BoardTransfer,
 )
+from kneemri.evaluation.ledger75 import Ruler
 from kneemri.evaluation.score_scale import ProbitScale, RawScale
 
 RECORD = [
@@ -95,11 +95,11 @@ def test_entries_under_ledger75_read_the_recut_field_and_drop_rows_without_one(t
     ]
     path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
 
-    entries = BoardTransfer(path, ruler=RULERS["ledger75"]).entries()
+    entries = BoardTransfer(path, ruler=Ruler.LEDGER75).entries()
 
     assert [entry.id for entry in entries] == ["recut"]
     assert entries[0].offline == pytest.approx(0.8900), "the recut field, not the midpoint one"
-    assert BoardTransfer(path, ruler=RULERS["ledger75"]).unmeasured() == ["midpoint only"]
+    assert BoardTransfer(path, ruler=Ruler.LEDGER75).unmeasured() == ["midpoint only"]
 
 
 def test_dropped(tmp_path: Path):

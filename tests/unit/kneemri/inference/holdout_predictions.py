@@ -16,7 +16,7 @@ import torch
 
 from core.data.corpus.slot_reader import GROUP
 from core.findings import TARGETS
-from kneemri.inference.holdout_predictions import HoldoutPredictions, Window
+from kneemri.inference.holdout_predictions import HoldoutPredictions, ServedModel, Window
 from kneemri.inference.holdout_slab import HoldoutSlab
 from kneemri.inference.members import Member
 from kneemri.inference.prediction_cache import PredictionCache
@@ -130,6 +130,33 @@ def test_fits():
 
     with pytest.raises(ValueError, match="does not fit a stack"):
         HoldoutPredictions.fits(Window(starts=[0], width=0, size=SIZE), SLICES)
+
+
+def test_autocast():
+    """The member's own precision on the card, and no autocast at all off it."""
+    served = ServedModel(_member(), Window(starts=[0], width=GROUP, size=SIZE), torch.bfloat16)
+    assert served.autocast(torch.device("cuda")).fast_dtype == torch.bfloat16
+    with served.autocast(torch.device("cpu")):
+        assert not torch.is_autocast_enabled("cuda")
+        assert not torch.is_autocast_enabled("cpu")
+
+
+def test_crop():
+    """Exactly `window.width` slices from the start asked, never the window's own first start."""
+    stack = torch.arange(SLICES, dtype=torch.uint8).view(1, 1, SLICES, 1, 1).expand(2, SLOTS, SLICES, 3, 3)
+    served = ServedModel(_member(), Window(starts=[0], width=GROUP, size=SIZE))
+    assert served.crop(stack, 2)[0, 0, :, 0, 0].tolist() == [2, 3, 4]
+
+
+def test_logits():
+    """One forward at one start, equal to calling the model on the cropped stack at the member's size."""
+    model = _member().eval()
+    generator = torch.Generator().manual_seed(SEED)
+    images = torch.randint(0, 256, (2, SLOTS, SLICES, SIZE, SIZE), generator=generator, dtype=torch.uint8)
+    mask = torch.ones(2, SLOTS)
+    served = ServedModel(model, Window(starts=[0, 3], width=GROUP, size=SIZE))
+    with torch.no_grad():
+        assert torch.equal(served.logits(images, mask, 3), model(images[:, :, 3 : 3 + GROUP], mask, SIZE))
 
 
 def test_predict():

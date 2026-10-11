@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from core.data.corpus.window_reader import FileReader, MappedReader
+from core.data.corpus.window_reader import FileReader, MappedReader, SliceSpan
 
 
 def test_file_reader_read(tmp_path: Path):
@@ -27,9 +27,10 @@ def test_file_reader_read(tmp_path: Path):
         (np.array([8]), 5, 1),
         (np.array([3, 3]), 1, 4),
     ]:
-        window = explicit.read(batch, start=start, width=width)
+        span = SliceSpan(start=start, width=width)
+        window = explicit.read(batch, span)
         assert window.shape == (len(batch), 3, width, 5, 5)
-        assert np.array_equal(window, indexed.read(batch, start=start, width=width))
+        assert np.array_equal(window, indexed.read(batch, span))
         assert np.array_equal(window, written[batch, :, start : start + width])
 
 
@@ -40,12 +41,28 @@ def test_mapped_reader_read(tmp_path: Path):
     batch = np.array([4, 1])
 
     reader = MappedReader(np.load(tmp_path / "images.npy", mmap_mode="r"))
-    window = reader.read(batch, start=2, width=3)
+    window = reader.read(batch, SliceSpan(start=2, width=3))
     assert window.shape == (2, 2, 3, 4, 4)
     assert np.array_equal(window, written[batch, :, 2:5])
 
+
+def test_stop():
+    """One past the last slice, so a span reads exactly `width` slices from `start`."""
+    assert SliceSpan(start=2, width=3).stop == 5
+    assert SliceSpan(start=0, width=0).stop == 0
+
+
+def test_covers():
+    """Only a span exactly as wide as the stack is the whole study — narrower or wider is not."""
+    assert SliceSpan(start=0, width=6).covers(6)
+    assert not SliceSpan(start=0, width=5).covers(6)
+    assert not SliceSpan(start=0, width=7).covers(6)
+
+
+def test_slice_span_is_keyword_only():
+    """Two ints on one axis cross silently when positional, so the span refuses to be built that way."""
     with pytest.raises(TypeError):
-        reader.read(batch, 2, 3)  # type: ignore[unexpected-positional-argument] - which is the point
+        SliceSpan(2, 3)  # type: ignore[bad-argument-count] - which is the point
 
 
 def test_per_slot(tmp_path: Path):
@@ -70,4 +87,6 @@ def test_file_reader_read_on_leading_slots(tmp_path: Path):
     assert reader.per_study == 5 * 6 * 9, "the stride on disk, not the width of the view"
     for start, width in [(0, 6), (2, 3)]:
         batch = np.array([3, 0, 2])
-        assert np.array_equal(reader.read(batch, start=start, width=width), written[batch, :3, start : start + width])
+        assert np.array_equal(
+            reader.read(batch, SliceSpan(start=start, width=width)), written[batch, :3, start : start + width]
+        )

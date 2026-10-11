@@ -29,33 +29,25 @@ unmeasured and structurally so — that is the finding, not a gap to fill later.
 THE VOTE RULE IS AN ARGUMENT AND ITS DEFAULT IS RANK, because every entry this can fill shipped before
 `kneemri-vote` served `LogitAverage`. Scoring an old entry under the rule it did not serve would put a
 number in the record that no submission ever computed.
+
+THE PRODUCER `offline75` NEVER HAD. The cut an entry's offline number is read under is `Ruler.scorer`, and
+the column it goes in is `Ruler.column`. `board_transfer` mapped `ledger75 -> offline75` from the start,
+and NOT ONE ROW HAD EVER CARRIED THAT FIELD before this module wrote it, so the `--ruler ledger75` arm of
+the transfer fit had always dropped every row and reported on an empty set while `ledger75.py` cited board
+evidence out of that arm.
 """
 
 import json
 import logging
-from collections.abc import Callable
 from pathlib import Path
 
 from core import cli
-from kneemri.evaluation.ledger75 import LedgerSeventyFive, Ruler
+from kneemri.evaluation.ledger75 import Ruler
 from kneemri.evaluation.record_mix import VOTE_RULES, RecordMix
-from kneemri.evaluation.scores import LabelScores
 from kneemri.kaggle.board_check import RECORD, BoardCensus, BoardRow
 from kneemri.runs.holdout_record import HoldoutRecord
 
 logger = logging.getLogger(__name__)
-
-RULERS: dict[Ruler, Callable[[], LabelScores]] = {
-    Ruler.MIDPOINT: LabelScores,
-    Ruler.LEDGER75: lambda: LedgerSeventyFive().scorer(),
-}
-"""The cut an entry's offline number is read under, and the column that number goes in.
-
-`board_transfer:88` has mapped `ledger75 -> offline75` since it was written, and NOT ONE ROW HAS EVER
-CARRIED THAT FIELD — `git log -S offline75` finds the reader and no data commit. So the `--ruler ledger75`
-arm of the transfer fit has always dropped every row and reported on an empty set, while `ledger75.py:26-28`
-cites board evidence out of that arm. This is the producer that column never had.
-"""
 
 FRAME_GAP = 0.0062
 """How far a recomputed midpoint may sit from a recorded `offline` before the two are different questions.
@@ -103,7 +95,7 @@ class EntryOffline:
         self.record = record
         self.vote = vote
         self.ruler = ruler
-        self.scores = RULERS[ruler]()
+        self.scores = ruler.scorer()
         self.column = ruler.column
 
     def stored(self) -> dict[str, dict[str, object]]:

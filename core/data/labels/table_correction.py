@@ -54,7 +54,7 @@ from core import cli
 from core.data.labels.finding_mentions import FindingMentions
 from core.data.labels.negation_scope import NegationScope
 from core.data.labels.report_language import ReportLanguages
-from core.data.labels.rubric_gap import RUBRIC, RubricGap
+from core.data.labels.rubric_gap import RUBRIC, RubricGap, RuleEvidence
 from core.findings import STUDY, TARGETS
 from core.paths import LABEL_TABLE
 
@@ -124,7 +124,7 @@ class RubricPull:
         cells: list[tuple[str, str]] = []
         for rule in RUBRIC:
             marks = gap.table(rule, sources.reports, sources.table)
-            if not gap.backed(rule, marks, sources.truth):
+            if not gap.backed(RuleEvidence(rule, marks, sources.truth)):
                 continue
             cells.extend((str(row.study), str(row.column)) for row in gap.contradicted(marks).itertuples())
         return cells

@@ -11,9 +11,8 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from core.findings import TARGETS
+from kneemri.inference.holdout_predictions import ServedModel
 from kneemri.inference.holdout_slab import HoldoutSlab
-from kneemri.inference.members import Window
-from kneemri.models.model import StudyModel
 
 BATCH = 8
 """Studies per encoder pass — the same batch the holdout scorer uses, for the same memory reason."""
@@ -31,13 +30,7 @@ class AttentionScan:
         self.device = device
         self.batch = batch
 
-    def weights(
-        self,
-        model: StudyModel,
-        slab: HoldoutSlab,
-        window: Window,
-        precision: torch.dtype = torch.float16,
-    ) -> Float[NDArray[np.float32], "b o s"]:
+    def weights(self, served: ServedModel, slab: HoldoutSlab) -> Float[NDArray[np.float32], "b o s"]:
         """Attention per study, finding and slot, averaged over the member's own window starts.
 
         NO TEST-TIME VIEWS. The scorer averages over rotations and shifts because that is what the
@@ -49,23 +42,23 @@ class AttentionScan:
         in fp16 is a different function of the same pixels.
         """
         chunks = []
-        with torch.no_grad(), torch.autocast("cuda", dtype=precision, enabled=self.device.type == "cuda"):
+        with torch.no_grad(), served.autocast(self.device):
             for images, mask in slab.batches(self.batch):
                 pixels: UInt8[Tensor, "b s g p q"] = torch.from_numpy(np.ascontiguousarray(images)).to(self.device)
                 flags: Float[Tensor, "b s"] = torch.from_numpy(mask).to(self.device)
-                chunks.append(self._batch(model, pixels, flags, window))
+                chunks.append(self._batch(served, pixels, flags))
         return np.concatenate(chunks).astype(np.float32)
 
     def _batch(
         self,
-        model: StudyModel,
+        served: ServedModel,
         pixels: UInt8[Tensor, "b s g p q"],
         flags: Float[Tensor, "b s"],
-        window: Window,
     ) -> Float[NDArray[np.float32], "b o s"]:
         """One batch's weights, meaned over the window starts this member reads."""
+        model, window = served.model, served.window
         total = torch.zeros(pixels.shape[0], len(TARGETS), pixels.shape[1], device=self.device)
         for start in window.starts:
-            features = model.slot_features(pixels[:, :, start : start + window.width], window.size)
+            features = model.slot_features(served.crop(pixels, start), window.size)
             total = total + model.head.slot_weights(features, flags).float()
         return (total / len(window.starts)).cpu().numpy()

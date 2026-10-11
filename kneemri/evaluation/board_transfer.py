@@ -69,6 +69,7 @@ from random import Random
 from statistics import median
 
 from core import cli
+from kneemri.evaluation.ledger75 import Ruler
 from kneemri.evaluation.score_scale import RAW, SCALES, Scale
 
 logger = logging.getLogger(__name__)
@@ -83,11 +84,11 @@ Dividing a board delta by a holdout delta that has nearly vanished reports the d
 the transfer, and two of these entries sit 0.0002 apart.
 """
 
-OFFLINE = "offline"
-"""The midpoint-cut holdout macro every constant in this module was fitted on."""
+DEFAULT_RULER = Ruler.MIDPOINT
+"""The midpoint-cut holdout macro every constant in this module was fitted on.
 
-RULERS: dict[str, str] = {"midpoint": OFFLINE, "ledger75": "offline75"}
-"""Which recorded number a reading prices against — the row FIELD, so a switch cannot silently re-derive.
+A reading prices against the recorded row FIELD its ruler names (`Ruler.column`), so a switch cannot
+silently re-derive.
 
 `ledger75` is D25's recut (ten columns at 0.75, Medial Meniscus and Baker's at the midpoint), which D27
 measured as cutting board inversions 21 -> 5 of ~530 pairs. It is NOT the default and must not become one
@@ -254,7 +255,9 @@ class BoardTransfer:
     needs it.
     """
 
-    def __init__(self, record: Path = RECORD, scope: str = ENSEMBLE, scale: Scale = RAW, ruler: str = OFFLINE) -> None:
+    def __init__(
+        self, record: Path = RECORD, scope: str = ENSEMBLE, scale: Scale = RAW, ruler: Ruler = DEFAULT_RULER
+    ) -> None:
         self.record = record
         self.scope = scope
         self.scale = scale
@@ -265,7 +268,7 @@ class BoardTransfer:
         return [json.loads(line) for line in self.record.read_text(encoding="utf-8").splitlines() if line]
 
     @staticmethod
-    def _carries_both(row: dict[str, object], ruler: str = OFFLINE) -> bool:
+    def _carries_both(row: dict[str, object], ruler: Ruler = DEFAULT_RULER) -> bool:
         """Whether a row has BOTH numbers, which is what makes it an entry rather than a record.
 
         A row may legitimately carry neither: an arm fired to answer a question the holdout cannot ask
@@ -273,14 +276,14 @@ class BoardTransfer:
         neither can enter a pair — before this the reader called `float(str(None))` on them and died,
         which took the whole reading down from 2026-08-17 onward rather than dropping three rows.
         """
-        return row.get(ruler) is not None and row.get("board") is not None
+        return row.get(ruler.column) is not None and row.get("board") is not None
 
     def entries(self) -> list[BoardEntry]:
         """Every entry carrying both numbers ON THIS READING'S SCOPE, weakest holdout first."""
         found = [
             BoardEntry(
                 id=str(row["id"]),
-                offline=float(str(row[self.ruler])),
+                offline=float(str(row[self.ruler.column])),
                 board=float(str(row["board"])),
                 members=int(str(row["members"])),
             )
@@ -461,7 +464,7 @@ class BoardTransfer:
         """The denominator, the whole-record compression, and the per-floor regimes beneath it."""
         excluded = ", ".join(f"{count} {scope}" for scope, count in self.dropped().items())
         return [
-            f"{len(self.entries())} entries on the {self.scope} scope read against `{self.ruler}`, "
+            f"{len(self.entries())} entries on the {self.scope} scope read against `{self.ruler.column}`, "
             f"{len(pairs)} orderable pairs "
             f"(excluded: {excluded or 'none'}; "
             f"one-sided: {', '.join(self.unmeasured()) or 'none'})",
@@ -542,14 +545,14 @@ def main() -> None:
     command.parser.add_argument("--from-offline", type=float, default=None, help="its holdout score")
     command.parser.add_argument(
         "--ruler",
-        default="midpoint",
-        choices=sorted(RULERS),
+        default=DEFAULT_RULER.value,
+        choices=sorted(ruler.value for ruler in Ruler),
         help="which recorded holdout number to price against. `midpoint` is the `offline` field every "
         "constant here was fitted on and stays the default until the champion's regime has a priceable "
         "row under the recut. `ledger75` reads `offline75` instead and drops rows that lack one.",
     )
     arguments = command.parsed()
-    reading = BoardTransfer(arguments.record, arguments.scope, SCALES[arguments.scale], RULERS[arguments.ruler])
+    reading = BoardTransfer(arguments.record, arguments.scope, SCALES[arguments.scale], Ruler(arguments.ruler))
     logger.info("scale: %s", arguments.scale)
     logger.info("%s", reading.report(arguments.near))
     if arguments.target is not None and arguments.from_board is not None and arguments.from_offline is not None:

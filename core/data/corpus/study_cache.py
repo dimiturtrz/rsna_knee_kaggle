@@ -30,7 +30,7 @@ from numpy.typing import NDArray
 from core.data.corpus.slot_reader import IMAGE_SIZE, Reading, SlotReader
 from core.data.corpus.slots import SCHEMES, Routing
 from core.data.corpus.study import SlotPipeline, Study
-from core.data.corpus.window_reader import FileReader, MappedReader, WindowReader
+from core.data.corpus.window_reader import FileReader, MappedReader, SliceSpan, WindowReader
 from core.denominator import Denominator
 from core.paths import TRAIN_TABLE
 
@@ -72,7 +72,7 @@ class CachedCorpus:
 
     def window(self, batch: NDArray[np.int64], *, start: int, width: int) -> NDArray[np.uint8]:
         """`width` slices of every slot, from `start`, for each position in `batch`."""
-        return self.reader.read(batch, start=start, width=width)
+        return self.reader.read(batch, SliceSpan(start=start, width=width))
 
     @property
     def image_size(self) -> int:

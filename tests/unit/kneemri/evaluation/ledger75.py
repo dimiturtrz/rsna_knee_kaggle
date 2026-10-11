@@ -49,7 +49,7 @@ def test_reading_refuses_a_member_with_no_record(tmp_path: Path) -> None:
         LedgerSeventyFive().reading(tmp_path / "dark.pt")
 
 
-def test_scorer(tmp_path: Path) -> None:
+def test_ledger_seventy_five_scorer(tmp_path: Path) -> None:
     """The mixed cut as a plain scorer: a caller holding arrays reads exactly what `macro` reads."""
     ruler = LedgerSeventyFive()
     reading = ruler.reading(_member(tmp_path, "m6", RECUT_COLUMN))
@@ -252,3 +252,13 @@ def test_column():
     assert Ruler.MIDPOINT.column == "offline"
     assert Ruler.LEDGER75.column == "offline75"
     assert len({ruler.column for ruler in Ruler}) == len(Ruler)
+
+
+def test_ruler_scorer():
+    """The midpoint reads every finding at 0.5; the recut is the instrument's own mixed cut, not a copy."""
+    midpoint, recut, instrument = Ruler.MIDPOINT.scorer(), Ruler.LEDGER75.scorer(), LedgerSeventyFive().scorer()
+    assert [midpoint.cut_for(target) for target in TARGETS] == [LabelScores().cut_for(target) for target in TARGETS]
+    assert [recut.cut_for(target) for target in TARGETS] == [instrument.cut_for(target) for target in TARGETS]
+    assert recut.cut_for(MIDPOINT_COLUMNS[0]) == midpoint.cut_for(MIDPOINT_COLUMNS[0])
+    assert recut.cut != midpoint.cut
+    assert Ruler.LEDGER75.scorer() is not recut, "a fresh scorer per call, never a shared instance"

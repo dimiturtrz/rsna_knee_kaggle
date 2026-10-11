@@ -13,6 +13,7 @@ from core.data.labels.rubric_gap import (
     SUBTHRESHOLD,
     UNQUALIFIED,
     RubricGap,
+    RuleEvidence,
 )
 from core.findings import CRITERIA, STUDY, TARGETS
 
@@ -141,7 +142,7 @@ def test_annotated():
     truth = _labels(MEDIAL, ABSENT)
     truth["Report"] = [DEGENERATE]
     table = gap.table(MENISCUS_RULE, _reports(DEGENERATE), _labels(MEDIAL, POSITIVE))
-    lines = gap.annotated(MENISCUS_RULE, table, truth)
+    lines = gap.annotated(RuleEvidence(MENISCUS_RULE, table, truth))
 
     assert lines[0].strip().startswith("1 of the 1 annotated studies are English")
     degenerate = next(line for line in lines if SUBTHRESHOLD in line)
@@ -186,11 +187,11 @@ def test_backed():
 
     agrees = _labels(MEDIAL, ABSENT)
     agrees["Report"] = [DEGENERATE]
-    assert gap.backed(MENISCUS_RULE, table, agrees)
+    assert gap.backed(RuleEvidence(MENISCUS_RULE, table, agrees))
 
     disagrees = _labels(MEDIAL, POSITIVE)
     disagrees["Report"] = [DEGENERATE]
-    assert not gap.backed(MENISCUS_RULE, table, disagrees)
+    assert not gap.backed(RuleEvidence(MENISCUS_RULE, table, disagrees))
 
 
 def test_subthreshold():
@@ -199,7 +200,7 @@ def test_subthreshold():
     table = gap.table(MENISCUS_RULE, _reports(DEGENERATE, TEAR_REPORT), _labels(MEDIAL, POSITIVE, POSITIVE))
     truth = _labels(MEDIAL, ABSENT, ABSENT)
     truth["Report"] = [DEGENERATE, TEAR_REPORT]
-    sub = gap.subthreshold(MENISCUS_RULE, table, truth)
+    sub = gap.subthreshold(RuleEvidence(MENISCUS_RULE, table, truth))
 
     assert list(sub["study"]) == ["study-0"]
     assert not bool(sub["truth"].iloc[0])
@@ -211,4 +212,4 @@ def test_backed_is_false_when_nothing_is_annotated():
     table = gap.table(ACL_RULE, _reports(SILENT_REPORT), _labels("ACL", POSITIVE))
     truth = _labels("ACL", ABSENT)
     truth["Report"] = [SILENT_REPORT]
-    assert not gap.backed(ACL_RULE, table, truth)
+    assert not gap.backed(RuleEvidence(ACL_RULE, table, truth))
