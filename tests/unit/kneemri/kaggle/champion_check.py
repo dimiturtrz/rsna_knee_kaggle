@@ -61,6 +61,9 @@ def test_named_by_kernel(tmp_path: Path):
 
     assert named == ("res392_ws_s2026", "lr4e-5_ws_s2026")
 
+    two_runs = 'KernelRun(names=("soup_a",)).run()\nKernelRun(names=("soup_b",)).run()\n'
+    assert champion.named_by_kernel(_kernels(tmp_path / "two", two_runs)) == ("soup_a", "soup_b"), "every run"
+
 
 def test_drift(tmp_path: Path):
     """The two ways the best entry dies quietly: the kernel stops naming it, the roster stops shipping it.

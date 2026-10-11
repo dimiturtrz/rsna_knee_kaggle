@@ -4943,3 +4943,13 @@ No OAI-free blend clears 0.948, so pick 2 is the owner's call between `basinsoup
 and `mirrorseat` (0.953, upside). The 562-row readeroof pricing had the half-half at −0.0026 under ours alone, and
 the board reads it flat, inside its 0.001 resolution. The reader's +0.0104 lead over the replica pile does not survive once ours is seated.
 Members ship from kit 5fea6702.
+
+## twosoupmirror_v1 — 0.954, ref 57055272, 2026-10-11 — two weight soups replace the seven as the ours third
+
+`kneemri-twosoupmirror` kept mirrorthird's nartaa 384 seat at 2/3 and made the ours third out of two weight soups from
+different families, `basinsoup_ff_k4_s2026` (board 0.946 alone) and `basinsoup_dmlb_k7_s2026` (0.944 alone), 1/6 each in
+rank space. It read 0.954 against mirrorthird's and mirrorseat's 0.953, the project's first entry above 0.953, and the
+pre-registered `>= 0.954` branch fired: it is the pick-1 candidate. One tick sits inside the top band's ~0.002 residual sd,
+so the reading is directional: the soups are at least as good an ours side as the seven, on two checkpoints instead of
+seven, which also halves the kernel's runtime risk. The offline analog (+0.0015) was priced against a weak nartaa replica
+and is sign-only. Both KernelRuns loaded 1 of 1, kit 5fea6702.

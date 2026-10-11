@@ -286,3 +286,13 @@ leg. In that regime, a stronger ours side and a combiner that shrinks extreme ra
 do on the board. Read those prices for SIGN only, and expect the 10-11 readings to land at 0.954 or below.
 What this does NOT rule out is the ours-side ranking itself: soup beats ours6 by about 0.004 solo on
 ledger75 regardless of the partner.
+
+## 2026-10-11 01:01Z — twosoupmirror 0.954
+
+`twosoupmirror_v1` (ref 57055272): nartaa 2/3 + `basinsoup_ff_k4` 1/6 + `basinsoup_dmlb_k7` 1/6, rank blend, read
+**0.954**, one tick over mirrorthird/mirrorseat 0.953 and the project's best. Its pre-registered `>= 0.954` branch fired.
+One tick is inside the top band's ~0.002 residual sd, so this is directional. For picks it still matters. Pick 1 moves
+to twosoupmirror: it has the higher read, and it has two checkpoints on the ours side instead of seven, so less serving
+risk. Pick 2 stays the owner's call. The candidates are mirrorthird (same nartaa share, ours7) as the diversity hedge,
+or the best all-ours entry as the licence hedge. The next combiner instrument should run on this ours side
+(twosoupprobit), not on mirrorthird's.

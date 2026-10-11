@@ -5469,6 +5469,12 @@
     {
       "kind": "import",
       "source": "kneemri.kaggle.champion_check",
+      "target": "kneemri.kaggle.kernel_script",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.champion_check",
       "target": "kneemri.kaggle.package_members",
       "weight": 1
     },
@@ -29278,6 +29284,18 @@
       "kind": "calls",
       "source": "kneemri.kaggle.champion_check.Champion.drift",
       "target": "kneemri.kaggle.package_members.MemberRoster.read",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.champion_check.Champion.named_by_kernel",
+      "target": "kneemri.kaggle.kernel_script.KernelScript",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.champion_check.Champion.named_by_kernel",
+      "target": "kneemri.kaggle.kernel_script.KernelScript.member_names",
       "weight": 1
     },
     {

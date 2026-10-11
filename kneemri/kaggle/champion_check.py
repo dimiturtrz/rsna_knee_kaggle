@@ -21,7 +21,6 @@ that is how the axes get priced — so a differing kernel is not a finding. Only
 reproduction path is asserted.
 """
 
-import ast
 import json
 import logging
 from dataclasses import dataclass
@@ -31,6 +30,7 @@ from core import cli
 from core.denominator import Denominator
 from kneemri.kaggle.board_read import RECORD as LEADERBOARD
 from kneemri.kaggle.board_read import LeaderboardRead
+from kneemri.kaggle.kernel_script import KernelScript
 from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)
@@ -40,9 +40,6 @@ RECORD = Path("comp/champion.json")
 
 KERNELS = Path("comp/kernels")
 """Where a kernel's script lives, one directory per entry, named after the kernel."""
-
-CHOSEN = "chosen"
-"""The name a kernel binds its member tuple to, which is the only line of it this check reads."""
 
 SHELVES = MemberRoster.shelves()
 """Every roster a kernel can mount a member from. A pin may seat members off any shelf, so a check
@@ -132,23 +129,14 @@ class Champion:
         )
 
     def named_by_kernel(self, kernels: Path = KERNELS) -> tuple[str, ...]:
-        """The members the champion's kernel binds to `chosen`, as Python would bind them.
+        """Every member the champion's kernel selects, across all of its entry calls, as Python would bind them.
 
-        Parsed rather than matched: a regex reads a member name out of a comment or a docstring, and
-        this check exists precisely for the case where the code and the prose around it disagree.
+        Read through `KernelScript`, the parse `submit_check` and `mount_check` share, so a two-run kernel
+        is read the same way everywhere: this check once read only the `chosen` tuple, and refused
+        `twosoupmirror_v1` for not naming the second soup it plainly loads (knee-5qv7k). Parsed rather
+        than matched, so a member name surviving only in a docstring is not a member.
         """
-        script = kernels / self.kernel / f"{self.kernel}.py"
-        tree = ast.parse(script.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Assign) or not isinstance(node.value, ast.Tuple):
-                continue
-            if any(isinstance(target, ast.Name) and target.id == CHOSEN for target in node.targets):
-                return tuple(
-                    element.value
-                    for element in node.value.elts
-                    if isinstance(element, ast.Constant) and isinstance(element.value, str)
-                )
-        return ()
+        return tuple(KernelScript(kernels / self.kernel / f"{self.kernel}.py").member_names() or ())
 
     def outranked(self, path: Path = BOARD) -> list[str]:
         """Scored entries the board holds ABOVE this one — the staleness `drift` is structurally blind to.

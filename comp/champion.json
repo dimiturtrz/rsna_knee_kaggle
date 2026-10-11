@@ -1,31 +1,27 @@
 {
   "why": "The best entry this project has, pinned so it cannot be lost to a roster edit or a kernel rewrite. Every field here was READ from the run that scored, not composed afterwards: the kit commit comes from the kernel log's own 'kit <sha>' line, the members from the kernel's `chosen` tuple, the board score from the submissions API. `python -m kneemri.kaggle.champion_check` is what keeps it true.",
-  "entry": "mirrorseat_v1",
-  "kernel": "kneemri-mirrorseat",
+  "entry": "twosoupmirror_v1",
+  "kernel": "kneemri-twosoupmirror",
   "kernel_owner": "dimiturnt",
   "kernel_owner_why": "The `kernel` field is a LOCAL directory name — `comp/kernels/<kernel>/<kernel>.py` — and the Kaggle API wants `<owner>/<kernel>`, which is not derivable from it. The owner slug here is NOT the git/Kaggle account name the repo is under (`dimiturtrz`); it is `dimiturnt`, and asking for the wrong one returns `Permission 'kernels.get' was denied`, which reads as an auth failure rather than a typo. Cost a round on 2026-09-08. Read it from `kaggle kernels list --mine -s kneemri` if it ever changes.",
-  "submission": "57008651",
-  "date": "2026-10-09",
-  "board": 0.953,
+  "submission": "57055272",
+  "date": "2026-10-11",
+  "board": 0.954,
   "kit": "5fea6702",
   "members": [
-    "final_ws_cf",
-    "calib_span_ff",
-    "stack_increments_ff",
-    "through_dense_cf",
-    "labelwise_depth24_drop40_long_s2026",
-    "labelwise_ext_drop40_long_s2026",
-    "labelwise_dense_drop40_long_s2026"
+    "basinsoup_ff_k4_s2026",
+    "basinsoup_dmlb_k7_s2026"
   ],
   "serving": {
     "overlap": false,
-    "vote": "LogitAverage for our seven, then RaptorSeat rank blend at 1/2 against nartaa's CoAtNet alone",
+    "vote": "two KernelRuns, one soup each; rank blend of nartaa's CoAtNet 2/3, basinsoup_ff_k4 1/6, basinsoup_dmlb_k7 1/6",
     "views": null,
     "precision": "each member's own",
-    "foreign_weight": 0.5,
-    "foreign_seat": "nartaa's CoAtNet alone (nartaa/rsna-knee-publication-swa-weights-20261007, raptor_ft_alldata_t16_blendjev_oai_d96_r384_swa.pt sha 7e5315da, public solo 0.949), served by nartaa's own scoring cells joined verbatim and mounted from dimiturnt/nartaa-mirror-src. NOT packaged by comp/members.roster. No ConvNeXt reader. Rebuilt by Kaggle mounts on the pinned pre-2026-10-09 image (docker_image in kernel-metadata)."
+    "foreign_weight": 0.6666666666666666,
+    "foreign_seat": "nartaa's CoAtNet alone, as in mirrorseat_v1 (raptor_ft_alldata_t16_blendjev_oai_d96_r384_swa.pt sha 7e5315da, public solo 0.949), served by nartaa's own scoring cells from dimiturnt/nartaa-mirror-src. NOT packaged by comp/members.roster."
   },
   "principles": [
+    "TWO WEIGHT SOUPS ARE AT LEAST AS GOOD AN OURS SIDE AS THE SEVEN. twosoupmirror_v1 is mirrorthird (nartaa 2/3, ours7 1/3, 0.953) with the ours third made of basinsoup_ff_k4 and basinsoup_dmlb_k7 at 1/6 each. It read 0.954, the project's best, and its pre-registered '>= 0.954 = pick-1 candidate' fired. One tick over 0.953 is inside the top band's ~0.002 residual sd, so it is directional; what it licenses is a two-checkpoint ours side at no loss, half the serving risk. Offline fold-0 analog +0.0015 against a weak nartaa replica, sign-only. run_check: both KernelRuns 1 of 1.",
     "THE CONVNEXT READER IS REDUNDANT ONCE OURS IS IN THE BLEND, and dropping it is worth a tick. mirrorseat_v1 is ours7 rank-blended 1/2 against nartaa's CoAtNet alone. It read 0.953 against triseat's 0.952 (wave = nartaa + goodpjw reader at rabari V1 shares, ours at 1/3) and trihalf's 0.952 (same wave, ours at 1/2). Pre-registered '>= 0.952 = the reader is redundant' fired. The reader added +0.001 to nartaa alone on the public board (0.949 -> 0.950), and our seven cover the same complementarity with more of it. One tick is directional, inside the top band's ~0.002 residual sd; what it licenses is a simpler entry (two families, not three) at no loss. No offline number: nartaa trained on every labelled study. run_check read 7 of 7.",
     "A THIRD FAMILY OVER THE PUBLIC WAVE IS WORTH TWO TICKS, and this is the first pin to sit above the public frontier rather than below it. triseat_v1 is the public 0.950 blend (nartaa CoAtNet + goodpjw ConvNeXt reader, per-finding shares found on the public board) with tripleseat's seven seated at 1/3 of a final rank blend. It read 0.952 against the wave's 0.950 (444 teams tied there) and ours7's 0.945, the top of its pre-registered '>= 0.952 adds' band, rank 129 of 5567 at 10:07Z. Both public arms trained on every labelled study, so this entry has NO offline number and the 1/3 share was named before the read, not fitted. Two ticks is directional against the 1.5% bar; what it establishes is that our DINO/ResNet family carries error structure the CoAtNet/ConvNeXt lineage every public notebook shares does not.",
     "THE PIN MOVED FOR ONE RESOLVABLE STEP, AND ONLY ONE. tripleseat_v2 is stackseat_v1 with its two weakest seats (grade_ladder_cf, lr4e-5_ws_cf) out and three labelwise drop40_long fold-0 bases in, raptor at 1/3 and LogitAverage held, seven of ours. It read 0.946 against 0.944 - +0.002, one step past BOARD_RESOLVABLE = 0.0015 and inside its pre-registered 0.9455-0.9469 'real gain' band, the first read to leave the flat 0.944 band three designed entries sat in. The fold-0-twin proxy projected ~+0.0084; about a quarter landed, so the proxy's SIGN transferred and its SIZE did not. Directional under the 1.5% bar. run_check read 7 of 7 before the pin moved.",
