@@ -4995,3 +4995,13 @@ are fused through `ndtri` instead of averaged. It scored 0.956, equal to s6third
 resolution" branch, and it agrees with the 0.954 tie between `twosoupprobit` and `twosoupmirror`. Two flat reads at two
 share points retire the combiner axis. Rank average stays the default. `s6sevenprobit` is dropped, and nothing gets
 paired with probit. The next slots go to the ours-share axis (`s6equal`) and to decorrelating pick 2 (`s6seven`).
+
+## s6seven_v1 — 0.956, ref 57095414, 2026-10-12 — the seven in place of the dmlb soup at the s6third shares: ties the champion, pick 2
+
+Same shares as s6third: nartaa 1/2, S6 1/3, and ours at 1/6. Ours is now basinsoup_ff_k4 at 1/12 plus mirrorthird's
+seven, logit-averaged, at 1/12, instead of the two soups. Every run carried its own Budget (knee-s6n3v), and run_check
+read 8 of 8. This is kernel v2; v1 was not submitted. It scored 0.956 against s6third's 0.956.
+
+It ties the champion with a different ours seat: the pre-registered decorrelated pick-2 branch. Pick 2 = s6seven_v1; pick 1 stays s6third_v1 unless a later entry reads >=0.957. s6sevenequal (S5) stays live if s6equal (S4) also reads >=0.956.
+
+
