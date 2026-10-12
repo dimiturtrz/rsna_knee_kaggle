@@ -42,6 +42,7 @@ FOREIGN_TABLES = {
     "ours_sub.csv": "heliosli_s6",
     "reader_seat.csv": "goodpjw_convnext",
     "reader_ranks.csv": "goodpjw_convnext",
+    "mavit_sub.csv": "hengck23_mavit",
 }
 """The table a foreign producer writes inside a kernel, by the seat name `comp/board.jsonl` records its share under."""
 
@@ -52,6 +53,7 @@ FOREIGN_MARKERS = {
     "nartaa_0945.py": "nartaa224",
     "helios_s6.py": "heliosli_s6",
     "cnxt_v0_fold0.pt": "goodpjw_convnext",
+    "mavit_seat.py": "hengck23_mavit",
 }
 """Every literal that says a foreign producer runs. A kernel carrying one whose blend this parse cannot resolve
 is UNKNOWN, never all-ours: a per-finding share table or a nested wave has no scalar share to compare."""

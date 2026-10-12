@@ -127,7 +127,7 @@ def main() -> None:
     mounts = Mounts()
     script = mounts.one("nartaa_mirror.py", "nartaa's scoring source") / "nartaa_mirror.py"
     subprocess.run([sys.executable, str(script)], check=True, cwd=working)  # noqa: S603 - our mounted copy, fixed argv
-    shutil.move(working / "submission.csv", foreign := working / "nartaa_seat.csv")
+    shutil.move(working / "submission.csv", working / "nartaa_seat.csv")
     spent = time.time() - started
 
     serving = Serving(vote=LogitAverage(), budget=Budget(seconds=max(KERNEL_SECONDS - spent, 0.0) / 4.0))
@@ -160,7 +160,13 @@ def main() -> None:
 
     frames = [
         pd.read_csv(path, dtype={"StudyInstanceUID": str})
-        for path in (working / "soup_ff.csv", working / "soup_dmlb.csv", s6, foreign, working / "mavit_sub.csv")
+        for path in (
+            working / "soup_ff.csv",
+            working / "soup_dmlb.csv",
+            s6,
+            working / "nartaa_seat.csv",
+            working / "mavit_sub.csv",
+        )
     ]
     RaptorSeat.combined(frames[0], frames[1:], [7.0 / 96.0, 7.0 / 24.0, 7.0 / 16.0, 1.0 / 8.0]).to_csv(
         working / "submission.csv", index=False
