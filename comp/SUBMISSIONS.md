@@ -5017,3 +5017,17 @@ kernel's own seat tables reproduced submission.csv with max |diff| 0.0. It score
 best OAI-free entry before it.
 **0.953 is the >=0.950 branch.** S6 carries the OAI-free line +0.007 over basinsoupff_v1 (0.946), 0.003 under the OAI-bearing s6third (0.956), and 0.001 under the public 0.954 mass. The OAI-free pick 2 becomes s6oaifree_v1; s6oaifree23 (S6 2/3, same members) is armed with --anyway to read the share direction.
 
+
+## s6dense2_v1 — 0.956, ref 57108981, 2026-10-12 — S6 at eval stride 2, HALF the windows: flat, the stride axis closes
+
+Same producers, shares and blend as s6third (nartaa 1/2, S6 1/3, soups 1/12 each, rank space). The one change: S6's
+`--eval-stride` patched to 2. It was built believing s6third ran S6 at the source's `.get` default of stride 3, so this was
+meant to be DENSER. The mounted `rsna-knee-compact-v1` manifest says `eval_stride: 1`, and the visible logs agree: 528.7
+windows/study for s6third against 262.0 here. So the entry that shipped averages half the windows. The docstring records
+both the original pre-registration (wrong premise) and the corrected read.
+
+It scored 0.956, equal to s6third. Under the corrected read that is the flat branch: S6's window density between stride 1
+and stride 2 does not move the board at 0.001 resolution, and s6third's hidden S6 was not deadline-bound in any way that
+a sparser pass recovers. Two consequences. The `*dense2` follow-ups (`s6oaifreedense2`, `s6sevendense2`), gated on
+>=0.957, are retired. And stride 2 is a free ~half cut of S6's hidden runtime (~3.3 h -> ~1.7 h projected), which is the
+headroom a fourth producer would need inside the 9 h limit.
