@@ -5005,3 +5005,15 @@ read 8 of 8. This is kernel v2; v1 was not submitted. It scored 0.956 against s6
 It ties the champion with a different ours seat: the pre-registered decorrelated pick-2 branch. Pick 2 = s6seven_v1; pick 1 stays s6third_v1 unless a later entry reads >=0.957. s6sevenequal (S5) stays live if s6equal (S4) also reads >=0.956.
 
 
+
+## s6oaifree_v1 — 0.953, ref 57102245, 2026-10-12 — the OAI-free hedge, S6 1/2 beside ours with no nartaa seat: LIFT, the OAI-free hedge moves into the 0.95 pile
+
+heliosli S6 at 1/2, basinsoup_ff_k4 at 1/4 and mirrorthird's seven (logit-averaged) at 1/4, blended in rank space. There
+is no nartaa seat, because nartaa's CoAtNet is OAI-trained and OAI eligibility still has no host ruling. Forum thread 748276
+argues that the NIH/NDA geo-block makes OAI not reasonably accessible under rule 2.6.b, the same logic that banned KneeCoT
+(knee-ll0of). S6's manifest is convnext_small in22k trained on the competition pool, so the entry is OAI-free end to end.
+Pre-flight passed: run_check read 8 of 8 members, and S6 exited 0 at 182 s. Re-deriving the blend locally from the
+kernel's own seat tables reproduced submission.csv with max |diff| 0.0. It scored 0.953 against basinsoupff_v1's 0.946, the
+best OAI-free entry before it.
+**0.953 is the >=0.950 branch.** S6 carries the OAI-free line +0.007 over basinsoupff_v1 (0.946), 0.003 under the OAI-bearing s6third (0.956), and 0.001 under the public 0.954 mass. The OAI-free pick 2 becomes s6oaifree_v1; s6oaifree23 (S6 2/3, same members) is armed with --anyway to read the share direction.
+
