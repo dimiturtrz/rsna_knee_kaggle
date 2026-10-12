@@ -1,4 +1,4 @@
-"""s6dense1 — CONDITIONAL PICK CANDIDATE. s6third (0.956) with S6 scoring every slice (eval stride 1).
+"""s6dense1 — RETIRED: s6third ALREADY runs S6 at stride 1 (manifest eval_stride 1), so this is s6third.
 
 Ships ONLY if s6dense2 (stride 2) scores >= 0.957 AND kneemri-nartaatiming puts nartaa + both soups under 5.1 h on
 the hidden set, because S6 at stride 1 projects ~3.5 h (GPU ~18 s/study, kneemri-s6timing) inside a deadline of

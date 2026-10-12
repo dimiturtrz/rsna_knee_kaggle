@@ -1,14 +1,14 @@
 """s6oaifreedense2 — CONDITIONAL PICK-2 CANDIDATE (OAI hedge). s6oaifree (0.953, ref 57102245) with S6 at eval stride 2.
 
 Same producers, shares and blend as `kneemri-s6oaifree`: heliosli S6 1/2 + basinsoup_ff_k4 1/4 + mirrorthird's seven
-(logit-averaged) 1/4, rank space, NO nartaa seat (OAI-free, knee-ll0of). One change: S6's `--eval-stride` 3 -> 2, the
+(logit-averaged) 1/4, rank space, NO nartaa seat (OAI-free, knee-ll0of). One change: S6's `--eval-stride` 1 -> 2, the
 change `kneemri-s6dense2` (ref 57108981) prices on the champion blend. Shipped ONLY if s6dense2 reads >= 0.957: the
 stride effect is then measured, and S6 carries 1/2 here against 1/3 there, so the hedge should take it too.
 
 PRE-REGISTRATION (vs s6oaifree_v1 0.953):
 - **>= 0.954** — stride carries into the OAI-free line; the hedge becomes this.
 - **0.953** — flat at board resolution; the hedge stays s6oaifree_v1.
-- **<= 0.952** — denser windows hurt here or S6 fell back; read the fallback count first.
+- **<= 0.952** — sparser windows hurt here or S6 fell back; read the fallback count first.
 """
 
 # >>> KERNEL-BOOTSTRAP

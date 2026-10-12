@@ -1,15 +1,19 @@
-"""s6dense2 — PICK CANDIDATE. s6third (champion 0.956, ref 57063964) with S6 at eval stride 2 instead of 3.
+"""s6dense2 — MISNAMED, it is SPARSER. s6third (0.956, ref 57063964) with S6 at eval stride 2 instead of 1.
 
 Same producers, shares and blend as `kneemri-s6third`: nartaa 384 at 1/2, heliosli's S6 at 1/3, the two soups at
-1/12 each, rank space. One change: S6's `--eval-stride` 3 -> 2. Training sampled window centres at any slice, so
-every centre is in distribution and a denser stride is a test-time average over 1.44x the windows, with no new input.
+1/12 each, rank space. One change: S6's `--eval-stride` 1 -> 2. Built believing s6third ran stride 3 (the source's
+`.get` default); the mounted manifest says `eval_stride: 1`, and the logs agree — 528.7 windows/study for s6third,
+262.0 here, on the same three visible studies. So this averages HALF the windows and finishes S6 sooner.
+
+READ AFTER THE CORRECTION: >= 0.957 means s6third's hidden S6 hit its deadline and fell back on studies (stride 2
+covers more of them) or fewer windows help; 0.956 flat; <= 0.955 density helps, stride 1 stays.
 
 TIMED FIRST (kneemri-s6timing v1, T4, 120 train studies each): stride 3 8.3 s/study/worker, stride 2 9.1, zero
 fallbacks; hidden projection 1.52 h -> 1.67 h of S6's window. S6 is decode-bound, so the extra windows cost ~10%.
 In-sample per-label Spearman stride 3 vs 2: 0.971-0.995, so the ranking does move. Stride 1 (~3.5 h) is NOT
 shipped: it needs nartaa + soups to finish inside 5.1 h on the hidden set, which has never been measured.
 
-PRE-REGISTRATION (s6third 0.956, resolution 0.001, top-band residual sd 0.0013 @ledger75):
+ORIGINAL PRE-REG, wrong premise, as submitted (s6third 0.956, resolution 0.001, top-band residual sd 0.0013 @ledger75):
 - **>= 0.957** — denser S6 lifts; becomes pick 1. Stride 1 earns a nartaa+soups timing run.
 - **0.956** — neutral at board resolution; stride axis closed for S6 at 1/3.
 - **<= 0.955** — denser windows hurt or S6 fell back; read the log's fallback count before blaming the mechanism.

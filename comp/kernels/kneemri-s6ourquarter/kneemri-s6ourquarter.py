@@ -1,6 +1,6 @@
 """s6ourquarter — PICK CANDIDATE. s6third (0.956, ref 57063964) with OUR share 1/6 -> 1/4, nartaa:S6 kept at 3:2.
 
-Same producers, stride (3) and rank blend as `kneemri-s6third`. Shares: nartaa 384 0.45, heliosli S6 0.30, the two
+Same producers, stride (1) and rank blend as `kneemri-s6third`. Shares: nartaa 384 0.45, heliosli S6 0.30, the two
 soups 1/8 each (were 1/2, 1/3, 1/12 each). This isolates the ours-share axis in the S6 era. The staged `s6equal` moved
 two knobs at once (nartaa:S6 3:2 -> 1:1 AND ours 1/6 -> 1/3), so a flat or a drop there could not be attributed.
 Ours has only been read at 1/6 since S6 joined, where it lifts two different nartaa+S6 bases by +0.001-0.002 over the

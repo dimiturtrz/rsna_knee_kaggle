@@ -2,7 +2,7 @@
 
 Same producers, shares and per-run Budgets as `kneemri-s6seven`: nartaa 384 at 1/2, heliosli's S6 at 1/3,
 basinsoup_ff_k4 and mirrorthird's seven at 1/12 each, rank space. One change, the one `kneemri-s6dense2` tests on
-pick 1: S6's `--eval-stride` 3 -> 2. Ships ONLY if s6dense2 scores >= 0.957, so both final picks carry the denser
+pick 1: S6's `--eval-stride` 1 -> 2. Ships ONLY if s6dense2 scores >= 0.957, so both final picks carry the sparser
 S6 instead of one of them. Timing: s6seven runs ~12 min over s6third and stride 2 adds ~0.15 h of S6
 (kneemri-s6timing), against S6's deadline of kernel start + 8.6 h — no new exposure.
 """
