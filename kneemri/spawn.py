@@ -33,6 +33,11 @@ SPAWN_BACKOFF_S = 2.0
 POSIX_SIGKILL = 9
 """`signal.SIGKILL`, spelled out because the name does not exist on Windows, where `killed` never reaches it."""
 
+KILL_DRAIN_S = 10.0
+"""After a tree kill only already-buffered bytes are left to read, so this bounds a wait that is ~0 when
+the kill took and forever when it did not. It is the SPAWN_BACKOFF_S scale (seconds a loaded box needs
+to tear a process down) with headroom, and short beside the timeouts `bounded` is given."""
+
 SPAWN_STDERR_TAIL = 2000
 """`CalledProcessError.__str__` prints the argv and the code and never the child's own stderr, so a
 transient API failure reaches the reader as a bare traceback with the diagnosis inside an attribute
@@ -92,8 +97,11 @@ class Spawn:
             try:
                 stdout, stderr = child.communicate(timeout=timeout_s)
             except subprocess.TimeoutExpired:
-                self.killed(child.pid)
-                child.communicate()
+                try:
+                    self.killed(child.pid)
+                finally:
+                    child.kill()
+                    self.drained(child)
                 return None
             if child.returncode != STATUS_DLL_INIT_FAILED:
                 return subprocess.CompletedProcess(list(command), child.returncode, stdout, stderr)
@@ -103,11 +111,30 @@ class Spawn:
 
     @staticmethod
     def killed(pid: int) -> None:
-        """Kill a process and every descendant it started."""
+        """Kill a process and every descendant it started.
+
+        `taskkill` is itself a spawn, so on a loaded box it is retried like one and its failure is logged:
+        a discarded failure here left a whole tree alive and `bounded` waiting on it for 13 min (knee-4jssr).
+        """
         if os.name == "nt":
-            subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True, check=False)  # noqa: S603, S607 - fixed argv, a Windows system binary
+            done = Spawn().ran(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True, text=True)
+            if done.returncode != 0:
+                logger.warning("taskkill left the tree of %d (exit %d): %s", pid, done.returncode, done.stderr.strip())
             return
         os.kill(-pid, POSIX_SIGKILL)
+
+    @staticmethod
+    def drained(child: subprocess.Popen[str]) -> None:
+        """Reap a killed child, waiting at most `KILL_DRAIN_S` for its pipes to close.
+
+        A descendant the kill missed still holds the inherited pipe ends, so an unbounded drain waits on
+        it for as long as it lives. Its reader threads are daemons and are abandoned, not closed: closing a
+        pipe another thread is reading blocks on that reader's buffer lock, which is the same hang.
+        """
+        try:
+            child.communicate(timeout=KILL_DRAIN_S)
+        except subprocess.TimeoutExpired:
+            logger.warning("pid %d's pipes are still held after the kill; abandoning the drain", child.pid)
 
     def checked(
         self, done: subprocess.CompletedProcess[str], command: Sequence[str], **options: object
