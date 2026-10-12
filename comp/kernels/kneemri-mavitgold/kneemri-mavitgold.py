@@ -30,7 +30,11 @@ def main() -> None:
     import numpy as np  # noqa: PLC0415
     import pandas as pd  # noqa: PLC0415
     import torch  # noqa: PLC0415
-    from model import KneeModel  # noqa: PLC0415 - hengck23's source, on sys.path only from here
+
+    # pyrefly: ignore[missing-import] - hengck23's source, on sys.path only from here
+    from model import KneeModel  # noqa: PLC0415
+
+    # pyrefly: ignore[missing-import]
     from my_fastread_knee import make_knee_dataset_reader  # noqa: PLC0415
     from sklearn.metrics import roc_auc_score  # noqa: PLC0415
 
@@ -74,7 +78,7 @@ def main() -> None:
     areas = {label: roc_auc_score(studies[label].to_numpy(), predicted[label].to_numpy()) for label in labels}
     for label, area in areas.items():
         log.info("%-18s %.4f", label, area)
-    log.info("MACRO %.4f", float(np.mean(list(areas.values()))))
+    log.info("MACRO %.4f", float(np.mean(np.asarray(list(areas.values()), dtype=float))))
 
 
 if __name__ == "__main__":
