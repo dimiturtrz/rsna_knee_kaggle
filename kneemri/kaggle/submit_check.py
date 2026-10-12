@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 ROSTERS = MemberRoster.shelves()
 """Where the licence tags live — EVERY shelf, not the first one. The rosters are the only files that
 state, per member, which external table it trained on, so they are the only files that can answer
-whether a seat is shippable at all.
+whether a seat is banned (KneeCoT) or shippable with its provenance on record.
 
 This was `comp/members.roster` alone, which reads a tag on any later shelf as ABSENT — and absent is
 the answer that ships. Shelf 2 carries no tag today so nothing was let through, but the gate was one
@@ -188,9 +188,12 @@ class SubmitCheck:
         return KernelScript(scripts[0]) if scripts else None
 
     @staticmethod
-    def licence_refusals(shelves: list[Path], named: set[str]) -> list[str]:
-        """Every seat any shelf tags as trained on a table whose licence forbids shipping it."""
-        return [refusal for shelf in shelves for refusal in MemberRoster.read(shelf).licence_refusals(named)]
+    def licence(shelves: list[Path], named: set[str]) -> tuple[list[str], list[str]]:
+        """Every seat any shelf tags, split into (refused: a banned table, provenance: a pick-eligible one)."""
+        rosters = [MemberRoster.read(shelf) for shelf in shelves]
+        refused = [line for roster in rosters for line in roster.licence_refusals(named)]
+        provenance = [line for roster in rosters for line in roster.licence_provenance(named)]
+        return refused, provenance
 
     @staticmethod
     def resolved(given: str, kernels: Path) -> Path:
@@ -225,10 +228,12 @@ def main() -> None:
     if named is None:
         command.unknown(f"{kernel.name} names no members in its source, so this check did not look")
 
-    # Before the repeat question, because a repeat is a wasted slot and this is a wasted WIN: rule 2.5
-    # obliges the winner to license the submission and its source, and a member trained on a
-    # no-derivatives table cannot be relicensed by us. `--anyway` does not open this one.
-    refusals = SubmitCheck.licence_refusals(arguments.roster, named)
+    # Before the repeat question, and `--anyway` does not open it: only a KneeCoT-derived seat refuses,
+    # since the host bans that table outright. Every other tag is provenance under the owner's
+    # 2026-10-11 ruling, warned and then judged like any seat (knee-35q47).
+    refusals, provenance = SubmitCheck.licence(arguments.roster, named)
+    for line in provenance:
+        logger.warning("LICENCE PROVENANCE %s: %s", kernel.name, line)
     for refusal in refusals:
         logger.error("LICENCE %s: %s", kernel.name, refusal)
     command.conclude(refusals, "licence refusal(s)")

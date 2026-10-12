@@ -196,14 +196,18 @@ def test_prose():
     assert TriedIdea.prose(row) == "greedy ruler"
 
 
-def test_licence_refusals(tmp_path: Path):
-    """Every shelf is read, so a tag on a LATER shelf refuses as surely as one on the first."""
+def test_licence(tmp_path: Path):
+    """Every shelf is read: untagged passes silently, a foreign tag warns, a KneeCoT tag on a LATER shelf refuses."""
     first, second = tmp_path / "shelf1", tmp_path / "shelf2"
-    first.write_text("clean_s2026.pt  # nothing external\n", encoding="utf-8")
-    second.write_text("tainted_s2026.pt  # licence: rijeka\n", encoding="utf-8")
-    assert SubmitCheck.licence_refusals([first, second], {"clean_s2026"}) == []
-    (refused,) = SubmitCheck.licence_refusals([first, second], {"clean_s2026", "tainted_s2026"})
-    assert refused.startswith("tainted_s2026 trains on the rijeka table")
+    first.write_text("clean_s2026.pt  # nothing external\nforeign_s2026.pt  # licence: rijeka\n", encoding="utf-8")
+    second.write_text("banned_s2026.pt  # licence: kneecot\n", encoding="utf-8")
+    shelves = [first, second]
+    assert SubmitCheck.licence(shelves, {"clean_s2026"}) == ([], [])
+    refused, (noted,) = SubmitCheck.licence(shelves, {"clean_s2026", "foreign_s2026"})
+    assert refused == []
+    assert noted.startswith("foreign_s2026 trains on the rijeka table: pick-eligible")
+    (refused_line,), _ = SubmitCheck.licence(shelves, {"foreign_s2026", "banned_s2026"})
+    assert refused_line.startswith("banned_s2026 trains on the kneecot table")
 
 
 def test_warnings(tmp_path: Path):

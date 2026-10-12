@@ -107,10 +107,13 @@ class MemberRoster:
     """The trailing-comment tag naming the external table a member trained on, when that table's terms
     are not settled against competition rule 2.5's obligation to license the winning submission.
 
-    It lives in the COMMENT because packaging a tagged member is not the thing being refused — SEATING
-    one in a submitted entry is. `patterns` splits on `#` and never sees this, so the shelf still holds
-    the member and every offline reading of it stays valid; only a `chosen` tuple is refused.
+    It lives in the COMMENT because packaging a tagged member is never refused — at most SEATING one in
+    a submitted entry is, and since 2026-10-11 only a `BANNED` tag does that. `patterns` splits on `#`
+    and never sees this, so the shelf still holds the member and every offline reading of it stays valid.
     """
+
+    BANNED = "kneecot"
+    """The one licence tag that still refuses a seat, matched case-folded anywhere in the tag."""
 
     SHELF_DIR = Path("comp")
     SHELF_GLOB = "members*.roster"
@@ -148,8 +151,8 @@ class MemberRoster:
         lines = [line.split(COMMENT)[0].strip() for line in self.text.splitlines()]
         return [line for line in lines if line]
 
-    def licence_refusals(self, names: set[str]) -> list[str]:
-        """Every seat in `names` whose roster line carries a `# licence:` tag, as the line a check prints.
+    def licence_tags(self, names: set[str]) -> dict[str, str]:
+        """Every seat in `names` whose roster line carries a `# licence:` tag, mapped to that tag, sorted.
 
         Keyed on the name a kernel spells — a `chosen` tuple never carries the `.pt` the roster does.
         """
@@ -158,9 +161,26 @@ class MemberRoster:
             member, _, comment = line.partition(COMMENT)
             if member.strip() and self.LICENCE in comment:
                 tagged[member.strip().removesuffix(".pt")] = comment.split(self.LICENCE)[1].split()[0]
+        return {name: tagged[name] for name in sorted(names & set(tagged))}
+
+    def licence_refusals(self, names: set[str]) -> list[str]:
+        """Every seat in `names` tagged with a BANNED table, as the line a check prints.
+
+        Only KneeCoT is banned: the owner's 2026-10-11 ruling made every other foreign-derived member
+        pick-eligible, so its tag is provenance (`licence_provenance`), never a refusal.
+        """
         return [
-            f"{name} trains on the {tagged[name]} table, whose terms are unresolved against rule 2.5"
-            for name in sorted(names & set(tagged))
+            f"{name} trains on the {tag} table, which the host bans from any submission"
+            for name, tag in self.licence_tags(names).items()
+            if self.BANNED in tag.casefold()
+        ]
+
+    def licence_provenance(self, names: set[str]) -> list[str]:
+        """Every seat in `names` tagged with a pick-eligible foreign table, as the line a check prints."""
+        return [
+            f"{name} trains on the {tag} table: pick-eligible, shipped with its provenance on record"
+            for name, tag in self.licence_tags(names).items()
+            if self.BANNED not in tag.casefold()
         ]
 
     def shelf(self) -> "RosterShelf":
