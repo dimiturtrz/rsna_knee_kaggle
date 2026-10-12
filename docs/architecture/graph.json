@@ -31934,6 +31934,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.package_members.MemberRoster.licence_provenance",
+      "target": "kneemri.kaggle.package_members.MemberRoster.licence_tags",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.package_members.MemberRoster.licence_refusals",
+      "target": "kneemri.kaggle.package_members.MemberRoster.licence_tags",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.package_members.MemberRoster.shelf",
       "target": "kneemri.kaggle.package_members.RosterShelf.read",
       "weight": 1
@@ -33794,7 +33806,7 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.kaggle.submit_check.SubmitCheck.licence_refusals",
+      "source": "kneemri.kaggle.submit_check.SubmitCheck.licence",
       "target": "kneemri.kaggle.package_members.MemberRoster.read",
       "weight": 1
     },
@@ -33939,7 +33951,7 @@
     {
       "kind": "calls",
       "source": "kneemri.kaggle.submit_check.main",
-      "target": "kneemri.kaggle.submit_check.SubmitCheck.licence_refusals",
+      "target": "kneemri.kaggle.submit_check.SubmitCheck.licence",
       "weight": 1
     },
     {
@@ -66566,8 +66578,24 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster.licence_provenance",
+      "label": "licence_provenance",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.kaggle.package_members.MemberRoster.licence_refusals",
       "label": "licence_refusals",
+      "level": "method",
+      "parent": "kneemri.kaggle.package_members.MemberRoster",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.package_members.MemberRoster.licence_tags",
+      "label": "licence_tags",
       "level": "method",
       "parent": "kneemri.kaggle.package_members.MemberRoster",
       "role": null
@@ -67894,8 +67922,8 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.submit_check.SubmitCheck.licence_refusals",
-      "label": "licence_refusals",
+      "id": "kneemri.kaggle.submit_check.SubmitCheck.licence",
+      "label": "licence",
       "level": "method",
       "parent": "kneemri.kaggle.submit_check.SubmitCheck",
       "role": null
