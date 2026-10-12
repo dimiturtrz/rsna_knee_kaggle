@@ -35667,7 +35667,19 @@
     {
       "kind": "calls",
       "source": "kneemri.spawn.Spawn.bounded",
+      "target": "kneemri.spawn.Spawn.drained",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.spawn.Spawn.bounded",
       "target": "kneemri.spawn.Spawn.killed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.spawn.Spawn.killed",
+      "target": "kneemri.spawn.Spawn.ran",
       "weight": 1
     },
     {
@@ -70260,6 +70272,14 @@
       "descendants": 0,
       "id": "kneemri.spawn.Spawn.checked",
       "label": "checked",
+      "level": "method",
+      "parent": "kneemri.spawn.Spawn",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.spawn.Spawn.drained",
+      "label": "drained",
       "level": "method",
       "parent": "kneemri.spawn.Spawn",
       "role": null
