@@ -108,7 +108,7 @@ def main() -> None:
     from core.mounts import SERIES as MOUNTED_SERIES  # noqa: PLC0415 - the kit is on sys.path only after boot
     from core.mounts import Mounts  # noqa: PLC0415
     from kneemri.inference.budget import KERNEL_SECONDS, Budget  # noqa: PLC0415
-    from kneemri.inference.ensemble import Serving  # noqa: PLC0415
+    from kneemri.inference.ensemble import Ensemble, Serving  # noqa: PLC0415
     from kneemri.inference.vote import LogitAverage  # noqa: PLC0415
     from kneemri.kaggle import kernel_run  # noqa: PLC0415
     from kneemri.kaggle.kernel_run import KernelRun  # noqa: PLC0415
@@ -126,7 +126,7 @@ def main() -> None:
     if original.count(anchor) != 1:
         message = f"nartaa source holds {original.count(anchor)} copies of {anchor!r}, expected one"
         raise ValueError(message)
-    timing = {}
+    timing: dict[int, dict[str, float]] = {}
     for size in SIZES:
         staged = Path(f"/tmp/staged{size}")
         staged.mkdir(parents=True)
@@ -139,13 +139,19 @@ def main() -> None:
         (staged / "test_series").symlink_to(competition / "train_series", target_is_directory=True)
         script = Path(f"/tmp/nartaa_staged{size}.py")
         script.write_text(original.replace(anchor, f"ROOT = {str(staged)!r}"), encoding="utf-8")
-        kernel_run.Submission = lambda ensemble, _competition, out, overlap, staged=staged: Submission(
-            ensemble, staged, out, overlap=overlap, split=Split(series_root=staged / "test_series")
-        )
-        row = {}
+
+        class Staged(Submission):
+            root = staged
+
+            def __init__(self, ensemble: Ensemble, _competition: Path, working: Path, *, overlap: bool = True) -> None:
+                super().__init__(
+                    ensemble, self.root, working, overlap=overlap, split=Split(series_root=self.root / "test_series")
+                )
+
+        kernel_run.Submission = Staged
         started = time.time()
         subprocess.run([sys.executable, str(script)], check=True, cwd=working)  # noqa: S603 - our mounted copy, one root patched
-        row["nartaa"] = round(time.time() - started, 1)
+        row: dict[str, float] = {"nartaa": round(time.time() - started, 1)}
         for name in ("basinsoup_ff_k4_s2026", "basinsoup_dmlb_k7_s2026"):
             started = time.time()
             KernelRun(names=(name,), overlap=False, serving=serving, mounts=ours_mounts).run()
