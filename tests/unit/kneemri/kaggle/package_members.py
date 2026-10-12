@@ -127,16 +127,42 @@ def test_patterns(tmp_path: Path):
     assert _rostered(tmp_path).patterns() == ["res392_ws_s2026.pt", "sliceattn_s2026.pt", "lora_r8_*.pt"]
 
 
+LICENSED = (
+    "clean_s2026.pt   # nothing external\n"
+    "foreign_s2026.pt # 0.85  # licence: rijeka\n"
+    "banned_s2026.pt  # 0.86  # licence: KneeCoT\n"
+)
+EVERY_SEAT = {"clean_s2026", "foreign_s2026", "banned_s2026"}
+
+
+def _licensed(tmp_path: Path) -> MemberRoster:
+    (tmp_path / "roster").write_text(LICENSED, encoding="utf-8")
+    return MemberRoster.read(tmp_path / "roster")
+
+
+def test_licence_tags(tmp_path: Path):
+    """Tagged seats only, mapped to their tag and sorted — and the tag is invisible to `patterns`."""
+    roster = _licensed(tmp_path)
+    assert roster.patterns() == ["clean_s2026.pt", "foreign_s2026.pt", "banned_s2026.pt"]
+    assert roster.licence_tags({"clean_s2026"}) == {}
+    assert roster.licence_tags(EVERY_SEAT) == {"banned_s2026": "KneeCoT", "foreign_s2026": "rijeka"}
+
+
 def test_licence_refusals(tmp_path: Path):
-    """A tagged member is refused a SEAT while still packaging — and the tag is invisible to `patterns`."""
-    text = "clean_s2026.pt   # nothing external\ntainted_s2026.pt # 0.85  # licence: rijeka\n"
-    (tmp_path / "roster").write_text(text, encoding="utf-8")
-    roster = MemberRoster.read(tmp_path / "roster")
-    assert roster.patterns() == ["clean_s2026.pt", "tainted_s2026.pt"]
+    """Only a KneeCoT tag, matched case-folded, refuses; an untagged or other-table seat never does."""
+    roster = _licensed(tmp_path)
     assert roster.licence_refusals({"clean_s2026"}) == []
-    refused = roster.licence_refusals({"clean_s2026", "tainted_s2026"})
-    assert len(refused) == 1
-    assert refused[0].startswith("tainted_s2026 trains on the rijeka table")
+    assert roster.licence_refusals({"clean_s2026", "foreign_s2026"}) == []
+    (refused,) = roster.licence_refusals(EVERY_SEAT)
+    assert refused.startswith("banned_s2026 trains on the KneeCoT table")
+
+
+def test_licence_provenance(tmp_path: Path):
+    """A pick-eligible tag is reported as provenance; a KneeCoT one is not, it is a refusal."""
+    roster = _licensed(tmp_path)
+    assert roster.licence_provenance({"clean_s2026"}) == []
+    (noted,) = roster.licence_provenance(EVERY_SEAT)
+    assert noted.startswith("foreign_s2026 trains on the rijeka table: pick-eligible")
 
 
 def test_checkpoints(tmp_path: Path):
