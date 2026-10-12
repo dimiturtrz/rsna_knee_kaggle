@@ -4987,3 +4987,11 @@ and scored 0.955, one tick under s6third. The curve now reads 0 -> 0.954, 1/6 ->
 which is the pre-registered "peaked at 1/3" branch. Each step is still about one residual sd, so the peak's position is
 directional. What it settles is that S6 does not want to lead the blend. The 2/3 point (`s6twothirds`) is dropped.
 Slot 4 goes to `s6probit`: the probit combiner at the s6third shares, the peak.
+
+## s6probit_v1 — 0.956, ref 57087369, 2026-10-11 — probit fusion at the s6third shares: flat
+
+Same producers and shares as s6third (nartaa 1/2, S6 1/3, soups 1/12 each). Only the combiner changed: per-label ranks
+are fused through `ndtri` instead of averaged. It scored 0.956, equal to s6third. That is the pre-registered "inside
+resolution" branch, and it agrees with the 0.954 tie between `twosoupprobit` and `twosoupmirror`. Two flat reads at two
+share points retire the combiner axis. Rank average stays the default. `s6sevenprobit` is dropped, and nothing gets
+paired with probit. The next slots go to the ours-share axis (`s6equal`) and to decorrelating pick 2 (`s6seven`).
