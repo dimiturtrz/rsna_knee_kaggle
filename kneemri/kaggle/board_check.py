@@ -140,6 +140,10 @@ class BoardRow:
     rows that carried a correction before this field existed stated the raw value in their prose, and a
     reader could confirm the subtraction by hand; nothing else could, which is the entire defect.
     """
+    foreign: Mapping[str, float] | None
+    """Each foreign seat's share of the blend, or None when the line does not say."""
+    fusion: str | None
+    """`rank` or `probit`, or None when the line does not say. A line saying neither is all-ours rank."""
 
     @classmethod
     def parsed(cls, row: Mapping[str, object]) -> "BoardRow":
@@ -147,6 +151,7 @@ class BoardRow:
         ref = str(row.get("ref", ""))
         named = row.get("members_named")
         seats: list[object] = named if isinstance(named, list) else []
+        shares = row.get("foreign")
         return cls(
             ref=ref,
             identifier=str(row.get("id", ref)),
@@ -160,6 +165,8 @@ class BoardRow:
             date=str(row.get("date", "")),
             selection=None if row.get("selection") is None else str(row["selection"]),
             offline_raw=None if row.get("offline_raw") is None else float(str(row["offline_raw"])),
+            foreign={str(seat): float(str(cut)) for seat, cut in shares.items()} if isinstance(shares, dict) else None,
+            fusion=None if row.get("fusion") is None else str(row["fusion"]),
         )
 
     def governed(self, since: str) -> bool:

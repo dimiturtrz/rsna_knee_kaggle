@@ -25,8 +25,9 @@ from pathlib import Path
 
 from core import cli
 from core.denominator import Denominator
+from kneemri.kaggle.blend_shape import Fusion
 from kneemri.kaggle.board_check import KERNELS, RECORD, BoardCensus, BoardRow
-from kneemri.kaggle.kernel_script import KernelScript
+from kneemri.kaggle.kernel_script import ALL_OURS, Blend, KernelScript
 from kneemri.kaggle.package_members import MemberRoster
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,9 @@ OVERLAP_FLOOR = 0.5
 Advisory only. Two ensembles drawn from a pool of a hundred members share seats constantly, and a
 report that names every one of them is a report nobody reads to the end.
 """
+
+UNRECORDED = "its foreign shares and fusion are not recorded, so it counts as differing"
+"""Why a foreign entry left blank in the record (per-finding shares, a nested wave) is never a match."""
 
 PROSE_SHOWN = 160
 """How much of a matched row's `what` a line quotes: enough to recognise the idea, short enough to read."""
@@ -97,12 +101,38 @@ class TriedIdea:
 class SubmitCheck:
     """The board's recorded entries, asked whether a candidate kernel's seats are already one of them."""
 
-    def __init__(self, rows: list[BoardRow]) -> None:
+    def __init__(self, rows: list[BoardRow], kernels: Path = KERNELS) -> None:
         self.rows = [row for row in rows if row.names_key and row.members_named]
+        self.kernels = kernels
 
-    def repeats(self, names: set[str]) -> list[BoardRow]:
-        """Every recorded entry whose seats are exactly this candidate's, newest last."""
+    def same_members(self, names: set[str]) -> list[BoardRow]:
+        """Every recorded entry whose seats of ours are exactly this candidate's, newest last."""
         return [row for row in self.rows if set(row.members_named) == names]
+
+    def repeats(self, names: set[str], blend: Blend) -> list[BoardRow]:
+        """Every recorded entry that IS this candidate: our members, foreign shares and fusion all equal."""
+        return [row for row in self.same_members(names) if self.recorded(row) == blend]
+
+    def variants(self, names: set[str], blend: Blend) -> list[str]:
+        """One line per entry sharing our members but not the blend, saying what differs. Never a refusal."""
+        return [self.varied(row, blend) for row in self.same_members(names) if self.recorded(row) != blend]
+
+    def varied(self, row: BoardRow, blend: Blend) -> str:
+        """The line for one such entry: the candidate's side first, the record's second."""
+        recorded = self.recorded(row)
+        differs = UNRECORDED if recorded is None else ", ".join(blend.differences(recorded))
+        return f"SAME members as {self.described(row)} but {differs}"
+
+    def recorded(self, row: BoardRow) -> Blend | None:
+        """The blend a row records, or None when it records none and its kernel runs a foreign seat.
+
+        A row saying neither field is all-ours rank ONLY if nothing foreign ran: a foreign entry left blank
+        because its shares were per-finding counts as differing, never as a match.
+        """
+        if row.foreign is not None or row.fusion is not None:
+            return Blend.of(row.foreign or {}, row.fusion or Fusion.RANK)
+        script = row.script(self.kernels)
+        return None if script.is_file() and KernelScript(script).marked_seats() else ALL_OURS
 
     def overlaps(self, names: set[str]) -> list[tuple[BoardRow, float]]:
         """Recorded entries sharing most of their seats with this candidate, most-shared first.
@@ -123,14 +153,39 @@ class SubmitCheck:
     @staticmethod
     def seats(kernel: Path) -> set[str] | None:
         """The members a kernel names plus the foreign seats it blends in, or None when its source does not say."""
-        scripts = sorted(kernel.glob("*.py"))
-        if not scripts:
-            return None
-        script = KernelScript(scripts[0])
-        if script.call() is None:
+        script = SubmitCheck.script(kernel)
+        if script is None or script.call() is None:
             return None
         names = script.member_names()
         return set(names) | script.foreign_seats() if names else None
+
+    def judge(self, command: cli.Command, kernel: str, entry: tuple[set[str], Blend], anyway: str) -> None:
+        """Refuse an entry the record holds whole; report, never refuse, one sharing only our members."""
+        named, blend = entry
+        command.report(self.variants(named, blend))
+        repeats = self.repeats(named, blend)
+        for row in repeats:
+            logger.info("SAME %d members, foreign and fusion as %s", len(named), self.described(row))
+        if not repeats:
+            command.report([f"ok {kernel}: {len(named)} members, no recorded entry pairs them so: {blend.described()}"])
+            return
+        if anyway:
+            logger.warning("SHIPPING A KNOWN REPEAT of %s: %s", kernel, anyway)
+            return
+        logger.error("REFUSED %s: this exact entry has already spent a slot. --anyway '<why>' to ship it again", kernel)
+        raise SystemExit(cli.Exit.FOUND)
+
+    @staticmethod
+    def blend(kernel: Path) -> Blend | None:
+        """The kernel's foreign shares and fusion, or None when its source runs a foreign seat it does not price."""
+        script = SubmitCheck.script(kernel)
+        return None if script is None else script.blend()
+
+    @staticmethod
+    def script(kernel: Path) -> KernelScript | None:
+        """The kernel directory's script, parsed, or None when it holds none."""
+        scripts = sorted(kernel.glob("*.py"))
+        return KernelScript(scripts[0]) if scripts else None
 
     @staticmethod
     def licence_refusals(shelves: list[Path], named: set[str]) -> list[str]:
@@ -178,24 +233,20 @@ def main() -> None:
         logger.error("LICENCE %s: %s", kernel.name, refusal)
     command.conclude(refusals, "licence refusal(s)")
 
-    shipped = SubmitCheck(BoardCensus(record=arguments.record).rows())
+    shipped = SubmitCheck(BoardCensus(record=arguments.record).rows(), arguments.kernels)
     Denominator(len(shipped.rows), "no recorded entry names its members, so nothing could be compared").refuse_empty()
 
     for row, part in shipped.overlaps(named):
         logger.info("overlaps %.0f%% of %s", 100 * part, shipped.described(row))
     for warning in TriedIdea.warnings(arguments.record, arguments.idea, kernel.name):
         logger.warning("%s", warning)
-    repeats = shipped.repeats(named)
-    for row in repeats:
-        logger.info("SAME %d members as %s", len(named), shipped.described(row))
-    if not repeats:
+    if not shipped.same_members(named):
         command.report([f"ok {kernel.name}: {len(named)} members, no recorded entry carries this set"])
         return
-    if arguments.anyway:
-        logger.warning("SHIPPING A KNOWN REPEAT of %s: %s", kernel.name, arguments.anyway)
-        return
-    logger.error("REFUSED %s: this member set has already spent a slot. --anyway '<why>' to ship it again", kernel.name)
-    raise SystemExit(cli.Exit.FOUND)
+    blend = SubmitCheck.blend(kernel)
+    if blend is None:
+        command.unknown(f"{kernel.name} runs a foreign seat whose shares its source does not state as scalars")
+    shipped.judge(command, kernel.name, (named, blend), arguments.anyway)
 
 
 if __name__ == "__main__":
