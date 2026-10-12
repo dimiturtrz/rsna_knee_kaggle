@@ -7,10 +7,13 @@ free and no Kaggle session — the whole point is to make it cheap enough to run
 """
 
 import ast
-from collections.abc import Iterator
+import operator
+from collections.abc import Callable, Iterator, Mapping
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeGuard
 
+from kneemri.kaggle.blend_shape import SHAPES, Fusion, Split
 from kneemri.kaggle.raptor_run import DEFAULT_WEIGHTS
 
 KERNEL_RUN = "KernelRun"
@@ -33,6 +36,65 @@ BOARD_NAMES = {"raptor_ft_coatnet_v4_full_swa": "raptor_v4_swa"}
 SELECTION = "names"
 """Its one keyword whose value resolves statically. `members=N` is `strongest(N)`, a ranking over
 recorded holdouts that a parse cannot evaluate, so it reads as the whole package instead."""
+
+FOREIGN_TABLES = {
+    "nartaa_seat.csv": "nartaa384",
+    "ours_sub.csv": "heliosli_s6",
+    "reader_seat.csv": "goodpjw_convnext",
+    "reader_ranks.csv": "goodpjw_convnext",
+}
+"""The table a foreign producer writes inside a kernel, by the seat name `comp/board.jsonl` records its share under."""
+
+FOREIGN_MARKERS = {
+    **FOREIGN_TABLES,
+    "nartaa_mirror.py": "nartaa384",
+    "nartaa_probs.csv": "nartaa384",
+    "nartaa_0945.py": "nartaa224",
+    "helios_s6.py": "heliosli_s6",
+    "cnxt_v0_fold0.pt": "goodpjw_convnext",
+}
+"""Every literal that says a foreign producer runs. A kernel carrying one whose blend this parse cannot resolve
+is UNKNOWN, never all-ours: a per-finding share table or a nested wave has no scalar share to compare."""
+
+PROBIT_TRANSFORM = "ndtri"
+"""The inverse normal CDF a probit fusion maps each table's ranks through before the weighted sum."""
+
+SHARE_PLACES = 4
+"""Shares compare at four decimals, so a kernel's `2.0 / 3.0` meets the record's 0.6667."""
+
+ARITHMETIC: dict[type[ast.operator], Callable[[float, float], float]] = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+}
+
+
+@dataclass(frozen=True)
+class Blend:
+    """The part of an entry's identity outside our members: each foreign seat's share, and the fusion."""
+
+    foreign: tuple[tuple[str, float], ...]
+    fusion: Fusion
+
+    @classmethod
+    def of(cls, foreign: Mapping[str, float], fusion: str) -> "Blend":
+        """A blend with its shares rounded and ordered, so two spellings of one blend compare equal."""
+        rounded = sorted((seat, round(share, SHARE_PLACES)) for seat, share in foreign.items())
+        return cls(tuple(rounded), Fusion(fusion))
+
+    def described(self) -> str:
+        """The blend as a reader writes it: `foreign {seat: share}, fusion rank`."""
+        return f"foreign {dict(self.foreign)}, fusion {self.fusion}"
+
+    def differences(self, other: "Blend") -> list[str]:
+        """One `<axis> mine vs theirs` phrase per axis that differs; empty when the two are one entry."""
+        axes = (("foreign", dict(self.foreign), dict(other.foreign)), ("fusion", str(self.fusion), str(other.fusion)))
+        return [f"{axis} {mine} vs {theirs}" for axis, mine, theirs in axes if mine != theirs]
+
+
+ALL_OURS = Blend((), Fusion.RANK)
+"""An entry blending no foreign seat, which is also what a record row without the two fields says."""
 
 
 class KernelScript:
@@ -163,3 +225,117 @@ class KernelScript:
             and any(isinstance(target, ast.Name) and target.id == name for target in node.targets)
         ]
         return assignments[-1] if assignments else None
+
+    def marked_seats(self) -> set[str]:
+        """The foreign seats the script's literals say it runs, whether or not its blend resolves."""
+        return {
+            FOREIGN_MARKERS[node.value]
+            for node in ast.walk(self.tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value in FOREIGN_MARKERS
+        }
+
+    def blend(self) -> Blend | None:
+        """The foreign shares and the fusion, or None when a foreign seat runs and no single blend prices it.
+
+        A blend call counts only if it resolves every table and share AND covers every seat the script's
+        literals mark, so a per-finding share table or a nested wave reads as unknown, never as a guess.
+        """
+        marked = self.marked_seats()
+        if not marked:
+            return ALL_OURS
+        resolved = {self._resolved(split) for split in self._splits()}
+        covering = {blend for blend in resolved if blend is not None and marked <= dict(blend.foreign).keys()}
+        return next(iter(covering)) if len(covering) == 1 else None
+
+    def _splits(self) -> list[Split]:
+        probit = any(isinstance(node, ast.Name) and node.id == PROBIT_TRANSFORM for node in ast.walk(self.tree))
+        calls = [node for node in ast.walk(self.tree) if isinstance(node, ast.Call)]
+        splits = [shape.split(call, probit=probit) for call in calls for shape in SHAPES]
+        return [split for split in splits if split is not None]
+
+    def _resolved(self, split: Split) -> Blend | None:
+        resolved = [self._tables(expression, frozenset()) for expression in split.tables]
+        tables = [table for found in resolved if found is not None for table in found]
+        weights = self._numbers(split.weights, frozenset())
+        if weights is None or None in resolved:
+            return None
+        shares = [1.0 - sum(weights), *weights] if split.remainder else weights
+        if len(shares) != len(tables) or None in tables:
+            return None
+        foreign: dict[str, float] = {}
+        for table, share in zip(tables, shares, strict=True):
+            seat = FOREIGN_TABLES.get(str(table))
+            if seat is not None:
+                foreign[seat] = foreign.get(seat, 0.0) + share
+        return Blend.of(foreign, split.fusion)
+
+    def _tables(self, expression: ast.expr, seen: frozenset[str]) -> list[str | None] | None:
+        """The table filenames an expression holds, in order: a tuple, a comprehension over one, a slice of either."""
+        if isinstance(expression, ast.Subscript):
+            base = self._tables(expression.value, seen)
+            return None if base is None else self._picked(base, expression.slice)
+        if isinstance(expression, ast.Name):
+            assigned = None if expression.id in seen else self._assigned(expression.id)
+            return None if assigned is None else self._tables(assigned, seen | {expression.id})
+        if isinstance(expression, ast.ListComp):
+            return self._tables(expression.generators[0].iter, seen)
+        if isinstance(expression, ast.Tuple | ast.List):
+            return [self._table(element, seen) for element in expression.elts]
+        return [self._table(expression, seen)]
+
+    def _table(self, expression: ast.expr, seen: frozenset[str]) -> str | None:
+        """One table's filename: a literal, the right side of `working / name`, a read of it, through a variable."""
+        if isinstance(expression, ast.Constant) and isinstance(expression.value, str):
+            return expression.value
+        if isinstance(expression, ast.BinOp) and isinstance(expression.op, ast.Div):
+            return self._table(expression.right, seen)
+        if isinstance(expression, ast.Call) and expression.args:
+            return self._table(expression.args[0], seen)
+        if isinstance(expression, ast.Name) and expression.id not in seen:
+            assigned = self._assigned(expression.id)
+            return None if assigned is None else self._table(assigned, seen | {expression.id})
+        return None
+
+    @staticmethod
+    def _picked(base: list[str | None], index: ast.expr) -> list[str | None] | None:
+        """`base[i]` as a one-table list, or `base[i:j]` with literal bounds; None for anything computed."""
+        position = KernelScript._integer(index)
+        if position is not None:
+            return base[position : position + 1] or None
+        if not isinstance(index, ast.Slice) or index.step is not None:
+            return None
+        written = (index.lower, index.upper)
+        lower, upper = (None if bound is None else KernelScript._integer(bound) for bound in written)
+        computed = (bound is not None and value is None for bound, value in zip(written, (lower, upper), strict=True))
+        return None if any(computed) else base[lower:upper]
+
+    @staticmethod
+    def _integer(node: ast.expr) -> int | None:
+        if isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool):
+            return node.value
+        return None
+
+    def _numbers(self, expression: ast.expr, seen: frozenset[str]) -> list[float] | None:
+        """A literal sequence of shares, or one share as a list of one, through a variable."""
+        if isinstance(expression, ast.Name) and expression.id not in seen:
+            assigned = self._assigned(expression.id)
+            return None if assigned is None else self._numbers(assigned, seen | {expression.id})
+        elements = expression.elts if isinstance(expression, ast.Tuple | ast.List) else [expression]
+        numbers = [self._number(element, seen) for element in elements]
+        return None if None in numbers else [number for number in numbers if number is not None]
+
+    def _number(self, expression: ast.expr, seen: frozenset[str]) -> float | None:
+        """Constant arithmetic over literals and module constants such as `1.0 - OURS`; None for anything else."""
+        if isinstance(expression, ast.Constant) and isinstance(expression.value, int | float):
+            return None if isinstance(expression.value, bool) else float(expression.value)
+        if isinstance(expression, ast.UnaryOp) and isinstance(expression.op, ast.USub):
+            operand = self._number(expression.operand, seen)
+            return None if operand is None else -operand
+        if isinstance(expression, ast.Name) and expression.id not in seen:
+            assigned = self._assigned(expression.id)
+            return None if assigned is None else self._number(assigned, seen | {expression.id})
+        if not isinstance(expression, ast.BinOp):
+            return None
+        applied = ARITHMETIC.get(type(expression.op))
+        left, right = self._number(expression.left, seen), self._number(expression.right, seen)
+        return None if applied is None or left is None or right is None else applied(left, right)

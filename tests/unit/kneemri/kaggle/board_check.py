@@ -72,6 +72,10 @@ def test_parsed():
 
     searched = BoardRow.parsed(SEARCHED)
     assert (searched.selection, searched.offline_raw, searched.date) == (SEARCH, 0.8731, "2026-08-31")
+    assert (searched.foreign, searched.fusion) == (None, None), "a row without the blend fields leaves them unsaid"
+
+    blended = BoardRow.parsed({**SEARCHED, "foreign": {"nartaa384": 0.6667}, "fusion": "probit"})
+    assert (blended.foreign, blended.fusion) == ({"nartaa384": 0.6667}, "probit")
 
 
 def test_script(tmp_path: Path):

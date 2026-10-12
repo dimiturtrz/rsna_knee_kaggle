@@ -1,18 +1,31 @@
 """Whether the board already holds a candidate's exact member set, read without spending a slot."""
 
 import json
+import logging
+from collections.abc import Mapping
 from pathlib import Path
 
+import pytest
+
+from core import cli
+from kneemri.kaggle.blend_shape import Fusion
 from kneemri.kaggle.board_check import BoardRow
-from kneemri.kaggle.submit_check import SubmitCheck, TriedIdea
+from kneemri.kaggle.kernel_script import ALL_OURS, Blend
+from kneemri.kaggle.submit_check import UNRECORDED, SubmitCheck, TriedIdea
 
 PEAK8 = ("a", "b", "c")
 
 
-def _row(identifier: str, members: tuple[str, ...], *, board: float | None = 0.932) -> BoardRow:
-    return BoardRow.parsed(
-        {"ref": "55751365", "id": identifier, "board": board, "members_named": list(members), "date": "2026-08-24"}
-    )
+SEAT_THIRD = Blend.of({"nartaa384": 1 / 3}, "rank")
+SEAT_PROBIT = Blend.of({"nartaa384": 1 / 3}, "probit")
+MARKED = 'KernelRun(names=("a",)).run()\nload("nartaa_seat.csv")\n'
+
+
+def _row(
+    identifier: str, members: tuple[str, ...], *, board: float | None = 0.932, blend: Mapping[str, object] | None = None
+) -> BoardRow:
+    fields = {"ref": "55751365", "id": identifier, "board": board, "members_named": list(members), "date": "2026-08-24"}
+    return BoardRow.parsed({**fields, **(blend or {})})
 
 
 def _kernel(tmp_path: Path, name: str, body: str) -> Path:
@@ -22,11 +35,88 @@ def _kernel(tmp_path: Path, name: str, body: str) -> Path:
     return kernel
 
 
-def test_repeats():
+def _foreign(identifier: str, fusion: str = "rank") -> BoardRow:
+    return _row(identifier, PEAK8, blend={"foreign": {"nartaa384": 0.3333}, "fusion": fusion})
+
+
+def test_same_members():
     """Set equality, not order and not the kernel's name — renaming is what happens between attempts."""
     shipped = SubmitCheck([_row("peak8_v1", PEAK8), _row("other_v1", ("a", "b", "d"))])
-    matched = shipped.repeats({"c", "b", "a"})
+    matched = shipped.same_members({"c", "b", "a"})
     assert [row.identifier for row in matched] == ["peak8_v1"], "a reordered tuple is the same entry"
+
+
+def test_repeats(tmp_path: Path):
+    """Only members AND foreign shares AND fusion all equal make a repeat; any one axis apart is a new entry."""
+    shipped = SubmitCheck([_row("plain_v1", PEAK8), _foreign("third_v1"), _foreign("probit_v1", "probit")], tmp_path)
+    assert [row.identifier for row in shipped.repeats(set(PEAK8), ALL_OURS)] == ["plain_v1"]
+    assert [row.identifier for row in shipped.repeats(set(PEAK8), SEAT_THIRD)] == ["third_v1"]
+    assert [row.identifier for row in shipped.repeats(set(PEAK8), SEAT_PROBIT)] == ["probit_v1"]
+    assert shipped.repeats(set(PEAK8), Blend.of({"nartaa384": 0.5}, "rank")) == [], "another share is another entry"
+    assert shipped.repeats({"a", "b"}, ALL_OURS) == [], "the blend never rescues different members"
+
+
+def test_variants(tmp_path: Path):
+    """Every same-members row whose blend differs gets one line; the matching row gets none."""
+    shipped = SubmitCheck([_row("plain_v1", PEAK8), _foreign("third_v1"), _foreign("probit_v1", "probit")], tmp_path)
+    lines = shipped.variants(set(PEAK8), SEAT_PROBIT)
+    assert len(lines) == len(["plain_v1", "third_v1"])
+    assert all(line.startswith("SAME members as") for line in lines)
+    assert not any("probit_v1" in line for line in lines), "the repeat itself is not a variant"
+
+
+def test_varied(tmp_path: Path):
+    """The line names exactly the axes that differ, and a blank foreign row says it is unrecorded."""
+    shipped = SubmitCheck([], tmp_path)
+    assert shipped.varied(_foreign("third_v1"), SEAT_PROBIT).endswith("but fusion probit vs rank")
+    assert "foreign {} vs {'nartaa384': 0.3333}" in shipped.varied(_foreign("third_v1"), ALL_OURS)
+    _kernel(tmp_path, "kneemri-blank", MARKED)
+    assert shipped.varied(_row("blank_v1", PEAK8), SEAT_THIRD).endswith(UNRECORDED)
+
+
+def test_recorded(tmp_path: Path):
+    """Fields win; a blank row is all-ours unless its own kernel runs a foreign seat, which makes it unknown."""
+    shipped = SubmitCheck([], tmp_path)
+    assert shipped.recorded(_foreign("third_v1")) == SEAT_THIRD
+    assert shipped.recorded(_row("fused_v1", PEAK8, blend={"fusion": "probit"})) == Blend((), Fusion.PROBIT)
+    assert shipped.recorded(_row("gone_v1", PEAK8)) == ALL_OURS, "no surviving script and no fields: all ours"
+    _kernel(tmp_path, "kneemri-ours", 'KernelRun(names=("a",)).run()\n')
+    assert shipped.recorded(_row("ours_v1", PEAK8)) == ALL_OURS
+    _kernel(tmp_path, "kneemri-blank", MARKED)
+    assert shipped.recorded(_row("blank_v1", PEAK8)) is None, "a foreign entry left blank is never a match"
+
+
+def test_judge(tmp_path: Path):
+    """A whole repeat refuses unless `--anyway` says why; members alone shared with another blend ships."""
+    shipped = SubmitCheck([_foreign("third_v1")], tmp_path)
+    command = cli.Command("a test check", logging.getLogger(__name__))
+    entry = (set(PEAK8), SEAT_THIRD)
+    with pytest.raises(SystemExit) as refused:
+        shipped.judge(command, "kneemri-third", entry, "")
+    assert refused.value.code == cli.Exit.FOUND
+    assert shipped.judge(command, "kneemri-third", entry, "re-reading the scorer") is None
+    assert shipped.judge(command, "kneemri-probit", (set(PEAK8), SEAT_PROBIT), "") is None, "a variant never refuses"
+
+
+def test_blend(tmp_path: Path):
+    """A kernel's blend through its script; no script reads as None, never as all-ours."""
+    seated = _kernel(
+        tmp_path, "kneemri-seated", MARKED + 'RaptorSeat.combined("ours.csv", working / "nartaa_seat.csv", (1 / 3,))\n'
+    )
+    assert SubmitCheck.blend(seated) == SEAT_THIRD
+    assert SubmitCheck.blend(_kernel(tmp_path, "kneemri-plain", "KernelRun().run()\n")) == ALL_OURS
+    empty = tmp_path / "kneemri-empty"
+    empty.mkdir()
+    assert SubmitCheck.blend(empty) is None
+
+
+def test_script(tmp_path: Path):
+    """The directory's script parsed, or None when it holds no python."""
+    kernel = _kernel(tmp_path, "kneemri-named", "KernelRun().run()\n")
+    parsed = SubmitCheck.script(kernel)
+    assert parsed is not None
+    assert parsed.call() is not None
+    assert SubmitCheck.script(tmp_path) is None
 
 
 def test_overlaps():
