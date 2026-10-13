@@ -5031,3 +5031,22 @@ and stride 2 does not move the board at 0.001 resolution, and s6third's hidden S
 a sparser pass recovers. Two consequences. The `*dense2` follow-ups (`s6oaifreedense2`, `s6sevendense2`), gated on
 >=0.957, are retired. And stride 2 is a free ~half cut of S6's hidden runtime (~3.3 h -> ~1.7 h projected), which is the
 headroom a fourth producer would need inside the 9 h limit.
+
+## s6mavit_v1 — 0.955, ref 57115920, 2026-10-12 — hengck23's MaViT as a fourth producer at 1/8: DILUTES, MaViT closed as a seat at 1/8
+
+s6dense2 (0.956) with every share scaled by 7/8 and hengck23's MALA-T MaViT reader (MIT, `hengck23/hengck23-rnsa-knee`
+`00000008.pth`, loaded `weights_only=True`) at 1/8: nartaa 7/16, S6 7/24, soups 7/96 each, rank space. MaViT runs as a
+subprocess from `dimiturnt/mavit-seat-src` before S6, inside the slack stride 2 freed. Kaggle version 2, the source in the
+repo; v1 was the same blend with the nartaa table bound by a walrus, which `submit_check` could not resolve (UNKNOWN, exit
+2), so v2 spells the path literally and `mavit_sub.csv` maps to the `hengck23_mavit` seat.
+
+Evidence it was shipped on: `kneemri-mavitgold` scored the checkpoint on the 58 organiser-gold studies at macro 0.9202,
+1.77 s/study on T4, against `band_dense_hold_s2026` 0.8956, paired +0.0247 [+0.0048, +0.0469] (`annotated_readings`).
+Its lift sits where ours is weakest: Effusion 0.980 vs 0.852, Synovitis 0.823 vs 0.752, Contusion 0.942 vs 0.896,
+Lateral OA 0.826 vs 0.787; ours leads PF OA and ACL. Its training data is unstated, so gold58 may be in-sample for it,
+which is why the share is 1/8 and the board, not gold58, decides. Visible run: 0 MAVIT FAILED, S6 PASS, 0 fallbacks,
+blend recomputed from the five frames to 1e-16.
+
+PRE-REG (s6dense2 0.956, resolution 0.001, top-band residual sd 0.0013 @ledger75): >= 0.957 lifts and becomes pick 1,
+the 1/4 point (`kneemri-s6mavit25`) earns the next slot; 0.956 flat closes MaViT at 1/8 as a seat; <= 0.955 dilutes.
+RESULT: **0.955**, one below s6dense2's 0.956 at the board's 0.001 resolution (inside the top band's ~2 sd of 0.0026, so direction only). The gold58 lead (+0.0247 paired) did not transfer: either gold58 was in-sample for hengck23's weights (training data unstated) or scaling the 0.956 core by 7/8 cost more than a fourth reader adds. The 1/4 point (`kneemri-s6mavit25`) and `s6r7mavit` stay on the shelf unshipped; the R7 line takes the slots (`s6r7_v1`, ref 57130546, 2026-10-13).
