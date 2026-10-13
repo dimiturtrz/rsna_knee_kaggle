@@ -133,13 +133,15 @@ def main() -> None:
     )
     subprocess.run([sys.executable, "/tmp/nartaa_full_view.py"], check=True, cwd=working)
     shutil.move(working / "submission.csv", working / "nartaa_seat.csv")
-    spent = time.time() - started
 
-    serving = Serving(vote=LogitAverage(), budget=Budget(seconds=max(KERNEL_SECONDS - spent, 0.0) / 4.0))
+    serving = Serving(
+        vote=LogitAverage(), budget=Budget(seconds=max(KERNEL_SECONDS - (time.time() - started), 0.0) / 4.0)
+    )
     ours_mounts = Mounts(skip=MOUNTED_SERIES | heliosli_mounts)
-    for soup, table in (("basinsoup_ff_k4_s2026", "soup_ff.csv"), ("basinsoup_dmlb_k7_s2026", "soup_dmlb.csv")):
-        KernelRun(names=(soup,), overlap=False, serving=serving, mounts=ours_mounts).run()
-        shutil.move(working / "submission.csv", working / table)
+    KernelRun(names=("basinsoup_ff_k4_s2026",), overlap=False, serving=serving, mounts=ours_mounts).run()
+    shutil.move(working / "submission.csv", working / "soup_ff.csv")
+    KernelRun(names=("basinsoup_dmlb_k7_s2026",), overlap=False, serving=serving, mounts=ours_mounts).run()
+    shutil.move(working / "submission.csv", working / "soup_dmlb.csv")
     gc.collect()
     torch.cuda.empty_cache()
 
