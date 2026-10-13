@@ -20,5 +20,7 @@
  "model_sources": [
   "metaresearch/dinov2/PyTorch/small/1",
   "metaresearch/dinov2/PyTorch/base/1"
- ]
+ ],
+ "docker_image": "gcr.io/kaggle-private-byod/python@sha256:37c64f7dd9c54116ecd1bcc88817c5469b88387388fade02bfa8bf3fc647d461",
+ "docker_image_pinning_type": "original"
 }
