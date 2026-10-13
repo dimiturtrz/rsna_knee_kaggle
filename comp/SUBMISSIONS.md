@@ -5050,3 +5050,18 @@ blend recomputed from the five frames to 1e-16.
 PRE-REG (s6dense2 0.956, resolution 0.001, top-band residual sd 0.0013 @ledger75): >= 0.957 lifts and becomes pick 1,
 the 1/4 point (`kneemri-s6mavit25`) earns the next slot; 0.956 flat closes MaViT at 1/8 as a seat; <= 0.955 dilutes.
 RESULT: **0.955**, one below s6dense2's 0.956 at the board's 0.001 resolution (inside the top band's ~2 sd of 0.0026, so direction only). The gold58 lead (+0.0247 paired) did not transfer: either gold58 was in-sample for hengck23's weights (training data unstated) or scaling the 0.956 core by 7/8 cost more than a fourth reader adds. The 1/4 point (`kneemri-s6mavit25`) and `s6r7mavit` stay on the shelf unshipped; the R7 line takes the slots (`s6r7_v1`, ref 57130546, 2026-10-13).
+
+## s6r7solo_v1 — 0.957, ref 57132795, 2026-10-13 — heliosli's retrained R7 bundle in S6's seat: LIFTS, new champion
+
+`kneemri-s6r7solo`: s6dense2's shape with the heliosli seat swapped from S6 to the retrained R7 bundle
+(`8c7b666e27dc0e8f`, the producer behind heliosli's public 0.957 notebook): nartaa 1/2, R7 1/3, soups 1/12 each, rank
+space. run_check 2 of 2, blend recomputed from its own frames to 1e-16.
+
+PRE-REG (s6dense2 0.956): >= 0.957 lifts and becomes pick 1; 0.956 flat; <= 0.955 R7 worse than S6.
+RESULT: **0.957**, one above every s6-family entry and pinned in `comp/champion.json` (kit `5fea6702`). One tick at the
+board's 0.001 resolution is direction, not a finding (top-band residual sd 0.0013 @ledger75), but it moves us from the
+0.956 tier (~rank 424 of 5895 at the 08:24Z read) into the 0.957 tier (~rank 119). A pure copy of heliosli's notebook
+(R7 + nartaa 0.5/0.5, no seat of ours) reads 0.956 by its own authors, so our soups at 1/6 are what this entry adds.
+Same-day follow-ups pending: `s6r7_v1` (S6 1/6 + R7 1/6, ref 57130546) and `s6ourquarter_v1` (soups 1/8 each, ref
+57132831). The slot after them is pre-registered: `kneemri-s6r7soloquarter` if ours at 1/4 lifts, else
+`kneemri-s6r7light` (R7 1/4, nartaa 7/12 — the untested side of the share, since S6 at 1/2 read 0.955 against 0.956 at 1/3).
