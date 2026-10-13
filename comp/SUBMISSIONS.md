@@ -5074,3 +5074,16 @@ Same-day follow-ups pending: `s6r7_v1` (S6 1/6 + R7 1/6, ref 57130546) and `s6ou
 - `s6ourquarter_v1` (soups 1/8 each, S6 0.30, nartaa 0.45; pre-reg vs `s6third` 0.956) reads **0.956**: FLAT. Our share
   at 1/4 instead of 1/6 does not lift, so `kneemri-s6r7soloquarter` (the stacked follow-up, gated on >= 0.957) is retired.
 - Slot 4 goes to `kneemri-s6r7light` (R7 1/4, nartaa 7/12) per the tree written before these read.
+
+## s6r7light_v1 — 0.956, ref 57148827, 2026-10-13 — R7 at 1/4, nartaa 7/12: one tick under, R7 1/3 stays
+
+`kneemri-s6r7light`: `s6r7solo`'s shape with the R7 share cut from 1/3 to 1/4 and the freed 1/12 given to nartaa
+(R7 1/4, nartaa 7/12, soups 1/12 each, rank space). run_check 2 of 2, blend recomputed from its own frames to 1.1e-16.
+The untested side of the heliosli share: S6 at 1/2 had read 0.955 against 0.956 at 1/3, so the step is downward.
+
+PRE-REG (B = `s6r7solo_v1` 0.957): > B lifts, pin it, slot 5 = `kneemri-s6r7sixth` (R7 1/6, nartaa 2/3); = B flat, 1/4
+and 1/3 bracket a flat top and the share axis closes; < B, 1/3 is the optimum. Either non-lift sends slot 5 to
+`kneemri-tblendsolo` v2, the efficiency-track instrument (knee-p844l).
+RESULT: **0.956**. The pre-registered < B branch fires: R7 1/4 reads 0.956 against 0.957 at 1/3, the same shape as the S6 curve (1/6 .955, 1/3 .956, 1/2 .955), so both heliosli readers peak at a 1/3 share and `s6r7solo_v1` stays the pin. Slot 5 goes to `kneemri-tblendsolo` v2 and `s6r7sixth` is not shipped (it was gated on a lift). A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
+scatter, so this reads as public RANK, not as a better model; the 0.957 tier holds ~118 teams with ties broken by
+submission time, and 0.958 holds 78.
