@@ -5065,3 +5065,12 @@ board's 0.001 resolution is direction, not a finding (top-band residual sd 0.001
 Same-day follow-ups pending: `s6r7_v1` (S6 1/6 + R7 1/6, ref 57130546) and `s6ourquarter_v1` (soups 1/8 each, ref
 57132831). The slot after them is pre-registered: `kneemri-s6r7soloquarter` if ours at 1/4 lifts, else
 `kneemri-s6r7light` (R7 1/4, nartaa 7/12 — the untested side of the share, since S6 at 1/2 read 0.955 against 0.956 at 1/3).
+
+## s6r7_v1 — 0.957, ref 57130546 · s6ourquarter_v1 — 0.956, ref 57132831 — 2026-10-13: neither moves the board
+
+- `s6r7_v1` (S6 1/6 + R7 1/6 in the heliosli seat, soups 1/12 each, nartaa 1/2) reads **0.957**, tying `s6r7solo_v1`.
+  Splitting the heliosli seat between its two producers neither adds nor costs at 0.001; `s6r7solo` keeps the pin
+  (same tier, reached first).
+- `s6ourquarter_v1` (soups 1/8 each, S6 0.30, nartaa 0.45; pre-reg vs `s6third` 0.956) reads **0.956**: FLAT. Our share
+  at 1/4 instead of 1/6 does not lift, so `kneemri-s6r7soloquarter` (the stacked follow-up, gated on >= 0.957) is retired.
+- Slot 4 goes to `kneemri-s6r7light` (R7 1/4, nartaa 7/12) per the tree written before these read.
