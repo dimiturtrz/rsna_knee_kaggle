@@ -18341,3 +18341,21 @@ Readings:
 
 What this does NOT rule out: training on a model-derived soft target read on the BOARD (knee-p0s4f). The holdout
 ruler is the report table, so it cannot see that lever: `interpretations/kneemri/2026-10-09_levers_before_final_picks.md`.
+
+### lw20_targetblend — knee-p0s4f target blend on the 20sl labelwise line (2026-10-13)
+
+`labelwise_dense_drop40_long_targetblend_s2026`: `labelwise_dense_drop40_long` verbatim, ONE input changed —
+`--labels blend_oof_a07_cal.csv` (0.3 calibrated report_labels_v2 + 0.7 teacher_clean_full five-fold OOF,
+fold excluded), `--eval-labels report_labels_v2`. 24 epochs, s2026, ~190 s/epoch.
+
+| run | midpoint best (ep) | ledger75 | pair w/ dmlb_k4 @ledger75 | rankcorr w/ dmlb_k4 |
+|---|---|---|---|---|
+| control labelwise_dense_drop40_long_s2026 | 0.8672 (23) | 0.9048 | 0.9105 | 0.937 |
+| replaced seat basinsoup_dmlb_k7_s2026 | — | 0.9096 | 0.9095 | 0.998 |
+| targetblend | 0.8594 (21) | 0.8891 | 0.9042 | 0.929 |
+
+Training curve trailed control by 0.006-0.010 midpoint from e12 on (control 0.8623 / tblend 0.8525 at e12;
+0.8669 / 0.8577 at e18). Pre-registered: ledger75 null-or-negative by construction (report ruler cannot see a
+move toward the teacher); more than 0.02 below control = lost signal, not seated. Otherwise the board decides
+via `kneemri-s6tblend` (s6dense2 with the dmlb_k7 1/12 seat swapped) against s6dense2 0.956.
+VERDICT: SEATABLE, NOT FAVOURED. -0.0157 ledger75 against control is inside the 0.02 kill bar, so the pre-registration sends it to the board. But its pair (0.9042) sits BELOW both the control pair (0.9105) and the seat it would replace (dmlb_k7 0.9095): more diverse than the soups (corr 0.929 vs 0.998) yet too weak for diversity to pay at 50/50. The ruler is report-derived and cannot see a move toward the teacher, so this is direction, not refutation. kneemri-s6tblend stays the LAST slot in the queue, an instrument at P(>=0.957) ~0.05-0.10.

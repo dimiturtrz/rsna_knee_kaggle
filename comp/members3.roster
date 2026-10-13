@@ -91,3 +91,4 @@ headlr_ship_ffp.pt          # DARK, fold -1. headlr_ship's refit STOPPED at e17,
                             # kept. headlr_ship_ff shipped e23 and boarded 0.938; the twin decays 0.0027
                             # midpoint from e17 to e23. Shelved as an INSTRUMENT for the stop-at-peak
                             # refit question, never as a champion candidate. knee-yatne.
+labelwise_dense_drop40_long_targetblend_s2026.pt  # knee-p0s4f target-blend (0.3 cal v2 + 0.7 teacher_clean) on the 20sl labelwise line; ledger75 0.8891 vs control 0.9048 (-0.016, inside the 0.02 kill bar). Board decides via kneemri-s6tblend.
