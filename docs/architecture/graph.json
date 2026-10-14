@@ -3993,6 +3993,12 @@
     {
       "kind": "import",
       "source": "kneemri.experiments.arm_diff",
+      "target": "kneemri.training.config_tree",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.experiments.arm_diff",
       "target": "kneemri.training.recipe_layers",
       "weight": 1
     },
@@ -6849,12 +6855,6 @@
     {
       "kind": "import",
       "source": "kneemri.training.config_tree",
-      "target": "kneemri.models.model",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.config_tree",
       "target": "kneemri.models.slice_pooling",
       "weight": 1
     },
@@ -6862,6 +6862,12 @@
       "kind": "import",
       "source": "kneemri.training.config_tree",
       "target": "kneemri.models.slot_head",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
+      "target": "kneemri.models.study_design",
       "weight": 1
     },
     {
@@ -7444,6 +7450,12 @@
       "kind": "import",
       "source": "kneemri.training.pseudo_table",
       "target": "kneemri.runs.holdout_record",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.recipe_layers",
+      "target": "core.paths",
       "weight": 1
     },
     {
@@ -22053,13 +22065,13 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
-      "target": "kneemri.experiments.arm_diff.ArmDiff.undeclared",
+      "target": "kneemri.experiments.arm_diff.ArmDiff.resolved",
       "weight": 1
     },
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
-      "target": "kneemri.experiments.arm_diff.ArmDiff.values",
+      "target": "kneemri.experiments.arm_diff.ArmDiff.undeclared",
       "weight": 1
     },
     {
@@ -22072,6 +22084,18 @@
       "kind": "calls",
       "source": "kneemri.experiments.arm_diff.ArmDiff.mismatched",
       "target": "kneemri.experiments.arm_header.ArmHeader.deliberate",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.resolved",
+      "target": "kneemri.training.config_tree.TrainConfig.flags",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_diff.ArmDiff.resolved",
+      "target": "kneemri.training.config_tree.TrainConfig.of",
       "weight": 1
     },
     {
@@ -33279,6 +33303,12 @@
     {
       "kind": "calls",
       "source": "kneemri.training.config_tree.TrainConfig._declare",
+      "target": "kneemri.training.config_tree.TrainConfig._flag",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.config_tree.TrainConfig._declare",
       "target": "kneemri.training.config_tree.TrainConfig._reader",
       "weight": 1
     },
@@ -33286,6 +33316,12 @@
       "kind": "calls",
       "source": "kneemri.training.config_tree.TrainConfig.addresses",
       "target": "kneemri.training.config_tree.TrainConfig._under",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.config_tree.TrainConfig.flags",
+      "target": "kneemri.training.config_tree.TrainConfig._flag",
       "weight": 1
     },
     {
@@ -34820,6 +34856,18 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.training.recipe_layers.RecipeLayers._rooted",
+      "target": "kneemri.training.recipe_layers.RecipeLayers._roots",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.recipe_layers.RecipeLayers._roots",
+      "target": "core.paths.DataRoot.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.training.recipe_layers.RecipeLayers._tables",
       "target": "kneemri.training.recipe_layers.RecipeLayers._expanded",
       "weight": 1
@@ -34852,6 +34900,12 @@
       "kind": "calls",
       "source": "kneemri.training.recipe_layers.RecipeLayers.sources",
       "target": "kneemri.training.recipe_layers.RecipeLayers._named",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.training.recipe_layers.RecipeLayers.sources",
+      "target": "kneemri.training.recipe_layers.RecipeLayers._rooted",
       "weight": 1
     },
     {
@@ -56074,6 +56128,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.experiments.arm_diff.ArmDiff.resolved",
+      "label": "resolved",
+      "level": "method",
+      "parent": "kneemri.experiments.arm_diff.ArmDiff",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.experiments.arm_diff.ArmDiff.twinned",
       "label": "twinned",
       "level": "method",
@@ -65850,6 +65912,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.training.config_tree.TrainConfig._flag",
+      "label": "_flag",
+      "level": "method",
+      "parent": "kneemri.training.config_tree.TrainConfig",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.training.config_tree.TrainConfig._reader",
       "label": "_reader",
       "level": "method",
@@ -65876,6 +65946,14 @@
       "descendants": 0,
       "id": "kneemri.training.config_tree.TrainConfig.addresses",
       "label": "addresses",
+      "level": "method",
+      "parent": "kneemri.training.config_tree.TrainConfig",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.config_tree.TrainConfig.flags",
+      "label": "flags",
       "level": "method",
       "parent": "kneemri.training.config_tree.TrainConfig",
       "role": null
@@ -67436,6 +67514,22 @@
       "descendants": 0,
       "id": "kneemri.training.recipe_layers.RecipeLayers._named",
       "label": "_named",
+      "level": "method",
+      "parent": "kneemri.training.recipe_layers.RecipeLayers",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.recipe_layers.RecipeLayers._rooted",
+      "label": "_rooted",
+      "level": "method",
+      "parent": "kneemri.training.recipe_layers.RecipeLayers",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.training.recipe_layers.RecipeLayers._roots",
+      "label": "_roots",
       "level": "method",
       "parent": "kneemri.training.recipe_layers.RecipeLayers",
       "role": null
