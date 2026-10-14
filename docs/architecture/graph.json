@@ -21753,6 +21753,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
+      "target": "kneemri.experiments.arm_diff.ArmDiff.resolved",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.arm_check.ArmCheck.moving_ruler",
       "target": "kneemri.experiments.arm_diff.ArmDiff.values",
       "weight": 1
     },
@@ -24290,20 +24296,26 @@
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.recipe_arm.RecipeArm.text",
+      "source": "kneemri.experiments.recipe_arm.RecipeArm._followed",
       "target": "kneemri.experiments.recipe_arm.RecipeArm.name",
       "weight": 1
     },
     {
       "kind": "construct",
-      "source": "kneemri.experiments.recipe_arm.RecipeArm.text",
+      "source": "kneemri.experiments.recipe_arm.RecipeArm._followed",
       "target": "kneemri.training.recipe_layers.RecipeLayers",
       "weight": 1
     },
     {
       "kind": "calls",
-      "source": "kneemri.experiments.recipe_arm.RecipeArm.text",
+      "source": "kneemri.experiments.recipe_arm.RecipeArm._followed",
       "target": "kneemri.training.recipe_layers.RecipeLayers.meta",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.recipe_arm.RecipeArm.text",
+      "target": "kneemri.experiments.recipe_arm.RecipeArm._followed",
       "weight": 1
     },
     {
@@ -57876,6 +57888,14 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.experiments.reading_check",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.recipe_arm.RecipeArm._followed",
+      "label": "_followed",
+      "level": "method",
+      "parent": "kneemri.experiments.recipe_arm.RecipeArm",
       "role": null
     },
     {
