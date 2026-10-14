@@ -5117,3 +5117,18 @@ rank share, s6r7solo stays; < B the mirrored pass (or its state read-out through
 costs signal, or the 8.3 h deadline bit and unreached studies fell back to the mean.
 RESULT: **0.957**. The = B branch fires: the mirror view at a 1/3 rank share sits below board resolution and `s6r7solo_v1` keeps the pin (same tier, reached first). Live read 08:26Z: rank 127 of 5958, a 95-way tie at 0.957, leader 0.966. Pending to scored took 3.4-3.6 h (04:52Z submit; PENDING at 08:16Z, COMPLETE at 08:26Z), against the R7 deadline at started + 8.3 h, so the deadline fallback cannot have filled the table wholesale. Slot 2 goes to `kneemri-s6r7stride1` per the rule written before this read (flip > B would have sent `s6r7flipstride1`); `s6r7flipres384` drops with it. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
 scatter, so it reads as public RANK, not as a better model.
+
+## r7half_v1 — 0.956, ref 57178693, 2026-10-14 — R7 1/2 + nartaa 1/2, the soups' sixth dropped: one tick under, the soups still decorrelate
+
+`kneemri-r7half` (v1): `kneemri-s6r7solo` with both weight soups removed, R7 (heliosli's bundle 8c7b666e27dc0e8f, eval
+stride 2, rc tolerance) 1/2 + nartaa 1/2, rank fusion via `RaptorSeat.combined`. This is the composition heliosli's
+teammate jingshuifu published on 2026-10-14 as `rsna-knee-raptor-multiview`, a "private candidate" with no score.
+Our R7 share curve read 1/4 0.956 and 1/3 0.957; 1/2 was never read. Kaggle run clean: nartaa seat 3 rows, R7 exit 0
+at 403 s, PASS 3/3, fallback 0. `run_check` refuses on "no member census printed" by construction (no member of ours
+is served), and its other refusals read clean by hand.
+
+PRE-REG (B = `s6r7solo_v1` 0.957): > B the soups were dilution once R7 sits beside nartaa; = B the soups' sixth is
+below board resolution and r7half is the cheaper equal (pick-2 candidate, different composition); < B the soups still
+decorrelate.
+RESULT: **0.956**. Under B by one tick, the direction the 0.956 prior predicted: dropping the soups loses rather than gains, so the soups' sixth still decorrelates slightly against R7 + nartaa. Pick 2 therefore stays with `s6r7_v1` (0.957, different producers), not r7half. Board read 12:26Z: rank 131 of 5971, tied with 98 others at 0.957; leader 0.966. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
+scatter, so it reads as public RANK, not as a better model.
