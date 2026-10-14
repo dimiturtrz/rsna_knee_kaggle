@@ -1,0 +1,61 @@
+# final_ws_wf — the WARM twin of `final_ws_df`: the same seat, the same teacher, the same distill
+# weight, started from the champion checkpoint instead of from scratch, on a complete four-epoch cycle.
+#
+# WHAT IT DECIDES, AND IT IS NOT THIS SEAT. `final_ws_df` is the from-scratch control and it is already
+# on disk, so this pair prices the WARM START itself at the cost of one run. If the two land inside the
+# 0.0062 floor, every retrain from here — tranche one, the merged successor, gen-2 — runs at four epochs
+# instead of twelve. Twenty-five minutes to license 3x on all of it is the best ratio on the card today
+# (mastermind 05:41Z, against the owner's 05:40Z ask for faster demonstration).
+#
+# --epochs 4 IS A COMPLETE ONE_CYCLE, NOT A TRUNCATION. `convergence_check`'s TRUNCATED class is a
+# twelve-epoch recipe killed early, whose anneal never ran; this recipe ASKS for four and anneals inside
+# them. That distinction is the whole reason the comparison is legible.
+#
+# THE PRIOR IS AGAINST IT, AND THAT IS WHY IT IS WORTH THE CARD. Every distillation arm on the ledger
+# peaks LATE — `foreign_distill` e9 of 12, `foreign_distill_mix07` e10-e11 of 12 — and the +0.0107 that
+# licenses `retrain_six_distill` is a twelve-epoch term. The one priced warm start this project owns,
+# `warm_calib_dense` 0.8562 against `calib_dense_hold` 0.8634, lost by 0.0072. So this is an INSTRUMENT:
+# it retires a suspicion or it licenses an axis, and it is not sold as an improvement.
+#
+# THE READING IS THE WITNESS, NOT A HOLDOUT AUC. Both arms are `--fold -1` and hold nothing out, so no
+# ledger row can price either. The comparison is the canonical-holdout witness on the two checkpoints.
+# reading: final_ws_wf_s2026.holdout.npz
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+init = "$MODELS/final_ws_cf.pt"
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+ema = true
+epochs = 4
+one_cycle = true
+
+[run]
+fold = -1
+
+[targets]
+calibrated_targets = true
+rank_weight = 1.0
+weight_floor = true
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_oof5.npz"
+
+[meta]
+hypothesis = "final_ws_wf — the WARM twin of `final_ws_df`: the same seat, the same teacher, the same distill"
+requires = ["$PROCESSED/teacher_oof5.npz", "$MODELS/final_ws_cf.pt"]
+status = "queued"
+out = "final_ws_wf"

@@ -1,0 +1,13 @@
+# stage after grand_stack_increments in experiments/arms/grand_stack_increments.sh
+
+extends = ["_family.toml"]
+
+[run]
+fold = -1
+labels = "$PROCESSED/labels/blend_three_v1.csv"
+
+[meta]
+hypothesis = "DRAFT, not armed. Seat stack_increments_ff is --fold -1: the fold-0 twin is the reading; the _ff refit runs only if the twin beats"
+bead = "knee-feb62.7"
+status = "queued"
+out = "grand_stack_increments_ff"

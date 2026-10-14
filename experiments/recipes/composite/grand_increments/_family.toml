@@ -1,0 +1,16 @@
+# grand_increments: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = ["../../base.toml", "../../grand.toml"]
+
+[model]
+slice_pooling = "max"
+
+[regularisation]
+slot_dropout = 0.0
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+
+[teacher]
+distill_weight = 0.3
+teacher_targets = "$PROCESSED/raptor_teacher.npz"

@@ -1,0 +1,17 @@
+# bead: knee-feb62.7
+# reading: grand_stack_increments_s2026.holdout.npz
+# DRAFT, not armed. Seat stack_increments_ff is --fold -1: the fold-0 twin is the reading; the _ff refit runs only if the twin beats
+# the seat's own fold-0 original. max pooling kept, grand's labelwise/hold/slot leaves overridden (grand.toml:20,28,32).
+# mixup (grand.toml:36) over teacher targets is unverified.
+
+extends = ["_family.toml"]
+
+[run]
+labels = "$PROCESSED/labels/blend_three_v1.csv"
+
+[meta]
+hypothesis = "DRAFT, not armed. Seat stack_increments_ff is --fold -1: the fold-0 twin is the reading; the _ff refit runs only if the twin beats"
+bead = "knee-feb62.7"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "queued"
+out = "grand_stack_increments_s2026"
