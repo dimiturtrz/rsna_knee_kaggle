@@ -1,0 +1,45 @@
+# blendsix_smoke.sh — the two minutes of card that gate `blendsix.sh`'s seven hours.
+#
+# bead: knee-4i3m
+#
+# blendsix carries THREE flags on every one of its five members (`--scheme merged`, the blend label
+# table, `--eval-labels`) and a fold flag that removes the holdout which would otherwise notice a
+# mistake. This runs ONE member of it at sixty studies and one epoch, so a typo costs two minutes
+# instead of a queue slot and seven hours of card.
+#
+# WHAT TO READ. Not a score — sixty studies score nothing. The printed recipe must name `merged` on
+# "scheme", `merged_blend_v1.csv` on "labels", `336` on "image_size" and `-1` on "fold", and the run must
+# reach `ARM DONE blendsix_smoke` with a non-zero throughput line. Anything else and blendsix does not
+# get queued.
+#
+# THE OUTPUT NAME IS DELIBERATELY ITS OWN. `_smoke` is not a member and must never be seatable; writing
+# to any name blendsix uses would leave a sixty-study checkpoint sitting where a twelve-epoch one is
+# expected, which is exactly the failure `final_fit_six.sh` names in its NEW NAMES paragraph.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# unmeasurable: blendsix_smoke is a two-minute recipe gate, not a measurement — it fits --fold -1 and its whole product is an exit code telling `blendsix` whether seven hours are safe to spend. There is no score to take and none is wanted.
+#
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+scheme = "merged"
+
+[optim]
+ema = true
+epochs = 1
+
+[run]
+fold = -1
+labels = "$PROCESSED/labels/merged_blend_v1.csv"
+studies = 60
+
+[meta]
+hypothesis = "blendsix_smoke.sh — the two minutes of card that gate `blendsix.sh`'s seven hours."
+bead = "knee-4i3m"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "queued"
+out = "blendsix_smoke"

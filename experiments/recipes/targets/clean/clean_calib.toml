@@ -1,0 +1,66 @@
+# knee-239cp (mastermind D29, researcher D30 §2): `seat_clean_distill` with `--calibrated-targets` and
+# NOTHING ELSE.
+#
+# WHY THIS CORNER. Under LEDGER75 the calibrated-targets knob is positive on every corner it has been
+# run (researcher D29, one-knob pairs re-read): band_span -> calib_span R1 -0.0020 flips to +0.0044,
+# band_span_hold +0.0074, band_dense_hold +0.0072, foreign_distill -> foreign_distill_calib +0.0133 —
+# the DISTILLATION corner pays most. Mechanism: the knob refits targets to the 696 gold cells
+# (`Supervision.MEASURED_AGREEMENT`), the same direction the board's ruler moved when the reader's 0.68
+# "possible" rung stopped counting as a full positive. No member in the distillation corner has the knob.
+#
+# WHY THIS PARENT AND NOT `oof_teacher_s2026`. This arm was written against `oof_teacher` first, on the
+# claim that `teacher_oof_corpus.npz` is out-of-fold. IT IS NOT, and the ledger already says so in
+# capitals (README.md:8526-8540, knee-zwcyk): its four blocks are `oof_fold{1,2,3,4}_s2026`, each trained
+# with `--fold k`, which trains on EVERY OTHER fold — fold 0 included. The file's COVERAGE excludes
+# fold 0; its teachers' TRAINING did not. The board refused that corner once already: `oofsolo`
+# (ref 56065873) read 0.926 on a 0.8681 offline while `holdsolo` read 0.928 on 0.8634, and
+# `teacher_witness` puts +0.0127 of the offline number in residual mimicry. A knob measured on a leaked
+# parent is measured on a ruler the board has refused.
+#
+# `teacher_clean.npz` is the same four blocks refitted with `--exclude-fold 0` (`teacher_clean.sh`), and
+# `seat_clean_distill_s2026` is the student that consumes it: 0.8634 against the leaky twin's 0.8633, so
+# the leak is worth ~0 AUC at this corner and costs the corner nothing to give up. It has a 909 npz, the
+# same 12 epochs, 20 slices, 336 px, lr 4e-5 and distill 0.7 as the arm below.
+#
+# ONE VARIABLE. Every flag here is `seat_clean_distill.sh`'s, byte for byte, plus `--calibrated-targets`.
+# Expect exactly `calibrated_targets False->True` and `out` in the recorded-recipe diff.
+# `eval_labels` stays unset in both: `--calibrated-targets` sets `moves_the_ruler()`, so `Targets.pair`
+# re-reads the ruler PLAIN from the same v2 file and the two arms are scored on the same table.
+#
+# PRE-REGISTERED, paired against `seat_clean_distill_s2026` on the 909 under LEDGER75 (the map
+# `kneemri.evaluation.ledger75` holds, frozen by D29):
+#   >= +0.008   licensed: calibrated distillation is the member lever, and the full-fit twin is queued.
+#   +0.003..+0.008  directional. The twin runs anyway, at low priority.
+#   <= 0        the distill corner does not take the knob. Closed for that use, and the finding to write
+#               down is WHY the other three corners took it and this one did not.
+# Report R1 alongside; report gold-58 labelled IN-SAMPLE, since the knob fits those cells.
+#
+# COST. ~73 min of card (12 epochs at the parent's 363 s/epoch). ZERO submission slots. Queues behind
+# `raptor_ft_effv2l_f0`; it does not preempt.
+#
+# deliberate: --calibrated-targets (the single moving variable)
+# deliberate: --teacher-targets teacher_clean.npz (the CLEAN teacher, held from the parent)
+# deliberate: --distill-weight 0.7 (the settled point on the weight curve; not re-searched)
+# reading: clean_calib_s2026.holdout.npz
+# bead: knee-239cp
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[optim]
+epochs = 12
+
+[targets]
+calibrated_targets = true
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_clean.npz"
+
+[meta]
+hypothesis = "knee-239cp (mastermind D29, researcher D30 §2): `seat_clean_distill` with `--calibrated-targets` and"
+bead = "knee-239cp"
+requires = ["$PROCESSED/teacher_clean.npz"]
+status = "done"
+out = "clean_calib_s2026"

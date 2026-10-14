@@ -6,6 +6,11 @@
 
 extends = ["_family.toml"]
 
+[data]
+slices = 12
+band_low = 0.2
+band_high = 0.8
+
 [meta]
 hypothesis = "Cheap probe pair for the grand recipe (knee-feb62.4): grand.toml's seat without its fragments, 224 px,"
 bead = "knee-feb62.8"

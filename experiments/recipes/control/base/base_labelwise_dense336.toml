@@ -73,6 +73,7 @@
 extends = ["_family.toml"]
 
 [data]
+image_size = 336
 band_high = 0.9
 band_low = 0.1
 slices = 20

@@ -1,0 +1,24 @@
+# fastmri: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+image_size = 224
+scheme = "mergedf"
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+variant = "ortholarge"
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

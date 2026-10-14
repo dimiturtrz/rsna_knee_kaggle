@@ -29,6 +29,11 @@ vram_gb = 22.0
 calibrated_targets = true
 hold_annotations = true
 
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
 [meta]
 hypothesis = "labelwise_ms_ctrl plus --fuse-blocks 3: blocks 9-11 gated into the last through zero-initialised"
 bead = "knee-vivli"

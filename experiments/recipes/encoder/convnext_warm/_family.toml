@@ -1,0 +1,31 @@
+# convnext_warm: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+train_size = 448
+
+[encoder]
+backbone_lr = 0.0001
+encoder_weights = "$MODELS/encoders/cnx_own_recipe.enc.pt"
+variant = "cnxbase"
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+accumulate = 6
+batch = 1
+epochs = 6
+one_cycle = true
+
+[run]
+vram_gb = 16.0
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

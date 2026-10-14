@@ -1,0 +1,18 @@
+# dinov3_base: 6 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[encoder]
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

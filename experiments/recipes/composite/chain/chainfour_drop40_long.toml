@@ -1,0 +1,75 @@
+# bead: knee-kiss9
+# reading: chainfour_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `chainfour_drop40`'s byte-identical line with ONE number changed: `--epochs 12` -> `--epochs 24`.
+#
+# WHY THE 12-EPOCH READ MAY NOT BE QUOTED AS A REFUTATION
+#   chainfour_drop40 and blendhold_drop40 both peaked ON THEIR LAST EPOCH and both were still climbing
+#   into the wall:
+#       chainfour_drop40   e9 0.8579  e10 0.8586  e11 0.8589   (last epoch, monotone)
+#       blendhold_drop40   e9 0.8493  e10 0.8505  e11 0.8507   (last epoch, monotone)
+#   Their controls did not: chainfour peaked at e7 and blendhold at e9, then decayed. So the two arms
+#   were not compared at their peaks — the control was at its peak and the treatment was at a wall.
+#   `dropstack_light` recorded this exact shape already: at stochastic-depth 0.05 the arm read 0.8654
+#   @e12 STILL CLIMBING while dense 0.1 plateaued at e11, and the ledger's own words are "the budget is
+#   BINDING" and "the control cannot spend twelve epochs; it has nothing to do after six but memorise."
+#   A regulariser removes capacity per step and buys it back with steps. Handing it the control's epoch
+#   budget is the faulty-TRAINING suspect, not a verdict on the operator.
+#
+# WHAT THIS DOES NOT CLAIM
+#   It does not re-open the DOSE axis (knee-yotj8, closed) and it does not re-ask the corpus axis. One
+#   number moves. And the seat refusal at 12 epochs stands as a fact ABOUT 12 EPOCHS — if this arm also
+#   refuses, the axis closes with the harness suspect eliminated rather than ignored.
+#
+# THE SCHEDULE MOVES WITH THE BUDGET, DELIBERATELY
+#   $RECIPE anneals over the epoch count, so 24 epochs is a different anneal. That is not a confound to
+#   remove: a one_cycle schedule truncated to 12 is what "still climbing at the wall" MEANS. The matched
+#   comparison is treatment-at-its-peak vs control-at-its-peak, which is what this buys.
+#
+# PRE-REGISTRATION (written before the run, against chainfour_s2026 0.8648 midpoint / 0.8912 ledger75)
+#   seat >= +0.0040   the operator earns a seat once its budget is not the control's. Package on shelf 2.
+#   seat +0.000..+0.004
+#                     directional. Keep for the pool, spend no slot.
+#   seat < 0.000 AND the arm no longer peaks on its last epoch
+#                     the budget suspect is ELIMINATED and the 12-epoch refusal was a real refusal. The
+#                     operator-on-seats axis CLOSES, now on a harness that cannot be blamed.
+#   seat < 0.000 AND the arm STILL peaks on its last epoch at 24
+#                     the budget is still binding and no seat verdict may be read off it at all. Record
+#                     that and stop spending card on this axis until something cheaper prices the budget.
+#   holdout           expected >= 0.8589 (its own 12-epoch peak). A read BELOW that is evidence the long
+#                     anneal, not the operator, is what moved — and it refuses the budget explanation.
+#
+# deliberate: --epochs 24 — the one variable. Every other flag byte-copied from chainfour_drop40.sh.
+# deliberate: --slot-dropout 0.40 — imported operating point, not a swept knob (knee-yotj8).
+#
+# control  chainfour_s2026 (seated, on disk) and chainfour_drop40_s2026 (this arm at 12). Costs no run.
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 336
+band_high = 0.9
+band_low = 0.1
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+labels = "$PROCESSED/labels/blend_three_v1.csv"
+
+[targets]
+calibrated_targets = true
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-kiss9"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "done"
+out = "chainfour_drop40_long_s2026"

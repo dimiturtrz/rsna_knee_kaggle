@@ -1,0 +1,23 @@
+# labelwise_depth24_distill.sh — the shipping line plus fold-0-clean own-OOF distillation, one variable.
+#
+# bead: knee-bgvmd
+# reading: labelwise_depth24_distill_s2026.holdout.npz
+#
+# The term read +0.0056 on the 12-epoch max line (`seat_clean_distill` vs `band_dense`) and never ran under
+# labelwise pooling. `teacher_clean.npz` excludes fold 0, so the holdout stays unleaked (knee-zwcyk).
+
+extends = ["_family.toml"]
+
+[run]
+vram_gb = 22.0
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_clean.npz"
+
+[meta]
+hypothesis = "labelwise_depth24_distill.sh — the shipping line plus fold-0-clean own-OOF distillation, one variable."
+bead = "knee-bgvmd"
+requires = ["$PROCESSED/teacher_clean.npz"]
+status = "queued"
+out = "labelwise_depth24_distill_s2026"

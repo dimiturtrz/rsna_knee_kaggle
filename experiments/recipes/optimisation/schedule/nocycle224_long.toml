@@ -67,6 +67,9 @@
 extends = ["_family.toml"]
 
 [data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
 image_size = 224
 
 [encoder]
@@ -78,6 +81,9 @@ slice_pooling = "max"
 
 [optim]
 epochs = 24
+
+[run]
+fold = 0
 
 [meta]
 hypothesis = "nocycle224_long.sh — the 24-epoch cell with `--one-cycle` OFF and nothing else moved. The first test"

@@ -11,6 +11,7 @@ patience_from_progress = 0.25
 warmup = 0.25
 
 [regularisation]
+aug_mid = 1.0
 aug_end = 0.5
 aug_ramp = 0.25
 aug_start = 0.25
@@ -21,6 +22,18 @@ mixup = 0.2
 padding_mode = "reflection"
 scale_jitter = 0.25
 stochastic_depth = 0.05
+
+[data]
+slices = 12
+band_low = 0.2
+band_high = 0.8
+
+[sampling]
+hard_tail = 0.0
+hard_start = 1.0
+hard_ramp = 0.0
+hard_mid = 1.0
+hard_end = 1.0
 
 [meta]
 hypothesis = "Leave-one-group-out over probe224_grand (0.8776@l75, failed its gate against control 0.8914): grand minus hard."

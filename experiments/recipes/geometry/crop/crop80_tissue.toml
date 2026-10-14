@@ -42,11 +42,15 @@
 extends = ["_family.toml"]
 
 [data]
+slices = 12
 centre = "tissue"
 crop_mm = 80.0
 
 [model]
 slice_pooling = "max"
+
+[optim]
+epochs = 8
 
 [meta]
 hypothesis = "Read 80 mm about the tissue instead of 130 mm about the image centre — the gating arm for knee-1nn."

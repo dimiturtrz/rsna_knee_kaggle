@@ -76,6 +76,7 @@
 extends = ["_family.toml"]
 
 [data]
+slices = 12
 crop_mm = 160.0
 image_size = 420
 

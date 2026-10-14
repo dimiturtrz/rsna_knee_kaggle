@@ -1,0 +1,25 @@
+# warm: 3 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+encoder_weights = "$MODELS/encoders/calib_dense_hold.enc.pt"
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+one_cycle = true
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+rank_weight = 1.0
+weight_floor = true

@@ -35,6 +35,9 @@ extends = ["_family.toml"]
 [model]
 slice_pooling = "max"
 
+[optim]
+epochs = 8
+
 [meta]
 hypothesis = "Read the whole cached stack per step instead of one three-slice window."
 status = "queued"

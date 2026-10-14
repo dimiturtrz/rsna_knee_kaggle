@@ -1,0 +1,70 @@
+# blendhold — the label-TABLE lane read on the ruler that can see it (knee-9198, the knee-bs4l shape).
+# bead: knee-g5hx
+#
+# WHAT IS BEING PRICED. `blendlabels` trained on a three-reader blend and measured +0.0034 on the mean
+# (+0.0070 on the six label-bottlenecked findings), and the ledger reads that as "the label lane is LIVE
+# and SMALL, an order of magnitude short of the 1.5% bar". Both numbers come from the proxy holdout,
+# which is scored against `report_labels_v2` — the very table the blend departs from. Pinned to v2 the
+# ruler CHARGES the arm for every cell where the blend is right and v2 is wrong; unpinned it would
+# measure disagreement with v2 and report it as quality. There is no pin that makes that ruler able to
+# see supervision quality, so the size of this lane has never actually been measured.
+#
+# HOW BIG THE BLIND SPOT IS, MEASURED 2026-08-26. Macro AUC against the 58 radiologist-annotated studies:
+# `report_labels_v2` 0.8700, `blend_three_v1` 0.8955, `blend_hybrid` 0.8978. The 0.8700 reproduces the
+# public benchmark's published 0.870 for that table exactly, which is the ruler validating itself. So the
+# blend this arm trains on is +0.026 macro AUC closer to the radiologist than the table the proxy scores
+# against, while `holdannot` has separately measured the ruler gap itself at +0.045 (0.8487 report against
+# 0.8932 annotation). A +0.0034 proxy reading is what a real improvement looks like through that.
+#
+# SINGLE VARIABLE, AND THE CONTROL ALREADY EXISTS. This is `holdannot`'s command with `--labels` moved to
+# the blend and `--eval-labels` pinned to v2 so the proxy stays comparable to every other row. Control is
+# `holdannot_s2026` (0.8487 proxy / 0.8932 annotation), NOT `native224` and NOT `blendlabels`: both arms
+# must hold the annotations, or the second ruler is scoring cells the model was trained on.
+#
+# PRE-REGISTRATION — the two rulers make opposite predictions, which is the whole reason this is worth a
+# card:
+#   - the blend is a genuinely better teacher -> proxy stays flat or slightly NEGATIVE (it is being
+#     charged for departing from v2) AND the `supervision_gap` aggregate over the 58 rises above 0.8932.
+#     A rise of +0.015 or more says the label lane was mispriced by the ruler and reopens it as a path.
+#   - the blend is not a better teacher -> both numbers fall or sit flat. The lane closes on the
+#     objective, and it closes for every table on disk, since these blends do not separate from each
+#     other (`table_blend`: every pairwise interval covers zero over 58 studies).
+#   - both rise -> the +0.0034 understated it on its own ruler too, and the pin is what was wrong.
+#
+# NON-LICENSE, carried from knee-9198: n = 58, and the annotated set is not a random sample of the corpus
+# (ACL 41% there against ~20%). The claim this arm can support is about WHICH RULER, and it is
+# documentary rather than statistical. It cannot on its own license a submission.
+#
+# COST: one ~20 minute card slot at 224 px / 12 slices, no submission slot.
+#
+# deliberate: --image-size 224 (matched to holdannot, the only control this arm can be read against)
+# deliberate: --hold-annotations (without it the second ruler scores the model's own training cells,
+# deliberate: and `annotated_readings` refuses the checkpoint rather than returning that number)
+# deliberate: --eval-labels report_labels_v2.csv (the proxy must not move with the arm)
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  holdannot_s2026 = 0.8506 (declared 2026-09-03 from this header own prose, verified on disk, knee-sgzgc)
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+image_size = 224
+
+[optim]
+epochs = 12
+
+[run]
+labels = "$PROCESSED/labels/blend_three_v1.csv"
+
+[targets]
+hold_annotations = true
+
+[meta]
+hypothesis = "blendhold — the label-TABLE lane read on the ruler that can see it (knee-9198, the knee-bs4l shape)."
+bead = "knee-g5hx"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "done"
+out = "blendhold_s2026"

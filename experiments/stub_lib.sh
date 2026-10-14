@@ -21,6 +21,7 @@ PROCESSED="${ARM_CHECK_PROCESSED:-/tmp/arm_check}"
 MODELS="${ARM_CHECK_MODELS:-/tmp/arm_check_models}"
 LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$MODELS/experiments"
+export PROCESSED MODELS
 
 # A retired arm is READ as documentation and never handed to the parser. Exiting here (0, because the
 # checker is not the queue and a retired arm is not a defect) means no invocation is captured, so a

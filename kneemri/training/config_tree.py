@@ -423,10 +423,19 @@ class TrainConfig:
                 TrainConfig._declare(parser, leaf, hint)
         return parser
 
+    @classmethod
+    def flags(cls) -> dict[str, str]:
+        """Every leaf's name to the flag that sets it — `bf16` is `--fp16`, so the spelling is not derivable."""
+        return {leaf.name: TrainConfig._flag(leaf) for leaf, _ in cls.leaves()}
+
+    @staticmethod
+    def _flag(leaf: Field[object]) -> str:
+        return str(leaf.metadata.get(FLAG, {}).get("flag", f"--{leaf.name.replace('_', '-')}"))
+
     @staticmethod
     def _declare(parser: argparse.ArgumentParser, leaf: Field[object], hint: object) -> None:
         spelling = cast("Spelling", dict(leaf.metadata[FLAG]))
-        flag = spelling.pop("flag", f"--{leaf.name.replace('_', '-')}")
+        flag = spelling.pop("flag", TrainConfig._flag(leaf))
         if hint is bool:
             spelling.setdefault("action", "store_true")
             parser.add_argument(flag, dest=leaf.name, **spelling)
@@ -507,7 +516,8 @@ class TrainConfig:
         For checks that read what an arm STATED rather than what it parsed to: a key in a recipe file
         is written down exactly as a flag on the line is, and must not read as silence.
         """
-        return [f"--{name.replace('_', '-')}" for name in cls.of_layers(RecipeLayers.of(argv))] + argv
+        flags = cls.flags()
+        return [flags[name] for name in cls.of_layers(RecipeLayers.of(argv))] + argv
 
     @staticmethod
     def _values(node: object) -> Iterator[tuple[str, object]]:

@@ -9,6 +9,7 @@
 extends = ["_family.toml"]
 
 [regularisation]
+aug_mid = 1.0
 aug_end = 0.5
 aug_ramp = 0.25
 aug_start = 0.25
@@ -16,6 +17,11 @@ aug_tail = 0.2
 ghosting = 0.04
 intensity_aug = true
 scale_jitter = 0.25
+
+[data]
+slices = 12
+band_low = 0.2
+band_high = 0.8
 
 [meta]
 hypothesis = "The knee-feb62.11 decomposition is closed: mixup +0.0030, hard +0.0013, ema +0.0032, the structural"

@@ -1,0 +1,24 @@
+# increments: 6 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[encoder]
+backbone_lr = 4e-05
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+one_cycle = true
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+
+[targets]
+rank_weight = 1.0
+weight_floor = true
+
+[teacher]
+distill_weight = 0.3
+teacher_targets = "$PROCESSED/raptor_teacher.npz"

@@ -68,9 +68,6 @@ CACHE=336
 # environment, never echoed and never written into a log - the trainer needs it to reach the hub once.
 case "$VARIANT" in
   v3*)
-    HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head -1)"
-    export HF_TOKEN
-    [ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
     ;;
 esac
 

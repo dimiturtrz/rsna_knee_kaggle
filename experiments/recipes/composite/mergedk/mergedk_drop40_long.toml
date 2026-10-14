@@ -1,0 +1,71 @@
+# bead: knee-0ggxn
+# reading: mergedk_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `mergedk_drop40`'s byte-identical line with ONE number changed: `--epochs 12` -> `--epochs 24`.
+#
+# WHY THE CORPUS READING HAS TO BE RE-TAKEN AND THIS IS NOT A REPEAT
+#   knee-kiss9 closed tonight on two independent seated recipes: at 12 epochs both slot_dropout 0.40 arms
+#   were still climbing into the wall, and twelve more epochs bought +0.0084 (chainfour) and +0.0088
+#   (blendhold) of holdout -- enough that blendhold_drop40's -0.0068 "band breach", written down as a
+#   fact about a recipe interaction, evaporated. mergedk_drop40 is 12-epoch AND carries the same
+#   operator. The corpus number this project quotes (mergedk_corpus 0.8490 vs base224_control 0.8451,
+#   +0.0039, "inside its own null band") was therefore read on a harness now measured to bind.
+#
+#   That makes this a DIFFERENT question from the one mergedk_drop40 asked, not the same one re-run.
+#
+# WHY IT IS WORTH MORE THAN THE OPERATOR ARM WAS
+#   The corpus lever is the owner's named lever and KMAR-50K is the only merge whose licence lets us
+#   ship it. A lever written off on a budget artefact is a lever lost for the wrong reason.
+#
+# THE CONFOUND, NAMED FIRST
+#   This arm moves the budget while keeping the operator, so on its own it cannot separate "the corpus
+#   needs budget" from "the operator needs budget". It does not have to: knee-kiss9 already priced the
+#   operator alone at BOTH budgets on TWO seats, so the operator's own budget dose is known (+0.0085
+#   holdout, ~+0.001 seat). Anything this arm reads above that dose is the corpus.
+#
+# PRE-REGISTRATION (written before the run, against mergedk_drop40_s2026 0.8530 midpoint / 0.8805 ledger75)
+#   seat >= +0.0040   the corpus lever earns a seat once its budget is not the control's. Ship the swap.
+#   seat +0.000..+0.004
+#                     directional. Keep for the pool, spend no slot.
+#   seat < 0.000 AND the arm no longer peaks on its last epoch
+#                     the corpus axis closes at the dose operating point, on a harness that cannot be
+#                     blamed. That is a real closure and it retires the second-site question for good.
+#   seat < 0.000 AND the arm STILL peaks on its last epoch at 24
+#                     the budget is still binding and no verdict may be read off it at all.
+#   holdout           expected >= 0.8530 (its own 12-epoch peak). A read below refuses the budget story
+#                     on this corpus even though two seated recipes confirmed it.
+#
+# deliberate: --epochs 24 — the one variable. Every other flag byte-copied from mergedk_drop40.sh.
+# deliberate: --slot-dropout 0.40 — imported operating point, not a swept knob (knee-yotj8).
+# deliberate: --image-size 224 — a 336 px merge needs ~43 GB of new array and /d holds 23 GB (knee-rijuv).
+#
+# control  mergedk_drop40_s2026 (this arm at 12) and mergedk_corpus_s2026. Both on disk. Costs no run.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+image_size = 224
+scheme = "mergedk"
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+labels = "$PROCESSED/labels/mergedk_labels.csv"
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-0ggxn"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "done"
+out = "mergedk_drop40_long_s2026"

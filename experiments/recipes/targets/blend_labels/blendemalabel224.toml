@@ -1,0 +1,107 @@
+# blendemalabel224.sh — the THIRD term, and the one that turns two points into a slope.
+#
+# bead: knee-y8ies
+# reading: logs/blendemalabel224_ledger.log
+#
+# UNGATED as of 2026-09-05T23:24Z, and the gate was REWRITTEN rather than passed. blendema224 landed at
+# 0.8567 - inside the ADDITIVE band by the letter, but the band was worthless: the term it tested
+# (--ema, +0.0042) is SMALLER THAN THE 0.0062 PAIRED FLOOR, so a term that transferred fully and a term
+# that vanished both land inside it. The point estimate says it vanished (-0.0008 against blendhold).
+# See logs/blendema224_ledger.log. That is a defect in how that arm was priced, not a result.
+#
+# THE FIX IS THE CONTROL, NOT THE RECIPE. This arm is unchanged; what changes is what it is measured
+# against. Comparing three terms to two terms tests a +0.0015 increment against a 0.0062 floor and is
+# unreadable for the same reason. Comparing three terms to the BARE BASE tests their SUM:
+#     native224_s2026  0.8502   (no blended labels, no EMA, no labelwise pooling)
+#     blended labels   +0.0073   (blendhold 0.8575 - native224 0.8502)
+#     ema              +0.0042   (ema224 0.8544 - native224 0.8502)
+#     labelwise        +0.0015   (labelwise224 0.8517 - native224 0.8502)
+#     sum              +0.0130 -> predicted 0.8632
+# +0.0130 clears the floor by roughly 2x, so THIS comparison can be read. It cannot say which link
+# carried the result - nothing affordable at this corner can - but it answers the question the 0.953
+# plan actually needs, which is whether a chain of small terms sums at all.
+#
+# STATE PLAINLY WHAT REMAINS UNREADABLE. Against the best single term (blendhold 0.8575) the predicted
+# gain is +0.0057, still under the floor. So a landing near 0.8632 says the chain SUMS relative to the
+# bare base while leaving "a stack beats its best member" undecided at this corner on one seed. Do not
+# report the second claim off this arm.
+#
+# WHY A THIRD TERM AND NOT A SECOND SEED. Two points cannot fit a composition rule; that limit is
+# written into blendema224's own header and into knee-orjq's close. The question the 0.953 plan actually
+# needs answered is not "do these two add" but "does a CHAIN add", because +0.015 is not reachable from
+# any single term this project owns and is only reachable as a sum. Three terms is the shortest chain
+# that can distinguish a sum from a coincidence: if term three lands additive on top of terms one and
+# two, the increments are behaving independently over a range, which is what licenses pricing a fourth
+# and fifth by arithmetic instead of by card time.
+#
+# THE THIRD TERM. --slice-pooling labelwise, measured at this exact corner by labelwise224_s2026 at
+# 0.8517 against native224_s2026 at 0.8502: +0.0015. It is the SMALLEST of the three terms and that is
+# deliberate. A chain is tested by whether its small increments survive, not by whether its large one
+# does - a third term big enough to dominate would hide a substitution, and this one cannot.
+# Mechanically it is a third independent axis: term one changes what the targets SAY (blended labels),
+# term two changes which weights are KEPT (EMA), term three changes how the head READS the pooled
+# features. Nothing about one predicts another.
+#
+# ONE VARIABLE against blendema224: --slice-pooling goes from max to labelwise. It is a SUBSTITUTION of
+# one flag value, not an added flag - which is exactly how labelwise224 was measured against native224,
+# so the +0.0015 term quoted below is the same change measured at the same corner. Every other flag is
+# blendema224s.
+#
+# PRE-REGISTERED, BEFORE THE NUMBER. Control is native224_s2026 at 0.8502; predicted sum 0.8632; the
+# paired floor is 0.0062:
+#   >= 0.8694   SUPER-ADDITIVE. The chain gains more than its parts. Suspect it once, then take it: it
+#               would be the first evidence this project owns that composition BUYS something rather
+#               than merely surviving, and it would make chaining the primary route to +0.015.
+#   0.8570-0.8694  THE CHAIN SUMS. Three independent small terms - targets, kept weights, head pooling -
+#               compose without destroying one another at a base that is not the calibrated dense
+#               corner. knee-orjq measured a saturated corner, not a law. Follow-up is a FOURTH and
+#               FIFTH term added in the same arm, never one at a time, priced again against the bare
+#               base so the tested quantity keeps growing past the floor.
+#   <= 0.8570   THE CHAIN DOES NOT SUM. Three terms deliver no more than the best one alone, which at
+#               this corner is what knee-orjq found at its own corner. Two corners agreeing turns that
+#               close from a statement about one recipe into a statement about this project, and
+#               composition stops being a candidate route to 0.953.
+#   <= 0.8440   Harness first, not a result. Verify --label-pooling and --ema fired and that the blend
+#               labels loaded; three positive terms cannot subtract to below the bare base.
+#
+# COST. ~20 min of card. Zero submission slots. Same corner, same holdout, same gold ruler via
+# --hold-annotations.
+#
+# control  blendema224_s2026, byte-identical recipe without --slice-pooling labelwise.
+#
+# deliberate: --slice-pooling labelwise (the arm's thesis, and the third link in the chain)
+# deliberate: --ema (term two, held from blendema224 and not under test)
+# deliberate: --labels blend_three_v1 (term one, held from blendhold and not under test)
+# deliberate: --hold-annotations (matched to both controls; buys the gold ruler in the same run)
+# deliberate: --eval-labels report_labels_v2.csv (the proxy must not move with the arm)
+# deliberate: every other flag — they are blendhold's and may not be touched in this arm.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+image_size = 224
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+ema = true
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+labels = "$PROCESSED/labels/blend_three_v1.csv"
+
+[targets]
+hold_annotations = true
+
+[meta]
+hypothesis = "blendemalabel224.sh — the THIRD term, and the one that turns two points into a slope."
+bead = "knee-y8ies"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "done"
+out = "blendemalabel224_s2026"

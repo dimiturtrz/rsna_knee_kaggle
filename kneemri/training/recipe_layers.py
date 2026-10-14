@@ -11,6 +11,7 @@ hypothesis, the control, the gate — and is never a training option.
 """
 
 import os
+import string
 import tomllib
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, fields
@@ -18,10 +19,14 @@ from enum import StrEnum
 from pathlib import Path
 from typing import cast
 
+from core.paths import DataRoot
+
 CONFIG = "--config"
 SET = "--set"
 EXTENDS = "extends"
 META = "meta"
+ROOTS = ("PROCESSED", "MODELS")
+PATHS = Path("paths.yaml")
 
 
 class RecipeStatus(StrEnum):
@@ -91,7 +96,7 @@ class RecipeLayers:
         for path, table in self._tables():
             options = {key: value for key, value in table.items() if key not in (EXTENDS, META)}
             named = self._named(dict(self._dotted(options, "")), addresses, str(path))
-            stated |= {name: (value, str(path)) for name, value in named.items()}
+            stated |= {name: (self._rooted(value, path), str(path)) for name, value in named.items()}
         assigned = dict(self._assigned(assignment) for assignment in self.assignments)
         return stated | {name: (value, SET) for name, value in self._named(assigned, addresses, SET).items()}
 
@@ -119,6 +124,35 @@ class RecipeLayers:
         for parent in cast("list[str]", table.get(EXTENDS, [])):
             yield from cls._expanded(Path(os.path.normpath(path.parent / parent)), (*trail, here))
         yield path, table
+
+    @staticmethod
+    def _rooted(value: object, source: Path) -> object:
+        """A file's text with its data roots (`$MODELS`, `$PROCESSED`) filled in.
+
+        A root left unfilled REFUSES: a literal `$MODELS/x.pt` is a path that exists nowhere, and the run
+        would find that out only after the card is held.
+        """
+        if not isinstance(value, str) or "$" not in value:
+            return value
+        rooted = string.Template(value).safe_substitute(RecipeLayers._roots())
+        if "$" in rooted:
+            message = f"{source} names a root the environment does not set: {rooted}"
+            raise ValueError(message)
+        return rooted
+
+    @staticmethod
+    def _roots() -> dict[str, str]:
+        """The roots `lib.sh` exports where an arm set them, else the `paths.yaml` it reads them from.
+
+        The fallback is what lets a reader outside an arm — `arm_check`, a review — resolve the same
+        recipe to the same paths, rather than crash on a root only the launcher's shell knows.
+        """
+        if all(name in os.environ for name in ROOTS):
+            return {name: os.environ[name] for name in ROOTS}
+        if not PATHS.is_file():
+            return {}
+        root = DataRoot.from_config(PATHS)
+        return {"PROCESSED": root.processed().as_posix(), "MODELS": root.models().as_posix()}
 
     @staticmethod
     def _named(table: Mapping[str, object], addresses: Mapping[str, str], source: str) -> dict[str, object]:

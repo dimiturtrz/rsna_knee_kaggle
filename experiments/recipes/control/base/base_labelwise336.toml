@@ -106,6 +106,12 @@ epochs = 12
 [run]
 vram_gb = 26.0
 
+[data]
+image_size = 336
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
 [meta]
 hypothesis = "base_labelwise336.sh — carry the validated trunk up to the corner we ship at."
 bead = "knee-mm6v0"

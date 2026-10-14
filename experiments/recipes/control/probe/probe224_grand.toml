@@ -12,6 +12,7 @@ patience_from_progress = 0.25
 warmup = 0.25
 
 [regularisation]
+aug_mid = 1.0
 aug_end = 0.5
 aug_ramp = 0.25
 aug_start = 0.25
@@ -24,8 +25,16 @@ scale_jitter = 0.25
 stochastic_depth = 0.05
 
 [sampling]
+hard_tail = 0.0
+hard_mid = 1.0
+hard_end = 1.0
 hard_ramp = 0.25
 hard_start = 0.0
+
+[data]
+slices = 12
+band_low = 0.2
+band_high = 0.8
 
 [meta]
 hypothesis = "Cheap probe pair for the grand recipe (knee-feb62.4): grand.toml's fragments over probe224_control, 224 px,"

@@ -14,11 +14,12 @@ import shlex
 from collections.abc import Collection, Mapping
 
 from kneemri.experiments.arm_header import ArmHeader
+from kneemri.training.config_tree import TrainConfig
 from kneemri.training.recipe_layers import CONFIG, SET
 
 REPEATABLE = (CONFIG, SET)
 
-INCIDENTAL_FLAGS = frozenset({"--out", "--labels", "--paths"})
+INCIDENTAL_FLAGS = frozenset({CONFIG, "--out", "--labels", "--paths"})
 """Flags every arm sets differently by construction, so a diff on them is not a difference of RECIPE."""
 
 
@@ -47,6 +48,19 @@ class ArmDiff:
             value = "" if following.startswith("--") else following
             parsed[token] = f"{parsed[token]} {value}" if token in REPEATABLE and token in parsed else value
         return parsed
+
+    @staticmethod
+    def resolved(flags: str) -> dict[str, str]:
+        """One arm's line as every flag -> the value the trainer would RUN, its recipe layers resolved.
+
+        The pair checks compare these, not the tokens: an arm moved into a recipe file states its options
+        as `--config <its own leaf>`, so two token lines differ on that path alone while running one
+        recipe — and an option the control states and the arm leaves at the trainer's default is a real
+        difference, which reads here as the default it will get rather than as an absence.
+        """
+        flags_of = TrainConfig.flags()
+        resolved = TrainConfig.of(shlex.split(flags)).flat
+        return {flags_of[name]: str(value) for name, value in resolved.items() if flags_of[name] != CONFIG}
 
     @staticmethod
     def _same(one: str, other: str) -> bool:
@@ -80,7 +94,7 @@ class ArmDiff:
             if control not in against or control == name:
                 continue
             found = self.undeclared(
-                self.values(invocations[name]), self.values(against[control]), self.headers.deliberate(name)
+                self.resolved(invocations[name]), self.resolved(against[control]), self.headers.deliberate(name)
             )
             if found:
                 differences[name] = found
@@ -142,4 +156,4 @@ class ArmDiff:
     @classmethod
     def _identity(cls, flags: str) -> tuple[tuple[str, str], ...]:
         """An arm's flag line as what makes it a distinct EXPERIMENT — everything but the file it writes."""
-        return tuple(sorted((flag, value) for flag, value in cls.values(flags).items() if flag != "--out"))
+        return tuple(sorted((flag, value) for flag, value in cls.resolved(flags).items() if flag != "--out"))

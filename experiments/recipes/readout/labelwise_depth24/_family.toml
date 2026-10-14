@@ -1,0 +1,30 @@
+# labelwise_depth24: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 24
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+epochs = 24
+one_cycle = true
+
+[regularisation]
+slot_dropout = 0.4
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+rank_weight = 1.0
+weight_floor = true

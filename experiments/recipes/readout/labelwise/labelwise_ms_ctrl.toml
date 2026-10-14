@@ -27,6 +27,11 @@ vram_gb = 22.0
 calibrated_targets = true
 hold_annotations = true
 
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
 [meta]
 hypothesis = "Control for labelwise_ms: the shipping labelwise recipe on the canonical 336px/12-slice cache"
 bead = "knee-5jfix"

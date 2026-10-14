@@ -34,19 +34,41 @@ def test_mismatched(tmp_path: Path):
     (arms / "silent.sh").write_text("# control  base = 0.85\n", encoding="utf-8")
     (arms / "declaring.sh").write_text("# deliberate: --distill-weight\n# control  base = 0.85\n", encoding="utf-8")
     diff = ArmDiff(ArmHeader(arms))
-    against = {"base": "--epochs 8 --backbone-lr 4e-5 --out base.pt"}
+    against = {"base": "--epochs 8 --backbone-lr 4e-5 --labels base.csv --out base.pt"}
+    default = ArmDiff.resolved("--labels l.csv")
 
     found = diff.mismatched(
         {
-            "silent": "--epochs 8 --distill-weight 0.3 --out silent.pt",
-            "declaring": "--epochs 8 --backbone-lr 4e-05 --distill-weight 0.3 --out declaring.pt",
+            "silent": "--epochs 8 --distill-weight 0.3 --labels silent.csv --out silent.pt",
+            "declaring": "--epochs 8 --backbone-lr 4e-05 --distill-weight 0.3 --labels d.csv --out declaring.pt",
         },
         against,
     )
 
-    assert found == {"silent": ["--backbone-lr: 4e-5 -> absent", "--distill-weight: absent -> 0.3"]}, (
-        "a declared flag, an incidental one and the same rate spelled twice are not differences"
-    )
+    assert found == {
+        "silent": [
+            f"--backbone-lr: 4e-05 -> {default['--backbone-lr']}",
+            f"--distill-weight: {default['--distill-weight']} -> 0.3",
+        ]
+    }, "a declared flag, an incidental one and the same rate spelled twice are not differences"
+
+
+def test_resolved(tmp_path: Path):
+    """A recipe file and the same option as a flag resolve alike; an unstated option reads as its default.
+
+    Partitioned on where a value comes from — a `--config` layer, the line, the trainer's default — and on
+    the one leaf dropped, `--config` itself, which differs between any two recipe files running one recipe.
+    """
+    recipe = tmp_path / "leaf.toml"
+    recipe.write_text("[optim]\nepochs = 8\n", encoding="utf-8")
+
+    layered = ArmDiff.resolved(f"--config {recipe.as_posix()} --labels l.csv")
+    flagged = ArmDiff.resolved("--epochs 8 --labels l.csv")
+
+    assert layered == flagged, "a value stated in a recipe file is the value stated on the line"
+    assert flagged["--epochs"] == "8"
+    assert "--config" not in flagged
+    assert flagged["--fp16"] == "True", "a leaf with its own spelling keys by the flag that sets it"
 
 
 def test_undeclared(tmp_path: Path):
@@ -82,9 +104,9 @@ def test_twinned(tmp_path: Path):
     headers.record("bf16", pair)
     headers.record("compiled", pair)
     diff = ArmDiff(headers)
-    duplicated = "--epochs 8 --backbone-lr 4e-5"
-    recoded = "--epochs 8 --backbone-lr 1e-4"
-    environmental = "--epochs 6 --backbone-lr 4e-5"
+    duplicated = "--epochs 8 --backbone-lr 4e-5 --labels l.csv"
+    recoded = "--epochs 8 --backbone-lr 1e-4 --labels l.csv"
+    environmental = "--epochs 6 --backbone-lr 4e-5 --labels l.csv"
     against = {
         "original": f"{duplicated} --out original.pt",
         "copy": f"{duplicated} --out copy.pt",

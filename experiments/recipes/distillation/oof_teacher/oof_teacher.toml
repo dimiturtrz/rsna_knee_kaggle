@@ -1,0 +1,92 @@
+# oof_teacher.sh — the one distillation form never tried: OUR pool's own out-of-fold posterior as teacher.
+#
+# WHAT THE THREE FLAT DISTILL ARMS SHARE, AND WHY THIS IS NOT A FOURTH OF THEM. `foreign_distill` (0.3),
+# `foreign_distill_mix07` (0.7) and `dissent_seat` all taught from `teacher_foreign_corpus` — a FOREIGN
+# pool whose ordering the seat curve places INSIDE our own consensus. Each increment of teacher weight
+# therefore pulled the student toward the pool it was supposed to diverge from, which is exactly what the
+# js divergence recorded (0.0273 no-teacher -> 0.0190 at weight 0.3). Those three close the FOREIGN
+# teacher, not distillation. This arm changes the teacher and holds everything else, so it is one
+# variable wide against `foreign_distill_mix07`.
+#
+# WHAT THE NEW TEACHER IS. `kneemri.evaluation.oof_teacher` concatenates `oof_fold1..4_s2026.holdout.npz`
+# — 875 + 884 + 849 + 890 = 3498 studies, the whole TRAINING half, each study read by the one fold model
+# that did not train on it. 3498 is the complete denominator, not a gap in a 4407 one.
+#
+# RETRACTED 2026-09-08: THIS FILE IS LEAKY, AND THE PARAGRAPH THAT USED TO SIT HERE ARGUED THE WRONG
+# TEST. It said fold 0 is absent from the coverage and must be, so nothing leaks. COVERAGE IS NOT THE
+# TEST — the teachers' TRAINING is. `oof_fold_k` (k=1..4) was each fitted at `--fold k`, which trains on
+# every other fold, FOLD 0 INCLUDED. So the file excludes fold 0 from what it COVERS while every teacher
+# that wrote it had already seen those studies. See `experiments/README.md:8526-8540` (knee-zwcyk) and
+# `clean_calib.sh:12-19`, which says it outright: "This arm was written against `oof_teacher` first, on
+# the claim that `teacher_oof_corpus.npz` is out-of-fold. IT IS NOT."
+#
+# THE LEAK'S SIZE IS MEASURED AND IT IS ~ZERO, which is why this is a retraction and not a void.
+# `teacher_clean.npz` is the same four blocks refitted with `--exclude-fold 0`, and its student
+# `seat_clean_distill_s2026` against the leaky twin `seat_distill_lr4e5_s2026` reads solo 0.8894 vs
+# 0.8900 and seat -0.0005 vs -0.0001 (D178 §3b). Both differences are far under the noise bar and neither
+# row is near the top of any table, so no conclusion downstream of this teacher moves. What was wrong was
+# the ARGUMENT, and the argument is what a future arm reads first.
+#
+# THE MECHANISM IT ADDRESSES. Our label table is five discrete levels; `label_disagreement` prices ~20%
+# of read cells wrong and 38.5% of cell PAIRS tied. Every label treatment so far reached a fraction of
+# that: `blendlabels` (+0.0034) breaks ties by a three-reader mean, `errors_relabel` reaches the cells a
+# regex can find. A continuous out-of-fold posterior orders EVERY cell, which is the only treatment whose
+# denominator is the whole defect rather than a slice of it.
+#
+# ONE VARIABLE against `foreign_distill_mix07`: --teacher-targets. Weight held at 0.7 (the best solo point
+# on the monotone line), rate, slices, band, pooling, whole-stack and epochs all held.
+#
+# HOW IT IS READ, written before the number (pre-registered with mastermind, 20:23Z).
+#   * v2 ruler >= 0.8640 AND gold above blendhold's 0.8952 — the corpus teacher is the label lever, and
+#     tomorrow's card is a member factory on it (five folds, then a seat).
+#   * v2 flat but gold up — same conclusion, and the v2 ruler is the thing that was wrong.
+#   * both flat — distillation closes on four points, and the remaining label lever is a better READER
+#     (an 85-level relabel of the wrong cells), not a mean blend.
+#
+# COST. ~70 min of card, 12 epochs on the shared recipe. ZERO submission slots. Teacher file already on
+# disk — it is assembled from readings that exist, so it cost no card of its own.
+#
+# deliberate: --teacher-targets (ours out-of-fold, the single moving variable)
+# deliberate: --distill-weight (0.7, HELD from foreign_distill_mix07)
+# bead: knee-bq62a
+# reading: oof_teacher_s2026.holdout.npz
+# control  band_dense = 0.8578
+# The second control is `foreign_distill_mix07` — same distill weight, foreign teacher — which is what
+# separates "a teacher helps" from "OUR out-of-fold teacher helps". `arm_read` parses one control line
+# only, so the no-teacher solo is the one named in machine form; the teacher control is read by hand.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_oof_corpus.npz"
+
+[meta]
+hypothesis = "oof_teacher.sh — the one distillation form never tried: OUR pool's own out-of-fold posterior as teacher."
+bead = "knee-bq62a"
+requires = ["$PROCESSED/teacher_oof_corpus.npz"]
+status = "done"
+out = "oof_teacher_s2026"

@@ -340,3 +340,13 @@ def test_positions():
     assert TrainConfig().with_leaves(seed=7).run.positions == FitPositions(), (
         "the MODEL seed does not move which studies exist, as with the fold — only --split-seed does"
     )
+
+
+def test_flags():
+    """Every leaf maps to the flag that sets it: derived from its name, or the spelling it declares."""
+    flags = TrainConfig.flags()
+
+    assert flags["epochs"] == "--epochs"
+    assert flags["backbone_lr"] == "--backbone-lr"
+    assert flags["bf16"] == "--fp16", "a leaf whose flag inverts it keeps the flag it declared"
+    assert set(flags) == set(TrainConfig.of(["--labels", "l.csv"]).flat)

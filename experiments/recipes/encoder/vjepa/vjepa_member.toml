@@ -92,6 +92,9 @@ extends = ["_family.toml"]
 [optim]
 epochs = 12
 
+[model]
+slice_pooling = "channels"
+
 [meta]
 hypothesis = "V-JEPA2-large as a FITTED member, on the depth axis the frozen probe could not reach."
 bead = "knee-rpkw"

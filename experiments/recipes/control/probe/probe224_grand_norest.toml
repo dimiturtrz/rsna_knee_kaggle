@@ -10,9 +10,14 @@
 extends = ["_family.toml"]
 
 [optim]
+warmup = 0.15
+patience_from_progress = 0.0
 ema = true
 
 [regularisation]
+stochastic_depth = 0.0
+padding_mode = "border"
+aug_mid = 1.0
 aug_end = 0.5
 aug_ramp = 0.25
 aug_start = 0.25
@@ -23,8 +28,16 @@ mixup = 0.2
 scale_jitter = 0.25
 
 [sampling]
+hard_tail = 0.0
+hard_mid = 1.0
+hard_end = 1.0
 hard_ramp = 0.25
 hard_start = 0.0
+
+[data]
+slices = 12
+band_low = 0.2
+band_high = 0.8
 
 [meta]
 hypothesis = "The four fragments the knee-feb62.11 leave-one-out never varied, returned to their control values in"

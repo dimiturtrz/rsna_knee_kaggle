@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from core.paths import ENV_OVERRIDE, DataRoot
 from kneemri.training.recipe_layers import SET, RecipeLayers, RecipeMeta, RecipeStatus
 
 ADDRESSES = {"optim.epochs": "epochs", "optim.ema": "ema", "regularisation.mixup": "mixup", "run.labels": "labels"}
@@ -60,6 +61,45 @@ def test_sources(tmp_path: Path):
     sources = RecipeLayers((leaf,), ("regularisation.mixup=0.2",)).sources(ADDRESSES)
 
     assert sources == {"epochs": (12, str(parent)), "ema": (True, str(leaf)), "mixup": (0.2, SET)}
+
+
+def test_sources_fill_a_data_root_from_the_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """A file names its input under `$PROCESSED`, the root `lib.sh` exports, never a machine path."""
+    monkeypatch.setenv("PROCESSED", "/data/processed")
+    monkeypatch.setenv("MODELS", "/data/models")
+    leaf = tmp_path / "leaf.toml"
+    leaf.write_text('[run]\nlabels = "$PROCESSED/labels/l.csv"\n[optim]\nepochs = 4\n', encoding="utf-8")
+
+    sources = RecipeLayers((leaf,)).sources(ADDRESSES)
+
+    assert sources == {"labels": ("/data/processed/labels/l.csv", str(leaf)), "epochs": (4, str(leaf))}
+
+
+def test_sources_refuse_a_root_the_environment_does_not_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """An unfilled `$MODELS` would train against a path that exists nowhere, found only once the card is held."""
+    monkeypatch.chdir(tmp_path)
+    for name in ("MODELS", "PROCESSED", ENV_OVERRIDE):
+        monkeypatch.delenv(name, raising=False)
+    leaf = tmp_path / "leaf.toml"
+    leaf.write_text('[run]\nlabels = "$MODELS/x.csv"\n', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="does not set"):
+        RecipeLayers((leaf,)).sources(ADDRESSES)
+
+
+def test_sources_fill_a_data_root_from_paths_yaml_outside_an_arm(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """A reader outside `lib.sh` (arm_check, a review) resolves a root where an arm would: from `paths.yaml`."""
+    monkeypatch.chdir(tmp_path)
+    for name in ("MODELS", "PROCESSED", ENV_OVERRIDE):
+        monkeypatch.delenv(name, raising=False)
+    (tmp_path / "paths.yaml").write_text(f"data: {(tmp_path / 'root').as_posix()}\n", encoding="utf-8")
+    leaf = tmp_path / "leaf.toml"
+    leaf.write_text('[run]\nlabels = "$MODELS/x.csv"\n', encoding="utf-8")
+
+    sources = RecipeLayers((leaf,)).sources(ADDRESSES)
+
+    models = DataRoot.from_config(Path("paths.yaml")).models().as_posix()
+    assert sources == {"labels": (f"{models}/x.csv", str(leaf))}
 
 
 def test_values_expands_extends_depth_first_with_parents_first(tmp_path: Path):

@@ -1,0 +1,88 @@
+# pool_specialise.sh -- POOL on three sites, then SPECIALISE back onto ours alone.
+#
+# reading: pool_specialise_s2026.holdout.npz
+#
+# bead: knee-jjyef
+#
+# WHY THIS ARM EXISTS, and it is named as untried by the row it answers. `merged3_corpus`
+# (experiments/README.md:332) added MRNet as a third site and landed 0.8521, -0.0024 against
+# `merged_corpus`. Its recorded reading is not "more sites do not help" -- it is that the shape is a
+# ROTATION, NOT AN ADDITION: Synovitis +0.0234 and Fracture +0.0169 arrive while Lateral Meniscus
+# -0.0217, Contusion -0.0164 and PF OA -0.0111 leave, so a corpus mean sits inside the floor while
+# every column underneath it moves by up to 0.02. That row closes the SITE-COUNT corner and then says,
+# verbatim: it "does not rule out MRNet under a different *combination* (per-site conditioning,
+# harmonisation, or pool-then-specialise, none of which this arm tried)".
+#
+# This is pool-then-specialise, the third of those three.
+#
+# THE MECHANISM, stated before the run. If the rotation is the foreign blocks competing with our own
+# supervision for the same head capacity, then the gains are in the TRUNK and the losses are in the
+# HEAD. Pooling teaches the trunk focal structure from expert image reads; specialising back onto our
+# 3,498 studies alone re-fits the head on our label distribution with no foreign rows present to pull
+# it. If that is right, the arm keeps Synovitis and Fracture and gets Lateral Meniscus, Contusion and
+# PF OA back, and the mean moves by something like the size of the rotation rather than its net.
+#
+# STAGE ONE IS ALREADY ON DISK AND COSTS NOTHING. `merged3_corpus_s2026.pt` was trained 2026-09-01 over
+# the 6,393-study three-site cache. This arm is stage two only.
+#
+# WHAT MOVES, against the our-corpus arm at this recipe. ONE flag pair: `--init
+# merged3_corpus_s2026.pt --init-scope trunk`. Scheme goes back to our canonical cache and `--labels`
+# back to report_labels_v2.csv, which is what makes the control the our-corpus arm rather than
+# merged3_corpus.
+#
+# deliberate: --init merged3_corpus_s2026.pt (the whole point of the arm)
+# deliberate: --init-scope trunk. The head is what we want REFIT, not inherited -- inheriting it would
+# deliberate: carry the foreign label distribution into the thing we are trying to clear. `mrnet_warm`
+# deliberate: used the same scope for the same reason.
+# deliberate: --eval-labels report_labels_v2.csv -- the proxy must not move with the arm.
+#
+# THE PRIOR THAT ARGUES AGAINST IT, recorded because it is real. `mrnet_warm_s2026` = 0.8487, a trunk
+# warm-started from an MRNet-only pretrain, BELOW its own control. That is evidence a foreign-touched
+# trunk does not transfer. What is different here: that trunk had seen MRNet ALONE under ACL-only
+# supervision, while this one was trained jointly on all three sites INCLUDING ours under full twelve-
+# column supervision and stands on its own at 0.8521 as a model. Different object, same scope flag.
+#
+# HARNESS CHECK BEFORE READING ANY NUMBER. The printed recipe must name the canonical scheme (NOT
+# merged3), report_labels_v2.csv on BOTH "labels" and "eval_labels", and the log must load 3,498
+# training studies and hold out 909 -- not 6,393. And epoch 0 must NOT equal the control's epoch 0: an
+# equal first epoch means `--init` did not land and the arm is measuring nothing, which is exactly how
+# `mrnet_warm`'s header says to catch it.
+#
+# COST. ~200 s/epoch over 3,498 studies at this recipe, twelve epochs, ~40 minutes. Stage one free.
+#
+# THE FALSIFIABLE PART, written before the run. Control is the our-corpus arm at this recipe
+# (`lr4e-5_ws`); merged3_corpus is 0.8521 and merged_corpus 0.8545 on the same ruler.
+#   * >= +0.0062 over the control. Pool-then-specialise clears the floor on its own. The corpus axis is
+#     re-opened as a TWO-STAGE axis, the rotation reading is confirmed as head-capacity competition,
+#     and the next arm is a fourth site pooled the same way -- which is the only thing that would
+#     licence spending the parked fastMRI credentials.
+#   * +0.002 to +0.0062. Directional, kept as a member, and read PER COLUMN against merged3_corpus:
+#     the claim stands only if Lateral Meniscus, Contusion and PF OA come back while Synovitis and
+#     Fracture are held. A mean in this band with the rotation UNCHANGED is not this mechanism.
+#   * Flat. The rotation is not head-capacity competition, and pooling buys the trunk nothing our own
+#     corpus does not already teach it. Two of the three named combinations are then dead and the
+#     corpus axis closes for good rather than "does not rule out".
+#   * Down past -0.0062. Suspect --init-scope first: if the trunk arrives carrying a three-site feature
+#     distribution the head must unlearn, a warm start is worse than none, and that is the second time
+#     this project would have measured it (mrnet_warm, 0.8487). Two measurements of one effect closes
+#     warm-starting from foreign-touched trunks across both depths.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[encoder]
+init = "$MODELS/merged3_corpus_s2026.pt"
+init_scope = "trunk"
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[meta]
+hypothesis = "pool_specialise.sh -- POOL on three sites, then SPECIALISE back onto ours alone."
+bead = "knee-jjyef"
+requires = ["$MODELS/merged3_corpus_s2026.pt"]
+status = "queued"
+out = "pool_specialise_s2026"

@@ -1,0 +1,60 @@
+# bead: knee-kiss9
+# reading: blendhold_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `blendhold_drop40`'s byte-identical line with ONE number changed: `--epochs 12` -> `--epochs 24`.
+#   The second point of the budget test. The argument lives in chainfour_drop40_long.sh and is not
+#   repeated here; what matters is that ONE seat cannot settle it, which is why the 12-epoch pair was
+#   run as a pair in the first place.
+#
+# WHY THIS SEAT IS THE CHEAP ONE AND RUNS SECOND
+#   45 s/epoch against chainfour's 185. Twenty-four epochs cost ~18 min here and ~74 there. It runs
+#   BEHIND chainfour so the expensive arm starts on an idle card rather than waiting on this one.
+#
+# THE READ THIS ARM IS ACTUALLY DECIDING
+#   blendhold_drop40 at 12 read 0.8507 against blendhold 0.8575 — a -0.0068 midpoint miss that BREACHED
+#   its own pre-registered +-0.006 holdout band, which its header said would be "a fact about the recipe
+#   interaction". At ledger75 the same pair is -0.0023. If the budget explanation is right, the breach
+#   closes here; if the arm lands at 0.8507 again with a flat tail, the breach was real and the operator
+#   costs this recipe something the epochs cannot buy back.
+#
+# PRE-REGISTRATION (written before the run, against blendhold_s2026 0.8575 midpoint / 0.8829 ledger75)
+#   seat >= +0.0040   the operator earns a seat once its budget is not the control's.
+#   seat +0.000..+0.004
+#                     directional. Keep for the pool, spend no slot.
+#   seat < 0.000 AND no last-epoch peak
+#                     budget suspect eliminated on this seat too. With chainfour agreeing, the axis CLOSES.
+#   holdout           expected >= 0.8507 (its own 12-epoch peak) and, if the budget story holds, back
+#                     inside blendhold's +-0.006 band, i.e. >= 0.8515. Below 0.8507 refuses the story.
+#
+# deliberate: --epochs 24 — the one variable. Every other flag byte-copied from blendhold_drop40.sh.
+# deliberate: --slot-dropout 0.40 — imported operating point, not a swept knob (knee-yotj8).
+#
+# control  blendhold_s2026 (seated, on disk) and blendhold_drop40_s2026 (this arm at 12). Costs no run.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+image_size = 224
+
+[optim]
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+labels = "$PROCESSED/labels/blend_three_v1.csv"
+
+[targets]
+hold_annotations = true
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-kiss9"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "done"
+out = "blendhold_drop40_long_s2026"

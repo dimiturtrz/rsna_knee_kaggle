@@ -40,6 +40,11 @@ epochs = 12
 [targets]
 normalise_by_count = true
 
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
 [meta]
 hypothesis = "normcount224.sh — the LAST unmeasured recipe key, run to close the knob space rather than to win."
 bead = "knee-il96"

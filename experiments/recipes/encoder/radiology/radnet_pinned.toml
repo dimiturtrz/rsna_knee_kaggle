@@ -139,6 +139,9 @@ batch = 1
 [run]
 vram_gb = 26.0
 
+[targets]
+rank_weight = 0.0
+
 [meta]
 hypothesis = "radnet_pinned.sh — the same arm as `radnet_family`, with the defect that voided it removed."
 bead = "knee-cj40f"

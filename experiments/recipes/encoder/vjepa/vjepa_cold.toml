@@ -63,6 +63,9 @@ extends = ["_family.toml"]
 [optim]
 epochs = 12
 
+[model]
+slice_pooling = "channels"
+
 [meta]
 hypothesis = "vjepa_cold.sh — the fair draw the volumetric family has never had: cold start, twelve epochs, finished."
 bead = "knee-s9e03"

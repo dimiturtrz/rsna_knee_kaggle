@@ -29,10 +29,14 @@
 extends = ["_family.toml"]
 
 [data]
+slices = 12
 centre = "tissue"
 
 [model]
 slice_pooling = "max"
+
+[optim]
+epochs = 8
 
 [meta]
 hypothesis = "Keep 130 mm, move where it is taken about: the tissue, not the image centre. One variable (knee-yrf)."

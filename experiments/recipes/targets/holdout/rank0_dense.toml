@@ -68,6 +68,9 @@ band_high = 0.9
 band_low = 0.1
 slices = 20
 
+[targets]
+rank_weight = 0.0
+
 [meta]
 hypothesis = "rank0_dense.sh — turn the pairwise ranking term OFF at the settled operating point, and find out what"
 status = "queued"

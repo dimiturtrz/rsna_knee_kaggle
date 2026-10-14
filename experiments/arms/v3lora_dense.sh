@@ -130,9 +130,6 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 
-HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head -1)"
-export HF_TOKEN
-[ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
 
 # `v3lora_dense smoke` runs the SAME line at 60 studies for one epoch, to a checkpoint whose name can
 # never be mistaken for the arm's. It exists so the queue can chain the smoke and the arm together and

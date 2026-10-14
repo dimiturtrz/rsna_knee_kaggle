@@ -14,6 +14,8 @@ patience_from_progress = 0.25
 warmup = 0.25
 
 [regularisation]
+mixup = 0.0
+aug_mid = 1.0
 aug_end = 0.5
 aug_ramp = 0.25
 aug_start = 0.25
@@ -23,6 +25,18 @@ intensity_aug = true
 padding_mode = "reflection"
 scale_jitter = 0.25
 stochastic_depth = 0.05
+
+[data]
+slices = 12
+band_low = 0.2
+band_high = 0.8
+
+[sampling]
+hard_tail = 0.0
+hard_start = 1.0
+hard_ramp = 0.0
+hard_mid = 1.0
+hard_end = 1.0
 
 [meta]
 hypothesis = "Every fragment the knee-feb62.11 leave-one-out priced POSITIVE, dropped together, on the same"

@@ -59,6 +59,11 @@ slice_regions = 4
 [optim]
 epochs = 12
 
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
 [meta]
 hypothesis = "The same region pooling as `depth_regions`, on the band every OTHER member reads: 0.20-0.80 at 12"
 status = "done"

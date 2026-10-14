@@ -1,0 +1,77 @@
+# The FIRST table in this chain that no dissent signal can see. One variable from `band_span`: the table.
+#
+# WHY THIS ARM EXISTS. Every label operation tonight has been cut on DISAGREEMENT - discord_mask masks
+# where the extractor cluster splits, v2_corrected and v2_delonly rewrite where one reader dissents.
+# All of them are blind to the same population by construction: the cells where every extractor AGREES
+# and all of them are wrong together. D366 measured that population directly.
+#
+# THE POPULATION. 711 v2 OA-column positives carry no compartment lexeme ANYWHERE in their report -
+# no medial/lateral/patellar word in any of the corpus's nine languages. By column:
+#
+#   PF OA        515 of 1,991 positives   0.259
+#   Medial OA    154 of 1,619 positives   0.095
+#   Lateral OA    42 of 1,087 positives   0.039
+#
+# "Named" is presence-anywhere, NOT attribution - a meniscus line naming a compartment counts - so
+# every share above is a FLOOR on the unattributed fraction, never an estimate of it. PF OA is the
+# outlier by a factor of three and carries 72% of the cells.
+#
+# AND 692 OF THE 711 (97.3%) ARE UNANIMOUS-STRATUM. Every extractor says present; no report names the
+# compartment. That is not disagreement, it is SHARED INFERENCE - D319's compartment-assignment error
+# with no dissent to mark it. Measured at build: this table's masked cells overlap `v2_delonly`'s
+# 2,080 changed cells by 9, and `discord_mask`'s 7,369 by 232, so 479 of the 711 are cells no
+# operation in the chain has ever touched.
+#
+# THE OPERATION IS A MASK, AND THAT IS THE MECHANISM. D363 measured the substitution's addition
+# direction at 0.786 wrong; D365 measured v2's own dissent-stratum error at 0.850 in the direction
+# that ASSERTS and 0.017 in the direction that withholds. Writing a 0 into an unsupported cell would
+# assert absence with exactly the confidence that put the 1 there. A mask writes nothing and cannot
+# invent - the same argument that puts `discord_mask` first on the blind-adjudicated gold ruler.
+#
+# THE TABLE. `report_labels_v8named.csv`, written by `research/scripts/apply_unnamed_mask.py` from
+# `report_labels_v2.csv` and D366's `unnamed_compartment_cells.csv`. Verified at build: 711 cells
+# requested, 711 written, 0 skipped, NaN count 0 -> 711, shape (4406, 37) unchanged.
+#
+# THE PRICE. 12 epochs, ~35 min on the 5090. 711 cells is the smallest correction in the family -
+# `v2_delonly` moves 2,080, `v6tears` 1,379 - so on the twelve-column mean the odds of clearing 1.5%
+# are low, as for every table arm. It is worth the card for one reason the others cannot claim: it is
+# the only axis measured tonight that is INDEPENDENT of the dissent signal, which makes it the only
+# one that can compose. `v9` = delonly-plus-named is priced only if this reads.
+#
+# THE RULER, AND THE SAME TRAP. `--eval-labels` stays pinned to v2, so the number is comparable to
+# `band_span` 0.8565, `v6tears_span` 0.8116 and `v7nontear_span` 0.8160. A member trained on a table
+# whose errors it was taught not to reproduce reads a FLOOR on the v2 ruler by construction, and this
+# table's 711 masked cells are 711 cells the v2 ruler still scores as positives. The read is the
+# corrected T1 rescore off this run's holdout npz.
+#
+# PREDICTION, written before the run. On the v2 ruler: BELOW `band_span`, and by LESS than
+# `v2delonly_span` falls, because 711 masked cells cost less ruler agreement than 2,080 rewritten
+# ones. Against `v7nontear_span` 0.8160: at or above. On the corrected T1 ruler: above v2-trained
+# members on the OA columns SPECIFICALLY and flat elsewhere - the table touches only three columns, so
+# a uniform lift across all twelve would be evidence of noise, not of the mechanism. A PF OA column
+# that does not move is the cleanest refutation available, since 72% of the cells are in it.
+# PLUMBING first: assert `labels` names v8named and `eval-labels` names v2 before writing any number.
+#
+# reading: D:/data/volumetric/mri/models/rsna_knee_abnormality/v8named_span_s2026*.holdout.npz
+# bead: knee-lv4fx
+
+extends = ["_family.toml"]
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+
+[run]
+labels = "$PROCESSED/labels/report_labels_v8named.csv"
+
+[data]
+slices = 12
+
+[meta]
+hypothesis = "The FIRST table in this chain that no dissent signal can see. One variable from `band_span`: the table."
+bead = "knee-lv4fx"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "queued"
+out = "v8named_span_s2026"

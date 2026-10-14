@@ -1,0 +1,64 @@
+# recal_calib.sh — does the reader RE-MAP compose with the level CALIBRATION? `recal_dense` + one token.
+#
+# WHY IT IS WORTH 75 MIN AHEAD OF 5.7 h OF TWINS. The six seats a `retrain_six` block would refit already
+# carry calib and ema; distillation is the only priced knob missing from them, which is what makes
+# `retrain_six_distill` the right stack (D38). The one priced knob on NO seat is labels v3
+# (`report_labels_v3.csv`): +0.0045 (band_dense_hold -> recal_dense) and +0.0052 (lr4e-5_ws ->
+# recal_holdannot), two pairs, NEITHER of them carrying calib. If v3 composes with calib then the twins'
+# stack is distill + v3 and the block's L doubles (~ +0.005 board alone). Six dark fits must not be bought
+# on an untested composition, so the composition is priced first: 75 min against 5.7 h.
+#
+# THE ONE MOVING TOKEN is `--calibrated-targets`. Everything else is `recal_dense`'s, taken from its
+# metrics row 0 rather than from prose: 12 epochs, slice-pooling max, whole-stack, backbone-lr 4e-5,
+# 20 slices, band 0.1-0.9, hold-annotations, fold 0 of 5, seed 2026, labels v3.
+#
+# --eval-labels IS PINNED, AND THAT IS THE WHOLE REASON THIS ARM CAN BE READ. `recal_holdannot` left it
+# unset and was scored against the RE-MAPPED table, so the ruler moved with the arm and a +0.0477 was two
+# rulers rather than a result. Assert from this arm's metrics row 0 that `eval_labels` names v2.
+#
+# WHY THE COMPOSITION COULD FAIL — the mechanism to write down if it does. v3's fitted levels and
+# `LevelCalibration`'s pool-adjacent-violators fit are two answers to the SAME question (what positive
+# rate does this reader value mean), so the second may have nothing left to correct on a table the first
+# already re-mapped, and the two together may over-correct.
+#
+# PRE-REGISTERED on the 896, L75mid. Parents: recal_dense 0.8923 (v3, no calib), calib_dense_hold 0.8948
+# (calib, v2). Additive = 0.8993.
+#   >= 0.8990  COMPOSES — the four twins train with `--labels report_labels_v3.csv` added, said in their
+#              headers; the two twins already on disk are re-fit last and only if the card is free.
+#   0.8950-0.8990  PARTIAL — the twins keep v2 and v3 goes to a ledger line as a half-knob.
+#   <= 0.8948  DOES NOT COMPOSE — ledger the WHY (the two-answers-to-one-question mechanism above), and
+#              the twins keep v2.
+#
+# deliberate: --calibrated-targets (the single moving token vs recal_dense)
+# deliberate: --eval-labels (the ruler must not move with the arm; recal_holdannot is the incident)
+# deliberate: --hold-annotations (the gold ruler refuses a checkpoint that trained on the annotated rows)
+# reading: recal_calib_s2026.holdout.npz
+# bead: knee-4h1if
+# control  recal_dense_s2026 = 0.8923 and calib_dense_hold_s2026 = 0.8948 (896, L75mid)
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+
+[model]
+slice_pooling = "max"
+
+[run]
+labels = "$PROCESSED/labels/report_labels_v3.csv"
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "recal_calib.sh — does the reader RE-MAP compose with the level CALIBRATION? `recal_dense` + one token."
+bead = "knee-4h1if"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "done"
+out = "recal_calib_s2026"

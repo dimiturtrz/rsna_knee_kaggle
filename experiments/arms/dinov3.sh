@@ -76,9 +76,6 @@ require "$LABELS"
 
 # The gated weights need a token. Read from the credential file into the environment, never echoed and
 # never written into a log — the trainer only needs it to reach the hub once, at construction.
-HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head -1)"
-export HF_TOKEN
-[ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
 
 # THE READ SIZE IS IN THE NAME, and it was not: this arm wrote `dinov3_v3small` whatever size it read,
 # so launching the 224 probe began overwriting the 336 run's log and was about to overwrite its

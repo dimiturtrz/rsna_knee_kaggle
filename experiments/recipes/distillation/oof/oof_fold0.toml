@@ -48,6 +48,9 @@
 extends = ["_family.toml"]
 
 [data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
 image_size = 224
 
 [encoder]
@@ -59,11 +62,15 @@ whole_stack = true
 slice_pooling = "max"
 
 [optim]
+epochs = 8
 one_cycle = true
 
 [targets]
 rank_weight = 1.0
 weight_floor = true
+
+[run]
+fold = 0
 
 [meta]
 hypothesis = "oof_fold0.sh — the fifth out-of-fold twin, the one `oof_teacher.py` deliberately does not have."

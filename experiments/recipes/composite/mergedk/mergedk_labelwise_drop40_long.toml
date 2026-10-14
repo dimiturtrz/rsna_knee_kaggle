@@ -1,0 +1,89 @@
+# bead: knee-dl65h
+# reading: mergedk_labelwise_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `mergedk_drop40_long`'s byte-identical line with ONE flag moved: `--slice-pooling max` becomes
+#   `--slice-pooling labelwise`. Corpus, resolution, slices, dose and budget are all inherited.
+#
+# THE CELL THE 2x2 NEVER FILLED
+#   At the 224px/12-slice corner the corpus lever plus the operator pair is measured and POSITIVE,
+#   matched, all four cells on disk at ledger75:
+#     base224_control_s2026      0.8754   no corpus, no dropout, 12ep
+#     mergedk_corpus_s2026       0.8787   +0.0033 corpus alone
+#     mergedk_drop40_s2026       0.8805   +0.0051 corpus + drop40
+#     mergedk_drop40_long_s2026  0.8853   +0.0099 corpus + drop40 + 24ep, peak e17 of 24
+#   Every one of those is `--slice-pooling max`. The labelwise family owns the top of the 0.75 ruler
+#   (depth24 0.8998, extended 0.8986, drop 0.8984, dense 0.8964) and is a different corner. Corpus x
+#   labelwise has never been run.
+#
+# WHY 224 AND NOT 336
+#   A 336px merge needs ~43 GB of new array and /d holds 23 GB (knee-rijuv). The 224 array already
+#   exists, so this cell costs card and no disk. That is the reason the resolution is held down, not a
+#   judgement that 224 is the right place for labelwise pooling.
+#
+# WHY IT IS WORTH THE CARD AS A DIVERSITY SEAT, NOT AS A SOLO
+#   At 224/12sl the ceiling is ~0.88, so this will not be the best solo the project owns and is not
+#   pitched as one. Owner directive: "even if a single model doesnt outperform our previous models, its
+#   still worth testing if an ensemble with it have better performance - after all, its about diversity."
+#   The honest pool's low-rho candidates are nearly exhausted -- every low-rho high-solo member already
+#   declined is in-sample void, and the honest minimum sits at rho 0.852. This member differs from the
+#   core six in CORPUS (second site), RESOLUTION (224 vs 336) and SLICES (12 vs 20-24) at once, which is
+#   the widest three-axis separation still available at zero licence cost: KMAR-50K is CC BY 4.0, the
+#   only shippable merge the project owns.
+#
+# NOT AN EINSTEIN REPEAT. `mergedk_drop40_long` is the same corpus and the same operators at `max`
+#   pooling. The variable that moves is the POOLING, and no run on disk has put labelwise on a merged
+#   corpus.
+#
+# PRE-REGISTRATION (ledger75)
+#   solo vs mergedk_drop40_long 0.8853
+#     >= +0.0040   labelwise pooling transfers to the merged corpus; the corpus axis re-opens at 336 as
+#                  soon as disk allows, which makes freeing /d a priced task rather than hygiene.
+#     +0.000..+0.0039  directional.
+#     <= 0.0000    labelwise pooling is a property of the home corpus at 336, not of the pooling.
+#   ensemble: add to the core six (LogitAverage, full 909, no selection)
+#     >= +0.0040   seats it and the slot argument is ensemble diversity, not member quality.
+#     +0.000..+0.0039  directional, no slot.
+#     <= 0.0000    closes the three-axis-diversity hope on the honest pool. If a member this far from
+#                  the core consensus cannot add, diversity is not the missing ingredient and only
+#                  member quality is (knee-0v8yz).
+#   peak: read under `convergence_check`, NEVER by argmax alone. A last-epoch argmax whose final three
+#         epochs gained under the 0.0062 holdout floor is a PLATEAU, not a binding budget (knee-a21h9).
+#
+# deliberate: --slot-dropout 0.40 — imported operating point (knee-yotj8), not a swept knob.
+# deliberate: --epochs 24 — inherited from mergedk_drop40_long, the cell this arm is matched against.
+# deliberate: --image-size 224 --slices 12 --band-low 0.2 --band-high 0.8 --scheme mergedk — inherited
+#             verbatim. This arm changes ONE flag.
+#
+# CARD. Same footprint as mergedk_drop40_long, which ran on this card at 224px. Nothing else of ours may
+#   share it (`card_check`).
+#
+# control  mergedk_drop40_long_s2026 (on disk, identical line at `max` pooling). No control run is owed.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+image_size = 224
+scheme = "mergedk"
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+labels = "$PROCESSED/labels/mergedk_labels.csv"
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-dl65h"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "queued"
+out = "mergedk_labelwise_drop40_long_s2026"

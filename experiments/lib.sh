@@ -71,6 +71,11 @@ PROCESSED="$(echo "$_lib_roots" | sed -n 1p)"
 MODELS="$(echo "$_lib_roots" | sed -n 2p)"
 LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$MODELS/experiments"
+export PROCESSED MODELS
+# Gated Hugging Face weights (DINOv3) read the token from here, once, for every arm — never echoed.
+HF_TOKEN_FILE="${HF_TOKEN_FILE:-/d/life/creds/machine/hfpat.txt}"
+[ -n "${HF_TOKEN:-}" ] || HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' "$HF_TOKEN_FILE" 2>/dev/null | head -1)"
+export HF_TOKEN
 
 # Touch this to stop a chain STARTING further arms; the running one finishes. See run_train.
 # In the repo's gitignored logs/ rather than under $PROCESSED, because the request comes from a person

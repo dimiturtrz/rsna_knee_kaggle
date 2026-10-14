@@ -1,0 +1,23 @@
+# chain: 7 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+whole_stack = true
+
+[optim]
+ema = true
+one_cycle = true
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+
+[targets]
+hold_annotations = true
+rank_weight = 1.0
+weight_floor = true

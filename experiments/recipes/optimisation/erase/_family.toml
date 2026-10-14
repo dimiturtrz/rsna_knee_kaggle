@@ -1,0 +1,25 @@
+# erase: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+one_cycle = true
+
+[regularisation]
+patch_erase = 0.25
+patch_maps = "$MODELS/patches/labelwise_dense_drop40_long_s2026_g4_train.named.patches.npz"
+slot_dropout = 0.4
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+rank_weight = 1.0
+weight_floor = true

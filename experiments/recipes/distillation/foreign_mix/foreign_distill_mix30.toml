@@ -1,0 +1,61 @@
+# foreign_distill_mix30.sh — the teacher term at 3.0, because the flag is ADDITIVE and 1.0 is not an endpoint.
+#
+# WHAT THE FLAG ACTUALLY DOES, checked in the objective rather than recalled from the arm that used it.
+# `DistilledObjective.__call__` (kneemri/training/objective.py:411) returns
+#     super().__call__(focused) + self.distill_weight * self.imitation(focused)
+# — the label term is at FULL strength at every setting, and `--distill-weight` scales only the teacher's
+# term on top of it. There is no mix. So `foreign_distill` (0.3) and `foreign_distill_mix07` (0.7) are not
+# "labels 0.7" and "labels 0.3"; they are the same label objective with the teacher at 0.3 and at 0.7, and
+# mix07's own docstring reasoning — "at 0.3 the label term holds 0.7 of the loss, so the ordering that
+# survives is ours" — is wrong about the mechanism even where it is right about the direction. A weight of
+# 1.0 would not be "pure teacher, labels off"; it would be 1.43x mix07, a step smaller than the step from
+# `foreign_distill` to mix07 (2.3x) that this axis is still waiting on the js reading for.
+#
+# WHY 3.0. If mix07's js is flat against foreign_distill's 0.0190, the question the axis owes is whether
+# the teacher CAN dominate our labels at all, and that is answered by the ratio, not by another neighbouring
+# point. 3.0 is 4.3x mix07 and 10x the original — one log-spaced endpoint rather than two crowded points —
+# and it is the largest setting whose gradient scale has a precedent here (`feature_distillation`'s
+# docstring records --distill-weight 20 in the logit path, so 3.0 is inside what this codebase has driven).
+# If the student's ordering does not leave our pool at ten times the original strength, no operating point
+# of this term will move it, and the supervision axis closes the way corpus and architecture already have.
+#
+# ONE VARIABLE against `foreign_distill_mix07`: --distill-weight, 0.7 -> 3.0. Teacher file, rate, slices,
+# band, pooling, whole-stack and epochs all held, so mix07 is the matched control and `foreign_distill`
+# (0.3) is the second point on the same line.
+#
+# HOW IT IS READ, written before the number. The reading is the NEAREST column, as it was for mix07:
+#   * js divergence UP past the roster's boundary (0.0147) — the teacher can carry family structure into
+#     a student, the axis re-opens on strength, and the seat on the served base of 8 is the next reading.
+#   * js FLAT or DOWN at 10x the original strength — with `foreign_distill`, `foreign_distill_mix07` and
+#     `dissent_seat` that is four arms spanning a decade of the knob, which closes the supervision axis
+#     rather than nulling it.
+#   * solo collapsing (below ~0.80) with js up — the term is overwhelming the labels rather than
+#     re-weighting them, and the reading is about 3.0 being too large, not about the axis.
+#
+# SEAT PRE-REGISTRATION (mastermind, 19:12Z): seat delta >= 0.003 on the served base of 8 = distillation is
+# a member factory; < 0.0011 = supervision joins corpus and architecture, all three closed on readable rulers.
+#
+# COST. ~73 min of card, 12 epochs at 364 s/epoch measured on mix07. ZERO submission slots. Teacher on disk.
+#
+# deliberate: --distill-weight (3.0, the single moving variable)
+# deliberate: --teacher-targets (theirs, HELD from foreign_distill_mix07)
+# bead: knee-bq62a
+# reading: foreign_distill_mix30_s2026.holdout.npz
+# control  foreign_distill_mix07 = 0.7, foreign_distill = 0.3 / js 0.0190, band_dense = 0.8578 solo / js 0.0273.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[targets]
+rank_weight = 1.0
+
+[teacher]
+distill_weight = 3.0
+
+[meta]
+hypothesis = "foreign_distill_mix30.sh — the teacher term at 3.0, because the flag is ADDITIVE and 1.0 is not an endpoint."
+bead = "knee-bq62a"
+requires = ["$PROCESSED/teacher_foreign_corpus.npz"]
+status = "queued"
+out = "foreign_distill_mix30_s2026"

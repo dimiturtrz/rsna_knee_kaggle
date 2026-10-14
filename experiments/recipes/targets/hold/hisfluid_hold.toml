@@ -1,0 +1,83 @@
+# hisfluid_hold.sh — ONE column retargeted onto a second reader of the SAME reports, nothing else moved.
+#
+# WHAT THIS ASKS. D23 read our v2 extraction and a foreign LLM reader (`labels_llm_soft.csv`, 4,349
+# studies, none of them a gold cell) against the 58 radiologist-annotated studies, per column. On
+# Effusion the foreign reader correlates +.78 with the radiologist where our v2 correlates -.17. Both
+# readers read the same report text, so on that column the defect is in OUR EXTRACTION, and it is
+# fixable from the reports with no gold anywhere in the target path.
+#
+# WHAT THE DISAGREEMENT ACTUALLY IS, measured (D24). The v2-positive / foreign-negative cell is 1,510
+# studies, and 96.9% of them sit on v2's 0.68 "possible" rung — SMALL effusion (small / mild / minimal /
+# trace, 32 of 40 seeded quotes carry an explicit size word). The language split of the cell is
+# proportional to the corpus, so this is not a non-English failure and not a lexicon miss: v2 grades the
+# finding correctly and files small fluid at "possible", where the 0.5 cut then makes it a LEDGER
+# positive. The foreign reader files the same cell at 0.20. The radiologist calls that rung positive 13
+# of 27 times, so neither reader is "right" on it — it is an ambiguous rung, which is what a soft label
+# is for. This arm moves the small-effusion TRAINING target from ~0.47 (`targets.py:40,54`) to 0.20 and
+# asks whether that ordering margin lands on the gold column.
+#
+# SYNOVITIS IS DELIBERATELY NOT RETARGETED, and this is the one place the obvious move is wrong. D24:
+# P(foreign Syn+ | foreign Eff+) = .924 against P(foreign Syn+ | foreign Eff-) = .011, and only 11.7% of
+# the foreign-positive / v2-negative Synovitis cell contains any synovium token at all (the ones that do
+# are cyst walls and nerves). The foreign reader's Synovitis is an EFFUSION-SIZE PROXY. Retargeting it
+# would train the Synovitis head on the effusion rung a second time under another name, and the
+# foreign-896 Synovitis ruler would then read that member high by construction — a confound, not a
+# reading. Contusion and Fracture are left alone for the opposite reason: there the foreign reader sides
+# WITH v2, so there is no lever.
+#
+# THE ONE VARIABLE. `--labels labels_hisfluid.csv`: v2 with the Effusion column replaced by the foreign
+# reader's soft value on the 4,349 studies it covers, v2 retained on the other 57, the other eleven
+# columns untouched. Built by
+#   python -m core.data.labels.table_blend --base .../report_labels_v2.csv \
+#     --foreign .../labels_llm_soft.csv --mode override --only Effusion --out .../labels_hisfluid.csv
+# Soft values are used AS THEY COME — no thresholding, because the reader's uncertainty is the part v2
+# throws away. `--eval-labels` is pinned to v2 so the holdout ruler does not move with the targets
+# (`table_blend`'s own docstring: an arm scored unpinned measures disagreement with v2, not supervision).
+#
+# WARM START, not a fresh fit. `--init band_dense_hold_s2026.pt --init-scope all` on that checkpoint's
+# own recipe, byte-identical otherwise, so the pair is single-variable and the control is already on
+# disk. Six epochs at ~390 s = ~40 min; the trunk starts fitted, so this reads a RETARGET, not a
+# convergence race.
+#
+# HELD, and it has to be. `--hold-annotations` is carried from the control: only a checkpoint that never
+# saw the 58 cells is readable by `annotated_readings`, which is the ruler this arm exists to move
+# (knee-9198). `level_calibration` is NOT invoked anywhere in this path — no constant here is fitted on
+# gold.
+#
+# PRE-REGISTERED, three rulers, all paired against band_dense_hold_s2026:
+#   gold Effusion >= +0.03 AND foreign-896 Effusion >= +0.02, with the eleven other LEDGER columns flat
+#              (macro not down beyond the 0.0062 floor) -> the retarget converts, and re-reading the
+#              WHOLE pool on the fixed extraction is licensed.
+#   gold flat while the foreign holdout moves -> the arm learned the foreign reader, not the finding.
+#              Hold; the foreign table becomes a member-selection ruler at most.
+#   both flat  -> the lever is closed FOR RANKING. It does not rule out a calibration or
+#              prevalence-dependent effect, which AUC cannot see — record that, do not generalise it.
+#
+# THE LEDGER EFFUSION COLUMN IS NOT A CONTROL HERE. `--eval-labels` is v2, so LEDGER Effusion measures
+# disagreement with the extraction this arm is replacing and is EXPECTED to fall. The eleven other
+# LEDGER columns are the control; gold-58 and the foreign-896 Effusion column are the two readings.
+#
+# reading: logs/hisfluid_hold_ledger.log
+# bead: knee-n3ubs (this arm; knee-ep74 is the control it warm-starts from)
+#
+# NO --vram-gb: DeviceBudget derives the cap from --slices — 20 slices reserve 28.26 GB.
+
+extends = ["_family.toml"]
+
+[encoder]
+init_scope = "all"
+init = "$MODELS/band_dense_hold_s2026.pt"
+
+[optim]
+epochs = 6
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+labels = "$PROCESSED/labels/labels_hisfluid.csv"
+
+[meta]
+hypothesis = "hisfluid_hold.sh — ONE column retargeted onto a second reader of the SAME reports, nothing else moved."
+bead = "knee-n3ubs (this arm; knee-ep74 is the control it warm-starts from)"
+requires = ["$PROCESSED/labels/report_labels_v2.csv", "$MODELS/band_dense_hold_s2026.pt"]
+status = "queued"
+out = "hisfluid_hold_s2026"

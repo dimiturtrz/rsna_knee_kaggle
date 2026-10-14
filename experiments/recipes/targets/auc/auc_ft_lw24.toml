@@ -1,0 +1,57 @@
+# bead: knee-rt48x
+# reading: auc_ft_lw24_s2026.holdout.npz
+#
+# LibAUC's published recipe is TWO-STAGE: cross-entropy first, then a short AUC-margin fine-tune from the
+# fitted network (Yuan et al. 2021, arXiv 2012.03173). `margin_seat` replaced cross-entropy FROM SCRATCH
+# and read -0.0053 (README:374), so the use the paper actually prescribes has never run here. Stage one is
+# `labelwise_depth24_drop40_long_s2026`, already on disk; this is stage two only.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_depth24_drop40_long_s2026 0.9053 ledger75 @e18)
+#   >= +0.0150   lever: run the CE-continuation control, then a slot.
+#   +0.0062..+0.0149  directional; the six extra epochs are a confound, CE-continuation control owed.
+#   <= +0.0061   two-stage AUC-margin closed.
+#
+# deliberate: --auc-margin 1.0 --rank-weight 0 — the objective, spelled as margin_seat spelled it.
+# deliberate: --init/--epochs 6/--backbone-lr 1e-5 — stage two of the two-stage recipe.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 24
+
+[encoder]
+init_scope = "all"
+backbone_lr = 1e-05
+init = "$MODELS/labelwise_depth24_drop40_long_s2026.pt"
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+epochs = 6
+one_cycle = true
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+vram_gb = 22.0
+
+[targets]
+rank_weight = 0.0
+auc_margin = 1.0
+calibrated_targets = true
+hold_annotations = true
+weight_floor = true
+
+[meta]
+hypothesis = "LibAUC's published recipe is TWO-STAGE: cross-entropy first, then a short AUC-margin fine-tune from the"
+bead = "knee-rt48x"
+requires = ["$MODELS/labelwise_depth24_drop40_long_s2026.pt"]
+status = "queued"
+out = "auc_ft_lw24_s2026"

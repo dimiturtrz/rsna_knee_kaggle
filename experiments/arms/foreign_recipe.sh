@@ -58,9 +58,6 @@ source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 SLICES="${1:-20}"
 require "$LABELS"
 
-HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' /d/life/creds/machine/hfpat.txt | head -1)"
-export HF_TOKEN
-[ -n "$HF_TOKEN" ] || { echo "MISSING: no Hugging Face token, and DINOv3 is a gated repository"; exit 1; }
 
 run_train "foreign_recipe_v3small_336_${SLICES}sl" \
   $RECIPE --epochs 12 --slice-pooling max --whole-stack $THROUGHPUT \

@@ -30,6 +30,9 @@ extends = ["_family.toml"]
 [run]
 fold = -1
 
+[targets]
+rank_weight = 0.0
+
 [meta]
 hypothesis = "margin_seat_ff.sh — margin_seat refit on the whole corpus, so it can sit beside the champion's six"
 bead = "knee-oizh2"

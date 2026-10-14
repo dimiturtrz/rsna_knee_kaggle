@@ -36,6 +36,9 @@ encoder_weights = "\\tmp\\arm_check_models\\vjepa_member_e5.encoder.pt"
 [optim]
 epochs = 6
 
+[model]
+slice_pooling = "channels"
+
 [meta]
 hypothesis = "vjepa_member's second half, warm-started from its own epoch-5 encoder."
 bead = "knee-rpkw"

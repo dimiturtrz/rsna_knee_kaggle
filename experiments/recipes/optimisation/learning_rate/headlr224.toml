@@ -80,6 +80,9 @@
 extends = ["_family.toml"]
 
 [data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
 image_size = 224
 
 [encoder]

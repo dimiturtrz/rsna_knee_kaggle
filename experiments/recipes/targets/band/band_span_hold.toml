@@ -15,6 +15,7 @@
 extends = ["_family.toml"]
 
 [data]
+slices = 12
 band_high = 0.9
 band_low = 0.1
 

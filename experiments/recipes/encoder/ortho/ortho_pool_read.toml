@@ -100,6 +100,12 @@ slice_regions = 4
 accumulate = 3
 batch = 4
 
+[data]
+image_size = 336
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
 [meta]
 hypothesis = "`ortholarge` on the POOL'S OWN read, because the probe says the trunk is not the problem. `knee-6hfi`."
 bead = "knee-6hfi, knee-x4yx, knee-440m"

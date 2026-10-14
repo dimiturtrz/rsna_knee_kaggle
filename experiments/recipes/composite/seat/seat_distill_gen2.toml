@@ -1,0 +1,69 @@
+# seat_distill_gen2 — the same seat, the same control, the SECOND teacher. The cheap proxy that gates
+# the eight-and-a-half-hour six-seat retrain, and the only arm that can price the gen-2 teacher's term
+# before the card is spent on consuming it.
+#
+# WHAT IT IS MATCHED AGAINST, and it is a three-point comparison already on disk:
+#   `lr4e-5_ws_s2026`         0.8525  the control, no teacher
+#   `seat_distill_lr4e5_s2026` 0.8633  the same seat under the GEN-1 teacher, +0.0108
+#   this arm                      ?    the same seat under the GEN-2 teacher
+# ONE VARIABLE against `seat_distill_lr4e5.sh`: the teacher file. Epochs, rate, slices, band, pooling,
+# throughput and labels are copied verbatim, and the control is not refitted because it does not move.
+#
+# THE TERM IT PRICES. `teacher_gen2` measured five fold twins against their gen-1 counterparts and every
+# one was up: +0.0111 / +0.0129 / +0.0166 / +0.0074 / +0.0125, mean **+0.0121**, five-for-five at 1.7x
+# the 0.0071 noise bar. `teacher_gen2_full.npz` is the union of those five holdouts, 4407 studies, five
+# real out-of-fold blocks, NO fill. So the question is the pass-through: gen-1 turned a teacher 0.0103
+# above its student's control into +0.0107 on that student, about 1:1 at that point. If the pass-through
+# holds, a teacher whose blocks read +0.0121 better lands the student near 0.875; if it is damped the way
+# `calibsix` damped a uniform treatment, near 0.869.
+#
+# PRICE: 12 epochs at 217 s (MEASURED off `seat_distill_lr4e5_s2026.metrics.jsonl`, not from prose) =
+# PRICE: **43 minutes of card** and zero submission slots.
+# GAIN: it decides whether `retrain_six_distill` under gen-2 is worth 8.5 h, and it is the first honest
+# GAIN: read of the producer's term rather than of its blocks.
+# P(clears 0.8688 — above the gen-1 student AND above `oof_teacher` 0.8685, the project's best honest
+# P(clears solo) ~ 55%. P(clears 1.5% over the control, i.e. >= 0.8675) ~ 60%.
+# RATIO: 0.7 h for the gate on an 8.5 h commit. Nothing else on the table gates that much for that little.
+#
+# PRE-REGISTERED BANDS, written before the card is spent:
+#   >= 0.875   pass-through is ~1:1. The six-seat retrain under gen-2 is the next arm and its own bands
+#              shift up by the same amount.
+#   0.869-0.874  damped but real. The retrain is still worth its 8.5 h; read its bands unchanged.
+#   0.863-0.868  inside the gen-1 student's own scatter. The teacher got better and the student did not,
+#              which kills the multiply-the-term thesis rather than the teacher, and the next lever is
+#              a PER-SEAT teacher, not a third generation.
+#   <= 0.862   the gen-2 blocks' gain is the distillation students' own inflation and does not exist as
+#              a teaching signal at all. Retract the multiply thesis in writing.
+#
+# THE LEAK IS MATCHED, WHICH IS THE ONLY REASON THIS READING IS USABLE. This seat is scored on fold 0 and
+# the gen-2 twins were fitted without `--exclude-fold`, so twin 1-4's rows are written by models that saw
+# fold 0 — the residual-mimicry structure D30 measured at +0.0127 (README.md:8526, knee-zwcyk). The gen-1
+# number it is compared against, `seat_distill_lr4e5`, read `teacher_oof_corpus.npz` and carries the SAME
+# leak by the same mechanism. So the DELTA between the two is clean and the LEVEL of neither is; the
+# bands above are deltas dressed as levels and must never be quoted as a solo score or rostered.
+#
+# deliberate: --teacher-targets teacher_gen2_full.npz (the one variable)
+# deliberate: --distill-weight 0.7 (HELD from every arm that has searched it; not re-searched here)
+# deliberate: --epochs 12 --slices 12 --band-low 0.2 --band-high 0.8 --backbone-lr 4e-5 (verbatim from
+# deliberate: seat_distill_lr4e5.sh, so the comparison has one moved variable and not two)
+# bead: knee-ygi2k
+# reading: seat_distill_gen2_s2026.holdout.npz
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[teacher]
+teacher_targets = "$PROCESSED/teacher_gen2_full.npz"
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[meta]
+hypothesis = "seat_distill_gen2 — the same seat, the same control, the SECOND teacher. The cheap proxy that gates"
+bead = "knee-ygi2k"
+requires = ["$PROCESSED/teacher_gen2_full.npz"]
+status = "done"
+out = "seat_distill_gen2_s2026"

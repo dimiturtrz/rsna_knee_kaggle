@@ -1,0 +1,86 @@
+# hold_clean_distill — the EIGHTH cell. The 336/20 corner is a 2x2x2 factorial in
+# (--calibrated-targets) x (--hold-annotations) x (clean teacher @0.7), and as of 2026-09-11 six cells
+# are on disk, one is on the card, and THIS is the only one nobody has run.
+#
+# THE FACTORIAL, every cell 336 px / 20 sl / band 0.1-0.9 / 12 ep / 4e-5 / max / whole-stack, identical
+# to the flag (assembled 04:30Z off metrics.jsonl line 0, README 2026-09-11):
+#   calib hold teacher                                   peak
+#     -     -     -    `band_dense_s2026`               0.8578   the control
+#     -     Y     -    `band_dense_hold_s2026`          0.8573   -0.0005
+#     Y     -     -    `calib_dense_s2026`              0.8562   -0.0016
+#     Y     Y     -    `calib_dense_hold_s2026`         0.8634   +0.0056   <- interaction +0.0077
+#     -     -     Y    `seat_clean_distill_s2026`       0.8634   +0.0056
+#     Y     -     Y    `clean_calib_s2026`              0.8649   +0.0071   <- interaction +0.0031
+#     Y     Y     Y    `calib_hold_clean_distill_s2026` RUNNING (launched 03:14Z)
+#     -     Y     Y    THIS ARM                              ?
+#
+# WHAT IT DECIDES, and why it is worth a card slot when its own expected score is NOT a record.
+# Calibration does nothing alone (-0.0016). Holding annotations does nothing alone (-0.0005). Together
+# they are +0.0056. So the whole "calibration" treatment this ledger has credited for weeks is a
+# calib x hold INTERACTION, and the open question is what `--hold-annotations` actually IS. Two readings
+# fit every number on disk and they predict different futures:
+#   (a) hold-annotations is a CALIBRATION enabler — it removes the double-counted annotator uncertainty
+#       that calibrated targets add, and does nothing for anything else. Then it never belongs on an arm
+#       without --calibrated-targets, and the eighth cell lands additive at ~0.8629.
+#   (b) hold-annotations is a GENERAL soft-target enabler — it helps whenever the targets are soft,
+#       and a distillation teacher at 0.7 makes them soft. Then it belongs on every distilled arm in
+#       the project, none of which carry it, and this cell clears 0.8660.
+# No existing run separates these, because --hold-annotations has never appeared without
+# --calibrated-targets beside it. That is exactly the defect the factorial section names.
+#
+# ONE VARIABLE against `seat_clean_distill.sh`: `--hold-annotations`. Slices, band, epochs, rate,
+# pooling, throughput, labels and the teacher file are copied verbatim from it, so 0.8634 is the matched
+# control and is NOT refitted. The teacher is `teacher_clean.npz` — the file THAT arm used, deliberately
+# not the `teacher_clean_full.npz` the running arm carries, so this comparison stays one-variable.
+#
+# PRICE: 12 epochs. `band_dense_s2026` measured 361 s/epoch at this corner on a quiet card = 1.2 h; the
+# PRICE: arm running right now is taking 942-1277 s/epoch against that same price because the device is
+# PRICE: at 98.4% VRAM with ~30 foreign compute PIDs on it. So **1.2 h quiet, ~4 h contended** — and the
+# PRICE: honest number to quote when this lands is whichever the log shows, not the 361 s.
+# GAIN: it is an INSTRUMENT, not a record attempt. It does not try to beat 0.8649; it decides whether
+# GAIN: --hold-annotations belongs on the ~20 distilled arms in this project that do not carry it.
+# P(clears 0.8660, i.e. reading (b)) ~ 30%.  P(lands 0.8620-0.8659, i.e. reading (a)) ~ 50%.
+# RATIO: 1.2-4 h to convert a flag this repo credits wrongly into a flag it can place correctly. The
+# RATIO: alternative is continuing to carry the pair by habit, which is how the mis-credit happened.
+#
+# PRE-REGISTERED BANDS, written before the card is spent:
+#   >= 0.8660  reading (b). --hold-annotations is a general soft-target enabler and the hold x teacher
+#              interaction is real. Every distilled arm in the project is then under-flagged, and the
+#              re-run list is written off THIS number.
+#   0.8620-0.8659  reading (a), additive. The teacher's +0.0056 carries and hold adds nothing to it.
+#              --hold-annotations is a calibration partner only; never put it on an uncalibrated arm.
+#              The +0.0077 stays credited to calib x hold specifically.
+#   0.8580-0.8619  hold DAMPS the teacher. The flag is not free, and the running eighth cell's upside
+#              is bounded by that rather than by the two-way terms.
+#   <= 0.8579  hold FIGHTS the teacher outright — inside the control's own 0.0071 bar, so "the teacher's
+#              +0.0056 is cancelled" is the verdict. Then the pair is load-bearing in both directions
+#              and nothing in this family composes.
+#
+# deliberate: --hold-annotations (THE one moved variable vs seat_clean_distill.sh)
+# deliberate: --teacher-targets teacher_clean.npz (the control's own teacher file, NOT teacher_clean_full,
+# deliberate: so this stays a one-variable comparison against 0.8634)
+# deliberate: --distill-weight 0.7 (HELD; the settled point, not re-searched)
+# deliberate: --epochs 12 --slices 20 --band-low 0.1 --band-high 0.9 --backbone-lr 4e-5 (verbatim)
+# bead: knee-ygi2k
+# reading: hold_clean_distill_s2026.holdout.npz
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[optim]
+epochs = 12
+
+[targets]
+hold_annotations = true
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_clean.npz"
+
+[meta]
+hypothesis = "hold_clean_distill — the EIGHTH cell. The 336/20 corner is a 2x2x2 factorial in"
+bead = "knee-ygi2k"
+requires = ["$PROCESSED/teacher_clean.npz"]
+status = "done"
+out = "hold_clean_distill_s2026"

@@ -71,6 +71,7 @@ slices = 20
 backbone_lr = 4e-05
 
 [targets]
+rank_weight = 0.0
 auc_margin = 1.0
 hold_annotations = true
 
