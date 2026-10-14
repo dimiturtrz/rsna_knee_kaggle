@@ -1,0 +1,12 @@
+# stage after disagreed_uniform in experiments/arms/disagreed_sampler.sh
+
+extends = ["_family.toml"]
+
+[sampling]
+sample_alpha = 1.0
+
+[meta]
+hypothesis = "disagreed_sampler.sh — does spending the epoch where the FAMILY SPLITS beat spending it uniformly?"
+bead = "knee-nyqc"
+status = "done"
+out = "disagreed_full_s2026"

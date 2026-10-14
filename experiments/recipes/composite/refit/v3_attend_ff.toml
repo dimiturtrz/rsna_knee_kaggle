@@ -1,0 +1,27 @@
+# stage after v3_calib_ff in experiments/arms/v3six.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 12
+
+[encoder]
+variant = "v3base"
+
+[model]
+slice_pooling = "attend"
+
+[optim]
+batch = 6
+ema = true
+epochs = 12
+
+[run]
+fold = -1
+
+[meta]
+hypothesis = "v3six.sh — the family swap applied to ALL SIX members at once, not to a seventh seat."
+status = "queued"
+out = "v3_attend_ff"

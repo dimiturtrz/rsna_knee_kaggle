@@ -1,0 +1,34 @@
+# stage after merged_blend_dm in experiments/arms/merged3_tranche_one.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+scheme = "merged3"
+slices = 12
+
+[model]
+slice_pooling = "max"
+
+[optim]
+ema = true
+epochs = 12
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+fold = -1
+labels = "$PROCESSED/labels/merged3_labels.csv"
+
+[targets]
+calibrated_targets = true
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_merged3_full.npz"
+
+[meta]
+hypothesis = "merged3_tranche_one.sh — the THREE 12-slice champion seats refitted on the three-site corpus."
+bead = "knee-cy3wj (held: runs only if noisy_student takes branch 1 or the LatMen branch)"
+status = "queued"
+out = "calib_span_dm"

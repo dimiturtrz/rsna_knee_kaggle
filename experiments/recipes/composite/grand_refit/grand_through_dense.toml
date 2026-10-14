@@ -1,0 +1,16 @@
+# bead: knee-feb62.7
+# reading: grand_through_dense_s2026.holdout.npz
+# DRAFT, not armed. Seat through_dense_cf is --fold -1: the fold-0 twin is the reading; the _ff refit runs only if the twin beats
+# the seat's own fold-0 original. max pooling kept, grand's labelwise/hold/slot leaves overridden (grand.toml:20,28,32).
+# through_plane is untested with the grand fragments (grand.toml:3).
+
+extends = ["_family.toml"]
+
+[encoder]
+through_plane = true
+
+[meta]
+hypothesis = "DRAFT, not armed. Seat through_dense_cf is --fold -1: the fold-0 twin is the reading; the _ff refit runs only if the twin beats"
+bead = "knee-feb62.7"
+status = "queued"
+out = "grand_through_dense_s2026"

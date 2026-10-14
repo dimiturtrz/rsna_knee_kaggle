@@ -1,0 +1,12 @@
+# grand_refit: 6 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = ["../../base.toml", "../../grand.toml"]
+
+[model]
+slice_pooling = "max"
+
+[regularisation]
+slot_dropout = 0.0
+
+[targets]
+hold_annotations = false

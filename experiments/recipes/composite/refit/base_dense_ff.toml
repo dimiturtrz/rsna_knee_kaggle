@@ -1,0 +1,27 @@
+# stage after calib_span_ff in experiments/arms/final_fit_six.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+variant = "base"
+
+[model]
+slice_pooling = "max"
+
+[optim]
+batch = 6
+ema = true
+epochs = 12
+
+[run]
+fold = -1
+
+[meta]
+hypothesis = "final_fit_six.sh — the champion's OTHER six members, refitted on 100% of the corpus."
+status = "done"
+out = "base_dense_ff"

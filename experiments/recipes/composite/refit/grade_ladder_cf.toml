@@ -1,0 +1,28 @@
+# stage after final_ws_cf in experiments/arms/calibsix.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[model]
+slice_pooling = "max"
+
+[optim]
+ema = true
+epochs = 12
+
+[run]
+fold = -1
+
+[targets]
+calibrated_targets = true
+grade_ladder = true
+
+[meta]
+hypothesis = "calibsix — the champion's five uncalibrated seats, refitted with `--calibrated-targets`."
+bead = "knee-1c00"
+status = "done"
+out = "grade_ladder_cf"

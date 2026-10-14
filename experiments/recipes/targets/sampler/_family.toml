@@ -1,0 +1,27 @@
+# sampler: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+one_cycle = true
+
+[sampling]
+sample_spread = "$PROCESSED/train_spread_honest12.npz"
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

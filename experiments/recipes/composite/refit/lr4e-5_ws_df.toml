@@ -1,0 +1,31 @@
+# stage after merged_blend_df in experiments/arms/retrain_six_distill.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[model]
+slice_pooling = "max"
+
+[optim]
+ema = true
+epochs = 12
+
+[run]
+fold = -1
+
+[targets]
+calibrated_targets = true
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_oof5.npz"
+
+[meta]
+hypothesis = "retrain_six_distill — the champion's SIX seats refitted under the out-of-fold teacher. One flag pair,"
+bead = "knee-ygi2k"
+status = "queued"
+out = "lr4e-5_ws_df"

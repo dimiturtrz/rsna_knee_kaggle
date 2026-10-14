@@ -1,0 +1,11 @@
+# stage after maxpool_12 in experiments/arms/slice_count_maxpool.sh
+
+extends = ["_family.toml"]
+
+[data]
+slices = 20
+
+[meta]
+hypothesis = "Slice count, deconfounded - REFUTED, and it took the excuse with it."
+status = "queued"
+out = "max20_s2026"

@@ -1,0 +1,12 @@
+# stage after grand_final_ws in experiments/arms/grand_final_ws.sh
+
+extends = ["_family.toml"]
+
+[run]
+fold = -1
+
+[meta]
+hypothesis = "DRAFT, not armed. Seat final_ws_cf is --fold -1: the fold-0 twin is the reading; the _ff refit runs only if the twin beats"
+bead = "knee-feb62.7"
+status = "queued"
+out = "grand_final_ws_ff"

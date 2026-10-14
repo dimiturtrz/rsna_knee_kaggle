@@ -1,0 +1,11 @@
+# stage after small_batch6 in experiments/arms/batch_teardown.sh
+
+extends = ["_family.toml"]
+
+[optim]
+accumulate = 2
+
+[meta]
+hypothesis = "batch_teardown.sh — price the BATCH alone, and prove accumulation buys it back."
+status = "done"
+out = "small_accum_s2026"
