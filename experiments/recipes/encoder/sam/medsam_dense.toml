@@ -1,0 +1,145 @@
+# medsam_dense.sh — the pretraining OBJECTIVE'S GRANULARITY, with the architecture held fixed.
+#
+# bead: knee-59qqc
+# deliberate: --variant medsam (the arm's thesis — a dense pretraining objective on a medical corpus,
+#             at zero architectural distance from the controls)
+# deliberate: --accumulate 3 (the other half of the split below — declared on its own line because
+#             `arm_check` reads the flag at the head of a `# deliberate:` line and credits that one only,
+#             so a two-flag declaration silently declares the first)
+# deliberate: --batch 2 (the control's --batch 6 with no accumulation, SPLIT rather than
+#             changed: 2 x 3 is the same effective batch and the same number of optimiser steps, so the
+#             recipe the controls were measured under is preserved. It is split because this trunk runs
+#             windowed attention at window 14 over a 21x21 grid, which transformers pads to 28x28 inside
+#             the windowed blocks — 784 tokens of arithmetic and activation for a 441-token read, which
+#             the controls do not pay. The alternative was a smaller effective batch, and that would have
+#             confounded the objective axis with an optimisation one on the only three-way comparison
+#             this ledger has)
+#
+# WHY THIS ARM. Every trunk this project has fitted was pretrained on one of two things: no labels at all
+# (DINOv2, DINOv3, ConvNeXtV2, V-JEPA2, RadioDino) or ONE label for the whole image (Swin-IN22k,
+# ViT-IN21k, RadImageNet). Nothing here has ever been pretrained on a DENSE objective — one that must say
+# what each pixel belongs to. MedSAM is SAM fine-tuned to segment 1M+ medical images across modalities,
+# musculoskeletal MRI among them, and its encoder is a plain ViT-B/16: twelve blocks, 768 wide, the same
+# shape as `v3base` and `radiodino_corpus`.
+#
+# WHAT IT ADDS THAT `radiodino_corpus` DOES NOT. That arm moves the CORPUS with the objective held (DINO
+# self-distillation, medical images). This one moves the OBJECTIVE with the corpus also medical. Read as a
+# pair against the two natural-image DINO controls already on disk, the ViT-B/16 row becomes:
+#   base_dense        0.8512   self-distillation,     natural (LVD-142M)
+#   v3base_dense      0.8455   self-distillation,     natural (LVD-1689M)
+#   radiodino_corpus  ?        self-distillation,     MEDICAL (RadImageNet 1.35M)
+#   medsam_dense      ?        DENSE SEGMENTATION,    MEDICAL (1M+, MSK MRI included)
+# The last two differ from each other in the objective alone, and the middle two in the corpus alone. No
+# encoder comparison in this ledger has previously had both.
+#
+# THE HYPOTHESIS, STATED SO IT CAN LOSE. Our task is to find focal abnormalities — tears, effusions,
+# lesions — which are LOCAL structures occupying a small part of a slice. An image-level objective has no
+# pressure to keep a representation that localises; a segmentation objective is nothing but that pressure.
+# If the pool's ceiling is set by trunks that pool away exactly the structure the task needs, a dense-
+# pretrained trunk is where that shows up. If instead the ceiling is set by label noise or by slice
+# sampling, this arm reads flat and that hypothesis is spent.
+#
+# IT MAY ALSO SIMPLY BE A WORSE CLASSIFIER, and that is the honest counter-prior. SAM's encoder was never
+# asked to say WHAT anything is — only where its boundaries are — and it is fine-tuned from a natural-image
+# SAM rather than pretrained from scratch on medicine. `knee-y59c` anti-correlates solo strength with
+# distance-from-DINOv2, and on the objective axis this is the furthest point the registry holds. That
+# curve predicts a weak solo. This arm is therefore priced as an INSTRUMENT: it is the first dense-
+# objective point, and whatever it reads is a statement about which distance that curve was measuring.
+#
+# 336 IS THE ONLY LEGAL READ and the pin is in the registry, not here. SAM carries ABSOLUTE position
+# embeddings as a learned (1, 64, 64, 768) parameter sized for its 1024 px pretrained read, and its patch
+# embedding refuses anything else outright. `SamVisionWeights.build` resamples that table to 21x21 once,
+# at build, and training then fits the resampled table — so the checkpoint is a function of 336 and a
+# later run at another size would interpolate a second time off an already-interpolated table.
+# `require_tiling` cannot enforce this: 224 and 384 both tile patch 16 cleanly and both would be wrong.
+#
+# THE WINDOW GRID PADS, and it is named here so a reader does not find it as a surprise. SAM runs windowed
+# attention at window 14 with global attention at blocks 2, 5, 8 and 11. A 21x21 token grid is not a
+# multiple of 14, so transformers pads to 28x28 inside the windowed blocks and masks the remainder. That
+# is handled and correct — the forward was run and checked — but it does mean the windowed blocks do more
+# arithmetic than the token count suggests. 224 px would give a 14x14 grid and tile the window exactly;
+# it is NOT used, because every control on the row above was measured at 336 and a matched recipe is worth
+# more than saved padding.
+#
+# NORMALIZATION IS THE IDENTITY, DECLARED BY THE RELEASE. MedSAM's `preprocessor_config.json` states mean
+# [0, 0, 0] and std [1, 1, 1] — rescale to [0, 1] and nothing more — and its upstream inference code
+# agrees. The registry declares `UNIT` for it. This is worth a line because the registry's DEFAULT is
+# ImageNet: had the entry stayed silent, every pixel would have been shifted by 0.485 and scaled by 0.229
+# in front of a trunk that never saw that distribution, with no shape anywhere to disagree and a plausible
+# curve to show for it.
+#
+# WIDTH 768, MATCHED TO EVERY CONTROL — and this paragraph said 256 until 2026-09-04, which was a
+# handicap the arm was carrying for no reason. The encoder runs twelve blocks 768 wide and then a neck
+# that compresses to 256 for a mask decoder this project never builds; the row read the head off that
+# neck. The stated objection to dropping it was that the pre-neck tokens are "a representation MedSAM's
+# objective never optimised through", and that objection is simply false — the objective optimises the
+# blocks BY optimising through the neck, and the neck is where the compression is, not where the
+# medicine is.
+#
+# MEASURED BEFORE CHANGING IT, because a neck-concentrated fine-tune would have made this swap discard
+# the medical part of a medical checkpoint. `kneemri.models.sam_drift` (retired, last at dd9a4566) against `facebook/sam-vit-base`,
+# the release MedSAM started from: every one of the twelve blocks moved 0.85-1.72 of its own initial
+# norm, and the neck moved 0.68 — the least-moved of fifteen regions bar the position table. The
+# adaptation is in the trunk. The published case agrees at a distance: SAM's neck linear-probes at 11.1%
+# ImageNet top-1 against DINOv2's 77.4% (SAMantics, arXiv:2411.15288), and FODA-PG (arXiv:2409.03947)
+# drops this exact neck. See `knee-h8luo`.
+#
+# WHAT THE CHANGE BUYS THE READING, which is more than it buys the score: read-out width is no longer a
+# confound against `base_dense` and `v3base_dense`. Those two are 768-wide ViT-B/16 at the same token
+# count, so a LOSS here is now attributable to the pretraining objective rather than to a 3x narrower
+# head — which is the whole reason the arm exists.
+#
+# APACHE-2.0 AND UNGATED, read from the HF API rather than the model card. Mirroring to Kaggle is
+# permitted, so there is no licence question of the kind that withdrew `dimiturnt/radimagenet-densenet121`
+# — but NO MOUNT EXISTS YET, so this trains here and cannot be submitted until a member earns the seat.
+# The upstream id in MedSAM's own README (`wanglab/medsam-vit-b`) 404s against the HF API; the entry names
+# the mirror `flaviagiammarino/medsam-vit-base`, which was checked rather than assumed.
+#
+# control  base_dense = 0.8512 and v3base_dense = 0.8455, same recipe, same architecture, same token
+#          count, natural corpus and an image-level-free objective. radiodino_corpus is the paired arm
+#          and the closer control once it reads. The non-DINOv2 seat bar is 0.8521.
+# cost     ~2.5-3 h at 12 epochs. 89.7M parameters against radiodino's 86.6M at an identical 441-token
+#          read, plus the window padding noted above. ZERO submission slots.
+# seat     none pre-registered. Card-free `record_mix` afterwards, and only on a positive read.
+#
+# PRE-REGISTERED, four outcomes. Floor 0.0062, so the band around v3base_dense is 0.8393-0.8517.
+#   THE OBJECTIVE PAYS — solo >= 0.8517. A dense pretraining objective transfers BETTER than an
+#     image-level one at fixed architecture, read-out width and token count. That would make localisation
+#     the axis the pool is short of and reframe `knee-y59c`'s curve as a statement about objective
+#     granularity rather than about distance from DINOv2.
+#   MATCHES — 0.8393-0.8516. The objective does not move competence. The seat value is then the whole
+#     question: a matched solo with a POSITIVE seat says a dense objective moves the trunk's OPINION
+#     rather than its strength, which is the diversity the pool needs at no cost in quality.
+#   COSTS — 0.80-0.8392. Dense pretraining transfers worse here, and since 2026-09-04 that reads CLEAN:
+#     the width handicap that used to be the live alternative explanation is gone, so a loss in this band
+#     is a statement about the objective. Price the seat before concluding — a weak solo that disagrees
+#     usefully is still a seat.
+#   REFUTES — < 0.80. The dense-objective cell is closed at this capacity, `knee-y59c`'s curve survives as
+#     an objective-distance reading, and MedSAM is declined in writing with this number as the reason.
+#
+# DO NOT ARM THIS WHILE ANOTHER OF OUR JOBS HOLDS THE CARD. `card_check` is the gate; two on one device
+# once stretched a three-minute member to eleven.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+slices = 20
+
+[encoder]
+variant = "medsam"
+
+[model]
+slice_pooling = "max"
+
+[optim]
+accumulate = 3
+batch = 2
+epochs = 12
+
+[meta]
+hypothesis = "medsam_dense.sh — the pretraining OBJECTIVE'S GRANULARITY, with the architecture held fixed."
+bead = "knee-59qqc"
+status = "done"
+out = "medsam_dense_s2026"

@@ -1,0 +1,72 @@
+# radiodino_s16.sh — the control half of the patch-size pair, and a cheap second read of the corpus.
+#
+# bead: knee-n9apo
+# deliberate: --variant radiodinos16 (the arm's thesis: ViT-S/16 on RadImageNet, at the 224 operating
+#             point the small-width row of this project is measured at)
+# deliberate: --image-size 224 (inherited from `native224`, which IS the 224 read)
+#
+# THIS ARM EXISTS TO BE SUBTRACTED. Its partner `radiodino_s8` is the reading; this is the control that
+# makes the subtraction mean patch size. Run alone it says something weaker but not nothing — see the
+# corpus note below — and run without it, `radiodino_s8` would move patch size and trunk width together,
+# which is the confound the trunk table already carries in too many rows to add another.
+#
+# WHAT IS HELD. `native224` is byte-identical to this except for `--variant`: 12 epochs, 12 slices, band
+# 0.2-0.8, max slice pooling, whole stack, backbone rate 4e-5, 224 px. So the pair `radiodino_s16` /
+# `radiodino_s8` differs in patch size ALONE, and both differ from `native224` in trunk only.
+#
+# THE CHEAP CORPUS ECHO, stated honestly because it is two variables and not one. Against `native224`
+# this moves the corpus (RadImageNet vs LVD-142M) AND the objective (DINO vs DINOv2) AND the patch (16
+# vs 14). `radiodino_corpus` is the clean single-variable corpus reading and this is not a substitute
+# for it. What this buys is a second point at a different WIDTH: if the corpus pays at 768 and not at
+# 384, or the reverse, that is a capacity interaction, and no arm here has ever been able to see one.
+#
+# TOKEN COUNT IS DOWN, not up. At 224 px, patch 16 tiles 14x14 = 196 tokens against `native224`'s patch
+# 14 at 16x16 = 256. So this is CHEAPER than its own control, and the honest epoch estimate is 80-90 s
+# against native224's 94 — call it 18 minutes for 12 epochs. That is an estimate; the smoke prices it.
+#
+# THE PACKAGING FAULT IS ALREADY FIXED. `Snarcy/RadioDino-s16` ships a `config.json` naming `ViTModel`
+# over timm-keyed weights, so `AutoModel.from_pretrained` would match zero keys and hand back a
+# correctly-shaped random ViT-S/16 that trains and logs a rising curve. The registry row loads it through
+# `TimmHubWeights` with a strict `load_state_dict`, and `python -m kneemri.models.load_check` reads 384
+# loaded against 384 declared. Do not take that on trust from the sibling row — it is exactly the
+# inheritance that produced the zero-key load in the first place.
+#
+# HARNESS CHECK. The printed recipe must name "variant": "radiodinos16" and "image_size": "224".
+#
+# control  native224 = 0.8502 (best epoch 7 of 12, converged) — same recipe, DINOv2-S at its own patch 14.
+#          The partner `radiodino_s8` is the arm this one is subtracted from.
+# cost     ~18 min at 12 epochs, 196 tokens a slice, 21.7M parameters. Smoke it anyway.
+# seat     none pre-registered. This is an instrument for the patch axis; a seat would be priced after.
+#
+# PRE-REGISTERED, and the branches are about the CORPUS, since the patch reading needs both arms.
+#   >= 0.8562 — medical pretraining pays at 384 width too, and `radiodino_corpus`'s branch at 768 becomes
+#     a capacity question rather than a corpus one.
+#   0.8440-0.8561 — flat inside the floor against `native224`. The corpus is neutral at this width; the
+#     pair still reads patch size, which is what the arm is for.
+#   0.80-0.8439 — the corpus costs at 384. Read it beside `radiodino_corpus` before concluding: a cost at
+#     small width and a gain at base width is a capacity interaction, not a corpus verdict.
+#   < 0.80 — the trunk is weak enough that the patch reading it anchors is worth little. Do not spend
+#     `radiodino_s8`'s 75 minutes on it; the pair is gated on this arm clearing 0.80.
+#
+# DO NOT ARM THIS WHILE ANOTHER OF OUR JOBS HOLDS THE CARD — `card_check` is the gate.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 224
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+variant = "radiodinos16"
+
+[targets]
+rank_weight = 1.0
+
+[meta]
+hypothesis = "radiodino_s16.sh — the control half of the patch-size pair, and a cheap second read of the corpus."
+bead = "knee-n9apo"
+status = "done"
+out = "radiodino_s16_s2026"

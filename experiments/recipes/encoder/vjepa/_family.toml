@@ -1,0 +1,26 @@
+# vjepa: 3 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+train_size = 256
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+variant = "vjepa2l"
+whole_stack = true
+
+[model]
+pool = "mean"
+
+[optim]
+batch = 6
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

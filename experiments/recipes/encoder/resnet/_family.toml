@@ -1,0 +1,15 @@
+# resnet: 8 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[encoder]
+through_plane = true
+variant = "resnet50d"
+whole_stack = true
+
+[optim]
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

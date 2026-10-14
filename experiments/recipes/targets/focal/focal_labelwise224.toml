@@ -1,0 +1,69 @@
+# focal_labelwise224.sh — the focal TOKEN tail, read by a head that can use it.
+#
+# bead: knee-r6dbj
+# reading: focal_labelwise224_s2026.holdout.npz
+#
+# THE 2x2 IS THREE QUARTERS BUILT AND HAS BEEN FOR WEEKS. Matched epoch 9, 909 studies, ledger75:
+#
+#                          --pool cls_mean        --pool cls_mean_focal
+#   --slice-pooling max    native224     0.8800   focal224      0.8776   (-0.0024)
+#   --slice-pooling        labelwise224  0.8832   THIS ARM
+#     labelwise            (+0.0032)
+#
+# WHY THE MISSING CELL IS NOT JUST A FOURTH NUMBER. `cls_mean_focal` appends the top-k patch tail to the
+# CLS+mean vector (token_pooling.py, FOCAL_FRACTION 8) — a bet on SMALL FOCAL findings, which is what a
+# 1-3 mm meniscal tear is. `max` over depth is the readout that destroys exactly that: one slice wins
+# and its focal tail is the only one that survives. AXES.md's disowned-ruler note says this in general
+# — four input rows were measured under a max head, which suppresses a real input change, and are
+# recorded UNREAD rather than refuted. This arm is that note applied to the token axis, and it is the
+# cheapest cell of the four to run.
+#
+# Under labelwise each finding attends its own slices, so a per-label head is the only readout that can
+# route a focal tail to the finding it belongs to. That is the INTERACTION being tested. A flat read
+# under `max` is not evidence the token change is inert; it is evidence about the head it was read on.
+#
+# THE BAR IS ARITHMETIC AND IT IS HARSH, stated before the run. Both main effects sit inside the 0.0062
+# paired floor. For this cell to be a RESULT rather than a fourth number the interaction has to carry
+# >= +0.009 on its own against the labelwise control's 0.8832.
+#
+#   * >= 0.8894  the interaction is real: focal token pooling was dilution-limited by the head, not
+#                inert. Rebuild at 336 and re-price the token axis, which is currently closed on one
+#                reading taken through a max head.
+#   * 0.8832-0.8894  DIRECTIONAL only. Keep nothing, plan nothing, do not compose it.
+#   * < 0.8832   focal token pooling is inert under labelwise TOO. The disowned-ruler caveat is then
+#                ANSWERED for this axis rather than merely quoted, and the pooling family closes on
+#                both rulers instead of staying open on a technicality.
+#
+# IT IS AN INSTRUMENT AND IS JUSTIFIED AS ONE, not as an improvement: P(clears 0.8894) ~ 0.15, and
+# P(clears the 1.5% bar) ~ 0.02. What it buys in every band is a verdict on a ruler four other rows
+# currently hang off. 45 minutes of card, zero submission slots, control free and on disk.
+#
+# ONE VARIABLE against `labelwise224`: `--pool cls_mean_focal`. Byte-identical otherwise, which is also
+# what makes it byte-identical to `focal224` apart from `--slice-pooling`. The cell closes both edges of
+# the square at once.
+#
+# HARNESS CHECK. The printed recipe must name "pool": "cls_mean_focal" AND "slice_pooling": "labelwise".
+# Either one absent and the arm measures a cell that already exists.
+#
+# control  labelwise224_s2026 = 0.8832 ledger75 @ epoch 9, 909 studies.
+#
+# deliberate: --pool cls_mean_focal (the arm's thesis)
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 224
+
+[encoder]
+backbone_lr = 4e-05
+
+[model]
+slice_pooling = "labelwise"
+
+[meta]
+hypothesis = "focal_labelwise224.sh — the focal TOKEN tail, read by a head that can use it."
+bead = "knee-r6dbj"
+status = "queued"
+out = "focal_labelwise224_s2026"

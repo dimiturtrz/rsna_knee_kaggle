@@ -1,0 +1,79 @@
+# The first member this project fits on a trunk that has SEEN A KNEE. `knee-440m`.
+#
+# WHY THIS AND NOT ANOTHER KNOB. Every other lane is closed: member quality ceilings near 0.943 against a
+# leader at 0.952, the stack lane closed 7/7 (knee-orjq), seating is flat over seven board entries, and
+# the trunk lane closed EMPTY on RadImageNet DenseNet at 0.6716 against its own 0.75 floor. What survived
+# `radnet_family` is the reading that a MIXED-RADIOLOGY corpus is not an in-domain corpus — and this arm
+# is the one trunk available that answers the in-domain version of the same question.
+#
+# `ortholarge` is `facebook/dinov3-vitl16-pretrain-lvd1689m` continued with DINO-style self-distillation
+# on 1.25M knee images (357k radiographs + 894k MRI slices: 200k PUTH multi-plane PDWFS, 200k OAI, 300k
+# fastMRI coronal PD/PD-FS), MIT licence, arXiv:2601.18250. Multi-plane and multi-sequence, so the
+# distance to our sagittal-heavy corpus is real but far smaller than RadImageNet's CT/X-ray distance —
+# the discount this arm applies in advance, having failed to apply it before `radnet_family`.
+#
+# ONE VARIABLE AGAINST THE CONTROL, which is what makes it readable. The control is `base224` = 0.8502,
+# and every flag below is `base224`'s except `--variant`. It is NOT `band_dense` = 0.8578: a 1024-wide
+# 24-block ViT cannot hold `band_dense`'s 20 slices at 336 px in 32 GB, and the first draft of this arm
+# kept `band_dense`'s 0.1-0.9 band while dropping to 12 slices at 224 px — which would have moved two
+# variables, cost an hours-long DICOM decode for a cache nothing else reads, and left the result
+# comparable to neither member. `arm_check` refused it on the missing cache, which is the same refusal
+# read as a design finding. Reading `base224`'s own cache makes the trunk the only free variable.
+#
+# WHY IT IS FINE-TUNED AND NOT FROZEN. `ortho_probe` runs first and reads the frozen features, but
+# OrthoFoundation's own published numbers — ACL 0.9849, MCL 0.9334, cartilage 0.9338 — are FULL
+# FINE-TUNING, and the paper's only DINOv3-L comparisons are prose on other tasks. So a frozen probe is
+# a floor and cannot close this; the fine-tuned arm is the one that matches the evidence, and it runs
+# whatever the probe reads.
+#
+# PRE-REGISTERED, before the arm runs:
+#
+#   >= 0.8578   BEATS THE BEST MEMBER THE PROJECT OWNS, at two thirds of its slice density. The
+#               in-domain trunk lane opens; the next arm is this recipe at `band_dense`'s density on
+#               whatever hardware budget allows, and a mount becomes worth arranging.
+#   0.8578 > s >= 0.8521   CLEARS THE NON-DINOv2 SEAT BAR. A shippable member and a real seat for a
+#               family nothing else here occupies, which is the diversity argument rather than the
+#               quality one. Roster it; do not call the lane open on it.
+#   0.8521 > s >= 0.8502   MATCHES ITS OWN CONTROL. Says the knee continuation bought nothing a
+#               224 px DINOv2-base did not already have on the identical read. Directional negative.
+#   < 0.8502    THE IN-DOMAIN TRUNK LANE CLOSES, and it closes on the strongest public instance of it —
+#               1.25M knee images, the exact architecture we already run, MIT licensed. Decline it in
+#               writing with this number and stop pricing external encoders.
+#
+# WHAT WOULD MAKE ME DISBELIEVE A LOW NUMBER before writing that last branch down. `ortholarge` carries
+# NO published preprocessing document — the release is a bare 1.2 GB training checkpoint and the
+# converted snapshot holds `config.json` and `model.safetensors` and nothing else. So
+# `normalization_evidence` on its registry entry is an argument rather than a read constant, and a trunk
+# fed 0.2 std off its own distribution is `radnet121`'s original failure exactly.
+#
+# But there is nothing to switch TO: Kimi's 2226z reply confirms no OrthoFoundation-specific constants
+# exist anywhere, and the checkpoint continues from the ImageNet-normalized DINOv3-L. So on a low number
+# the FIRST suspicion is a CONVERSION or LOADING mismatch, not a normalization one — the qkv split, the
+# `mlp.fc1/fc2` to `up_proj/down_proj` rename, `ls.gamma` to `layer_scale.lambda1`, the reshaped mask
+# token. `ortho_probe` is the cheap discriminator: a trunk loaded wrong probes at chance, and a trunk
+# loaded right but unhelpful probes near `v3large`. Check the printed recipe names "variant":
+# "ortholarge" before believing anything at all.
+#
+# deliberate: --variant ortholarge (the arm's thesis)
+# deliberate: --slices 12 --image-size 224 (base224's read exactly — a VRAM floor AND the control)
+# deliberate: --band-low 0.2 --band-high 0.8 (base224's band, stated rather than inherited — knee-aixw)
+#
+# bead: knee-440m
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  base224 = 0.8509 (best epoch on disk; was 0.8502, declared 2026-09-03 from this header's own
+#          prose per knee-sgzgc, and corrected 2026-09-08 by control_check against the run itself)
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 224
+
+[encoder]
+backbone_lr = 4e-05
+
+[meta]
+hypothesis = "The first member this project fits on a trunk that has SEEN A KNEE. `knee-440m`."
+bead = "knee-440m"
+status = "done"
+out = "ortho_dense_s2026"

@@ -1,0 +1,86 @@
+# bead: knee-q3clv
+# reading: logs/mricore_deep_ledger.log
+# also: knee-zt3l6
+# deliberate: --unfreeze-last 12 --layer-decay 0.7 --backbone-lr 9.8e-5 — the ladder from band_deep_matched, carried across to a foreign trunk with every other flag held at the control.
+# mricore_deep.sh — the SAME ladder as band_deep_matched, on the best foreign trunk we own.
+#
+# ITS LICENCE WAS ANSWERED **NO** ON 2026-09-05, AND THIS ARM MAY NOT RUN. `band_deep_matched` read
+# **0.8487 at e11** against control `band_dense` 0.8578 — the third of its four bands, the one whose
+# text is "closes the depth axis", -0.0091 and outside the 0.0062 paired floor. The ABOVE branch did
+# not fire, so the condition below is MET IN THE NEGATIVE: the ladder does not pay on our own trunk,
+# the four foreign-trunk rows close on their own merits, and the schedule suspicion that hung over all
+# of them is RETIRED rather than outstanding.
+#
+# READ THE NEXT SENTENCE BEFORE RE-OPENING THIS. On 2026-09-09 this arm was nearly launched on a
+# reading of **0.8781**, which is `band_deep_matched`'s `solo@ledger75` from the D203 table — a
+# different STATISTIC on a different POPULATION at a different CUT from the 0.8487 the branch was
+# written against. Both numbers are correct and they are not comparable, and substituting one for the
+# other clears a bar that the real reading misses by 0.0153. That would have bought roughly four hours
+# of card on an arm its own header forbids. A licence is checked against the number its branch names,
+# in the units that branch names.
+#
+# It re-opens only if some LATER arm clears 0.8640 on `band_dense`'s own holdout ruler. Nothing has.
+#
+# THIS ARM IS ONLY LICENSED IF band_deep_matched CLEARS 0.8640. That is its ABOVE branch, and the
+# branch text says what it licenses: "re-running the trunk family". This is that re-run. If
+# band_deep_matched lands anywhere else, do not launch this — a null on our own trunk says the ladder
+# does not pay, and carrying it to a trunk that scores 0.0188 lower cannot rescue it.
+#
+# WHAT IT ASKS. Every foreign-trunk arm this project has run inherits `unfreeze_last 6 / offset 0 /
+# layer_decay 1.0`: radiodino_corpus 0.8214, coatnet_hybrid 0.8259, ortho_slow_trunk 0.8265,
+# mricore_corpus 0.8390. Four negative readings, one recipe, and the recipe never lets the bottom half
+# of the trunk move. If the ladder pays here, those four rows are readings of OUR SCHEDULE and not of
+# their pretraining, and the whole family is owed a re-run. If it does not, the family closes on its
+# own merits and the suspicion that hangs over all four rows is retired. Either answer is worth having;
+# only one of them is worth more card.
+#
+# WHY THE LADDER TRANSFERS EXACTLY. mricore is `mricore-vitb` — a ViT-Base, twelve blocks, the same
+# depth as the DINOv2-small the ladder was derived on. So the arithmetic is unchanged:
+# `StudyModel.parameter_groups` anchors at the TOP opened block, opening twelve re-grades the control's
+# own six by a geometric mean of 0.7^2.5 = 0.4100, and the anchor absorbs it at
+# 4e-5 / 0.4100 = 9.8e-5. Blocks 6-11 then average the control's flat 4e-5 while blocks 0-5 get the
+# whisper. Same derivation, same compensation, different trunk — which is the point.
+#
+# ONE VARIABLE, AND THE BATCH IS NOT IT. mricore_corpus ran `--batch 2 --accumulate 3`, an effective
+# batch of 6, not the 12 that band_dense uses. This arm keeps 2/3 unchanged rather than copying
+# band_deep_matched 2/6, because holding the control's effective batch is what makes the ladder the
+# only thing that moved. Twelve open blocks under `recompute_activations` cost activation memory
+# weakly, so the control's 7.66 GB reserved has room on a card that also serves the other project.
+#
+# THE PRICE, stated because arm_check refuses an arm without one. COST 12 epochs at roughly 700s =
+# ~2h20 of card. GAIN AS A MEMBER: near zero, and it is not sold as one — band_deep_matched's own ABOVE
+# branch sits +0.006 over its control, and the same delta on 0.8390 lands at ~0.845, still short of the
+# 0.8521 seat bar. P(clears the seat bar) ~ 0.15. GAIN AS AN INSTRUMENT: it prices four existing rows,
+# and the alternative way to learn the same thing is to re-run all four. That is the whole
+# justification, and this arm is not to be reported as a score attempt.
+#
+# READ IT ON, against control `mricore_corpus` = 0.8390 (best epoch 11 of 12 — the LAST one):
+#   * ABOVE 0.8452 — clears the 0.0062 paired floor over the control. The ladder pays on a foreign
+#     trunk too, and radiodino_corpus / coatnet_hybrid / ortho_slow_trunk are each owed a re-run before
+#     any of their numbers is quoted again.
+#   * 0.8328 to 0.8452 — inside the floor. The ladder is neutral on this trunk. Combined with an ABOVE
+#     on band_deep_matched that is a finding in itself: depth pays where the pretraining is in-domain
+#     for natural images and not where it is in-domain for MRI, which is the opposite of the prior.
+#   * BELOW 0.8328 — the ladder HURTS a foreign trunk. Closes the family re-run, and the four rows
+#     stand as read.
+# CARRY THE CONTROL'S OWN QUALIFIER FORWARD: mricore_corpus peaked on its final epoch and its loss was
+# still descending, so it is UNDERTRAINED and its 0.8390 is a budget-bound reading rather than a
+# ceiling. This arm holds the budget at 12 epochs on purpose — changing it would confound the ladder
+# with the budget — so the same qualifier applies to BOTH sides of the comparison and cancels in the
+# delta. It does NOT cancel in the absolute, so no branch above is a statement about mricore's ceiling.
+#
+# control  mricore_corpus = 0.8390 (best epoch 11), six blocks at a flat 4e-5, effective batch 6.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[encoder]
+backbone_lr = 9.8e-05
+layer_decay = 0.7
+unfreeze_last = 12
+
+[meta]
+hypothesis = "also: knee-zt3l6"
+bead = "knee-q3clv"
+status = "queued"
+out = "mricore_deep_s2026"
