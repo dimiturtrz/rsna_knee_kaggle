@@ -1,0 +1,23 @@
+# stage after basinsoup_r2_c501 in experiments/arms/basinsoup_r2.sh
+
+extends = ["_family.toml"]
+
+[data]
+slices = 24
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/basinsoup_dmlb_k4_s2026.pt"
+
+[optim]
+epochs = 4
+
+[run]
+seed = 503
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-p9mp5"
+after = ["kneemri.models.weight_soup --members $MODELS/basinsoup_r2_c501.pt $MODELS/basinsoup_r2_c502.pt $MODELS/basinsoup_r2_c503.pt --out $MODELS/basinsoup_r2_k3_s2026.pt", "kneemri.models.weight_soup --members $MODELS/basinsoup_dmlb_k4_s2026.pt $MODELS/basinsoup_r2_c501.pt $MODELS/basinsoup_r2_c502.pt $MODELS/basinsoup_r2_c503.pt --out $MODELS/basinsoup_r2_k4_s2026.pt", "kneemri.inference.holdout_backfill --device cuda --checkpoints $MODELS/basinsoup_r2_k3_s2026.pt $MODELS/basinsoup_r2_k4_s2026.pt", "kneemri.evaluation.ledger75 --holdouts $MODELS --only basinsoup_r2_k3_s2026 basinsoup_r2_k4_s2026 basinsoup_r2_c501 basinsoup_r2_c502 basinsoup_r2_c503 basinsoup_dmlb_k4_s2026"]
+status = "done"
+out = "basinsoup_r2_c503"

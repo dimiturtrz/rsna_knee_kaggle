@@ -1,0 +1,19 @@
+# stage after oof_reader_fold0 in experiments/arms/oof_reader_folds.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+fold = 3
+labels = "$PROCESSED/labels/report_labels_v5reader.csv"
+
+[meta]
+hypothesis = "oof_reader_folds.sh — the v5reader table across all five folds, so the gold ruler is 58 studies wide."
+bead = "knee-07gvn"
+status = "queued"
+out = "oof_reader_fold3_s2026"

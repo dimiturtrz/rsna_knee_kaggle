@@ -1,0 +1,21 @@
+# stage after oof_gen2_fold0 in experiments/arms/teacher_gen2.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[run]
+fold = 2
+
+[teacher]
+distill_weight = 0.7
+teacher_targets = "$PROCESSED/teacher_oof_full.npz"
+
+[meta]
+hypothesis = "teacher_gen2 — the born-again round: five fold twins refitted UNDER the gen-1 teacher, whose union is"
+bead = "knee-ygi2k"
+status = "queued"
+out = "oof_gen2_fold2_s2026"

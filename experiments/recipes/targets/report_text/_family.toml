@@ -1,0 +1,14 @@
+# report_text: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[optim]
+epochs = 24
+one_cycle = true
+
+[run]
+report_vectors = "$PROCESSED/labels/report_embeddings.npz"
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

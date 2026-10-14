@@ -1,0 +1,16 @@
+# stage after oof_fold1 in experiments/arms/oof_folds.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[run]
+fold = 3
+
+[meta]
+hypothesis = "oof_folds.sh — the four complementary folds, so the corpus has an OUT-OF-SAMPLE opinion everywhere."
+status = "queued"
+out = "oof_fold3_s2026"

@@ -1,0 +1,24 @@
+# stage after basinsoup_ff_c301 in experiments/arms/basinsoup_ff.sh
+
+extends = ["_family.toml"]
+
+[data]
+scheme = "extended"
+slices = 20
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/labelwise_ext_drop40_long_ff.pt"
+
+[optim]
+epochs = 4
+
+[run]
+fold = -1
+seed = 302
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-mc1ls"
+status = "done"
+out = "basinsoup_ff_c302"

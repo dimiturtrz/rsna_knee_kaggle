@@ -1,0 +1,12 @@
+# stage after elr_hold_w0 in experiments/arms/elr_hold.sh
+
+extends = ["_family.toml"]
+
+[targets]
+early_weight = 3.0
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-bpuei"
+status = "queued"
+out = "elr_hold_w3_s2026"

@@ -1,0 +1,18 @@
+# stage after oof_band_fold0 in experiments/arms/oof_band_folds.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[run]
+fold = 4
+labels = "$PROCESSED/labels/report_labels_v6band50.csv"
+
+[meta]
+hypothesis = "oof_band_folds.sh — the control's geometry, on a table whose middle rung carries the model's own order."
+bead = "knee-27kuj"
+status = "queued"
+out = "oof_band_fold4_s2026"

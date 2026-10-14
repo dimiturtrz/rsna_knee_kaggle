@@ -1,0 +1,22 @@
+# stage after basinsoup_dmlb_c401 in experiments/arms/basinsoup_dmlb.sh
+
+extends = ["_family.toml"]
+
+[data]
+slices = 24
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/dml_b_s2026.pt"
+
+[optim]
+epochs = 4
+
+[run]
+seed = 402
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-8pj5j"
+status = "done"
+out = "basinsoup_dmlb_c402"

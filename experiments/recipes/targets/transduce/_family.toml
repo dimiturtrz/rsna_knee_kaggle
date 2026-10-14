@@ -1,0 +1,38 @@
+# transduce: 4 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 24
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/dml_b_s2026.pt"
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+accumulate = 3
+batch = 4
+ema = true
+epochs = 4
+one_cycle = true
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+eval_labels = "$PROCESSED/labels/report_labels_v2.csv"
+pseudo_fold = 0
+vram_gb = 22.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+rank_weight = 1.0
+weight_floor = true

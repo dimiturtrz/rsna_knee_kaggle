@@ -1,0 +1,22 @@
+# stage after basinsoup_r2_c501 in experiments/arms/basinsoup_r2.sh
+
+extends = ["_family.toml"]
+
+[data]
+slices = 24
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/basinsoup_dmlb_k4_s2026.pt"
+
+[optim]
+epochs = 4
+
+[run]
+seed = 502
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-p9mp5"
+status = "done"
+out = "basinsoup_r2_c502"

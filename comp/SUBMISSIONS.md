@@ -5148,3 +5148,18 @@ PRE-REG (B = `s6r7solo_v1` 0.957): > B unlike S6, R7's sparser read had cost sig
 resolution and stride 2 stays as free runtime (expected); < B stride 2 was better for this blend.
 RESULT: **0.957**. The = B branch fires, as expected: R7's denser read moves its own table (up to 0.31 on a sampled cell) but not the blend at board resolution, the same answer S6 gave, so stride 2 stays as free runtime and the R7 eval-stride axis closes at 0.001. Pending to scored took ~4.1 h (14:38Z submit, COMPLETE by 18:46Z), the slowest R7 entry yet but inside the 8.3 h deadline. Full-LB read 18:27Z (n=5996): ours rank 136 at 0.957; gold #21 0.963, silver #299 0.956, >=0.958 113 teams, >=0.957 226. Flip and stride have now both read flat on R7, so neither is a lever to compose onto a res384 > B read: composing a flat lever buys nothing the board can see, and the 10-15 slot after such a read goes to a mechanism of its own, not to `s6r7flipres384` or a res384+stride1 build. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
 scatter, so it reads as public RANK, not as a better model.
+
+## s6r7res384_v1 — 0.957, ref 57192860, 2026-10-14 — nartaa's 384 reader at its full 384 px view: flat, = B
+
+`kneemri-s6r7res384` (v2): `s6r7solo` except nartaa's scoring source is patched on two anchors, `INPUT_RES = 320` →
+`384` and its shape assert `(94,3,320,320)` → `(94,3,384,384)`, both via split-unpacking that refuses a source holding
+either anchor zero or twice. His source trains and scores `coatnet_rmlp_2_rw_384` on a 320 px centre crop of a native
+384 px, 140 mm box (`INPUT_MODE = "crop"`), so the outer ~12 mm per side is never read; this reads it at the same pixel
+scale (crop, never resize), 1.44x the field of view. Blend unchanged: nartaa 1/2 (mirror TTA), R7 1/3, soups 1/12
+each, rank space. nartaa infer 16.9 s vs 13.0 s. run_check clean on v2 (loaded 2 of 2 members, R7 exit 0 at 392 s).
+
+PRE-REG (B = `s6r7solo_v1` 0.957): > B the clipped periphery carries signal, new pin, and the 224 reader's full-view
+variant becomes worth building (a SCALE change there, `CROP_FRAC = 0.8` before resize, so priced lower); = B below
+board resolution, read the rank; < B the train/test field-of-view mismatch costs more than the periphery adds.
+RESULT: **0.957**. Ties `s6r7solo_v1` and `s6r7_v1` at the competition's 0.001 resolution: the 1.44x field of view neither carries board-visible signal nor costs it, so neither the periphery hypothesis nor the train/test mismatch is visible here. Not a new pin; the 224 reader's full-view variant is NOT armed (its gate was > B). A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
+scatter, so it reads as public RANK, not as a better model.

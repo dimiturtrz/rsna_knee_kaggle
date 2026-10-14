@@ -1,0 +1,13 @@
+# stage after transduce_dmlb_c409 in experiments/arms/transduce_dmlb_more.sh
+
+extends = ["_family.toml"]
+
+[run]
+labels = "$PROCESSED/labels/pseudo_dmlb_fold0.csv"
+seed = 411
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-nchjt"
+status = "done"
+out = "transduce_dmlb_c411"

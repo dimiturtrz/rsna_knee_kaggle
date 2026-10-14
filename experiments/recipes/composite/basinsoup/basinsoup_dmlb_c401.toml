@@ -1,0 +1,87 @@
+# bead: knee-8pj5j
+# reading: basinsoup_dmlb_k*_s2026.pt
+#
+# WHAT THIS ARM IS
+#   The basin-soup operation applied to `dml_b_s2026`, the highest honest fold-0 fit this project owns
+#   (0.9078 ledger75, peak epoch 18 of 24, convergence clean). Three 4-epoch seed-children forked off it
+#   and the K=3 and K=4 uniform averages, priced on the holdout the parent held out. The product is ONE
+#   checkpoint with ONE forward pass -- not an ensemble, not a seat, not a pair.
+#
+# WHY THIS BASE AND WHY NOW
+#   knee-xjxdn states the bar as a single number: a solo _ff refit beats the pinned 0.946 champion only
+#   from a fold-0 ledger75 of >= 0.9098. The whole shelf tops out at `basinsoup_k3` 0.9089, so no
+#   member currently on it licenses an _ff refit aimed at 0.946. Souping is the one weight-space
+#   operation measured positive here (+0.0016, 0.9073 -> 0.9089) and it has never been applied to the
+#   best base. 0.9078 + 0.0016 = 0.9094 against a 0.9098 bar: SHORT in expectation, and inside the
+#   spread of the +0.0016 itself. That is the whole reason this is worth an idle card -- it is the only
+#   construction on the shelf whose expected value lands within scatter of the bar instead of 0.002
+#   below it. Every other open route proposes a new member of a cluster that has boarded 0.943-0.945
+#   four times.
+#
+# PRE-REGISTERED, on ledger75 against the parent's 0.9078 and the 0.0053 paired floor
+#   >= 0.9098   the bar is cleared. An _ff refit of THIS soup becomes the next slot with a mechanism
+#               behind it rather than a reseating.
+#   0.9085-0.9097  the op reproduces on a second base (+0.0007 to +0.0019, matching basinsoup's
+#               +0.0016) but the base was too low. The OPERATION is then confirmed twice and the
+#               shortfall is the base's, which points the next arm at the base and not at the soup.
+#   <= 0.9084   below the floor's worth of gain. Souping does not reproduce off a non-EMA parent, and
+#               the top-the-shelf route closes by the record's own stated bar -- which is worth more
+#               than another entry inside the cluster.
+#
+# ZERO SLOTS. Fold 0, so this is priced offline on ledger75 and never on the board. It is decisive in
+#   both directions without spending a submission.
+#
+# deliberate: every flag is `fit_b`'s line (dml_cohort.sh:83-90) byte for byte EXCEPT the five named
+#             below, so the twelve ARCHITECTURE and three SPLIT keys `weight_soup` refuses on are
+#             identical across parent and children by construction -- including the nine that neither
+#             line mentions and that fall through to the same `TrainConfig` defaults. No `--scheme`,
+#             because `fit_b` names none: the parent is `canonical` and a child that declared
+#             `extended` would fail the signature after an hour of card.
+# deliberate: --vram-gb 22, NOT the parent's 28. The owner's cap is 50-70% of 32.6 GB and 28 is above
+#             it. Memory is not a signature key, so this changes nothing the soup can see.
+# deliberate: --batch 4 --accumulate 3 for the same reason -- the parent's batch 10 at 24 slices needed
+#             the 28 GB. Effective batch 12 against the parent's 10; `batch` is not a signature key and
+#             `--rank-weight`'s pairwise population is the only term that reads it, at a ratio of 1.2.
+# deliberate: --epochs 4 and --backbone-lr 2e-5, the values basinsoup measured positive and basinsoup2
+#             measured the far side of (K=3 0.9075 / K=4 0.9080 at 8 epochs, below the 4-epoch pair).
+#             Neither is a knob with a sweep in it here.
+# deliberate: --ema on the children, as both earlier basinsoup arms. The parent has none -- `fit_b`
+#             ships its best epoch -- which is the one way this differs in KIND from the measured op,
+#             and it is the named risk: basinsoup2 found children of a CONVERGED EMA parent all land
+#             below it, and a non-EMA parent's basin may be shaped differently.
+# deliberate: --seed 401/402/403, fresh, so these are not any earlier trio re-run. With the trunk
+#             supplied by --init the init half of `seed` is inert and it buys data order and
+#             augmentation draws only -- the one term that differs between the three children.
+# deliberate: the `holdout_backfill` + `ledger75` tail, unlike the dark `basinsoup_ff` arm. Fold 0
+#             holds out real studies, so the soup HAS a ruler and leaving it unread would be the
+#             nineteen-unpriced-arms failure.
+#
+# CARD. 4 epochs x ~350 s x 3 children = ~1.2 h, plus ~10 min to backfill and price the two soups.
+#   ~1.4 h total. Nothing else of ours may share the card.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# K=4 includes the PARENT, the basin's centre by construction and the only member here with a 24-epoch
+#   fit behind it. If the children have drifted it is the anchor that pulls the average back; if they
+#   have not, K=3 and K=4 agree and that agreement is itself the divergence reading.
+
+extends = ["_family.toml"]
+
+[data]
+slices = 24
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/dml_b_s2026.pt"
+
+[optim]
+epochs = 4
+
+[run]
+seed = 401
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-8pj5j"
+requires = ["$MODELS/dml_b_s2026.pt"]
+status = "done"
+out = "basinsoup_dmlb_c401"

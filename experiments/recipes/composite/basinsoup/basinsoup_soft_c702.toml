@@ -1,0 +1,22 @@
+# stage after basinsoup_soft_c701 in experiments/arms/basinsoup_soft.sh
+
+extends = ["_family.toml"]
+
+[data]
+slices = 24
+
+[encoder]
+backbone_lr = 1e-05
+init = "$MODELS/basinsoup_dmlb_k4_s2026.pt"
+
+[optim]
+epochs = 2
+
+[run]
+seed = 702
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-grkrv"
+status = "done"
+out = "basinsoup_soft_c702"

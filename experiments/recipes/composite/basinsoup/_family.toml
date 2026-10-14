@@ -1,0 +1,32 @@
+# basinsoup: 18 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.9
+band_low = 0.1
+
+[encoder]
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+accumulate = 3
+batch = 4
+ema = true
+one_cycle = true
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+vram_gb = 22.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+rank_weight = 1.0
+weight_floor = true

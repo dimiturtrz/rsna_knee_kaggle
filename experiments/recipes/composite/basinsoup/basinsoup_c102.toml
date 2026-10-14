@@ -1,0 +1,23 @@
+# stage after basinsoup_c101 in experiments/arms/basinsoup.sh
+
+extends = ["_family.toml"]
+
+[data]
+scheme = "extended"
+slices = 20
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/labelwise_ext_drop40_long_ema_s2026.pt"
+
+[optim]
+epochs = 4
+
+[run]
+seed = 102
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-0dfys"
+status = "done"
+out = "basinsoup_c102"

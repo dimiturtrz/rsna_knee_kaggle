@@ -1,0 +1,25 @@
+# stage after basinsoup_ff_c301 in experiments/arms/basinsoup_ff.sh
+
+extends = ["_family.toml"]
+
+[data]
+scheme = "extended"
+slices = 20
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/labelwise_ext_drop40_long_ff.pt"
+
+[optim]
+epochs = 4
+
+[run]
+fold = -1
+seed = 303
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-mc1ls"
+after = ["kneemri.models.weight_soup --ship-only --members $MODELS/basinsoup_ff_c301.pt $MODELS/basinsoup_ff_c302.pt $MODELS/basinsoup_ff_c303.pt --out $MODELS/basinsoup_ff_k3_s2026.pt", "kneemri.models.weight_soup --ship-only --members $MODELS/labelwise_ext_drop40_long_ff.pt $MODELS/basinsoup_ff_c301.pt $MODELS/basinsoup_ff_c302.pt $MODELS/basinsoup_ff_c303.pt --out $MODELS/basinsoup_ff_k4_s2026.pt"]
+status = "done"
+out = "basinsoup_ff_c303"

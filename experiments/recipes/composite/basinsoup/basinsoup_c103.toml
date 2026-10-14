@@ -1,0 +1,24 @@
+# stage after basinsoup_c101 in experiments/arms/basinsoup.sh
+
+extends = ["_family.toml"]
+
+[data]
+scheme = "extended"
+slices = 20
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/labelwise_ext_drop40_long_ema_s2026.pt"
+
+[optim]
+epochs = 4
+
+[run]
+seed = 103
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-0dfys"
+after = ["kneemri.models.weight_soup --members $MODELS/basinsoup_c101.pt $MODELS/basinsoup_c102.pt $MODELS/basinsoup_c103.pt --out $MODELS/basinsoup_k3_s2026.pt", "kneemri.models.weight_soup --members $MODELS/labelwise_ext_drop40_long_ema_s2026.pt $MODELS/basinsoup_c101.pt $MODELS/basinsoup_c102.pt $MODELS/basinsoup_c103.pt --out $MODELS/basinsoup_k4_s2026.pt", "kneemri.inference.holdout_backfill --device cuda --checkpoints $MODELS/basinsoup_k3_s2026.pt $MODELS/basinsoup_k4_s2026.pt", "kneemri.evaluation.ledger75 --holdouts $MODELS --only basinsoup_k3_s2026 basinsoup_k4_s2026 basinsoup_c101 basinsoup_c102 basinsoup_c103 labelwise_ext_drop40_long_ema_s2026"]
+status = "done"
+out = "basinsoup_c103"

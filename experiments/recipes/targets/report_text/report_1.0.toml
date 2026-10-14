@@ -1,0 +1,11 @@
+# stage after report_0.3 in experiments/arms/report_supervision.sh
+
+extends = ["_family.toml"]
+
+[encoder]
+report_weight = 1.0
+
+[meta]
+hypothesis = "Supervise the slot embedding with the whole report, not just twelve numbers - REFUTED."
+status = "queued"
+out = "report1.0_s2026"

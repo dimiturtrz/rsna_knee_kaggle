@@ -1,0 +1,18 @@
+# stage after oof_clean_fold1 in experiments/arms/teacher_clean.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+slices = 12
+
+[run]
+exclude_fold = 0
+fold = 4
+
+[meta]
+hypothesis = "teacher_clean — the out-of-fold teacher REBUILT so that no teacher ever saw fold 0."
+bead = "knee-ygi2k"
+status = "queued"
+out = "oof_clean_fold4_s2026"
