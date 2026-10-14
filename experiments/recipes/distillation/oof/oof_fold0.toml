@@ -1,0 +1,72 @@
+# oof_fold0.sh — the fifth out-of-fold twin, the one `oof_teacher.py` deliberately does not have.
+#
+# WHAT IT UNBLOCKS, AND IT IS NOT A NICE-TO-HAVE. `TeacherTargets.rows` RAISES on any study with no
+# teacher row (`kneemri/training/teacher_targets.py:70`) — a positive witness, per batch, not a mask.
+# `teacher_oof_corpus.npz` covers folds 1-4, 3,498 of the corpus's 4,406 studies. So EVERY distillation
+# arm that trains on fold 0 dies in its first epoch, and that is both of the branches queued behind the
+# card: the six-seat retrain (`--fold -1`, all 4,406) and the gen-2 teacher (whose fold-1..4 students
+# each train on fold 0). `seat_distill_lr4e5` is the only distilled arm that runs today, and it runs
+# because it is `--fold 0` and therefore trains on exactly the 3,498 the file covers.
+#
+# WHY FILLING THE HOLE IS NOT THE LEAK `oof_teacher.py` REFUSES. That module's docstring is right:
+# "a teacher covering all 4407 would be the broken one". It is right ABOUT ARMS SCORED ON FOLD 0 — a
+# teacher that read the holdout leaks the evaluation labels into the student. The two consumers here
+# have no holdout at all. A `--fold -1` refit is scored on the BOARD; there is no evaluation set for a
+# fold-0 reading to leak into. The constraint that creates the hole does not reach the one arm that
+# needs it filled, and the output is written to a DIFFERENT FILENAME so no fold-0-scored arm can pick
+# it up by accident.
+#
+# WHY A TWIN AND NOT AN AVERAGE OF THE ONES ON DISK. Every `_s2026` model held out fold 0, so any of
+# their `.holdout.npz` files is already an honest out-of-fold reading of those 909 studies, and
+# averaging the strong ones would cost zero card. It is the wrong file to build. Folds 1-4 are each
+# taught by ONE cheap 224 px / 8-epoch model; a fold-0 block averaged from strong 336 px members would
+# make a fifth of the corpus taught by a consensus and the rest by singles, which is a variable neither
+# consumer asked for and which nothing downstream could separate from the treatment. Twenty-five
+# minutes of card buys a teacher whose five blocks are the SAME KIND, and the retrain then moves one
+# variable instead of two.
+#
+# ONE VARIABLE against `oof_folds.sh`: `--fold 0`. Rate, slices, band, image size, epochs, pooling and
+# throughput are copied verbatim from that arm rather than reassembled, for the reason `final_fit_six`
+# states — a reassembly is a configuration nobody ran.
+#
+# IT HAS NO PRE-REGISTRATION AND WANTS NONE. This is not a member and not a candidate; it is one fifth
+# of a producer. Its holdout number is the fold-0 twin's own score and prices nothing — the reading
+# that matters is the one the CONSUMER makes. What it must do is exist and cover 909 studies, which is
+# what `oof_teacher --full` then asserts by refusing a corpus that is not 4,406 rows.
+#
+# COST ~25 min of card at 224 px / 8 epochs, zero submission slots. It gates roughly twelve hours of
+# queued work behind it, which is the whole argument for spending them before either branch starts.
+#
+# deliberate: --fold 0 (the only change; the fold this teacher has never covered)
+# deliberate: --image-size 224 --epochs 8 (oof_folds.sh's own cheap geometry, HELD so the five blocks
+# deliberate: of the teacher are one kind rather than four cheap and one strong)
+# bead: knee-ygi2k
+# reading: oof_fold0_s2026.holdout.npz
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 224
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true
+
+[meta]
+hypothesis = "oof_fold0.sh — the fifth out-of-fold twin, the one `oof_teacher.py` deliberately does not have."
+bead = "knee-ygi2k"
+status = "queued"
+out = "oof_fold0_s2026"

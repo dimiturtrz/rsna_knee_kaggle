@@ -1,0 +1,20 @@
+# bead: knee-feb62.7
+# reading: grand_labelwise_depth24_s2026.holdout.npz
+# DRAFT, not armed. Seat labelwise_depth24_drop40_long_s2026 under grand.toml; seat identity = 24 slices, batch 10.
+
+extends = ["_family.toml"]
+
+[data]
+slices = 24
+
+[optim]
+batch = 10
+
+[run]
+vram_gb = 28.0
+
+[meta]
+hypothesis = "DRAFT, not armed. Seat labelwise_depth24_drop40_long_s2026 under grand.toml; seat identity = 24 slices, batch 10."
+bead = "knee-feb62.7"
+status = "queued"
+out = "grand_labelwise_depth24_s2026"

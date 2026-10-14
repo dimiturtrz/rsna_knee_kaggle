@@ -1,0 +1,18 @@
+# bead: knee-feb62.7
+# reading: grand_labelwise_ext_s2026.holdout.npz
+# DRAFT, not armed. Seat labelwise_ext_drop40_long_s2026 under grand.toml; seat identity = extended scheme.
+
+extends = ["_family.toml"]
+
+[data]
+scheme = "extended"
+
+[optim]
+accumulate = 3
+batch = 4
+
+[meta]
+hypothesis = "DRAFT, not armed. Seat labelwise_ext_drop40_long_s2026 under grand.toml; seat identity = extended scheme."
+bead = "knee-feb62.7"
+status = "queued"
+out = "grand_labelwise_ext_s2026"

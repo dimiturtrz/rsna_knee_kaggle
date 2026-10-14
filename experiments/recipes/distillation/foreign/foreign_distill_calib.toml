@@ -1,0 +1,55 @@
+# foreign_distill_calib.sh — the distant teacher on the recipe that already produces our SEATED members.
+#
+# WHAT MOVES AND WHAT IS HELD. This is `calib_dense`'s invocation with the two distillation arguments
+# added and nothing else touched: same variant, rate, batch, slices, band, pooling, whole-stack, epochs
+# and schedule. Its control is therefore already in the ledger (calib_dense, the champion-seated member),
+# and the teacher is the only moving variable — the same single-variable shape `foreign_distill` used
+# against `band_dense` 0.8578.
+#
+# WHY THIS ARM AND NOT A SECOND STUDENT FAMILY. The obvious alternative was a swinbase student on the
+# same teacher. The ledger refuses it: the whole swin family lands ~0.833 (`swin_supervised` 0.8331,
+# `swin_wholetop`, `swin_calib_dense`) and `seat_value` prices `swin_supervised` at **-0.0012** against
+# the greedyseat roster — a distant student that cannot hold a seat cannot carry a diversity term either.
+# The mechanism `foreign_distill` is demonstrating is the TEACHER's ordering, not the student's trunk, so
+# the arm that tests it hardest puts that teacher on the strongest student we own.
+#
+# THE TEACHER. `teacher_foreign_corpus.npz` — mattiaangeli's five released DINOv3 folds, fold-matched so
+# every study is taken from the one fold that never trained on it: 0.8929, honestly out-of-sample on all
+# 4406 rows, from a different family's decode, crop, pooling and trunk. `distill_pairs` (our own teacher)
+# read 0.8594 with nearest 0.9159 — a rank average cannot pay for an ordering it already holds. This
+# teacher is the variable that diagnosis named.
+#
+# THE READING IS THE SEAT, NOT THE SOLO. Same as `foreign_distill`: `seat_value` against a scoreable base
+# with the distance column beside it. calib_dense's own seat is the comparison that matters — if the
+# teacher buys distance on a member that is ALREADY seated, the pool gains without losing a seat.
+#
+# PRE-REGISTERED, before the run, against calib_dense's ledger row and `foreign_distill`'s:
+#   * solo above calib_dense AND nearest below its nearest — the teacher transfers on the strong student
+#     too, and this is a straight replacement for a champion seat. The branch worth a slot.
+#   * solo flat, nearest down — the teacher is a pure diversity term; seat it beside calib_dense rather
+#     than instead of it.
+#   * solo down and nearest unmoved — the distillation term fights the calibrated targets (both rewrite
+#     what the model is told a cell is worth). That is a real interaction, not a null: it says the
+#     teacher belongs on the UNCALIBRATED corner, which `foreign_distill` already occupies.
+#
+# COST. ~2 h of card, 12 epochs on the shared recipe. ZERO submission slots. Teacher file already on disk.
+#
+# deliberate: --teacher-targets (the whole thesis; the file is the single changed argument)
+# deliberate: --distill-weight (0.3, HELD from distill_pairs and foreign_distill so weight is not a
+#             second moving variable)
+# deliberate: --calibrated-targets (inherited from calib_dense, the control this arm is read against)
+# bead: knee-ubj5z
+# reading: foreign_distill_calib_s2026.holdout.npz
+# control  calib_dense (the seated member) and foreign_distill_s2026 (the same teacher, uncalibrated).
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[targets]
+calibrated_targets = true
+
+[meta]
+hypothesis = "foreign_distill_calib.sh — the distant teacher on the recipe that already produces our SEATED members."
+bead = "knee-ubj5z"
+status = "queued"
+out = "foreign_distill_calib_s2026"

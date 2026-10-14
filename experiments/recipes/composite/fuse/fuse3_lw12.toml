@@ -1,0 +1,36 @@
+# bead: knee-vivli
+# reading: fuse3_lw12_s2026.holdout.npz
+#
+# labelwise_ms_ctrl plus --fuse-blocks 3: blocks 9-11 gated into the last through zero-initialised
+# per-channel gates, so epoch 0 starts at the control's function. Read against labelwise_ms_ctrl
+# (0.9006 ledger75), the same cache, recipe and seed.
+#
+# deliberate: --slices 12 --band-low 0.2 --band-high 0.8 — the control's slab, the cheap line.
+
+extends = ["_family.toml"]
+
+[encoder]
+fuse_blocks = 3
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+vram_gb = 22.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "labelwise_ms_ctrl plus --fuse-blocks 3: blocks 9-11 gated into the last through zero-initialised"
+bead = "knee-vivli"
+status = "queued"
+out = "fuse3_lw12_s2026"
