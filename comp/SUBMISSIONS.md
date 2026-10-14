@@ -5087,3 +5087,18 @@ and 1/3 bracket a flat top and the share axis closes; < B, 1/3 is the optimum. E
 RESULT: **0.956**. The pre-registered < B branch fires: R7 1/4 reads 0.956 against 0.957 at 1/3, the same shape as the S6 curve (1/6 .955, 1/3 .956, 1/2 .955), so both heliosli readers peak at a 1/3 share and `s6r7solo_v1` stays the pin. Slot 5 goes to `kneemri-tblendsolo` v2 and `s6r7sixth` is not shipped (it was gated on a lift). A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
 scatter, so this reads as public RANK, not as a better model; the 0.957 tier holds ~118 teams with ties broken by
 submission time, and 0.958 holds 78.
+
+## s6r7solo224_v1 — 0.957, ref 57158477, 2026-10-13 — nartaa's unused 224-px checkpoint inside his half: flat
+
+`kneemri-s6r7solo224`: `s6r7solo` with one stage added. `nartaa/rsna-knee-publication-swa-weights-20261007` ships two
+CoAtNets and every public blend, ours included, read only the 384-px one; the second,
+`raptor_ft_alldata_t16_blendjev_oai_d96_c08_r224_swa.pt` (sha256 3394fdd7…), is the same recipe at 224 px on a 0.8
+centre crop of the field (0.945 alone). Scored by nartaa's own 224 script (`dimiturnt/nartaa224-src`, diffed against
+our mounted 384 copy: crop, resolution, output name and no mirror pass are the only differences) and folded into his
+half as 0.65 x rank(384) + 0.35 x rank(224), the split varshithakolupuri's public notebook fixed before any run. R7
+1/3 and the soups 1/12 each unchanged. run_check clean (loaded 2 of 2 members, R7 exit 0 at 443 s).
+
+PRE-REG (B = `s6r7solo_v1` 0.957): > B the second field of view carries signal the 384 reader misses, new pin; = B
+below board resolution at 0.175 of the vote, and the reading is public RANK inside the 0.957 tie; < B the 224 reader
+dilutes the 384 one at this share.
+RESULT: **0.957**. Flat: the 224 view at 0.175 of the vote sits below board resolution. Public rank read live afterwards was 119 of 5954 in an 84-way tie at 0.957, so it bought no rank either. The 224 checkpoint stays a candidate only as a composition lever (s6r7flip224); alone it is closed at this share.
