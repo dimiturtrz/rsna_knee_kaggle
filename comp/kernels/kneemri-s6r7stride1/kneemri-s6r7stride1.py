@@ -1,12 +1,13 @@
 """s6r7stride1 — `kneemri-s6r7solo` with heliosli's R7 read at the stride its own manifest declares, nothing else moved.
 
 R7's manifest (`heliosli/rsna-knee-compact-r7cnxfsss`, bundle 8c7b666e27dc0e8f) says `eval_stride: 1`. Every s6r7* entry
-(the 0.957 pin included) forced `'2'` through an anchor inherited from `kneemri-s6dense2`, where it had made S6 DENSER
-than its manifest; carried into R7 it made R7 SPARSER than the author's read. This restores it. Members, weights
-(nartaa 1/2, R7 1/3, soups 1/12 each) and rank fusion are s6r7solo's. The fallback for slot 2 if s6r7flip < 0.957.
+(the 0.957 pin included) forced `'2'` through the anchor `kneemri-s6dense2` introduced, which halved S6's windows
+against ITS manifest's stride 1 and read flat (0.956 = 0.956, "the stride axis closes"). This re-asks that question of
+R7, the same author's compact pipeline: an INSTRUMENT, expected flat. Members, weights (nartaa 1/2, R7 1/3, soups 1/12
+each) and rank fusion are s6r7solo's.
 PRE-REG (B = `s6r7solo_v1` 0.957, resolution 0.001, top-band residual sd 0.0013 @ledger75):
-- **> B** — the sparser read had cost signal; new pin.
-- **= B** — stride sits below board resolution at a third of the rank vote; s6r7solo stays.
+- **> B** — unlike S6, R7's sparser read had cost signal; new pin.
+- **= B** — R7 agrees with S6: stride is below board resolution, and stride 2 stays as free runtime.
 - **< B** — stride 2 was better for this blend; s6r7solo stays.
 """
 

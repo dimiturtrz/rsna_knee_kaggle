@@ -1,11 +1,11 @@
 """s6r7flipstride1 — `kneemri-s6r7flip` with heliosli's R7 reader windowed at eval stride 1, not 2.
 
-R7 scores each series by sliding a slab window along the slice axis; the manifest default is stride 3 and every s6r7
+R7 scores each series by sliding a slab window along the slice axis; its manifest declares stride 1 and every s6r7
 entry has run it at 2. Stride 1 places a window at every slice, so each slice is read by every window covering it and
 the per-study vote averages over roughly twice the windows. Runtime: R7 is GPU-bound once warm (4.4 s a study plain,
 8.8 s with flip, per T4 worker), so this is ~3.2 h of R7 on a ~1,300-study hidden test against a deadline 8.6 h after
 the kernel starts; studies it does not reach fall back to the mean score silently. Everything else is s6r7flip.
-Ships only if s6r7flip read > s6r7solo_v1.
+Ships only if s6r7flip read > s6r7solo_v1. S6, the same pipeline, read flat between stride 1 and 2 (s6dense2).
 PRE-REG (B = s6r7flip's board score, resolution 0.001, top-band residual sd 0.0013 @ledger75):
 - **> B** — denser windows still add signal; new pin.
 - **= B** — the vote has saturated at stride 2; s6r7flip stays.
