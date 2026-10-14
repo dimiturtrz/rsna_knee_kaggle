@@ -53,7 +53,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_drop_drop40_long`'s line with `--scheme roi` added: the six canonical views kept whole,"
 bead = "knee-vgz5b.5"
 status = "queued"
 out = "roi_labelwise_drop40_long_s2026"

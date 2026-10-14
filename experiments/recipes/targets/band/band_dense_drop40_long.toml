@@ -51,7 +51,7 @@ epochs = 24
 slot_dropout = 0.4
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`severity_weight`'s byte-identical line with the objective OFF and two flags imported:"
 bead = "knee-evdfd"
 status = "done"
 out = "band_dense_drop40_long_s2026"

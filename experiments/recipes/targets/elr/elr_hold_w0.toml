@@ -28,7 +28,7 @@
 extends = ["_family.toml"]
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "The gate for Liu et al.'s early-learning regulariser (ELR, NeurIPS 2020; code 428aa973) on the"
 bead = "knee-bpuei"
 status = "queued"
 out = "elr_hold_w0_s2026"

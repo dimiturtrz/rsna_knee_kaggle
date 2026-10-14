@@ -64,7 +64,7 @@ slot_dropout = 0.4
 labels = "$PROCESSED/labels/mergedk_labels.csv"
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`mergedk_drop40`'s byte-identical line with ONE number changed: `--epochs 12` -> `--epochs 24`."
 bead = "knee-0ggxn"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "done"

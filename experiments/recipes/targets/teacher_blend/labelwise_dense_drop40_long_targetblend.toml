@@ -1,0 +1,41 @@
+# bead: knee-p0s4f
+# reading: labelwise_dense_drop40_long_targetblend_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `lw24_targetblend` re-anchored on the 20-slice shipping line, because the 24sl cache it needs is
+#   deleted (72 GB rebuild) while `labelwise_dense_drop40_long_s2026` (0.9048 ledger75) is a 20sl
+#   control already on disk. `labelwise_dense_drop40_long`'s line with ONE input changed: `--labels` is
+#   `blend_oof_a07_cal.csv` = 0.3 * calibrated(report_labels_v2) + 0.7 * teacher_clean on the 3497 train
+#   rows; the 909 fold-0 holdout rows are the report's own. `--eval-labels` pins the ruler to v2.
+#
+# WHY — forum 735304's one convergent recipe (single ConvNeXt-T 0.953, DINOv2 ViT-S 0.951 on pseudo
+#   labels, no external data), in its TARGET form, on the line our soups are built from.
+#
+# PRE-REGISTRATION. ledger75 is EXPECTED null-or-negative by construction (a report-derived ruler cannot
+#   see a move toward the teacher) and does not decide. A run below control by more than 0.02 ledger75
+#   is a different fact: the student lost signal, not bias — record it, do not seat it.
+#   Otherwise the BOARD decides, one INSTRUMENT slot: seat it in s6dense2's dmlb 1/12 seat
+#   (kneemri-s6discord form) against s6dense2 0.956: >= 0.957 the target form transfers, compose it into
+#   a soup; 0.956 flat; <= 0.955 drop.
+#
+# --calibrated-targets remaps exact reader levels only: blended cells pass through (calibrated by
+# pseudo_table --calibrated), holdout raw levels calibrate as in the control.
+# deliberate: --labels blend_oof_a07_cal.csv --eval-labels report_labels_v2 — the one variable.
+# deliberate: every other flag verbatim from labelwise_dense_drop40_long.
+#
+# control  labelwise_dense_drop40_long_s2026 = 0.9048 ledger75 (on disk). No control run is owed.
+
+extends = ["_family.toml"]
+
+[data]
+slices = 20
+
+[run]
+labels = "$PROCESSED/labels/blend_oof_a07_cal.csv"
+
+[meta]
+hypothesis = "`lw24_targetblend` re-anchored on the 20-slice shipping line, because the 24sl cache it needs is"
+bead = "knee-p0s4f"
+requires = ["$PROCESSED/labels/report_labels_v2.csv"]
+status = "done"
+out = "labelwise_dense_drop40_long_targetblend_s2026"

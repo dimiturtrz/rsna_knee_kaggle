@@ -53,7 +53,7 @@ labels = "$PROCESSED/labels/blend_three_v1.csv"
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`blendhold_drop40`'s byte-identical line with ONE number changed: `--epochs 12` -> `--epochs 24`."
 bead = "knee-kiss9"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "done"

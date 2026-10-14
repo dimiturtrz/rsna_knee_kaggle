@@ -70,7 +70,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_dense`'s byte-identical line with the two operators this project has now MEASURED to"
 bead = "knee-vs06j"
 status = "done"
 out = "labelwise_dense_drop40_long_s2026"

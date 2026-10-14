@@ -74,7 +74,7 @@ fold = -1
 seed = 301
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`basinsoup.sh` moved onto the FULL-DATA line: three 4-epoch seed-children forked off the shipping"
 bead = "knee-mc1ls"
 requires = ["$MODELS/labelwise_ext_drop40_long_ff.pt"]
 status = "done"

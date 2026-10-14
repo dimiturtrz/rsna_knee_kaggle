@@ -70,7 +70,7 @@ epochs = 4
 seed = 501
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "Round TWO of the basin-soup operation: three 4-epoch seed-children forked off a checkpoint that is"
 bead = "knee-p9mp5"
 requires = ["$MODELS/basinsoup_dmlb_k4_s2026.pt"]
 status = "done"

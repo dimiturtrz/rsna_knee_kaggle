@@ -82,7 +82,7 @@ slot_dropout = 0.4
 labels = "$PROCESSED/labels/mergedk_labels.csv"
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`mergedk_drop40_long`'s byte-identical line with ONE flag moved: `--slice-pooling max` becomes"
 bead = "knee-dl65h"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "queued"

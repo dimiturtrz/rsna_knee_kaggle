@@ -59,7 +59,7 @@ epochs = 2
 seed = 701
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`basinsoup_r2.sh` byte for byte -- same parent `basinsoup_dmlb_k4_s2026`, same K=3/K=4 shape, same"
 bead = "knee-grkrv"
 requires = ["$MODELS/basinsoup_dmlb_k4_s2026.pt"]
 status = "done"

@@ -108,7 +108,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`resnet_224_short`'s trunk under OUR recipe stack instead of the foreign baseline one. The trunk,"
 bead = "knee-67rgi"
 status = "done"
 out = "resnet_stack_224_s2026"

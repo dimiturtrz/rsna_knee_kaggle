@@ -61,7 +61,7 @@ init = "$MODELS/labelwise_ext_drop40_long_ema_s2026.pt"
 seed = 201
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "basinsoup.sh again with ONE term changed: --epochs 8 instead of 4. Same parent, same"
 bead = "knee-ted6u"
 requires = ["$MODELS/labelwise_ext_drop40_long_ema_s2026.pt"]
 status = "done"

@@ -16,7 +16,7 @@ epochs = 4
 seed = 503
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "Round TWO of the basin-soup operation: three 4-epoch seed-children forked off a checkpoint that is"
 bead = "knee-p9mp5"
 after = ["kneemri.models.weight_soup --members $MODELS/basinsoup_r2_c501.pt $MODELS/basinsoup_r2_c502.pt $MODELS/basinsoup_r2_c503.pt --out $MODELS/basinsoup_r2_k3_s2026.pt", "kneemri.models.weight_soup --members $MODELS/basinsoup_dmlb_k4_s2026.pt $MODELS/basinsoup_r2_c501.pt $MODELS/basinsoup_r2_c502.pt $MODELS/basinsoup_r2_c503.pt --out $MODELS/basinsoup_r2_k4_s2026.pt", "kneemri.inference.holdout_backfill --device cuda --checkpoints $MODELS/basinsoup_r2_k3_s2026.pt $MODELS/basinsoup_r2_k4_s2026.pt", "kneemri.evaluation.ledger75 --holdouts $MODELS --only basinsoup_r2_k3_s2026 basinsoup_r2_k4_s2026 basinsoup_r2_c501 basinsoup_r2_c502 basinsoup_r2_c503 basinsoup_dmlb_k4_s2026"]
 status = "done"

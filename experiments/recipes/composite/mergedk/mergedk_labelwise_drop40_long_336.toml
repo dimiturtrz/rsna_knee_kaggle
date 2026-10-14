@@ -85,7 +85,7 @@ slot_dropout = 0.4
 labels = "$PROCESSED/labels/mergedk_labels.csv"
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`mergedk_labelwise_drop40_long`'s line with ONE flag moved: `--image-size 224` becomes"
 bead = "knee-8c8up"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "queued"

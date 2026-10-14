@@ -17,7 +17,7 @@ epochs = 4
 seed = 103
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "Three seed-children forked off ONE already-corpus-fine-tuned parent, so their weight-space average"
 bead = "knee-0dfys"
 after = ["kneemri.models.weight_soup --members $MODELS/basinsoup_c101.pt $MODELS/basinsoup_c102.pt $MODELS/basinsoup_c103.pt --out $MODELS/basinsoup_k3_s2026.pt", "kneemri.models.weight_soup --members $MODELS/labelwise_ext_drop40_long_ema_s2026.pt $MODELS/basinsoup_c101.pt $MODELS/basinsoup_c102.pt $MODELS/basinsoup_c103.pt --out $MODELS/basinsoup_k4_s2026.pt", "kneemri.inference.holdout_backfill --device cuda --checkpoints $MODELS/basinsoup_k3_s2026.pt $MODELS/basinsoup_k4_s2026.pt", "kneemri.evaluation.ledger75 --holdouts $MODELS --only basinsoup_k3_s2026 basinsoup_k4_s2026 basinsoup_c101 basinsoup_c102 basinsoup_c103 labelwise_ext_drop40_long_ema_s2026"]
 status = "done"

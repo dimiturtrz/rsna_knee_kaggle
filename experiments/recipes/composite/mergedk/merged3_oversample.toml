@@ -71,7 +71,7 @@ labels = "$PROCESSED/labels/merged3_labels_tagged_raw.csv"
 corpus_oversample = 2.22
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "merged3_corpus.sh's exact line plus one flag: --corpus-oversample 2.22."
 bead = "knee-eb68g"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "queued"

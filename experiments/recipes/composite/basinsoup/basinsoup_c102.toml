@@ -17,7 +17,7 @@ epochs = 4
 seed = 102
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "Three seed-children forked off ONE already-corpus-fine-tuned parent, so their weight-space average"
 bead = "knee-0dfys"
 status = "done"
 out = "basinsoup_c102"

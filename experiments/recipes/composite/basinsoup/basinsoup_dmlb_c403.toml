@@ -16,7 +16,7 @@ epochs = 4
 seed = 403
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "The basin-soup operation applied to `dml_b_s2026`, the highest honest fold-0 fit this project owns"
 bead = "knee-8pj5j"
 after = ["kneemri.models.weight_soup --members $MODELS/basinsoup_dmlb_c401.pt $MODELS/basinsoup_dmlb_c402.pt $MODELS/basinsoup_dmlb_c403.pt --out $MODELS/basinsoup_dmlb_k3_s2026.pt", "kneemri.models.weight_soup --members $MODELS/dml_b_s2026.pt $MODELS/basinsoup_dmlb_c401.pt $MODELS/basinsoup_dmlb_c402.pt $MODELS/basinsoup_dmlb_c403.pt --out $MODELS/basinsoup_dmlb_k4_s2026.pt", "kneemri.inference.holdout_backfill --device cuda --checkpoints $MODELS/basinsoup_dmlb_k3_s2026.pt $MODELS/basinsoup_dmlb_k4_s2026.pt", "kneemri.evaluation.ledger75 --holdouts $MODELS --only basinsoup_dmlb_k3_s2026 basinsoup_dmlb_k4_s2026 basinsoup_dmlb_c401 basinsoup_dmlb_c402 basinsoup_dmlb_c403 dml_b_s2026"]
 status = "done"

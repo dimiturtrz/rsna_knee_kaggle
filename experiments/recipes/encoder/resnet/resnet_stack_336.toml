@@ -74,7 +74,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "resnet_stack_224 at the resolution the stack was tuned for. ONE term moves: 224 -> 336. The trunk,"
 bead = "knee-mc23l"
 status = "queued"
 out = "resnet_stack_336_s2026"

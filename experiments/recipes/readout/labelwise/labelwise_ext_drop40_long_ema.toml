@@ -69,7 +69,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_ext_drop40_long`'s byte-identical line with `--ema` ADDED. Nothing else moves, and it"
 bead = "knee-0ed8f"
 status = "done"
 out = "labelwise_ext_drop40_long_ema_s2026"

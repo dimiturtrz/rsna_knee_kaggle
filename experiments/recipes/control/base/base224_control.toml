@@ -39,7 +39,7 @@ epochs = 12
 eval_labels = "\\tmp\\arm_check\\labels\\report_labels_v2.csv"
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "The CONTROL for mergedk_corpus, and nothing else: the identical line on our own 4,407 studies."
 bead = "knee-vrvus"
 status = "queued"
 out = "base224_control_s2026"

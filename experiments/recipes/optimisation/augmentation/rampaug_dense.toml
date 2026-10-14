@@ -43,7 +43,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_dense_drop40_long`'s byte-identical line with ONE change: every regulariser read through"
 bead = "knee-u15bj"
 status = "queued"
 out = "rampaug_dense_s2026"

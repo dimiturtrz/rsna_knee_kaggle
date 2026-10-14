@@ -53,7 +53,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_depth24_drop40_long`'s byte-identical line with ONE variable moved:"
 bead = "knee-hbta3"
 status = "queued"
 out = "labelwise_patch_s2026"

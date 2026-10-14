@@ -66,7 +66,7 @@ labels = "$PROCESSED/labels/blend_three_v1.csv"
 calibrated_targets = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`chainfour`'s byte-identical line with one flag added: `--slot-dropout 0.40`. chainfour is a SEATED"
 bead = "knee-uhknv"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "queued"

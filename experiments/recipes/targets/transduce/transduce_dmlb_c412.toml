@@ -7,7 +7,7 @@ labels = "$PROCESSED/labels/pseudo_dmlb_fold0.csv"
 seed = 412
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "Four more seeds of `transduce_dmlb.sh`, unchanged in every other flag, taking the treated arm to"
 bead = "knee-nchjt"
 after = ["kneemri.evaluation.ledger75 --holdouts $MODELS --only transduce_dmlb_c407 transduce_dmlb_c408 transduce_dmlb_c409 transduce_dmlb_c410 transduce_dmlb_c411 transduce_dmlb_c412 basinsoup_dmlb_c401 basinsoup_dmlb_c402 basinsoup_dmlb_c403 basinsoup_dmlb_c404 basinsoup_dmlb_c405 basinsoup_dmlb_c406 dml_b_s2026"]
 status = "queued"

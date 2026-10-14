@@ -18,7 +18,7 @@ fold = -1
 seed = 302
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`basinsoup.sh` moved onto the FULL-DATA line: three 4-epoch seed-children forked off the shipping"
 bead = "knee-mc1ls"
 status = "done"
 out = "basinsoup_ff_c302"

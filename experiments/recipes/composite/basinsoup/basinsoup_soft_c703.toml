@@ -16,7 +16,7 @@ epochs = 2
 seed = 703
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`basinsoup_r2.sh` byte for byte -- same parent `basinsoup_dmlb_k4_s2026`, same K=3/K=4 shape, same"
 bead = "knee-grkrv"
 after = ["kneemri.models.weight_soup --members $MODELS/basinsoup_soft_c701.pt $MODELS/basinsoup_soft_c702.pt $MODELS/basinsoup_soft_c703.pt --out $MODELS/basinsoup_soft_k3_s2026.pt", "kneemri.models.weight_soup --members $MODELS/basinsoup_dmlb_k4_s2026.pt $MODELS/basinsoup_soft_c701.pt $MODELS/basinsoup_soft_c702.pt $MODELS/basinsoup_soft_c703.pt --out $MODELS/basinsoup_soft_k4_s2026.pt", "kneemri.inference.holdout_backfill --device cuda --checkpoints $MODELS/basinsoup_soft_k3_s2026.pt $MODELS/basinsoup_soft_k4_s2026.pt", "kneemri.evaluation.ledger75 --holdouts $MODELS --only basinsoup_soft_k3_s2026 basinsoup_soft_k4_s2026 basinsoup_soft_c701 basinsoup_soft_c702 basinsoup_soft_c703 basinsoup_dmlb_k4_s2026 basinsoup_r2_k4_s2026"]
 status = "done"

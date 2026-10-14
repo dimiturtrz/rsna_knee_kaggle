@@ -62,7 +62,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_depth24_drop40_long`'s byte-identical line with `--backbone-lr 4e-5 -> 8e-5`. One flag."
 bead = "knee-e9f83"
 status = "queued"
 out = "lr8e5_ship_s2026"

@@ -80,7 +80,7 @@ epochs = 4
 seed = 401
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "The basin-soup operation applied to `dml_b_s2026`, the highest honest fold-0 fit this project owns"
 bead = "knee-8pj5j"
 requires = ["$MODELS/dml_b_s2026.pt"]
 status = "done"

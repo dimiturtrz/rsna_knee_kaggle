@@ -65,7 +65,7 @@ slot_dropout = 0.4
 severity_weight = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`severity_weight`'s byte-identical line with two flags imported: `--slot-dropout 0.40` and"
 bead = "knee-evdfd"
 status = "done"
 out = "severity_drop40_long_s2026"

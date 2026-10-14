@@ -70,7 +70,7 @@ epochs = 12
 labels = "$PROCESSED/labels/mergedk_labels.csv"
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`base224_control`'s exact line with two flags changed: `--scheme mergedk` and a labels table that"
 bead = "knee-vrvus"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "done"

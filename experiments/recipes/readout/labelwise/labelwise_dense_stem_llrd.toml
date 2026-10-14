@@ -68,7 +68,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_dense_stem`'s line plus `--layer-decay 0.75`. It is the follow-up that arm's own"
 bead = "knee-p6fr8"
 status = "queued"
 out = "labelwise_dense_stem_llrd_s2026"

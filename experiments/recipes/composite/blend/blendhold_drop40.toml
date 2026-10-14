@@ -69,7 +69,7 @@ labels = "$PROCESSED/labels/blend_three_v1.csv"
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`blendhold`'s byte-identical line with one flag added: `--slot-dropout 0.40`. blendhold is a SEATED"
 bead = "knee-wy4vt"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "queued"

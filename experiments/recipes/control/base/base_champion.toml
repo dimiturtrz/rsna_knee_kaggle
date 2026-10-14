@@ -75,7 +75,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_depth24_drop40_long`'s line, byte-identical except the encoder width and the batch it"
 bead = "knee-4zw4n"
 status = "queued"
 out = "base_champion_s2026"

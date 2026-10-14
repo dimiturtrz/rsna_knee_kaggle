@@ -63,7 +63,7 @@ slot_dropout = 0.4
 labels = "$PROCESSED/labels/mergedk_labels.csv"
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`mergedk_corpus`'s exact line with one flag added: `--slot-dropout 0.40`. Two independent"
 bead = "knee-zrcww"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "done"

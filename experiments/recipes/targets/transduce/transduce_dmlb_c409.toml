@@ -48,7 +48,7 @@ labels = "$PROCESSED/labels/pseudo_dmlb_fold0.csv"
 seed = 409
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "Four more seeds of `transduce_dmlb.sh`, unchanged in every other flag, taking the treated arm to"
 bead = "knee-nchjt"
 requires = ["$PROCESSED/labels/report_labels_v2.csv", "$MODELS/dml_b_s2026.pt"]
 status = "queued"

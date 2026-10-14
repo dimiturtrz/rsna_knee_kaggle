@@ -89,7 +89,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_ext_drop40_long_ema.sh`'s line with ONE byte changed: --labels points at the FP-only cut"
 bead = "knee-j48lj"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 after = ["kneemri.evaluation.ledger75 --holdouts $MODELS --only labelcut_v3_ema_s2026 labelwise_ext_drop40_long_ema_s2026"]

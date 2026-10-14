@@ -64,7 +64,7 @@ labels = "$PROCESSED/labels/merged_blend_v1.csv"
 calibrated_targets = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "merged_span_cf's exact line plus two terms it does not carry: --hold-annotations and --ema."
 bead = "knee-gpp93"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "queued"

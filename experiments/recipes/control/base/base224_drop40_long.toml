@@ -61,7 +61,7 @@ slot_dropout = 0.4
 eval_labels = "\\tmp\\arm_check\\labels\\report_labels_v2.csv"
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`base224_control`'s byte-identical line with two changes, both imported from arms already on disk:"
 bead = "knee-q1pp0"
 status = "done"
 out = "base224_drop40_long_s2026"

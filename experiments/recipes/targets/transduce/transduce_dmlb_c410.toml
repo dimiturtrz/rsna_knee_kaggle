@@ -7,7 +7,7 @@ labels = "$PROCESSED/labels/pseudo_dmlb_fold0.csv"
 seed = 410
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "Four more seeds of `transduce_dmlb.sh`, unchanged in every other flag, taking the treated arm to"
 bead = "knee-nchjt"
 status = "queued"
 out = "transduce_dmlb_c410"

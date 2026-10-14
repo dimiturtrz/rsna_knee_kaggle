@@ -72,7 +72,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_extended`'s byte-identical line with the two operators that are MEASURED to pay at the"
 bead = "knee-cgt9m"
 status = "done"
 out = "labelwise_ext_drop40_long_s2026"

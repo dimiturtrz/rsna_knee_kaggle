@@ -58,7 +58,7 @@ rank_weight = 1.0
 weight_floor = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`labelwise_dense_drop40_long`'s byte-identical line with ONE input changed: the training table is"
 bead = "knee-5vilf"
 requires = ["$PROCESSED/labels/report_labels_v2.csv"]
 status = "queued"

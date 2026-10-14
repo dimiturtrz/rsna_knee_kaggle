@@ -18,7 +18,7 @@ fold = -1
 seed = 303
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "`basinsoup.sh` moved onto the FULL-DATA line: three 4-epoch seed-children forked off the shipping"
 bead = "knee-mc1ls"
 after = ["kneemri.models.weight_soup --ship-only --members $MODELS/basinsoup_ff_c301.pt $MODELS/basinsoup_ff_c302.pt $MODELS/basinsoup_ff_c303.pt --out $MODELS/basinsoup_ff_k3_s2026.pt", "kneemri.models.weight_soup --ship-only --members $MODELS/labelwise_ext_drop40_long_ff.pt $MODELS/basinsoup_ff_c301.pt $MODELS/basinsoup_ff_c302.pt $MODELS/basinsoup_ff_c303.pt --out $MODELS/basinsoup_ff_k4_s2026.pt"]
 status = "done"

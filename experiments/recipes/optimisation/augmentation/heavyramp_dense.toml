@@ -48,7 +48,7 @@ calibrated_targets = true
 hold_annotations = true
 
 [meta]
-hypothesis = "WHAT THIS ARM IS"
+hypothesis = "rampaug_dense's schedule carrying a HEAVIER package: intensity augmentation, ghosting 0.04,"
 bead = "knee-7gfzv"
 status = "queued"
 out = "heavyramp_dense_s2026"
