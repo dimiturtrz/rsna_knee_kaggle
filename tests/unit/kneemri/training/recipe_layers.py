@@ -41,10 +41,12 @@ def test_values_refuses_a_path_naming_no_leaf(tmp_path: Path):
 
 
 def test_recipe_meta_of():
-    """`status` reads as the enum, `requires` as a tuple, and a key naming no field refuses."""
-    meta = RecipeMeta.of({"status": "done", "requires": ["a.npz", "b.npz"], "out": "x_s2026"})
+    """`status` reads as the enum, `requires` and `after` as tuples, and a key naming no field refuses."""
+    step = "kneemri.evaluation.ledger75 --only x_s2026"
+    meta = RecipeMeta.of({"status": "done", "requires": ["a.npz", "b.npz"], "after": [step], "out": "x_s2026"})
 
-    assert meta == RecipeMeta(status=RecipeStatus.DONE, requires=("a.npz", "b.npz"), out="x_s2026")
+    expected = RecipeMeta(status=RecipeStatus.DONE, requires=("a.npz", "b.npz"), after=(step,), out="x_s2026")
+    assert meta == expected
     assert RecipeMeta.of({}) == RecipeMeta()
     with pytest.raises(ValueError, match="hypotesis"):
         RecipeMeta.of({"hypotesis": "typo"})

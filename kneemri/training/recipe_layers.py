@@ -48,6 +48,7 @@ class RecipeMeta:
     results: str = ""
     status: RecipeStatus = RecipeStatus.QUEUED
     requires: tuple[str, ...] = ()
+    after: tuple[str, ...] = ()
     bead: str = ""
     out: str = ""
 
@@ -61,7 +62,8 @@ class RecipeMeta:
             raise ValueError(message)
         stated = dict(table)
         stated["status"] = RecipeStatus(str(stated.get("status", RecipeStatus.QUEUED)))
-        stated["requires"] = tuple(str(path) for path in cast("list[object]", stated.get("requires", [])))
+        for listed in ("requires", "after"):
+            stated[listed] = tuple(str(item) for item in cast("list[object]", stated.get(listed, [])))
         # pyrefly: ignore[bad-argument-type] - every key was checked against the fields above
         return cls(**stated)
 
