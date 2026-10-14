@@ -1,0 +1,17 @@
+# bead: knee-rn9py
+# reading: ctl_nocalib_s2026.holdout.npz
+#
+# Control-recipe leave-one-out at 224px: calibrated_targets off, back to the report levels as assigned.
+# Read against probe224_control_s2026 0.8914@l75 (909 rows, epoch 10, converged), the same recipe with
+# this one fragment left in. INSTRUMENT: a 12-epoch delta ranks the fragment, it does not prove it.
+
+extends = ["_family.toml"]
+
+[targets]
+calibrated_targets = false
+
+[meta]
+hypothesis = "Control-recipe leave-one-out at 224px: calibrated_targets off, back to the report levels as assigned."
+gate = "Read against probe224_control_s2026 0.8914@l75 (909 rows, epoch 10, converged), the same recipe with this one fragment left in. INSTRUMENT: a 12-epoch delta ranks the fragment, it does not prove it."
+bead = "knee-rn9py"
+out = "ctl_nocalib_s2026"

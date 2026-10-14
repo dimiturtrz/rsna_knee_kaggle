@@ -9,7 +9,7 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 run_train probe224_control_aug \
-  --config experiments/recipes/base.toml --config experiments/recipes/probe224.toml \
+  --config experiments/recipes/base.toml --config experiments/recipes/trunks/probe224.toml \
   --set regularisation.ghosting=0.04 --set regularisation.intensity_aug=true --set regularisation.scale_jitter=0.25 \
   --set regularisation.aug_start=0.25 --set regularisation.aug_mid=1.0 --set regularisation.aug_end=0.5 \
   --set regularisation.aug_ramp=0.25 --set regularisation.aug_tail=0.2 \

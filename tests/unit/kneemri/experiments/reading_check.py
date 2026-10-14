@@ -19,6 +19,15 @@ def test_read(tmp_path: Path) -> None:
     assert ArmDeclaration.read(path).text.startswith("# reading:")
 
 
+def test_read_follows_a_recipe_shim(tmp_path: Path) -> None:
+    recipe = tmp_path / "experiments" / "recipes" / "ctl" / "one.toml"
+    recipe.parent.mkdir(parents=True)
+    recipe.write_text("# reading: ctl_one_s2026.holdout.npz\n", encoding="utf-8")
+    shim = 'exec bash "$(dirname "$0")/../run.sh" experiments/recipes/ctl/one.toml "$@"\n'
+    path = _arm(tmp_path / "experiments" / "arms", "ctl_one", shim)
+    assert ArmDeclaration.read(path).readings() == ["ctl_one_s2026.holdout.npz"]
+
+
 def test_name(tmp_path: Path) -> None:
     assert ArmDeclaration.read(_arm(tmp_path, "one", "x\n")).name == "one"
 

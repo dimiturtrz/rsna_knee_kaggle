@@ -33,11 +33,13 @@ from pathlib import Path
 
 from core import cli
 from kneemri.training.config_tree import TrainConfig
+from kneemri.training.recipe_layers import RecipeLayers
 
 logger = logging.getLogger(__name__)
 
 INCIDENTAL = frozenset({"out", "labels", "paths"})
 """Keys every run states for itself, so a difference from the default carries no information."""
+DEFAULT = "default"
 
 
 class DefaultDrift:
@@ -67,6 +69,17 @@ class DefaultDrift:
         first = metrics.read_text(encoding="utf-8").splitlines()[0]
         recipe = json.loads(first).get("recipe", {})
         return cls(recipe)
+
+    @staticmethod
+    def provenance(layers: RecipeLayers) -> list[tuple[str, str, str]]:
+        """(option, value, the layer that set it last) for every option a recipe resolves to.
+
+        An option no layer states reads `DEFAULT`: it is exactly the set a default moving underneath
+        would reach, which is why the answer lives beside the drift and not beside the recipe files.
+        """
+        resolved = TrainConfig.of_flat(TrainConfig.of_layers(layers)).recipe
+        sources = {name: source for name, (_, source) in layers.sources(TrainConfig.addresses()).items()}
+        return [(name, value, sources.get(name, DEFAULT)) for name, value in sorted(resolved.items())]
 
     def drifted(self) -> dict[str, tuple[str, str]]:
         """Key -> (what the run got, what it would get today), for every key that moved underneath it.

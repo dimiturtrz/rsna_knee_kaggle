@@ -1,0 +1,48 @@
+from pathlib import Path
+
+from kneemri.experiments.recipe_arm import RecipeArm
+
+
+def _shim(root: Path, recipe: str) -> Path:
+    arm = root / "experiments" / "arms" / "ctl_fast.sh"
+    arm.parent.mkdir(parents=True)
+    arm.write_text(f'#!/usr/bin/env bash\nexec bash "$(dirname "$0")/../run.sh" {recipe} "$@"\n', encoding="utf-8")
+    return arm
+
+
+def test_name():
+    """A recipe trains under `<family>_<variant>`, the name `run.sh` gives it."""
+    assert RecipeArm.name(Path("experiments/recipes/ctl/fastbb.toml")) == "ctl_fastbb"
+
+
+def test_text(tmp_path: Path):
+    """A shim reads as itself, its recipe, and the invocation `run.sh` makes with the recipe's `out`."""
+    recipe = tmp_path / "experiments" / "recipes" / "ctl" / "fast.toml"
+    recipe.parent.mkdir(parents=True)
+    recipe.write_text('# bead: knee-abc\n[meta]\nout = "ctl_fast_s2026"\n', encoding="utf-8")
+    arm = _shim(tmp_path, "experiments/recipes/ctl/fast.toml")
+
+    text = RecipeArm.text(arm)
+
+    assert "# bead: knee-abc" in text
+    invocation = 'run_train ctl_fast --config experiments/recipes/ctl/fast.toml --out "$MODELS/ctl_fast_s2026.pt"'
+    assert text.endswith(invocation)
+
+
+def test_text_of_a_shell_arm_is_the_shell(tmp_path: Path):
+    """An arm that names no recipe reads as exactly its own text."""
+    arm = tmp_path / "plain.sh"
+    arm.write_text("# bead: knee-xyz\nrun_train plain --out x.pt\n", encoding="utf-8")
+
+    assert RecipeArm.text(arm) == "# bead: knee-xyz\nrun_train plain --out x.pt\n"
+
+
+def test_text_without_an_out_names_the_run(tmp_path: Path):
+    """A recipe whose `[meta]` states no `out` writes under its run name, as `run.sh` does."""
+    recipe = tmp_path / "experiments" / "recipes" / "ctl" / "fast.toml"
+    recipe.parent.mkdir(parents=True)
+    recipe.write_text("[optim]\nepochs = 4\n", encoding="utf-8")
+
+    text = RecipeArm.text(_shim(tmp_path, "experiments/recipes/ctl/fast.toml"))
+
+    assert text.endswith('--out "$MODELS/ctl_fast.pt"')

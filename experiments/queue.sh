@@ -6,7 +6,7 @@
 # queueing a parameterised arm ran its DEFAULT: `resolution` spent a slot re-fitting a member we
 # already had and overwrote its checkpoint with a copy of itself, while the queue file read as if it
 # had asked for a rung (knee-8hu7). Splitting the entry is why `parts` exists rather than a loop over
-# "$@" directly. Snapshotting is not this script's job: lib.sh re-execs any arm launched from the repo
+# "$@" directly. An entry naming a `.toml` is a recipe and runs through `experiments/run.sh`. Snapshotting is not this script's job: lib.sh re-execs any arm launched from the repo
 # tree out of a snapshot copy and forwards the arguments it was given.
 #
 # WHY THIS EXISTS. Arms were launched one at a time, so the GPU sat idle for the whole gap between a
@@ -45,9 +45,12 @@ entries=("$@")
 for entry in "${entries[@]}"; do
   read -r -a parts <<< "$entry"
   arm="${parts[0]}"
-  script="experiments/arms/$arm.sh"
-  [ -f "$script" ] || { echo "queue.sh: no such arm '$arm'"; exit 3; }
+  case "$arm" in
+    *.toml) script="experiments/run.sh"; named="$arm"; args=("${parts[@]}") ;;
+    *) script="experiments/arms/$arm.sh"; named="$script"; args=("${parts[@]:1}") ;;
+  esac
+  [ -f "$named" ] || { echo "queue.sh: no such arm '$arm'"; exit 3; }
   echo "=== $(date -u +%H:%M:%SZ) queue: $entry ==="
-  timeout "$ARM_TIMEOUT" bash "$script" "${parts[@]:1}"
+  timeout "$ARM_TIMEOUT" bash "$script" "${args[@]}"
   echo "=== $(date -u +%H:%M:%SZ) queue: $arm exited $? ==="
 done

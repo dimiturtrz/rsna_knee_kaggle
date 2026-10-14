@@ -40,6 +40,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from kneemri.experiments.recipe_arm import RecipeArm
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class ArmDeclaration:
 
     @classmethod
     def read(cls, path: Path) -> "ArmDeclaration":
-        return cls(path, path.read_text(encoding="utf-8"))
+        return cls(path, RecipeArm.text(path))
 
     @property
     def name(self) -> str:

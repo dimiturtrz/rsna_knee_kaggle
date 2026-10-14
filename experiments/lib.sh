@@ -412,7 +412,7 @@ run_snapshot() {
   # matching quote" and took a 2-hour arm with it. The repo has to stay editable while long work runs,
   # so the run gets its own immutable copy.
   local arm="$1"; shift
-  local name; name="$(basename "$arm" .sh)"
+  local name; name="${ARM_NAME:-$(basename "$arm" .sh)}"
   local snapshot="$LOGS/$name.running.sh"
   cp "$arm" "$snapshot"
 
@@ -473,7 +473,7 @@ run_snapshot() {
 case "${ARM_LIB:-}" in
   "")
     case "$(cd "$(dirname "$0")" && pwd)/$(basename "$0")" in
-      "$REPO/experiments/arms/"*.sh)
+      "$REPO/experiments/arms/"*.sh | "$REPO/experiments/run.sh")
         echo "lib.sh: $(basename "$0") was launched from the repo tree; re-running it from a snapshot"
         run_snapshot "$0" "$@"
         exit $?

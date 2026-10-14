@@ -147,6 +147,7 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | command | what it answers |
 |---|---|
 | `python -m kneemri.commands` | Every `python -m` entrypoint the package has, generated from the modules themselves. |
+| `python -m kneemri.run` | Every recipe and what became of it, or one recipe's resolved options: `python -m kneemri.run`. |
 
 ### models
 

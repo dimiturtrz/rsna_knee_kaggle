@@ -2,8 +2,8 @@
 # Stacked LAST, so under grand.toml it overrides only horizon and geometry and the pair differs in grand's
 # fragments alone (ema, warmup, patience_from_progress, stochastic_depth, ghosting, intensity_aug, mixup,
 # scale_jitter, padding_mode, aug_*, hard_*):
-#   control  --config base.toml --config probe224.toml
-#   grand    --config base.toml --config grand.toml --config probe224.toml
+#   control  --config base.toml --config trunks/probe224.toml
+#   grand    --config base.toml --config grand.toml --config trunks/probe224.toml
 
 [optim]
 epochs = 12

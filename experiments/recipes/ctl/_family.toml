@@ -1,0 +1,10 @@
+# The control recipe taken apart: probe224_control (base + the 224 px / 12-slice / 12-epoch trunk) with one
+# fragment changed per leaf, and one leaf changing five together. Every leaf reads against
+# probe224_control_s2026 0.8914@l75 on the same cache and the same 909-row ruler.
+
+extends = ["../base.toml", "../trunks/probe224.toml"]
+
+[meta]
+control = "experiments/arms/probe224_control.sh"
+results = "experiments/README.md#the-control-recipe-taken-apart-seven-fragments-and-a-composition-test-2026-09-16"
+status = "done"

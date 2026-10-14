@@ -16544,7 +16544,7 @@ recipe's, which is exactly what that check exists to prevent.
 
 ## the control recipe, taken apart: seven fragments and a composition test, 2026-09-16
 
-`probe224_control` = `base.toml + probe224.toml` IS the champion family's recipe at 224px/12sl/12ep,
+`probe224_control` = `base.toml + trunks/probe224.toml` IS the champion family's recipe at 224px/12sl/12ep,
 band 0.2–0.8 — labelwise pooling, whole_stack, slot_dropout 0.40, calibrated_targets, hold_annotations,
 backbone_lr 4e-5, rank_weight 1.0, weight_floor. knee-rn9py removed one fragment at a time and priced each
 on the same 909-row `ledger75` cut against the intact control at **0.8914**.

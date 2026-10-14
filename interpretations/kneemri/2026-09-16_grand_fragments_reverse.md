@@ -4,12 +4,12 @@
 
 ## What was measured
 
-`experiments/recipes/probe224.toml` pins horizon (12 epochs) and geometry (12 slices, 224 px, band
+`experiments/recipes/trunks/probe224.toml` pins horizon (12 epochs) and geometry (12 slices, 224 px, band
 0.2–0.8), so a pair stacked as
 
 ```
-control  --config base.toml --config probe224.toml
-grand    --config base.toml --config grand.toml --config probe224.toml
+control  --config base.toml --config trunks/probe224.toml
+grand    --config base.toml --config grand.toml --config trunks/probe224.toml
 ```
 
 differs in `grand.toml`'s **fragment block alone** — `ema`, `warmup`, `patience_from_progress`,
@@ -61,7 +61,7 @@ it is not needed for the decision, which −0.0138 already settles.
 
 ## What this does NOT prove
 
-**Nothing here says the fragments are harmful at 36 epochs and 336 px.** `probe224.toml` pins horizon
+**Nothing here says the fragments are harmful at 36 epochs and 336 px.** `trunks/probe224.toml` pins horizon
 and geometry, so every arm above varied fragments alone, at short horizon and small geometry — and
 regularisation earning nothing at 12 epochs while earning at 36 is exactly what regularisation is for.
 

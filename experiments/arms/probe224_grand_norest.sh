@@ -10,7 +10,7 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 run_train probe224_grand_norest \
-  --config experiments/recipes/base.toml --config experiments/recipes/grand.toml --config experiments/recipes/probe224.toml \
+  --config experiments/recipes/base.toml --config experiments/recipes/grand.toml --config experiments/recipes/trunks/probe224.toml \
   --set regularisation.stochastic_depth=0.0 --set regularisation.padding_mode=border \
   --set optim.warmup=0.15 --set optim.patience_from_progress=0.0 \
   --labels "$LABELS" --out "$MODELS/probe224_grand_norest_s2026.pt"

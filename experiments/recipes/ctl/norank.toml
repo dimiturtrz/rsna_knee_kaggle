@@ -1,0 +1,17 @@
+# bead: knee-rn9py
+# reading: ctl_norank_s2026.holdout.npz
+#
+# Control-recipe leave-one-out at 224px: the pairwise ranking term off, cross-entropy only.
+# Read against probe224_control_s2026 0.8914@l75 (909 rows, epoch 10, converged), the same recipe with
+# this one fragment left in. INSTRUMENT: a 12-epoch delta ranks the fragment, it does not prove it.
+
+extends = ["_family.toml"]
+
+[targets]
+rank_weight = 0.0
+
+[meta]
+hypothesis = "Control-recipe leave-one-out at 224px: the pairwise ranking term off, cross-entropy only."
+gate = "Read against probe224_control_s2026 0.8914@l75 (909 rows, epoch 10, converged), the same recipe with this one fragment left in. INSTRUMENT: a 12-epoch delta ranks the fragment, it does not prove it."
+bead = "knee-rn9py"
+out = "ctl_norank_s2026"

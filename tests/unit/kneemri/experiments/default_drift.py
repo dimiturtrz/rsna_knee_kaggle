@@ -3,8 +3,9 @@
 import json
 from pathlib import Path
 
-from kneemri.experiments.default_drift import DefaultDrift
+from kneemri.experiments.default_drift import DEFAULT, DefaultDrift
 from kneemri.training.config_tree import TrainConfig
+from kneemri.training.recipe_layers import RecipeLayers
 
 
 def _recipe() -> dict[str, str]:
@@ -17,6 +18,17 @@ def test_declared() -> None:
     defaults = DefaultDrift.declared()
     assert defaults["layer_decay"] == "1.0"
     assert defaults["accumulate"] == "1"
+
+
+def test_provenance(tmp_path: Path) -> None:
+    """A stated option names the file that stated it; an unstated one reads as the default it inherits."""
+    recipe = tmp_path / "r.toml"
+    recipe.write_text("[optim]\nepochs = 4\n", encoding="utf-8")
+
+    rows = {name: (value, source) for name, value, source in DefaultDrift.provenance(RecipeLayers((recipe,)))}
+
+    assert rows["epochs"] == ("4", str(recipe))
+    assert rows["layer_decay"] == ("1.0", DEFAULT)
 
 
 def test_drifted() -> None:

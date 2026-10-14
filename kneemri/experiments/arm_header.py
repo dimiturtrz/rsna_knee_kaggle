@@ -15,6 +15,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 from kneemri.experiments.arm_gate import BOARD, ArmGate
+from kneemri.experiments.recipe_arm import RecipeArm
 
 BEAD_LINE = re.compile(r"^#\s*bead:\s*(knee-[a-z0-9]+(?:\.[0-9]+)*)\s*$", re.MULTILINE)
 """How an arm names the issue that priced it. One line, anywhere in the shell's header."""
@@ -90,7 +91,7 @@ class ArmHeader:
         source = self._sources.get(name)
         if not path.exists() and source is not None and source.exists():
             path = source
-        return path.read_text(encoding="utf-8") if path.exists() else ""
+        return RecipeArm.text(path) if path.exists() else ""
 
     def beads(self, names: Iterable[str]) -> dict[str, str | None]:
         """The bead each arm names in a `# bead:` line, or None where its shell names none.

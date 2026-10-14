@@ -42,6 +42,7 @@ from pathlib import Path
 from core import cli
 from core.denominator import Denominator
 from kneemri.evaluation.ledger75 import LedgerSeventyFive
+from kneemri.experiments.recipe_arm import RecipeArm
 from kneemri.runs.run_record import RunRecord
 
 logger = logging.getLogger(__name__)
@@ -234,7 +235,7 @@ class ControlCheck:
 
     def declared(self, arm: Path) -> Comparison | None:
         """The comparison one arm script states, or nothing if it declares no control or trains no run."""
-        lines = arm.read_text(encoding="utf-8", errors="replace").splitlines()
+        lines = RecipeArm.text(arm).splitlines()
         control = self._first(DECLARATION, lines)
         trained = self._first(TRAINED, lines)
         if control is None or trained is None:
@@ -266,7 +267,7 @@ class ControlCheck:
         script = self.arms / f"{arm}.sh"
         if not script.is_file():
             return None
-        found = self._first(OUTPUT, script.read_text(encoding="utf-8", errors="replace").splitlines())
+        found = self._first(OUTPUT, RecipeArm.text(script).splitlines())
         return None if found is None else Path(found["path"]).name
 
     def findings(self, comparison: Comparison) -> tuple[tuple[str, ...], float | None]:

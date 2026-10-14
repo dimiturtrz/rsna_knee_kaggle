@@ -9,6 +9,6 @@
 source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
 require "$LABELS"
 run_train probe224_grand_trim \
-  --config experiments/recipes/base.toml --config experiments/recipes/grand.toml --config experiments/recipes/probe224.toml \
+  --config experiments/recipes/base.toml --config experiments/recipes/grand.toml --config experiments/recipes/trunks/probe224.toml \
   --set regularisation.mixup=0.0 --set sampling.hard_start=1.0 --set sampling.hard_ramp=0.0 \
   --labels "$LABELS" --out "$MODELS/probe224_grand_trim_s2026.pt"
