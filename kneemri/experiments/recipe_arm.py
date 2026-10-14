@@ -29,14 +29,15 @@ class RecipeArm:
 
     @staticmethod
     def text(arm: Path) -> str:
-        """The arm's shell text, followed by its recipe and the invocation `run.sh` makes, when it is a shim."""
+        """The arm's shell text, followed by each recipe it hands `run.sh` and the invocation made, in order."""
         shell = arm.read_text(encoding="utf-8", errors="replace")
-        found = RUNNER.search(shell)
-        if found is None:
-            return shell
-        relative = found["recipe"]
-        recipe = arm.resolve().parents[ROOT_DEPTH] / relative
+        root = arm.resolve().parents[ROOT_DEPTH]
+        return "\n".join([shell, *(RecipeArm._followed(root, found["recipe"]) for found in RUNNER.finditer(shell))])
+
+    @staticmethod
+    def _followed(root: Path, relative: str) -> str:
+        recipe = root / relative
         name = RecipeArm.name(recipe)
         out = RecipeLayers((recipe,)).meta().out or name
         invocation = f'run_train {name} --config {relative} --out "$MODELS/{out}.pt"'
-        return "\n".join((shell, recipe.read_text(encoding="utf-8", errors="replace"), invocation))
+        return "\n".join((recipe.read_text(encoding="utf-8", errors="replace"), invocation))

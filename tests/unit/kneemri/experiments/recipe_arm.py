@@ -38,6 +38,29 @@ def test_text_of_a_shell_arm_is_the_shell(tmp_path: Path):
     assert RecipeArm.text(arm) == "# bead: knee-xyz\nrun_train plain --out x.pt\n"
 
 
+def test_text_of_a_chained_shim_follows_every_recipe(tmp_path: Path):
+    """A shim running two recipes in sequence reads as both, each with its own invocation, in order."""
+    recipes = tmp_path / "experiments" / "recipes" / "control" / "ctl"
+    recipes.mkdir(parents=True)
+    (recipes / "head.toml").write_text("# bead: knee-one\n", encoding="utf-8")
+    (recipes / "full.toml").write_text('[meta]\nout = "full_s2026"\n', encoding="utf-8")
+    arm = tmp_path / "experiments" / "arms" / "staged.sh"
+    arm.parent.mkdir(parents=True)
+    runner = 'bash "$(dirname "$0")/../run.sh"'
+    arm.write_text(
+        f'{runner} experiments/recipes/control/ctl/head.toml "$@" && exec {runner} '
+        'experiments/recipes/control/ctl/full.toml "$@"\n',
+        encoding="utf-8",
+    )
+
+    text = RecipeArm.text(arm)
+
+    assert "# bead: knee-one" in text
+    head = text.index('run_train head --config experiments/recipes/control/ctl/head.toml --out "$MODELS/head.pt"')
+    full = text.index('run_train full --config experiments/recipes/control/ctl/full.toml --out "$MODELS/full_s2026.pt"')
+    assert head < full, "the stages read in the order the shim runs them"
+
+
 def test_text_without_an_out_names_the_run(tmp_path: Path):
     """A recipe whose `[meta]` states no `out` writes under its run name, as `run.sh` does."""
     recipe = tmp_path / "experiments" / "recipes" / "control" / "ctl" / "ctl_fast.toml"

@@ -151,6 +151,7 @@ class ArmCheck:
         self.shells = shells
         self.headers = ArmHeader(arms)
         self.diff = ArmDiff(self.headers)
+        self.timed_out: list[str] = []
 
     def _environment(self) -> dict[str, str]:
         """The inherited environment, plus ARM_LIB, the resolved data root, and coreutils on PATH.
@@ -225,8 +226,8 @@ class ArmCheck:
         """
         return self._printed([[str(arm)] for arm in sorted(self.arms.glob("*.sh"))])
 
-    def _spawned(self, command: list[str]) -> str:
-        """One arm's stdout, or empty when it hung past `TIMEOUT_SECONDS`."""
+    def _spawned(self, command: list[str]) -> str | None:
+        """One arm's stdout, or None when it hung past `TIMEOUT_SECONDS`."""
         done = Spawn().bounded(
             [str(GIT_BASH) if GIT_BASH.exists() else "bash", *command],
             TIMEOUT_SECONDS,
@@ -235,7 +236,7 @@ class ArmCheck:
             # nothing - which this lint reports as "0 arms checked", a clean pass over nothing.
             env=self._environment(),
         )
-        return "" if done is None else done.stdout
+        return None if done is None else done.stdout
 
     def _printed(self, commands: list[list[str]]) -> dict[str, str]:
         """Run each arm command against the stub lib and collect the `name<TAB>flags` lines it prints.
@@ -256,8 +257,12 @@ class ArmCheck:
         found: dict[str, str] = {}
         with ThreadPoolExecutor(max_workers=SPAWN_WORKERS) as pool:
             outputs = list(pool.map(self._spawned, commands))
-        for command, output in zip(commands, outputs, strict=True):
-            for line in output.splitlines():
+        # NAMED, because a timeout under load drops an arm from every verdict without a word: on
+        # 2026-10-14 fifteen went, the controls among them, and MISMATCHED read 20 against 60.
+        spawned = list(zip(commands, outputs, strict=True))
+        self.timed_out = [Path(command[0]).stem for command, output in spawned if output is None]
+        for command, output in spawned:
+            for line in (output or "").splitlines():
                 name, tab, flags = line.partition("\t")
                 # The stub SHELL-QUOTES what it prints, so a flag value containing a space keeps its
                 # argument boundary; the "is this an invocation" test therefore has to look at the
@@ -591,7 +596,7 @@ class ArmCheck:
         for name, flags in invocations.items():
             values = ArmDiff.values(flags)
             table = Path(values.get("--labels", LABEL_TABLE))
-            if table.name == LABEL_TABLE or "--eval-labels" in values:
+            if table.name == LABEL_TABLE or ArmDiff.resolved(flags).get("--eval-labels", "None") != "None":
                 continue
             ruler = table.with_name(LABEL_TABLE)
             if not (ruler.is_file() and table.is_file()):
@@ -715,6 +720,13 @@ def main() -> None:
     for line in ArmShadow(check.arms).reported():
         logger.info("%s", line)
     logger.info("%d arms checked, %d refused, %d uncached", len(invocations), len(refused), len(uncached))
+    if check.timed_out:
+        logger.info(
+            "TIMED-OUT: %d arms printed nothing in %ds and are absent from every verdict above: %s",
+            len(check.timed_out),
+            TIMEOUT_SECONDS,
+            " ".join(sorted(check.timed_out)),
+        )
     Denominator(len(invocations), "no arm printed an invocation — the shell, not the arms, failed").refuse_empty()
     if any(refusing) or broken:
         sys.exit(1)

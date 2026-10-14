@@ -109,10 +109,13 @@ def test_moving_ruler(tmp_path: Path):
     ruler = _label_table(tmp_path / LABEL_TABLE, [0.82, 0.28])
     crossed = _label_table(tmp_path / "report_labels_v3.csv", [0.42, 0.28])
     base = "--fold 0 --epochs 12 --one-cycle --slice-pooling max --whole-stack"
+    recipe = tmp_path / "pinned.toml"
+    recipe.write_text(f'[run]\neval_labels = "{ruler.as_posix()}"\n', encoding="utf-8")
     moved = ArmCheck().moving_ruler(
         {
             "recal_holdannot": f"{base} --labels {crossed.as_posix()}",
             "recal_dense": f"{base} --labels {crossed.as_posix()} --eval-labels {ruler.as_posix()}",
+            "recipe_pinned": f"--config {recipe.as_posix()} {base} --labels {crossed.as_posix()}",
             "ordinary": f"{base} --labels {ruler.as_posix()}",
             "silent": base,
             "absent_tables": f"{base} --labels {(tmp_path / 'never_written.csv').as_posix()}",
@@ -121,6 +124,7 @@ def test_moving_ruler(tmp_path: Path):
 
     assert "report_labels_v3.csv" in moved["recal_holdannot"]
     assert "recal_dense" not in moved, "a pinned --eval-labels is what makes the re-map readable"
+    assert "recipe_pinned" not in moved, "a recipe arm pins its ruler in its TOML, not on the flag line"
     assert "ordinary" not in moved
     assert "silent" not in moved, "an arm naming no table inherits the shared one and moves nothing"
     assert "absent_tables" not in moved, "gitignored tables are absent in CI; a lint must not fail on that"
@@ -288,6 +292,23 @@ def test_invocations(tmp_path: Path):
     assert found == {"real": "'--fold' '0' '--epochs' '8'"}, (
         "a retired arm reaches no parser, so it is never reported UNCACHED for a cache nobody should build"
     )
+
+
+def test_invocations_names_an_arm_that_timed_out(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """An arm that hangs past the bound is NAMED, never just absent from the denominator."""
+    arms = tmp_path / "arms"
+    arms.mkdir()
+    for name in ("quick", "hung"):
+        (arms / f"{name}.sh").write_text(f'run_train "{name}" --fold 0\n', encoding="utf-8")
+    monkeypatch.setattr(
+        ArmCheck, "_spawned", lambda _self, command: None if "hung" in command[0] else "quick\t'--fold' '0'\n"
+    )
+    check = ArmCheck(arms, Path("experiments/stub_lib.sh"))
+
+    found = check.invocations()
+
+    assert list(found) == ["quick"]
+    assert check.timed_out == ["hung"]
 
 
 def test_invocations_never_spawns_an_arm_the_stub_cannot_shadow(tmp_path: Path):

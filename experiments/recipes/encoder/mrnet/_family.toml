@@ -1,0 +1,25 @@
+# mrnet: 2 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+band_high = 0.8
+band_low = 0.2
+image_size = 224
+slices = 12
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+variant = "base"
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true
