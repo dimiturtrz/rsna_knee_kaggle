@@ -5102,3 +5102,18 @@ PRE-REG (B = `s6r7solo_v1` 0.957): > B the second field of view carries signal t
 below board resolution at 0.175 of the vote, and the reading is public RANK inside the 0.957 tie; < B the 224 reader
 dilutes the 384 one at this share.
 RESULT: **0.957**. Flat: the 224 view at 0.175 of the vote sits below board resolution. Public rank read live afterwards was 119 of 5954 in an 84-way tie at 0.957, so it bought no rank either. The 224 checkpoint stays a candidate only as a composition lever (s6r7flip224); alone it is closed at this share.
+
+## s6r7flip_v1 — 0.957, ref 57167502, 2026-10-14 — R7 read with its own mirror TTA: flat
+
+`kneemri-s6r7flip`: `s6r7solo` byte-for-byte except one anchor in heliosli's R7 source, `if manifest.get('flip_tta'):`
+→ `if True:`, which passes the worker's shipped `--flip-tta`. The R7 bundle trained with `mirror: 0.5` (coronal/axial
+width flip, sagittal slice reversal, Medial ↔ Lateral outputs permuted), so the second view is in its training
+distribution; the worker averages the two passes in logit space and takes MCL from the plain pass. The manifest ships
+`flip_tta: false`, so every public R7 blend, `s6r7solo` included, read the reader on one view. Blend unchanged:
+nartaa 1/2, R7 1/3, soups 1/12 each, rank space. run_check clean (loaded 2 of 2 members, R7 exit 0 at 414 s, FLIP_TTA_READY in both workers).
+
+PRE-REG (B = `s6r7solo_v1` 0.957): > B the mirror view carries signal, new pin; = B below board resolution at a 1/3
+rank share, s6r7solo stays; < B the mirrored pass (or its state read-out through a stacker fitted on plain passes)
+costs signal, or the 8.3 h deadline bit and unreached studies fell back to the mean.
+RESULT: **0.957**. The = B branch fires: the mirror view at a 1/3 rank share sits below board resolution and `s6r7solo_v1` keeps the pin (same tier, reached first). Live read 08:26Z: rank 127 of 5958, a 95-way tie at 0.957, leader 0.966. Pending to scored took 3.4-3.6 h (04:52Z submit; PENDING at 08:16Z, COMPLETE at 08:26Z), against the R7 deadline at started + 8.3 h, so the deadline fallback cannot have filled the table wholesale. Slot 2 goes to `kneemri-s6r7stride1` per the rule written before this read (flip > B would have sent `s6r7flipstride1`); `s6r7flipres384` drops with it. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
+scatter, so it reads as public RANK, not as a better model.
