@@ -159,7 +159,7 @@
     {
       "kind": "import",
       "source": "core.data.corpus.build_fastmri",
-      "target": "core.data.corpus.corpus_build",
+      "target": "core.data.corpus.cache_flags",
       "weight": 1
     },
     {
@@ -182,6 +182,18 @@
     },
     {
       "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
+      "target": "core.data.corpus.study_metadata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_fastmri",
+      "target": "core.wakelock",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "core.data.corpus.build_kmar",
       "target": "core.cli",
       "weight": 1
@@ -189,7 +201,7 @@
     {
       "kind": "import",
       "source": "core.data.corpus.build_kmar",
-      "target": "core.data.corpus.corpus_build",
+      "target": "core.data.corpus.cache_flags",
       "weight": 1
     },
     {
@@ -202,6 +214,18 @@
       "kind": "import",
       "source": "core.data.corpus.build_kmar",
       "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.data.corpus.study_metadata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_kmar",
+      "target": "core.wakelock",
       "weight": 1
     },
     {
@@ -255,7 +279,7 @@
     {
       "kind": "import",
       "source": "core.data.corpus.build_mrnet",
-      "target": "core.data.corpus.corpus_build",
+      "target": "core.data.corpus.cache_flags",
       "weight": 1
     },
     {
@@ -274,6 +298,18 @@
       "kind": "import",
       "source": "core.data.corpus.build_mrnet",
       "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_mrnet",
+      "target": "core.data.corpus.study_metadata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_mrnet",
+      "target": "core.wakelock",
       "weight": 1
     },
     {
@@ -321,7 +357,7 @@
     {
       "kind": "import",
       "source": "core.data.corpus.build_rijeka",
-      "target": "core.data.corpus.corpus_build",
+      "target": "core.data.corpus.cache_flags",
       "weight": 1
     },
     {
@@ -334,6 +370,18 @@
       "kind": "import",
       "source": "core.data.corpus.build_rijeka",
       "target": "core.data.corpus.slots",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_rijeka",
+      "target": "core.data.corpus.study_metadata",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "core.data.corpus.build_rijeka",
+      "target": "core.wakelock",
       "weight": 1
     },
     {
@@ -1515,12 +1563,6 @@
     {
       "kind": "import",
       "source": "kneemri.embeddings.build_embeddings",
-      "target": "kneemri.models.study_design",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.embeddings.build_embeddings",
       "target": "kneemri.models.token_pooling",
       "weight": 1
     },
@@ -1696,7 +1738,7 @@
       "kind": "import",
       "source": "kneemri.evaluation.annotated_readings",
       "target": "kneemri.evaluation.scores",
-      "weight": 3
+      "weight": 4
     },
     {
       "kind": "import",
@@ -2756,12 +2798,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.evaluation.member_space",
-      "target": "kneemri.inference.vote",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.evaluation.noise_binding",
       "target": "core.bootstrap",
       "weight": 1
@@ -3442,12 +3478,6 @@
       "kind": "import",
       "source": "kneemri.evaluation.slotdrop_tta",
       "target": "kneemri.runs.holdout_record",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.evaluation.stack_fit",
-      "target": "core.cli",
       "weight": 1
     },
     {
@@ -4791,7 +4821,7 @@
     {
       "kind": "import",
       "source": "kneemri.inference.members",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -6170,12 +6200,6 @@
     },
     {
       "kind": "import",
-      "source": "kneemri.models.encoder_surgery",
-      "target": "kneemri.models.slice_shift",
-      "weight": 1
-    },
-    {
-      "kind": "import",
       "source": "kneemri.models.foreign_encoders",
       "target": "kneemri.models.encoder",
       "weight": 1
@@ -6303,6 +6327,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
+      "target": "kneemri.models.backbone",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
       "target": "kneemri.models.encoder",
       "weight": 1
     },
@@ -6333,19 +6363,25 @@
     {
       "kind": "import",
       "source": "kneemri.models.model",
+      "target": "kneemri.models.slice_shift",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.model",
       "target": "kneemri.models.slot_head",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.models.model",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.token_pooling",
       "weight": 1
     },
     {
       "kind": "import",
       "source": "kneemri.models.model",
-      "target": "kneemri.models.token_pooling",
+      "target": "kneemri.models.variants",
       "weight": 1
     },
     {
@@ -6651,7 +6687,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.adaptation",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -6753,6 +6789,12 @@
     {
       "kind": "import",
       "source": "kneemri.training.config_tree",
+      "target": "kneemri.models.model",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.training.config_tree",
       "target": "kneemri.models.slice_pooling",
       "weight": 1
     },
@@ -6760,12 +6802,6 @@
       "kind": "import",
       "source": "kneemri.training.config_tree",
       "target": "kneemri.models.slot_head",
-      "weight": 1
-    },
-    {
-      "kind": "import",
-      "source": "kneemri.training.config_tree",
-      "target": "kneemri.models.study_design",
       "weight": 1
     },
     {
@@ -7683,7 +7719,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.train",
-      "target": "kneemri.models.study_design",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
@@ -7911,7 +7947,7 @@
     {
       "kind": "import",
       "source": "kneemri.training.witness",
-      "target": "kneemri.models.encoder_surgery",
+      "target": "kneemri.models.model",
       "weight": 1
     },
     {
