@@ -5132,3 +5132,19 @@ below board resolution and r7half is the cheaper equal (pick-2 candidate, differ
 decorrelate.
 RESULT: **0.956**. Under B by one tick, the direction the 0.956 prior predicted: dropping the soups loses rather than gains, so the soups' sixth still decorrelates slightly against R7 + nartaa. Pick 2 therefore stays with `s6r7_v1` (0.957, different producers), not r7half. Board read 17:37Z: rank 135 of 5995, tied with 108 others at 0.957; leader 0.966 (12:26Z it was 131, so the tie keeps filling from below). Full-LB download 17:37Z: silver line (rank 299) 0.956 with 1087 teams at or above it, gold (rank 21) 0.963. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
 scatter, so it reads as public RANK, not as a better model.
+
+
+## s6r7stride1_v1 — 0.957, ref 57185827, 2026-10-14 — R7 at its manifest's own eval stride 1: flat, stride 2 stays
+
+`kneemri-s6r7stride1` (v2): `kneemri-s6r7solo` with one more R7 anchor, `str(manifest.get('eval_stride', 3))` →
+`'1'` (was `'2'`). Members, weights (nartaa 1/2, R7 1/3, soups 1/12 each) and rank fusion are s6r7solo's; no flip.
+run_check clean (loaded 2 of 2 members, R7 exit 0 at 429 s, no FLIP_TTA_READY); submission bit-identical between v1
+and v2; the R7 table moves against stride-2 plain by up to 0.31 on sampled studies, so the lever landed. Stride 1 is
+what R7's own manifest declares; every s6r7* entry, the 0.957 pin included, ran 2 through the anchor `s6dense2`
+(knee-1oxsy) introduced, which HALVED S6's windows against its manifest's stride 1 and read flat (0.956 = 0.956). So
+this asks the same question of R7: an INSTRUMENT, nothing tuned, expected flat.
+
+PRE-REG (B = `s6r7solo_v1` 0.957): > B unlike S6, R7's sparser read had cost signal; = B stride is below board
+resolution and stride 2 stays as free runtime (expected); < B stride 2 was better for this blend.
+RESULT: **0.957**. The = B branch fires, as expected: R7's denser read moves its own table (up to 0.31 on a sampled cell) but not the blend at board resolution, the same answer S6 gave, so stride 2 stays as free runtime and the R7 eval-stride axis closes at 0.001. Pending to scored took ~4.1 h (14:38Z submit, COMPLETE by 18:46Z), the slowest R7 entry yet but inside the 8.3 h deadline. Full-LB read 18:27Z (n=5996): ours rank 136 at 0.957; gold #21 0.963, silver #299 0.956, >=0.958 113 teams, >=0.957 226. Flip and stride have now both read flat on R7, so neither is a lever to compose onto a res384 > B read: composing a flat lever buys nothing the board can see, and the 10-15 slot after such a read goes to a mechanism of its own, not to `s6r7flipres384` or a res384+stride1 build. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
+scatter, so it reads as public RANK, not as a better model.
