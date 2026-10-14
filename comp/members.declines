@@ -586,7 +586,7 @@ relabel_hold_s2026    # The supervision arm read as a QUESTION, not as a member,
                       # in this holdout, so the other 10,498 cells are ones the detector does not flag,
                       # where the report label is trustworthy and the ruler-bias argument cannot apply.
                       # Read there against its control band_dense_hold_s2026
-                      # (`python -m kneemri.evaluation.clean_cells`), corrected supervision is
+                      # (`python -m kneemri.evaluation.clean_cells`, module retired; see git history), corrected supervision is
                       # +0.0005 LEDGER and -0.0005 LEDGER75 over clean cells of the 909-study fold-0
                       # holdout — opposite signs on the two cuts, a tenth of the noise floor, at 25x
                       # the gold ruler's n. THAT REFUTES THE RULER-BIAS ACCOUNT rather than confirming

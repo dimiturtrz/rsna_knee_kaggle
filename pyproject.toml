@@ -61,16 +61,16 @@ dependencies = [
     # are not keyed for. Transitive of transformers, and present in Kaggle's image, so it needs no wheel
     # in the kit; declared for the same reason `huggingface-hub` is.
     "safetensors",
-    # `kneemri/evaluation/mixing_rules.py` fits the sparse label-graph rule with sklearn's `Lasso`.
-    # Hand-rolling coordinate descent to dodge a declaration is exactly the trade `labelnoise`'s comment
-    # argues against: a soft-threshold bug reads as a null, and a null here closes a lane. Arrives
-    # transitively with cleanlab and lives in Kaggle's image, so it costs no wheel in the kit; declared
-    # because the import is direct and DEP003 is enforced.
+    # `kneemri/kaggle/pool_ceiling.py` fits its ceiling with sklearn's `LogisticRegression`. Hand-rolling
+    # the fit to dodge a declaration is exactly the trade `labelnoise`'s comment argues against: an
+    # optimiser bug reads as a null, and a null closes a lane. Arrives transitively with cleanlab and lives
+    # in Kaggle's image, so it costs no wheel in the kit; declared because the import is direct and DEP003
+    # is enforced.
     "scikit-learn",
-    # `kneemri/evaluation/seat_swap.py` reads the paired-swap significance off `scipy.stats`. It arrives
-    # transitively with scikit-learn — which is exactly what DEP003 refuses: a transitive dep is one the
-    # upstream is free to drop, and the swap test is how a seat decision is priced. Direct import,
-    # declared. Costs no wheel in the kit; it is already in Kaggle's image.
+    # `kneemri/evaluation/rank_stability.py` and `diversity_slope.py` read their significance off
+    # `scipy.stats`. It arrives transitively with scikit-learn — which is exactly what DEP003 refuses: a
+    # transitive dep is one the upstream is free to drop. Direct import, declared. Costs no wheel in the
+    # kit; it is already in Kaggle's image.
     "scipy",
 ]
 

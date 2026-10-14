@@ -7549,7 +7549,7 @@ and the ordering is what transfers, never the value.
 After seat count, seating, weighting, re-lensing and calibration each closed, one combiner question was
 still genuinely untried: every entry this project has shipped reduces the pool with a fixed rule whose
 only freedom is one scalar per member, shared across all twelve findings. `votefit` fitted that vector
-and `stackseat` swapped a member; neither is a level-2 model. `kneemri.evaluation.stack_combiner` fits a
+and `stackseat` swapped a member; neither is a level-2 model. `kneemri.evaluation.stack_combiner` (module retired; see git history) fits a
 ridge per FINDING over the members' ranks, and optionally lets a finding read what the members said about
 the other eleven — a thing no vote can express at all, since a vote sees one column at a time.
 
@@ -13064,7 +13064,7 @@ withholds them (45 of its 74 misses are UNK, 29 an explicit NO) and its silent s
 **This settles the design the paragraph above left open.** Of its three candidates: scoring on the
 UNK-free subcorpus is dead — dropping those cells moves 318 members by mean +0.0229 (sd 0.0063) and
 re-ranks 8.8% of member pairs, so it is not a neutral lens but an easier corpus
-(`kneemri.evaluation.unk_surface`). The gold reading is the one that works and it **exists**, contrary
+(`kneemri.evaluation.unk_surface`, module retired; see git history). The gold reading is the one that works and it **exists**, contrary
 to M296: `foreign_gate --gold-auc`, n=58, and it has already carried a decision — the gold-vs-proxy
 pair that declined a member is written out in `comp/members.declines`, and is deliberately not
 re-quoted here, because that member's own holdout record sits on a ruler that moved with it and the
@@ -18359,3 +18359,19 @@ Training curve trailed control by 0.006-0.010 midpoint from e12 on (control 0.86
 move toward the teacher); more than 0.02 below control = lost signal, not seated. Otherwise the board decides
 via `kneemri-s6tblend` (s6dense2 with the dmlb_k7 1/12 seat swapped) against s6dense2 0.956.
 VERDICT: SEATABLE, NOT FAVOURED. -0.0157 ledger75 against control is inside the 0.02 kill bar, so the pre-registration sends it to the board. But its pair (0.9042) sits BELOW both the control pair (0.9105) and the seat it would replace (dmlb_k7 0.9095): more diverse than the soups (corr 0.929 vs 0.998) yet too weak for diversity to pay at 50/50. The ruler is report-derived and cannot see a move toward the teacher, so this is direction, not refutation. kneemri-s6tblend stays the LAST slot in the queue, an instrument at P(>=0.957) ~0.05-0.10.
+
+## gold_estimators retired with no importer — 2026-10-14
+
+`kneemri/evaluation/gold_estimators.py` held the ways the 58-study x twelve-finding gold set can be
+spent on one number (D297): per-finding rank-normalised pooled cell AUC (`rankpooled`, registered as the
+internal arm-choosing ruler, paired sd 0.0096 in its docstring), pair-count weighted macro (0.0103) and
+the flat macro (0.0107, the only board-comparable one); raw pooling and inverse-variance weighting were
+excluded on purpose. Its readings are recorded where they were taken — `oof_reader_fold[0-4]` rankpooled
+−0.0112 sd 0.0122 and `oof_band_folds` −0.0066 sd 0.0062 (README:13097, README:13136) — and its last
+caller (`oof_gold`) was retired in 6fae3640. Module retired 2026-10-14 (knee-ij7lk.4), recover with
+`git show 3cb553e7:kneemri/evaluation/gold_estimators.py`. The same commit retires nineteen other one-off
+study CLIs whose verdicts are already on record here or in `interpretations/kneemri/`: foreign_ruler,
+residual_split, pool_census, column_headroom, column_mixing, mixing_rules, seat_add, seat_swap,
+seat_profile, label_stability, weights_gap, alignment_damage, padding_split, label_contradiction,
+competence_axis, matched_axes, vendor_ruler, transduction, study_attribution — each recoverable at
+`git show 3cb553e7:kneemri/evaluation/<name>.py`.
