@@ -11,21 +11,22 @@ def _shim(root: Path, recipe: str) -> Path:
 
 
 def test_name():
-    """A recipe trains under `<family>_<variant>`, the name `run.sh` gives it."""
-    assert RecipeArm.name(Path("experiments/recipes/ctl/fastbb.toml")) == "ctl_fastbb"
+    """A recipe trains under its file stem, the name `run.sh` gives it; the directories only group it."""
+    assert RecipeArm.name(Path("experiments/recipes/control/ctl/ctl_fastbb.toml")) == "ctl_fastbb"
 
 
 def test_text(tmp_path: Path):
     """A shim reads as itself, its recipe, and the invocation `run.sh` makes with the recipe's `out`."""
-    recipe = tmp_path / "experiments" / "recipes" / "ctl" / "fast.toml"
+    recipe = tmp_path / "experiments" / "recipes" / "control" / "ctl" / "ctl_fast.toml"
     recipe.parent.mkdir(parents=True)
     recipe.write_text('# bead: knee-abc\n[meta]\nout = "ctl_fast_s2026"\n', encoding="utf-8")
-    arm = _shim(tmp_path, "experiments/recipes/ctl/fast.toml")
+    arm = _shim(tmp_path, "experiments/recipes/control/ctl/ctl_fast.toml")
 
     text = RecipeArm.text(arm)
 
     assert "# bead: knee-abc" in text
-    invocation = 'run_train ctl_fast --config experiments/recipes/ctl/fast.toml --out "$MODELS/ctl_fast_s2026.pt"'
+    recipe = "experiments/recipes/control/ctl/ctl_fast.toml"
+    invocation = f'run_train ctl_fast --config {recipe} --out "$MODELS/ctl_fast_s2026.pt"'
     assert text.endswith(invocation)
 
 
@@ -39,10 +40,10 @@ def test_text_of_a_shell_arm_is_the_shell(tmp_path: Path):
 
 def test_text_without_an_out_names_the_run(tmp_path: Path):
     """A recipe whose `[meta]` states no `out` writes under its run name, as `run.sh` does."""
-    recipe = tmp_path / "experiments" / "recipes" / "ctl" / "fast.toml"
+    recipe = tmp_path / "experiments" / "recipes" / "control" / "ctl" / "ctl_fast.toml"
     recipe.parent.mkdir(parents=True)
     recipe.write_text("[optim]\nepochs = 4\n", encoding="utf-8")
 
-    text = RecipeArm.text(_shim(tmp_path, "experiments/recipes/ctl/fast.toml"))
+    text = RecipeArm.text(_shim(tmp_path, "experiments/recipes/control/ctl/ctl_fast.toml"))
 
     assert text.endswith('--out "$MODELS/ctl_fast.pt"')

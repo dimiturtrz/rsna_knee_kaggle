@@ -13,6 +13,18 @@ def test_armed(tmp_path: Path):
     assert armed == {"slice_pooling", "whole_stack"}, "the flags passed, translated to option names"
 
 
+def test_recipe_keys(tmp_path: Path):
+    """A recipe layer's keys arm their options; `[meta]` and top-level `extends` arm nothing."""
+    (tmp_path / "a.toml").write_text(
+        'extends = ["b.toml"]\n[optim]\nmixup = 0.2\n[meta]\nbead = "knee-a"\n', encoding="utf-8"
+    )
+
+    coverage = SwitchCoverage(tmp_path)
+
+    assert coverage.recipe_keys() == {"mixup"}
+    assert coverage.armed() == {"mixup"}
+
+
 def test_unaccounted():
     """No training switch may be reachable, stamped, and never run by anything.
 

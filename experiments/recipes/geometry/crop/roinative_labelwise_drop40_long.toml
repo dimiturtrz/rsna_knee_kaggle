@@ -1,0 +1,43 @@
+# bead: knee-vgz5b.10
+# reading: roinative_labelwise_drop40_long_s2026.holdout.npz
+#
+# roi_labelwise_drop40_long with ONE change: the three sagittal ROI views are re-cut from DICOM decoded
+# at 672 px (0.193 mm/px) instead of upsampled from the 336 px cache. Same boxes, same slots, same recipe.
+# The roi arm's upsampled crops lost Fracture -0.023 / MCL -0.024 vs control; 73% of sagittal series are
+# acquired finer than 0.387 mm/px, so the upsample threw away detail the crop existed to buy.
+#
+# control  roi_labelwise_drop40_long_s2026 (ledger75 0.8984 on 909 rows).
+# OFFLINE ONLY: locator fitted on SKM-TEA, licence ruling knee-vgz5b.7.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+scheme = "roinative"
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+accumulate = 3
+batch = 4
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+stochastic_depth = 0.05
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "roi_labelwise_drop40_long with ONE change: the three sagittal ROI views are re-cut from DICOM decoded"
+bead = "knee-vgz5b.10"
+status = "queued"
+out = "roinative_labelwise_drop40_long_s2026"

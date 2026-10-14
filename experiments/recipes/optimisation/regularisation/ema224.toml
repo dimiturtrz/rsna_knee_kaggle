@@ -1,0 +1,88 @@
+# ema224.sh — native224's invocation with `--ema` appended and nothing else touched. The fold-0
+# measurement of the one flag every 224 full-fit member already ships with and that has never been
+# measured in this cell.
+#
+# bead: knee-s9cr
+#
+# THIS IS AN INSTRUMENT WITH A NAMED CONSUMER, and it is priced as one below rather than sold as an
+# improvement. `ema_dense` (README:4602) already read `--ema` at +0.0010 against `band_dense` — a sixth
+# of the 0.0062 floor — and an outside single-variable ablation read +0.003. Two measurements, same
+# sign, both under their floors. The expected score movement here is about zero and the header says so
+# before the run.
+#
+# WHAT IT BUYS ANYWAY. Every `_ff` member this roster packages is its `_s2026` twin plus `--fold -1` AND
+# `--ema`, which is the confound `ema_dense` existed to price — and it priced it at 336 px on the dense
+# cache. The 224 cell is not that cell: `native224_long` (README:4004-4040) measured a 24-epoch holdout
+# SLIDE of −0.0165 from peak to finish here, and `nocycle224_long` (README:4041-4051) exonerated the
+# schedule as its cause. A weight average over the trajectory is the one mechanism whose value scales
+# with exactly that slide, and 224 is the only cell where the slide has been measured. So the transport
+# `ema_dense`'s number is currently doing — a delta measured in one cell, applied to members shipped
+# from another — is untested in the direction the mechanism says it should be largest. Every 224 member
+# the roster ships from tonight's arms will carry `--ema` on the strength of that transport.
+#
+# WHY THIS IS NOT COVERED BY THE 224 CLOSURE. `mixup224_long` (README:4178-4215) closed every axis that
+# "perturbs how the SAME supervision is presented to the SAME encoder", and named the survivors as a
+# different representation or different supervision. EMA is neither: it does not touch the supervision,
+# its presentation, or the encoder's architecture. It averages the weights the same optimiser visits.
+# The closure's own tally — mixup, appearance augmentation, schedule shape, example count — contains no
+# weight-space term, and the optimiser path is where this repo's never-varied keys are concentrated
+# (weight decay `trainer.py:49`, warmup fraction `trainer.py:81`, AdamW `trainer.py:127`, and gradient
+# clipping which is absent from the tree entirely — none of the four has a CLI flag).
+#
+# THE ONE THING IT CANNOT TEST, stated so nobody reads it in later. `--ema` is a boolean. The decay is
+# `DECAY = 0.999` (`kneemri/models/ema.py:19`), ramped early by `min(self.decay, (1 + steps) /
+# (WARMUP_FLOOR + steps))` (`ema.py:91`), and NO flag exposes it. At ~370 steps an epoch and twelve
+# epochs the averaging window is a large fraction of the whole run, which for a curve that peaks at
+# epoch 7 is a plausible way for the average to lag the peak rather than smooth it. If this arm reads
+# NEGATIVE, the decay rate is the first suspect and it is not armable today — it wants a one-line flag,
+# not another arm.
+#
+# control  native224 = 0.8502, best at epoch 7, converged not truncated. 12 epochs, 12 slices, 0.20-0.80
+#          band, whole-stack, 4e-5, 224 px, same labels, same 909-study holdout. Single variable: --ema.
+# cost     ~19 min for twelve epochs at 94 s, ~8124 MiB reserved. EMA holds a second copy of the model's
+#          parameters; the encoder dominates the footprint and the copy is not on the activation path.
+# price    19 min for P(clears the 0.0062 floor) = 0.10. That is a near-null by its own pre-registration
+#          and the arm is justified ONLY as the instrument above: it prices a transport the roster is
+#          already relying on, in the cell where the mechanism predicts the largest effect, for the
+#          cheapest arm slot this project has.
+#
+# HARNESS CHECK BEFORE READING ANY NUMBER. `--ema` defaults False, so a flag that never reached the
+# trainer produces a run byte-identical to the control — this is the suspect `ema_dense` named in
+# advance and discharged by the checkpoint config stamping `'ema': True` with a score that was not the
+# control's. Do the same here: the printed recipe must say "ema": True and "image_size": "224", and a
+# delta of exactly 0.0000 is a plumbing verdict, not a null.
+#
+# THE FALSIFIABLE PART, written before the run.
+#   CONFIRMED   the peak clears 0.8564. Given two prior measurements at +0.0010 and +0.003 this would be
+#               a cell-specific effect, and the mechanism predicts one only where the trajectory slides
+#               — so it would tie the gain to `native224_long`'s −0.0165 and make the 24-epoch budget
+#               worth re-opening WITH EMA, which no arm has run.
+#   DIRECTIONAL positive and under the floor, i.e. a third measurement agreeing in sign with the first
+#               two. The honest joint reading is then a real but sub-floor lever — kept as a free rider
+#               on every 224 member, never quoted as a finding, no confirmation seed. This is the modal
+#               branch.
+#   FLAT        inside +/-0.0062 with no sign. The transport the roster relies on is priced at zero in
+#               the cell it is applied to, which is the instrument returning its answer.
+#   NEGATIVE    the peak falls by more than the floor. Read this as being about the DECAY, not about
+#               weight averaging: 0.999 over a ~4400-step run averages across a peak that arrives at
+#               epoch 7, and the fix is a flag on `ema.py:19` rather than another arm. It would also put
+#               every `_ff` member's unmeasured `--ema` under suspicion at 224, which is a P1 finding
+#               about the roster and not a null.
+#
+# deliberate: --ema (the arm's thesis)
+# deliberate: --image-size 224 (native224's control, per that row's standing instruction)
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 224
+
+[optim]
+ema = true
+
+[meta]
+hypothesis = "ema224.sh — native224's invocation with `--ema` appended and nothing else touched. The fold-0"
+bead = "knee-s9cr"
+status = "done"
+out = "ema224_s2026"

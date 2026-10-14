@@ -1,0 +1,21 @@
+# resolution: 3 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = []
+
+[data]
+image_size = 224
+
+[encoder]
+backbone_lr = 4e-05
+recompute_activations = true
+whole_stack = true
+
+[model]
+slice_pooling = "max"
+
+[optim]
+one_cycle = true
+
+[targets]
+rank_weight = 1.0
+weight_floor = true

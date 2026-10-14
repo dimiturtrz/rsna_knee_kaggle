@@ -24567,6 +24567,12 @@
     {
       "kind": "calls",
       "source": "kneemri.experiments.switch_coverage.SwitchCoverage.armed",
+      "target": "kneemri.experiments.switch_coverage.SwitchCoverage.recipe_keys",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.experiments.switch_coverage.SwitchCoverage.armed",
       "target": "kneemri.training.config_tree.TrainConfig.leaves",
       "weight": 1
     },
@@ -58038,6 +58044,14 @@
       "descendants": 0,
       "id": "kneemri.experiments.switch_coverage.SwitchCoverage.labels",
       "label": "labels",
+      "level": "method",
+      "parent": "kneemri.experiments.switch_coverage.SwitchCoverage",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.experiments.switch_coverage.SwitchCoverage.recipe_keys",
+      "label": "recipe_keys",
       "level": "method",
       "parent": "kneemri.experiments.switch_coverage.SwitchCoverage",
       "role": null

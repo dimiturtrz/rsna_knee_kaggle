@@ -1,0 +1,76 @@
+# crop160_span.sh — band_span with the field of view WIDENED to 160 mm. The mirror of crop80_span.
+#
+# WHY THIS ARM EXISTS. `crop80_span` cropped IN, 130 mm -> 80 mm, and lost most on exactly the
+# structures at the field's margins: MCL -0.0265*, ACL -0.0263*, against a mean of -0.0099. The ledger
+# read that as antagonism between the two coverage axes and closed the decode-geometry family. It closed
+# it on ONE DIRECTION. Nothing has ever been read going OUT, and the mechanism the closure was written
+# around is a claim about the margins that only a wider field can test.
+#
+# The measurement that makes it worth the card. `seat_profile` over 15 members gives the first
+# per-finding leader table this project has had, and MCL is the WEAKEST finding for 12 of those 15
+# (0.7760-0.8041); Fracture is the weakest for the other 3. Their leaders, 0.8253 and 0.8214, are the
+# two lowest of twelve against Baker's 0.9215 and Medial Meniscus 0.9135. The two floor findings are the
+# collateral ligament and the bone injury, and MCL is the structure crop80_span lost most of when the
+# field narrowed. `crop_coverage` then measured what the 130 mm crop actually discards, and it is five
+# times what the crop_centre docstring assumes: image@130 retains a MEDIAN 0.8495 of imaged tissue
+# (p10 0.7299, worst 0.4537). Roughly 15% of the tissue that was imaged is cropped away at the median.
+#
+# WHY 420 px AND NOT 336. Field of view and physical resolution are separable only if mm/px is held.
+# 130 mm / 336 px = 0.387 mm/px; 160 mm needs 420 px for 0.381. 420 is also a multiple of DINOv2's
+# patch 14. This is deliberately NOT the cheaper 336 px version, which would widen the field by giving
+# up 23% of the resolution and confound the two axes on the exact test written to separate them. The
+# resolution axis is measured FLAT here (392 -> 448 read +-0.0000), so paying 1.6x the wall-clock to
+# hold it constant costs compute and buys the clean read.
+#
+# control  band_span_s2026 = 0.8565 — the same control crop80_span was read against, so the two arms are the
+#          two directions of one axis measured off one point. No control arm of its own.
+# cost     12 epochs at 420 px. The throughput table reads 420/12sl at 23.42 GB and 89 s per 618 img/s
+#          rung, so ~620 s an epoch against band_span's ~395 = ~2 h. Decode was done off-card while
+#          stack_increments_fx held it.
+#
+# PRE-REGISTERED against band_span 0.8565. Floor 0.0062, board resolution 0.0015.
+#   CARRIES   — mean at or above 0.8627 AND MCL up. The margin claim holds in both directions, the
+#               decode-geometry family re-opens on the axis it was never read on, and 160 mm becomes the
+#               operating point every later member is fitted at. That is a cache rebuild, not a knob.
+#   PARTIAL   — 0.8580 to 0.8626, or a mean inside noise WITH MCL and ACL both up by more than their own
+#               paired half-widths. Directional; the field-of-view lever is real but small, and the next
+#               move is a per-finding seat rather than a new operating point.
+#   NULL      — within +-0.0015 with MCL flat. The margins do not carry what crop80_span's losses
+#               implied, and the loss going in was resolution or slice budget rather than coverage. The
+#               decode-geometry family is then closed in BOTH directions and stays closed.
+#   REGRESSION— below 0.8503. Wider is worse, which would say the 130 mm crop is doing useful work by
+#               excluding tissue, and the suspect becomes the fraction of the frame the joint occupies
+#               rather than the extent itself.
+#
+# WHAT THIS ARM CANNOT SETTLE. `crop_coverage`'s image@160 figure (0.9633) is read over 733 of 1822
+# series, because only 40% of them have a field that wide. The +0.1138 against image@130 is therefore
+# CROSS-DENOMINATOR and is not a paired gain — 60% of series cannot fill a 160 mm frame at all and will
+# be padded. If this arm reads NULL, that padding is the first suspect and not the last.
+#
+# bead: knee-ii0q
+#
+# deliberate: --crop-mm     (160 -- THE MOVED FLAG)
+# deliberate: --image-size  (420 -- carried by the flag above to hold mm/px, not an independent choice)
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+crop_mm = 160.0
+image_size = 420
+
+[encoder]
+backbone_lr = 4e-05
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+
+[meta]
+hypothesis = "crop160_span.sh — band_span with the field of view WIDENED to 160 mm. The mirror of crop80_span."
+bead = "knee-ii0q"
+status = "done"
+out = "crop160_span_s2026"

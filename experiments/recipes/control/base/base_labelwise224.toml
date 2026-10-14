@@ -1,0 +1,89 @@
+# base_labelwise224.sh — the capacity axis, re-read on a head that can spend the width.
+#
+# bead: knee-ss5rd
+# reading: base_labelwise224_s2026.holdout.npz
+#
+# WHAT IS DISOWNED HERE. `backbone.py:177-206` records capacity as inside the noise floor: small 0.8272,
+# base 0.8283 (+0.0011), large_deep_rank24 0.8304, against a 0.0053 floor. All three are `rank24`
+# members — a MAX-pooling head, before whole-stack reading and before labelwise pooling — and that same
+# comment says of ITS predecessor that it "is not a second opinion about base — it is a measurement of a
+# different setup". That is exactly the disowned-ruler shape AXES.md section B applies to the input rows.
+# The repo also contradicts itself about it: `adaptation.py:121` states "Capacity is the only axis that
+# has ever cleared our noise floor". One of those two sentences is wrong, and neither was measured on the
+# readout we ship.
+#
+# WHY A LABELWISE HEAD IS THE READ THAT COULD CHANGE THE SIGN. Under `max` one slice wins per finding and
+# whatever the wider trunk bought on the other eleven is discarded before the loss sees it, so a capacity
+# change can only pay through a readout that spends per-slice, per-finding detail. labelwise gives each
+# of the twelve findings its own attention over all twelve slices, and is the first readout in this
+# project able to consume 768-wide features rather than bottleneck them. 22M -> 86.6M parameters,
+# 384 -> 768 dims: an ARCHITECTURE step, not a knob, and what the strongest public notebooks here run.
+#
+# ONE VARIABLE against `labelwise224`: `--variant base`. Byte-identical otherwise, batch 12 preserved, so
+# the pairwise `--rank-weight` term sees the same 66 pairs per step the control saw. The control is free
+# and on disk at 0.8832 ledger75, epoch 9 of 12, 909 studies, and the 224px/12sl/0.2-0.8 array is already
+# decoded — no build, no new disk.
+#
+# WHY THE 224 CORNER AND NOT 336, WHERE WE SHIP. Because the boundary binds. Every member of the 336
+# labelwise family (labelwise_dense 0.8964, labelwise_dense_drop40_long36 0.9030) was fitted at 20 slices
+# and measured a 24.93 GB peak — 78% of the card, against this project's 50% grant. Reproducing that
+# recipe inside the grant needs the batch cut to 3 or 4, and `--accumulate` restores the GRADIENT only:
+# anything pooled WITHIN a step still sees `--batch` studies, and `--rank-weight 1.0` is pairwise, so a
+# batch cut takes the rank term from 66 pairs to 6 and confounds every comparison against those numbers.
+# The 224 corner is the one place a capacity arm is both in-boundary and unconfounded: `labelwise224`
+# measured 6.86 GB allocated, and base at twice the width lands near 14 — inside the 15.92 GB share at
+# full batch. A positive here is what LICENSES paying for the 336 cell; a negative closes the axis
+# cheaply. Cheap proxy gates the expensive commit.
+#
+# PRICE, out loud. ~2 h of card (base is ~2.5x small's FLOPs; `labelwise224` took ~45 min), zero decode,
+# zero submission slots, control free. P(clears 0.8894) ~ 0.25. P(clears the 1.5% bar) ~ 0.08.
+#
+# BANDS, pre-registered, ledger75, against labelwise224 0.8832.
+#   * >= 0.8894  capacity clears the 0.0062 paired floor once the readout can spend it. The three rank24
+#                rows are then DISOWNED rather than merely suspect, base becomes the trunk to re-fit the
+#                336 family on, and that is the arm worth taking the boundary question to the owner for.
+#   * 0.8832-0.8894  directional. Keep nothing, compose nothing.
+#   * <  0.8832  capacity is inert under labelwise TOO. The three rank24 rows stop being disowned and
+#                become ANSWERED, which closes the trunk-width axis on the ruler we ship instead of
+#                leaving it open on a technicality. That verdict is most of what this arm is worth and is
+#                why it is armed as an instrument.
+#
+# READ THE FOCAL LABELS, NOT ONLY THE MEAN. Lateral Meniscus -0.1925, ACL -0.1225, MCL -0.0964 lead the
+# model-side error census. If the mean moves and those do not, the delta is not this mechanism. Say so.
+#
+# HARNESS CHECK. The printed recipe must name "variant": "base" AND "slice_pooling": "labelwise", and the
+# trunk must load `facebook/dinov2-base`. A silent fall back to small measures the control twice.
+#
+# control  labelwise224_s2026 = 0.8832 ledger75 @ epoch 9, 909 studies. No control run is owed.
+#
+# deliberate: --variant base (the arm's thesis)
+# deliberate: --vram-gb 20 — named rather than derived, because a hand-typed cap is taken as measured and
+#             the derived one for this recipe is small's, not base's. It was 15 (the 50% grant) until the
+#             owner freed the whole card 2026-09-22 20:16Z; the arm is unchanged otherwise, since base at
+#             336/20sl would need ~45 GB and a whole card does not unlock the shipping corner either.
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 224
+
+[encoder]
+backbone_lr = 4e-05
+variant = "base"
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 12
+
+[run]
+vram_gb = 20.0
+
+[meta]
+hypothesis = "base_labelwise224.sh — the capacity axis, re-read on a head that can spend the width."
+bead = "knee-ss5rd"
+status = "done"
+out = "base_labelwise224_s2026"

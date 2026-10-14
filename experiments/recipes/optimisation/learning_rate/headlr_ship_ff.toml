@@ -1,0 +1,62 @@
+# headlr_ship_ff.sh — headlr_ship's own line, refit on every study.
+#
+# bead: knee-33iwi
+# unmeasurable: this arm fits --fold -1, so it holds no study back and no ledger row can price it
+#               (knee-s8kim). Its holdout TWIN headlr_ship_s2026 reads 0.9059 ledger75 / 0.8702
+#               midpoint, peak e17 of 24 — the highest offline75 member on disk.
+#
+# WHAT THIS ARM IS. `headlr_ship.sh`'s flag line plus `--fold -1 --ema`, the matched refit line of
+# `labelwise_depth24_drop40_long_ff` and `labelwise_ext_drop40_long_ff`. One variable against the twin.
+#
+# WHY REFIT AND NOT A KNOB. Refitting is the only positive measured BOARD term this repo owns: +0.008
+# on labelwise_ext_drop40_long and +0.003 on labelwise_depth24_drop40_long, each against its own
+# measured half-fit twin. The term is per-member and its SIZE may not be predicted (knee-22nk5), but
+# both readings are positive and the larger exceeds the whole ensemble premium of +0.001..+0.002.
+#
+# PRE-REGISTRATION (board, solo entry). >= 0.947: this member becomes the shipping solo and the refit
+#   road carries to the highest point we own. 0.944-0.946: refit reproduces a third time at the top and
+#   the solo line is level with the champion ensemble. <= 0.943: the refit term does not survive at the
+#   top of the offline75 range, and the road stops here rather than at a fourth member.
+#
+# deliberate: --fold -1 --ema — the refit line, matched to both prior _ff arms.
+# deliberate: --head-lr 2e-4 --slot-dropout 0.40 --epochs 24 --slices 24 --batch 10 — the twin's, byte
+#             for byte. --batch is what keeps RECIPE's --rank-weight pairwise population matched.
+# deliberate: --vram-gb 22 — owner VRAM cap 50-70% of the card.
+#
+# CARD. ~25% more studies per epoch than the twin's 221 s, ~3 h. Nothing else of ours on the card.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 24
+
+[encoder]
+backbone_lr = 4e-05
+head_lr = 0.0002
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+ema = true
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+fold = -1
+vram_gb = 22.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "headlr_ship_ff.sh — headlr_ship's own line, refit on every study."
+bead = "knee-33iwi"
+status = "done"
+out = "headlr_ship_ff"

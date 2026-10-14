@@ -1,0 +1,102 @@
+# mixup224.sh — native224's recipe with `--mixup 0.2` and nothing else moved. The first point of a
+# DOSE-RESPONSE pair; `mixup224_strong.sh` is the second at 0.4.
+#
+# bead: knee-x580
+#
+# WHY THIS RUNS AT 224 AND NOT AT band_dense's 336. `native224` measured the in-plane read as FLAT
+# (0.8502 against lr4e-5_ws's 0.8525, -0.0023 on a 0.0062 floor) and priced it: 94 s an epoch against
+# 290, 8124 MiB reserved against 17997. The ledger's own standing instruction from that row is that
+# every matched comparison from here runs at 224 against 0.8502, because three arms then fit in the
+# wall-clock one used to take. This arm takes that instruction literally: the same forty-five minutes
+# that would have bought ONE point of mixup at 336 buys TWO points at 224, and two points are a
+# different kind of evidence.
+#
+# WHY A DOSE PAIR IS WORTH MORE THAN A BETTER-CONTROLLED SINGLE POINT. Every result in this ledger that
+# died died as a single number inside the floor. mixup's plausible effect size is not large enough for
+# one arm to separate from scatter: if 0.2 reads +0.004 alone, that is a shrug. If 0.2 reads +0.004 and
+# 0.4 reads +0.009 against the same control, the ORDERING is signal that neither point carries by
+# itself, because noise has no reason to respect the knob. And if they scatter — 0.2 up, 0.4 down by
+# similar magnitudes — that is a null the project can close on rather than a number to re-run at a third
+# concentration. One arm cannot produce either reading.
+#
+# THE MECHANISM IS RESOLUTION-INDEPENDENT, which is what licenses moving it. The diagnosis is
+# memorisation of the (study, label) pair — band_dense_long peaked at epoch 6 and slid -0.0182 to epoch
+# 23 while train loss halved; ConvNeXtV2 reads a 0.044 generalisation gap at MATCHED train loss
+# (knee-jk3); band_span_hold repeated the shape a third time. Nothing in that account is about pixel
+# count, and `native224` measured pixel count as flat, so a regulariser aimed at memorisation has no
+# reason to need 576 patches rather than 256. If it turns out to, that is itself a finding and the 336
+# arm (`mixup_dense.sh`, written and gated) is still on disk to run.
+#
+# WHY NOT THE REGULARISER WE ALREADY HAD. `aug_long` turned the intensity block on over 24 epochs and
+# read -0.0076, with the informative failure: the regulariser demonstrably FIRED (train loss higher at
+# every epoch past 4) and the decline was UNCHANGED at -0.0169 against -0.0182. Appearance augmentation
+# leaves the pair (this study, this label) intact, so a memorised answer still satisfies it. A convex
+# combination moves the TARGET with the pixels, which makes the memorised answer wrong rather than
+# merely harder to recognise.
+#
+# WHY THE FIELD'S OWN BOTTLENECK IS NOT WHAT WE ARE BUYING, stated so the divergence is deliberate.
+# Discussion 735826 is a near-consensus that the binding constraint is report-label quality, and the
+# strongest single claim in it is "the entire competition is the label making". We have measured that
+# lane ourselves: `blendlabels` blended three independent readers and bought +0.0034 on the mean and
+# +0.0070 on the six findings a better reader can reach, and `stevenleehans/llm_labels_v4_blend` — the
+# best public table, and the one that thread benchmarks at 0.893 — reads 0.8927 on our own 58-study
+# ruler. Both are an order of magnitude under the 1.5% bar. So the field is grinding an axis we have
+# already priced small, and our own diagnosis points somewhere else. That divergence is the bet.
+#
+# control  native224 = 0.8502, best at epoch 7, converged not truncated, 12 epochs, 12 slices,
+#          0.20-0.80 band, whole-stack, 4e-5, 224 px, same labels, same 909-study holdout. The single
+#          variable is --mixup. NOT lr4e-5_ws and NOT band_dense: either would confound the blend with
+#          the in-plane read or with the stack geometry.
+# cost     ~19 min for twelve epochs at 94 s. 8124 MiB reserved, a quarter of the card, so this arm can
+#          share the GPU with a peer's job instead of demanding it — which is the second reason 224 is
+#          the right place to run it tonight.
+#
+# CONFOUND, NAMED BEFORE THE RUN. --report-weight is off here and must stay off: ReportSupervision is
+# handed the batch's POSITIONS rather than a table of rows, so it alone would read un-blended under
+# --mixup. The label, ranking and teacher terms all read blended rows. See kneemri/training/mixup.py.
+#
+# HARNESS CHECK BEFORE READING ANY NUMBER. The printed recipe must say "image_size": "224" and
+# "mixup": 0.2, and the log must load 4,406 studies and hold out 909. Three runs have entered this
+# ledger as facts about an architecture when they were facts about a flag that never landed.
+#
+# THE FALSIFIABLE PART, written before the run, and READ AS A PAIR with mixup224_strong.
+#   CONFIRMED   the peak clears 0.8502 by more than 0.0062 (>= 0.8564) AND 0.4 lands at or above 0.2.
+#               A monotone dose response over a floor is the only outcome that licenses building the
+#               band_dense geometry at 224 with mixup on and seating the result.
+#   DIRECTIONAL both points positive but under the floor, ordered correctly. Kept as a knob that is
+#               free and mechanism-sound; NOT a finding, not planned around, and no confirmation seed.
+#   LATE PEAK   the peak epoch moves from 7 to 10 or later with the mean held. This matters as much as
+#               the height: a regulariser that buys the same score while the curve stops declining is
+#               licensing a LONGER schedule, and the -0.0182 was measured over 24 epochs.
+#   REFUTED     the peak falls by more than the floor at EITHER concentration, or the two points
+#               scatter with no ordering. A blend that destroys signal rather than memorisation would
+#               be a fact about this corpus (small, soft-labelled, twelve correlated findings), not
+#               about mixup.
+#   THE THIRD OUTCOME, and the one aug_long landed in: train loss rises (the blend fired) and the
+#               decline is UNCHANGED. That says the memorisation is not in the study-to-label pair at
+#               all, and moves the remaining suspects to supervision volume (knee-ombx, owner-blocked)
+#               and representation (knee-jk3).
+#
+# deliberate: --mixup 0.2 (the arm's thesis)
+# deliberate: --image-size 224 (native224's control, per that row's standing instruction)
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[data]
+image_size = 224
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+
+[regularisation]
+mixup = 0.2
+
+[meta]
+hypothesis = "mixup224.sh — native224's recipe with `--mixup 0.2` and nothing else moved. The first point of a"
+bead = "knee-x580"
+status = "done"
+out = "mixup224_s2026"

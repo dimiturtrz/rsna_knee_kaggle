@@ -24,8 +24,8 @@ class RecipeArm:
 
     @staticmethod
     def name(recipe: Path) -> str:
-        """The run a recipe trains under — `<family>_<variant>`, as `run.sh` names it."""
-        return f"{recipe.parent.name}_{recipe.stem}"
+        """The run a recipe trains under — its file stem, as `run.sh` names it; the directories only group it."""
+        return recipe.stem
 
     @staticmethod
     def text(arm: Path) -> str:

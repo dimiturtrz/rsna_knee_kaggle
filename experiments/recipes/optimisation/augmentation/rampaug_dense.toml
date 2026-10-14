@@ -1,0 +1,48 @@
+# bead: knee-u15bj
+# reading: rampaug_dense_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `labelwise_dense_drop40_long`'s byte-identical line with ONE change: every regulariser read through
+#   the shared ProgressSchedule, climbing from 0 to full strength over the first 30% of the run and
+#   descending back to 0 over the last 15%. Geometric widths, slot dropout 0.40 and the rest scale by
+#   one multiplier; no per-op schedule.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_dense_drop40_long_s2026 0.9048, ledger75)
+#   >= +0.0040   the schedule pays on this seat; candidate recipe default.
+#   +0.000..+0.0039  directional. Keep for the pool, spend no slot.
+#   <= 0.0000    schedule does not pay at this strength; heavyramp_dense still reads the heavy package.
+#   peak         on its LAST epoch = no verdict.
+#
+# deliberate: --aug-start 0 --aug-mid 1 --aug-end 0 --aug-ramp 0.3 --aug-tail 0.15 — owner's schedule, not swept.
+#
+# control  labelwise_dense_drop40_long_s2026 = 0.9048 ledger75 (on disk, same recipe line). No control owed.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 24
+
+[regularisation]
+aug_end = 0.0
+aug_ramp = 0.3
+aug_start = 0.0
+aug_tail = 0.15
+slot_dropout = 0.4
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-u15bj"
+status = "queued"
+out = "rampaug_dense_s2026"

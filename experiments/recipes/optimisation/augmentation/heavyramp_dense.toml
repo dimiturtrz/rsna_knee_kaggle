@@ -1,0 +1,53 @@
+# bead: knee-7gfzv
+# reading: heavyramp_dense_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   rampaug_dense's schedule carrying a HEAVIER package: intensity augmentation, ghosting 0.04,
+#   stochastic depth 0.05 and mixup 0.2, over 36 epochs. The ramp keeps early fitting fast and the tail
+#   lets the anneal settle on clean inputs, which is what should make the heavier plateau affordable.
+#   A PACKAGE read by design, not an attribution: a clear lift is ablated afterwards.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_dense_drop40_long_s2026 0.9048, ledger75)
+#   >= +0.0040   seat candidate; ablate the package.
+#   +0.000..+0.0039  directional. Keep for the pool, spend no slot.
+#   <= 0.0000    the heavy package does not pay on this seat even scheduled.
+#   peak         on its LAST epoch = no verdict.
+#
+# deliberate: --aug-start 0 --aug-mid 1 --aug-end 0 --aug-ramp 0.3 --aug-tail 0.15 — owner's schedule, not swept.
+# deliberate: --intensity-aug --ghosting 0.04 --stochastic-depth 0.05 --mixup 0.2 --epochs 36 — the owner's heavy package.
+#
+# control  labelwise_dense_drop40_long_s2026 = 0.9048 ledger75 (on disk, same recipe line). No control owed.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 36
+
+[regularisation]
+aug_end = 0.0
+aug_ramp = 0.3
+aug_start = 0.0
+aug_tail = 0.15
+ghosting = 0.04
+intensity_aug = true
+mixup = 0.2
+slot_dropout = 0.4
+stochastic_depth = 0.05
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-7gfzv"
+status = "queued"
+out = "heavyramp_dense_s2026"

@@ -17,6 +17,7 @@ has, and `decode_smoke_caches` builds the sixty-study one for it without knowing
 """
 
 import re
+import tomllib
 from pathlib import Path
 
 from kneemri.training.config_tree import TrainConfig
@@ -92,7 +93,18 @@ class SwitchCoverage:
         """
         text = "\n".join(path.read_text(encoding="utf-8") for path in self.scripts.rglob("*.sh"))
         passed = {flag.removeprefix("--").replace("-", "_") for flag in re.findall(r"--[a-z0-9-]+", text)}
-        return {leaf.name for leaf, _ in TrainConfig.leaves() if leaf.name in passed}
+        return {leaf.name for leaf, _ in TrainConfig.leaves() if leaf.name in passed | self.recipe_keys()}
+
+    def recipe_keys(self) -> set[str]:
+        """The leaf names some recipe layer sets, which is a flag passed by a file instead of a line."""
+        layers = [tomllib.loads(path.read_text(encoding="utf-8")) for path in self.scripts.rglob("*.toml")]
+        return {
+            key
+            for layer in layers
+            for node, table in layer.items()
+            if node != "meta" and isinstance(table, dict)
+            for key in table
+        }
 
     def unaccounted(self) -> set[str]:
         """Options no arm passes, no recipe here covers, and nobody has written off. Must stay empty."""

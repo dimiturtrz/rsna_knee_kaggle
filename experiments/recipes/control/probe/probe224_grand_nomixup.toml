@@ -1,0 +1,32 @@
+# bead: knee-feb62.11
+# reading: probe224_grand_nomixup_s2026.holdout.npz
+#
+# Leave-one-group-out over probe224_grand (0.8776@l75, failed its gate against control 0.8914): grand minus mixup.
+
+extends = ["_family.toml"]
+
+[optim]
+ema = true
+patience_from_progress = 0.25
+warmup = 0.25
+
+[regularisation]
+aug_end = 0.5
+aug_ramp = 0.25
+aug_start = 0.25
+aug_tail = 0.2
+ghosting = 0.04
+intensity_aug = true
+padding_mode = "reflection"
+scale_jitter = 0.25
+stochastic_depth = 0.05
+
+[sampling]
+hard_ramp = 0.25
+hard_start = 0.0
+
+[meta]
+hypothesis = "Leave-one-group-out over probe224_grand (0.8776@l75, failed its gate against control 0.8914): grand minus mixup."
+bead = "knee-feb62.11"
+status = "queued"
+out = "probe224_grand_nomixup_s2026"

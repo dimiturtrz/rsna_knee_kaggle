@@ -1,0 +1,73 @@
+# headlr_ship_ffp.sh — headlr_ship's refit, stopped on the epoch its own line peaks at.
+#
+# bead: knee-yatne
+# unmeasurable: this arm fits --fold -1, so it holds no study back and no ledger row can price it
+#               (knee-s8kim). Its holdout TWIN headlr_ship_s2026 reads 0.9059 ledger75, peak e17 of
+#               24, and that twin is what fixes the stop epoch below.
+#
+# WHAT IS WRONG WITH headlr_ship_ff. fitting.py:283-292 keeps an epoch when `ranked > best`, and with
+# no holdout `ranked` is the epoch INDEX, so every epoch improves and the refit ships its LAST one.
+# The twin peaks at e17 0.8702 midpoint and decays to e23 0.8676, so headlr_ship_ff.pt gives away
+# 0.0027 by construction. The penalty is member-specific and this is the member that has it:
+# labelwise_ext_drop40_long and labelwise_dense_drop40_long peak exactly at e23 (0.0000) and
+# labelwise_depth24_drop40_long at e18 (-0.0006), which is why the +0.008 and +0.003 board refit
+# terms those arms measured are clean and are not retracted by this.
+#
+# WHY --stop-after-epoch AND NOT --epochs 18. The leaf's own definition: --stop-after-epoch ends the
+# LOOP on a count while keeping the schedule built for the full one, and "asking for fewer --epochs
+# instead COMPRESSES the cycle into a different recipe". A compressed cycle is a knob and would need
+# its own control; this keeps headlr_ship's exact 24-epoch anneal and changes only where it stops,
+# so the weights are the refit's e17 rather than a different recipe's.
+#
+# WHY 18 AND NOT 20. The twin's top is a two-epoch plateau (e17 0.8702, e18 0.8695) above a flat tail
+# (e19-e23 all 0.8674-0.8676). Stopping after 18 epochs keeps e17, the plateau's own peak. The refit
+# sees 25% more studies and may overfit later, which would put e17 on the rising side of the anneal —
+# the cheaper error of the two, since the tail it replaces is flat and measurably lower.
+#
+# PRE-REGISTRATION (board, solo entry). This is read against kneemri-headlrff's own board number, the
+# same members and the same kit, one knob apart. >= +0.004: the epoch penalty is real at the board and
+# every future --fold -1 refit takes a stop epoch from its twin. +0.001..+0.003: directional, matching
+# the 0.0027 offline gap through a 1.10 transfer, kept because it is free. <= 0.000: the twin's epoch
+# ordering does NOT transfer to a refit trained on 25% more data, and last-epoch selection stops being
+# treated as a defect.
+#
+# deliberate: --fold -1 --ema — the refit line, matched to headlr_ship_ff and both prior _ff arms.
+# deliberate: --vram-gb 22 — owner VRAM cap 50-70%; run_comparison marks it NOT_AN_AXIS.
+# CARD. 18 of 24 epochs at headlr_ship_ff's measured 241 s, ~1.2 h. Nothing else of ours on the card.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 24
+
+[encoder]
+backbone_lr = 4e-05
+head_lr = 0.0002
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+ema = true
+epochs = 24
+stop_after_epoch = 18
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+fold = -1
+vram_gb = 22.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "headlr_ship_ffp.sh — headlr_ship's refit, stopped on the epoch its own line peaks at."
+bead = "knee-yatne"
+status = "done"
+out = "headlr_ship_ffp"

@@ -1,0 +1,33 @@
+# bead: knee-dcl6e
+# reading: probe224_grand_norest_s2026.holdout.npz
+#
+# The four fragments the knee-feb62.11 leave-one-out never varied, returned to their control values in
+# one group. Named by diffing the two arms' own recipe stamps, which is the only place three of them
+# appear: the control sets none of these keys, it inherits the defaults.
+# Accounted for so far, against grand 0.8776 and control 0.8914: mixup +0.0030, hard +0.0013,
+# ema +0.0032, aug -0.0050 -- positives +0.0075 of a 0.0138 deficit, leaving -0.0063 unexplained.
+
+extends = ["_family.toml"]
+
+[optim]
+ema = true
+
+[regularisation]
+aug_end = 0.5
+aug_ramp = 0.25
+aug_start = 0.25
+aug_tail = 0.2
+ghosting = 0.04
+intensity_aug = true
+mixup = 0.2
+scale_jitter = 0.25
+
+[sampling]
+hard_ramp = 0.25
+hard_start = 0.0
+
+[meta]
+hypothesis = "The four fragments the knee-feb62.11 leave-one-out never varied, returned to their control values in"
+bead = "knee-dcl6e"
+status = "queued"
+out = "probe224_grand_norest_s2026"

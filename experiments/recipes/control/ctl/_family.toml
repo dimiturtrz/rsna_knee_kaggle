@@ -2,7 +2,7 @@
 # fragment changed per leaf, and one leaf changing five together. Every leaf reads against
 # probe224_control_s2026 0.8914@l75 on the same cache and the same 909-row ruler.
 
-extends = ["../base.toml", "../trunks/probe224.toml"]
+extends = ["../../base.toml", "../../trunks/probe224.toml"]
 
 [meta]
 control = "experiments/arms/probe224_control.sh"

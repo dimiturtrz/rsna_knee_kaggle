@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-exec bash "$(dirname "$0")/../run.sh" experiments/recipes/ctl/nocalib.toml "$@"
+exec bash "$(dirname "$0")/../run.sh" experiments/recipes/control/ctl/ctl_nocalib.toml "$@"

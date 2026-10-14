@@ -1,0 +1,59 @@
+# bead: knee-vgz5b.5
+# reading: roi_labelwise_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `labelwise_drop_drop40_long`'s line with `--scheme roi` added: the six canonical views kept whole,
+#   plus the three sagittal stacks again, cropped to the joint the SKM-TEA tissue locator drew
+#   (`python -m kneemri.embeddings.roi_cache`, locator_sag.pt) and upsampled back to 336 px, ~1.5x zoom.
+#   A blank box leaves its ROI slot absent in the mask. Coronal and axial get no ROI view.
+#
+# OFFLINE ONLY until knee-vgz5b.7 rules on SKM-TEA's licence: the crop placement is SKM-TEA-derived, so
+# this member may not ship to Kaggle.
+#
+# PRE-REGISTRATION — solo, LEDGER75, peak-to-peak
+#   control  labelwise_drop_drop40_long_s2026 = 0.9051 ledger75 (e18, 909 rows, on disk).
+#   >= 0.9201  (+0.015) clears the bar: zoom on the located joint is a real view.
+#   +0.005..+0.015  directional; worth a seat test on the ensemble, never a finding.
+#   <= +0.005  more pixels of the same frame add nothing; record which labels moved before closing.
+#   precedent  labelwise_ext_drop40_long_s2026, three EXTRA views on this recipe, read 0.9045 — -0.0006.
+#   peak       if it peaks on its last epoch the budget binds at 24 and no verdict may be read.
+#
+# deliberate: --scheme roi — the variable under test.
+# deliberate: --batch 4 --accumulate 3 — nine views, imported from labelwise_ext_drop40_long (same slot
+#             count), keeping the effective batch at twelve.
+# deliberate: every other flag inherited verbatim from labelwise_drop_drop40_long.
+#
+# PRICE and P(clears) live in the bead, as arm_check reads them.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+scheme = "roi"
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+accumulate = 3
+batch = 4
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+stochastic_depth = 0.05
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-vgz5b.5"
+status = "queued"
+out = "roi_labelwise_drop40_long_s2026"

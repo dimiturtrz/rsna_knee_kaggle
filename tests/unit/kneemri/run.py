@@ -13,14 +13,14 @@ def _tree(root: Path) -> RecipeTree:
     (family / "_family.toml").write_text(
         'extends = ["../base.toml", "../trunks/probe.toml"]\n[meta]\nstatus = "done"\n', encoding="utf-8"
     )
-    (family / "fast.toml").write_text(
+    (family / "ctl_fast.toml").write_text(
         'extends = ["_family.toml"]\n[encoder]\nbackbone_lr = 1e-4\n'
         '[meta]\nhypothesis = "faster"\nbead = "knee-a"\nout = "ctl_fast_s2026"\n',
         encoding="utf-8",
     )
     other = root / "abl"
     other.mkdir()
-    (other / "slow.toml").write_text('[meta]\nstatus = "queued"\n', encoding="utf-8")
+    (other / "abl_slow.toml").write_text('[meta]\nstatus = "queued"\n', encoding="utf-8")
     return RecipeTree(root)
 
 
@@ -28,7 +28,7 @@ def test_leaves(tmp_path: Path):
     """Runnable recipes only: no family file, no trunk, no top-level layer."""
     tree = _tree(tmp_path)
 
-    assert tree.leaves() == [tmp_path / "abl" / "slow.toml", tmp_path / "ctl" / "fast.toml"]
+    assert tree.leaves() == [tmp_path / "abl" / "abl_slow.toml", tmp_path / "ctl" / "ctl_fast.toml"]
 
 
 def test_runs(tmp_path: Path):
@@ -60,11 +60,11 @@ def test_dry(tmp_path: Path):
     """Every option with its value and the layer that set it; untouched options read as the default."""
     tree = _tree(tmp_path)
 
-    lines = tree.dry(tmp_path / "ctl" / "fast.toml")
+    lines = tree.dry(tmp_path / "ctl" / "ctl_fast.toml")
     table = {line.split(SEPARATOR)[0]: line.split(SEPARATOR)[1:] for line in lines[1:]}
 
     assert lines[0] == SEPARATOR.join(DRY_HEAD)
     assert table["epochs"] == ["12", str(tmp_path / "base.toml")]
     assert table["image_size"] == ["224", str(tmp_path / "trunks" / "probe.toml")]
-    assert table["backbone_lr"] == ["0.0001", str(tmp_path / "ctl" / "fast.toml")]
+    assert table["backbone_lr"] == ["0.0001", str(tmp_path / "ctl" / "ctl_fast.toml")]
     assert table["mixup"][1] == DEFAULT

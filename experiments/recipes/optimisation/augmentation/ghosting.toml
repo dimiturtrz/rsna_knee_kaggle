@@ -1,0 +1,77 @@
+# ghosting.sh -- the first augmentation in this project whose magnitude was READ OFF A CORPUS.
+#
+# bead: knee-bwqi9
+# reading: ghosting_s2026.holdout.npz
+#
+# WHY THIS IS NOT ANOTHER KNOB ARM. Every other AugmentConfig field is a number somebody chose. This one
+# is 0.040 because KMAR-50K ships the same knee acquired twice -- once with patient motion, once without
+# -- and `core.data.corpus.kmar_stats` measured the per-pixel residual between them over 109 pairs on
+# 2026-09-12: p10 0.023, p50 0.040, p90 0.086, in the same [0, 1] space this cache holds images in. The
+# operator was then handed only that magnitude and made to REPRODUCE the corpus's impulsiveness
+# (p99/mean ~9) from its mechanism alone. Its first build failed that test at 3.39 and was rebuilt; it
+# now reads 7.50. That refutation cost zero card, which is the whole argument for calibrating.
+#
+# THE MECHANISM CLASS IS THE ONE THAT SURVIVED TODAY. `slot_dropout_s2026` is the single shared blind
+# spot still standing after 2026-09-12: cross-site toll -0.0271 against its matched control
+# `band_dense_s2026` at -0.0361, +0.0090 shallower, 2.4 sd of the eleven-member pool (mean -0.0336, sd
+# 0.0038). It is a corruption-robustness augmentation dialled to taste. This is the same class with the
+# taste removed.
+#
+# LICENCE IS CLEAR AND WAS ESTABLISHED BEFORE THE ARM. KMAR-50K is CC BY 4.0 (Mendeley DOI
+# 10.17632/xw7mrg7ntg.6; the Kaggle mirror reports "License(s): unknown", which is the mirror's silence,
+# not the dataset's). No KMAR pixel enters a cache, a checkpoint or a Kaggle kernel in any case -- what
+# crosses is a handful of operator parameters fitted to a published statistic. This is why the lane
+# survived the two that died beside it (the RadImageNet resnet on CC BY-NC-SA, fastMRI on its
+# derived-data clause).
+#
+# THE READING IS CROSS-SITE, AND THE OWN HOLDOUT IS ONLY A SAFETY CHECK. holdout909 is drawn from the
+# same acquisition distribution as training, so it is structurally blind to a robustness lever by
+# construction -- exactly as `slot_dropout_s2026` reading 0.8592 against 0.8578 (+0.0014, knob-sized)
+# looked. Comparator is decode_cost(band_dense_s2026) MEASURED IN THE SAME PASS, never the pool mean:
+# the control is not in that pool, so reading against it prices eleven confounds at once.
+#
+#   OWN HOLDOUT (safety, not the reading)
+#     >= 0.8500   intact. Proceed to the cross-site read whatever the sign.
+#     <  0.8500   the operator is destroying in-distribution signal at the measured severity. Lane dies
+#                 here; do not rescue it on a cross-site number, because a member this much worse cannot
+#                 seat.
+#
+#   CROSS-SITE TOLL vs band_dense_s2026's decode_cost in the same pass (the actual reading)
+#     >= -0.0290  CLEARS. A calibrated artefact operator buys cross-site robustness, and the shared-field
+#                 axis re-opens on a TERM rather than a knob.
+#     -0.0291 to -0.0340  directional. Keep the operator, do not run a second severity.
+#     -0.0341 to -0.0400  NULL. The calibration bought nothing slot_dropout had not already bought, and
+#                 the KMAR transfer assumption is what to suspect first.
+#     <  -0.0400  harmful at the measured severity.
+#
+# EINSTEIN GATE. No submission on comp/board.jsonl and no arm in this directory carries a motion or
+# ghosting term. The three closed external-corpus arms all POOLED foreign studies into our label space
+# and the site-count axis closed negative there (+0.0043, -0.0024); this arm trains on zero KMAR studies.
+#
+# PRICE: ~1.2 h (12 epochs x ~280 s, plus ~10 min for the foreign readout). No submission slot.
+# EXPECTED GAIN: P(clears >= -0.0290) ~ 0.30.
+#
+# control  band_dense_s2026 = 0.8578 (decode -0.0361 measured 2026-09-12) -- the SAME control
+#          slot_dropout.sh and slot_dropout_hi.sh declare, so the three tolls are directly comparable.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[model]
+slice_pooling = "max"
+
+[optim]
+epochs = 12
+
+[regularisation]
+ghosting = 0.04
+
+[meta]
+hypothesis = "ghosting.sh -- the first augmentation in this project whose magnitude was READ OFF A CORPUS."
+bead = "knee-bwqi9"
+status = "queued"
+out = "ghosting_s2026"

@@ -1,0 +1,31 @@
+# bead: knee-3tk4b
+# reading: probe224_grand_trim_s2026.holdout.npz
+#
+# Every fragment the knee-feb62.11 leave-one-out priced POSITIVE, dropped together, on the same
+# probe224 recipe as the five runs it is read against: grand 0.8776, control 0.8914, nomixup 0.8806
+# (+0.0030), nohard 0.8789 (+0.0013), noaug 0.8726 (-0.0050, so the aug block STAYS).
+# It answers additivity before a 24-epoch seat is spent on the assumption.
+
+extends = ["_family.toml"]
+
+[optim]
+ema = true
+patience_from_progress = 0.25
+warmup = 0.25
+
+[regularisation]
+aug_end = 0.5
+aug_ramp = 0.25
+aug_start = 0.25
+aug_tail = 0.2
+ghosting = 0.04
+intensity_aug = true
+padding_mode = "reflection"
+scale_jitter = 0.25
+stochastic_depth = 0.05
+
+[meta]
+hypothesis = "Every fragment the knee-feb62.11 leave-one-out priced POSITIVE, dropped together, on the same"
+bead = "knee-3tk4b"
+status = "queued"
+out = "probe224_grand_trim_s2026"

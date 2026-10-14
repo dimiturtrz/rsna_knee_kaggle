@@ -1,0 +1,26 @@
+# bead: knee-feb62.11
+# reading: probe224_grand_noaug_s2026.holdout.npz
+#
+# Leave-one-group-out over probe224_grand (0.8776@l75, failed its gate against control 0.8914): grand minus aug.
+
+extends = ["_family.toml"]
+
+[optim]
+ema = true
+patience_from_progress = 0.25
+warmup = 0.25
+
+[regularisation]
+mixup = 0.2
+padding_mode = "reflection"
+stochastic_depth = 0.05
+
+[sampling]
+hard_ramp = 0.25
+hard_start = 0.0
+
+[meta]
+hypothesis = "Leave-one-group-out over probe224_grand (0.8776@l75, failed its gate against control 0.8914): grand minus aug."
+bead = "knee-feb62.11"
+status = "queued"
+out = "probe224_grand_noaug_s2026"

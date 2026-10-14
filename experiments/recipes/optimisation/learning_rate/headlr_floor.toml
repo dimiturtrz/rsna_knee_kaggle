@@ -1,0 +1,52 @@
+# headlr_floor.sh — the shipping line with the head at 5e-5, the third point on the head_lr curve.
+#
+# bead: knee-h25fx
+# reading: headlr_floor_s2026.holdout.npz
+# control  labelwise_depth24_drop40_long_s2026 = 0.8679 (midpoint; 0.9053 ledger75, peak e18 of 24)
+#
+# THE FLAG LINE IS labelwise_depth24_drop40_long's, BYTE FOR BYTE, PLUS ONE FLAG — the same line
+# `headlr_ship` carries, differing from it only in the value of --head-lr. --batch 10 and --vram-gb 28
+# are part of that line and may not move: RECIPE carries --rank-weight 1.0, whose pairwise population IS
+# the batch (head_trial.py:231), so a batch trim makes this measure two knobs and owes a matched control.
+#
+# TWO POINTS ARE A SIGN, THREE ARE A SHAPE. head_lr is 0.001 in 286 of 288 runs in this corpus, so the
+# shipping value is a silent default rather than a tuned one. With 0.001 and 2e-4 alone, a win at 2e-4
+# cannot be told apart from a flat top the corner already sits on — the misreading knee-dry3h caught on
+# weight_decay, where +0.0106 decomposed into +0.0077 and +0.0029 and the headline was mostly "0.005 is
+# too little decay". 5e-5 is what makes the curve readable either way.
+#
+# IF THIS OOMs, LOWER --slices, NEVER --batch. The batch is what keeps the comparison single-knob.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 24
+
+[encoder]
+backbone_lr = 4e-05
+head_lr = 5e-05
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+vram_gb = 28.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "headlr_floor.sh — the shipping line with the head at 5e-5, the third point on the head_lr curve."
+bead = "knee-h25fx"
+status = "queued"
+out = "headlr_floor_s2026"

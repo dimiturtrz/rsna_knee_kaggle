@@ -1,0 +1,23 @@
+# probe: 9 arms moved from experiments/arms (Phase B, knee-ij7lk.1).
+
+extends = ["../../base.toml"]
+
+[data]
+image_size = 224
+
+[encoder]
+backbone_lr = 4e-05
+whole_stack = true
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 12
+
+[regularisation]
+slot_dropout = 0.4
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
