@@ -1,0 +1,76 @@
+# bead: knee-vs06j
+# reading: labelwise_dense_drop40_long_s2026.holdout.npz
+#
+# WHAT THIS ARM IS
+#   `labelwise_dense`'s byte-identical line with the two operators this project has now MEASURED to
+#   transfer: `--slot-dropout 0.40` and `--epochs 12 -> 24`. Nothing else moves.
+#
+# WHY IT IS NOT A REPEAT UNDER THE EINSTEIN GATE
+#   The operator pair has cleared its +0.0040 pre-registration on two distinct labelwise bases:
+#     labelwise_depth24   0.8998 -> labelwise_depth24_drop40_long  0.9053  (+0.0055, converged, peak e18/24)
+#     labelwise_extended  0.8986 -> labelwise_ext_drop40_long      0.9045  (+0.0059, converged)
+#   The variable that moves HERE is the BASE, a third one, differing from both in slices (20 vs 24) and
+#   in scheme. `grep -c` on comp/board.jsonl returns 0 for both transferred members, so no submission
+#   carries this operation either.
+#
+# WHY THIS BASE AND NOT ANOTHER
+#   `labelwise_dense_s2026` is ALREADY A SEAT in the honest core six. Measured 2026-09-13 on the full
+#   909 with LogitAverage and no selection: core six 0.9050, and the two transferred members seat at
+#   +0.0020 and +0.0017, +0.0031 together -- near-additive, so the pair is not redundant with itself.
+#   Upgrading a seat that is already carrying weight lifts the ensemble without widening it, and
+#   knee-0v8yz says only MEMBER QUALITY at count 1 has ever moved this board 0.005+.
+#
+# THE FAMILY SIGNATURE THIS TARGETS
+#   Every twelve-epoch labelwise member peaks at epoch 7 to 10 and then declines -- depth24 0.8998 @e8,
+#   extended 0.8986 @e8, drop 0.8984 @e10, dense 0.8964 @e7. A budget wall peaks on the LAST epoch;
+#   peaking at 7 of 12 and declining for five is a missing regulariser. `dense` peaks EARLIEST of the
+#   four, which is the strongest form of that signature in the family.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_dense_s2026 0.8964, ledger75)
+#   >= +0.0040   the pair is established on three of three bases and stops being a transfer question.
+#                Seat it in place of its own base and spend a slot on the eight.
+#   +0.000..+0.0039
+#                directional. Keep for the pool, spend no slot.
+#   <= 0.0000    the pair is a fact about deep-slice bases (24) and not about labelwise pooling. A real
+#                closure, and worth the card to have it.
+#   peak         if this arm peaks ON ITS LAST EPOCH the budget is still binding at 24 and NO verdict
+#                may be read. Record it and stop; do not quote the delta.
+#
+# READ PEAK-TO-PEAK ONLY. $RECIPE carries --one-cycle, so the anneal stretches with the budget and the
+#   two runs differ from epoch 1. Epoch-by-epoch comparison against the 12-epoch base is meaningless.
+#
+# deliberate: --slot-dropout 0.40 — imported operating point (knee-yotj8), not a swept knob.
+# deliberate: --epochs 24 — imported from the pair that measured the operator, not a swept knob.
+# deliberate: --slices 20 --band-low 0.1 --band-high 0.9 --calibrated-targets --hold-annotations —
+#             inherited verbatim from labelwise_dense. This arm changes two flags, not six.
+#
+# PRICE: ~0.8 h. P(clears +0.0040) ~ 0.55.
+#
+# control  labelwise_dense_s2026 = 0.8964 ledger75 (on disk, 12-epoch, same recipe line). No control
+#          run is owed.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "WHAT THIS ARM IS"
+bead = "knee-vs06j"
+status = "done"
+out = "labelwise_dense_drop40_long_s2026"

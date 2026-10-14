@@ -1,0 +1,43 @@
+# bead: knee-5jfix
+# reading: labelwise_ms_s2026.holdout.npz
+#
+# Multiscale slots under labelwise pooling. `multiscale` was gated out under max pooling (crop80_tissue,
+# +0.0016); max keeps one slot per study, labelwise keeps one per label, so scale-specific evidence
+# (fine for menisci/ACL, coarse for effusion/OA) is the thing max could not use and labelwise can.
+#
+# PRE-REGISTRATION (delta = this arm minus labelwise_ms_ctrl_s2026, ledger75)
+#   >= +0.0150   lever: port to the 24-slice shipping line, then a slot.
+#   +0.0062..+0.0149  directional; the tissue centre is confounded in (alone it read -0.0048).
+#   <= +0.0061   multiscale closed on labelwise too.
+#
+# deliberate: --scheme multiscale --centre tissue — the single change vs labelwise_ms_ctrl; the cache
+#   only exists tissue-centred.
+
+extends = ["_family.toml"]
+
+[data]
+centre = "tissue"
+scheme = "multiscale"
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+vram_gb = 22.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "Multiscale slots under labelwise pooling. `multiscale` was gated out under max pooling (crop80_tissue,"
+bead = "knee-5jfix"
+status = "queued"
+out = "labelwise_ms_s2026"

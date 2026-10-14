@@ -1,0 +1,32 @@
+# bead: knee-pqfbs
+# reading: labelwise_dense_drop40_long36_s2026.holdout.npz
+#
+# labelwise_dense_drop40_long at 36 epochs instead of 24: the 24-epoch run peaked e23/24, budget-bound
+# (ledger75 2026-09-15). Also the HORIZON-ONLY control for grand_recipe: grand = this line + fragments.
+# deliberate: --epochs 36 — the grand recipe horizon, so the pair differs in fragments alone.
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+epochs = 36
+
+[regularisation]
+slot_dropout = 0.4
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "labelwise_dense_drop40_long at 36 epochs instead of 24: the 24-epoch run peaked e23/24, budget-bound"
+bead = "knee-pqfbs"
+status = "done"
+out = "labelwise_dense_drop40_long36_s2026"

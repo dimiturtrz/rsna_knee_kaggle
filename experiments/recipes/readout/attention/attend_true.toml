@@ -1,0 +1,64 @@
+# attend_true.sh — the attention pooling arm, run for the first time with the attention actually trained.
+#
+# bead: knee-7gyw
+#
+# WHY THIS ARM EXISTS. `StudyModel.parameter_groups` built its head group as `self.head.parameters()`,
+# and the slice aggregator is a SIBLING of the head rather than a child of it, so the gate's tensors sat
+# in no param group and the optimiser never updated them. `SliceAttention`'s score layer is
+# zero-initialised on purpose so that an untrained gate is exactly the arithmetic MEAN over slices —
+# which is why the defect never surfaced as a crash or even as a bad score. Every arm this project ran
+# under the name `attend` compared MEAN pooling against MAX pooling. `slice_attention` (0.8473, +0.0016)
+# and `attend_dense` (0.8569, −0.0009) are both mislabelled in the ledger, and the pooling-OPERATOR cell
+# of the decode family — recorded as closed — was never opened.
+#
+# WHY THIS EXACT GEOMETRY and not `attend_dense`'s. Two reasons, and only one is about the card.
+#   1. 20 slices reserve 28.9 GB and the desktop currently holds ~10 GB of a 32 GB card, so the 20-slice
+#      pair cannot start at all. 12 slices reserve 18.0 GB and fit.
+#   2. This geometry is where the pair's CONTROL already lives. `wsfold0_e6` ran max pooling at 336 px,
+#      12 slices, band 0.20-0.80, crop 130 mm, `small`, cls_mean, whole-stack, unfreeze 6, head 1e-3,
+#      backbone 8e-6 and scored 0.8457; the mislabelled `attend` run scored 0.8473 at a config identical
+#      on every one of those keys. So this arm is the SINGLE-VARIABLE third point of an existing pair,
+#      not a new cell that would need its own control on the card. `backbone_lr 8e-6` is deliberately
+#      the era's rate rather than today's 4e-5: matching the control is what makes the read clean, and
+#      re-measuring the rate here would move two things.
+#
+# control  wsfold0_e6 = 0.8457 (max pooling) and the mislabelled attend run = 0.8473 (mean pooling).
+#          SINGLE VARIABLE: the gate now receives gradient. Nothing else in the invocation moves.
+# price    ~45 min of card (12 epochs at 12 slices). Plausible gain if a learned per-slice weighting is
+#          worth anything over an unweighted mean: 0.5-2%. P(clears the 1.5% bar): ~10%.
+#
+# AND IT IS JUSTIFIED AS AN INSTRUMENT RATHER THAN AS AN IMPROVEMENT, because the cheap tier already
+# read close to null. The frozen-feature proxy — which optimises `TrialHead.parameters()`, and the
+# aggregator IS a child of that, so the proxy has always trained the gate the pixel model did not — ran
+# all three poolings on cached features: max 0.7605, attend 0.7632, depth 0.7625. A trained gate buys
+# +0.0027 there and a through-plane mixer on top of it buys nothing. Two things make that worth 45
+# minutes anyway. First, `head_axes.jsonl` records that the proxy CANNOT yet be trusted to rank head
+# variants — it holds one resolved pair — and this arm either resolves its second or shows the proxy
+# disagreeing with the pixel model on the one axis where their optimisers differed. Second, it decides
+# whether the reopened operator cell deserves the 20-slice arm and whether `depth_dense` is worth 1.1 h;
+# a null here retires both cheaply.
+#
+# PREDICTION, written before the run. If a learned weighting matters at all, it clears the mean by more
+# than the 0.0062 floor, and the gain concentrates where the finding occupies FEW slices — a mean over
+# twelve slices dilutes a two-slice tear and a gate can decline to average it away. A mean that moves
+# with no such per-label structure is a number to distrust.
+#
+# THE REFUTATION CONDITION. If a trained gate lands inside the floor of the mean it replaces, then the
+# pooling OPERATOR closes for real this time — on a measurement rather than on a plumbing bug — and both
+# `depth_dense` and the 20-slice repeat come off the queue. That does NOT retire order-awareness: this
+# arm's gate still scores each slice from that slice alone, so through-plane CONTINUITY stays untested
+# and `DepthAttention` stays a re-testable asset rather than a refuted one.
+#
+# NO --vram-gb: DeviceBudget derives the cap from --slices. 12 slices reserve 18.0 GB.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+
+extends = ["_family.toml"]
+
+[model]
+slice_pooling = "attend"
+
+[meta]
+hypothesis = "attend_true.sh — the attention pooling arm, run for the first time with the attention actually trained."
+bead = "knee-7gyw"
+status = "done"
+out = "attend_true_s2026"

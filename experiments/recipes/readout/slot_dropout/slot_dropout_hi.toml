@@ -1,0 +1,64 @@
+# slot_dropout_hi.sh -- the SECOND dose on the one shared field that survived 2026-09-12.
+#
+# bead: knee-lhico
+# reading: slot_dropout_hi_s2026.holdout.npz
+#
+# WHY A SECOND DOSE AND NOT A NEW FIELD. Three AugmentConfig fields sit at the identity value every
+# member on disk shares, so no offline solo ruler can see them: --scale-jitter 0.08, --padding-mode
+# border, --slot-dropout 0.0. `fieldwide` moved the first two together and came back FLAT on the one
+# ruler built to see them (+0.0042 against its matched control, inside its own pre-registered
+# -0.0049..+0.0049 band by 0.0008), so that half is retired and --padding-mode alone is now CONFOUNDED
+# with a dose that is known dead. The third field is the half that survived: `slot_dropout_s2026` pays a
+# cross-site decode toll of -0.0271 against its documented control `band_dense_s2026` at -0.0361, which
+# is +0.0090 shallower and 2.4 sd of the eleven-member pool (mean -0.0336, sd 0.0038) -- the shallowest
+# toll-vs-matched-control this project has measured.
+#
+# AND IT HAS BEEN RUN AT EXACTLY ONE DOSE. That is the weakness in the argument this project is spending
+# a submission slot on today. One point cannot separate a dose-response from an accident at one setting,
+# and the pool sd is 0.0038 against a claimed 0.0090 -- large enough to be real, small enough that a
+# second point is the cheapest thing that can either harden it or kill it. This arm is ONE VARIABLE off
+# `slot_dropout.sh`: 0.25 -> 0.40. Everything else is byte-identical, control included.
+#
+# THE READING IS CROSS-SITE, NOT OUR OWN HOLDOUT, AND THE HOLDOUT IS ONLY A SAFETY CHECK. holdout909 is
+# drawn from the same field distribution as training, so it is structurally blind to this lever by
+# construction and a flat there refutes nothing -- that is the whole thesis, and `slot_dropout_s2026`
+# reading 0.8592 against `band_dense_s2026` 0.8578 (+0.0014, knob-sized) is what it looks like.
+#
+# PRE-REGISTERED BANDS. Comparator is decode_cost(band_dense_s2026) = -0.0361, MEASURED IN THE SAME PASS,
+# never the pool mean -- that pool is eleven members and the control is not among them, so reading
+# against it prices eleven confounds at once. The pool sd stays as the SCALE that sets the bands.
+#
+#   OWN HOLDOUT (safety, not the reading)
+#     >= 0.8500   intact. Proceed to the cross-site read whatever the sign.
+#     <  0.8500   0.40 is destroying in-distribution signal. Lane dies here; do not rescue it on a
+#                 cross-site number, because a member this much worse cannot seat.
+#
+#   CROSS-SITE TOLL vs band_dense_s2026's decode_cost in the same pass (the actual reading)
+#     >= -0.0271  DOSE-RESPONSE CONFIRMED (toll +0.0090 or shallower, monotone in dose). Slot dropout
+#                 becomes a recipe TERM rather than one lucky member, and the shared-field axis re-opens
+#                 on the field that survived.
+#     -0.0272 to -0.0330  directional, non-monotone. The 0.25 point stands alone. Do not run a third dose.
+#     -0.0331 to -0.0400  DOES NOT REPLICATE. The shallowness is a property of that ONE checkpoint and
+#                 not of slot dropout, and the mechanism behind `kneemri-slotseat` is retrospectively
+#                 weakened whatever the board returned.
+#     <  -0.0400  0.40 destroys signal outright; the field has a ceiling well below it.
+#
+# PRICE: ~1.1 h (~280 s/epoch x 12, plus ~10 min for the foreign readout). No submission slot to run it.
+# EXPECTED GAIN: P(clears >= -0.0271) ~ 0.35. The alternatives standing today are a padding-only arm
+#        (reads a lever whose partner just died), a MedicalNet fine-tune (4-6 h to close 0.067 of frozen
+#        gap before it can reach a +0.0040 seat bar from -0.0028), and nothing else -- foreign mounts,
+#        volumetric, SSL, external data and relabelling are all closed. This is the best
+#        wall-clock-per-plausible-gain available AND it audits the claim a slot is being spent on today.
+#
+# control  band_dense_s2026 = 0.8578 (same control as slot_dropout.sh, decode -0.0361 measured 2026-09-12)
+
+extends = ["_family.toml"]
+
+[regularisation]
+slot_dropout = 0.4
+
+[meta]
+hypothesis = "slot_dropout_hi.sh -- the SECOND dose on the one shared field that survived 2026-09-12."
+bead = "knee-lhico"
+status = "done"
+out = "slot_dropout_hi_s2026"

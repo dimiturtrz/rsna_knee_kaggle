@@ -1,0 +1,34 @@
+# bead: knee-5jfix
+# reading: labelwise_ms_ctrl_s2026.holdout.npz
+#
+# Control for labelwise_ms: the shipping labelwise recipe on the canonical 336px/12-slice cache
+# (0.2-0.8 band, image centre), the only geometry the multiscale cache shares. No labelwise run on
+# this cache exists — labelwise224 is 224px — so the multiscale arm has nothing to be read against
+# without it.
+#
+# deliberate: --slices 12 --band-low 0.2 --band-high 0.8 — the multiscale cache's own slab.
+
+extends = ["_family.toml"]
+
+[model]
+slice_pooling = "labelwise"
+
+[optim]
+batch = 10
+epochs = 24
+
+[regularisation]
+slot_dropout = 0.4
+
+[run]
+vram_gb = 22.0
+
+[targets]
+calibrated_targets = true
+hold_annotations = true
+
+[meta]
+hypothesis = "Control for labelwise_ms: the shipping labelwise recipe on the canonical 336px/12-slice cache"
+bead = "knee-5jfix"
+status = "queued"
+out = "labelwise_ms_ctrl_s2026"
