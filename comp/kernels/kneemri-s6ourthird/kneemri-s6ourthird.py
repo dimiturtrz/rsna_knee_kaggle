@@ -1,4 +1,6 @@
-"""s6ourthird — staged follow-up to s6ourquarter. s6third (0.956, ref 57063964) with OUR share 1/6 -> 1/3, nartaa:S6 kept at 3:2.
+"""s6ourthird — staged follow-up to s6ourquarter.
+
+s6third (0.956, ref 57063964) with OUR share 1/6 -> 1/3, nartaa:S6 kept at 3:2.
 
 Same producers, stride (1) and rank blend as `kneemri-s6third`. Shares: nartaa 384 0.40, heliosli S6 4/15, the two
 soups 1/6 each. Second point of the ours-share axis; armed only if s6ourquarter (ref 57132831) reads >= 0.957.

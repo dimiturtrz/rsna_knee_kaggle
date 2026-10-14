@@ -5041,7 +5041,7 @@ repo; v1 was the same blend with the nartaa table bound by a walrus, which `subm
 2), so v2 spells the path literally and `mavit_sub.csv` maps to the `hengck23_mavit` seat.
 
 Evidence it was shipped on: `kneemri-mavitgold` scored the checkpoint on the 58 organiser-gold studies at macro 0.9202,
-1.77 s/study on T4, against `band_dense_hold_s2026` 0.8956, paired +0.0247 [+0.0048, +0.0469] (`annotated_readings`).
+1.77 s/study on T4, against `band_dense_hold_s2026` on the gold 58 at 0.8956, paired +0.0247 [+0.0048, +0.0469] (`annotated_readings`).
 Its lift sits where ours is weakest: Effusion 0.980 vs 0.852, Synovitis 0.823 vs 0.752, Contusion 0.942 vs 0.896,
 Lateral OA 0.826 vs 0.787; ours leads PF OA and ACL. Its training data is unstated, so gold58 may be in-sample for it,
 which is why the share is 1/8 and the board, not gold58, decides. Visible run: 0 MAVIT FAILED, S6 PASS, 0 fallbacks,
@@ -5060,7 +5060,7 @@ space. run_check 2 of 2, blend recomputed from its own frames to 1e-16.
 PRE-REG (s6dense2 0.956): >= 0.957 lifts and becomes pick 1; 0.956 flat; <= 0.955 R7 worse than S6.
 RESULT: **0.957**, one above every s6-family entry and pinned in `comp/champion.json` (kit `5fea6702`). One tick at the
 board's 0.001 resolution is direction, not a finding (top-band residual sd 0.0013 @ledger75), but it moves us from the
-0.956 tier (~rank 424 of 5895 at the 08:24Z read) into the 0.957 tier (~rank 119). A pure copy of heliosli's notebook
+0.956 tier (~rank 424 of 5895 at the 2026-10-14 08:24Z read) into the 0.957 tier (~rank 119). A pure copy of heliosli's notebook
 (R7 + nartaa 0.5/0.5, no seat of ours) reads 0.956 by its own authors, so our soups at 1/6 are what this entry adds.
 Same-day follow-ups pending: `s6r7_v1` (S6 1/6 + R7 1/6, ref 57130546) and `s6ourquarter_v1` (soups 1/8 each, ref
 57132831). The slot after them is pre-registered: `kneemri-s6r7soloquarter` if ours at 1/4 lifts, else
@@ -5115,7 +5115,7 @@ nartaa 1/2, R7 1/3, soups 1/12 each, rank space. run_check clean (loaded 2 of 2 
 PRE-REG (B = `s6r7solo_v1` 0.957): > B the mirror view carries signal, new pin; = B below board resolution at a 1/3
 rank share, s6r7solo stays; < B the mirrored pass (or its state read-out through a stacker fitted on plain passes)
 costs signal, or the 8.3 h deadline bit and unreached studies fell back to the mean.
-RESULT: **0.957**. The = B branch fires: the mirror view at a 1/3 rank share sits below board resolution and `s6r7solo_v1` keeps the pin (same tier, reached first). Live read 08:26Z: rank 127 of 5958, a 95-way tie at 0.957, leader 0.966. Pending to scored took 3.4-3.6 h (04:52Z submit; PENDING at 08:16Z, COMPLETE at 08:26Z), against the R7 deadline at started + 8.3 h, so the deadline fallback cannot have filled the table wholesale. Slot 2 goes to `kneemri-s6r7stride1` per the rule written before this read (flip > B would have sent `s6r7flipstride1`); `s6r7flipres384` drops with it. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
+RESULT: **0.957**. The = B branch fires: the mirror view at a 1/3 rank share sits below board resolution and `s6r7solo_v1` keeps the pin (same tier, reached first). Live read 2026-10-14 08:26Z: rank 127 of 5958, a 95-way tie at 0.957, leader 0.966. Pending to scored took 3.4-3.6 h (04:52Z submit; PENDING at 08:16Z, COMPLETE at 08:26Z), against the R7 deadline at started + 8.3 h, so the deadline fallback cannot have filled the table wholesale. Slot 2 goes to `kneemri-s6r7stride1` per the rule written before this read (flip > B would have sent `s6r7flipstride1`); `s6r7flipres384` drops with it. A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
 scatter, so it reads as public RANK, not as a better model.
 
 ## r7half_v1 — 0.956, ref 57178693, 2026-10-14 — R7 1/2 + nartaa 1/2, the soups' sixth dropped: one tick under, the soups still decorrelate
