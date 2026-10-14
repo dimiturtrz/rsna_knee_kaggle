@@ -1,0 +1,100 @@
+# The same trunk as `ortho_dense`, reached in TWO stages instead of one. `knee-6hfi`.
+#
+# WHY A SECOND ARM ON A TRUNK THAT ALREADY HAS ONE. `radnet_family` fine-tuned an external trunk end to
+# end at --backbone-lr 4e-4 and read 0.6716, while a ridge probe over that same trunk's FROZEN features
+# read 0.8197. One set of weights, two readings 0.148 apart. That gap is not the signature of an empty
+# trunk - it is the published signature of fine-tuning DISTORTING pretrained features before the head
+# has anything useful to ask of them. Kumar et al. (arXiv:2202.10054) measure it directly: with a
+# randomly initialised head, the first gradients are large and arbitrary, and they move the trunk about
+# twenty times further than the same fine-tune started from a fitted head. Davila et al.
+# (arXiv:2406.10050) sweep {1e-3,1e-4,1e-5} over ResNet-50 / DenseNet-121 / VGG-19 across five medical
+# modalities and find LP-FT beats direct fine-tuning in more than half of the pairs.
+#
+# `ortho_dense` is the DIRECT fine-tune of `ortholarge` at 4e-5. This arm is the linear-probe-then-
+# fine-tune version of exactly that recipe, and the two together are the only readable pair the project
+# can build on the question, because every other flag is held.
+#
+# THE ONE THING THAT MADE THIS INEXPRESSIBLE UNTIL NOW was that stage two has to START from stage one's
+# checkpoint, and the trainer had no way to say so. `--init` is that flag; `WarmStart` loads it
+# strictly, so a mismatched design raises before the card is spent rather than landing partially.
+#
+# STAGE ONE fits the head over a frozen trunk, to a CRITERION rather than to a number. The first draft
+# said four epochs and had no argument for it; Kimi's Q-BN reply (2026-09-02) reports there is no
+# published sweep for stage-one length at all, and that the nearest precedent - Mensah et al.
+# arXiv:2603.18846, a linear head on retinal fundus - runs ten epochs with early stopping inside a
+# fifty-epoch cap. So this runs to patience 3 under a twelve-epoch ceiling: the trunk is frozen, which
+# makes an extra epoch cheap, and a head stopped short is the thing that makes stage two a slow
+# fine-tune rather than an LP-FT. Its own holdout is a free by-product - the frozen-probe floor for
+# `ortholarge`, the number `ortho_probe` was going to read before its embedding build left the card.
+#
+# STAGE TWO unfreezes the whole stack at 1e-5, an order below `ortho_dense`'s 4e-5.
+#
+# THE CONTROL IS `ortho_fresh_lowlr`, NOT `ortho_dense`, AND THE FIRST DRAFT OF THIS ARM HAD THAT WRONG.
+# Read against `ortho_dense` the pair moves TWO variables at once - the initialisation AND the rate -
+# so a gain could be either and neither branch below would have been readable. `ortho_fresh_lowlr` is
+# this arm's stage two with a RANDOM head instead of stage one's, identical in every other flag, which
+# isolates the warm start. `ortho_dense` remains the rate point of the same triple, not the control.
+#
+# THE THEORY DOES NOT COVER THIS HEAD, which is why the control is not optional. Kumar et al. prove the
+# feature-distortion tradeoff for two-layer LINEAR networks and list non-linear activations as an open
+# question; Tomihari & Sato (arXiv:2405.16747) extend it to Transformers through the growth of the
+# LINEAR head's norm; Davila et al. replicate on medical CNNs with a standard linear classifier. Ours
+# is a `LayerNorm -> Linear -> GELU` projection, per-diagnosis attention over slots, then a per-row
+# readout - deep enough to have its own optimisation problem. Both failure modes are live: a nonlinear
+# head can fit the frozen features into a basin that is a WORSE start once the trunk moves, and a head
+# with its own depth may absorb the large first gradients anyway, making a fresh-head fine-tune at 1e-5
+# already do what LP-FT does. The published answer is not that it works or fails; it is that nobody has
+# shown it. The triple is what answers it here.
+#
+# PRE-REGISTERED against `ortho_fresh_lowlr`, and against the non-DINOv2 seat bar 0.8521:
+#
+#   s >= fresh_lowlr + 0.015   THE WARM START IS THE LEVER, on a head the literature has never tested
+#               it on. Every external trunk this project priced by direct fine-tuning was priced on the
+#               wrong recipe - including `radnet121` at 0.6716, whose written decline is then re-opened
+#               by argument rather than by re-quoting the number.
+#   +0.015 > s - fresh_lowlr >= 0.006   Directional. Keep the member if it is shippable, do not plan
+#               around it, do not spend a confirmation run on it.
+#   |s - fresh_lowlr| < 0.006   INSIDE THE HOLDOUT NOISE FLOOR: the two stages buy nothing on this
+#               head. Read the triple's third point before writing the reason down - if both 1e-5 arms
+#               sit well above `ortho_dense` at 4e-5, the radnet collapse was about RATE and not about
+#               initialisation, which is the cheaper finding and re-opens that decline anyway.
+#   s <= fresh_lowlr - 0.006   The fitted head is a WORSE starting point than a random one, which is
+#               failure mode (a) measured rather than argued. Read stage one's own holdout first: a
+#               head that stopped at patience with a poor probe number never had a basin to be in.
+#
+# WHAT WOULD MAKE ME DISBELIEVE ANY OF IT. The run's first log line must carry the warm-start line
+# `WarmStart.applied` returns, naming the stage-one file and its tensor count. Without that line stage
+# two is a plain fine-tune at 1e-5 and the pair reads as a rate sweep, which is the exact class of
+# defect this repo keeps hitting: a value recorded in a config while the consumer reads a constant.
+#
+# deliberate: --unfreeze-last 0 --patience 3 in stage one (the probe half, run to a criterion)
+# deliberate: --init in stage two (the whole point)
+# deliberate: --backbone-lr 1e-5 in stage two (gentle, and NOT the control's 4e-5)
+# deliberate: --variant ortholarge --slices 12 --image-size 224 --band-low 0.2 --band-high 0.8
+#             (base224's read exactly, held identical to ortho_dense so the trunk stays the variable)
+#
+# bead: knee-6hfi
+#
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+# control  ortho_fresh_lowlr = (not yet run; the missing third point of the LP-FT triple, knee-6hfi)
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.8
+band_low = 0.2
+image_size = 224
+slices = 12
+
+[encoder]
+unfreeze_last = 0
+variant = "ortholarge"
+
+[optim]
+patience = 3
+
+[meta]
+hypothesis = "The same trunk as `ortho_dense`, reached in TWO stages instead of one. `knee-6hfi`."
+bead = "knee-6hfi"
+status = "done"
+out = "ortho_lpft_head"

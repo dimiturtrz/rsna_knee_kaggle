@@ -1,0 +1,19 @@
+# stage after band_lpft_head in experiments/arms/band_lpft.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+init = "$MODELS/band_lpft_head.pt"
+whole_stack = true
+
+[meta]
+hypothesis = "band_lpft - LP-FT on the INCUMBENT recipe, at the incumbent's own rate, so the only variable is the head."
+bead = "knee-cyk91 (this arm; knee-6hfi is the OrthoDiffusion smoke and was a stale citation)"
+status = "queued"
+out = "band_lpft_s2026"

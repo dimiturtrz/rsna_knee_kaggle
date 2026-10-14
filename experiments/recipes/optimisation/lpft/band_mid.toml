@@ -1,0 +1,19 @@
+# stage after band_early in experiments/arms/band_surgical.sh
+
+extends = ["_family.toml"]
+
+[data]
+band_high = 0.9
+band_low = 0.1
+slices = 20
+
+[encoder]
+backbone_lr = 4e-05
+unfreeze_offset = 3
+whole_stack = true
+
+[meta]
+hypothesis = "band_surgical - the SAME SIX BLOCKS, opened somewhere else. Two cells, one variable: WHERE."
+bead = "knee-ep6a4"
+status = "queued"
+out = "band_mid_s2026"
