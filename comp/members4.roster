@@ -1,0 +1,14 @@
+# shelf: kneemri-members-4
+# out: members_4
+#
+# comp/members4.roster — the FOURTH weights dataset, `kneemri-members-4`, opened by shelf 3's own rule:
+# "when it grows past a gigabyte or so it stops being cheap and the next new member opens shelf 4".
+# Shelf 3 holds ten members, ~0.9 GB; one more would tax every submission that mounts it.
+#
+# NO MEMBER MAY APPEAR ON TWO SHELVES (`MemberPackage.spanning` refuses a duplicate identifier), and a
+# kernel must list `dimiturnt/kneemri-members-4` in `dataset_sources` to see anything here, or
+# `KernelRun` drops the member and keeps going.
+
+nartaa_soup_k4_s2026.pt     # DARK, fold -1. basinsoup_ff's K=4 soup (extffsolo + children 801/802/803) with
+                            # nartaa CoAtNet-384 as teacher at distill weight 0.5 (knee-p844l). Board is
+                            # the only ruler; pre-registered >= 0.948 transfers, <= 0.945 closes the axis.
