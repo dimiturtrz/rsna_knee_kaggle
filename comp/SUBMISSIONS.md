@@ -5177,3 +5177,16 @@ PRE-REG (vs `extffsolo` 0.945, the current efficiency pick): >= 0.946 new effici
 the first fold-honest teacher at or above the control, 0.9061) is armed by its own >= 0.938 gate; <= 0.937 the ruler
 was right.
 RESULT: **0.928**. The <= 0.937 branch fires: the relabelled student reads 0.017 under `extffsolo` (0.945) on the board, so ledger75's 0.8891-vs-0.9048 deficit was a real loss of signal, not a ruler blind to the new target. A 0.7-weight teacher below its own student (0.8775) pulled the labels toward a worse model. `lw20_btblend` stays DISARMED (its gate was >= 0.938) and no soup is relabelled; the target-blend axis closes at this teacher weight. What it does NOT rule out: a teacher clearly ABOVE the control at a small weight; that is a new arm with its own price, not a re-read of this one.
+
+## s6r7soloquarter_v1 — 0.957, ref 57198495, 2026-10-15 — our share 1/6 → 1/4 on s6r7solo: flat, = B
+
+`kneemri-s6r7soloquarter`: `s6r7solo` with OUR two soups (`basinsoup_ff_k4_s2026`, `basinsoup_dmlb_k7_s2026`) lifted
+from 1/12 each to 1/8 each, R7 0.30, nartaa384 0.45, rank space. run_check clean (2 of 2 members).
+
+PRE-REG (B = `s6r7solo_v1` 0.957): > B new pin, and `s6r7solothird` (ours 1/3) gets the one remaining Kaggle GPU run
+before the 10-17 quota reset; = B an equal-score pick-2 candidate that leans less on the public base; < B our share
+above 1/6 dilutes R7.
+RESULT: **0.957**. Ties B at the board's 0.001 resolution, so a 1.5x larger share of our own members neither costs nor
+buys anything visible. `s6r7solothird` is NOT pushed; the quota run is kept. As a pick it is the same public score with
+more weight on members trained only on this competition's data, which is the hedge against a private split that
+punishes the public kernels' tuning — the owner's call, not a re-pin.
