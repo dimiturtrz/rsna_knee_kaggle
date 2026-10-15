@@ -61,7 +61,11 @@ members (`2026-09-05_the-holdout-is-the-distorted-ruler.md`).
   fitted, and independent strong teams rise past it. Here the pick wants weight on increments measured OFF
   the public board. The owner's pair (`s6r7solo_v1`, `s6r7_v1`) both sit at ours 1/6, and both carry the soup
   increment, so neither world finds them naked. What they lack is any coverage of a bad pile reweight: both
-  ride nartaa 1/2 + R7 1/3 from public recipes. A pick 2 with LESS public-tuned structure (fewer reblend
+  ride nartaa 1/2 + R7 1/3 from public recipes. Narrower than it reads (09:17Z, read off the mounted sources):
+  neither carries the per-finding outer matrix that the hoshinoyumemi ledger names as the selected +0.002.
+  `nartaa_mirror.py` runs ONE CoAtNet-384 arm (its own comment picks it over a 3-arm blend on a 45-study gold
+  panel and the board), and `helios_r7.py` applies per-class weights fixed in heliosli's bundle. The board-touched
+  structure left in our picks is the outer shares and the one-arm choice, not a probed 4x12 routing. A pick 2 with LESS public-tuned structure (fewer reblend
   steps, weights not fitted to the board) would hedge that, at the cost the 10-09 table states for a larger
   ours share. No measurement here prices that trade. It is the owner's call, and this note records that the
   sampling-only analysis did not see it.
