@@ -23,6 +23,14 @@ the PILE against independent teams and leaves our rank INSIDE the pile mostly al
 inside the 0.956 block today (07:07Z full LB: 1,210 teams >= 0.956; top 5% and top 10% both cut at 0.956).
 So the medal question is our private position RELATIVE TO THE PILE, and that is layer 3.
 
+An independent ledger narrows the size (public notebook `hoshinoyumemi/knee-0-939-to-0-956-what-moved-the-score`,
+read 2026-10-15 07:33Z, fourteen of that author's submissions, one addition at a time). Of its 0.939 → 0.956 climb,
++0.011 came from two newly trained models (nartaa CoAtNet-384 +0.005, heliosli R7 +0.006), each a single addition
+rather than the best of many tries. Those are the part most likely to transfer. The part that was SELECTED is the
+per-finding outer weights "published after leaderboard probes by their author", +0.002. So layer 2 is most likely
+~0.002 rather than 0.004. It is one author's public-only ledger, so it locates the selected part but does not measure
+its private loss.
+
 **3. Our edge over a pure-pile fork: the only increment with off-public evidence.** It is our two soups (1/12 each, 1/6 together, in `s6r7solo`).
 Two independent rulers agree on its sign:
 - offline, fold-honest, nartaa replica as the pile proxy: two soups at 1/6 each add +0.0015 / +0.0016
