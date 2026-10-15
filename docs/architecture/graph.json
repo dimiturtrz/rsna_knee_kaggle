@@ -6573,6 +6573,12 @@
     {
       "kind": "import",
       "source": "kneemri.models.weight_soup",
+      "target": "kneemri.models.study_design",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.models.weight_soup",
       "target": "kneemri.runs.holdout_record",
       "weight": 1
     },
@@ -32362,6 +32368,18 @@
       "kind": "calls",
       "source": "kneemri.models.weight_soup.WeightSoup.averaged",
       "target": "kneemri.models.weight_soup.WeightSoup.agreed",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.WeightSoup.signature",
+      "target": "kneemri.models.study_design.StudyDesign.from_config",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.models.weight_soup.WeightSoup.signature",
+      "target": "kneemri.models.study_design.StudyDesign.lora_rank_of",
       "weight": 1
     },
     {

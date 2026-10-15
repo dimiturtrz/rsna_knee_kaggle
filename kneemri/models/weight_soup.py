@@ -49,6 +49,7 @@ import torch
 from torch import Tensor
 
 from core import cli
+from kneemri.models.study_design import StudyDesign
 from kneemri.runs.holdout_record import UNKNOWN_EPOCH
 from kneemri.runs.run_identity import RunIdentity
 from kneemri.runs.run_metrics import RunMetrics
@@ -133,7 +134,18 @@ class WeightSoup:
             raise IncompatibleSoupError(message)
         evaluation = str(options.get("eval_labels"))
         ruler = evaluation if evaluation not in {"None", ""} else str(options.get("labels"))
-        return (*(str(options.get(key)) for key in (*ARCHITECTURE, *SPLIT)), Path(ruler).name)
+        design = StudyDesign.from_config(options)
+        resolved = {
+            **options,
+            "pool": design.pool,
+            "slice_pooling": design.slice_pooling,
+            "slot_pooling": design.slot_pooling,
+            "encoder_layer": design.layer,
+            "fuse_blocks": design.fuse_blocks,
+            "slice_shift": design.slice_shift,
+            "lora_rank": StudyDesign.lora_rank_of(options),
+        }
+        return (*(str(resolved.get(key)) for key in (*ARCHITECTURE, *SPLIT)), Path(ruler).name)
 
     def agreed(self) -> tuple[str, ...]:
         """The one signature every member shares, or a refusal naming the first member that differs."""

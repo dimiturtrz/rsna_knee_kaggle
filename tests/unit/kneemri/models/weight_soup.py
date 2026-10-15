@@ -73,6 +73,11 @@ def test_weight_soup_agreed(tmp_path: Path) -> None:
         odd = WeightSoup([tmp_path / "a.pt", _checkpoint(tmp_path / f"{key}.pt", 3.0, **{key: value})])
         with pytest.raises(IncompatibleSoupError, match=key):
             odd.agreed()
+    spelled = _checkpoint(tmp_path / "spelled.pt", 3.0, fuse_blocks="0", slice_shift="0")
+    assert WeightSoup([tmp_path / "a.pt", spelled]).agreed()[0] == "small", "an absent key reads as its default"
+    fused = _checkpoint(tmp_path / "fused.pt", 3.0, fuse_blocks="2")
+    with pytest.raises(IncompatibleSoupError, match="fuse_blocks"):
+        WeightSoup([tmp_path / "a.pt", fused]).agreed()
 
 
 def test_weight_soup_averaged(tmp_path: Path) -> None:
