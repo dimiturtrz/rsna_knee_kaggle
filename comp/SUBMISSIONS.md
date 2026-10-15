@@ -5199,3 +5199,27 @@ Visible run (v1): MAVIT DONE 3 studies 0 failed; R7 and S6 PASS with fallback_st
 
 PRE-REG (B = s6r7 0.957, resolution 0.001, top-band residual sd 0.0013 @ledger75): > B the levers compose and it becomes pick 1; = B keep the simpler entry; < B interference.
 RESULT: **0.955**, 0.002 under B, which is about 1.5 residual sd on the ledger75 top band: direction only, but it is the second read in the same direction (s6mavit 0.955 against s6dense2). MaViT at 1/8 has now cost board on both public bases it was seated in, so the MaViT seat is closed for the remaining slots; the R7 change did not make room for it. Picks unchanged.
+
+
+## nartaasoup_v1 — 0.948, ref 57236495, 2026-10-15 — basinsoup_ff distilled from nartaa's CoAtNet-384: meets the transfer bar, by the board's own scatter
+
+`kneemri-nartaasoup`: one member, `nartaa_soup_k4_s2026`, the K=4 weight soup of the 0.945 parent
+(`labelwise_ext_drop40_long_ff.pt`) and three 4-epoch children (`nartaa_soup_c801..c803`, seeds 801-803, 2e-5,
+fold -1). It is basinsoup_ff with one change: every child also fits the nartaa CoAtNet-384 teacher's readings
+(`nartaa_teacher.npz`, 4407 studies, read by `raptor_teacher`) at distill_weight 0.5. Kit 5fea6702, the
+control's. The children ran one at a time; the paired launch paged the card, and c802 resumed from its
+epoch-1 state.
+
+PRE-REG (control `basinsoupff_v1` 0.946): >= 0.948 the teacher's labels transfer into our trunk and it is the
+next pick-2 candidate; 0.946-0.947 null; <= 0.945 distillation spends the soup's gain and the pseudo-label
+axis closes for this teacher.
+RESULT
+0.948 against the control's 0.946: +0.002, exactly on the pre-registered transfer bar. The board resolves 0.001
+and the top band's residual sd is ~0.002, so this is one step past the bar and inside 2 sd: DIRECTION ONLY,
+pointing the right way. The kernel loaded 1 of 1 members; its predictions differ from basinsoupff_v1's by up
+to 0.068 (corr 0.995), so the distillation reached the weights. The soup itself was built by hand: the
+parent predates the `fuse_blocks`/`slice_shift` options and `weight_soup.agreed` refused it, so a scratch copy
+of the parent carried both at their default 0.
+
+What it licenses: the swap, not a pick. `s6r7nsoup_v1` (s6r7solo_v1 with this soup in the ff seat) is the
+reading that can move a pick, and it was pushed on this result.
