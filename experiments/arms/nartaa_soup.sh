@@ -23,8 +23,17 @@ PARENT="$MODELS/labelwise_ext_drop40_long_ff.pt"
 require "$PARENT"
 require "$PROCESSED/nartaa_teacher.npz"
 
-bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c801.toml "$@" || exit
-bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c802.toml "$@" || exit
+# Two children share the card: one peaks at 11.7 GB reserved (basinsoup_ff_c301.full.log), so a pair
+# fits a 32.6 GB card and the third follows. The second takes its own lock dir; the free-memory gate
+# admits it after two minutes, since its derived need (vram_gb 22) is the cap, not the 11.7 GB used.
+bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c801.toml "$@" &
+first=$!
+GPU_LOCK_DIR="$HOME/.gpu.lock.pair" FOREIGN_WAITS=2 bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c802.toml "$@" &
+second=$!
+wait "$first" || exit
+wait "$second" || exit
+require "$MODELS/nartaa_soup_c801.pt"
+require "$MODELS/nartaa_soup_c802.pt"
 bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c803.toml "$@" || exit
 
 uv run --no-sync --project "$REPO" python -m kneemri.models.weight_soup \
