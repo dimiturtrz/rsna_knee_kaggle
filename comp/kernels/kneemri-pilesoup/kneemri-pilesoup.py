@@ -1,10 +1,11 @@
 """pilesoup — TEMPLATE, the repeatable defence: a new public best plus our two soups at 1/12 each, rank space.
 
-The one increment in our entries with off-public evidence is the soup pair (offline +0.0015, P>0 1.00 on the replicas;
-board s6r7solo 0.957 vs r7half 0.956), `interpretations/kneemri/2026-10-15_public_overfit_exposure.md`. When a public
-notebook beats our best, this kernel runs that notebook's scoring source unmodified (mounted as `pile_best.py` from
-`dimiturnt/pile-best-src`, its own inputs added to the metadata) and keeps 5/6 of its ranks. No weight is fitted to
-the board. Before shipping: fill the source dataset, add the notebook's inputs, visible run, run_check, submit_check.
+The one increment in our entries not selected on the public board is the soup pair (sign only off the board:
+replica blends + s6r7solo 0.957 vs r7half 0.956, size unmeasured),
+`interpretations/kneemri/2026-10-15_public_overfit_exposure.md`. When a public notebook beats our best, this kernel
+runs that notebook's scoring source unmodified (mounted as `pile_best.py` from `dimiturnt/pile-best-src`, its own
+inputs added to the metadata) and keeps 5/6 of its ranks. No weight is fitted to the board.
+Before shipping: fill the source dataset, add the notebook's inputs, visible run, run_check, submit_check.
 """
 
 # >>> KERNEL-BOOTSTRAP

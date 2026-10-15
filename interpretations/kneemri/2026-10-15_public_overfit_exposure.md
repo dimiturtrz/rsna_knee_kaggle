@@ -31,14 +31,21 @@ per-finding outer weights "published after leaderboard probes by their author", 
 ~0.002 rather than 0.004. It is one author's public-only ledger, so it locates the selected part but does not measure
 its private loss.
 
-**3. Our edge over a pure-pile fork: the only increment with off-public evidence.** It is our two soups (1/12 each, 1/6 together, in `s6r7solo`).
-Two independent rulers agree on its sign:
-- offline, fold-honest, nartaa replica as the pile proxy: two soups at 1/6 each add +0.0015 / +0.0016
-  [+0.0005, +0.0026], P>0 1.00 on both replicas (`2026-10-10_postprocessing_and_pick_risk.md`, 21:17Z);
-- board: `s6r7solo_v1` 0.957 with soups at 1/12 each against `r7half_v1` 0.956 without them (SUBMISSIONS: r7half). The offline read is at 1/6 each, a larger share, so it is the sign that agrees, not the size. The board pair is not a clean ablation either: R7 also moves from 1/3 to 1/2.
-That is the part of our score that was NOT fitted to the public board. Caveats: the replica is weaker than the
-real nartaa, so the true increment against the real pile is likely smaller, and the holdout labels lean
-toward our own members (`2026-09-05_the-holdout-is-the-distorted-ruler.md`).
+**3. Our edge over a pure-pile fork: the only increment not selected on the public board.** It is our two soups (1/12 each, 1/6 together, in `s6r7solo`).
+Its evidence is thinner than the first draft of this note claimed (corrected 07:58Z):
+- offline, fold-honest: the +0.0015 / +0.0016 [+0.0005, +0.0026], P>0 1.00 (`2026-10-10_postprocessing_and_pick_risk.md`,
+  21:17Z) is two soups AGAINST OUR OLDER SIX-MEMBER SIDE (ours6), as our third of a blend with a nartaa replica.
+  It ranks our own side's composition. It does NOT measure what adding our side does to the pile. The same note
+  (line ~285) restricts every "partner against a replica" price to SIGN ONLY: the replica is far weaker than the
+  real nartaa (0.8787@ledger75), and in that regime a stronger ours side matters more than on the board;
+- board: `s6r7solo_v1` 0.957 with soups at 1/12 each against `r7half_v1` 0.956 without them (SUBMISSIONS: r7half).
+  That is one display bin, and it is not a clean ablation: R7 also moves from 1/3 to 1/2;
+- mechanism: our members are trained on a different recipe and data path from both public families, so their errors
+  decorrelate from the pile's. This is the argument that does not depend on the public board.
+No honest offline measurement exists of "pile + ours" against "pile". The replicas are too weak to stand in for the
+pile, and the real public checkpoints trained on our holdout studies. So layer 3 is the part of our score NOT
+SELECTED on the public board, but its size off the board is unmeasured. Also, the holdout labels lean toward our own
+members (`2026-09-05_the-holdout-is-the-distorted-ruler.md`).
 
 ## What follows
 
@@ -46,8 +53,8 @@ toward our own members (`2026-09-05_the-holdout-is-the-distorted-ruler.md`).
   and add selection. A slot is worth spending on a change with off-public evidence, or on an instrument that
   answers a question, never on the next decimal.
 - **The repeatable defence against "a new notebook breaks 0.957" is a transform, not a weight hunt:** take
-  the new public best and add our two soups at 1/12 each in rank space (as in `s6r7solo`). That increment has the off-public evidence
-  above. The binding constraint is Kaggle GPU quota: ~17 min, one R7-class visible run until the 10-17
+  the new public best and add our two soups at 1/12 each in rank space (as in `s6r7solo`). That increment is the one not selected on
+  the public board (its size off the board is unmeasured, above). The binding constraint is Kaggle GPU quota: ~17 min, one R7-class visible run until the 10-17
   reset. That run is worth more held for this transform than spent on any shelf instrument.
 - **Picks.** The 10-09 rule (pick 1 = lowest ours share holding the board best) protects against the pile
   HOLDING on private (sampling world). Selection is a second failure world: the pile's public lead is partly
@@ -58,6 +65,16 @@ toward our own members (`2026-09-05_the-holdout-is-the-distorted-ruler.md`).
   steps, weights not fitted to the board) would hedge that, at the cost the 10-09 table states for a larger
   ours share. No measurement here prices that trade. It is the owner's call, and this note records that the
   sampling-only analysis did not see it.
+- **The 10-09 table's premise no longer holds (07:58Z).** It priced P(private < pile) for an entry with a
+  0.003 PUBLIC LEAD over the pile. Today the lead is at most 0.001 (we sit inside the 0.957 bin with ~150 others),
+  and the silver cut (~rank 301) lies inside the ~1,210-team 0.956+ mass. So the medal does not need us to beat
+  the pile by 0.003. It needs us in roughly the top quarter of that mass on private. The pile's members will
+  reshuffle by the sampling sd, which is the same for every fork. A pile-only fork's expected place is the middle of the mass, and
+  only an increment the pile lacks moves the expectation. Raising ours share buys more of that increment
+  (sign known, size unmeasured off the board) and more variance. With the lead gone, the variance term no longer
+  costs a lead it was protecting. That tilts the GENERAL pick toward a larger ours share than the 10-09 rule
+  chose. It does not license any share in particular: the size of the increment is what the board cannot tell us,
+  and `s6r7thirds` (ours 1/3, pushed after the 10-17 reset) is the one read we can still buy for it.
 
 ## What would change this
 
