@@ -19,7 +19,8 @@
 # tblendsolo used 0.7 under a teacher BELOW its student and read -0.017 on the board.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
 # Two children share the card: one peaks at 11.7 GB reserved (basinsoup_ff_c301.full.log), so a pair
-# fits a 32.6 GB card and the third follows. The second takes its own lock dir; the free-memory gate
+# fits a 32.6 GB card and the third follows. MEASURED WRONG 2026-10-15: these children reserve 14-15.5 GB
+# each, the pair held 31.6 GB, Windows paged and froze the desktop. Do not pair them; see nartaa_soup_rest. The second takes its own lock dir; the free-memory gate
 # admits it after two minutes, since its derived need (vram_gb 22) is the cap, not the 11.7 GB used.
 # lib.sh first: it re-runs this arm from ONE snapshot and exports ARM_LIB, so the children below share it.
 # A bare `run.sh` started from the repo would re-exec itself and drop its recipe argument, and two of them

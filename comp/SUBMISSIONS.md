@@ -5190,3 +5190,12 @@ RESULT: **0.957**. Ties B at the board's 0.001 resolution, so a 1.5x larger shar
 buys anything visible. `s6r7solothird` is NOT pushed; the quota run is kept. As a pick it is the same public score with
 more weight on members trained only on this competition's data, which is the hedge against a private split that
 punishes the public kernels' tuning — the owner's call, not a re-pin.
+
+## s6r7mavit_v1 — 0.955, ref 57218193, 2026-10-15 — R7 and MaViT levers stacked: below B, MaViT dilutes a second time
+
+s6r7's blend (S6 1/6, R7 1/6, nartaa 1/2, soups 1/12) scaled by 7/8, with hengck23's MaViT at 1/8: nartaa 7/16, S6 7/48, R7 7/48, soups 7/96 each, rank space. MaViT runs as a subprocess from `dimiturnt/mavit-seat-src` before the heliosli stages. R7 keeps its 5.0 h deadline from S6_T0 and S6 its 8.3 h. s6mavit read 0.955 (MaViT diluted s6dense2), so this stacks only if R7 changed the blend; its own shelf gate (both >= 0.957) did not open, and it ships as an instrument.
+
+Visible run (v1): MAVIT DONE 3 studies 0 failed; R7 and S6 PASS with fallback_studies 0, exit 0 at 495 s / 599 s; ASSETS_READY x2; run_check 2 of 2; blend recomputed from the six frames max |d| 1.1e-16. submit_check foreign {heliosli_r7 0.1458, heliosli_s6 0.1458, hengck23_mavit 0.125, nartaa384 0.4375}.
+
+PRE-REG (B = s6r7 0.957, resolution 0.001, top-band residual sd 0.0013 @ledger75): > B the levers compose and it becomes pick 1; = B keep the simpler entry; < B interference.
+RESULT: **0.955**, 0.002 under B, which is about 1.5 residual sd on the ledger75 top band: direction only, but it is the second read in the same direction (s6mavit 0.955 against s6dense2). MaViT at 1/8 has now cost board on both public bases it was seated in, so the MaViT seat is closed for the remaining slots; the R7 change did not make room for it. Picks unchanged.
