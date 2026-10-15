@@ -16,12 +16,15 @@ failure never fires, and across a hidden test set of thousands it is close to ce
 """
 
 import logging
-from collections.abc import Mapping
+from collections import deque
+from collections.abc import Iterator, Mapping
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from jaxtyping import UInt8
 from numpy.typing import NDArray
 
 from core.findings import STUDY, TARGETS
@@ -42,6 +45,14 @@ DEFAULT_WEIGHTS = "raptor_ft_coatnet_v4_full_swa.pt"
 
 PROGRESS_EVERY = 100
 
+DECODERS = 8
+"""Threads decoding ahead of the forward. The decode is file opens, not arithmetic: on the nartaa layout one
+thread read 1.81 s a study and eight read 0.76 s (eight PROCESSES read 0.91 s — pickling, no gain), while the
+card sat at 3% behind a serial loop. Past eight the opens contend; a 4-CPU kernel still overlaps decode and
+forward, which is the point."""
+
+Decoded = tuple[UInt8[NDArray[np.uint8], "depth height width"], UInt8[NDArray[np.uint8], " depth"]] | None
+
 
 @dataclass(frozen=True)
 class RaptorEntry:
@@ -52,6 +63,7 @@ class RaptorEntry:
     split: Split = field(default_factory=Split)
     layout: Layout = RAPTOR
     """The decode every member in a fleet shares; a member fitted under another layout needs its own entry."""
+    decoders: int = DECODERS
 
     @staticmethod
     def weights(filename: str = DEFAULT_WEIGHTS, mounts: Mounts | None = None) -> Path:
@@ -74,14 +86,11 @@ class RaptorEntry:
         """
         feed = RaptorFeed(self.split.series(self.competition), self.layout)
         rows = {name: np.full((len(identifiers), len(TARGETS)), FALLBACK_PROBABILITY) for name in members}
-        for index, study in enumerate(identifiers):
-            try:
-                volume, mask = feed.study(study, records)
-            # Broad on purpose, and logged with its traceback: pydicom, the filesystem and the slot
-            # match each fail in their own way, and none of them may cost the other studies.
-            except Exception:
-                logger.exception("study %s could not be decoded — contributing %s", study, FALLBACK_PROBABILITY)
+        studies = zip(identifiers, self.decoded(feed, identifiers, records), strict=True)
+        for index, (study, decoded) in enumerate(studies):
+            if decoded is None:
                 continue
+            volume, mask = decoded
             for name, member in members.items():
                 try:
                     rows[name][index] = member.ordered(volume, mask, device)
@@ -91,6 +100,32 @@ class RaptorEntry:
             if (index + 1) % PROGRESS_EVERY == 0:
                 logger.info("scored %d of %d studies", index + 1, len(identifiers))
         return rows
+
+    def decoded(self, feed: RaptorFeed, identifiers: list[str], records: Records) -> Iterator[Decoded]:
+        """Every study's decode IN ORDER, read `decoders` threads ahead so the card never waits on pydicom.
+
+        The window is bounded at twice the pool: a forward slower than the decode must not hold the whole
+        split's volumes in memory. A study that cannot be read yields None and a logged traceback.
+        """
+        with ThreadPoolExecutor(self.decoders) as pool:
+            pending: deque[Future[Decoded]] = deque()
+            for study in identifiers:
+                pending.append(pool.submit(self.one, feed, study, records))
+                if len(pending) > 2 * self.decoders:
+                    yield pending.popleft().result()
+            while pending:
+                yield pending.popleft().result()
+
+    @staticmethod
+    def one(feed: RaptorFeed, study: str, records: Records) -> Decoded:
+        """One study's volume and mask, or None when it cannot be read."""
+        try:
+            return feed.study(study, records)
+        # Broad on purpose, and logged with its traceback: pydicom, the filesystem and the slot
+        # match each fail in their own way, and none of them may cost the other studies.
+        except Exception:
+            logger.exception("study %s could not be decoded — contributing %s", study, FALLBACK_PROBABILITY)
+            return None
 
     def tables(self, members: Mapping[str, RaptorMember], device: str) -> dict[str, pd.DataFrame]:
         """One submission frame per member, out of a SINGLE decode of the split.

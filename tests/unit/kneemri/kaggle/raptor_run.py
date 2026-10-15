@@ -17,6 +17,7 @@ from torch import Tensor, nn
 
 from core.findings import STUDY, TARGETS
 from core.mounts import Mounts
+from kneemri.evaluation.raptor_feed import RaptorFeed
 from kneemri.evaluation.raptor_model import Architecture, RaptorClassifier, RaptorMember
 from kneemri.kaggle.raptor_run import DEFAULT_WEIGHTS, FALLBACK_PROBABILITY, RaptorEntry
 
@@ -146,3 +147,45 @@ def test_run(tmp_path: Path) -> None:
     assert len(frame) == 1
     assert list(written.columns) == [STUDY, *TARGETS]
     assert written[STUDY].tolist() == ["study-a"]
+
+
+class Numbered:
+    """A feed whose every study decodes to its own number, except the one named broken."""
+
+    def __init__(self, broken: str) -> None:
+        self.broken = broken
+
+    def study(self, study: str, records: object) -> tuple[np.ndarray, np.ndarray]:
+        """A one-voxel volume holding the study's number, so order is visible in the output."""
+        del records
+        if study == self.broken:
+            message = f"{study} is unreadable"
+            raise OSError(message)
+        return np.full((1, 1, 1), int(study), np.uint8), np.ones(1, np.uint8)
+
+
+def test_decoded(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    """Decodes come back in INPUT order past the read-ahead window, a broken study as None in its place.
+
+    Classes: more studies than the window (2 x one decoder), so the bounded deque must drain while still
+    submitting; and one unreadable study mid-stream, which must not shift any later study's row.
+    """
+    studies = [str(number) for number in range(7)]
+    entry = RaptorEntry(competition(tmp_path / "comp", studies), working=tmp_path, decoders=1)
+
+    with caplog.at_level(logging.ERROR):
+        decoded = list(entry.decoded(cast("RaptorFeed", Numbered("3")), studies, {}))
+
+    assert [None if item is None else int(item[0][0, 0, 0]) for item in decoded] == [0, 1, 2, None, 4, 5, 6]
+    assert len(caplog.records) == 1
+
+
+def test_one() -> None:
+    """A readable study is its decode; an unreadable one is None, never a raise."""
+    feed = cast("RaptorFeed", Numbered("9"))
+
+    readable = RaptorEntry.one(feed, "5", {})
+
+    assert readable is not None
+    assert int(readable[0][0, 0, 0]) == 5
+    assert RaptorEntry.one(feed, "9", {}) is None
