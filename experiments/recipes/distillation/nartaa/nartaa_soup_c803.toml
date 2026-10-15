@@ -7,5 +7,6 @@ seed = 803
 hypothesis = "basinsoup_ff's child with the nartaa CoAtNet-384 teacher at 0.5, the only change against basinsoup_ff_c30x."
 bead = "knee-p844l"
 requires = ["$MODELS/labelwise_ext_drop40_long_ff.pt", "$PROCESSED/nartaa_teacher.npz"]
+after = ["kneemri.models.weight_soup --ship-only --members $MODELS/labelwise_ext_drop40_long_ff.pt $MODELS/nartaa_soup_c801.pt $MODELS/nartaa_soup_c802.pt $MODELS/nartaa_soup_c803.pt --out $MODELS/nartaa_soup_k4_s2026.pt"]
 status = "queued"
 out = "nartaa_soup_c803"

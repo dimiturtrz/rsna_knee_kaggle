@@ -18,24 +18,18 @@
 # deliberate: --distill-weight 0.5 = nartaa's 1/2 share in the champion blend, in label space. Not 0.7:
 # tblendsolo used 0.7 under a teacher BELOW its student and read -0.017 on the board.
 # ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
-source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
-PARENT="$MODELS/labelwise_ext_drop40_long_ff.pt"
-require "$PARENT"
-require "$PROCESSED/nartaa_teacher.npz"
-
 # Two children share the card: one peaks at 11.7 GB reserved (basinsoup_ff_c301.full.log), so a pair
 # fits a 32.6 GB card and the third follows. The second takes its own lock dir; the free-memory gate
 # admits it after two minutes, since its derived need (vram_gb 22) is the cap, not the 11.7 GB used.
-bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c801.toml "$@" &
+# lib.sh first: it re-runs this arm from ONE snapshot and exports ARM_LIB, so the children below share it.
+# A bare `run.sh` started from the repo would re-exec itself and drop its recipe argument, and two of them
+# at once race on the same snapshot dir. The K=4 soup is c803's `after`, as in basinsoup_ff.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+run="$REPO/experiments/run.sh"
+bash "$run" experiments/recipes/distillation/nartaa/nartaa_soup_c801.toml "$@" &
 first=$!
-GPU_LOCK_DIR="$HOME/.gpu.lock.pair" FOREIGN_WAITS=2 bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c802.toml "$@" &
+GPU_LOCK_DIR="$HOME/.gpu.lock.pair" FOREIGN_WAITS=2 bash "$run" experiments/recipes/distillation/nartaa/nartaa_soup_c802.toml "$@" &
 second=$!
 wait "$first" || exit
 wait "$second" || exit
-require "$MODELS/nartaa_soup_c801.pt"
-require "$MODELS/nartaa_soup_c802.pt"
-bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c803.toml "$@" || exit
-
-uv run --no-sync --project "$REPO" python -m kneemri.models.weight_soup \
-  --members "$PARENT" "$MODELS/nartaa_soup_c801.pt" "$MODELS/nartaa_soup_c802.pt" "$MODELS/nartaa_soup_c803.pt" \
-  --out "$MODELS/nartaa_soup_k4_s2026.pt"
+exec bash "$run" experiments/recipes/distillation/nartaa/nartaa_soup_c803.toml "$@"
