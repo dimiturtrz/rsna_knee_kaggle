@@ -1,0 +1,23 @@
+# nartaa_soup: basinsoup_ff's children with the nartaa CoAtNet-384 teacher as the ONE added term.
+# Same parent (labelwise_ext_drop40_long_ff.pt = extffsolo_v1, board 0.945), same 4 epochs at 2e-5,
+# same seeds' role; the matched control is basinsoup_ff_k4_s2026 (board 0.946), already on the board.
+
+extends = ["../../composite/basinsoup/_family.toml"]
+
+[data]
+scheme = "extended"
+slices = 20
+
+[encoder]
+backbone_lr = 2e-05
+init = "$MODELS/labelwise_ext_drop40_long_ff.pt"
+
+[optim]
+epochs = 4
+
+[run]
+fold = -1
+
+[teacher]
+distill_weight = 0.5
+teacher_targets = "$PROCESSED/nartaa_teacher.npz"

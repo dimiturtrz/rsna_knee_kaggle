@@ -89,7 +89,7 @@ class FeaturePass(TeacherPass):
         throw away thirty minutes of decode over one unreadable study, and substituting a value would
         put a direction in the file that no member ever read.
         """
-        feed = RaptorFeed(self.split.series(self.competition))
+        feed = RaptorFeed(self.split.series(self.competition), self.layout)
         rows = {name: np.full((len(identifiers), member.width()), np.nan) for name, member in members.items()}
         for index, study in enumerate(identifiers):
             try:

@@ -34,6 +34,7 @@ import logging
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TypedDict
 
 import cv2
 import numpy as np
@@ -83,6 +84,8 @@ class Slot:
     slices: int
 
 
+SAGITTAL = "Sagittal"
+
 ANY_WEIGHTING = -1
 """`Slot.fluid_sensitive` for the axial slot, which takes whatever series the study has."""
 
@@ -123,6 +126,67 @@ EVAL_WINDOWS = 42
 
 TRIPLET = 3
 """A window is the slice and its two neighbours, stacked into the three channels of one image."""
+
+NARTAA_SLOTS = (
+    Slot("Sagittal", 1, 26),
+    Slot("Sagittal", 0, 22),
+    Slot("Coronal", 1, 18),
+    Slot("Coronal", 0, 12),
+    Slot("Axial", ANY_WEIGHTING, 18),
+)
+"""The 96-deep stack nartaa's CoAtNet-384 was fitted on: the same five slots, half again as many slices."""
+
+
+class TimmOptions(TypedDict, total=False):
+    """The `timm.create_model` options a foreign checkpoint can be built with beyond the defaults."""
+
+    img_size: int
+
+
+@dataclass(frozen=True)
+class Layout:
+    """Every constant a checkpoint's decode was fitted under, so one member is never read through another's.
+
+    The raptor family shares one decode SHAPE — five slots, a millimetre crop, a series percentile window,
+    three-slice windows — and differs only in these numbers. `2026-08-27_the-feed-was-the-whole-shortfall.md`
+    is what a wrong number costs: the byte-identical checkpoint lost 0.035 through the wrong feed.
+    """
+
+    image_size: int
+    slots: tuple[Slot, ...]
+    span: tuple[float, float]
+    windows: int
+    crop: int
+    """Side of the centre box handed to the backbone, cut out of `image_size`; 0 hands it the whole frame."""
+    flips: tuple[bool, ...]
+    """The views averaged per study: `(False,)` reads it once, `(False, True)` adds the left-right mirror."""
+    backbone: TimmOptions
+    """Extra `timm.create_model` options the checkpoint was BUILT with, e.g. a non-default `img_size`."""
+    half: bool
+    """Read under fp16 autocast on a card, as the checkpoint's own serving path does."""
+
+    @property
+    def depth(self) -> int:
+        """Slices in the stack, every slot's count summed."""
+        return sum(slot.slices for slot in self.slots)
+
+    @property
+    def sagittal(self) -> int:
+        """Depths below this belong to a sagittal slot, where a left-right mirror is a slice-order reversal."""
+        return sum(slot.slices for slot in self.slots if slot.plane == SAGITTAL)
+
+    def resolution(self, fitted: int) -> int:
+        """The side the backbone reads: the crop when there is one, else the checkpoint's own resolution."""
+        return self.crop or fitted
+
+
+RAPTOR = Layout(IMAGE_SIZE, SLOTS, (SPAN_LOW, SPAN_HIGH), EVAL_WINDOWS, 0, (False,), {}, half=False)
+"""The public raptor arms' decode — the default every existing member was measured through."""
+
+NARTAA = Layout(384, NARTAA_SLOTS, (0.02, 0.98), 94, 320, (False, True), {"img_size": 320}, half=True)
+"""nartaa's native-384 decode: 96 slices over 2-98%, 94 windows centre-cropped to 320, mirror TTA, fp16."""
+
+LAYOUTS = {"raptor": RAPTOR, "nartaa": NARTAA}
 
 IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(TRIPLET, 1, 1)
 IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(TRIPLET, 1, 1)
@@ -204,13 +268,13 @@ class Series:
         spacing = getattr(header, DicomTag.PIXEL_SPACING, None)
         return float(spacing[0]) if spacing is not None else DEFAULT_SPACING_MM
 
-    def sampled(self, count: int) -> tuple[Slice, ...]:
+    def sampled(self, count: int, span: tuple[float, float] = (SPAN_LOW, SPAN_HIGH)) -> tuple[Slice, ...]:
         """Take `count` slices evenly across the span, repeating the first if there is only one."""
         total = len(self.slices)
         if total <= 1:
             return tuple(self.slices[0] for _ in range(count)) if total else ()
-        low = int(total * SPAN_LOW)
-        high = max(int(total * SPAN_HIGH) - 1, low)
+        low = int(total * span[0])
+        high = max(int(total * span[1]) - 1, low)
         picks = np.linspace(low, high, count).round().astype(int)
         return tuple(self.slices[min(int(pick), total - 1)] for pick in picks)
 
@@ -220,6 +284,7 @@ class RaptorFeed:
     """Their study decode, written out here: DICOM directory in, a scorable `uint8` volume out."""
 
     series_root: Path
+    layout: Layout = RAPTOR
 
     @staticmethod
     def records(series_csv: Path) -> Records:
@@ -235,10 +300,11 @@ class RaptorFeed:
     ) -> tuple[UInt8[NDArray[np.uint8], "depth height width"], UInt8[NDArray[np.uint8], " depth"]]:
         """Fill the five slots for one study and report which depths actually hold an image."""
         rows = list(records.get(study, []))
-        volume = np.zeros((STACK_DEPTH, IMAGE_SIZE, IMAGE_SIZE), np.uint8)
+        stack = self.layout.depth
+        volume = np.zeros((stack, self.layout.image_size, self.layout.image_size), np.uint8)
         depth = 0
         used: set[object] = set()
-        for slot in SLOTS:
+        for slot in self.layout.slots:
             chosen = RaptorFeed._chosen(rows, slot, used)
             if chosen is None:
                 depth += slot.slices
@@ -249,9 +315,9 @@ class RaptorFeed:
                 depth += slot.slices
                 continue
             depth = self._filled(volume, depth, series, slot)
-            if depth >= STACK_DEPTH:
+            if depth >= stack:
                 break
-        mask = (volume.reshape(STACK_DEPTH, -1).sum(1) > 0).astype(np.uint8)
+        mask = (volume.reshape(stack, -1).sum(1) > 0).astype(np.uint8)
         return volume, mask
 
     @staticmethod
@@ -280,18 +346,18 @@ class RaptorFeed:
         slot: Slot,
     ) -> int:
         """Write one slot's slices into the volume and hand back the depth to continue at."""
-        picked = series.sampled(slot.slices)
+        picked = series.sampled(slot.slices, self.layout.span)
         images = [RaptorFeed._pixels(one.path) for one in picked]
         low, high = RaptorFeed._window(images)
         for image, one in zip(images, picked, strict=True):
-            if depth >= STACK_DEPTH:
+            if depth >= self.layout.depth:
                 break
             if image is None:
                 depth += 1
                 continue
             windowed = np.clip((image - low) / (high - low + 1e-6), 0, 1)
             spacing = one.spacing_mm if one.spacing_mm > 0 else series.median_spacing_mm
-            volume[depth] = (RaptorFeed._cropped(windowed, spacing) * BYTE_MAX).astype(np.uint8)
+            volume[depth] = (RaptorFeed._cropped(windowed, spacing, self.layout.image_size) * BYTE_MAX).astype(np.uint8)
             depth += 1
         return depth
 
@@ -329,7 +395,7 @@ class RaptorFeed:
 
     @staticmethod
     def _cropped(
-        image: Float[NDArray[np.float64], "height width"], spacing_mm: float
+        image: Float[NDArray[np.float64], "height width"], spacing_mm: float, size: int = IMAGE_SIZE
     ) -> Float[NDArray[np.float64], "size size"]:
         """Centre-crop a fixed number of MILLIMETRES, then resize to the model's input."""
         height, width = image.shape
@@ -337,7 +403,7 @@ class RaptorFeed:
         top = (height - side) // 2
         left = (width - side) // 2
         cropped = image[top : top + side, left : left + side]
-        resized = cv2.resize(cropped, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_AREA)
+        resized = cv2.resize(cropped, (size, size), interpolation=cv2.INTER_AREA)
         return np.asarray(resized, dtype=np.float64)
 
 
@@ -346,6 +412,37 @@ class Windows:
     """The scoring view of a decoded study: every three-slice window the mask allows."""
 
     count: int = EVAL_WINDOWS
+    crop: int = 0
+    """Side of the centre box cut out of each window before resizing; 0 keeps the whole frame."""
+    sagittal: int = 0
+    """Depths below this mirror by slice-order reversal, the rest by a width flip (`Layout.sagittal`)."""
+
+    @staticmethod
+    def of(layout: Layout) -> "Windows":
+        """The windowing a layout's checkpoint was fitted under."""
+        return Windows(layout.windows, layout.crop, layout.sagittal)
+
+    def views(
+        self,
+        volume: UInt8[NDArray[np.uint8], "depth height width"],
+        mask: UInt8[NDArray[np.uint8], " depth"],
+        resolution: int,
+        flips: tuple[bool, ...],
+    ) -> list[Float[Tensor, "windows channels size size"]]:
+        """One stack of windows per view a layout averages — the plain read, then any mirror."""
+        return [self.stacked(volume, mask, resolution, mirrored=flip) for flip in flips]
+
+    def mirrored(
+        self, triplet: UInt8[NDArray[np.uint8], "channels height width"], centre: int
+    ) -> UInt8[NDArray[np.uint8], "channels height width"]:
+        """The knee seen left-right reversed, applied to `uint8` BEFORE normalisation as nartaa's TTA does.
+
+        On a sagittal slot the left-right axis is the slice axis, so the three channels reverse; on a
+        coronal or axial slot it is the image width. Reversing channels after the per-channel ImageNet
+        normalisation would not be the same thing, which is why this runs on raw bytes.
+        """
+        axis = 0 if centre < self.sagittal else -1
+        return np.flip(triplet, axis=axis)
 
     def centres(self, mask: UInt8[NDArray[np.uint8], " depth"]) -> list[int]:
         """The slice indices to centre windows on — inside the filled span, never on its edge."""
@@ -365,15 +462,21 @@ class Windows:
         volume: UInt8[NDArray[np.uint8], "depth height width"],
         mask: UInt8[NDArray[np.uint8], " depth"],
         resolution: int,
+        *,
+        mirrored: bool = False,
     ) -> Float[Tensor, "windows channels size size"]:
         """Stack each centre with its two neighbours and normalise the way the weights expect."""
-        depth = volume.shape[0]
+        depth, height = volume.shape[:2]
+        side = self.crop or height
+        top = (height - side) // 2
         centres = self.centres(mask)
         windows = np.empty((len(centres), TRIPLET, resolution, resolution), np.float32)
         for position, centre in enumerate(centres):
             middle = max(1, min(centre, depth - 2))
-            triplet = np.stack([volume[middle - 1], volume[middle], volume[middle + 1]], 0, dtype=np.float32)
-            windows[position] = Windows._resized(torch.from_numpy(triplet / BYTE_MAX), resolution).numpy()
+            triplet = np.stack([volume[middle - 1], volume[middle], volume[middle + 1]], 0)
+            oriented = self.mirrored(triplet, middle) if mirrored else triplet
+            cut = oriented[:, top : top + side, top : top + side].astype(np.float32)
+            windows[position] = Windows._resized(torch.from_numpy(cut / BYTE_MAX), resolution).numpy()
         return (torch.from_numpy(windows) - IMAGENET_MEAN) / IMAGENET_STD
 
     @staticmethod

@@ -26,7 +26,7 @@ from numpy.typing import NDArray
 
 from core.findings import STUDY, TARGETS
 from core.mounts import Mounts
-from kneemri.evaluation.raptor_feed import RaptorFeed, Records
+from kneemri.evaluation.raptor_feed import RAPTOR, Layout, RaptorFeed, Records
 from kneemri.evaluation.raptor_model import RaptorMember
 from kneemri.kaggle.submission import Split, Submission
 
@@ -50,6 +50,8 @@ class RaptorEntry:
     competition: Path
     working: Path = WORKING
     split: Split = field(default_factory=Split)
+    layout: Layout = RAPTOR
+    """The decode every member in a fleet shares; a member fitted under another layout needs its own entry."""
 
     @staticmethod
     def weights(filename: str = DEFAULT_WEIGHTS, mounts: Mounts | None = None) -> Path:
@@ -70,7 +72,7 @@ class RaptorEntry:
         member's alone. Keeping the two apart matters here in a way it does not for a single member: a
         checkpoint that cannot run must not silently hand the other twelve a corpus full of 0.5s.
         """
-        feed = RaptorFeed(self.split.series(self.competition))
+        feed = RaptorFeed(self.split.series(self.competition), self.layout)
         rows = {name: np.full((len(identifiers), len(TARGETS)), FALLBACK_PROBABILITY) for name in members}
         for index, study in enumerate(identifiers):
             try:

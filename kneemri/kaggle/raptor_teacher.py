@@ -43,7 +43,7 @@ from jaxtyping import Float
 from core import cli
 from core.findings import STUDY
 from kneemri.device import VisibleCards
-from kneemri.evaluation.raptor_feed import RaptorFeed, Records
+from kneemri.evaluation.raptor_feed import LAYOUTS, RAPTOR, Layout, RaptorFeed, Records
 from kneemri.evaluation.raptor_model import RaptorMember
 from kneemri.kaggle.raptor_run import RaptorEntry
 from kneemri.kaggle.submission import Split
@@ -71,6 +71,7 @@ class TeacherPass:
     competition: Path
     destination: Path
     split: Split = field(default_factory=lambda: Split(name=TRAIN))
+    layout: Layout = RAPTOR
 
     def identifiers(self) -> list[str]:
         """Every study in the split's own table order, as strings.
@@ -103,7 +104,7 @@ class TeacherPass:
         foreign decode, its window count and its per-study fallback are the ones a submission uses, with
         no second reading of any of them written here.
         """
-        return RaptorEntry(self.competition, working=self.destination.parent, split=self.split)
+        return RaptorEntry(self.competition, working=self.destination.parent, split=self.split, layout=self.layout)
 
     def written(self, path: Path, identifiers: list[str], scores: Float[np.ndarray, "n t"]) -> Path:
         """Write one member's readings under the two names the training side looks them up by.
@@ -118,7 +119,7 @@ class TeacherPass:
         return path
 
     @staticmethod
-    def fleet(weights: Sequence[Path], device: str) -> dict[str, RaptorMember]:
+    def fleet(weights: Sequence[Path], device: str, layout: Layout = RAPTOR) -> dict[str, RaptorMember]:
         """Every checkpoint loaded at once, keyed by its filename stem.
 
         They fit together because a member is a backbone and a forty-line head: thirteen of them are a
@@ -126,7 +127,7 @@ class TeacherPass:
         all of them. The stem is the key because it is what the teacher file is then named for, so the
         distance report reads back the checkpoint rather than an index into an argument list.
         """
-        return {path.stem: RaptorMember.loaded(path, device) for path in weights}
+        return {path.stem: RaptorMember.loaded(path, device, layout=layout) for path in weights}
 
     @staticmethod
     def honest(checkpoint: Path) -> None:
@@ -163,6 +164,9 @@ class TeacherPass:
         command.parser.add_argument("--shard", type=int, default=0, help=f"which stride of the split to {cls.VERB}")
         command.parser.add_argument("--shards", type=int, default=1, help="how many processes share the pass")
         command.parser.add_argument("--merge", type=Path, nargs="*", help="join these shard files and exit")
+        command.parser.add_argument(
+            "--layout", choices=sorted(LAYOUTS), default="raptor", help="the decode it was fitted on"
+        )
         arguments = command.parsed()
         root = command.rooted(arguments)
 
@@ -174,14 +178,15 @@ class TeacherPass:
 
         for checkpoint in arguments.weights:
             cls.honest(checkpoint)
-        passing = cls(root.raw(), destination, Split(name=str(arguments.split)))
+        layout = LAYOUTS[arguments.layout]
+        passing = cls(root.raw(), destination, Split(name=str(arguments.split)), layout)
         identifiers = cls.sharded(passing.identifiers(), arguments.shard, arguments.shards)
         if arguments.studies:
             identifiers = identifiers[: arguments.studies]
         log.info("%s over %d %s studies", cls.GERUND, len(identifiers), arguments.split)
 
         device = str(VisibleCards().device())
-        members = cls.fleet(arguments.weights, device)
+        members = cls.fleet(arguments.weights, device, layout)
         log.info("loaded %d members onto %s", len(members), device)
 
         for name, values in passing.taught(identifiers, passing.records(), members, device).items():

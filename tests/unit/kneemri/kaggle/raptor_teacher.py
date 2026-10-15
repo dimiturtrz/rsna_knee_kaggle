@@ -13,6 +13,7 @@ from core import cli
 from core.findings import STUDY
 from core.paths import ENV_OVERRIDE, DataRoot
 from kneemri.device import VisibleCards
+from kneemri.evaluation.raptor_feed import NARTAA
 from kneemri.evaluation.raptor_model import RaptorMember
 from kneemri.kaggle import raptor_features, raptor_teacher
 from kneemri.kaggle.raptor_run import RaptorEntry
@@ -85,11 +86,12 @@ def test_fleet(monkeypatch: pytest.MonkeyPatch) -> None:
     The key matters more than it looks: the distance report reads a member back by this name, so keying
     on an index into the argument list would make every report unreadable against the checkpoints.
     """
-    monkeypatch.setattr(RaptorMember, "loaded", classmethod(lambda cls, path, device: (path, device)))
+    monkeypatch.setattr(RaptorMember, "loaded", classmethod(lambda cls, path, device, layout: (path, layout)))
 
-    members = TeacherPass.fleet([Path("a/raptor_ft_coatnet_v5_full_swa.pt"), Path("b/cnn336.pt")], "cpu")
+    members = TeacherPass.fleet([Path("a/raptor_ft_coatnet_v5_full_swa.pt"), Path("b/cnn336.pt")], "cpu", NARTAA)
 
     assert list(members) == ["raptor_ft_coatnet_v5_full_swa", "cnn336"]
+    assert members["cnn336"] == (Path("b/cnn336.pt"), NARTAA)
 
 
 def test_sharded():
@@ -166,6 +168,7 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         shard=1,
         shards=2,
         merge=None,
+        layout="raptor",
     )
     assert _namespace(monkeypatch, raptor_teacher.main, argv) == expected_flags
     assert _namespace(monkeypatch, raptor_features.main, argv) == expected_flags
@@ -175,7 +178,9 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     raw.mkdir(parents=True)
     _corpus(raw, ["s0", "s1", "s2", "s3"])
     monkeypatch.setattr(VisibleCards, "device", lambda self: torch.device("cpu"))
-    monkeypatch.setattr(TeacherPass, "fleet", staticmethod(lambda weights, device: {p.stem: device for p in weights}))
+    monkeypatch.setattr(
+        TeacherPass, "fleet", staticmethod(lambda weights, device, layout: {p.stem: device for p in weights})
+    )
     monkeypatch.setattr(
         RaptorEntry,
         "readings",

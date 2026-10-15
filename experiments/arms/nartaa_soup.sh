@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# bead: knee-p844l
+# reading: nartaa_soup_k4_s2026.pt
+# unmeasurable: fold -1, read on the BOARD against basinsoupff_v1 (0.946), like basinsoup_ff.
+#
+# basinsoup_ff with ONE change: each 4-epoch child also fits the nartaa CoAtNet-384 teacher's readings
+# (OAI + JEV-blend supervision, board 0.949 solo) at distill_weight 0.5. Parent, seeds' role, epochs,
+# rate and the K=4 average are basinsoup_ff's, so basinsoup_ff_k4_s2026 (board 0.946) is the control.
+#
+# PRE-REGISTERED ON THE BOARD (solo, one seat):
+#   >= 0.948   the teacher's labels transfer into our trunk; the next general-pick candidate.
+#   0.946-0.947 inside the board's resolution of the control; the teacher adds nothing a soup lacks.
+#   <= 0.945   distillation spends the soup's gain; the pseudo-label axis closes for this teacher.
+# CAVEAT: the teacher fitted on all labelled studies, so its readings on our training set are partly
+# memorised labels. That is the point (they are its blended labels) and why only the board can read it.
+#
+# deliberate: --fold -1, --init the 0.945 parent, --epochs 4, --backbone-lr 2e-5 (basinsoup_ff's op).
+# deliberate: --distill-weight 0.5 = nartaa's 1/2 share in the champion blend, in label space. Not 0.7:
+# tblendsolo used 0.7 under a teacher BELOW its student and read -0.017 on the board.
+# ARM_LIB is set when this arm runs from a snapshot copy (see run_snapshot); $0 moves, the lib does not.
+source "${ARM_LIB:-$(dirname "$0")/../lib.sh}"
+PARENT="$MODELS/labelwise_ext_drop40_long_ff.pt"
+require "$PARENT"
+require "$PROCESSED/nartaa_teacher.npz"
+
+bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c801.toml "$@" || exit
+bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c802.toml "$@" || exit
+bash "$(dirname "$0")/../run.sh" experiments/recipes/distillation/nartaa/nartaa_soup_c803.toml "$@" || exit
+
+uv run --no-sync --project "$REPO" python -m kneemri.models.weight_soup \
+  --members "$PARENT" "$MODELS/nartaa_soup_c801.pt" "$MODELS/nartaa_soup_c802.pt" "$MODELS/nartaa_soup_c803.pt" \
+  --out "$MODELS/nartaa_soup_k4_s2026.pt"

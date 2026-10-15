@@ -1,0 +1,11 @@
+extends = ["_family.toml"]
+
+[run]
+seed = 802
+
+[meta]
+hypothesis = "basinsoup_ff's child with the nartaa CoAtNet-384 teacher at 0.5, the only change against basinsoup_ff_c30x."
+bead = "knee-p844l"
+requires = ["$MODELS/labelwise_ext_drop40_long_ff.pt", "$PROCESSED/nartaa_teacher.npz"]
+status = "queued"
+out = "nartaa_soup_c802"

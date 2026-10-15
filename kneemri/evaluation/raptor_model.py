@@ -24,7 +24,7 @@ which is a serving choice, not part of the specification. `--device cpu` is what
 """
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import cast, override
 
@@ -65,6 +65,8 @@ DEFAULT_ARCHITECTURE = "coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k"
 
 DEFAULT_RESOLUTION = 384
 
+CUDA = "cuda"
+
 
 @dataclass(frozen=True)
 class Architecture:
@@ -72,6 +74,8 @@ class Architecture:
 
     name: str
     resolution: int
+    options: raptor_feed.TimmOptions = field(default_factory=raptor_feed.TimmOptions)
+    """Extra `timm.create_model` options the checkpoint was built with — its `Layout.backbone`."""
 
     @property
     def transformer(self) -> bool:
@@ -89,8 +93,11 @@ class Architecture:
                 in_chans=3,
                 global_pool="token",
                 dynamic_img_size=True,
+                **self.options,
             )
-        return timm.create_model(self.name, pretrained=False, num_classes=0, in_chans=3, global_pool="avg")
+        return timm.create_model(
+            self.name, pretrained=False, num_classes=0, in_chans=3, global_pool="avg", **self.options
+        )
 
     @staticmethod
     def width(backbone: nn.Module) -> int:
@@ -172,6 +179,8 @@ class RaptorMember:
 
     Carried rather than assumed: the two orders agree today, and a submission whose columns were
     assigned positionally would keep scoring — around chance — the day an arm's did not."""
+    layout: raptor_feed.Layout = raptor_feed.RAPTOR
+    """The decode and windowing this checkpoint was fitted under; the feed that decodes for it must match."""
 
     @classmethod
     def loaded(
@@ -180,24 +189,40 @@ class RaptorMember:
         device: str,
         architecture: str = DEFAULT_ARCHITECTURE,
         resolution: int = DEFAULT_RESOLUTION,
+        layout: raptor_feed.Layout = raptor_feed.RAPTOR,
     ) -> "RaptorMember":
-        """Read a checkpoint, build the architecture IT names, and load its weights strictly."""
-        state = torch.load(checkpoint, map_location="cpu", weights_only=False)
-        named = Architecture(str(state.get("arch", architecture)), int(state.get("res", resolution)))
+        """Read a checkpoint, build the architecture IT names, and load its weights strictly.
+
+        `weights_only=True`: these are foreign files, and every one on disk loads under it.
+        """
+        state = torch.load(checkpoint, map_location="cpu", weights_only=True)
+        fitted = int(state.get("res", resolution))
+        named = Architecture(str(state.get("arch", architecture)), layout.resolution(fitted), layout.backbone)
         backbone = named.built()
         model = RaptorClassifier(backbone, features=Architecture.width(backbone))
         model.load_state_dict(state["model"], strict=True)
         model.eval().to(device)
         labels = tuple(str(name) for name in state.get("lab", TARGETS))
-        return cls(model, named, labels)
+        return cls(model, named, labels, layout)
 
     @torch.no_grad()
     def probs(
         self, windows: Float[Tensor, "windows channels size size"], device: str
     ) -> Float[NDArray[np.float32], " findings"]:
         """Twelve probabilities for one study, from the windows `raptor_feed` stacked for it."""
-        logits = self.model(windows.unsqueeze(0).to(device))
+        half = self.layout.half and torch.device(device).type == CUDA
+        with torch.autocast(CUDA, dtype=torch.float16, enabled=half):
+            logits = self.model(windows.unsqueeze(0).to(device))
         return torch.sigmoid(logits.float())[0].cpu().numpy()
+
+    def viewed(
+        self,
+        volume: Float[NDArray[np.uint8], "depth height width"],
+        mask: Float[NDArray[np.uint8], " depth"],
+    ) -> list[Float[Tensor, "windows channels size size"]]:
+        """Every view this member's layout averages, windowed the way it was fitted."""
+        windows = raptor_feed.Windows.of(self.layout)
+        return windows.views(volume, mask, self.architecture.resolution, self.layout.flips)
 
     def scored(
         self,
@@ -205,9 +230,9 @@ class RaptorMember:
         mask: Float[NDArray[np.uint8], " depth"],
         device: str,
     ) -> Float[NDArray[np.float32], " findings"]:
-        """The whole serving step for one decoded study: window it, then read the member."""
-        windows = raptor_feed.Windows().stacked(volume, mask, self.architecture.resolution)
-        return self.probs(windows, device)
+        """The whole serving step for one decoded study: window it, then read the member, views averaged."""
+        read = [self.probs(view, device) for view in self.viewed(volume, mask)]
+        return np.asarray(np.mean(read, axis=0), dtype=np.float32)
 
     @torch.no_grad()
     def embedded(
@@ -230,7 +255,7 @@ class RaptorMember:
         NO `TARGETS` REORDER, unlike `ordered`, and that is not an omission: the finding axis has already
         been averaged away, so there is no column order left for a label list to disagree about.
         """
-        windows = raptor_feed.Windows().stacked(volume, mask, self.architecture.resolution)
+        windows = raptor_feed.Windows.of(self.layout).stacked(volume, mask, self.architecture.resolution)
         return self.embedded(windows, device)
 
     def width(self) -> int:

@@ -15,7 +15,7 @@ import torch
 from torch import Tensor, nn
 
 from core.findings import TARGETS
-from kneemri.evaluation.raptor_feed import STACK_DEPTH
+from kneemri.evaluation.raptor_feed import NARTAA, STACK_DEPTH
 from kneemri.evaluation.raptor_model import (
     ATTENTION_WIDTH,
     FINDINGS,
@@ -245,3 +245,16 @@ def test_scored() -> None:
     member = RaptorMember(classifier(), Architecture(TEST_ARCHITECTURE, SIDE * 2))
 
     assert member.scored(volume, mask, "cpu").shape == (FINDINGS,)
+
+
+def test_viewed() -> None:
+    """One view per flip the layout averages, each at the member's own resolution."""
+    volume = np.zeros((STACK_DEPTH, SIDE, SIDE), np.uint8)
+    volume[2:20] = 200
+    mask = (volume.reshape(STACK_DEPTH, -1).sum(1) > 0).astype(np.uint8)
+    member = RaptorMember(classifier(), Architecture(TEST_ARCHITECTURE, SIDE * 2), layout=NARTAA)
+
+    views = member.viewed(volume, mask)
+
+    assert len(views) == len(NARTAA.flips)
+    assert all(view.shape[-2:] == (SIDE * 2, SIDE * 2) for view in views)

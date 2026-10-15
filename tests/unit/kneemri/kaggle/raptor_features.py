@@ -189,7 +189,9 @@ def test_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     weights = tmp_path / "foreign.pt"
     torch.save({"model": {}}, weights)
     monkeypatch.setattr(VisibleCards, "device", lambda self: torch.device("cpu"))
-    monkeypatch.setattr(FeaturePass, "fleet", staticmethod(lambda paths, device: _members(foreign=_Reader(0.5))))
+    monkeypatch.setattr(
+        FeaturePass, "fleet", staticmethod(lambda paths, device, layout: _members(foreign=_Reader(0.5)))
+    )
     monkeypatch.setattr(
         RaptorFeed,
         "study",

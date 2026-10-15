@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 import pydicom
 import pytest
+import torch
 from pydicom.dataset import Dataset, FileMetaDataset
 from pydicom.uid import CTImageStorage, ExplicitVRLittleEndian, generate_uid
 
@@ -18,9 +19,12 @@ from kneemri.evaluation.raptor_feed import (
     EVAL_WINDOWS,
     IMAGE_SIZE,
     IMAGENET_MEAN,
+    NARTAA,
+    RAPTOR,
     SLOTS,
     STACK_DEPTH,
     TRIPLET,
+    Layout,
     RaptorFeed,
     Series,
     Slice,
@@ -207,3 +211,74 @@ def test_read_px_inverts_a_monochrome1_study(tmp_path: Path) -> None:
         "the darkest written pixel is 0 and must come back as the brightest; left uninverted the study "
         "is a photographic negative of itself and every finding is scored on the wrong contrast"
     )
+
+
+def test_depth() -> None:
+    """A layout's depth is the sum of its slots — the volume the checkpoint reads."""
+    assert RAPTOR.depth == STACK_DEPTH
+    assert NARTAA.depth == 96
+
+
+def test_sagittal() -> None:
+    """The sagittal slots lead the stack, so the boundary is their summed slice count."""
+    assert NARTAA.sagittal == 26 + 22
+    assert RAPTOR.sagittal == 18 + 14
+
+
+def test_resolution() -> None:
+    """A cropping layout reads at its crop; otherwise at the resolution the checkpoint was fitted at."""
+    assert NARTAA.resolution(384) == 320
+    assert RAPTOR.resolution(IMAGE_SIZE) == IMAGE_SIZE
+
+
+def test_of() -> None:
+    """Windows carry the layout's count, crop and sagittal boundary."""
+    windows = Windows.of(NARTAA)
+    assert (windows.count, windows.crop, windows.sagittal) == (94, 320, 48)
+    assert (Windows.of(RAPTOR).count, Windows.of(RAPTOR).crop) == (EVAL_WINDOWS, 0)
+
+
+def test_mirrored() -> None:
+    """Sagittal slices reverse the channel order; the others flip the image width."""
+    triplet = np.arange(TRIPLET * 2 * 2, dtype=np.uint8).reshape(TRIPLET, 2, 2)
+    windows = Windows(sagittal=10)
+
+    assert np.array_equal(windows.mirrored(triplet, 3), triplet[::-1])
+    assert np.array_equal(windows.mirrored(triplet, 10), triplet[:, :, ::-1])
+
+
+def test_views() -> None:
+    """One stack per flip, the plain read first, and the mirror genuinely different from it."""
+    volume = np.zeros((STACK_DEPTH, SIDE, SIDE), np.uint8)
+    volume[2:10, :, : SIDE // 2] = 255
+    mask = (volume.reshape(STACK_DEPTH, -1).sum(1) > 0).astype(np.uint8)
+    plain, flipped = Windows(count=2).views(volume, mask, SIDE, (False, True))
+
+    assert torch.equal(plain, Windows(count=2).stacked(volume, mask, SIDE))
+    assert torch.equal(flipped, torch.flip(plain, dims=(-1,)))
+
+
+def test_stacked_crops_the_centre_box_before_resizing() -> None:
+    """With a crop the frame border is cut away, so a bright border never reaches the model."""
+    volume = np.zeros((STACK_DEPTH, SIDE, SIDE), np.uint8)
+    volume[:, 0, :] = 255
+    mask = np.ones(STACK_DEPTH, np.uint8)
+    cropped = Windows(count=1, crop=SIDE - 2).stacked(volume, mask, SIDE - 2)
+
+    assert cropped.shape == (1, TRIPLET, SIDE - 2, SIDE - 2)
+    assert float(cropped.max()) < 0.0, "every surviving pixel is black, below the ImageNet mean"
+
+
+def test_sampled_honours_a_custom_span() -> None:
+    """nartaa's 2-98% span starts at int(100*0.02)=2 and ends at int(100*0.98)-1=97."""
+    series = Series(tuple(Slice(float(i), f"{i}.dcm", SPACING) for i in range(100)), SPACING)
+    picked = series.sampled(2, NARTAA.span)
+
+    assert [one.path for one in picked] == ["2.dcm", "97.dcm"]
+
+
+def test_layout_is_frozen() -> None:
+    """A layout is a constant the checkpoint was fitted under; nothing may edit it in flight."""
+    with pytest.raises(AttributeError):
+        NARTAA.crop = 0  # type: ignore[misc]
+    assert isinstance(NARTAA, Layout)

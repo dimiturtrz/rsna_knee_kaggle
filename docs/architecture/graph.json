@@ -18913,6 +18913,24 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.evaluation.raptor_feed.Layout",
+      "target": "kneemri.evaluation.raptor_feed.Slot",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.raptor_feed.Layout",
+      "target": "kneemri.evaluation.raptor_feed.TimmOptions",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.evaluation.raptor_feed.RaptorFeed",
+      "target": "kneemri.evaluation.raptor_feed.Layout",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.evaluation.raptor_feed.RaptorFeed",
       "target": "kneemri.evaluation.raptor_feed.Series",
@@ -18997,6 +19015,18 @@
       "weight": 1
     },
     {
+      "kind": "references",
+      "source": "kneemri.evaluation.raptor_feed.Windows",
+      "target": "kneemri.evaluation.raptor_feed.Layout",
+      "weight": 1
+    },
+    {
+      "kind": "references",
+      "source": "kneemri.evaluation.raptor_feed.Windows",
+      "target": "kneemri.evaluation.raptor_feed.Windows",
+      "weight": 1
+    },
+    {
       "kind": "calls",
       "source": "kneemri.evaluation.raptor_feed.Windows.stacked",
       "target": "kneemri.evaluation.raptor_feed.Windows._resized",
@@ -19006,6 +19036,18 @@
       "kind": "calls",
       "source": "kneemri.evaluation.raptor_feed.Windows.stacked",
       "target": "kneemri.evaluation.raptor_feed.Windows.centres",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.raptor_feed.Windows.stacked",
+      "target": "kneemri.evaluation.raptor_feed.Windows.mirrored",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.raptor_feed.Windows.views",
+      "target": "kneemri.evaluation.raptor_feed.Windows.stacked",
       "weight": 1
     },
     {
@@ -19120,6 +19162,12 @@
       "kind": "calls",
       "source": "kneemri.evaluation.raptor_model.RaptorMember.scored",
       "target": "kneemri.evaluation.raptor_model.RaptorMember.probs",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.evaluation.raptor_model.RaptorMember.scored",
+      "target": "kneemri.evaluation.raptor_model.RaptorMember.viewed",
       "weight": 1
     },
     {
@@ -29665,6 +29713,12 @@
       "weight": 1
     },
     {
+      "kind": "holds",
+      "source": "kneemri.kaggle.raptor_run.RaptorEntry",
+      "target": "kneemri.evaluation.raptor_feed.Layout",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.raptor_run.RaptorEntry",
       "target": "kneemri.evaluation.raptor_model.RaptorMember",
@@ -29782,6 +29836,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.raptor_seat.WeightedRankAverage.scored",
       "target": "kneemri.inference.vote.Vote.ranks",
+      "weight": 1
+    },
+    {
+      "kind": "holds",
+      "source": "kneemri.kaggle.raptor_teacher.TeacherPass",
+      "target": "kneemri.evaluation.raptor_feed.Layout",
       "weight": 1
     },
     {
@@ -42036,6 +42096,14 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.Layout",
+      "label": "Layout",
+      "level": "class",
+      "parent": "kneemri.evaluation.raptor_feed",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.raptor_feed.RaptorFeed",
       "label": "RaptorFeed",
       "level": "class",
@@ -42062,6 +42130,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.raptor_feed.Slot",
       "label": "Slot",
+      "level": "class",
+      "parent": "kneemri.evaluation.raptor_feed",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.TimmOptions",
+      "label": "TimmOptions",
       "level": "class",
       "parent": "kneemri.evaluation.raptor_feed",
       "role": "satellite"
@@ -54148,6 +54224,30 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.Layout.depth",
+      "label": "depth",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_feed.Layout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.Layout.resolution",
+      "label": "resolution",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_feed.Layout",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.Layout.sagittal",
+      "label": "sagittal",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_feed.Layout",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.raptor_feed.RaptorFeed._chosen",
       "label": "_chosen",
       "level": "method",
@@ -54252,8 +54352,32 @@
     },
     {
       "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.Windows.mirrored",
+      "label": "mirrored",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_feed.Windows",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.Windows.of",
+      "label": "of",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_feed.Windows",
+      "role": null
+    },
+    {
+      "descendants": 0,
       "id": "kneemri.evaluation.raptor_feed.Windows.stacked",
       "label": "stacked",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_feed.Windows",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_feed.Windows.views",
+      "label": "views",
       "level": "method",
       "parent": "kneemri.evaluation.raptor_feed.Windows",
       "role": null
@@ -54382,6 +54506,14 @@
       "descendants": 0,
       "id": "kneemri.evaluation.raptor_model.RaptorMember.scored",
       "label": "scored",
+      "level": "method",
+      "parent": "kneemri.evaluation.raptor_model.RaptorMember",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.evaluation.raptor_model.RaptorMember.viewed",
+      "label": "viewed",
       "level": "method",
       "parent": "kneemri.evaluation.raptor_model.RaptorMember",
       "role": null
