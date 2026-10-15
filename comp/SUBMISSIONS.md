@@ -5163,3 +5163,17 @@ variant becomes worth building (a SCALE change there, `CROP_FRAC = 0.8` before r
 board resolution, read the rank; < B the train/test field-of-view mismatch costs more than the periphery adds.
 RESULT: **0.957**. Ties `s6r7solo_v1` and `s6r7_v1` at the competition's 0.001 resolution: the 1.44x field of view neither carries board-visible signal nor costs it, so neither the periphery hypothesis nor the train/test mismatch is visible here. Not a new pin; the 224 reader's full-view variant is NOT armed (its gate was > B). A 0.001 tick between two of our own entries is inside 2 sd of the top band's residual
 scatter, so it reads as public RANK, not as a better model.
+
+## tblendsolo_v1 — 0.928, ref 57197538, 2026-10-14 — teacher-relabelled single model, first board read: the report ruler was right, -0.017 vs extffsolo
+
+`kneemri-tblendsolo` (v2), the efficiency-track instrument (knee-p0s4f, knee-p844l): one member,
+`labelwise_dense_drop40_long_targetblend_s2026`, trained on 0.3 * calibrated report labels + 0.7 * teacher OOF
+(`teacher_clean_full`). ledger75 0.8891 against the control's 0.9048, but that ruler IS the report table, so it is
+blind to a relabelled target by construction (AXES:163). This asks the board instead. Submitted 23:16Z, 14 min ahead
+of the 23:30 mark.
+
+PRE-REG (vs `extffsolo` 0.945, the current efficiency pick): >= 0.946 new efficiency pick, relabel the soups;
+0.938-0.945 the ruler under-reads relabelled targets (no re-teach card, README:9881) and `lw20_btblend` (teacher_blend,
+the first fold-honest teacher at or above the control, 0.9061) is armed by its own >= 0.938 gate; <= 0.937 the ruler
+was right.
+RESULT: **0.928**. The <= 0.937 branch fires: the relabelled student reads 0.017 under `extffsolo` (0.945) on the board, so ledger75's 0.8891-vs-0.9048 deficit was a real loss of signal, not a ruler blind to the new target. A 0.7-weight teacher below its own student (0.8775) pulled the labels toward a worse model. `lw20_btblend` stays DISARMED (its gate was >= 0.938) and no soup is relabelled; the target-blend axis closes at this teacher weight. What it does NOT rule out: a teacher clearly ABOVE the control at a small weight; that is a new arm with its own price, not a re-read of this one.
