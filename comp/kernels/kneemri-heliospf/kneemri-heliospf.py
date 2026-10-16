@@ -1,8 +1,8 @@
 """heliospf — heliosli's 10-15 public blend (credited 0.958), replicated with nothing of ours seated.
 
 The control for `kneemri-s6r7pf`: the same producers minus our two soups. nartaa 384 + 224 (0.65 / 0.35 inside the
-Raptor half), heliosli's R6/R7 bundle `fe055406` under its own flip TTA at the manifest's own eval stride (as
-`blend-mine` runs it), and the per-finding Raptor share: 0.80 Synovitis, 0.20 Lateral OA, 0.60 PF OA, 0.35 Baker's,
+Raptor half), heliosli's R6 bundle `fe055406` (mount `rsna-knee-r6-frozen-fe055406-w1`; NOT the R7 `8c7b666e`
+every s6r7 entry seats) under its own flip TTA at the manifest's own eval stride (as `blend-mine` runs it), and the per-finding Raptor share: 0.80 Synovitis, 0.20 Lateral OA, 0.60 PF OA, 0.35 Baker's,
 0.50 elsewhere, the bundle taking the rest. Fusion is linear in each table's percentile rank, as theirs is.
 The per-finding table was very likely fitted on the PUBLIC board, so this is a FITTING-pick candidate only.
 PRE-REG (resolution 0.001): **0.958** — the replica is faithful, and it is the baseline `s6r7pf` is read against;
@@ -112,6 +112,8 @@ def main() -> None:
     tolerant_r7 = {
         "if rc != 0:": "if rc != 0 and not (pred / 'submission.csv').is_file():",
         "if manifest.get('flip_tta'):": "if True:",
+        "BUNDLE_ID = '8c7b666e27dc0e8f'": "BUNDLE_ID = 'fe055406fad6a12f'",
+        "C_SLUG = 'rsna-knee-compact-r7cnxfsss'": "C_SLUG = 'rsna-knee-r6-frozen-fe055406-w1'",
     }
     working = Path("/kaggle/working")
     started = time.time()

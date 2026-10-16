@@ -1,9 +1,11 @@
 """s6r7pf — heliosli's 10-15 public blend (credited 0.958) with our two soups seated at 1/6.
 
-`kneemri-s6r7flip224`'s producers, unchanged: nartaa 384 + 224 (0.65 / 0.35 inside the Raptor half), heliosli's
-R6/R7 bundle `fe055406` with its own flip TTA, our two soups. Only the blend moves, to heliosli's per-finding Raptor
-share (`blend-mine-in-private-lb-luck-to-all-upvoters`, 10-15 version): Raptor 0.80 on Synovitis, 0.20 on Lateral OA,
-0.60 on PF OA, 0.35 on Baker's, 0.50 elsewhere, R7 taking the rest; that pair is scaled to 5/6 and the soups keep
+`kneemri-s6r7flip224`'s producers with ONE swap: nartaa 384 + 224 (0.65 / 0.35 inside the Raptor half), our two
+soups, and heliosli's R6 bundle `fe055406` (mount `rsna-knee-r6-frozen-fe055406-w1`, flip TTA on, manifest stride)
+in place of the R7 bundle `8c7b666e` — blend-mine's own stage-2 cell is our `helios_r7.py` with exactly that
+BUNDLE_ID / C_SLUG / FLIP_TTA difference, so this is the faithful copy of what scored 0.958. The blend moves to
+heliosli's per-finding Raptor share (`blend-mine-in-private-lb-luck-to-all-upvoters`, 10-15 version): Raptor 0.80 on
+Synovitis, 0.20 on Lateral OA, 0.60 on PF OA, 0.35 on Baker's, 0.50 elsewhere, R6 taking the rest; that pair is scaled to 5/6 and the soups keep
 1/12 each, as in every s6r7 entry.
 The per-finding table was very likely fitted on the PUBLIC board (that notebook carries a single-class probe), so
 this is a FITTING-pick candidate, never the general one.
@@ -121,10 +123,11 @@ def main() -> None:
 
     tolerant_r7 = {
         "if rc != 0:": "if rc != 0 and not (pred / 'submission.csv').is_file():",
-        "str(manifest.get('eval_stride', 3))": "'2'",
         "if manifest.get('flip_tta'):": "if True:",
+        "BUNDLE_ID = '8c7b666e27dc0e8f'": "BUNDLE_ID = 'fe055406fad6a12f'",
+        "C_SLUG = 'rsna-knee-compact-r7cnxfsss'": "C_SLUG = 'rsna-knee-r6-frozen-fe055406-w1'",
     }
-    heliosli_mounts = frozenset({"rsna-knee-compact-r7cnxfsss", "rsna-orthofoundation-fold0-epoch7-20261004"})
+    heliosli_mounts = frozenset({"rsna-knee-r6-frozen-fe055406-w1", "rsna-orthofoundation-fold0-epoch7-20261004"})
     working = Path("/kaggle/working")
     started = time.time()
     mounts = Mounts()
