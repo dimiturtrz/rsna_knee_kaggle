@@ -62094,14 +62094,6 @@
     },
     {
       "descendants": 0,
-      "id": "kneemri.kaggle.pf_teacher._shares",
-      "label": "_shares",
-      "level": "method",
-      "parent": "kneemri.kaggle.pf_teacher",
-      "role": null
-    },
-    {
-      "descendants": 0,
       "id": "kneemri.kaggle.pf_teacher.main",
       "label": "main",
       "level": "method",
