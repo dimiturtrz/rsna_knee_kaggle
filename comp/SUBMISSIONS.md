@@ -5234,3 +5234,13 @@ PRE-REG (control `s6r7solo_v1` 0.957, nartaa 1/2): >= 0.956 the even split costs
 it is a general pick-2 candidate, since every weight in it is a prior rather than a public-board fit; <= 0.955
 nartaa's 1/2 carries public signal, and the pick stays the owner's call between the fitted and the even entry.
 RESULT: **0.957**, tied with the control `s6r7solo_v1`. The pre-registered branch is >= 0.956, so the even split costs nothing the board can resolve and nartaa's 1/2 carries no public signal at 0.001. `s6r7thirds_v1` becomes the GENERAL pick-2 candidate: every share is a prior (1/3 per family), none was fitted on the public board, so it is the lower-variance private bet at the same public score. knee-p844l.
+
+## s6r7quarter_v1 — 0.957, ref 57255686, 2026-10-16 — heliosli's 0.30 split R7 + S6 on s6r7soloquarter: splitting heliosli's seat across R7 + S6: flat, = control
+
+`kneemri-s6r7quarter`: `s6r7soloquarter_v1` (0.957) with heliosli's 0.30 seat split between two trunks, R7 0.15
+and S6 0.15. nartaa384 0.45 and our two soups (`basinsoup_ff_k4_s2026`, `basinsoup_dmlb_k7_s2026`) 0.25 between
+them are unchanged. Rank blend, kit 5fea6702. Shipped as an INSTRUMENT.
+
+PRE-REG (control `s6r7soloquarter_v1` 0.957): >= 0.958 the two helios trunks add diversity; 0.957 null; <= 0.956
+S6 dilutes, which is what s6r7mavit's 0.955 already pointed at.
+RESULT: **0.957**, tied with the control `s6r7soloquarter_v1` at the board's 0.001 resolution: the null branch. Two heliosli trunks in place of one neither add diversity the board can resolve nor dilute (S6 at 0.15 did not repeat s6r7mavit's -0.002). The helios-trunk split closes for the remaining slots; picks unchanged. The pf line (heliospf / s6r7pflight / s6r7pf), still pending, is now the only open lever above 0.957.
