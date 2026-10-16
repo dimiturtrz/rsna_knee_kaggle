@@ -5272,3 +5272,14 @@ spread evenly over [0.9575, 0.9585). The soups at 1/12 each ADD. The P > H branc
 slot 5. The 3-decimal tie that read as neutral was the display, not the score. A within-pile rank shift is now an
 instrument: an entry that beats our current best moves the team row, and one that does not leaves it fixed.
 
+## s6r7pflight_v1 — 0.958, ref 57259671, 2026-10-16 — s6r7pf with the soups halved to 1/24 each: 0.958, does not lift the team row past P
+
+`kneemri-s6r7pflight`: point L, between H (soups 0) and P (soups 1/12 each). The heliosli pair takes 11/12.
+
+PRE-REG: read against H and P. If P > H, this checks whether half the seat keeps the gain; it ships as a pick only
+if it is >= P. If P = H, it is the cheapest shot at the next 0.001. If P < H, it measures whether 1/24 still costs.
+RESULT: **0.958** displayed. Read by the team row (the board orders ties on the hidden full-precision score): at
+13:35Z we sit rank 134 with 133 teams above, the same count as at 12:56Z when P was the team best. So L is at or below P,
+or above P by less than the gap to the next team in the pile. The line H (0) < P (1/12) holds; this point does not
+place the peak below 1/12. `LastSubmissionDate` in the download moved to L's time, but it is the last scored
+submission, not the best one, so it says nothing here. pfheavy (1/8) stays slot 5.
