@@ -9,10 +9,11 @@ Synovitis, 0.20 on Lateral OA, 0.60 on PF OA, 0.35 on Baker's, 0.50 elsewhere, R
 that pair is scaled to 5/6 and the soups keep 1/12 each, as in every s6r7 entry.
 The per-finding table was very likely fitted on the PUBLIC board (that notebook carries a single-class probe), so
 this is a FITTING-pick candidate, never the general one.
-PRE-REG (B = `s6r7flip224_v1` if read, else `s6r7solo_v1` 0.957; resolution 0.001):
-- **>= 0.958** — the per-finding share transfers with our soups beside it; fitting pick-1 candidate.
-- **= B** — the soups absorb the reweight, or it is below resolution; keep the even split as the general pick.
-- **< B** — the table does not survive dilution by 1/6; record it as a public-only fit.
+PRE-REG — two things move against `s6r7flip224_v1` (R6 for R7, per-finding share), so it is read against
+`kneemri-heliospf` (H, the same pair without our soups), resolution 0.001:
+- **> H** — the soups add on top of the public 0.958 blend; fitting pick-1 candidate.
+- **= H** — the soups are neutral at 1/6; ship whichever of the two is higher on our own ruler.
+- **< H** — the soups dilute this blend; the general pick stays the even-split s6r7 family.
 """
 
 # >>> KERNEL-BOOTSTRAP
