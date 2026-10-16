@@ -5244,3 +5244,14 @@ them are unchanged. Rank blend, kit 5fea6702. Shipped as an INSTRUMENT.
 PRE-REG (control `s6r7soloquarter_v1` 0.957): >= 0.958 the two helios trunks add diversity; 0.957 null; <= 0.956
 S6 dilutes, which is what s6r7mavit's 0.955 already pointed at.
 RESULT: **0.957**, tied with the control `s6r7soloquarter_v1` at the board's 0.001 resolution: the null branch. Two heliosli trunks in place of one neither add diversity the board can resolve nor dilute (S6 at 0.15 did not repeat s6r7mavit's -0.002). The helios-trunk split closes for the remaining slots; picks unchanged. The pf line (heliospf / s6r7pflight / s6r7pf), still pending, is now the only open lever above 0.957.
+
+## heliospf_v1 — 0.958, ref 57258701, 2026-10-16 — faithful replica of heliosli blend-mine 10-15, nothing of ours: the replica is faithful, and the pf line can be read against it
+
+`kneemri-heliospf`: CONTROL for the pf line. heliosli's R6 bundle `fe055406` under flip TTA, plus nartaa 384 and
+224 at 0.65 / 0.35 inside the Raptor half. Per-finding Raptor share of the (Raptor + R6) pair: Synovitis 0.80,
+Lateral OA 0.20, PF OA 0.60, Baker's 0.35, every other finding 0.50. No member of ours. The share table was very
+likely fitted on the public board, so anything built on it is a FITTING-pick candidate only.
+
+PRE-REG (heliosli's credited 0.958): 0.958 the replica is faithful; 0.957 a producer differs or the credit was
+rounding; <= 0.956 the replica is broken, and the fault has to be found before s6r7pf can be read against it.
+RESULT: **0.958**. The replica reproduces heliosli's credited score, so it is faithful and is the control H for s6r7pf (P) and s6r7pflight (L). It lands inside the 0.958 pile (272 teams at the 11:22Z read) as the latest submission there, rank 377 of 6078: new 0.958 arrivals now rank below it, and only teams reaching >= 0.959 can pass it.
