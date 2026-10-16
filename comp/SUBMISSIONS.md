@@ -5223,3 +5223,14 @@ of the parent carried both at their default 0.
 
 What it licenses: the swap, not a pick. `s6r7nsoup_v1` (s6r7solo_v1 with this soup in the ff seat) is the
 reading that can move a pick, and it was pushed on this result.
+
+## s6r7thirds_v1 — 0.957, ref 57242342, 2026-10-15 — every family at 1/3: even split holds 0.957, general pick-2 candidate
+
+`kneemri-s6r7thirds`: `s6r7solo_v1` (0.957) with no board-fitted share. nartaa 1/3, heliosli R7 1/3, our two
+soups (`basinsoup_ff_k4_s2026`, `basinsoup_dmlb_k7_s2026`) 1/6 each, rank blend. Kit 5fea6702. The log
+fingerprint-checked both members with no drop line, and its shared seats match `s6r7solo_v1`'s outputs.
+
+PRE-REG (control `s6r7solo_v1` 0.957, nartaa 1/2): >= 0.956 the even split costs at most one board bin and
+it is a general pick-2 candidate, since every weight in it is a prior rather than a public-board fit; <= 0.955
+nartaa's 1/2 carries public signal, and the pick stays the owner's call between the fitted and the even entry.
+RESULT: **0.957**, tied with the control `s6r7solo_v1`. The pre-registered branch is >= 0.956, so the even split costs nothing the board can resolve and nartaa's 1/2 carries no public signal at 0.001. `s6r7thirds_v1` becomes the GENERAL pick-2 candidate: every share is a prior (1/3 per family), none was fitted on the public board, so it is the lower-variance private bet at the same public score. knee-p844l.
