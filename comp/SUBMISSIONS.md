@@ -5255,3 +5255,17 @@ likely fitted on the public board, so anything built on it is a FITTING-pick can
 PRE-REG (heliosli's credited 0.958): 0.958 the replica is faithful; 0.957 a producer differs or the credit was
 rounding; <= 0.956 the replica is broken, and the fault has to be found before s6r7pf can be read against it.
 RESULT: **0.958**. The replica reproduces heliosli's credited score, so it is faithful and is the control H for s6r7pf (P) and s6r7pflight (L). It lands inside the 0.958 pile (272 teams at the 11:22Z read) as the latest submission there, rank 377 of 6078: new 0.958 arrivals now rank below it, and only teams reaching >= 0.959 can pass it.
+
+## s6r7pf_v1 — 0.958, ref 57259032, 2026-10-16 — heliospf scaled 5/6 + our two soups at 1/12 each: ties H, the soups are neutral at 1/12
+
+`kneemri-s6r7pf`: `heliospf_v1` with every foreign weight scaled by 5/6 and our two soups at 1/12 each. Point P on
+the soup-weight line H (0) -> L (1/24) -> P (1/12) -> pfheavy (1/8), where the weights are per soup.
+
+PRE-REG (H = `heliospf_v1`): > H the soups add; = H neutral; < H the soups dilute, and the general pick stays the
+even-split s6r7.
+RESULT: **0.958**, equal to H (`heliospf_v1` 0.958). Neutral by the pre-registration: the soups neither add nor
+dilute at 1/12 each, at the board's 0.001 resolution. pfheavy (1/8) is therefore not shipped (its branch was P > H).
+The FITTING pick stays at the 0.958 level whichever of H/P/L it is; P carries our soups at a cost of nothing visible,
+so P is preferred over H as the FITTING pick for the private board, where the herd's shared seats give no edge and our
+soups are the only differentiator.
+
