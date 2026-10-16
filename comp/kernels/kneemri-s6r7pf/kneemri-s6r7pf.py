@@ -5,8 +5,8 @@ soups, and heliosli's R6 bundle `fe055406` (mount `rsna-knee-r6-frozen-fe055406-
 in place of the R7 bundle `8c7b666e` — blend-mine's own stage-2 cell is our `helios_r7.py` with exactly that
 BUNDLE_ID / C_SLUG / FLIP_TTA difference, so this is the faithful copy of what scored 0.958. The blend moves to
 heliosli's per-finding Raptor share (`blend-mine-in-private-lb-luck-to-all-upvoters`, 10-15 version): Raptor 0.80 on
-Synovitis, 0.20 on Lateral OA, 0.60 on PF OA, 0.35 on Baker's, 0.50 elsewhere, R6 taking the rest; that pair is scaled to 5/6 and the soups keep
-1/12 each, as in every s6r7 entry.
+Synovitis, 0.20 on Lateral OA, 0.60 on PF OA, 0.35 on Baker's, 0.50 elsewhere, R6 taking the rest;
+that pair is scaled to 5/6 and the soups keep 1/12 each, as in every s6r7 entry.
 The per-finding table was very likely fitted on the PUBLIC board (that notebook carries a single-class probe), so
 this is a FITTING-pick candidate, never the general one.
 PRE-REG (B = `s6r7flip224_v1` if read, else `s6r7solo_v1` 0.957; resolution 0.001):
