@@ -1,0 +1,11 @@
+extends = ["_family.toml"]
+
+[run]
+seed = 801
+
+[meta]
+hypothesis = "nartaa_soup_c801 with the pf-line teacher (CoAtNet-384 + R6 reader) in place of the CoAtNet alone, the only change."
+bead = "knee-p844l"
+requires = ["$MODELS/labelwise_ext_drop40_long_ff.pt", "$PROCESSED/pf_teacher.npz"]
+status = "queued"
+out = "pfteach_soup_c801"

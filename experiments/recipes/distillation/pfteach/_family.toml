@@ -1,0 +1,10 @@
+# pfteach_soup: nartaa_soup with the teacher widened from nartaa's CoAtNet-384 to the pf line's pair
+# (CoAtNet-384 + heliosli's R6 reader, per-finding rank fusion at heliosli's shares; board 0.958 as an entry).
+# Same parent, epochs, rate, seeds and distill weight as nartaa_soup, so nartaa_soup_k4_s2026 (board 0.948)
+# is the control and the teacher file is the one change. pf_teacher.npz is `kneemri.kaggle.pf_teacher` over
+# `kneemri-r6teacher`'s worker predictions.
+
+extends = ["../nartaa/_family.toml"]
+
+[teacher]
+teacher_targets = "$PROCESSED/pf_teacher.npz"

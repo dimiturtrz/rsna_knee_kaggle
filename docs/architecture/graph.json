@@ -5624,6 +5624,24 @@
     },
     {
       "kind": "import",
+      "source": "kneemri.kaggle.pf_teacher",
+      "target": "core.cli",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pf_teacher",
+      "target": "core.findings",
+      "weight": 1
+    },
+    {
+      "kind": "import",
+      "source": "kneemri.kaggle.pf_teacher",
+      "target": "kneemri.teacher_file",
+      "weight": 1
+    },
+    {
+      "kind": "import",
       "source": "kneemri.kaggle.pool_ceiling",
       "target": "core.bootstrap",
       "weight": 1
@@ -29251,6 +29269,36 @@
       "weight": 1
     },
     {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pf_teacher.main",
+      "target": "kneemri.kaggle.pf_teacher.PfTeacher",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pf_teacher.main",
+      "target": "kneemri.kaggle.pf_teacher.PfTeacher.blended",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pf_teacher.main",
+      "target": "kneemri.kaggle.pf_teacher.PfTeacher.readings",
+      "weight": 1
+    },
+    {
+      "kind": "construct",
+      "source": "kneemri.kaggle.pf_teacher.main",
+      "target": "kneemri.teacher_file.TeacherFile",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.pf_teacher.main",
+      "target": "kneemri.teacher_file.TeacherFile.write",
+      "weight": 1
+    },
+    {
       "kind": "references",
       "source": "kneemri.kaggle.pool_ceiling.PoolCeiling",
       "target": "kneemri.evaluation.pool.Pool",
@@ -37645,7 +37693,7 @@
       "role": null
     },
     {
-      "descendants": 287,
+      "descendants": 288,
       "id": "kneemri",
       "label": "kneemri",
       "level": "module",
@@ -38717,7 +38765,7 @@
       "role": null
     },
     {
-      "descendants": 44,
+      "descendants": 45,
       "id": "kneemri.kaggle",
       "label": "kaggle",
       "level": "module",
@@ -38912,6 +38960,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.package_members",
       "label": "package_members",
+      "level": "module",
+      "parent": "kneemri.kaggle",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pf_teacher",
+      "label": "pf_teacher",
       "level": "module",
       "parent": "kneemri.kaggle",
       "role": null
@@ -43698,6 +43754,14 @@
       "label": "RosterShelf",
       "level": "class",
       "parent": "kneemri.kaggle.package_members",
+      "role": "satellite"
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pf_teacher.PfTeacher",
+      "label": "PfTeacher",
+      "level": "class",
+      "parent": "kneemri.kaggle.pf_teacher",
       "role": "satellite"
     },
     {
@@ -62010,6 +62074,38 @@
       "label": "main",
       "level": "method",
       "parent": "kneemri.kaggle.package_members",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pf_teacher.PfTeacher.blended",
+      "label": "blended",
+      "level": "method",
+      "parent": "kneemri.kaggle.pf_teacher.PfTeacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pf_teacher.PfTeacher.readings",
+      "label": "readings",
+      "level": "method",
+      "parent": "kneemri.kaggle.pf_teacher.PfTeacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pf_teacher._shares",
+      "label": "_shares",
+      "level": "method",
+      "parent": "kneemri.kaggle.pf_teacher",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.pf_teacher.main",
+      "label": "main",
+      "level": "method",
+      "parent": "kneemri.kaggle.pf_teacher",
       "role": null
     },
     {
