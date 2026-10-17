@@ -5294,3 +5294,14 @@ PRE-REG (team best = P = `s6r7pf_v1`, in-pile 34 of 589 at the 23:16Z download, 
 pfheavy <= P, the peak is between 1/12 and 1/8 or at P, and 10-17 runs branch B (pfv2share first). A displayed 0.959
 is branch A outright; a displayed 0.957 closes the heavier half of the line.
 RESULT: displayed 0.958 (same 3-decimal bin as P and H). Read 05:33Z, seconds after it scored and with pfv2share (57296545) still pending, so the move is attributable to pfheavy alone: team row rank 168 -> 144, in-pile 36 of 675 (05:19Z) -> 10 of 681, last-sub flipped to 23:16:56 and subs 205 -> 206. pfheavy > P at full precision: the soups keep adding past 1/12 per soup. pfheavy is the new team row holder and the FITTING pick. 10-17 runs branch A: pfsixth (1/6) next. pfv2share was built on P (soups 1/12), so it now reads against pfheavy: it moves the row only if the V2 shares gain more than 1/12 -> 1/8 did; holding no longer closes the share axis, it only says V2 on P < pfheavy.
+
+## s6r7pfv2share_v1 — BOARD, ref 57296545, 2026-10-17 — s6r7pf with heliosli's V2 per-finding shares: TEAM ROW HELD
+
+`kneemri-s6r7pfv2share`: s6r7pf (soups 1/12 each) with the per-finding Raptor share moved to heliosli's 10-16 V2 table
+(Synovitis 0.85, Lateral OA 0.15, PF OA 0.65, Baker's 0.30; was 0.80/0.20/0.60/0.35). Submitted 05:19Z, before pfheavy
+scored, as the slot common to both branches.
+
+PRE-REG, re-stated after pfheavy took the row (in-pile 10 of 681 at 05:33Z): the row is now pfheavy, so this moves the
+row only if V2-on-P beats pfheavy; row holds -> V2-on-P < pfheavy, which does NOT close the share axis (pfheavyv2 asks it
+at 1/8). Score shown 0.957 -> the V2 table is worse than the 10-15 one on P.
+RESULT: displayed 0.958. Read 11:09Z, minutes after it scored and with pfsixth (57306211) still pending: team row rank 150 -> 150, in-pile 13 of 755 (09:53Z) -> 13 of 779, while 24 entries joined the pile. LastSubmissionDate flipped to 05:19:26 and subs 206 -> 207, so that column is the last SCORED submission, not the row holder (the 10-16 "last-sub flipped" read was consistent with both). V2-on-P did not overtake pfheavy. This is the expected outcome whichever table is better, since P sits below pfheavy by the 1/12 -> 1/8 soup gain, so the share axis stays open at 1/8. Per branch A, slot 3 is pfheavynsoup (the soup swap at the row-holder weight). pfheavyv2 waits for a later slot.
