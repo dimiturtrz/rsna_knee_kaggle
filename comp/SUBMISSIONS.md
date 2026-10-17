@@ -5283,3 +5283,14 @@ RESULT: **0.958** displayed. Read by the team row (the board orders ties on the 
 or above P by less than the gap to the next team in the pile. The line H (0) < P (1/12) holds; this point does not
 place the peak below 1/12. `LastSubmissionDate` in the download moved to L's time, but it is the last scored
 submission, not the best one, so it says nothing here. pfheavy (1/8) stays slot 5.
+
+## s6r7pfheavy_v1 — BOARD, ref 57286020, 2026-10-16 — s6r7pf with our two soups raised to 1/8 each: TEAM ROW MOVED UP (branch A)
+
+`kneemri-s6r7pfheavy`: point pfheavy on the soup-weight line H (0) -> L (1/24) -> P (1/12) -> pfheavy (1/8), where the
+weights are per soup. The heliosli pair takes 3/4.
+
+PRE-REG (team best = P = `s6r7pf_v1`, in-pile 34 of 589 at the 23:16Z download, read seconds before submitting): the team row moves up inside the
+0.958 pile -> pfheavy > P, the soups still add past 1/12, and 10-17 runs branch A (pfsixth next); the row holds ->
+pfheavy <= P, the peak is between 1/12 and 1/8 or at P, and 10-17 runs branch B (pfv2share first). A displayed 0.959
+is branch A outright; a displayed 0.957 closes the heavier half of the line.
+RESULT: displayed 0.958 (same 3-decimal bin as P and H). Read 05:33Z, seconds after it scored and with pfv2share (57296545) still pending, so the move is attributable to pfheavy alone: team row rank 168 -> 144, in-pile 36 of 675 (05:19Z) -> 10 of 681, last-sub flipped to 23:16:56 and subs 205 -> 206. pfheavy > P at full precision: the soups keep adding past 1/12 per soup. pfheavy is the new team row holder and the FITTING pick. 10-17 runs branch A: pfsixth (1/6) next. pfv2share was built on P (soups 1/12), so it now reads against pfheavy: it moves the row only if the V2 shares gain more than 1/12 -> 1/8 did; holding no longer closes the share axis, it only says V2 on P < pfheavy.
