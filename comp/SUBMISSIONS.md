@@ -5305,3 +5305,12 @@ PRE-REG, re-stated after pfheavy took the row (in-pile 10 of 681 at 05:33Z): the
 row only if V2-on-P beats pfheavy; row holds -> V2-on-P < pfheavy, which does NOT close the share axis (pfheavyv2 asks it
 at 1/8). Score shown 0.957 -> the V2 table is worse than the 10-15 one on P.
 RESULT: displayed 0.958. Read 11:09Z, minutes after it scored and with pfsixth (57306211) still pending: team row rank 150 -> 150, in-pile 13 of 755 (09:53Z) -> 13 of 779, while 24 entries joined the pile. LastSubmissionDate flipped to 05:19:26 and subs 206 -> 207, so that column is the last SCORED submission, not the row holder (the 10-16 "last-sub flipped" read was consistent with both). V2-on-P did not overtake pfheavy. This is the expected outcome whichever table is better, since P sits below pfheavy by the 1/12 -> 1/8 soup gain, so the share axis stays open at 1/8. Per branch A, slot 3 is pfheavynsoup (the soup swap at the row-holder weight). pfheavyv2 waits for a later slot.
+
+## s6r7pfsixth_v1 — 0.958, ref 57306211, 2026-10-17 — s6r7pf with our two soups raised to 1/6 each: TEAM ROW HELD
+
+`kneemri-s6r7pfsixth`: next point on the soup-weight line H (0) -> L (1/24) -> P (1/12) -> pfheavy (1/8) -> pfsixth (1/6),
+weights per soup, heliosli pair 2/3.
+
+PRE-REG (team row holder = `s6r7pfheavy_v1`, in-pile 13 of 755 at 09:53Z submit): row moves up -> gain still climbs past 1/8, pffifth (1/5)
+next; row holds -> plateau or peak between 1/8 and 1/6, pfheavynsoup next. A displayed 0.957 says the line turned down.
+RESULT: board 0.958; team row held at in-pile 13 (13 of 779 at 05:19Z -> 13 of 848 at 15:30Z), team rank 150 -> 153 as others joined the pile. So pfsixth <= pfheavy at hidden precision: the gain does not climb past 1/8 per soup, and the peak on this line sits between 1/12 and 1/6, at or near 1/8. pffifth (1/5) and pfquarter (1/4) are dropped; slot 4 = pfheavyv2 (V2 shares at 1/8), which re-opens the share axis at the line's peak.
