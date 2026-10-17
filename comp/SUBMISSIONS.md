@@ -5314,3 +5314,15 @@ weights per soup, heliosli pair 2/3.
 PRE-REG (team row holder = `s6r7pfheavy_v1`, in-pile 13 of 755 at 09:53Z submit): row moves up -> gain still climbs past 1/8, pffifth (1/5)
 next; row holds -> plateau or peak between 1/8 and 1/6, pfheavynsoup next. A displayed 0.957 says the line turned down.
 RESULT: board 0.958; team row held at in-pile 13 (13 of 779 at 05:19Z -> 13 of 848 at 15:30Z), team rank 150 -> 153 as others joined the pile. So pfsixth <= pfheavy at hidden precision: the gain does not climb past 1/8 per soup, and the peak on this line sits between 1/12 and 1/6, at or near 1/8. pffifth (1/5) and pfquarter (1/4) are dropped; slot 4 = pfheavyv2 (V2 shares at 1/8), which re-opens the share axis at the line's peak.
+
+
+## s6r7pfheavynsoup_v1 — 0.958, ref 57314341, 2026-10-17 — s6r7pfheavy with the ff soup seat swapped for nartaa_soup_k4: TEAM ROW HELD
+
+`kneemri-s6r7pfheavynsoup`: pfheavy (soups 1/8 each, heliosli pair 3/4) with `basinsoup_ff_k4_s2026` (solo board 0.946)
+replaced by `nartaa_soup_k4_s2026` (solo 0.948); `basinsoup_dmlb_k7_s2026` and every foreign weight unchanged. Slot 3 of
+10-17, shipped because pfv2share held the row (branch A).
+
+PRE-REG (team row = pfheavy, rank 152, in-pile 14 of 834 at the 14:21Z read, seconds before submitting 14:21:35Z): row moves up -> the better solo seat transfers into the pf blend at 1/8;
+row fixed -> it does not, most plausibly because nartaa_soup distils the CoAtNet-384 teacher that the nartaa seat already
+carries, so its extra solo score is overlap the blend already holds.
+RESULT: 0.958, TEAM ROW HELD: 21:04Z read after it scored (LastSubmissionDate 14:21:35) has the row at rank 160, in-pile 14 of 903, the same position 14 it held at the 18:46Z read. The better solo seat does not transfer into the pf blend at 1/8; consistent with nartaa_soup distilling the CoAtNet-384 teacher the nartaa seat already carries. pfheavy stays the fitting pick. Kills the conditional combo kneemri-s6r7pfheavynsoupv2 (needed both arms to move).
