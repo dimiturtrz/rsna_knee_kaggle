@@ -5375,3 +5375,17 @@ PRE-REG vs `r7oaifree_v1` 0.955: >=0.956 -> the heavy share transfers, this beco
 r7oaifree stays; <=0.954 -> our seats carry more without nartaa, r7oaifree stays.
 Pre-flight 10-18 03:10Z: run_check 8/8 members, submit_check new pairing, shape (3,13) 0 NaN, blend oracle maxdiff 0.0.
 RESULT: 0.953 (scored 10-18 ~12:13Z after ~2.8h in queue), -0.002 under `r7oaifree_v1` 0.955: PRE-REG branch <=0.954, our seats carry more weight without nartaa beside them, r7oaifree stays the OAI-free general-pick fallback (knee-ll0of). The 3/4 public share that carries the pf line is a property of the nartaa-bearing pair, not of the reader. Team row unchanged (pfheavy 0.958, rank 183, in-pile 16 of 1059). The OAI-free reader share stays at 1/2; `kneemri-r7oaifreedual` keeps that total and splits it R7 1/4 + R6 1/4.
+
+## s6r7pfheavydual_v1 — 0.957, ref 57356983, 2026-10-18 — R6 and R7 readers both seated on pfheavy: one tick DOWN, dual axis closed
+
+`kneemri-s6r7pfheavydual`: `kneemri-s6r7pfheavy` (our two soups 1/8 each, the public pair 3/4, nartaa 384/224 at
+0.65/0.35, heliosli's 10-15 per-finding Raptor shares) with heliosli's R7 reader (bundle 8c7b666e27dc0e8f) seated beside
+R6 (fe055406), each at half the old reader weight. The pf line swapped R7 out for R6 and no board row ever seated both;
+`s6r7` read two heliosli readers above one (0.957 vs 0.956). INSTRUMENT, FITTING-pick only. Slot 3 of 10-18, shipped
+because heavyeven held the row (split axis closed).
+
+PRE-REG (team row holder = `s6r7pfheavy_v1`), read by our position inside the 0.958 pile: row moves up -> two readers
+beat one on the pf line, this becomes the fitting pick; row holds -> R6 alone carries the reader seat, dual axis closed.
+Pre-flight 10-18 11:07Z: run_check 2/2 members, R7c exit 0 at 477s and R6 exit 0 at 719s, shape (3,13) 0 NaN, blend
+oracle max|diff| 1.1e-16, R7c vs R6 table corr 0.993 (max|diff| 0.28, distinct readers). rank 184, in-pile 17 of 1084 (14:06Z)
+RESULT (scored by 22:49Z, about 8h40m in queue): 0.957, one tick under the row holder pfheavy 0.958, so the team row is unchanged (22:49Z: 0.958, rank 191, in-pile 19 of 1145, which is still pfheavy). The pre-registered "row holds" branch fires, and the score itself sits a tick lower. Seating R7 beside R6, each at half the reader weight, does not beat R6 alone on the pf line. One tick is inside the ~0.002 top-band residual sd, so this is DIRECTION ONLY, not a measured loss. Dual-reader axis closed for the fitting pick, which stays pfheavy 57286020. It does not rule out R7 replacing R6 at full weight (that is `s6r7solo`, 0.957) or a dual seat on the OAI-free line (57365635, still pending).
