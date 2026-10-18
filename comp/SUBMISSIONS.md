@@ -5337,3 +5337,15 @@ best read point and the share axis is re-tested there; pfv2share read it only at
 PRE-REG (team row holder = `s6r7pfheavy_v1`): row moves up -> V2 shares add at 1/8; row holds -> no gain read, pfheavy stays
 the fitting pick.
 RESULT: 0.958 (scored 10-18 ~00:55Z after ~6h in queue). Team row pfheavy rank 164, in-pile 15 of 947 (was 13 of 929 at 23:15Z; the 18 newcomers put two above, the row did not move up). The V2 shares add nothing at 1/8: share-table axis closed on the pf line; v2even retired unshipped, pfheavyeven takes 10-18 slot 1.
+
+## r7oaifree_v1 — BOARD, ref 57328674, 2026-10-17 — OAI-free hedge: heliosli R7 + our soup + seven, no nartaa seat: R7 LIFTS THE OAI-FREE LINE
+
+`kneemri-r7oaifree`: heliosli's R7 reader 1/2 + `basinsoup_ff_k4_s2026` 1/4 + the mirrorthird seven 1/4, fused in rank
+space. No nartaa seat, so no OAI-trained weights are mounted (R7 still carries its fastMRI auxiliary). INSTRUMENT for the
+10-22 general pick (knee-ll0of): forum questions 750257-60 challenge external weights on the pf line and have no host ruling
+yet, so the price of the best OAI-free entry is the unknown that decides the pick.
+
+PRE-REG vs `s6oaifree_v1` 0.953: >=0.954 -> R7 lifts the OAI-free line and this becomes the OAI-free pick; 0.953 -> tie,
+s6oaifree stays; <=0.952 -> R7's lift on the pf line needed the nartaa seat.
+Pre-flight 17:41Z: run_check 8/8 members, submit_check new pairing, shape (3,13) 0 NaN, blend oracle maxdiff 0.0.
+RESULT: 0.955 (scored 10-18 ~02:30Z after ~8.8h in queue), +0.002 over `s6oaifree_v1` 0.953, so PRE-REG branch >=0.954: R7 lifts the OAI-free line and `r7oaifree_v1` replaces `s6oaifree_v1` as the OAI-free general-pick fallback (knee-ll0of). Team row held at pfheavy 0.958, rank 165, in-pile 14 of 964. 0.955 still sits under the pf line 0.958, so the nartaa seat (OAI-trained) is still worth about +0.003.
