@@ -5326,3 +5326,14 @@ PRE-REG (team row = pfheavy, rank 152, in-pile 14 of 834 at the 14:21Z read, sec
 row fixed -> it does not, most plausibly because nartaa_soup distils the CoAtNet-384 teacher that the nartaa seat already
 carries, so its extra solo score is overlap the blend already holds.
 RESULT: 0.958, TEAM ROW HELD: 21:04Z read after it scored (LastSubmissionDate 14:21:35) has the row at rank 160, in-pile 14 of 903, the same position 14 it held at the 18:46Z read. The better solo seat does not transfer into the pf blend at 1/8; consistent with nartaa_soup distilling the CoAtNet-384 teacher the nartaa seat already carries. pfheavy stays the fitting pick. Kills the conditional combo kneemri-s6r7pfheavynsoupv2 (needed both arms to move).
+
+
+## s6r7pfheavyv2_v1 — 0.958, ref 57322366, 2026-10-17 — pfheavy with heliosli's V2 per-finding shares: TEAM ROW HELD
+
+`kneemri-s6r7pfheavyv2`: pfheavy's weights (our two soups 1/8 each, heliosli pair 3/4) with the 10-16 V2 Raptor shares
+(Synovitis 0.85, Lateral OA 0.15, PF OA 0.65, Baker's 0.30). pfsixth (1/6) held the row, so 1/8 is the soup-weight line's
+best read point and the share axis is re-tested there; pfv2share read it only at 1/12, under the row.
+
+PRE-REG (team row holder = `s6r7pfheavy_v1`): row moves up -> V2 shares add at 1/8; row holds -> no gain read, pfheavy stays
+the fitting pick.
+RESULT: 0.958 (scored 10-18 ~00:55Z after ~6h in queue). Team row pfheavy rank 164, in-pile 15 of 947 (was 13 of 929 at 23:15Z; the 18 newcomers put two above, the row did not move up). The V2 shares add nothing at 1/8: share-table axis closed on the pf line; v2even retired unshipped, pfheavyeven takes 10-18 slot 1.
