@@ -5338,7 +5338,7 @@ PRE-REG (team row holder = `s6r7pfheavy_v1`): row moves up -> V2 shares add at 1
 the fitting pick.
 RESULT: 0.958 (scored 10-18 ~00:55Z after ~6h in queue). Team row pfheavy rank 164, in-pile 15 of 947 (was 13 of 929 at 23:15Z; the 18 newcomers put two above, the row did not move up). The V2 shares add nothing at 1/8: share-table axis closed on the pf line; v2even retired unshipped, pfheavyeven takes 10-18 slot 1.
 
-## r7oaifree_v1 — BOARD, ref 57328674, 2026-10-17 — OAI-free hedge: heliosli R7 + our soup + seven, no nartaa seat: R7 LIFTS THE OAI-FREE LINE
+## r7oaifree_v1 — 0.955, ref 57328674, 2026-10-17 — OAI-free hedge: heliosli R7 + our soup + seven, no nartaa seat: R7 LIFTS THE OAI-FREE LINE
 
 `kneemri-r7oaifree`: heliosli's R7 reader 1/2 + `basinsoup_ff_k4_s2026` 1/4 + the mirrorthird seven 1/4, fused in rank
 space. No nartaa seat, so no OAI-trained weights are mounted (R7 still carries its fastMRI auxiliary). INSTRUMENT for the
