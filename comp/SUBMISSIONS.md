@@ -5349,3 +5349,16 @@ PRE-REG vs `s6oaifree_v1` 0.953: >=0.954 -> R7 lifts the OAI-free line and this 
 s6oaifree stays; <=0.952 -> R7's lift on the pf line needed the nartaa seat.
 Pre-flight 17:41Z: run_check 8/8 members, submit_check new pairing, shape (3,13) 0 NaN, blend oracle maxdiff 0.0.
 RESULT: 0.955 (scored 10-18 ~02:30Z after ~8.8h in queue), +0.002 over `s6oaifree_v1` 0.953, so PRE-REG branch >=0.954: R7 lifts the OAI-free line and `r7oaifree_v1` replaces `s6oaifree_v1` as the OAI-free general-pick fallback (knee-ll0of). Team row held at pfheavy 0.958, rank 165, in-pile 14 of 964. 0.955 still sits under the pf line 0.958, so the nartaa seat (OAI-trained) is still worth about +0.003.
+
+
+## s6r7pfheavyeven_v1 — 0.958, ref 57338723, 2026-10-18 — the nartaa 384/224 split at 0.50/0.50 on pfheavy: TEAM ROW HELD
+
+`kneemri-s6r7pfheavyeven`: `kneemri-s6r7pfheavy` (our two soups 1/8 each, the public pair 3/4, heliosli's 10-15
+per-finding Raptor shares) with nartaa's 384/224 split inside the Raptor half moved from nartaa's own 0.65/0.35 to
+0.50/0.50, the only pf-line weight never varied. INSTRUMENT, FITTING-pick only.
+
+PRE-REG (team row holder = `s6r7pfheavy_v1`), read by our position inside the 0.958 pile: row moves up -> the 224 crop
+is under-weighted, port the split to the line's best point; row holds -> the split is not the lever, axis closed.
+Pre-flight 10-17 23:15Z: run_check 2/2 members, shape (3,13) 0 NaN, blend oracle at split 0.50 max|diff| 1e-16 (0.045
+vs the 0.65 split). Pile before the slot (10-18 04:40Z): rank 169, in-pile 15 of 982.
+RESULT: 0.958 (scored 10-18 ~11:03Z after ~6.4h in queue). TEAM ROW HELD: 11:05Z read has the row at rank 181, in-pile 17 of 1048, against 16 of 1032 at the 09:24Z read; the 16 newcomers put one above and the row did not move up. LastSubmissionDate reads 04:40:21, but that field is the last SCORED submission, not the row holder (see s6r7pflight). The 224 crop is not under-weighted at 0.35: the split axis closes on the pf line, lean224 (0.35/0.65, pre-flighted) is retired unshipped, and pfheavy stays the fitting pick. 10-18 slot 3 goes to the dual-reader fallback kneemri-s6r7pfheavydual once its pre-flight passes.
