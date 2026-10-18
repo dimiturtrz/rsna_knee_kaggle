@@ -5362,3 +5362,16 @@ is under-weighted, port the split to the line's best point; row holds -> the spl
 Pre-flight 10-17 23:15Z: run_check 2/2 members, shape (3,13) 0 NaN, blend oracle at split 0.50 max|diff| 1e-16 (0.045
 vs the 0.65 split). Pile before the slot (10-18 04:40Z): rank 169, in-pile 15 of 982.
 RESULT: 0.958 (scored 10-18 ~11:03Z after ~6.4h in queue). TEAM ROW HELD: 11:05Z read has the row at rank 181, in-pile 17 of 1048, against 16 of 1032 at the 09:24Z read; the 16 newcomers put one above and the row did not move up. LastSubmissionDate reads 04:40:21, but that field is the last SCORED submission, not the row holder (see s6r7pflight). The 224 crop is not under-weighted at 0.35: the split axis closes on the pf line, lean224 (0.35/0.65, pre-flighted) is retired unshipped, and pfheavy stays the fitting pick. 10-18 slot 3 goes to the dual-reader fallback kneemri-s6r7pfheavydual once its pre-flight passes.
+
+
+## r7oaifreeheavy_v1 — 0.953, ref 57348544, 2026-10-18 — OAI-free hedge at the heavy share: R7 3/4, ours 1/8 + 1/8: THE HEAVY SHARE DOES NOT TRANSFER
+
+`kneemri-r7oaifreeheavy`: `kneemri-r7oaifree` with heliosli's R7 reader raised from 1/2 to 3/4 and our two seats
+(`basinsoup_ff_k4_s2026`, the mirrorthird seven) cut to 1/8 each, fused in rank space; no nartaa mount. INSTRUMENT for
+the 10-22 general pick (knee-ll0of): on the OAI-bearing pf line the 3/4 public share carried the team row, and the
+OAI-free line had only been read at 1/2.
+
+PRE-REG vs `r7oaifree_v1` 0.955: >=0.956 -> the heavy share transfers, this becomes the OAI-free pick; 0.955 -> flat,
+r7oaifree stays; <=0.954 -> our seats carry more without nartaa, r7oaifree stays.
+Pre-flight 10-18 03:10Z: run_check 8/8 members, submit_check new pairing, shape (3,13) 0 NaN, blend oracle maxdiff 0.0.
+RESULT: 0.953 (scored 10-18 ~12:13Z after ~2.8h in queue), -0.002 under `r7oaifree_v1` 0.955: PRE-REG branch <=0.954, our seats carry more weight without nartaa beside them, r7oaifree stays the OAI-free general-pick fallback (knee-ll0of). The 3/4 public share that carries the pf line is a property of the nartaa-bearing pair, not of the reader. Team row unchanged (pfheavy 0.958, rank 183, in-pile 16 of 1059). The OAI-free reader share stays at 1/2; `kneemri-r7oaifreedual` keeps that total and splits it R7 1/4 + R6 1/4.
