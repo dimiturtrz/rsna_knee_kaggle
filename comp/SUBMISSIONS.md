@@ -5417,3 +5417,16 @@ oracle max|diff| 8.3e-17; vs the dual entry's table only Lateral OA (0.11) and S
 studies (PF OA and Baker's keep their rank order there). mount_check ok; submit_check UNKNOWN (foreign shares not
 scalar-stated, expected). Pile pre-slot rank 193, in-pile 19 of 1145 (23:30Z).
 RESULT: 0.957 (scored by 09:03Z 10-19, about 9.5 h in the queue), equal to its fitted parent pfheavydual 0.957. Pre-registered branch "flat": the public-fitted per-finding share table carries nothing measurable beside two readers, so drop it (fewer public-fitted parameters). With the single-reader line's +0.001 (inside the ~0.002 residual sd), this is the second reading in which the table does not move the board beyond resolution. Neither the general pick nor the fitting pick changes; pfheavyflat (57382612, pending) answers the same question on the 0.958 line.
+
+
+## s6r7pfheavyflat_v1 — 0.958, ref 57382612, 2026-10-19 — general-pick instrument: pfheavy without the public-fitted Raptor share table: ties pfheavy, the unfitted twin is the private-robust row candidate
+
+Kernel `kneemri-s6r7pfheavyflat` v1 = `kneemri-s6r7pfheavy` (row holder 57286020, 0.958) with `RAPTOR_SHARE = {}`: every finding takes `RAPTOR_SHARE_ELSEWHERE` 0.50 instead of heliosli's per-finding table, which was fitted on the public board. Single-reader twin of dualeven 57372110.
+
+PRE-REG vs pfheavy 0.958: 0.958 -> the table carries nothing at public resolution, and the unfitted twin becomes the private-robust candidate for the fitting pick; <=0.957 -> the table is worth its tick and the picks are unchanged; 0.959 -> exits the pile and becomes the row.
+
+Pre-flight 2026-10-19 01:37Z: Kaggle v1 COMPLETE; `run_check` "loaded 2 of 2 members" rc 0; 0 Tracebacks; submission (3,13), 0 NaN, in [0,1]; vs the pfheavy output only Lateral OA (max |d| 0.1125) and Synovitis (0.0394) differ, the other 10 columns are identical — the table touched exactly those two findings. submit_check UNKNOWN (shares are expressions); novel by construction.
+
+Submitted 2026-10-19 04:47Z as S1 of 10-19. Pile pre-slot 04:47Z: rank 202, in-pile 23 of 1180.
+
+RESULT: 0.958 (scored by 10:38Z 10-19, ~6 h queue), equal to pfheavy 0.958. Pre-registered branch: the public-fitted share table carries nothing at public resolution; with dualeven = pfheavydual (0.957) this is the second line on which it reads flat. The LB now shows this entry as the team best (last-sub 04:47Z) and the pile position did not move (rank 211, in-pile 28 of 1215 at 10:38Z, 28 of 1211 at 09:34Z), so its hidden-precision public score is not below pfheavy's by enough to cost a place. RECOMMENDATION for the 10-22 lock (knee-kl48k): the fitting pick moves from pfheavy 57286020 to pfheavyflat 57382612 — same public score, two fewer public-fitted parameters (Lateral OA, Synovitis), so a private board can only punish the table, never the flat entry.
