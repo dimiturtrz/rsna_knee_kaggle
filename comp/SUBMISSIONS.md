@@ -5401,3 +5401,19 @@ dilutes R7.
 Pre-flight 16:27Z: run_check 8/8 members, R7 exit 0 at 400s, R6 exit 0 at 630s, R7 vs R6 maxdiff 0.31 corr 0.989,
 submit_check new pairing, shape (3,13) 0 NaN, blend oracle maxdiff 0.0. Pile pre-slot rank 186, in-pile 17 of 1124 (18:50Z).
 RESULT: 0.956 (scored by 01:37Z 10-19), one tick over r7oaifree 0.955. Pre-reg branch >=0.956 fires: the OAI-free general-pick candidate moves to r7oaifreedual_v1. DIRECTION ONLY - one tick is inside the board residual sd ~0.002: read as "a second heliosli reader does not hurt the OAI-free line", not a measured gain. Contrast the pf line, where R7 beside R6 read one tick DOWN (pfheavydual 0.957 vs pfheavy 0.958). Team row unaffected (0.956 < 0.958).
+
+
+## s6r7pfdualeven_v1 — 0.957, ref 57372110, 2026-10-18 — dual readers without the fitted share table: the table is neutral beside two readers
+
+`kneemri-s6r7pfdualeven`: `kneemri-s6r7pfheavydual` (soups 1/8 each, R6 and R7 beside each other, nartaa 384/224 at
+0.65/0.35) with heliosli's per-finding Raptor share table removed, so every finding takes the 0.50 share. The table was
+fitted on the public board, which makes the dual entry a FITTING candidate; this is its unfitted twin, the candidate for
+the GENERAL (private-robust) pick. On the single-reader line the table read +0.001 (heliospf 0.958 vs s6r7 0.957),
+inside the board's ~0.002 residual sd. INSTRUMENT, slot 5 of 10-18.
+
+PRE-REG (re-anchored 22:49Z, before the slot, once the parent scored: pfheavydual 57356983 = 0.957; the 19:19Z version read against 0.958): >=0.958 -> the public-fitted share table HURTS beside two readers, this becomes the general-pick candidate; 0.957 flat -> the table is neutral here, so drop it (fewer public-fitted parameters); <=0.956 -> the table carries its share. The general pick is unchanged in the last two branches.
+Pre-flight 10-18 19:19Z: run_check 2/2 members, R7c exit 0 at 506s and R6 exit 0 at 752s, shape (3,13) 0 NaN, blend
+oracle max|diff| 8.3e-17; vs the dual entry's table only Lateral OA (0.11) and Synovitis (0.04) move on the 3 public
+studies (PF OA and Baker's keep their rank order there). mount_check ok; submit_check UNKNOWN (foreign shares not
+scalar-stated, expected). Pile pre-slot rank 193, in-pile 19 of 1145 (23:30Z).
+RESULT: 0.957 (scored by 09:03Z 10-19, about 9.5 h in the queue), equal to its fitted parent pfheavydual 0.957. Pre-registered branch "flat": the public-fitted per-finding share table carries nothing measurable beside two readers, so drop it (fewer public-fitted parameters). With the single-reader line's +0.001 (inside the ~0.002 residual sd), this is the second reading in which the table does not move the board beyond resolution. Neither the general pick nor the fitting pick changes; pfheavyflat (57382612, pending) answers the same question on the 0.958 line.
