@@ -1,0 +1,33 @@
+{
+ "id": "dimiturnt/kneemri-r6oaifree",
+ "title": "kneemri-r6oaifree",
+ "code_file": "kneemri-r6oaifree.py",
+ "language": "python",
+ "kernel_type": "script",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": false,
+ "machine_shape": "NvidiaTeslaT4",
+ "dataset_sources": [
+  "dimiturnt/kneemri-kit",
+  "dimiturnt/kneemri-members",
+  "dimiturnt/kneemri-members-2",
+  "dimiturnt/kneemri-members-3",
+  "dimiturnt/dinov3-hf",
+  "dimiturnt/resnet50d-224",
+  "dimiturnt/helios-r7-src",
+  "heliosli/rsna-knee-compact-r7cnxfsss",
+  "heliosli/rsna-knee-r6-frozen-fe055406-w1",
+  "heliosli/rsna-orthofoundation-fold0-epoch7-20261004"
+ ],
+ "competition_sources": [
+  "rsna-knee-abnormality-detection"
+ ],
+ "kernel_sources": [],
+ "docker_image": "gcr.io/kaggle-private-byod/python@sha256:37c64f7dd9c54116ecd1bcc88817c5469b88387388fade02bfa8bf3fc647d461",
+ "docker_image_pinning_type": "original",
+ "model_sources": [
+  "metaresearch/dinov2/PyTorch/small/1",
+  "metaresearch/dinov2/PyTorch/base/1"
+ ]
+}
