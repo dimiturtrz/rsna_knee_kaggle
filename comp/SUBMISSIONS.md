@@ -5430,3 +5430,15 @@ Pre-flight 2026-10-19 01:37Z: Kaggle v1 COMPLETE; `run_check` "loaded 2 of 2 mem
 Submitted 2026-10-19 04:47Z as S1 of 10-19. Pile pre-slot 04:47Z: rank 202, in-pile 23 of 1180.
 
 RESULT: 0.958 (scored by 10:38Z 10-19, ~6 h queue), equal to pfheavy 0.958. Pre-registered branch: the public-fitted share table carries nothing at public resolution; with dualeven = pfheavydual (0.957) this is the second line on which it reads flat. The LB now shows this entry as the team best (last-sub 04:47Z) and the pile position did not move (rank 211, in-pile 28 of 1215 at 10:38Z, 28 of 1211 at 09:34Z), so its hidden-precision public score is not below pfheavy's by enough to cost a place. RECOMMENDATION for the 10-22 lock (knee-kl48k): the fitting pick moves from pfheavy 57286020 to pfheavyflat 57382612 — same public score, two fewer public-fitted parameters (Lateral OA, Synovitis), so a private board can only punish the table, never the flat entry.
+
+## r7oaifreeduallean_v1 — 0.955, ref 57391409, 2026-10-19 — OAI-free hedge: the two readers' share cut to 1/3: one tick under dual, the share curve peaks at 1/2
+
+Kernel `kneemri-r7oaifreeduallean` v1 = `kneemri-r7oaifreedual` (0.956) with `RaptorSeat.combined` weights `[1/3, 1/6, 1/6]`: basinsoup_ff_k4 1/3 (remainder), mirrorthird's seven 1/3, R7 1/6, R6 1/6. Same mounts, no nartaa dataset. Built 2026-10-19 05:53Z because the OAI-free reader-share curve rose as the readers' share fell (3/4 R7 -> 0.953 r7oaifreeheavy; 1/2 R7 -> 0.955 r7oaifree; 1/2 R7+R6 -> 0.956 r7oaifreedual) and nothing below 1/2 had been read. Exempt from the one-row-candidate rule: it cannot reach the team row.
+
+PRE-REG vs r7oaifreedual 0.956: >=0.957 -> the curve still climbs, becomes the OAI-free pick; 0.956 -> plateau, dual stays (reached first); <=0.955 -> peak at 1/2, dual stays.
+
+Pre-flight 06:50Z: kernel v1 COMPLETE; run_check loaded 8 of 8 members; 0 Tracebacks; submission (3,13), 0 NaN, in [0,1]; recomputed RaptorSeat.combined(soup, [seven, R7, R6], [1/3, 1/6, 1/6]) from the kernel tables matches submission.csv to 8e-17 (dropping R6 would differ by 0.167); differs from r7oaifreedual in 10 of 13 columns; submit_check ok (new pairing).
+
+Submitted 2026-10-19 09:34Z as S2 of 10-19. Pile pre-slot 09:34Z: rank 211, in-pile 28 of 1211.
+
+RESULT: 0.955 (scored by 16:24Z 10-19, ~7 h queue), one tick under r7oaifreedual 0.956. Pre-registered branch "<=0.955 -> peak at 1/2, dual stays". The OAI-free reader-share curve now reads 3/4 0.953, 1/2 0.955-0.956, 1/3 0.955: flat-topped around 1/2, every step inside the ~0.002 board residual sd, so DIRECTION ONLY. The OAI-free general pick stays r7oaifreedual_v1 57365635 (0.956). duallight (1/4, 57399099) is pending and is expected to read <=0.955; a 0.957 there would re-open the curve.
