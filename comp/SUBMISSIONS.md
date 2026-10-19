@@ -5442,3 +5442,14 @@ Pre-flight 06:50Z: kernel v1 COMPLETE; run_check loaded 8 of 8 members; 0 Traceb
 Submitted 2026-10-19 09:34Z as S2 of 10-19. Pile pre-slot 09:34Z: rank 211, in-pile 28 of 1211.
 
 RESULT: 0.955 (scored by 16:24Z 10-19, ~7 h queue), one tick under r7oaifreedual 0.956. Pre-registered branch "<=0.955 -> peak at 1/2, dual stays". The OAI-free reader-share curve now reads 3/4 0.953, 1/2 0.955-0.956, 1/3 0.955: flat-topped around 1/2, every step inside the ~0.002 board residual sd, so DIRECTION ONLY. The OAI-free general pick stays r7oaifreedual_v1 57365635 (0.956). duallight (1/4, 57399099) is pending and is expected to read <=0.955; a 0.957 there would re-open the curve.
+
+
+## r7oaifreeduallight_v1 — 0.954, ref 57399099, 2026-10-19 — OAI-free hedge: the two readers' share cut to 1/4: the gain is gone by 1/4
+
+Kernel `kneemri-r7oaifreeduallight` v1 = `kneemri-r7oaifreedual` (0.956) with `RaptorSeat.combined` weights `[3/8, 1/8, 1/8]`: basinsoup_ff_k4 3/8 (remainder), mirrorthird's seven 3/8, R7 1/8, R6 1/8. Same mounts, no nartaa dataset. Built 2026-10-19 07:58Z as the point after duallean (1/3, S2 57391409); shipped beside it rather than after it because queues ran ~9.5 h on 10-19 (dualeven), so waiting for duallean would have cost the slot. Exempt from the one-row-candidate rule: it cannot reach the team row.
+
+PRE-REG vs r7oaifreedual 0.956 (re-anchored 09:37Z from "vs duallean", since duallean will not read before the slot): >=0.957 -> the curve still climbs at 1/4; OAI-free pick = the higher of light/lean, a tie going to lean (nearer the reader share that has scored); 0.956 -> flat; <=0.955 -> the gain is gone by 1/4.
+
+Pre-flight 09:03Z: kernel v1 COMPLETE; run_check loaded 8 of 8 members; 0 Tracebacks; submission (3,13), 0 NaN, in [0,1]; recomputed RaptorSeat.combined(soup, [seven, R7, R6], [3/8, 1/8, 1/8]) matches submission.csv exactly (dropping R6 would differ by 0.125); differs from duallean in 5 of 13 columns; submit_check ok (new pairing, prices r6 1/8 + r7 1/8).
+Submitted 2026-10-19 14:15Z as S3 of 10-19. Pile pre-slot 14:15Z: rank 215, in-pile 30 of 1242.
+RESULT: 0.954 (scored by 21:36Z 10-19, ~7.3 h queue), two ticks under r7oaifreedual 0.956. Pre-registered branch "<=0.955 -> the gain is gone by 1/4". The OAI-free reader-share curve: 3/4 0.953, 1/2 0.955-0.956, 1/3 0.955, 1/4 0.954 — peaked at 1/2 and falling on both sides; each step is inside the ~0.002 board residual sd, so DIRECTION ONLY, but four points agree on the shape. OAI-free general pick stays r7oaifreedual_v1 57365635 (0.956). Axis closed: no further reader-share points.
