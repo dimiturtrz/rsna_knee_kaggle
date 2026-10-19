@@ -5389,3 +5389,15 @@ beat one on the pf line, this becomes the fitting pick; row holds -> R6 alone ca
 Pre-flight 10-18 11:07Z: run_check 2/2 members, R7c exit 0 at 477s and R6 exit 0 at 719s, shape (3,13) 0 NaN, blend
 oracle max|diff| 1.1e-16, R7c vs R6 table corr 0.993 (max|diff| 0.28, distinct readers). rank 184, in-pile 17 of 1084 (14:06Z)
 RESULT (scored by 22:49Z, about 8h40m in queue): 0.957, one tick under the row holder pfheavy 0.958, so the team row is unchanged (22:49Z: 0.958, rank 191, in-pile 19 of 1145, which is still pfheavy). The pre-registered "row holds" branch fires, and the score itself sits a tick lower. Seating R7 beside R6, each at half the reader weight, does not beat R6 alone on the pf line. One tick is inside the ~0.002 top-band residual sd, so this is DIRECTION ONLY, not a measured loss. Dual-reader axis closed for the fitting pick, which stays pfheavy 57286020. It does not rule out R7 replacing R6 at full weight (that is `s6r7solo`, 0.957) or a dual seat on the OAI-free line (57365635, still pending).
+## r7oaifreedual_v1 — 0.956, ref 57365635, 2026-10-18 — OAI-free hedge: R6 beside R7 on the OAI-free line: one tick UP, becomes the OAI-free pick
+
+`kneemri-r7oaifreedual`: heliosli's R7 reader 1/4 + R6 reader 1/4 + `basinsoup_ff_k4_s2026` 1/4 + the mirrorthird seven 1/4,
+fused in rank space. No nartaa seat; both readers are convnext_small in22k-init with a fastMRI auxiliary, no OAI weights.
+INSTRUMENT for the 10-22 general pick (knee-ll0of): holds the reader total at r7oaifree's 1/2 (r7oaifreeheavy showed 3/4
+does not transfer) and asks only whether a second reader lifts the OAI-free line.
+
+PRE-REG vs `r7oaifree_v1` 0.955: >=0.956 -> becomes the OAI-free pick; 0.955 -> flat, r7oaifree stays; <=0.954 -> R6
+dilutes R7.
+Pre-flight 16:27Z: run_check 8/8 members, R7 exit 0 at 400s, R6 exit 0 at 630s, R7 vs R6 maxdiff 0.31 corr 0.989,
+submit_check new pairing, shape (3,13) 0 NaN, blend oracle maxdiff 0.0. Pile pre-slot rank 186, in-pile 17 of 1124 (18:50Z).
+RESULT: 0.956 (scored by 01:37Z 10-19), one tick over r7oaifree 0.955. Pre-reg branch >=0.956 fires: the OAI-free general-pick candidate moves to r7oaifreedual_v1. DIRECTION ONLY - one tick is inside the board residual sd ~0.002: read as "a second heliosli reader does not hurt the OAI-free line", not a measured gain. Contrast the pf line, where R7 beside R6 read one tick DOWN (pfheavydual 0.957 vs pfheavy 0.958). Team row unaffected (0.956 < 0.958).
