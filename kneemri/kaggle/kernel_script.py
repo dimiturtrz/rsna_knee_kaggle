@@ -44,6 +44,7 @@ FOREIGN_TABLES = {
     "reader_ranks.csv": "goodpjw_convnext",
     "mavit_sub.csv": "hengck23_mavit",
     "r7_sub.csv": "heliosli_r7",
+    "r6_sub.csv": "heliosli_r6",
 }
 """The table a foreign producer writes inside a kernel, by the seat name `comp/board.jsonl` records its share under."""
 

@@ -113,6 +113,13 @@ def test_blend(tmp_path: Path):
 
     sliced = 'T = ("ours.csv", "nartaa_seat.csv")\nRaptorSeat.combined(T[0], T[1:], (0.25,))\n'
     assert _script(tmp_path, sliced).blend() == Blend.of({"nartaa384": 0.25}, "rank")
+    two_readers = (
+        'T = ("ours.csv", "seven.csv", "r7_sub.csv", "r6_sub.csv")\n'
+        "RaptorSeat.combined(T[0], T[1:], (1 / 3, 1 / 6, 1 / 6))\n"
+    )
+    assert _script(tmp_path, two_readers).blend() == Blend.of({"heliosli_r7": 1 / 6, "heliosli_r6": 1 / 6}, "rank"), (
+        "R6 is a foreign seat, not ours"
+    )
     computed = 'T = ("ours.csv", "nartaa_seat.csv")\nRaptorSeat.combined(T[0], T[k:], (0.25,))\n'
     assert _script(tmp_path, computed).blend() is None, "a computed slice bound"
 
