@@ -5489,6 +5489,16 @@ Submitted 2026-10-20 04:43Z as S1 of 10-20.
 
 RESULT: 0.956 (scored by 11:47Z, ~7h in queue). The PRE-REG 0.956 branch fired: the seven and a second soup are interchangeable as the ours half at board resolution, and `r7oaifreedual_v1` stays. This is the last row of the OAI-free hedge axis (knee-ll0of). The owner withdrew that axis on 10-20 ("we dont actually need to free ourselves of oai"), so no further slot goes to it and none of these entries is a pick.
 
+## s6r7pfheavytrio_v1 — 0.958, ref 57431093, 2026-10-20 — team-row attempt: our quarter split three ways (soup_ff, soup_dmlb, the seven): flat, team row unmoved
+
+Kernel `kneemri-s6r7pfheavytrio` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958) with ours held at 1/4 total but split soup_ff 1/12 + soup_dmlb 1/12 + mirrorthird's seven 1/12; readers 3/4 unchanged (R6 `fe055406` flip TTA, nartaa 384 / 224 at 0.65 / 0.35).
+
+PRE-REG: >=0.959 the third ours seat lifts the row; 0.958 flat, the ours side is closed at board resolution; <=0.957 the split dilutes. P(>=0.959) ~0.1.
+
+Pre-flight: run_check 9 of 9 loaded, local oracle exact, submit_check ok on a literal-unrolled copy (novel set). Submitted 2026-10-20 09:10Z as S2 of 10-20. Pile pre-slot: rank 233, in-pile 31 of 1366.
+
+RESULT: 0.958 (scored between 15:47Z and 16:07Z, ~7h in queue). The 0.958 branch fired: the ours side is closed at board resolution. The TEAM ROW did not move: at 16:07Z our row sits at rank 245 with the same three neighbours on each side as at 15:47Z (before the score), so trio is not above pfheavyflat at hidden precision. Equal and worse are indistinguishable, so pfheavyflat stays pick 1. Under the S4 rule pre-registered on knee-rrqxc (scored, row unmoved), S4 goes to `kneemri-s6r7pfflatown2x`.
+
 ## s6r7pfflatown_v1 — PENDING, ref 57440431, 2026-10-20 — row lever: goodpjw2008's reader rank-blended at the end of pfheavyflat
 
 Kernel `kneemri-s6r7pfflatown` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958) with goodpjw2008's 2.5D ConvNeXt reader (three folds) blended last, `rank((1 - w) * rank(entry) + w * rank(reader))` per finding, at heliosli's v11 weights (Baker's 0.035 ... Synovitis 0.003). This is Part B of the public 0.9586 stack (heliosli; copied verbatim by `evgendvorkin/rsna-versia-7`), on top of our own pfheavyflat (knee-rrqxc).
