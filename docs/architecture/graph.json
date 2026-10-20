@@ -28706,6 +28706,12 @@
     },
     {
       "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._selection",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._unpacked",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript._strings",
       "target": "kneemri.kaggle.kernel_script.KernelScript._assigned",
       "weight": 1
@@ -28732,6 +28738,12 @@
       "kind": "calls",
       "source": "kneemri.kaggle.kernel_script.KernelScript._tables",
       "target": "kneemri.kaggle.kernel_script.KernelScript._table",
+      "weight": 1
+    },
+    {
+      "kind": "calls",
+      "source": "kneemri.kaggle.kernel_script.KernelScript._unpacked",
+      "target": "kneemri.kaggle.kernel_script.KernelScript._strings",
       "weight": 1
     },
     {
@@ -61580,6 +61592,14 @@
       "descendants": 0,
       "id": "kneemri.kaggle.kernel_script.KernelScript._tables",
       "label": "_tables",
+      "level": "method",
+      "parent": "kneemri.kaggle.kernel_script.KernelScript",
+      "role": null
+    },
+    {
+      "descendants": 0,
+      "id": "kneemri.kaggle.kernel_script.KernelScript._unpacked",
+      "label": "_unpacked",
       "level": "method",
       "parent": "kneemri.kaggle.kernel_script.KernelScript",
       "role": null
