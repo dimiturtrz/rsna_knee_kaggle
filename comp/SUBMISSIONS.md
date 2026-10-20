@@ -5465,3 +5465,16 @@ Pre-flight 2026-10-19 16:36-17:08Z: Kaggle v1 COMPLETE; `run_check` "loaded 2 of
 Submitted 2026-10-19 18:53Z as S4 of 10-19. Pile pre-slot 18:53Z: rank 220, in-pile 31 of 1277.
 
 RESULT: board 0.958, same as pfheavyflat 57382612. Pile 01:31Z: rank 225, in-pile 33 of 1316 (pre-slot 220, 31 of 1277; the drift is the pile growing, not a move). Pre-reg: row fixed -> pfheavyflat stays the fitting pick. Soup share 1/12 -> 1/6 on the unfitted pf line reads flat at board resolution, confirming the line is saturated in soup share; fifthflat (1/5) is retired unshipped, it asks the same flat question. 10-20 S1 = r7oaifreedualsoups (branch B).
+
+
+## r6oaifree_v1 — BOARD, ref 57412101, 2026-10-19 — OAI-free hedge instrument: R6 alone at the readers' 1/2: VERDICT
+
+Kernel `kneemri-r6oaifree` v1 = `kneemri-r7oaifreedual` (57365635, 0.956) with R7 removed: R6 (`heliosli/rsna-knee-r6-frozen-fe055406-w1`, flip TTA, rc tolerance) 1/2 + basinsoup_ff_k4 1/4 + mirrorthird's seven 1/4, rank space; no nartaa mount, OAI-free by its mounts.
+
+PRE-REG vs r7oaifreedual 0.956: >=0.957 R6 is the better reader and R7 dilutes it -> OAI-free pick; 0.956 readers interchangeable at 1/2 -> dual stays; <=0.955 the lift is the pairing -> dual stays.
+
+Pre-flight 2026-10-19 18:23Z: Kaggle v1 COMPLETE; `run_check` "loaded 8 of 8 members" rc 0; R6 runner exit 0 at 1223 s; 0 Tracebacks; local recompute at shares [1/4, 1/2] matches submission.csv exactly (0.0; the dual-style [1/4, 1/4] reads 0.25 off, so the share took effect); (3,13), 0 NaN, in [0,1]; mount_check ok; submit_check UNKNOWN (expression shares), no prior R6-only OAI-free entry on the board.
+
+Submitted 2026-10-19 23:12Z as S5 of 10-19. Pile pre-slot 23:12Z: rank 223, in-pile 32 of 1303.
+
+RESULT: 0.955 (scored 10-20 by 05:07Z, ~6h in queue). PRE-REG branch <=0.955 fired: the lift is the pairing, `r7oaifreedual_v1` 0.956 stays the OAI-free pick. R6 alone 0.955 = R7 alone (`r7oaifree_v1` 0.955), so the readers are interchangeable solo and the dual entry sits one board tick above either: +0.001, inside the top band resid sd (~0.002), directional only, never a finding. The reader-identity axis on the OAI-free line is closed. Team row held (OAI-free line cannot reach 0.958).
