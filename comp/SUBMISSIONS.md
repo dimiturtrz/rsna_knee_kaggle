@@ -5499,6 +5499,16 @@ Pre-flight: run_check 9 of 9 loaded, local oracle exact, submit_check ok on a li
 
 RESULT: 0.958 (scored between 15:47Z and 16:07Z, ~7h in queue). The 0.958 branch fired: the ours side is closed at board resolution. The TEAM ROW did not move: at 16:07Z our row sits at rank 245 with the same three neighbours on each side as at 15:47Z (before the score), so trio is not above pfheavyflat at hidden precision. Equal and worse are indistinguishable, so pfheavyflat stays pick 1. Under the S4 rule pre-registered on knee-rrqxc (scored, row unmoved), S4 goes to `kneemri-s6r7pfflatown2x`.
 
+## s6r7pfflatown2x_v1 — PENDING, ref 57449424, 2026-10-20 — reader dose: flatown with the reader end-blend weights doubled
+
+Kernel `kneemri-s6r7pfflatown2x` v1 = `kneemri-s6r7pfflatown` with every per-finding reader share doubled (Baker's 0.07, Contusion 0.06, Medial OA 0.05 ... Synovitis 0.006). It asks whether goodpjw2008's reader carries signal beyond heliosli's dose (knee-rrqxc).
+
+PRE-REG: 0.958 expected; the read is the TEAM ROW, taken beside flatown's. If the row moves past flatown, the reader carries more than the 1x dose and this entry is a pick-2 candidate. If the row is unchanged, the 1x dose stands; equal and worse cannot be told apart.
+
+Pre-flight: run_check 2/2 members loaded, `READER LEG BLENDED (ran True)` at 798s, local oracle maxdiff 0.0 (plain stack 0.167), mount_check ok, submit_check UNKNOWN (expected for expression shares). The pinned `-v 1` was checked against the live kernel: current_version_number 1, and the source matches the repo after CRLF strip.
+
+Submitted 2026-10-20 18:27Z as S4 of 10-20 (mark 18:38Z), by the pre-registered rrqxc rule after trio 57431093 scored 0.958 with the team row unmoved. Pile pre-slot: rank 248, in-pile 36 of 1407. flatown 57440431 was still PENDING at submit.
+
 ## s6r7pfflatown_v1 — PENDING, ref 57440431, 2026-10-20 — row lever: goodpjw2008's reader rank-blended at the end of pfheavyflat
 
 Kernel `kneemri-s6r7pfflatown` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958) with goodpjw2008's 2.5D ConvNeXt reader (three folds) blended last, `rank((1 - w) * rank(entry) + w * rank(reader))` per finding, at heliosli's v11 weights (Baker's 0.035 ... Synovitis 0.003). This is Part B of the public 0.9586 stack (heliosli; copied verbatim by `evgendvorkin/rsna-versia-7`), on top of our own pfheavyflat (knee-rrqxc).
