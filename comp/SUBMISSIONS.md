@@ -5453,3 +5453,15 @@ PRE-REG vs r7oaifreedual 0.956 (re-anchored 09:37Z from "vs duallean", since dua
 Pre-flight 09:03Z: kernel v1 COMPLETE; run_check loaded 8 of 8 members; 0 Tracebacks; submission (3,13), 0 NaN, in [0,1]; recomputed RaptorSeat.combined(soup, [seven, R7, R6], [3/8, 1/8, 1/8]) matches submission.csv exactly (dropping R6 would differ by 0.125); differs from duallean in 5 of 13 columns; submit_check ok (new pairing, prices r6 1/8 + r7 1/8).
 Submitted 2026-10-19 14:15Z as S3 of 10-19. Pile pre-slot 14:15Z: rank 215, in-pile 30 of 1242.
 RESULT: 0.954 (scored by 21:36Z 10-19, ~7.3 h queue), two ticks under r7oaifreedual 0.956. Pre-registered branch "<=0.955 -> the gain is gone by 1/4". The OAI-free reader-share curve: 3/4 0.953, 1/2 0.955-0.956, 1/3 0.955, 1/4 0.954 — peaked at 1/2 and falling on both sides; each step is inside the ~0.002 board residual sd, so DIRECTION ONLY, but four points agree on the shape. OAI-free general pick stays r7oaifreedual_v1 57365635 (0.956). Axis closed: no further reader-share points.
+
+## s6r7pfsixthflat_v1 — 0.958, ref 57406260, 2026-10-19 — soup-share instrument on the unfitted pf line: TEAM ROW HELD, soups at 1/6 neither lift nor cost
+
+Kernel `kneemri-s6r7pfsixthflat` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958) with the two basin soups at 1/6 each instead of 1/8 (foreign pair 3/4 -> 2/3, inner split unchanged: R6 1/2, nartaa 384/224 0.65/0.35). pfsixth (1/6 with heliosli's table) did not move the row; this is the same point on the unfitted line.
+
+PRE-REG vs pfheavyflat 0.958: 0.959 or row up -> soups carry more than 1/8 on the unfitted line, candidate fitting pick; 0.958 with row fixed -> the 1/8 peak holds, pfheavyflat stays the pick; <=0.957 -> soups past 1/8 cost.
+
+Pre-flight 2026-10-19 16:36-17:08Z: Kaggle v1 COMPLETE; `run_check` "loaded 2 of 2 members" rc 0; R7 runner exit 0 at 564 s; 0 Tracebacks; local recompute of the combined table from the five downloaded tables at weights [1/6, 1/6, 1/3, 0.2167, 0.1167] matches submission.csv to 5.6e-17 (vs heavyflat weights 0.0417: the share took effect); submission (3,13), 0 NaN, in [0,1]; mount_check ok. submit_check UNKNOWN (shares are expressions), as every pf entry.
+
+Submitted 2026-10-19 18:53Z as S4 of 10-19. Pile pre-slot 18:53Z: rank 220, in-pile 31 of 1277.
+
+RESULT: board 0.958, same as pfheavyflat 57382612. Pile 01:31Z: rank 225, in-pile 33 of 1316 (pre-slot 220, 31 of 1277; the drift is the pile growing, not a move). Pre-reg: row fixed -> pfheavyflat stays the fitting pick. Soup share 1/12 -> 1/6 on the unfitted pf line reads flat at board resolution, confirming the line is saturated in soup share; fifthflat (1/5) is retired unshipped, it asks the same flat question. 10-20 S1 = r7oaifreedualsoups (branch B).
