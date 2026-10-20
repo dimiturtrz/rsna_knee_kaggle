@@ -50,6 +50,15 @@ def test_member_names(tmp_path: Path):
     unbound = "def main():\n    SeatedEntry(names=chosen).run()\n"
     assert _script(tmp_path, unbound).member_names() is None, "an unbound name is not a literal"
 
+    table = (
+        "def main():\n    seven = ('c', 'a')\n"
+        "    for names, share, out in ((('a',), 0.25, 'x.csv'), (('b',), 0.25, 'y.csv'), (seven, 0.3, 'z.csv')):\n"
+        "        KernelRun(names=names).run()\n"
+    )
+    assert _script(tmp_path, table).member_names() == ["a", "b", "c"], "every row of an unpacked loop table"
+    ranked = "for names, out in ((picked(), 'x.csv'),):\n    KernelRun(names=names).run()\n"
+    assert _script(tmp_path, ranked).member_names() is None, "a row that is not literal"
+
     ranked_second = "KernelRun(names=('a',)).run()\nKernelRun(members=2).run()\n"
     assert _script(tmp_path, ranked_second).member_names() is None, "one ranked run makes the whole set unknown"
 

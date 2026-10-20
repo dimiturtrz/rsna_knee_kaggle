@@ -148,7 +148,42 @@ class KernelScript:
 
     def _selection(self, call: ast.Call) -> list[str] | None:
         selected = self._keyword(call, SELECTION)
-        return None if selected is None else self._strings(selected)
+        if selected is None:
+            return None
+        literal = self._strings(selected)
+        if literal is None and isinstance(selected, ast.Name):
+            return self._unpacked(call, selected.id)
+        return literal
+
+    def _unpacked(self, call: ast.Call, name: str) -> list[str] | None:
+        """Every row's names when a `for names, ... in ((...), ...)` loop around `call` binds `name`.
+
+        `kneemri-s6r7pftrioown` runs one `KernelRun` per row of a literal table, and a check that could not
+        read the row priced the whole package, refusing a kernel whose run loaded nine of nine.
+        """
+        bindings = [
+            (loop.iter, position)
+            for loop in ast.walk(self.tree)
+            if isinstance(loop, ast.For)
+            and isinstance(loop.target, ast.Tuple)
+            and any(inner is call for inner in ast.walk(loop))
+            for position, target in enumerate(loop.target.elts)
+            if isinstance(target, ast.Name) and target.id == name
+        ]
+        if not bindings:
+            return None
+        table, position = bindings[-1]
+        if not isinstance(table, ast.Tuple | ast.List):
+            return None
+        rows = [
+            self._strings(row.elts[position])
+            if isinstance(row, ast.Tuple | ast.List) and len(row.elts) > position
+            else None
+            for row in table.elts
+        ]
+        if any(names is None for names in rows):
+            return None
+        return list(dict.fromkeys(member for names in rows if names is not None for member in names))
 
     def foreign_seats(self) -> set[str]:
         """The foreign checkpoints the script loads, by the name `comp/board.jsonl` records them under.
