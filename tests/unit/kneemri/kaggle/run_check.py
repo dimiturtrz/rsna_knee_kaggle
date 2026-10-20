@@ -3,7 +3,8 @@
 import json
 from pathlib import Path
 
-from kneemri.kaggle.run_check import KernelLog
+from core.findings import STUDY, TARGETS
+from kneemri.kaggle.run_check import KernelLog, SubmissionHeader
 
 WHOLE = (
     "kit 53f81d3\n"
@@ -23,7 +24,7 @@ def test_of():
     assert KernelLog.of(records).lines == KernelLog.of(WHOLE).lines
 
 
-def test_read(tmp_path: Path):
+def test_kernel_log_read(tmp_path: Path):
     """A log on disk is read as `kaggle kernels output` leaves it."""
     path = tmp_path / "kneemri-vjepaseat.log"
     path.write_text(WHOLE, encoding="utf-8")
@@ -63,7 +64,7 @@ def test_fell_back():
     assert any("stand-in" in refusal for refusal in KernelLog.of(stage_one_died).faults())
 
 
-def test_faults():
+def test_kernel_log_faults():
     """A whole run refuses nothing; the farseat shape refuses on the drop, the mark and the count.
 
     That shape is `farseat_v1` verbatim (ref 55758082, 2026-08-25): six of seven members, scored under the
@@ -74,3 +75,17 @@ def test_faults():
     assert len(refusals) == 3, refusals
     assert any("vjepa_warm_s2026" in refusal for refusal in refusals)
     assert any("6 of 7" in refusal for refusal in refusals)
+
+
+def test_submission_header_faults():
+    """The contract order passes; the alphabetical order `s6r7pfflatown_v1` shipped is refused."""
+    assert SubmissionHeader((STUDY, *TARGETS)).faults() == []
+    assert len(SubmissionHeader((STUDY, *sorted(TARGETS))).faults()) == 1
+
+
+def test_submission_header_read(tmp_path: Path):
+    """A submission csv on disk yields its header columns, in file order."""
+    path = tmp_path / "submission.csv"
+    rows = [",".join((STUDY, *TARGETS)), ",".join(("1.2.3", *("0.5" for _ in TARGETS)))]
+    path.write_text("\n".join(rows), encoding="utf-8")
+    assert SubmissionHeader.read(path).columns == (STUDY, *TARGETS)

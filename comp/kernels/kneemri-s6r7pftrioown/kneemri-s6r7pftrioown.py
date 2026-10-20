@@ -254,10 +254,9 @@ def main() -> None:
         else entry
     ).reindex(index=entry.index, columns=entry.columns)
     blended = ran and not own.isna().any().any() and bool((own.nunique() > 1).all())
+    share = pd.Series(READER_SHARE).reindex(entry.columns)
     (
-        (entry.rank(pct=True) * (1.0 - pd.Series(READER_SHARE)) + own.rank(pct=True) * pd.Series(READER_SHARE)).rank(
-            pct=True
-        )
+        (entry.rank(pct=True) * (1.0 - share) + own.rank(pct=True) * share).rank(pct=True)[entry.columns]
         if blended
         else entry
     ).reset_index().to_csv(working / "submission.csv", index=False)

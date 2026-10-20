@@ -5509,7 +5509,7 @@ Pre-flight: run_check 2/2 members loaded, `READER LEG BLENDED (ran True)` at 798
 
 Submitted 2026-10-20 18:27Z as S4 of 10-20 (mark 18:38Z), by the pre-registered rrqxc rule after trio 57431093 scored 0.958 with the team row unmoved. Pile pre-slot: rank 248, in-pile 36 of 1407. flatown 57440431 was still PENDING at submit.
 
-## s6r7pfflatown_v1 — PENDING, ref 57440431, 2026-10-20 — row lever: goodpjw2008's reader rank-blended at the end of pfheavyflat
+## s6r7pfflatown_v1 — 0.668 (DEFECT: scrambled columns), ref 57440431, 2026-10-20 — row lever: goodpjw2008's reader rank-blended at the end of pfheavyflat
 
 Kernel `kneemri-s6r7pfflatown` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958) with goodpjw2008's 2.5D ConvNeXt reader (three folds) blended last, `rank((1 - w) * rank(entry) + w * rank(reader))` per finding, at heliosli's v11 weights (Baker's 0.035 ... Synovitis 0.003). This is Part B of the public 0.9586 stack (heliosli; copied verbatim by `evgendvorkin/rsna-versia-7`), on top of our own pfheavyflat (knee-rrqxc).
 
@@ -5518,3 +5518,5 @@ PRE-REG: every share is below board resolution, so 0.958 is expected; the read i
 Pre-flight: run_check 2/2 members loaded, `READER LEG BLENDED (ran True)`, local oracle maxdiff 0.0 against a recomputation from the kernel's own tables; submit_check UNKNOWN (expression shares), novel (no reader end-leg on our board); mount_check sweep ok; kit 5fea6702.
 
 Submitted 2026-10-20 13:47Z as S3 of 10-20 (mark 13:57Z). Pile pre-slot: rank 239, in-pile 31 of 1382.
+
+RESULT 0.668, read 2026-10-20 20:13Z. Not a reading of the reader leg: the kernel's `submission.csv` came out with its columns in ALPHABETICAL order (ACL, Baker's, Contusion, ...). `entry.rank(pct=True) * (1.0 - pd.Series(READER_SHARE))` aligns the frame on the union of its columns and the Series index, and pandas sorts that union when the two orders differ; the grader reads the twelve columns by POSITION, so eleven findings were scored against another finding's ranks. Pre-flight missed it because the local oracle `reindex`ed both sides onto the same columns before diffing, which is the one operation that hides a column-order defect. Fixed in all four reader-leg kernels (flatown, flatown2x, flatown4x, trioown) by `share = pd.Series(READER_SHARE).reindex(entry.columns)` and indexing the result `[entry.columns]`; verified header-for-header against the entry's own csv. flatown2x (57449424, pending) carries the v1 defect and is expected at the same ~0.67. The reader-leg question is therefore still unanswered.

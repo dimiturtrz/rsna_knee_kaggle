@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core import cli
+from core.findings import STUDY, TARGETS
 
 logger = logging.getLogger(__name__)
 
@@ -138,10 +139,35 @@ class KernelLog:
         return found
 
 
+@dataclass(frozen=True)
+class SubmissionHeader:
+    """A kernel's `submission.csv` header, held against the contract's column order.
+
+    The grader reads the twelve findings by POSITION. `s6r7pfflatown_v1` (ref 57440431, 2026-10-20) blended
+    a frame with a `pd.Series` keyed by finding, pandas sorted the aligned union alphabetically, and the
+    entry scored 0.668 against a 0.958 parent with every log line reading like a success.
+    """
+
+    columns: tuple[str, ...]
+
+    @classmethod
+    def read(cls, path: Path) -> "SubmissionHeader":
+        """The first line of a submission csv, split into its column names."""
+        return cls(tuple(path.read_text(encoding="utf-8").splitlines()[0].split(",")))
+
+    def faults(self) -> list[str]:
+        """Why this header is not the contract's column order; empty when it is."""
+        expected = (STUDY, *TARGETS)
+        if self.columns == expected:
+            return []
+        return [f"submission header is {self.columns}, the grader reads columns by position and expects {expected}"]
+
+
 def main() -> None:
     """Refuse a kernel run whose output is a different entry from the one its kernel is named for."""
     command = cli.Command(__doc__, logger)
     command.parser.add_argument("--log", type=Path, required=True, help="the kernel log to read")
+    command.parser.add_argument("--submission", type=Path, help="the kernel's submission.csv, to check its header")
     arguments = command.parsed()
 
     log = KernelLog.read(arguments.log)
@@ -152,6 +178,8 @@ def main() -> None:
         f"loaded {seats[0]} of {seats[1]} members" if seats else "no member census printed",
     )
     faults = log.faults()
+    if arguments.submission is not None:
+        faults += SubmissionHeader.read(arguments.submission).faults()
     for fault in faults:
         logger.error("%s", fault)
     command.conclude(faults, "refusal(s)")
