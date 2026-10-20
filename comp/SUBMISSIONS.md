@@ -5499,6 +5499,16 @@ Pre-flight: run_check 9 of 9 loaded, local oracle exact, submit_check ok on a li
 
 RESULT: 0.958 (scored between 15:47Z and 16:07Z, ~7h in queue). The 0.958 branch fired: the ours side is closed at board resolution. The TEAM ROW did not move: at 16:07Z our row sits at rank 245 with the same three neighbours on each side as at 15:47Z (before the score), so trio is not above pfheavyflat at hidden precision. Equal and worse are indistinguishable, so pfheavyflat stays pick 1. Under the S4 rule pre-registered on knee-rrqxc (scored, row unmoved), S4 goes to `kneemri-s6r7pfflatown2x`.
 
+## s6r7pfflatown4x_v2 — PENDING, ref 57455911, 2026-10-20 — reader dose 4x on the column-order fix
+
+Kernel `kneemri-s6r7pfflatown4x` v2 = `kneemri-s6r7pfflatown` with every per-finding reader share times four (Baker's 0.14, Contusion 0.12, Medial OA 0.1, ACL 0.1 ... Synovitis 0.012), and the blend's output re-indexed to the contract column order: flatown v1 (57440431, 0.668) and flatown2x (57449424) both shipped alphabetical columns, which the board grades by position.
+
+Price: the flat proxy (soups + raptor replicas, NO R7 seat) read +0.0012 at 4x, monotone to 12-16x. An R7-faithful proxy (soups 1/4, ours6 as R7 stand-in 3/8, replicas 3/8; AUC 0.9098, 562 honest rows) reads +0.00016 at 4x (P 0.74), the peak of its dose curve, with 8x vs 4x at -0.00029 (P 0.21). So 4x is the best-priced dose and the gain is tiebreak-size, far below the 0.001 board unit. The stand-in is ours, not R7, so the shape is directional.
+
+PRE-REG: 0.958; the read is the TEAM ROW. Row moves up in-pile -> the reader moves hidden precision, pick-2 candidate; row unchanged -> pfheavyflat stays (equal and worse indistinguishable).
+
+Pre-flight: run_check clean, `READER LEG BLENDED`, header in contract order, positional replay equal to the shipped table, mount_check ok, slot_guard 4/4. Submitted 2026-10-20 23:27Z as S5 of 10-20 (mark 23:30Z). Pile pre-slot: rank 253, in-pile 35 of 1433. flatown2x 57449424 still PENDING at submit.
+
 ## s6r7pfflatown2x_v1 — PENDING, ref 57449424, 2026-10-20 — reader dose: flatown with the reader end-blend weights doubled
 
 Kernel `kneemri-s6r7pfflatown2x` v1 = `kneemri-s6r7pfflatown` with every per-finding reader share doubled (Baker's 0.07, Contusion 0.06, Medial OA 0.05 ... Synovitis 0.006). It asks whether goodpjw2008's reader carries signal beyond heliosli's dose (knee-rrqxc).
