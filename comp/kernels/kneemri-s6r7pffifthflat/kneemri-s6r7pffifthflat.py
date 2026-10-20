@@ -1,4 +1,4 @@
-"""s6r7pffifthflat — `kneemri-s6r7pfsixthflat` with our two soups raised again, from 1/6 to 1/5 each, the heliosli pair 3/5.
+"""s6r7pffifthflat — `kneemri-s6r7pfsixthflat` with our soups raised from 1/6 to 1/5 each, heliosli pair 3/5.
 
 Shelf branch for 10-20, armed only if sixthflat (57406260) moved the team row: the next point up the soup-share curve
 on the unfitted line (no per-finding Raptor share table, 0.50 everywhere). INSTRUMENT, read by the team row:
