@@ -5499,6 +5499,12 @@ Pre-flight: run_check 9 of 9 loaded, local oracle exact, submit_check ok on a li
 
 RESULT: 0.958 (scored between 15:47Z and 16:07Z, ~7h in queue). The 0.958 branch fired: the ours side is closed at board resolution. The TEAM ROW did not move: at 16:07Z our row sits at rank 245 with the same three neighbours on each side as at 15:47Z (before the score), so trio is not above pfheavyflat at hidden precision. Equal and worse are indistinguishable, so pfheavyflat stays pick 1. Under the S4 rule pre-registered on knee-rrqxc (scored, row unmoved), S4 goes to `kneemri-s6r7pfflatown2x`.
 
+## s6r7pfseventhflat_v1 — PENDING, ref 57475588, 2026-10-21 09:27Z — INSTRUMENT: soup share 1/7 on the flat line
+
+Kernel `kneemri-s6r7pfseventhflat` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1; no per-finding Raptor share table) with each of our two soups at 1/7 instead of 1/8 and the heliosli/nartaa readers at 5/7 (R7 5/14, nartaa 384 / 224 at 0.232 / 0.125). The soup-share sweep moved the team row once, 1/12 -> 1/8, and 1/6 did not beat 1/8 on either line, so the peak sits in (1/12, 1/6); 1/7 probes its upper side. Pre-flight: run_check clean, header in contract order, positional replay at 1/7 exact (5.6e-17; 1/8 and 1/6 replays differ 0.018 / 0.024), mount_check ok. Pile before the slot: rank 266, 38th of 1474 at 0.958.
+
+PRE-REG 0.958; the read is the TEAM ROW's place in the tie (up = peak above 1/8; fixed = the upper side is closed). Expected to score ~17:30Z (heavy readers take ~8h). Its lower-side mirror, `kneemri-s6r7pftenthflat` (1/10), is pre-flighted and shelved for a later 10-21 slot.
+
 ## s6r7pftrioown_v2 — PENDING, ref 57465996, 2026-10-21 — row lever: goodpjw2008's reader end-blended on pfheavytrio, column order fixed
 
 Kernel `kneemri-s6r7pftrioown` v2 = `kneemri-s6r7pfheavytrio` (57431093, 0.958: soup_ff, soup_dmlb and the seven at 1/12 each, readers 3/4) with goodpjw2008's 2.5D ConvNeXt reader (three folds) blended last, `rank((1 - w) * rank(entry) + w * rank(reader))` per finding, at heliosli's v11 weights (Baker's 0.035 ... Synovitis 0.003). Carries the column-order fix that voided flatown v1 and flatown2x (both 0.668).
