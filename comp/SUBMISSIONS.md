@@ -5506,6 +5506,7 @@ Kernel `kneemri-s6r7pftrioown` v2 = `kneemri-s6r7pfheavytrio` (57431093, 0.958: 
 PRE-REG: 0.958; the read is the TEAM ROW. Row moves up in-pile -> beats pfheavyflat at hidden precision, pick-2 candidate; row unchanged -> pfheavyflat stays (equal and worse indistinguishable).
 
 Pre-flight: run_check --log --submission clean (9 of 9 members, header in contract order), R7 exit 0, `READER LEG BLENDED (ran True)`, receipt 3/3 scored with 0 fallbacks; positional replay from the kernel's own six tables plus `reader_seat.csv` reproduces the shipped table at maxdiff 0.0 WITHOUT reindexing the shipped side (the reader moves it 0.357 from the plain stack); slot_guard 0/0. Submitted 2026-10-21 04:47Z as S1 of 10-21 (mark ~04:42Z). Pile pre-slot: rank 256, in-pile 36 of 1460. flatown4x 57455911 still PENDING at submit.
+
 ## s6r7pfflatown4x_v2 — PENDING, ref 57455911, 2026-10-20 — reader dose 4x on the column-order fix
 
 Kernel `kneemri-s6r7pfflatown4x` v2 = `kneemri-s6r7pfflatown` with every per-finding reader share times four (Baker's 0.14, Contusion 0.12, Medial OA 0.1, ACL 0.1 ... Synovitis 0.012), and the blend's output re-indexed to the contract column order: flatown v1 (57440431, 0.668) and flatown2x (57449424) both shipped alphabetical columns, which the board grades by position.
