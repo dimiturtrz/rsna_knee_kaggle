@@ -5511,7 +5511,7 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 
 **Pending reads and the 10-22 contingency matrix** (kernels score ~8 h after submission, so only the first ~3 slots of 10-22 can inform the picks):
 
-- tenthflat 57485224 (soup 1/10), ETA ~22Z. If the row moves up, ninthflat (1/9, pre-flighted) fires on 10-22.
+- tenthflat 57485224 (soup 1/10): 0.958, row HELD 22:07Z. Soup axis closed at 1/8; ninthflat retired.
 - nartaa60 57493981 (reader split 0.40/0.60), ETA ~03Z. nartaa70 fires 23:30Z as S5 of 10-21.
 - 10-22 slot 1 (~00Z): n384x80 (nartaa inner 0.80), pre-flighted. If nartaa60 AND n384x80 both move up, n60x80 (pre-flighted) fires ~09Z.
 - If nothing moves up, no new public-knob probe ships and the picks stay as above.
@@ -5520,9 +5520,11 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 
 Kernel `kneemri-s6r7pfnartaa60` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it and adds no knob. Pre-flight: run_check clean (2 of 2, R7 exit 0 at 649s), header in contract order, positional replay at 0.60 exact (8e-17; 0.50 differs 0.075), mount_check ok. Pile pre-slot 18:47Z: rank 270, 36th of 1525. PRE-REG 0.958; read is the TEAM ROW (up = replaces pick 1; held = 0.50 stands). Expected to score around 03Z on 10-22. S5 (23:30Z) = nartaa70, the same axis one step further.
 
-## s6r7pftenthflat_v1 — PENDING, ref 57485224, 2026-10-21 14:07Z — INSTRUMENT: soup share 1/10 on the flat line
+## s6r7pftenthflat_v1 — 0.958, ref 57485224, 2026-10-21 14:07Z — INSTRUMENT: soup share 1/10 on the flat line: TEAM ROW HELD, the soup axis is closed at 1/8
 
 Kernel `kneemri-s6r7pftenthflat` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with each soup at 1/10 instead of 1/8 and the reader block at 4/5. Mirror of seventhflat's 1/7: 1/12 -> 1/8 moved the team row and 1/6 did not beat 1/8, so this probes the lower side of that peak. Pre-flight: run_check clean (2 of 2, R7 exit 0), header in contract order, positional replay at 1/10 exact (1.1e-16), mount_check ok. Pile pre-slot 14:07Z: rank 269, in-pile 37 of 1497. PRE-REG 0.958; read is the TEAM ROW (up = the peak sits below 1/8 and this can replace pick 1 with no added knob; held = the lower side is closed).
+
+RESULT: 0.958 (scored by 22:07Z, ~8h in queue). Team row HELD: in-pile 35 of 1542 before and after. With 1/7 and 1/6 also holding, 1/8 is the only soup share that moved the row, so the soup axis is closed on both sides at board resolution. The contingent ninthflat (1/9, between a held 1/10 and the shipped 1/8) cannot move the row by the same reading, so it is retired, not fired.
 
 Staged next (S4, ~18:49Z): `kneemri-s6r7pfnartaa60` v1 = pfheavyflat with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it with no added knob. Pre-flight passed 14:08Z: replay at 0.60 exact (8e-17; 0.50 differs 0.075), R7 exit 0 at 649s, mount_check ok. It takes S4 ahead of ninthflat because a slot scores about 8h later: S4 reads around 03:00Z on 10-22, before the picks lock, and a new axis is worth more there than a finer step on the share line.
 

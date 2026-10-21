@@ -204,6 +204,7 @@ with a foreign seat (`comp/champion.json`). The rows below were closed over OUR 
 | label post-processing (cross-label stack, truth-correlation coupling, per-label member reweight, max/median/power aggregation) | **CLOSED** — every form reads −0.001 to −0.019 under 5×5-fold CV on 896 studies; the models already carry the label correlations. Only per-finding SHARE reads positive, which is the tilt kernels' question | `2026-10-10_postprocessing_and_pick_risk.md` |
 | per-finding SHARE over the nartaa seat (tilt around 1/3) | **FLAT at board resolution.** `mirrortiltthird_v1` reads 0.953, the same as flat 1/3, and costs private risk (0.14 vs 0.09). The holdout's +0.006 is a replica's. Complement member selection (out-of-half −0.0005..+0.0005) and per-member weights (−0.0015 / −0.0001; halves pick disjoint members) are null too. The CPU blend axis is spent | knee-kl48k |
 | more public families in the wave | heliosli compact **DEAD** (weights retired 2026-10-09 13:50Z). lixin73 MaxViT fold0 is weaker than our trio and flat in a blend. nartaa's 224-crop seat `mirrorpair_v1` read 0.952 against mirrorseat's 0.953: a second checkpoint of the same family adds nothing (closed) | knee-dbj03 |
+| soup SHARE on the pf line (each soup over the reader block) | **CLOSED at 1/8, both sides.** 1/12 -> 1/8 moved the team row; 1/6 (`sixthflat`), 1/7 (`seventhflat`) and 1/10 (`tenthflat`, ref 57485224) all read 0.958 with the in-pile row held. A public-row knob, read as an instrument only | comp/SUBMISSIONS.md `s6r7pftenthflat_v1` |
 
 ## H. Serving
 
