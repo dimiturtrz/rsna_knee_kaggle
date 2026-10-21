@@ -5499,6 +5499,22 @@ Pre-flight: run_check 9 of 9 loaded, local oracle exact, submit_check ok on a li
 
 RESULT: 0.958 (scored between 15:47Z and 16:07Z, ~7h in queue). The 0.958 branch fired: the ours side is closed at board resolution. The TEAM ROW did not move: at 16:07Z our row sits at rank 245 with the same three neighbours on each side as at 15:47Z (before the score), so trio is not above pfheavyflat at hidden precision. Equal and worse are indistinguishable, so pfheavyflat stays pick 1. Under the S4 rule pre-registered on knee-rrqxc (scored, row unmoved), S4 goes to `kneemri-s6r7pfflatown2x`.
 
+## FINAL PICKS (lock 2026-10-22, check 22:00Z) — pick 1 pfheavyflat 57382612, pick 2 pfheavytrio 57431093
+
+Goal is a private-LB silver, so the picks favour generalization over public hidden precision.
+
+- **Pick 1 — `s6r7pfheavyflat_v1` (57382612, 0.958).** pfheavy without the public-fitted Raptor share table: the same row with one fewer knob fitted on the public board. Owner tick NOT yet confirmed (the API exposes no selection field).
+- **Pick 2 — `s6r7pfheavytrio_v1` (57431093, 0.958).** Owner has ticked it. Ours quarter split over three members (soup_ff, soup_dmlb, the seven), which spreads the ours side across more independent members.
+- Board read 20:07Z: r270, 36th of the 1532-team 0.958 pile, 47 places above the silver line (r317). In-pile position is mostly public noise and reshuffles on private.
+
+**Swap rule.** A probe replaces pick 1 only if it ranks ABOVE pfheavyflat in-pile (team row moves up from 36) AND adds no knob fitted on the public board. A probe that wins by a fitted share alone is an instrument, not a pick.
+
+**Pending reads and the 10-22 contingency matrix** (kernels score ~8 h after submission, so only the first ~3 slots of 10-22 can inform the picks):
+
+- tenthflat 57485224 (soup 1/10), ETA ~22Z. If the row moves up, ninthflat (1/9, pre-flighted) fires on 10-22.
+- nartaa60 57493981 (reader split 0.40/0.60), ETA ~03Z. nartaa70 fires 23:30Z as S5 of 10-21.
+- 10-22 slot 1 (~00Z): n384x80 (nartaa inner 0.80), pre-flighted. If nartaa60 AND n384x80 both move up, n60x80 (pre-flighted) fires ~09Z.
+- If nothing moves up, no new public-knob probe ships and the picks stay as above.
 ## s6r7pfnartaa60_v1 — PENDING, ref 57493981, 2026-10-21 18:47Z — INSTRUMENT: reader split R7/nartaa 0.40/0.60
 
 Kernel `kneemri-s6r7pfnartaa60` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it and adds no knob. Pre-flight: run_check clean (2 of 2, R7 exit 0 at 649s), header in contract order, positional replay at 0.60 exact (8e-17; 0.50 differs 0.075), mount_check ok. Pile pre-slot 18:47Z: rank 270, 36th of 1525. PRE-REG 0.958; read is the TEAM ROW (up = replaces pick 1; held = 0.50 stands). Expected to score around 03Z on 10-22. S5 (23:30Z) = nartaa70, the same axis one step further.
