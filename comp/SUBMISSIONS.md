@@ -5516,6 +5516,18 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 - 10-22 slot 1 (~00Z): n384x80 (nartaa inner 0.80), pre-flighted. If nartaa60 AND n384x80 both move up, n60x80 (pre-flighted) fires ~09Z.
 - If nothing moves up, no new public-knob probe ships and the picks stay as above.
 
+**10-22 slot clock.** Queue-to-score has run 7 to 8.5 h, so a slot can only inform the 22:00Z check if it is submitted by ~13:30Z. That leaves four useful slots; a fifth after 13:30Z can never inform a pick and goes out only as a late instrument, labelled that way.
+
+| slot | when | entry | gated on |
+|---|---|---|---|
+| S1 | ~00:00Z | n384x80 (nartaa inner 0.80) | none, pre-flighted |
+| S2 | ~03:30Z | if nartaa60 moved up: R 0.60 is the reader-split pick candidate, so spend S2 on nothing new and wait for nartaa70; if it held, S2 is free | nartaa60 read ~03Z |
+| S3 | ~08:30Z | n60x80 if nartaa60 AND n384x80 both moved up | n384x80 read ~08Z |
+| S4 | ≤13:30Z | last pick-informing slot | nartaa70 read ~07:30Z |
+| S5 | after 13:30Z | late instrument only | — |
+
+An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
+
 ## s6r7pfnartaa60_v1 — PENDING, ref 57493981, 2026-10-21 18:47Z — INSTRUMENT: reader split R7/nartaa 0.40/0.60
 
 Kernel `kneemri-s6r7pfnartaa60` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it and adds no knob. Pre-flight: run_check clean (2 of 2, R7 exit 0 at 649s), header in contract order, positional replay at 0.60 exact (8e-17; 0.50 differs 0.075), mount_check ok. Pile pre-slot 18:47Z: rank 270, 36th of 1525. PRE-REG 0.958; read is the TEAM ROW (up = replaces pick 1; held = 0.50 stands). Expected to score around 03Z on 10-22. S5 (23:30Z) = nartaa70, the same axis one step further.
