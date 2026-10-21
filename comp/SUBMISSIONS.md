@@ -5505,9 +5505,11 @@ Kernel `kneemri-s6r7pfseventhflat` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.9
 
 PRE-REG 0.958; the read is the TEAM ROW's place in the tie (up = peak above 1/8; fixed = the upper side is closed). Expected to score ~17:30Z (heavy readers take ~8h). Its lower-side mirror, `kneemri-s6r7pftenthflat` (1/10), is pre-flighted and shelved for a later 10-21 slot.
 
-## s6r7pftrioown_v2 — PENDING, ref 57465996, 2026-10-21 — row lever: goodpjw2008's reader end-blended on pfheavytrio, column order fixed
+## s6r7pftrioown_v2 — 0.957, ref 57465996, 2026-10-21 — row lever: goodpjw2008's reader end-blended on pfheavytrio, column order fixed
 
 Kernel `kneemri-s6r7pftrioown` v2 = `kneemri-s6r7pfheavytrio` (57431093, 0.958: soup_ff, soup_dmlb and the seven at 1/12 each, readers 3/4) with goodpjw2008's 2.5D ConvNeXt reader (three folds) blended last, `rank((1 - w) * rank(entry) + w * rank(reader))` per finding, at heliosli's v11 weights (Baker's 0.035 ... Synovitis 0.003). Carries the column-order fix that voided flatown v1 and flatown2x (both 0.668).
+
+Result 2026-10-21 13:27Z: **0.957**, one notch BELOW pfheavytrio's 0.958, team row unmoved (rank 269, 38th of 1491 in the 0.958 tie). The kernel log says `READER LEG BLENDED (ran True) at 1022s` (kit 5fea6702), so this is the leg itself and not the skipped-leg fallback: goodpjw2008's reader end-blended at heliosli's v11 table costs public score on top of heavytrio. Under the 12:07Z pre-registration it could not become a pick either way; it now also closes the reader end-blend for this round. `kneemri-s6r7pftrioownflat` (flat 0.194/12 share) stays built and unpushed: its mean dose equals v2's, so it inherits the same sign. Picks unchanged.
 
 PRE-REG: 0.958; the read is the TEAM ROW. Row moves up in-pile -> beats pfheavyflat at hidden precision, pick-2 candidate; row unchanged -> pfheavyflat stays (equal and worse indistinguishable).
 
