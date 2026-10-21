@@ -5499,6 +5499,10 @@ Pre-flight: run_check 9 of 9 loaded, local oracle exact, submit_check ok on a li
 
 RESULT: 0.958 (scored between 15:47Z and 16:07Z, ~7h in queue). The 0.958 branch fired: the ours side is closed at board resolution. The TEAM ROW did not move: at 16:07Z our row sits at rank 245 with the same three neighbours on each side as at 15:47Z (before the score), so trio is not above pfheavyflat at hidden precision. Equal and worse are indistinguishable, so pfheavyflat stays pick 1. Under the S4 rule pre-registered on knee-rrqxc (scored, row unmoved), S4 goes to `kneemri-s6r7pfflatown2x`.
 
+## s6r7pfnartaa60_v1 — PENDING, ref 57493981, 2026-10-21 18:47Z — INSTRUMENT: reader split R7/nartaa 0.40/0.60
+
+Kernel `kneemri-s6r7pfnartaa60` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it and adds no knob. Pre-flight: run_check clean (2 of 2, R7 exit 0 at 649s), header in contract order, positional replay at 0.60 exact (8e-17; 0.50 differs 0.075), mount_check ok. Pile pre-slot 18:47Z: rank 270, 36th of 1525. PRE-REG 0.958; read is the TEAM ROW (up = replaces pick 1; held = 0.50 stands). Expected to score around 03Z on 10-22. S5 (23:30Z) = nartaa70, the same axis one step further.
+
 ## s6r7pftenthflat_v1 — PENDING, ref 57485224, 2026-10-21 14:07Z — INSTRUMENT: soup share 1/10 on the flat line
 
 Kernel `kneemri-s6r7pftenthflat` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with each soup at 1/10 instead of 1/8 and the reader block at 4/5. Mirror of seventhflat's 1/7: 1/12 -> 1/8 moved the team row and 1/6 did not beat 1/8, so this probes the lower side of that peak. Pre-flight: run_check clean (2 of 2, R7 exit 0), header in contract order, positional replay at 1/10 exact (1.1e-16), mount_check ok. Pile pre-slot 14:07Z: rank 269, in-pile 37 of 1497. PRE-REG 0.958; read is the TEAM ROW (up = the peak sits below 1/8 and this can replace pick 1 with no added knob; held = the lower side is closed).
