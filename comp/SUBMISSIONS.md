@@ -5507,7 +5507,7 @@ PRE-REG: 0.958; the read is the TEAM ROW. Row moves up in-pile -> beats pfheavyf
 
 Pre-flight: run_check --log --submission clean (9 of 9 members, header in contract order), R7 exit 0, `READER LEG BLENDED (ran True)`, receipt 3/3 scored with 0 fallbacks; positional replay from the kernel's own six tables plus `reader_seat.csv` reproduces the shipped table at maxdiff 0.0 WITHOUT reindexing the shipped side (the reader moves it 0.357 from the plain stack); slot_guard 0/0. Submitted 2026-10-21 04:47Z as S1 of 10-21 (mark ~04:42Z). Pile pre-slot: rank 256, in-pile 36 of 1460. flatown4x 57455911 still PENDING at submit.
 
-## s6r7pfflatown4x_v2 — PENDING, ref 57455911, 2026-10-20 — reader dose 4x on the column-order fix
+## s6r7pfflatown4x_v2 — 0.958, row unmoved, ref 57455911, 2026-10-20 — reader dose 4x on the column-order fix
 
 Kernel `kneemri-s6r7pfflatown4x` v2 = `kneemri-s6r7pfflatown` with every per-finding reader share times four (Baker's 0.14, Contusion 0.12, Medial OA 0.1, ACL 0.1 ... Synovitis 0.012), and the blend's output re-indexed to the contract column order: flatown v1 (57440431, 0.668) and flatown2x (57449424) both shipped alphabetical columns, which the board grades by position.
 
@@ -5516,6 +5516,8 @@ Price: the flat proxy (soups + raptor replicas, NO R7 seat) read +0.0012 at 4x, 
 PRE-REG: 0.958; the read is the TEAM ROW. Row moves up in-pile -> the reader moves hidden precision, pick-2 candidate; row unchanged -> pfheavyflat stays (equal and worse indistinguishable).
 
 Pre-flight: run_check clean, `READER LEG BLENDED`, header in contract order, positional replay equal to the shipped table, mount_check ok, slot_guard 4/4. Submitted 2026-10-20 23:27Z as S5 of 10-20 (mark 23:30Z). Pile pre-slot: rank 253, in-pile 35 of 1433. flatown2x 57449424 still PENDING at submit.
+
+Result 2026-10-21 06:47Z: 0.958, and the TEAM ROW DID NOT MOVE. Our place in the 0.958 tie went from 36th to 37th of 1466. The one team newly ahead is `offhand`, whose submission count went 56 -> 57 and who jumped from 52nd to 29th in the tie. That is a team rising past us, not us falling, and no 0.958 team that sat behind us was passed. So the 4x reader leg does not beat the entry already holding the row on public hidden precision. Branch B: pfheavyflat stays pick 1, no 8x, and the reader-dose axis is closed for the row. The outcome matches the R7-faithful proxy's +0.00016 at 4x, not the flat proxy's +0.0012, so the flat proxy (which has no R7 seat) overstated the leg. On the same proxy the staged trioown4x is priced at ~0.
 
 ## s6r7pfflatown2x_v1 — 0.668 (DEFECT: scrambled columns), ref 57449424, 2026-10-20 — reader dose: flatown with the reader end-blend weights doubled
 
