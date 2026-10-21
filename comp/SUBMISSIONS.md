@@ -5509,7 +5509,9 @@ PRE-REG: 0.958; the read is the TEAM ROW. Row moves up in-pile -> the reader mov
 
 Pre-flight: run_check clean, `READER LEG BLENDED`, header in contract order, positional replay equal to the shipped table, mount_check ok, slot_guard 4/4. Submitted 2026-10-20 23:27Z as S5 of 10-20 (mark 23:30Z). Pile pre-slot: rank 253, in-pile 35 of 1433. flatown2x 57449424 still PENDING at submit.
 
-## s6r7pfflatown2x_v1 — PENDING, ref 57449424, 2026-10-20 — reader dose: flatown with the reader end-blend weights doubled
+## s6r7pfflatown2x_v1 — 0.668 (DEFECT: scrambled columns), ref 57449424, 2026-10-20 — reader dose: flatown with the reader end-blend weights doubled
+
+RESULT 01:27Z 10-21: 0.668, as predicted — built before the column-order fix, so the blended table reached Kaggle in alphabetical order and was graded by position. Confirms the defect; says NOTHING about the 2x dose. Superseded by flatown4x v2 (ref 57455911, fixed columns), still pending.
 
 Kernel `kneemri-s6r7pfflatown2x` v1 = `kneemri-s6r7pfflatown` with every per-finding reader share doubled (Baker's 0.07, Contusion 0.06, Medial OA 0.05 ... Synovitis 0.006). It asks whether goodpjw2008's reader carries signal beyond heliosli's dose (knee-rrqxc).
 
