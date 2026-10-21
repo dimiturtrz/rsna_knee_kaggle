@@ -5505,9 +5505,11 @@ Kernel `kneemri-s6r7pftenthflat` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958
 
 Staged next (S4, ~18:49Z): `kneemri-s6r7pfnartaa60` v1 = pfheavyflat with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it with no added knob. Pre-flight passed 14:08Z: replay at 0.60 exact (8e-17; 0.50 differs 0.075), R7 exit 0 at 649s, mount_check ok. It takes S4 ahead of ninthflat because a slot scores about 8h later: S4 reads around 03:00Z on 10-22, before the picks lock, and a new axis is worth more there than a finer step on the share line.
 
-## s6r7pfseventhflat_v1 — PENDING, ref 57475588, 2026-10-21 09:27Z — INSTRUMENT: soup share 1/7 on the flat line
+## s6r7pfseventhflat_v1 — 0.958, ref 57475588, 2026-10-21 09:27Z — INSTRUMENT: soup share 1/7 on the flat line
 
 Kernel `kneemri-s6r7pfseventhflat` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1; no per-finding Raptor share table) with each of our two soups at 1/7 instead of 1/8 and the heliosli/nartaa readers at 5/7 (R7 5/14, nartaa 384 / 224 at 0.232 / 0.125). The soup-share sweep moved the team row once, 1/12 -> 1/8, and 1/6 did not beat 1/8 on either line, so the peak sits in (1/12, 1/6); 1/7 probes its upper side. Pre-flight: run_check clean, header in contract order, positional replay at 1/7 exact (5.6e-17; 1/8 and 1/6 replays differ 0.018 / 0.024), mount_check ok. Pile before the slot: rank 266, 38th of 1474 at 0.958.
+
+**Result 0.958, team row held** (read 17:27Z: rank 269, 36th of 1518 in the 0.958 pile, unchanged from the pre-score reads). 1/7 does not beat 1/8 at the hidden precision the row exposes; with 1/6 already flat, the upper side of the soup-share peak is closed and 1/8 stays the read point. Consequence for S5: ninthflat (1/9) only refines a side tenthflat (S3, pending) is already reading, so S5 23:30Z goes to `kneemri-s6r7pfnartaa70` (0.30/0.70 reader split, pre-flighted, previously staged as 10-22 slot 1) and frees that 10-22 slot for a point chosen after nartaa60 reads. `kneemri-s6r7pf7n60` (1/7 + 0.60) is not shipped.
 
 PRE-REG 0.958; the read is the TEAM ROW's place in the tie (up = peak above 1/8; fixed = the upper side is closed). Expected to score ~17:30Z (heavy readers take ~8h). Its lower-side mirror, `kneemri-s6r7pftenthflat` (1/10), is pre-flighted and shelved for a later 10-21 slot.
 
