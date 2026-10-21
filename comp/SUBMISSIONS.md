@@ -5515,6 +5515,7 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 - nartaa60 57493981 (reader split 0.40/0.60), ETA ~03Z. nartaa70 fires 23:30Z as S5 of 10-21.
 - 10-22 slot 1 (~00Z): n384x80 (nartaa inner 0.80), pre-flighted. If nartaa60 AND n384x80 both move up, n60x80 (pre-flighted) fires ~09Z.
 - If nothing moves up, no new public-knob probe ships and the picks stay as above.
+
 ## s6r7pfnartaa60_v1 — PENDING, ref 57493981, 2026-10-21 18:47Z — INSTRUMENT: reader split R7/nartaa 0.40/0.60
 
 Kernel `kneemri-s6r7pfnartaa60` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it and adds no knob. Pre-flight: run_check clean (2 of 2, R7 exit 0 at 649s), header in contract order, positional replay at 0.60 exact (8e-17; 0.50 differs 0.075), mount_check ok. Pile pre-slot 18:47Z: rank 270, 36th of 1525. PRE-REG 0.958; read is the TEAM ROW (up = replaces pick 1; held = 0.50 stands). Expected to score around 03Z on 10-22. S5 (23:30Z) = nartaa70, the same axis one step further.
