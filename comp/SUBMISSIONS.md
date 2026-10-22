@@ -5524,10 +5524,16 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 | S1 | ~00:00Z | n384x80 (nartaa inner 0.80) | none, pre-flighted |
 | S2 | 03:27Z | SPENT: s6r7pfalleven v1, ref 57507754 (nartaa60 held, so the held branch). Read ~11Z. |
 | S3 | 10:28Z | SPENT: s6r7pfnartaa40 v1, ref 57520830 (n60x80 retired: nartaa60 held, nartaa70 0.953, n384x80 0.950). Read ~18Z. |
-| S4 | ≤13:30Z | last pick-informing slot; candidate s6r7pftrioeven v1 (pick 2 pfheavytrio with nartaa 0.50/0.50, the pick-2 twin of alleven; pushed 01:07Z, pre-flight pending). If S4 is trioeven and alleven is not spent yet, spend the earlier slot on alleven | nartaa70 read ~07:30Z |
+| S4 | 11:28Z | SPENT: s6r7pftrioeven v1, ref 57522741 (fired early: nothing could read before the 13:30Z window closes). Read ~19Z. |
 | S5 | after 13:30Z | late instrument only | — |
 
 An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
+
+## s6r7pftrioeven_v1 — PENDING, ref 57522741, 2026-10-22 11:28Z — GENERALIZATION CANDIDATE: pick-2 twin of alleven
+
+Kernel `kneemri-s6r7pftrioeven` v1 = pfheavytrio (57431093, 0.958, manual pick) with the nartaa 384/224 inner split at 0.50/0.50 instead of the inherited 0.65/0.35. Pre-flight: run_check 9 of 9 (R7 exit 0 at 561s, kit 5fea6702), header in contract order, positional replay at 0.50 exact (1.1e-16; 0.65 differs 0.028), mount_check ok; every component table matches pfheavytrio to 0 (R7 1.0e-4 GPU jitter). alleven (same change on the flat line) held 0.958, n384x80 (0.80) fell to 0.950. Submitted 11:28Z as S4 of 10-22; pile pre-slot r283, in-pile 32 of 1595.
+
+PRE-REG 0.958; read is the TEAM ROW. Moves up: Kaggle's auto pick moves here. Holds: picks unchanged.
 
 ## s6r7pfnartaa40_v1 — PENDING, ref 57520830, 2026-10-22 10:28Z — INSTRUMENT: reader split R7/nartaa 0.60/0.40
 
