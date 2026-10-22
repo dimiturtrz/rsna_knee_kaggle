@@ -5524,7 +5524,7 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 | S1 | ~00:00Z | n384x80 (nartaa inner 0.80) | none, pre-flighted |
 | S2 | ~03:30Z | if nartaa60 moved up: R 0.60 is the reader-split pick candidate, so spend S2 on nothing new and wait for nartaa70; if it held, S2 = s6r7pfalleven v1 (pfheavyflat with nartaa 0.50/0.50, every reader weight even, REMOVES a public-fitted knob; pre-flight clean 00:12Z, staged) | nartaa60 read ~03Z |
 | S3 | ~08:30Z | n60x80 if nartaa60 AND n384x80 both moved up | n384x80 read ~08Z |
-| S4 | ≤13:30Z | last pick-informing slot | nartaa70 read ~07:30Z |
+| S4 | ≤13:30Z | last pick-informing slot; candidate s6r7pftrioeven v1 (pick 2 pfheavytrio with nartaa 0.50/0.50, the pick-2 twin of alleven; pushed 01:07Z, pre-flight pending). If S4 is trioeven and alleven is not spent yet, spend the earlier slot on alleven | nartaa70 read ~07:30Z |
 | S5 | after 13:30Z | late instrument only | — |
 
 An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
