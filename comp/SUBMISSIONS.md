@@ -5513,7 +5513,7 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 **Pending reads and the 10-22 contingency matrix** (kernels score ~8 h after submission, so only the first ~3 slots of 10-22 can inform the picks):
 
 - tenthflat 57485224 (soup 1/10): 0.958, row HELD 22:07Z. Soup axis closed at 1/8; ninthflat retired.
-- nartaa60 57493981 (reader split 0.40/0.60), ETA ~03Z. nartaa70 fires 23:30Z as S5 of 10-21.
+- nartaa60 57493981 (reader split 0.40/0.60): 0.958, row HELD 01:27Z (35 of 1553). S2 = alleven. nartaa70 57500099 ETA ~07:30Z.
 - 10-22 slot 1 (~00Z): n384x80 (nartaa inner 0.80), pre-flighted. If nartaa60 AND n384x80 both move up, n60x80 (pre-flighted) fires ~09Z.
 - If nothing moves up, no new public-knob probe ships and the picks stay as above.
 
@@ -5541,9 +5541,11 @@ Kernel `kneemri-s6r7pfnartaa70` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958,
 
 PRE-REG 0.958; the read is the TEAM ROW against in-pile 35. Moves up: the reader split leans toward nartaa and R 0.70 is a pick candidate only if nartaa60 also moved. Holds: the split is flat at board resolution between 0.50 and 0.70. Reads ~07:30Z 10-22, inside the pick-informing window.
 
-## s6r7pfnartaa60_v1 — PENDING, ref 57493981, 2026-10-21 18:47Z — INSTRUMENT: reader split R7/nartaa 0.40/0.60
+## s6r7pfnartaa60_v1 — 0.958, ref 57493981, 2026-10-21 18:47Z — INSTRUMENT: reader split R7/nartaa 0.40/0.60: TEAM ROW HELD
 
 Kernel `kneemri-s6r7pfnartaa60` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the R7/nartaa split inside the reader 3/4 at 0.40/0.60 instead of the 0.50/0.50 inherited from the public R7+nartaa notebook. R7 is a single-fold checkpoint, so this leans away from it and adds no knob. Pre-flight: run_check clean (2 of 2, R7 exit 0 at 649s), header in contract order, positional replay at 0.60 exact (8e-17; 0.50 differs 0.075), mount_check ok. Pile pre-slot 18:47Z: rank 270, 36th of 1525. PRE-REG 0.958; read is the TEAM ROW (up = replaces pick 1; held = 0.50 stands). Expected to score around 03Z on 10-22. S5 (23:30Z) = nartaa70, the same axis one step further.
+
+**Result 0.958, team row held** (scored early, read 2026-10-22 01:27Z: rank 276, 35th of 1553 in the 0.958 pile, unchanged from the 00:07Z read). 0.40/0.60 does not beat the inherited 0.50/0.50 at the hidden precision the row exposes. Per the contingency matrix S2 goes to alleven; n60x80 stays contingent on n384x80 moving up, and with nartaa60 flat that precondition has already failed, so it is retired (a nartaa70 move would point at a 0.30/0.70 combination, not this one).
 
 ## s6r7pftenthflat_v1 — 0.958, ref 57485224, 2026-10-21 14:07Z — INSTRUMENT: soup share 1/10 on the flat line: TEAM ROW HELD, the soup axis is closed at 1/8
 
