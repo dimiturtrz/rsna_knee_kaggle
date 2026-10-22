@@ -5506,6 +5506,7 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 - **Pick 1 — `s6r7pfheavyflat_v1` (57382612, 0.958).** pfheavy without the public-fitted Raptor share table: the same row with one fewer knob fitted on the public board. Owner tick NOT yet confirmed (the API exposes no selection field).
 - **Pick 2 — `s6r7pfheavytrio_v1` (57431093, 0.958).** Owner has ticked it. Ours quarter split over three members (soup_ff, soup_dmlb, the seven), which spreads the ours side across more independent members.
 - Board read 20:07Z: r270, 36th of the 1532-team 0.958 pile, 47 places above the silver line (r317). In-pile position is mostly public noise and reshuffles on private.
+- Board read 2026-10-22 00:47Z (full LB download, 6352 teams): r274, 35th of the 1552-team 0.958 pile; silver line r317 at 0.958, so 43 places above it (45 at 21:47Z). Teams at 0.959 or better: 239 (237 at 21:47Z). That drift is about 2 teams in 3 h: a risk note, not a projection, and the private LB reshuffles the pile anyway.
 
 **Swap rule.** A probe replaces pick 1 only if it ranks ABOVE pfheavyflat in-pile (team row moves up from 36) AND adds no knob fitted on the public board. A probe that wins by a fitted share alone is an instrument, not a pick.
 
