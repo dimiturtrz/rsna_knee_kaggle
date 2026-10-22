@@ -5522,12 +5522,16 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 | slot | when | entry | gated on |
 |---|---|---|---|
 | S1 | ~00:00Z | n384x80 (nartaa inner 0.80) | none, pre-flighted |
-| S2 | ~03:30Z | if nartaa60 moved up: R 0.60 is the reader-split pick candidate, so spend S2 on nothing new and wait for nartaa70; if it held, S2 = s6r7pfalleven v1 (pfheavyflat with nartaa 0.50/0.50, every reader weight even, REMOVES a public-fitted knob; pre-flight clean 00:12Z, staged) | nartaa60 read ~03Z |
+| S2 | 03:27Z | SPENT: s6r7pfalleven v1, ref 57507754 (nartaa60 held, so the held branch). Read ~11Z. |
 | S3 | ~08:30Z | n60x80 if nartaa60 AND n384x80 both moved up | n384x80 read ~08Z |
 | S4 | ≤13:30Z | last pick-informing slot; candidate s6r7pftrioeven v1 (pick 2 pfheavytrio with nartaa 0.50/0.50, the pick-2 twin of alleven; pushed 01:07Z, pre-flight pending). If S4 is trioeven and alleven is not spent yet, spend the earlier slot on alleven | nartaa70 read ~07:30Z |
 | S5 | after 13:30Z | late instrument only | — |
 
 An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
+
+## s6r7pfalleven_v1 — PENDING, ref 57507754, 2026-10-22 03:27Z — GENERALIZATION CANDIDATE: every reader weight even
+
+pfheavyflat 57382612 (pick 1, 0.958) with the nartaa 384/224 inner split at 0.50/0.50 instead of the 0.65/0.35 inherited from the public notebook, so no reader weight on the line is a public-fitted value. Kernel v1 (lastRun 2026-10-21 23:47:56Z), run_check 2 of 2 (R7 exit 0 at 633s, kit 5fea6702), header in contract order, positional replay maxdiff 0.0 at 0.50 (0.65 differs 0.028), mount_check ok, submit_check UNKNOWN (foreign seat). Every component csv matches heavyflat's to 0 except R7 (1.0-1.4e-4 GPU jitter), so the 0.028 submission delta is the weight change alone. Pile pre-slot 03:27Z: rank 277, 33rd of 1561. PRE-REG 0.958; the read is the TEAM ROW. If it holds, it is a pick-1 candidate with one fewer public-fitted knob (goal-silver-generalize), not a score lift.
 
 ## s6r7pfn384x80_v1 — PENDING, ref 57501920, 2026-10-22 00:07Z — INSTRUMENT: nartaa 384/224 at 0.80/0.20 on the flat line
 
