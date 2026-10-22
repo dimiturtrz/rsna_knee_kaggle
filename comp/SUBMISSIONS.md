@@ -5523,9 +5523,9 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 |---|---|---|---|
 | S1 | ~00:00Z | n384x80 (nartaa inner 0.80) | none, pre-flighted |
 | S2 | 03:27Z | SPENT: s6r7pfalleven v1, ref 57507754 (nartaa60 held, so the held branch). Read ~11Z. |
-| S3 | 10:28Z | SPENT: s6r7pfnartaa40 v1, ref 57520830 (n60x80 retired: nartaa60 held, nartaa70 0.953, n384x80 0.950). Read ~18Z. |
+| S3 | 10:28Z | SPENT: s6r7pfnartaa40 v1, ref 57520830 (n60x80 retired: nartaa60 held, nartaa70 0.953, n384x80 0.950). **0.942, DOWN 0.016.** |
 | S4 | 11:28Z | SPENT: s6r7pftrioeven v1, ref 57522741 (fired early: nothing could read before the 13:30Z window closes). Read ~19Z. |
-| S5 | late (after nartaa40 read ~18Z) | STAGED: s6r7pftrio40 v1 (pfheavytrio, reader 0.60 R7 / 0.40 nartaa), pre-flighted clean 13:29Z (9 of 9, R7 exit 0 at 771s, replay 1.1e-16, mount_check ok). Fires if nartaa40 holds or moves up. | — |
+| S5 | 19:29Z | SPENT: s6r7pftrio60 v1, ref 57536206 (trio40 retired: nartaa40 0.942). Scores after 23:59Z. | — |
 
 An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
 
@@ -5535,9 +5535,15 @@ Kernel `kneemri-s6r7pftrioeven` v1 = pfheavytrio (57431093, 0.958, manual pick) 
 
 PRE-REG 0.958; read is the TEAM ROW. Moves up: Kaggle's auto pick moves here. Holds: picks unchanged.
 
-## s6r7pfnartaa40_v1 — PENDING, ref 57520830, 2026-10-22 10:28Z — INSTRUMENT: reader split R7/nartaa 0.60/0.40
+## s6r7pftrio60_v1 — PENDING, ref 57536206, 2026-10-22 19:29Z — S5: trio line at nartaa 0.60
+
+Kernel `kneemri-s6r7pftrio60` v1 = `kneemri-s6r7pfheavytrio` (57431093, 0.958, pick) with line 96 at 0.60: the reader 3/4 split 0.40 R7 / 0.60 nartaa, the flat line's other 0.958 point carried to the trio line. Chosen over trio40 (0.60 R7 / 0.40 nartaa) after nartaa40 read 0.942. Pre-flight: run_check 9 of 9 (R7 exit 0 at 553s, kit 5fea6702), header in contract order, 3 rows 0 nan, positional replay at 0.60 q 0.65 exact (1.1e-16), mount_check ok, slot_guard 4/4. Pile pre-slot r286, in-pile 32 of 1625. PRE-REG 0.958 (hold). Queue-to-score is ~6.5-8.5 h, so it scores after the 23:59Z deadline.
+
+## s6r7pfnartaa40_v1 — **0.942, DOWN 0.016**, ref 57520830, 2026-10-22 10:28Z — INSTRUMENT: reader split R7/nartaa 0.60/0.40
 
 Kernel `kneemri-s6r7pfnartaa40` v1 = `kneemri-s6r7pfnartaa60` with line 96 at 0.40: pfheavyflat's reader 3/4 split 0.60 R7 / 0.40 nartaa, the side of 0.50 opposite nartaa60 (0.958 held) and nartaa70 (0.953). No added knob. Pre-flight: run_check 2 of 2 (R7 exit 0 at 512s, kit 5fea6702), header in contract order, 3 rows 0 nan, positional replay at 0.40 exact (5.6e-17; 0.50 differs 0.075, 0.60 differs 0.15), mount_check ok. Submitted 10:28Z as S3 of 10-22; pile pre-slot r282, in-pile 32 of 1591.
+
+**Result 0.942, DOWN 0.016** (read 19:28Z vs t1528: team row held at 0.958, r283 -> r286 by drift, overtook 0). The reader-split axis on the flat line now reads nartaa share 0.40 = 0.942, 0.50 = 0.958, 0.60 = 0.958, 0.70 = 0.953. The optimum sits at 0.50-0.60 and falls off steeply on the R7 side. Leaning toward the single-fold R7 costs far more than leaning toward nartaa. trio40 is retired and S5 goes to trio60.
 
 PRE-REG 0.958; the read is the TEAM ROW (drift-proof overtake count). Moves up: Kaggle's auto pick moves to this entry. Holds: the split peaks at 0.50-0.60.
 
