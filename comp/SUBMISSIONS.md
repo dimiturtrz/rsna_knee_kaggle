@@ -5528,6 +5528,12 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 
 An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
 
+## s6r7pfn384x80_v1 — PENDING, ref 57501920, 2026-10-22 00:07Z — INSTRUMENT: nartaa 384/224 at 0.80/0.20 on the flat line
+
+Kernel `kneemri-s6r7pfn384x80` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the nartaa inner split at 0.80/0.20 instead of the 0.65/0.35 inherited from the public nartaa notebook; 0.50/0.50 on pfheavy held the row, so this reads the upper side. No added knob, and a separate axis from the reader split, so it does not wait on nartaa60 or nartaa70. Pre-flight: run_check 2 of 2 (R7 exit 0 at 1208s, kit 5fea6702), header in contract order, positional replay at 0.80 exact (1.1e-16; 0.65 differs 0.028, 0.50 differs 0.056), mount_check ok. Submitted 00:07Z as S1 of 10-22; pile pre-slot r273, in-pile 35 of 1551.
+
+PRE-REG 0.958; the read is the TEAM ROW against in-pile 35. Moves up: the 384 crop carries more than its inherited weight and, with no added knob, this replaces pick 1; if nartaa60 also moved, n60x80 fires ~08:30Z. Holds: the inner split is closed on both sides. Reads ~08Z.
+
 ## s6r7pfnartaa70_v1 — PENDING, ref 57500099, 2026-10-21 23:27Z — INSTRUMENT: reader split R7/nartaa 0.30/0.70
 
 Kernel `kneemri-s6r7pfnartaa70` v1 = `kneemri-s6r7pfheavyflat` (57382612, 0.958, pick 1) with the R7/nartaa split inside the reader 3/4 at 0.30/0.70; the second point on the reader-split axis after nartaa60 (0.40/0.60). No added knob. Pre-flight: run_check 2 of 2 (R7 exit 0 at 684s), header in contract order, positional replay at 0.70 exact (1.1e-16; 0.60 differs 0.075, 0.50 differs 0.15), mount_check ok. Submitted 23:27Z as S5 of 10-21; pile pre-slot r273, in-pile 35 of 1549.
