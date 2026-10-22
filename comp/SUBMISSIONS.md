@@ -5525,7 +5525,7 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 | S2 | 03:27Z | SPENT: s6r7pfalleven v1, ref 57507754 (nartaa60 held, so the held branch). Read ~11Z. |
 | S3 | 10:28Z | SPENT: s6r7pfnartaa40 v1, ref 57520830 (n60x80 retired: nartaa60 held, nartaa70 0.953, n384x80 0.950). Read ~18Z. |
 | S4 | 11:28Z | SPENT: s6r7pftrioeven v1, ref 57522741 (fired early: nothing could read before the 13:30Z window closes). Read ~19Z. |
-| S5 | after 13:30Z | late instrument only | — |
+| S5 | late (after nartaa40 read ~18Z) | STAGED: s6r7pftrio40 v1 (pfheavytrio, reader 0.60 R7 / 0.40 nartaa), pre-flighted clean 13:29Z (9 of 9, R7 exit 0 at 771s, replay 1.1e-16, mount_check ok). Fires if nartaa40 holds or moves up. | — |
 
 An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
 
