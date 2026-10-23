@@ -128,6 +128,7 @@ The training arms are NOT here — they are shell recipes over `kneemri.training
 | `python -m kneemri.kaggle.kit_check` | Is the kit we are about to ship the code we are running? `python -m kneemri.kaggle.kit_check`. |
 | `python -m kneemri.kaggle.mount_check` | Does every kernel declare the mounts its members need? `python -m kneemri.kaggle.mount_check`. |
 | `python -m kneemri.kaggle.package_members` | Package our trained members for Kaggle: `python -m kneemri.kaggle.package_members`. |
+| `python -m kneemri.kaggle.pf_teacher` | Write the pf line's teacher over the TRAINING studies: `python -m kneemri.kaggle.pf_teacher --reader <csv> …`. |
 | `python -m kneemri.kaggle.pool_ceiling` | What the BEST LINEAR COMBINATION of this pool scores — the bound selection cannot answer. |
 | `python -m kneemri.kaggle.priceable_blend` | The best blend this project can PRICE, greedily, with no card and no slot. |
 | `python -m kneemri.kaggle.raptor_features` | The raptor member's READING of our corpus, written as a feature-teacher file. |

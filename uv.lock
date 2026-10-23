@@ -706,6 +706,8 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "h5py" },
+    { name = "nibabel" },
     { name = "pytest" },
     { name = "pytest-cov" },
 ]
@@ -736,10 +738,12 @@ requires-dist = [
     { name = "accelerate", marker = "extra == 'reader'" },
     { name = "beartype" },
     { name = "cleanlab", marker = "extra == 'labelnoise'" },
+    { name = "h5py", marker = "extra == 'dev'" },
     { name = "h5py", marker = "extra == 'fastmri'" },
     { name = "huggingface-hub" },
     { name = "jaxtyping" },
     { name = "kaggle", marker = "extra == 'submit'" },
+    { name = "nibabel", marker = "extra == 'dev'" },
     { name = "nibabel", marker = "extra == 'motion'" },
     { name = "numpy" },
     { name = "opencv-python-headless" },

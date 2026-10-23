@@ -17,6 +17,8 @@ gains a real policy by joining `POLICIES` rather than by growing an `if`. `Wakel
 that holds one of these for the span of a block.
 """
 
+from __future__ import annotations
+
 import ctypes
 import sys
 from dataclasses import dataclass
