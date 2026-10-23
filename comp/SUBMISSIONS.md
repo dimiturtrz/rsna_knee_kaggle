@@ -5254,7 +5254,7 @@ likely fitted on the public board, so anything built on it is a FITTING-pick can
 
 PRE-REG (heliosli's credited 0.958): 0.958 the replica is faithful; 0.957 a producer differs or the credit was
 rounding; <= 0.956 the replica is broken, and the fault has to be found before s6r7pf can be read against it.
-RESULT: **0.958**. The replica reproduces heliosli's credited score, so it is faithful and is the control H for s6r7pf (P) and s6r7pflight (L). It lands inside the 0.958 pile (272 teams at the 11:22Z read) as the latest submission there, rank 377 of 6078: new 0.958 arrivals now rank below it, and only teams reaching >= 0.959 can pass it.
+RESULT: **0.958**. The replica reproduces heliosli's credited score, so it is faithful and is the control H for s6r7pf (P) and s6r7pflight (L). It lands inside the 0.958 pile (272 teams at the 11:22Z read) as the latest submission there, rank 377 of 6078 (read 2026-10-16): new 0.958 arrivals now rank below it, and only teams reaching >= 0.959 can pass it.
 
 ## s6r7pf_v1 — 0.958, ref 57259032, 2026-10-16 — heliospf scaled 5/6 + our two soups at 1/12 each: displays as a tie with H, but is ABOVE it at full precision
 
@@ -5525,7 +5525,7 @@ Goal is a private-LB silver, so the picks favour generalization over public hidd
 | S2 | 03:27Z | SPENT: s6r7pfalleven v1, ref 57507754 (nartaa60 held, so the held branch). Read ~11Z. |
 | S3 | 10:28Z | SPENT: s6r7pfnartaa40 v1, ref 57520830 (n60x80 retired: nartaa60 held, nartaa70 0.953, n384x80 0.950). **0.942, DOWN 0.016.** |
 | S4 | 11:28Z | SPENT: s6r7pftrioeven v1, ref 57522741 (fired early: nothing could read before the 13:30Z window closes). **0.956, DOWN 0.002.** |
-| S5 | 19:29Z | SPENT: s6r7pftrio60 v1, ref 57536206 (trio40 retired: nartaa40 0.942). Scores after 23:59Z. | — |
+| S5 | 19:29Z | SPENT: s6r7pftrio60 v1, ref 57536206 (trio40 retired: nartaa40 0.942). **0.957 public / 0.942 private.** | — |
 
 An unmoved row on every read means S2 to S4 carry no public-knob probe, per the swap rule.
 
@@ -5537,7 +5537,7 @@ Kernel `kneemri-s6r7pftrioeven` v1 = pfheavytrio (57431093, 0.958, manual pick) 
 
 PRE-REG 0.958; read is the TEAM ROW. Moves up: Kaggle's auto pick moves here. Holds: picks unchanged.
 
-## s6r7pftrio60_v1 — PENDING, ref 57536206, 2026-10-22 19:29Z — S5: trio line at nartaa 0.60
+## s6r7pftrio60_v1 — **0.957 / private 0.942**, ref 57536206, 2026-10-22 19:29Z — S5: trio line at nartaa 0.60
 
 Kernel `kneemri-s6r7pftrio60` v1 = `kneemri-s6r7pfheavytrio` (57431093, 0.958, pick) with line 96 at 0.60: the reader 3/4 split 0.40 R7 / 0.60 nartaa, the flat line's other 0.958 point carried to the trio line. Chosen over trio40 (0.60 R7 / 0.40 nartaa) after nartaa40 read 0.942. Pre-flight: run_check 9 of 9 (R7 exit 0 at 553s, kit 5fea6702), header in contract order, 3 rows 0 nan, positional replay at 0.60 q 0.65 exact (1.1e-16), mount_check ok, slot_guard 4/4. Pile pre-slot r286, in-pile 32 of 1625. PRE-REG 0.958 (hold). Queue-to-score is ~6.5-8.5 h, so it scores after the 23:59Z deadline.
 
@@ -5638,3 +5638,7 @@ Pre-flight: run_check 2/2 members loaded, `READER LEG BLENDED (ran True)`, local
 Submitted 2026-10-20 13:47Z as S3 of 10-20 (mark 13:57Z). Pile pre-slot: rank 239, in-pile 31 of 1382.
 
 RESULT 0.668, read 2026-10-20 20:13Z. Not a reading of the reader leg: the kernel's `submission.csv` came out with its columns in ALPHABETICAL order (ACL, Baker's, Contusion, ...). `entry.rank(pct=True) * (1.0 - pd.Series(READER_SHARE))` aligns the frame on the union of its columns and the Series index, and pandas sorts that union when the two orders differ; the grader reads the twelve columns by POSITION, so eleven findings were scored against another finding's ranks. Pre-flight missed it because the local oracle `reindex`ed both sides onto the same columns before diffing, which is the one operation that hides a column-order defect. Fixed in all four reader-leg kernels (flatown, flatown2x, flatown4x, trioown) by `share = pd.Series(READER_SHARE).reindex(entry.columns)` and indexing the result `[entry.columns]`; verified header-for-header against the entry's own csv. flatown2x (57449424, pending) carries the v1 defect and is expected at the same ~0.67. The reader-leg question is therefore still unanswered.
+
+## FINAL — private 0.943, bronze (2026-10-23)
+
+Both picks (pfheavytrio 57431093, manual; auto pick among the 0.958 entries) read **0.943 private** against 0.958 public. Public close: rank 288 of ~6,400, leader 0.970. The private board kept our public order exactly across the 18 working entries of the last four days; see [the post-mortem](../interpretations/kneemri/2026-10-23_final-result-public-to-private.md).

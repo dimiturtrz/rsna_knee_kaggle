@@ -6,7 +6,8 @@
 # peak beats 0.8731, whether or not the set it comes back with looks like the old one.
 set -euo pipefail
 
-D=D:/data/volumetric/mri/processed/rsna_knee_abnormality
+source "$(dirname "$0")/roots.sh"
+D="$PROCESSED"
 CANDIDATE="${1:?usage: displacement.sh <member_stem>}"
 
 test -f "$D/${CANDIDATE}.holdout.npz" || { echo "no holdout record for $CANDIDATE"; exit 1; }

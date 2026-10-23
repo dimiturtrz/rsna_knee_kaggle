@@ -1,4 +1,5 @@
-"""s6r7pfheavynsoup — `kneemri-s6r7pfheavy` with its `basinsoup_ff_k4` seat swapped for `nartaa_soup_k4` (solo 0.948 vs 0.946).
+"""s6r7pfheavynsoup — `kneemri-s6r7pfheavy` with its `basinsoup_ff_k4` seat swapped for `nartaa_soup_k4` (solo 0.948
+vs 0.946).
 
 Everything else is `kneemri-s6r7pfheavy`'s: heliosli's R6 bundle `fe055406` with flip TTA, nartaa 384 + 224 (0.65 / 0.35
 inside the Raptor half), heliosli's per-finding Raptor share, the soups at 1/8 each and the heliosli pair at 3/4.

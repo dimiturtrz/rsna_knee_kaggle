@@ -4,13 +4,13 @@ Every number this project owns is measured on a 909-study holdout carved from th
 members trained on. That is the gap these corpora exist to close, and it is a different job from
 "more training data" — most of what follows will never enter a training set.
 
-Credentials for all three live OUTSIDE the repo under `D:/life/creds/machine/`, `chmod 600`, and are
+Credentials for all three live OUTSIDE the repo under a credentials directory (`$CREDS` below), `chmod 600`, and are
 read by the fetch scripts rather than embedded. Never echo one into a log or a chat.
 
 ## SKM-TEA (Stanford AIMI) — the external validation set
 
 - Access: a time-limited Azure blob **SAS URL** for the `qdess` container, saved at
-  `D:/life/creds/machine/skmtea_url.txt`. `sp=rl` is read+list only. Stanford recommends AzCopy or
+  the file `SKMTEA_URL_FILE` names. `sp=rl` is read+list only. Stanford recommends AzCopy or
   Storage Explorer; **neither is installed here**, and neither is needed — the container answers the
   plain REST list endpoint, `"$BASE?$QUERY&restype=container&comp=list"`, which costs no transfer and
   is how the breakdown below was taken before anything was downloaded.
@@ -44,9 +44,9 @@ which is the one thing our own holdout can never be.
 ## fastMRI (NYU) — the label namespace, and the steering error that cost a download
 
 - Access: presigned download links, extracted from the NYU mail to
-  `D:/life/creds/machine/fastmri_urls.txt` (231 URLs across knee, brain, breast, prostate).
+  `$CREDS/fastmri_urls.txt` (231 URLs across knee, brain, breast, prostate).
 - Fetch: no script. The links file IS the fetch step — pick the archive by name and call it:
-  `curl -sfL -C - "$(grep -F '/knee_singlecoil_train.tar.xz?' D:/life/creds/machine/fastmri_urls.txt \
+  `curl -sfL -C - "$(grep -F '/knee_singlecoil_train.tar.xz?' $CREDS/fastmri_urls.txt \
   | head -1)" -o /d/data/volumetric/mri/raw/fastmri/knee_singlecoil_train.tar.xz`. `-C -` resumes. A wrapper around
   three curl calls would be a file to maintain and a second place for the credential path to be
   written down.

@@ -5,7 +5,8 @@
 set -u
 cd "$(dirname "$0")/.."
 export UV_NO_SYNC=1
-HOLDOUTS="D:/data/volumetric/mri/models/rsna_knee_abnormality"
+source experiments/roots.sh
+HOLDOUTS="$MODELS"
 GATE=0.9128
 
 stamp() { echo "[$(date -u +%H:%MZ)] $*"; }

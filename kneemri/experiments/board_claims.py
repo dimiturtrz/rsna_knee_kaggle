@@ -90,13 +90,13 @@ A claim about an entry's score is written next to the entry — `dark6 reads 0.9
 the corpus spans."""
 
 SENTENCE_END = re.compile(r"[.!?;]\s")
-RANGE = re.compile(r"0\.\d{3,4}\s*[-–]\s*0\.\d{3,4}")
-"""A pre-registered FLAT band, written as a range. Both ends are bars; neither is anyone's score."""
+RANGE = re.compile(r"0\.\d{3,4}\s*[-–]\s*0\.\d{3,4}|0\.\d{2,4}/0\.\d{2,4}")
+"""A pre-registered FLAT band written as a range, or a weight split (`0.80/0.20`). Neither is anyone's score."""
 
 RANK = re.compile(r"rank (\d+) of ([\d,]+)", re.IGNORECASE)
 """The standing as this project writes it, both halves, so a rank is never checked without its field."""
 
-DATED = re.compile(r"\d{4}-\d{2}-\d{2}")
+DATED = re.compile(r"\d{4}-\d{2}-\d{2}|\b\d{2}-\d{2} \d{2}:\d{2}Z")
 
 VERSION = re.compile(r"_v\d+$")
 """An entry's version suffix. Prose names the comparator by its bare stem (`s6third` beside `s6half_v1`), and

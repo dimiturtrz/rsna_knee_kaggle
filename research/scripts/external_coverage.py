@@ -103,7 +103,7 @@ def main() -> None:
           + ", ".join(f"{col} {int((pd.to_numeric(held[col], errors='coerce') >= 0.5).sum())}"
                       for col in COLS))
     print(f"\n231-URL record: docs/EXTERNAL_CORPORA.md:47 — "
-          f"D:/life/creds/machine/fastmri_urls.txt (231 presigned URLs across "
+          f"$CREDS/fastmri_urls.txt (231 presigned URLs across "
           f"knee/brain/breast/prostate, credential file outside the repo, not "
           f"read). The knee singlecoil h5 archives are the ONLY carrier of the "
           f"fastMRI+ label namespace (fileNNNNNNN); the DICOM batch on disk "

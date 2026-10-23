@@ -4,7 +4,8 @@ Everything else is pfheavyflat's (57382612, 0.958, pick 1): soups 1/8 each, R6 b
 384 / 224 at 0.65 / 0.35, no per-finding share table. The 0.50 split was inherited from the public R7+nartaa notebook,
 never fitted by us, and R7 is a single-fold checkpoint, so leaning toward nartaa moves weight off the one-fold reader
 without adding a knob. Read by the TEAM ROW:
-- **row moves up** — the split optimum is below 0.50 (nartaa70 0.953 shows the axis is steep above 0.60); this replaces the auto pick.
+- **row moves up** — the split optimum is below 0.50 (nartaa70 0.953 shows the axis is steep above 0.60); this
+replaces the auto pick.
 - **row holds / 0.957** — the split peaks at 0.50-0.60; picks unchanged.
 """
 

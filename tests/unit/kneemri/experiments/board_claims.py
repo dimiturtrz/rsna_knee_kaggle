@@ -77,6 +77,7 @@ def test_quoted() -> None:
     assert BoardClaims.quoted("its branch was >=0.939") == []
     assert BoardClaims.quoted("the swap bought +0.938") == []
     assert BoardClaims.quoted("FLAT is 0.9425-0.9455") == []
+    assert BoardClaims.quoted("nartaa inner 0.80/0.20") == []
     assert BoardClaims.quoted("a blend weight of 0.330") == []
 
 
@@ -119,5 +120,6 @@ def test_stale_ranks() -> None:
     assert check([document(1, "we sit at rank 30 of 2814")]).stale_ranks() == []
     # A line that carries its own read date is a dated read, and a dated read is never stale.
     assert check([document(1, "rank 50 of 2404, read 2026-08-25")]).stale_ranks() == []
+    assert check([document(1, "10-18 04:05Z board: rank 169 of 6161")]).stale_ranks() == []
     assert check([document(1, "0.919 is rank 84 of 1758")]).stale_ranks() == [("note.md", 1, 84, 1758)]
     assert BoardClaims(ENTRIES, {}, [document(1, "rank 84 of 1758")]).stale_ranks() == []

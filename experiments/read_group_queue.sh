@@ -53,7 +53,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-MODELS=D:/data/volumetric/mri/models/rsna_knee_abnormality
+source experiments/roots.sh
 TWINS=(calib_span_s2026 grade_ladder_s2026 merged_blend_cf lr4e-5_ws_s2026 through_dense_s2026)
 LOGS=experiments/logs
 mkdir -p "$LOGS"

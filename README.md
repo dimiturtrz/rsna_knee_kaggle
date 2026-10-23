@@ -9,7 +9,14 @@ competition (deadline 2026-10-22): given a study — several MRI series across s
 planes at different weightings — predict twelve binary findings (ACL, MCL, medial/lateral meniscus,
 medial/lateral/patellofemoral OA, effusion, synovitis, Baker's cyst, contusion, fracture).
 
-**Where it stands** (2026-08-20). The highest number on the board is **0.929**, from a four-member
+**Final result** (2026-10-23): **bronze**, private **0.943**. Both final picks scored 0.943 private
+against 0.958 public; at close the public board had us at 288 of ~6,400 teams, leader 0.970. Across our
+last 18 working entries the private board kept the public order exactly, about 0.015 lower at the top,
+so the final-week tuning did not over-fit public; the field simply held up better than we did. See
+[the post-mortem](interpretations/kneemri/2026-10-23_final-result-public-to-private.md) and
+[comp/SUBMISSIONS.md](comp/SUBMISSIONS.md).
+
+**Where it stood mid-competition** (2026-08-20). The highest number on the board is **0.929**, from a four-member
 entry that is *entirely ours* — no CC0 weights. It clears the 0.895 the 22-member mostly-grafted fusion
 reached, so the published weights we started from are now a [**cost** rather than a
 contribution](interpretations/kneemri/2026-08-16_the_grafted_members_became_a_cost.md). The last

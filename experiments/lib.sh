@@ -60,21 +60,11 @@ _lib_is_stale() { [ "$(_lib_blob)" != "$LIB_PARSED" ]; }
 LIB_PARSED="$(_lib_blob)"
 LIB_PARSED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-# Both roots out of ONE interpreter start: a second `uv run` here costs every arm a fresh import of
-# torch's dependency tree before it has read a single study.
-_lib_roots="$(uv run --no-sync python -c 'from pathlib import Path
-from core.paths import DataRoot
-root = DataRoot.from_config(Path("paths.yaml"))
-print(root.processed().as_posix())
-print(root.models().as_posix())')"
-PROCESSED="$(echo "$_lib_roots" | sed -n 1p)"
-MODELS="$(echo "$_lib_roots" | sed -n 2p)"
+source "$(dirname "${BASH_SOURCE[0]}")/roots.sh"
 LABELS="$PROCESSED/labels/report_labels_v2.csv"
 LOGS="$MODELS/experiments"
-export PROCESSED MODELS
-# Gated Hugging Face weights (DINOv3) read the token from here, once, for every arm — never echoed.
-HF_TOKEN_FILE="${HF_TOKEN_FILE:-/d/life/creds/machine/hfpat.txt}"
-[ -n "${HF_TOKEN:-}" ] || HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' "$HF_TOKEN_FILE" 2>/dev/null | head -1)"
+# Gated Hugging Face weights (DINOv3) take HF_TOKEN, or the first hf_ token in the file HF_TOKEN_FILE names — never echoed.
+[ -n "${HF_TOKEN:-}" ] || HF_TOKEN="$(grep -oE 'hf_[A-Za-z0-9_-]+' "${HF_TOKEN_FILE:-/dev/null}" 2>/dev/null | head -1)"
 export HF_TOKEN
 
 # Touch this to stop a chain STARTING further arms; the running one finishes. See run_train.

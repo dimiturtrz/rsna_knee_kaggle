@@ -10,8 +10,7 @@
 # holdout, so they cannot teach an arm scored on fold 0.
 set -u
 cd "$(dirname "$0")/.."
-PROCESSED="D:/data/volumetric/mri/processed/rsna_knee_abnormality"
-MODELS="D:/data/volumetric/mri/models/rsna_knee_abnormality"
+source experiments/roots.sh
 CLEAN_TWINS=("$MODELS"/oof_clean_fold[1-4]_s2026.pt)
 
 echo "TEACHER START $(date -u +%FT%TZ)"

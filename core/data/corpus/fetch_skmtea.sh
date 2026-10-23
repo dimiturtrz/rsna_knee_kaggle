@@ -20,9 +20,10 @@
 # total no-op. Count the files on disk, never the progress lines.
 set -u
 TRACK="${1:-dicoms|segmentation_masks}"
-SAS=$(cat "D:/life/creds/machine/skmtea_url.txt")
+SAS=$(cat "${SKMTEA_URL_FILE:?set SKMTEA_URL_FILE to the file holding the SAS URL}")
 BASE="${SAS%%\?*}"; QUERY="${SAS#*\?}"
-OUT=/d/data/volumetric/mri/raw/skmtea
+source experiments/roots.sh
+OUT="$SKMTEA_RAW"
 mkdir -p "$OUT/dicoms" "$OUT/segmentation_masks"
 python_list() { grep -oE "<Name>v1-release/($TRACK)/[^<]*</Name>" logs/skmtea_list.xml | sed 's/<[^>]*>//g'; }
 total=$(python_list | wc -l); done_count=0

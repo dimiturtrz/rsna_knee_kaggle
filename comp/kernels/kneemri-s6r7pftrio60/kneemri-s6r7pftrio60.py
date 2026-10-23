@@ -1,7 +1,8 @@
 """s6r7pftrio60 — `kneemri-s6r7pfheavytrio` with the reader half split 0.40 R7 / 0.60 nartaa instead of 0.50 / 0.50.
 
 Everything else is pfheavytrio's (57431093, 0.958, manual pick): soups and mirrorthird's seven at 1/12 each, R6 bundle
-`fe055406` with flip TTA, nartaa 384 / 224 at 0.65 / 0.35, no share table. Carries nartaa60 (held 0.958 on the flat line) onto
+`fe055406` with flip TTA, nartaa 384 / 224 at 0.65 / 0.35, no share table. Carries nartaa60 (held 0.958 on the flat
+line) onto
 the pick-2 structure. Read by the TEAM ROW:
 - **row moves up** — the trio line rewards more nartaa than 0.50; Kaggle's auto pick moves here.
 - **row holds** — the 0.60 is flat on the trio line as on the flat one; picks unchanged.
