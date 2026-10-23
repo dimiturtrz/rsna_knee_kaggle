@@ -75,9 +75,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# h5py/nibabel: the corpus readers are imported by the unit tests (tests/unit/core/data/corpus), so a bare
-# `--extra dev` CI sync must carry them; the fastmri/motion extras below stay as the ingest-side names.
-dev = ["pytest", "pytest-cov", "h5py", "nibabel"]
+# h5py/nibabel/cleanlab: the corpus readers and label_errors are imported by the unit tests, so a bare
+# `--extra dev` CI sync must carry them; the fastmri/motion/labelnoise extras below stay as the run-side names.
+dev = ["pytest", "pytest-cov", "h5py", "nibabel", "cleanlab"]
 # The official Kaggle CLI. The REST scripts in comp/ use a bearer token and need none of this, but the CLI
 # reads ~/.kaggle/kaggle.json and is the working path for competition/kernel READS. Declared so a bare
 # `uv sync` stops silently uninstalling it. Invoke the venv entrypoint (.venv/Scripts/kaggle.exe) by path.

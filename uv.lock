@@ -706,6 +706,7 @@ dependencies = [
 
 [package.optional-dependencies]
 dev = [
+    { name = "cleanlab" },
     { name = "h5py" },
     { name = "nibabel" },
     { name = "pytest" },
@@ -737,6 +738,7 @@ submit = [
 requires-dist = [
     { name = "accelerate", marker = "extra == 'reader'" },
     { name = "beartype" },
+    { name = "cleanlab", marker = "extra == 'dev'" },
     { name = "cleanlab", marker = "extra == 'labelnoise'" },
     { name = "h5py", marker = "extra == 'dev'" },
     { name = "h5py", marker = "extra == 'fastmri'" },
