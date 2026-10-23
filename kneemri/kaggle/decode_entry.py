@@ -1,6 +1,6 @@
 """The best roster a DECODE BUDGET can buy: `python -m kneemri.kaggle.decode_entry`.
 
-THE EFFICIENCY TRACK PAYS ITS OWN PODIUM ($7k/$6k/$5k, `comp/COMPETITION_RULES.txt`) and we sit at rank
+THE EFFICIENCY TRACK PAYS ITS OWN PODIUM ($7k/$6k/$5k, the competition rules) and we sit at rank
 16 there against rank 28 on accuracy. Its ruler weights runtime hard, and runtime on a four-CPU Kaggle
 host is dominated by DECODE — `Ensemble.reads` calls it "the I/O-bound half", and a fleet pass measured
 the card at 0% while pydicom worked. So an efficiency entry is not a small roster, it is a roster on FEW

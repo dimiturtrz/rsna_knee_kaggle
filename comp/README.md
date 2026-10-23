@@ -160,7 +160,7 @@ dataset push, which is how it escaped the first time. It fired on its first real
   returns 400 here too; the working form is `-k <owner>/<kernel> -v <version> -f submission.csv`. The
   kit-as-dataset machinery is therefore load-bearing, not optional. Recorded in `SUBMISSIONS.md`.
 - ~~**The competition rules page is JavaScript-only**~~ **Settled 2026-08-13, from the rules saved
-  verbatim to `COMPETITION_RULES.txt` on 2026-08-12.** The clause was unreadable by any tool here for
+  verbatim to a local copy, since removed (knee-ixj1o) on 2026-08-12.** The clause was unreadable by any tool here for
   three days and then sat unread for one more because the issue still said it needed a browser.
   - **External data and models are PERMITTED.** §2.6.a allows External Data that is "publicly available
     and equally accessible to use by all Participants … at no cost"; §2.6.b says use "is acceptable

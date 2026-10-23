@@ -519,7 +519,7 @@ for new M-letters first, don't trust the absence of a notification (missed M323�
   per-column AUC confirmed by organiser statement + 2 public notebooks, so the flattening risk is
   closed. Rules: NO clause forbids probing — nearest are hand-labeling ban §4.b (not implicated),
   5/day limit (ordinary slot), catch-all §8.d (discretionary, no probing precedent). Rules live at
-  comp/COMPETITION_RULES.txt (Kaggle web page is an SPA shell, unfetchable). Q4: 58 is the whole of
+  the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules) (Kaggle web page is an SPA shell, unfetchable). Q4: 58 is the whole of
   it; CORRECTION to main's premise — the two community gold files are NOT byte-identical (gxpixel
   carries Report+lang cols) but ARE content-identical on the 12-col label matrix (58/58 UIDs, diff 0.0).
 - D323 (M329): depth curve — only two on-regime measurements exist: Ilse ABMIL (1802.04712, attention

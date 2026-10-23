@@ -6,7 +6,7 @@ Can the project use fastMRI and MRNet as external training data for the RSNA Kne
 
 ## Kaggle rule reminder
 
-From `comp/COMPETITION_RULES.txt` Section 2.6:
+From the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules) Section 2.6:
 
 > a. You may use data other than the Competition Data ("External Data") to develop and test your Submissions. However, you will ensure the External Data is either publicly available and equally accessible to use by all Participants of the Competition for purposes of the competition at no cost to the other Participants, or satisfies the Reasonableness criteria ...
 
@@ -97,7 +97,7 @@ The pathology annotations (`fastMRI+`) are hosted in the Microsoft `fastmri-plus
 
 ## References
 
-- `comp/COMPETITION_RULES.txt`, Section 2.6
+- the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules), Section 2.6
 - MRNet Research Use Agreement: [stanfordmlgroup.github.io commit `a07223d`](https://github.com/stanfordmlgroup/stanfordmlgroup.github.io/commit/a07223dfda18ebae2a09a8c43e11e7365c3ccc90.patch)
 - fastMRI paper: Knoll et al., "fastMRI: A Publicly Available Raw k-Space and DICOM Dataset of Knee Images for Accelerated MR Image Reconstruction Using Machine Learning" ([PMC6996599](https://pmc.ncbi.nlm.nih.gov/articles/PMC6996599/))
 - fastMRI+ repo: [microsoft/fastmri-plus](https://github.com/microsoft/fastmri-plus)

@@ -34,7 +34,7 @@ Tags: **[ours]** = measured by us, **[lit]** = literature, **[unv]** = unverifie
 Notes on the table:
 
 - **[lit]** No labelled knee-MRI corpus is shippable under this competition's winner-licence obligation ([shippable-survey](../deep_dives/2026-09-11_shippable-corpus-licence-survey.md)).
-  - Kaggle rule 2.6a (external data reasonably accessible) passes. The exposure is rule **2.5** and the winner's duty to publish weights (COMPETITION_RULES.txt:187-196).
+  - Kaggle rule 2.6a (external data reasonably accessible) passes. The exposure is rule **2.5** and the winner's duty to publish weights (the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules):187-196).
   - Evidence: the 09-07 correction in [access_audit](../deep_dives/2026-09-02_external_knee_mri_data_access_audit.md); [AXES:162](../../docs/AXES.md).
 - **[unv]** The US Copyright Office's May 2025 view on weights trained from licensed data is unsettled ([shippable-survey](../deep_dives/2026-09-11_shippable-corpus-licence-survey.md)).
 - **[lit]** Licensed *models*, as distinct from corpora:

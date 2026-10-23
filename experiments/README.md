@@ -5963,7 +5963,7 @@ costs nothing. Do not spend a slot here until it lands.
 **Open mechanism, named so it is not assumed:** this read does not establish how our row got reassigned
 from 0.925 to 0.941. 473 of 2160 settled teams carry an efficiency entry below their public best and
 none carry a better one, so the slot is separately held by design — but by what selection is unknown,
-and the rules file (`comp/COMPETITION_RULES.txt` 61-64) states only the three prizes.
+and the rules file (the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules) 61-64) states only the three prizes.
 
 ### Kernel logs cannot price the efficiency lane: the public rerun scores THREE studies
 

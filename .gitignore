@@ -141,3 +141,31 @@ scratchpad/
 # tree-wide ruff format gate would demand exactly that. Data attachments stay tracked; code does not.
 /inbox/*/attach/*.py
 .kernel_out_*/
+
+# Third-party material is fetched, never tracked (knee-ixj1o): papers are their publishers' copyright,
+# competitors' notebooks carry no licence, and a vendored wheel is a dependency. research/PAPERS.md
+# maps every local file back to its source.
+*.pdf
+*.whl
+/mang/
+/.agent-runtime/zhang_pages/
+/.agent-runtime/*_paper.txt
+/.agent-runtime/zhang2403.txt
+/mahmood.txt
+/zhang.txt
+/research/external/
+/comp/external/
+/inbox/*/attach/mattia_*
+/dataset-metadata.json
+
+# Runtime state and run outputs: letters' archive, listener/watcher logs, downloaded kernel logs and
+# submissions, scratch arrays. Evidence lives in the ledger and board.jsonl, not in these.
+/.claude/inbox/history/
+*.log
+/.agent-runtime/mastermind_outbox/
+/inbox/*/*.npz
+/comp/logs/
+/comp/runlogs/
+/comp/runs/
+/comp/kernels/*/out/
+/comp/efficiency.json/

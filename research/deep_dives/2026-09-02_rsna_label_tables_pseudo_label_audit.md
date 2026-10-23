@@ -63,7 +63,7 @@ The weakest inter-source agreement is on Synovitis, Fracture, and Lateral OA —
 
 ## Competition-rules reading
 
-Kaggle rule 2.6a (copied from `comp/COMPETITION_RULES.txt`):
+Kaggle rule 2.6a (copied from the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules)):
 
 > You may use data other than the Competition Data ("External Data") to develop and test your Submissions. However, you will ensure the External Data is either publicly available and equally accessible to use by all Participants of the Competition for purposes of the competition at no cost to the other Participants ...
 
@@ -95,6 +95,6 @@ The conservative reading: **using these tables as soft training targets is allow
 - `D:/data/volumetric/mri/raw/knee_label_tables/gxpixel_knee-consensus-labels/README.md`
 - `D:/data/volumetric/mri/raw/knee_label_tables/rayanbabur_rsna-knee-2026-calibrated-soft-targets/target_quality_report.md`
 - `D:/data/volumetric/mri/raw/knee_label_tables/rayanbabur_rsna-knee-2026-calibrated-soft-targets/target_quality_audit.json`
-- `comp/COMPETITION_RULES.txt`, Section 2.6 (External Data and Tools)
+- the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules), Section 2.6 (External Data and Tools)
 - `comp/board.jsonl`, entries `calibsix_v1` and `corpusfull_v1` for the external-data context
 - `research/deep_dives/2026-09-01_past_ensemble_plateau_mechanisms.md`, Section 4, for the RSNA 2024 pseudo-labeling precedent

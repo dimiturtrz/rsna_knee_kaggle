@@ -66,7 +66,7 @@ and leaves supervision as the only card-cheap axis still open. M183 asks for it.
 
 ## 4. The licence table, complete across four corpora
 
-`comp/COMPETITION_RULES.txt` §2.5a:128-130 exempts incompatible-licence INPUTS by name, and the
+the competition rules (https://www.kaggle.com/competitions/rsna-knee-abnormality-detection/rules) §2.5a:128-130 exempts incompatible-licence INPUTS by name, and the
 competition's own WINNER LICENSE TYPE is CC-BY-NC 4.0 (:66-67), so **NC is defused for all four**. ND is
 the clause that decides.
 
